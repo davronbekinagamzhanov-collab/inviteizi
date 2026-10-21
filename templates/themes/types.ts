@@ -1,19 +1,18 @@
 import type { CSSProperties } from "react";
 import type { InvitationData, InvitationMode } from "@/lib/types";
 
-/** Что получает любой дизайн: данные заказа, режим (демо/полный) и цветовой вариант */
+/** Что получает любой дизайн: данные заказа и режим (демо/полный) */
 export type TemplateProps = {
   data: InvitationData;
   mode: InvitationMode;
-  color: string;
 };
 
-/** Набор цветов одного цветового варианта дизайна */
+/** Цвета дизайна */
 export type Palette = {
   primary: string; // основной цвет (конверт, бархат, кнопки)
-  primaryDark: string; // самый тёмный фон
-  gold: string;
-  goldLight: string;
+  primaryDark: string; // самый тёмный цвет
+  gold: string; // золото: тёмный край градиента
+  goldLight: string; // золото: блик
   paper: string; // фон страницы с текстом
   ink: string; // цвет текста
   muted: string; // второстепенный текст

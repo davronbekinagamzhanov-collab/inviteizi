@@ -1,69 +1,75 @@
 import type { ComponentType } from "react";
-import type { Palette, TemplateProps } from "./themes/types";
-import { oltinMuhrPalettes } from "./themes/oltin-muhr/palettes";
-import { pardaPalettes } from "./themes/parda/palettes";
-import { uramaPalettes } from "./themes/urama/palettes";
+import type { TemplateProps } from "./themes/types";
+import type { InvitationData } from "@/lib/types";
+import { pilotSamples } from "@/lib/pilot-samples";
 
 export type { TemplateProps };
-export type Tier = "premium" | "ekonom";
+export type Format = "animated" | "simple";
+
+/** Цена формата, ₸ (музыка входит в цену) */
+export const PRICES: Record<Format, number> = { animated: 10_000, simple: 7_000 };
 
 type Loader = () => Promise<{ default: ComponentType<TemplateProps> }>;
 
 /**
- * Один ДИЗАЙН = своё открытие, композиция, шрифты, декор, анимации.
- * Номер — из таблицы в «План проекта/08_50_ДИЗАЙНОВ_И_МУЗЫКА.md».
- * Цвета — бонусные варианты одного дизайна, в 50 не считаются.
+ * Один ДИЗАЙН = своя картина/украшение, раскладка, шрифты, открытие и анимация.
+ * Номер — из каталога в «План проекта/10_ЭТАЛОНЫ_И_60_ДИЗАЙНОВ.md».
  */
-type Design = {
-  key: string; // ключ в t.themes
-  tier: Tier;
+export type Design = {
+  id: keyof typeof pilotSamples; // адрес демо: /demo/oq-ot
   number: number;
-  palettes: Record<string, Palette>;
+  format: Format;
+  /** Пример данных для демо */
+  sample: InvitationData;
+  /** Превью для витрины (public/) */
+  preview: string;
   // Код дизайна загружается только когда его открыли (шрифты и анимации других дизайнов не грузятся)
   load: Loader;
 };
 
 export const designs: Design[] = [
   {
-    key: "oltin-muhr",
-    tier: "premium",
+    id: "oltin-monogramma",
     number: 1,
-    palettes: oltinMuhrPalettes,
-    load: () => import("./themes/oltin-muhr/OltinMuhr"),
+    format: "animated",
+    sample: pilotSamples["oltin-monogramma"],
+    preview: "/pilots/oltin-monogramma.webp",
+    load: () => import("./themes/oltin-monogramma/OltinMonogramma"),
   },
   {
-    key: "parda",
-    tier: "premium",
-    number: 2,
-    palettes: pardaPalettes,
-    load: () => import("./themes/parda/Parda"),
+    id: "sapfir",
+    number: 23,
+    format: "simple",
+    sample: pilotSamples.sapfir,
+    preview: "/pilots/sapfir.webp",
+    load: () => import("./themes/sapfir/Sapfir"),
   },
   {
-    key: "urama",
-    tier: "premium",
-    number: 4,
-    palettes: uramaPalettes,
-    load: () => import("./themes/urama/Urama"),
+    id: "oq-ot",
+    number: 31,
+    format: "animated",
+    sample: pilotSamples["oq-ot"],
+    preview: "/pilots/oq-ot.webp",
+    load: () => import("./themes/oq-ot/OqOt"),
+  },
+  {
+    id: "tonggi-qozon",
+    number: 41,
+    format: "animated",
+    sample: pilotSamples["tonggi-qozon"],
+    preview: "/pilots/tonggi-qozon.webp",
+    load: () => import("./themes/tonggi-qozon/TonggiQozon"),
+  },
+  {
+    id: "pion-guldasta",
+    number: 51,
+    format: "animated",
+    sample: pilotSamples["pion-guldasta"],
+    preview: "/pilots/pion-guldasta.webp",
+    load: () => import("./themes/pion-guldasta/PionGuldasta"),
   },
 ];
 
-/** Шаблон каталога = дизайн × цвет. Первый цвет получает короткий адрес без суффикса */
-export type TemplateInfo = {
-  id: string; // адрес демо: /demo/parda-binafsha
-  design: Design;
-  color: string; // ключ в t.colors
-  swatch: string; // цвет кружка в каталоге
-};
-
-export const templates: TemplateInfo[] = designs.flatMap((design) =>
-  Object.entries(design.palettes).map(([color, palette], i) => ({
-    id: i === 0 ? design.key : `${design.key}-${color}`,
-    design,
-    color,
-    swatch: palette.primary,
-  })),
-);
-
-export function getTemplate(id: string) {
-  return templates.find((tpl) => tpl.id === id);
+export function getDesign(id: string) {
+  return designs.find((d) => d.id === id);
 }

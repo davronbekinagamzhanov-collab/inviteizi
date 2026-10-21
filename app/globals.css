@@ -14,55 +14,89 @@
   --color-muted: var(--c-muted);
   --color-accent: var(--c-accent);
 
-  --font-script: var(--font-script);
-  --font-serif: var(--font-serif);
-  --font-sans: var(--font-sans);
-
-  /* Шрифты ДИЗАЙНА: каждый дизайн задаёт свои --d-* (см. templates/themes/<id>) */
+  /* Шрифты ДИЗАЙНА: каждый дизайн задаёт свои --d-* (см. templates/themes/<id>/fonts.ts) */
   --font-display: var(--d-display); /* имена и заголовки */
   --font-accent: var(--d-accent); /* украшающий шрифт */
   --font-body: var(--d-body); /* обычный текст */
 }
 
 :root {
-  --c-primary: #6b1426;
-  --c-primary-dark: #3d0a15;
-  --c-gold: #c9a24a;
-  --c-gold-light: #f1dc9c;
-  --c-paper: #fbf6ec;
-  --c-ink: #3a2a20;
-  --c-muted: #8a7462;
-  --c-accent: #c9a24a;
+  /* Золото по умолчанию: #B8892F → #F3D58A → #A87A28 */
+  --c-primary: #3b2a1e;
+  --c-primary-dark: #2a1d14;
+  --c-gold: #b8892f;
+  --c-gold-light: #f3d58a;
+  --c-gold-deep: #a87a28;
+  --c-paper: #f8f3ea;
+  --c-ink: #3b2a1e;
+  --c-muted: #7d6a58;
+  --c-accent: #b8892f;
 
-  --d-display: var(--font-serif);
-  --d-accent: var(--font-script);
-  --d-body: var(--font-sans);
+  --d-display: Georgia, serif;
+  --d-accent: Georgia, serif;
+  --d-body: Georgia, serif;
 }
 
 html,
 body {
-  background: var(--c-primary-dark);
+  background: var(--c-paper);
   color: var(--c-ink);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  font-family: var(--d-body);
   font-variant-numeric: lining-nums; /* ровные цифры в датах: 2026, а не «прыгающие» */
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Золотой текст с бликом */
+/* Золотой текст: градиент с бликом, а не плоский жёлтый */
 .gold-text {
   background: linear-gradient(
     100deg,
     var(--c-gold) 0%,
-    var(--c-gold-light) 45%,
-    var(--c-gold) 60%,
-    #9c7a2c 100%
+    var(--c-gold-light) 42%,
+    var(--c-gold) 62%,
+    var(--c-gold-deep, #a87a28) 100%
   );
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
-/* Лепестки и блёстки, которые падают после открытия конверта */
+/* Золотая заливка для фигур, линий и кнопок */
+.gold-fill {
+  background: linear-gradient(
+    115deg,
+    var(--c-gold-deep, #a87a28) 0%,
+    var(--c-gold) 22%,
+    var(--c-gold-light) 48%,
+    var(--c-gold) 72%,
+    var(--c-gold-deep, #a87a28) 100%
+  );
+}
+
+/* Пробегающий блик по золотому тексту (добавлять вместе с .gold-text) */
+@keyframes gold-shine {
+  0% {
+    background-position: 120% 0;
+  }
+  100% {
+    background-position: -20% 0;
+  }
+}
+
+.gold-shine {
+  background-image: linear-gradient(
+    100deg,
+    var(--c-gold) 0%,
+    var(--c-gold) 35%,
+    #fff6d8 48%,
+    var(--c-gold-light) 52%,
+    var(--c-gold) 65%,
+    var(--c-gold-deep, #a87a28) 100%
+  );
+  background-size: 250% 100%;
+  animation: gold-shine 4.5s ease-in-out infinite;
+}
+
+/* Лепестки и блёстки, которые падают после открытия */
 @keyframes fall {
   0% {
     transform: translate3d(0, -10vh, 0) rotate(0deg);
@@ -101,7 +135,8 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .petal,
-  .soft-pulse {
+  .soft-pulse,
+  .gold-shine {
     animation: none;
   }
 }

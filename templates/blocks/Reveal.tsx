@@ -5,20 +5,28 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 
 /**
  * Появление блока при листании. Каждый дизайн выбирает свой эффект.
- * Короткие и лёгкие анимации: при быстром листании блок уже виден, пустого экрана нет.
+ *
+ * Правило: пустого экрана не бывает никогда.
+ * - Блок запускается заранее — когда до него остаётся ещё четверть экрана.
+ * - Анимация короткая (0,35 с) и начинается не с нуля: блок сразу виден на 35%.
+ * - Если гость пролистал так быстро, что блок уже на экране, — он показывается мгновенно.
  */
 export const revealEffects = {
-  rise: { hidden: { opacity: 0, y: 18 }, shown: { opacity: 1, y: 0 } },
+  rise: { hidden: { opacity: 0.35, y: 14 }, shown: { opacity: 1, y: 0 } },
   // «луч прожектора»: из лёгкой дымки и чуть меньше размером
-  spotlight: { hidden: { opacity: 0, scale: 0.95 }, shown: { opacity: 1, scale: 1 } },
-  // разворачивается сверху вниз, как свиток
+  spotlight: { hidden: { opacity: 0.35, scale: 0.97 }, shown: { opacity: 1, scale: 1 } },
+  // мягкое проявление без сдвига
+  fade: { hidden: { opacity: 0.35 }, shown: { opacity: 1 } },
+  // разворачивается сверху вниз, как свиток (край не уходит в ноль)
   unroll: {
-    hidden: { opacity: 0, clipPath: "inset(0% 0% 100% 0%)" },
+    hidden: { opacity: 0.5, clipPath: "inset(0% 0% 40% 0%)" },
     shown: { opacity: 1, clipPath: "inset(0% 0% 0% 0%)" },
   },
 } satisfies Record<string, Variants>;
 
 export type RevealEffect = keyof typeof revealEffects;
+
+type State = "hidden" | "animate" | "instant";
 
 export function Reveal({
   children,
@@ -27,12 +35,13 @@ export function Reveal({
   className,
 }: {
   children: ReactNode;
+  /** Задержка, не больше 0,15 с (для лесенки внутри блока) */
   delay?: number;
   effect?: RevealEffect;
   className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const shown = useShownOnScroll(ref);
+  const state = useRevealState(ref);
 
   return (
     <motion.div
@@ -40,8 +49,12 @@ export function Reveal({
       className={className}
       variants={revealEffects[effect]}
       initial="hidden"
-      animate={shown ? "shown" : "hidden"}
-      transition={{ duration: 0.45, delay, ease: [0.22, 1, 0.36, 1] }}
+      animate={state === "hidden" ? "hidden" : "shown"}
+      transition={
+        state === "instant"
+          ? { duration: 0 }
+          : { duration: 0.35, delay: Math.min(delay, 0.15), ease: [0.22, 1, 0.36, 1] }
+      }
     >
       {children}
     </motion.div>
@@ -49,24 +62,28 @@ export function Reveal({
 }
 
 /**
- * Блок показывается, как только его верх оказался чуть ниже края экрана или выше.
- * Проверяем при каждом скролле (а не только «пересечение»), поэтому даже если гость
- * пролистал блок за долю секунды, он всё равно появится и не останется пустым.
+ * Проверяем положение при каждом кадре скролла (а не только «пересечение»):
+ * даже если гость пролистал блок за долю секунды, он всё равно появится.
  */
-function useShownOnScroll(ref: React.RefObject<HTMLElement | null>) {
-  const [shown, setShown] = useState(false);
+function useRevealState(ref: React.RefObject<HTMLElement | null>) {
+  const [state, setState] = useState<State>("hidden");
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     let frame = 0;
+    let first = true;
 
     const check = () => {
       frame = 0;
-      if (el.getBoundingClientRect().top < window.innerHeight * 1.05) {
-        setShown(true);
+      const { top } = el.getBoundingClientRect();
+      const h = window.innerHeight;
+      if (top < h * 1.25) {
+        // уже глубоко на экране после быстрого листания — без анимации
+        setState(!first && top < h * 0.85 ? "instant" : "animate");
         stop();
       }
+      first = false;
     };
     const onScroll = () => {
       if (!frame) frame = requestAnimationFrame(check);
@@ -83,5 +100,5 @@ function useShownOnScroll(ref: React.RefObject<HTMLElement | null>) {
     return stop;
   }, [ref]);
 
-  return shown;
+  return state;
 }

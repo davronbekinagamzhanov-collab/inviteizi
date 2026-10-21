@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# черновики картин
+/art-raw/
+/pilots-screens/*.tmp

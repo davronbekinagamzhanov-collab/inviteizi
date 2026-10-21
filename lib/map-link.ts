@@ -1,20 +1,21 @@
-import type { InvitationData } from "./types";
+import type { InvitationEvent } from "./types";
 
 /**
  * Ссылка для кнопки «Харитада очиш». Порядок важен:
- * 1. Точные координаты из заказа (клиент отправил локацию в Telegram) — главный вариант.
- *    Google Maps ставит метку ровно в эту точку и на телефоне открывается в приложении карт.
+ * 1. Точные координаты (клиент отправил локацию в Telegram) — главный вариант.
+ *    2GIS ставит метку ровно в эту точку; на телефоне ссылку перехватывает приложение 2GIS.
  * 2. Ссылка 2GIS / Google Maps, которую прислал клиент.
- * 3. Запасной: поиск по названию тойханы и адресу в 2GIS.
+ * 3. Запасной: поиск по названию и адресу в 2GIS.
  */
-export function mapLink(data: Pick<InvitationData, "location" | "mapUrl" | "venueName" | "address">) {
-  if (data.location && isValidCoords(data.location)) {
-    const { lat, lng } = data.location;
-    return `https://www.google.com/maps/search/?api=1&query=${lat.toFixed(6)},${lng.toFixed(6)}`;
+export function mapLink(ev: Pick<InvitationEvent, "location" | "mapUrl" | "venueName" | "address">) {
+  if (ev.location && isValidCoords(ev.location)) {
+    const { lat, lng } = ev.location;
+    // 2GIS ждёт «долгота,широта»
+    return `https://2gis.kz/geo/${lng.toFixed(6)},${lat.toFixed(6)}`;
   }
-  if (data.mapUrl && /^https?:\/\//i.test(data.mapUrl)) return data.mapUrl;
+  if (ev.mapUrl && /^https?:\/\//i.test(ev.mapUrl)) return ev.mapUrl;
 
-  const query = `${data.venueName.replace(/[«»"]/g, "")} ${data.address}`;
+  const query = `${ev.venueName.replace(/[«»"]/g, "")} ${ev.address}`;
   return `https://2gis.kz/shymkent/search/${encodeURIComponent(query)}`;
 }
 

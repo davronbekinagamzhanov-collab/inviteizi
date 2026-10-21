@@ -9,6 +9,7 @@ export function Watermark() {
   return (
     <div
       aria-hidden
+      data-watermark
       className="pointer-events-none fixed inset-0 z-50 overflow-hidden select-none"
     >
       <div className="absolute -inset-1/2 flex rotate-[-28deg] flex-col justify-center gap-16">

@@ -3,8 +3,9 @@
 import { motion } from "motion/react";
 import { t } from "@/texts/uz-cyrl";
 
+// right: на компьютере кнопка стоит в углу колонки шириной 430px, а не в углу экрана
 const BASE =
-  "fixed right-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 flex h-12 w-12 items-center justify-center active:scale-90";
+  "fixed right-[max(1rem,calc((100vw-430px)/2+1rem))] bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 flex h-12 w-12 items-center justify-center active:scale-90";
 const DEFAULT_LOOK =
   "rounded-full bg-primary text-gold-light shadow-xl shadow-black/30 ring-1 ring-gold/70";
 
