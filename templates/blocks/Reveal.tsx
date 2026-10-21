@@ -1,7 +1,6 @@
 "use client";
 
-import { motion, type Variants } from "motion/react";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 
 /**
  * Появление блока при листании. Каждый дизайн выбирает свой эффект.
@@ -10,23 +9,28 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
  * - Блок запускается заранее — когда до него остаётся ещё четверть экрана.
  * - Анимация короткая (0,35 с) и начинается не с нуля: блок сразу виден на 35%.
  * - Если гость пролистал так быстро, что блок уже на экране, — он показывается мгновенно.
+ *
+ * Работает на CSS-переходах (а не на JS-анимации): состояние в DOM всегда совпадает с тем,
+ * что видно, и анимация не может «застрять» на полпути.
  */
 export const revealEffects = {
-  rise: { hidden: { opacity: 0.35, y: 14 }, shown: { opacity: 1, y: 0 } },
+  rise: { opacity: 0.35, transform: "translateY(14px)" },
   // «луч прожектора»: из лёгкой дымки и чуть меньше размером
-  spotlight: { hidden: { opacity: 0.35, scale: 0.97 }, shown: { opacity: 1, scale: 1 } },
+  spotlight: { opacity: 0.35, transform: "scale(0.97)" },
   // мягкое проявление без сдвига
-  fade: { hidden: { opacity: 0.35 }, shown: { opacity: 1 } },
-  // разворачивается сверху вниз, как свиток (край не уходит в ноль)
-  unroll: {
-    hidden: { opacity: 0.5, clipPath: "inset(0% 0% 40% 0%)" },
-    shown: { opacity: 1, clipPath: "inset(0% 0% 0% 0%)" },
-  },
-} satisfies Record<string, Variants>;
+  fade: { opacity: 0.35 },
+  // разворачивается сверху вниз, как свиток (край не уходит в ноль).
+  // Отрицательные отступы — чтобы не обрезать тени карточек
+  unroll: { opacity: 0.5, clipPath: "inset(-60px -60px 40% -60px)" },
+} satisfies Record<string, CSSProperties>;
 
 export type RevealEffect = keyof typeof revealEffects;
 
 type State = "hidden" | "animate" | "instant";
+
+const SHOWN: CSSProperties = { opacity: 1, transform: "none" };
+// clip-path только у «свитка»: у остальных он обрезал бы тени
+const SHOWN_UNROLL: CSSProperties = { ...SHOWN, clipPath: "inset(-60px -60px -60px -60px)" };
 
 export function Reveal({
   children,
@@ -43,21 +47,21 @@ export function Reveal({
   const ref = useRef<HTMLDivElement>(null);
   const state = useRevealState(ref);
 
+  const style: CSSProperties =
+    state === "hidden"
+      ? revealEffects[effect]
+      : {
+          ...(effect === "unroll" ? SHOWN_UNROLL : SHOWN),
+          transition:
+            state === "instant"
+              ? "none"
+              : `opacity 0.35s ease-out ${Math.min(delay, 0.15)}s, transform 0.35s cubic-bezier(0.22,1,0.36,1) ${Math.min(delay, 0.15)}s, clip-path 0.35s ease-out ${Math.min(delay, 0.15)}s`,
+        };
+
   return (
-    <motion.div
-      ref={ref}
-      className={className}
-      variants={revealEffects[effect]}
-      initial="hidden"
-      animate={state === "hidden" ? "hidden" : "shown"}
-      transition={
-        state === "instant"
-          ? { duration: 0 }
-          : { duration: 0.35, delay: Math.min(delay, 0.15), ease: [0.22, 1, 0.36, 1] }
-      }
-    >
+    <div ref={ref} data-reveal={state} className={`motion-reduce:!transition-none ${className ?? ""}`} style={style}>
       {children}
-    </motion.div>
+    </div>
   );
 }
 

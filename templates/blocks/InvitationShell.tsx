@@ -16,6 +16,7 @@ export function InvitationShell({
   style,
   className,
   backdropClassName = "bg-paper",
+  fontsClassName = "",
   musicButtonClassName,
   pageColor,
   children,
@@ -24,6 +25,8 @@ export function InvitationShell({
   style: CSSProperties;
   className?: string;
   backdropClassName?: string;
+  /** Классы next/font дизайна: должны стоять там же, где style, иначе --d-* не увидят шрифты */
+  fontsClassName?: string;
   musicButtonClassName?: string;
   /** Цвет за краями страницы (виден, когда телефон «пружинит» при листании) */
   pageColor?: string;
@@ -41,7 +44,7 @@ export function InvitationShell({
   return (
     // reducedMotion="user": если в телефоне отключены анимации, не мучаем гостя
     <MotionConfig reducedMotion="user">
-      <div style={style} className={`min-h-svh ${backdropClassName}`}>
+      <div style={style} className={`min-h-svh ${fontsClassName} ${backdropClassName}`}>
         <div
           data-opened={inv.opened}
           className={`relative mx-auto min-h-svh w-full max-w-[430px] overflow-x-clip font-body ${className ?? ""}`}

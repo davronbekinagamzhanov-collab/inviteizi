@@ -125,7 +125,7 @@ function inviteTexts(d: InvitationData): InviteText[] {
         {
           id: "classic",
           greeting: "Қадрли меҳмонлар!",
-          body: `${cap(whose(d))} ${d.age} ёшлик муборак юбилейи муносабати билан ташкил этиладиган базмга Сизни лутфан таклиф этамиз.`,
+          body: `${cap(whose(d))} ${d.age} ёшлик муборак юбилейи муносабати билан ташкил этиладиган базмга Сизни лутфан таклиф этамиз.`,
         },
       ];
   }
@@ -193,7 +193,8 @@ export const t = {
     `${cap(whose(d))} ${occasionTitles[d.cause ?? "nikoh"].toLowerCase()} муносабати билан`,
 
   /** Юбилей: «Онамиз Мукаррам опанинг 60 ёшлик юбилейи» */
-  jubileeLine: (d: InvitationData) => `${cap(whose(d))} ${d.age} ёшлик юбилейи`,
+  // неразрывный пробел: «60 ёшлик» не разрывается между строками
+  jubileeLine: (d: InvitationData) => `${cap(whose(d))} ${d.age} ёшлик юбилейи`,
   ageLabel: "ёш",
 
   /** Суннат: «набирамиз» над именем мальчика */

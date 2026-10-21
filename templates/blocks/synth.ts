@@ -395,3 +395,25 @@ function drumHit(ctx: Ctx, drum: Drum, out: AudioNode, at: number, vel: number, 
     jingle(0.16, 0.35);
   }
 }
+
+/**
+ * Арпеджио по аккордам: по аккорду на такт, ноты аккорда идут по шаблону индексов.
+ * arpeggiate([["A3","C4","E4","A4"], …], [0,1,2,1,3,2,1,2], 0.5) — восьмыми.
+ */
+export function arpeggiate(
+  bars: string[][],
+  pattern: number[],
+  step: number,
+  { beatsPerBar = 4, velocity = 0.5, accent = 0.15 } = {},
+): Note[] {
+  const notes: Note[] = [];
+  bars.forEach((chord, bar) => {
+    pattern.forEach((idx, i) => {
+      const beat = bar * beatsPerBar + i * step;
+      if (beat >= (bar + 1) * beatsPerBar) return;
+      // первая нота такта чуть громче — так арпеджио «дышит»
+      notes.push([beat, chord[idx % chord.length], step * 1.5, velocity + (i === 0 ? accent : 0)]);
+    });
+  });
+  return notes;
+}

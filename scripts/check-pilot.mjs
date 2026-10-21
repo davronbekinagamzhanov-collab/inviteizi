@@ -113,6 +113,8 @@ for (const vp of VIEWPORTS) {
   await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight }));
   await page.waitForTimeout(900);
   await page.screenshot({ path: `${dir}/05-end.png` });
+  // Ни один блок не должен остаться в начальном состоянии после пролистывания до конца
+  r.stuckReveals = await page.evaluate(() => document.querySelectorAll('[data-reveal="hidden"]').length);
 
   // Быстрое листание на свежей странице: прыжки по полэкрана, проверка через 60 мс
   await page.reload({ waitUntil: "load" });

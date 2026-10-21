@@ -1,10 +1,12 @@
 import type { CSSProperties } from "react";
 import type { InvitationData, InvitationMode } from "@/lib/types";
 
-/** Что получает любой дизайн: данные заказа и режим (демо/полный) */
+/** Что получает любой дизайн: данные заказа, режим (демо/полный) и картина */
 export type TemplateProps = {
   data: InvitationData;
   mode: InvitationMode;
+  /** Картина дизайна (public/art/…), если файл уже лежит на месте. Нет — дизайн рисует временный фон */
+  art?: string;
 };
 
 /** Цвета дизайна */

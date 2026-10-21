@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { designs, getDesign } from "@/templates/registry";
+import { designs, existingArt, getDesign } from "@/templates/registry";
 
 // Гости открывают страницу по прямой ссылке, поэтому переход внутри сайта может подождать
 export const instant = false;
@@ -15,5 +15,5 @@ export default async function DemoPage({ params }: PageProps<"/demo/[template]">
   if (!design) notFound();
 
   const { default: Design } = await design.load();
-  return <Design data={design.sample} mode="full" />;
+  return <Design data={design.sample} mode="full" art={existingArt(design)} />;
 }

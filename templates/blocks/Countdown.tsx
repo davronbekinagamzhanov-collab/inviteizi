@@ -82,7 +82,7 @@ export function Countdown({ startsAt, look = {} }: { startsAt: Date; look?: Coun
           <div key={u.key}>{look.renderUnit(u)}</div>
         ) : (
           <div key={u.key} className={s.box}>
-            <span className={`${s.number} tabular-nums`}>{u.value}</span>
+            <span className={`${s.number} lining-nums tabular-nums`}>{u.value}</span>
             <span className={s.label}>{u.label}</span>
           </div>
         ),

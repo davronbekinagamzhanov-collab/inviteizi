@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import path from "node:path";
 import type { ComponentType } from "react";
 import type { TemplateProps } from "./themes/types";
 import type { InvitationData } from "@/lib/types";
@@ -23,6 +25,8 @@ export type Design = {
   sample: InvitationData;
   /** Превью для витрины (public/) */
   preview: string;
+  /** Картина дизайна в public/ (если дизайн с картиной) */
+  art?: string;
   // Код дизайна загружается только когда его открыли (шрифты и анимации других дизайнов не грузятся)
   load: Loader;
 };
@@ -50,6 +54,7 @@ export const designs: Design[] = [
     format: "animated",
     sample: pilotSamples["oq-ot"],
     preview: "/pilots/oq-ot.webp",
+    art: "/art/oq-ot.png",
     load: () => import("./themes/oq-ot/OqOt"),
   },
   {
@@ -58,6 +63,7 @@ export const designs: Design[] = [
     format: "animated",
     sample: pilotSamples["tonggi-qozon"],
     preview: "/pilots/tonggi-qozon.webp",
+    art: "/art/tonggi-qozon.png",
     load: () => import("./themes/tonggi-qozon/TonggiQozon"),
   },
   {
@@ -66,10 +72,17 @@ export const designs: Design[] = [
     format: "animated",
     sample: pilotSamples["pion-guldasta"],
     preview: "/pilots/pion-guldasta.webp",
+    art: "/art/pion.png",
     load: () => import("./themes/pion-guldasta/PionGuldasta"),
   },
 ];
 
 export function getDesign(id: string) {
   return designs.find((d) => d.id === id);
+}
+
+/** Адрес картины дизайна, если файл уже лежит в public/ (иначе дизайн рисует временный фон) */
+export function existingArt(design: Design) {
+  if (!design.art) return undefined;
+  return existsSync(path.join(process.cwd(), "public", design.art)) ? design.art : undefined;
 }

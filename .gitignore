@@ -43,3 +43,5 @@ next-env.d.ts
 # черновики картин
 /art-raw/
 /pilots-screens/*.tmp
+/scripts/tmp/
+/pilots-screens/
