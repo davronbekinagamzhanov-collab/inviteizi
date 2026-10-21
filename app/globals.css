@@ -1,26 +1,107 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/*
+  Цвета шаблона приходят из темы (templates/themes) как CSS-переменные --c-*.
+  Здесь мы даём им короткие имена для Tailwind: bg-primary, text-gold и т.д.
+*/
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-primary: var(--c-primary);
+  --color-primary-dark: var(--c-primary-dark);
+  --color-gold: var(--c-gold);
+  --color-gold-light: var(--c-gold-light);
+  --color-paper: var(--c-paper);
+  --color-ink: var(--c-ink);
+  --color-muted: var(--c-muted);
+  --color-accent: var(--c-accent);
+
+  --font-script: var(--font-script);
+  --font-serif: var(--font-serif);
+  --font-sans: var(--font-sans);
+
+  /* Шрифты ДИЗАЙНА: каждый дизайн задаёт свои --d-* (см. templates/themes/<id>) */
+  --font-display: var(--d-display); /* имена и заголовки */
+  --font-accent: var(--d-accent); /* украшающий шрифт */
+  --font-body: var(--d-body); /* обычный текст */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  --c-primary: #6b1426;
+  --c-primary-dark: #3d0a15;
+  --c-gold: #c9a24a;
+  --c-gold-light: #f1dc9c;
+  --c-paper: #fbf6ec;
+  --c-ink: #3a2a20;
+  --c-muted: #8a7462;
+  --c-accent: #c9a24a;
+
+  --d-display: var(--font-serif);
+  --d-accent: var(--font-script);
+  --d-body: var(--font-sans);
+}
+
+html,
+body {
+  background: var(--c-primary-dark);
+  color: var(--c-ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-variant-numeric: lining-nums; /* ровные цифры в датах: 2026, а не «прыгающие» */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Золотой текст с бликом */
+.gold-text {
+  background: linear-gradient(
+    100deg,
+    var(--c-gold) 0%,
+    var(--c-gold-light) 45%,
+    var(--c-gold) 60%,
+    #9c7a2c 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Лепестки и блёстки, которые падают после открытия конверта */
+@keyframes fall {
+  0% {
+    transform: translate3d(0, -10vh, 0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--drift, 30px), 110vh, 0) rotate(540deg);
+    opacity: 0;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.petal {
+  position: absolute;
+  top: 0;
+  animation: fall linear infinite;
+  will-change: transform, opacity;
+}
+
+/* Мягкая пульсация подсказки «Очиш учун босинг» */
+@keyframes soft-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.soft-pulse {
+  animation: soft-pulse 2.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .petal,
+  .soft-pulse {
+    animation: none;
+  }
 }

@@ -1,69 +1,54 @@
-import Image from "next/image";
+import Link from "next/link";
+import { t } from "@/texts/uz-cyrl";
+import { designs, templates } from "@/templates/registry";
 
+/** Временная главная: список демо. Настоящий каталог будет Mini App в Telegram (Этап 2). */
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <main className="mx-auto min-h-svh max-w-[480px] px-6 py-14 text-center text-paper">
+      <p className="font-serif text-4xl font-semibold">
+        Invite<span className="gold-text">IZI</span>
+      </p>
+      <h1 className="mt-6 font-serif text-2xl">{t.site.home.heading}</h1>
+      <p className="mt-3 text-sm leading-relaxed text-paper/75">{t.site.home.lead}</p>
+
+      <h2 className="mt-12 mb-4 text-xs font-semibold tracking-[0.3em] text-gold uppercase">
+        {t.site.home.demosTitle}
+      </h2>
+      <ul className="space-y-3">
+        {designs.map((design) => {
+          const variants = templates.filter((tpl) => tpl.design === design);
+          return (
+            <li key={design.key} className="rounded-2xl border border-gold/30 bg-white/5 p-4 text-left">
+              <p className="flex items-baseline justify-between">
+                <span className="font-serif text-2xl">{t.themes[design.key as keyof typeof t.themes]}</span>
+                <span className="text-xs text-paper/60">
+                  {t.tiers[design.tier]} {t.site.home.designNumber(design.number)}
+                </span>
+              </p>
+              <div className="mt-3 space-y-2">
+                {variants.map((tpl) => (
+                  <div key={tpl.id} className="flex items-center gap-3">
+                    <Link href={`/demo/${tpl.id}`} className="flex flex-1 items-center gap-3">
+                      <span
+                        className="h-8 w-8 shrink-0 rounded-full ring-2 ring-gold/70"
+                        style={{ background: tpl.swatch }}
+                      />
+                      <span className="text-sm">{t.colors[tpl.color as keyof typeof t.colors]}</span>
+                    </Link>
+                    <Link
+                      href={`/demo/${tpl.id}/namuna`}
+                      className="text-xs text-gold-light/80 underline underline-offset-4"
+                    >
+                      {t.site.home.watermarkPreview}
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </main>
   );
 }
