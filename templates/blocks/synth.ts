@@ -50,11 +50,12 @@ export function noteToFreq(pitch: string) {
   return 440 * 2 ** ((midi - 69) / 12);
 }
 
-type Ctx = AudioContext;
+// BaseAudioContext: и живое воспроизведение, и офлайн-запись (renderOffline) — один и тот же звук
+type Ctx = BaseAudioContext;
 
 /** Проигрыватель одной партитуры */
 export class SynthPlayer {
-  private ctx: Ctx | null = null;
+  private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
   private wet: GainNode | null = null;
   private dry: GainNode | null = null;
@@ -416,4 +417,62 @@ export function arpeggiate(
     });
   });
   return notes;
+}
+
+/**
+ * Записать мелодию в звуковой буфер (без воспроизведения) — для файлов «нашего списка» в боте.
+ * Тот же звук, что и на странице: инструменты, дойра, «зал». В конце мягкое затухание.
+ */
+export async function renderOffline(score: Score, seconds: number, sampleRate = 44100): Promise<AudioBuffer> {
+  const ctx = new OfflineAudioContext(2, Math.ceil(seconds * sampleRate), sampleRate);
+  const comp = ctx.createDynamicsCompressor();
+  comp.threshold.value = -16;
+  comp.ratio.value = 3;
+  comp.connect(ctx.destination);
+  const master = ctx.createGain();
+  master.gain.setValueAtTime(0.55, 0);
+  master.gain.setValueAtTime(0.55, Math.max(0, seconds - 4));
+  master.gain.linearRampToValueAtTime(0, seconds);
+  master.connect(comp);
+  const dry = ctx.createGain();
+  dry.connect(master);
+  const reverb = ctx.createConvolver();
+  reverb.buffer = makeImpulse(ctx, 2.6);
+  const wet = ctx.createGain();
+  wet.gain.value = score.reverb ?? 0.25;
+  wet.connect(reverb);
+  reverb.connect(master);
+  const noise = makeNoise(ctx);
+
+  const spb = 60 / score.bpm;
+  const loopLen = score.loopBeats * spb;
+  for (let t0 = 0.05; t0 < seconds; t0 += loopLen) {
+    for (const track of score.tracks) {
+      const bus = ctx.createGain();
+      bus.gain.value = track.gain ?? 1;
+      const pan = ctx.createStereoPanner();
+      pan.pan.value = track.pan ?? 0;
+      bus.connect(pan);
+      pan.connect(dry);
+      pan.connect(wet);
+      for (const [beat, pitch, len, vel = 0.8] of track.notes) {
+        const at = t0 + beat * spb;
+        if (at < seconds) voice(ctx, track.instrument, bus, at, len * spb, noteToFreq(pitch), vel, noise);
+      }
+    }
+    if (score.drums) {
+      const bus = ctx.createGain();
+      bus.gain.value = score.drums.gain ?? 1;
+      bus.connect(dry);
+      const send = ctx.createGain();
+      send.gain.value = 0.35;
+      bus.connect(send);
+      send.connect(wet);
+      for (const [beat, drum, vel = 0.8] of score.drums.hits) {
+        const at = t0 + beat * spb;
+        if (at < seconds) drumHit(ctx, drum, bus, at, vel, noise);
+      }
+    }
+  }
+  return ctx.startRendering();
 }
