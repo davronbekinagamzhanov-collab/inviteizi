@@ -8,7 +8,13 @@
 export type Occasion = "nikoh" | "sunnat" | "nahorgi" | "yubiley";
 
 /** Вид отдельного события внутри пригласительного (у каждого свои дата, время, место) */
-export type EventKind = "nahorgi" | "nikohBazm" | "sunnatBazm" | "yubileyBazm";
+export type EventKind =
+  | "nahorgi" // наҳорги ош (утром)
+  | "nikohMarosim" // никоҳ маросими (ЗАГС / имом)
+  | "nikohBazm" // тўй базми
+  | "kelinSalom" // келин салом (обычно на следующее утро)
+  | "sunnatBazm"
+  | "yubileyBazm";
 
 export type InvitationEvent = {
   kind: EventKind;
@@ -37,6 +43,8 @@ export type InvitationData = {
   age?: number;
   /** «Каримовлар оиласи» */
   hosts: string;
+  /** Никоҳ: «Куёв томони» и «Келин томони» (если клиент указал обе семьи) */
+  sides?: { groom?: string; bride?: string };
   /** 1–3 события; первое — главное (для таймера и «Тўй санаси») */
   events: InvitationEvent[];
   /** Готовый вариант текста из t.invite (по умолчанию первый) */

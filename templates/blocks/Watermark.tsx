@@ -3,6 +3,7 @@ import { t } from "@/texts/uz-cyrl";
 /**
  * Водяной знак «НАМУНА» поверх всей страницы (демо до оплаты).
  * Лежит над контентом, поэтому виден на любом скриншоте.
+ * Внизу — плашка: после оплаты надпись исчезнет (та же ссылка станет полной).
  */
 export function Watermark() {
   const rows = Array.from({ length: 14 });
@@ -27,6 +28,10 @@ export function Watermark() {
           </div>
         ))}
       </div>
+
+      <p className="absolute inset-x-0 bottom-0 mx-auto w-full max-w-[430px] bg-black/55 px-4 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] text-center font-sans text-[13px] leading-snug text-white backdrop-blur-sm">
+        {t.watermarkNote}
+      </p>
     </div>
   );
 }

@@ -44,6 +44,17 @@ const relations: Record<Relation, string> = {
   ota: "отамиз",
 };
 
+/** Если виновников торжества двое («Абдураҳмонжон ва Абдуллоҳжон») — множественное число */
+const relationsPlural: Record<Relation, string> = {
+  farzand: "фарзандларимиз",
+  ogil: "ўғилларимиз",
+  qiz: "қизларимиз",
+  nabira: "набираларимиз",
+  uka: "укаларимиз",
+  ona: "оналаримиз",
+  ota: "оталаримиз",
+};
+
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 /** Родительный падеж: «Мадина» → «Мадинанинг» */
@@ -51,7 +62,9 @@ const gen = (name: string) => `${name}нинг`;
 
 /** «набирамиз Муҳаммадалининг» */
 function whose(d: InvitationData) {
-  return `${relations[d.relation ?? "farzand"]} ${gen(d.person ?? "")}`;
+  const many = / ва /.test(d.person ?? "");
+  const rel = (many ? relationsPlural : relations)[d.relation ?? "farzand"];
+  return `${rel} ${gen(d.person ?? "")}`;
 }
 
 const occasionTitles: Record<Occasion, string> = {
@@ -63,7 +76,9 @@ const occasionTitles: Record<Occasion, string> = {
 
 const eventTitles: Record<EventKind, string> = {
   nahorgi: "Наҳорги ош",
+  nikohMarosim: "Никоҳ маросими",
   nikohBazm: "Никоҳ базми",
+  kelinSalom: "Келин салом",
   sunnatBazm: "Суннат тўйи базми",
   yubileyBazm: "Юбилей базми",
 };
@@ -80,6 +95,11 @@ function inviteTexts(d: InvitationData): InviteText[] {
     case "nikoh": {
       const couple = `${d.groom} ва ${gen(d.bride ?? "")}`;
       return [
+        {
+          id: "classic",
+          greeting: "Ҳурматли меҳмон!",
+          body: `Сизни фарзандларимиз ${couple} никоҳ тўйларига бағишланган базмимизга лутфан таклиф этамиз.`,
+        },
         {
           id: "royal",
           greeting: "Азиз ва қадрли меҳмонлар!",
@@ -100,7 +120,7 @@ function inviteTexts(d: InvitationData): InviteText[] {
     case "sunnat":
       return [
         {
-          id: "nahorgi",
+          id: "classic",
           greeting: "Азиз меҳмонимиз!",
           body: firstIsNahorgi
             ? `Сизни ${whose(d)} суннат тўйи муносабати билан ёзиладиган наҳорги ошга лутфан таклиф этамиз.`
@@ -116,8 +136,13 @@ function inviteTexts(d: InvitationData): InviteText[] {
       return [
         {
           id: "classic",
-          greeting: "Ҳурматли меҳмонлар!",
-          body: `${cap(whose(d))} ${occasionTitles[d.cause ?? "nikoh"].toLowerCase()} муносабати билан бериладиган наҳорги ошга Сизни лутфан таклиф этамиз.`,
+          greeting: "Ҳурматли меҳмон!",
+          body: `Сизни ${whose(d)} ${occasionTitles[d.cause ?? "nikoh"].toLowerCase()} муносабати билан бериладиган наҳорги ошга лутфан таклиф этамиз.`,
+        },
+        {
+          id: "morning",
+          greeting: "Азиз ва қадрли меҳмонлар!",
+          body: `${cap(whose(d))} ${occasionTitles[d.cause ?? "nikoh"].toLowerCase()} муносабати билан тонгги наҳорги ош дастурхонимизга Сизни лутфан таклиф этамиз.`,
         },
       ];
     case "yubiley":
@@ -137,13 +162,15 @@ export const t = {
     description: "Чиройли, мусиқали тўй таклифномаси. Битта ҳавола — барча меҳмонлар учун.",
   },
 
-  /** Страница /pilots — витрина пилотных дизайнов */
-  pilots: {
-    title: "Пилот дизайнлар",
-    lead: "Каталогнинг биринчи бешта дизайни. Телефонда очиб кўринг.",
+  /** Страница /catalog — все дизайны по тадбирам */
+  catalog: {
+    title: "Таклифнома дизайнлари",
+    lead: "Дизайнни танланг ва телефонда очиб кўринг. Буюртма — Telegram бот орқали.",
     open: "Кўриш",
     watermark: "«НАМУНА» билан",
     number: (n: number) => `№${n}`,
+    photo: "Сурат билан",
+    ornament: "Нақш билан",
   },
 
   /** Названия дизайнов каталога */
@@ -153,7 +180,23 @@ export const t = {
     "oq-ot": "Оқ от",
     "tonggi-qozon": "Тонгги қозон",
     "pion-guldasta": "Пион гулдаста",
-  },
+    "ganch-peshtoq": "Ганч пештоқ",
+    "zarhal-eshik": "Зарҳал эшик",
+    "atlas-tolqin": "Атлас тўлқини",
+    "anor-bogi": "Анор боғи",
+    "bodom-guli": "Бодом гули",
+    "samarqand-kitob": "Самарқанд",
+    "ipak-romol": "Ипак рўмол",
+    "rishton-koshin": "Риштон кошин",
+    atirgul: "Атиргул",
+    "shohona-baxmal": "Шоҳона бахмал",
+    "tandir-nuri": "Тандир нури",
+    dasturxon: "Дастурхон",
+    "non-muhr": "Нон муҳри",
+    "tonggi-choy": "Тонгги чой",
+    "paxta-gul": "Пахта гул",
+    "oltin-ot": "Олтин от",
+  } as Record<string, string>,
 
   formats: {
     animated: "Анимацияли",
@@ -232,6 +275,12 @@ export const t = {
     /** «Шанба, соат 18:00» */
     dayAndTime: (weekdayIndex: number, time: string) => `${weekdays[weekdayIndex]}, соат ${time}`,
     monthYear: (monthIndex: number, year: number) => `${months[monthIndex]} ${year}`,
+    /** «06:00» → «6:00» (так пишут на пригласительных) */
+    clock: (time: string) => time.replace(/^0(\d)/, "$1"),
+    /** «эрталаб соат 6:00» */
+    morningAt: (time: string) => `эрталаб соат ${time.replace(/^0(\d)/, "$1")}`,
+    /** «соат 18:00» */
+    at: (time: string) => `соат ${time}`,
   },
 
   venue: {
@@ -255,7 +304,25 @@ export const t = {
     } satisfies Record<Occasion, string>,
   },
 
+  /** Никоҳ: две семьи */
+  sides: {
+    groom: "Куёв томони",
+    bride: "Келин томони",
+  },
+
+  /** Оқ фотиҳа — короткое благословение в рамке */
+  blessing: {
+    title: "Оқ фотиҳа",
+    text: {
+      nikoh: "Илоҳим, ёшларимизнинг бахти бутун, умри узоқ, хонадони файзли бўлсин. Омин!",
+      sunnat: "Илоҳим, фарзандимиз соғ-омон улғайсин, умри узоқ, бахти бутун бўлсин. Омин!",
+      nahorgi: "Дастурхонимиз доимо тўкин, хонадонимиз файзли, дийдорлашувимиз бардавом бўлсин. Омин!",
+      yubiley: "Илоҳим, азизимизнинг умри узоқ, саломатлиги мустаҳкам, бахти бутун бўлсин. Омин!",
+    } satisfies Record<Occasion, string>,
+  },
+
   hosts: {
+    thanks: "Ташрифингиздан мамнун бўламиз!",
     respectDeep: "Ҳурмат ва эҳтиром билан",
     respect: "Ҳурмат билан",
     waiting: "Кутиб қоламиз!",
@@ -268,6 +335,29 @@ export const t = {
   },
 
   watermark: "НАМУНА",
+  watermarkNote: "Тўловдан сўнг бу ёзув олиб ташланади",
+
+  /**
+   * Свои слова дизайнов (если общих не хватило). Каждый дизайнер правит ТОЛЬКО свою строку.
+   */
+  design: {
+    "ganch-peshtoq": {}, // тексты ganch-peshtoq
+    "zarhal-eshik": {}, // тексты zarhal-eshik
+    "atlas-tolqin": {}, // тексты atlas-tolqin
+    "anor-bogi": {}, // тексты anor-bogi
+    "bodom-guli": {}, // тексты bodom-guli
+    "samarqand-kitob": {}, // тексты samarqand-kitob
+    "ipak-romol": {}, // тексты ipak-romol
+    "rishton-koshin": {}, // тексты rishton-koshin
+    "atirgul": {}, // тексты atirgul
+    "shohona-baxmal": {}, // тексты shohona-baxmal
+    "tandir-nuri": {}, // тексты tandir-nuri
+    "dasturxon": {}, // тексты dasturxon
+    "non-muhr": {}, // тексты non-muhr
+    "tonggi-choy": {}, // тексты tonggi-choy
+    "paxta-gul": {}, // тексты paxta-gul
+    "oltin-ot": {}, // тексты oltin-ot
+  },
 
   footer: {
     madeWith: "InviteIZI орқали яратилди",

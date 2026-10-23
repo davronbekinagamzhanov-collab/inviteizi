@@ -45,3 +45,4 @@ next-env.d.ts
 /pilots-screens/*.tmp
 /scripts/tmp/
 /pilots-screens/
+/screens/

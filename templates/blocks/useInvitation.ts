@@ -73,6 +73,10 @@ export function useInvitation(data: InvitationData, mode: InvitationMode, opts: 
     mapHref: mapLink(ev),
   }));
 
+  // «Тўй дастури»: все тадбиры по порядку (по дате и времени)
+  const program = [...events].sort((a, b) => a.when.startsAt.getTime() - b.when.startsAt.getTime());
+  const sides = data.sides?.groom || data.sides?.bride ? data.sides : undefined;
+
   return {
     data,
     mode,
@@ -82,6 +86,14 @@ export function useInvitation(data: InvitationData, mode: InvitationMode, opts: 
     events,
     /** Главное событие: для «Тўй санаси», календаря и таймера */
     main: events[0],
+    /** «Тўй дастури»: тадбиры по порядку времени */
+    program,
+    /** Никоҳ: «Куёв томони / Келин томони», если клиент указал обе семьи */
+    sides,
+    /** Оқ фотиҳа: короткое благословение для рамки */
+    blessing: t.blessing.text[data.occasion],
+    /** Первое событие утром (до 09:00): «эрталаб соат 6:00» */
+    isMorning: Number(events[0]?.time.slice(0, 2)) < 9,
     hasMusic: Boolean(musicUrl || melody),
     /** Тег <audio> для песни клиента: InvitationShell вставляет его на страницу */
     audioElement: musicUrl
