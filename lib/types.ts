@@ -27,7 +27,8 @@ export type InvitationEvent = {
 };
 
 /** Кем приходится виновник торжества хозяевам: от этого собирается текст */
-export type Relation = "farzand" | "ogil" | "qiz" | "nabira" | "uka" | "ona" | "ota";
+/** ozimiz — «ўзимизники»: тўй самих хозяев, без «фарзандимиз» */
+export type Relation = "farzand" | "ogil" | "qiz" | "nabira" | "uka" | "ona" | "ota" | "ozimiz";
 
 export type InvitationData = {
   occasion: Occasion;

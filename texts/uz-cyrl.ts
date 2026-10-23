@@ -42,6 +42,7 @@ const relations: Record<Relation, string> = {
   uka: "укамиз",
   ona: "онамиз",
   ota: "отамиз",
+  ozimiz: "",
 };
 
 /** Если виновников торжества двое («Абдураҳмонжон ва Абдуллоҳжон») — множественное число */
@@ -53,6 +54,7 @@ const relationsPlural: Record<Relation, string> = {
   uka: "укаларимиз",
   ona: "оналаримиз",
   ota: "оталаримиз",
+  ozimiz: "",
 };
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -64,7 +66,7 @@ const gen = (name: string) => `${name}нинг`;
 function whose(d: InvitationData) {
   const many = / ва /.test(d.person ?? "");
   const rel = (many ? relationsPlural : relations)[d.relation ?? "farzand"];
-  return `${rel} ${gen(d.person ?? "")}`;
+  return rel ? `${rel} ${gen(d.person ?? "")}` : gen(d.person ?? "");
 }
 
 const occasionTitles: Record<Occasion, string> = {
@@ -94,21 +96,26 @@ function inviteTexts(d: InvitationData): InviteText[] {
   switch (d.occasion) {
     case "nikoh": {
       const couple = `${d.groom} ва ${gen(d.bride ?? "")}`;
+      // «фарзандларимиз Азиз ва Мадинанинг»; для «ўзимизники» — просто имена
+      const own = d.relation === "ozimiz";
+      const kin = own ? "" : `${relationsPlural[d.relation ?? "farzand"]} `;
       return [
         {
           id: "classic",
           greeting: "Ҳурматли меҳмон!",
-          body: `Сизни фарзандларимиз ${couple} никоҳ тўйларига бағишланган базмимизга лутфан таклиф этамиз.`,
+          body: `Сизни ${kin}${couple} никоҳ тўйларига бағишланган базмимизга лутфан таклиф этамиз.`,
         },
         {
           id: "royal",
           greeting: "Азиз ва қадрли меҳмонлар!",
-          body: `Ҳаётимизнинг энг қувончли кунида — фарзандларимиз ${couple} никоҳ тўйига Сизни ва оилангизни лутфан таклиф этамиз.`,
+          body: `Ҳаётимизнинг энг қувончли кунида — ${kin}${couple} никоҳ тўйига Сизни ва оилангизни лутфан таклиф этамиз.`,
         },
         {
           id: "short",
           greeting: "Ҳурматли меҳмонлар!",
-          body: "Фарзандларимизнинг никоҳ тўйига Сизни ва оилангизни лутфан таклиф этамиз.",
+          body: own
+            ? "Никоҳ тўйимизга Сизни ва оилангизни лутфан таклиф этамиз."
+            : `${cap(relationsPlural[d.relation ?? "farzand"])}нинг никоҳ тўйига Сизни ва оилангизни лутфан таклиф этамиз.`,
         },
         {
           id: "warm",
@@ -231,6 +238,9 @@ export const t = {
     return list.find((x) => x.id === d.textId) ?? list[0];
   },
 
+  /** Все готовые варианты текста для тадбира (бот показывает их клиенту на выбор) */
+  inviteOptions: (d: InvitationData): InviteText[] => inviteTexts(d),
+
   /** Наҳорги ош: «Ўғлимиз Жасурбекнинг никоҳ тўйи муносабати билан» */
   causeLine: (d: InvitationData) =>
     `${cap(whose(d))} ${occasionTitles[d.cause ?? "nikoh"].toLowerCase()} муносабати билан`,
@@ -242,6 +252,17 @@ export const t = {
 
   /** Суннат: «набирамиз» над именем мальчика */
   relationWord: (r: Relation) => cap(relations[r]),
+  /** Подпись «кем приходится» для кнопок и проверки данных */
+  relationLabel: {
+    farzand: "Фарзандимиз",
+    ogil: "Ўғлимиз",
+    qiz: "Қизимиз",
+    nabira: "Набирамиз",
+    uka: "Укамиз",
+    ona: "Онамиз",
+    ota: "Отамиз",
+    ozimiz: "Ўзимизники",
+  } satisfies Record<Relation, string>,
 
   countdown: {
     title: {
