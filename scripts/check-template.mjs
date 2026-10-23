@@ -131,6 +131,25 @@ for (const vp of VIEWPORTS) {
   });
 
   r.fallbackGlyphs = await glyphCheck(page);
+
+  // Слово, разорванное посередине переносом строки («Нуриддиновла / р»)
+  r.brokenWords = await page.evaluate(() => {
+    const out = [];
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    const range = document.createRange();
+    for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+      const el = n.parentElement;
+      if (!el || el.closest("[data-watermark], [aria-hidden='true'], [data-decor]")) continue;
+      const text = n.textContent ?? "";
+      for (const m of text.matchAll(/[\p{L}\p{N}]{4,}/gu)) {
+        range.setStart(n, m.index);
+        range.setEnd(n, m.index + m[0].length);
+        const rects = [...range.getClientRects()].filter((r) => r.width > 0);
+        if (rects.length > 1 && Math.abs(rects[0].top - rects[rects.length - 1].top) > 4) out.push(m[0]);
+      }
+    }
+    return [...new Set(out)].slice(0, 10);
+  });
   r.mapLinks = (await page.$$eval("a[href*='2gis']", (as) => as.map((a) => a.href))).length;
 
   await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight / 2 - innerHeight / 2 }));
@@ -208,6 +227,7 @@ for (const v of report.viewports) {
   p(v.offscreen.length, `вылезает за экран: ${v.offscreen.join("; ")}`);
   p(v.blankScreens.length, `пустые экраны при быстром листании: ${v.blankScreens.join(", ")}`);
   p(v.stuckReveals, `блоки не появились: ${v.stuckReveals}`);
+  p(v.brokenWords.length, `слово разорвано переносом: ${v.brokenWords.join(", ")}`);
   p(v.fallbackGlyphs.length, `ў қ ғ ҳ запасным шрифтом: ${v.fallbackGlyphs.join("; ")}`);
   p(v.smallText.length, `мелкий текст: ${v.smallText.join("; ")}`);
   p(v.openedTimeout, "не открылось за 10 с");
