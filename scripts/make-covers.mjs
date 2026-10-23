@@ -1,4 +1,4 @@
-// Обложки для каталога бота: первый экран после открытия, 1080×1920 webp → public/covers/<id>.webp
+// Обложки для каталога: первый экран после открытия, 1080×1920 → public/covers/<id>.webp (сайт) и .jpg (бот)
 // Запуск (при работающем dev-сервере): node scripts/make-covers.mjs [id …]
 // Без аргументов — все дизайны из templates/registry.ts.
 import { chromium } from "playwright-core";
@@ -26,6 +26,8 @@ for (const id of ids) {
   await page.addStyleTag({ content: "[aria-label^='Мусиқани'] { display: none !important; }" });
   const png = await page.screenshot();
   await sharp(png).resize(1080, 1920).webp({ quality: 82 }).toFile(`public/covers/${id}.webp`);
+  // Telegram показывает фото только в JPG/PNG — для каталога в боте
+  await sharp(png).resize(1080, 1920).jpeg({ quality: 82, mozjpeg: true }).toFile(`public/covers/${id}.jpg`);
   console.log("ok", id);
   await page.close();
 }
