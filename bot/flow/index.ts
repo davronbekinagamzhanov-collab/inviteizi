@@ -226,7 +226,8 @@ async function route(c: Ctx) {
   if (u.kind === "callback") {
     const d = u.data;
     if (d.startsWith("lang:")) return chooseLang(c, d.slice(5));
-    if (!c.user.lang) return askLang(c);
+    // Решение по чеку — даже если админ ещё не выбрал язык
+    if (!c.user.lang && !/^(ok|no|nr):/.test(d)) return askLang(c);
     return onCallback(c, d);
   }
 
