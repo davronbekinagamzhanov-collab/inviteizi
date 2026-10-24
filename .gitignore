@@ -46,3 +46,6 @@ next-env.d.ts
 /scripts/tmp/
 /pilots-screens/
 /screens/
+
+# музыка «нашего списка»: файлы живут в хранилище Supabase (scripts/music-sync.mjs), не в git
+/public/music/*/

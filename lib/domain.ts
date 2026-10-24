@@ -48,6 +48,10 @@ export type MusicRecord = {
   /** file_id в Telegram, когда файл уже отправлялся (чтобы не грузить заново) */
   telegramFileId: string | null;
   sort: number;
+  /** Тадбир трека: бот показывает список только для типа заказа. Нет — трек подходит всем */
+  occasion?: Occasion | null;
+  /** Песня исполнителя (владелец может скрыть все разом) */
+  isArtist?: boolean;
 };
 
 export type Receipt = { fileId: string; kind: "photo" | "document" };

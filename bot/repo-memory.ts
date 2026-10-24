@@ -3,6 +3,7 @@
  * Записи отдаются копиями (как из базы): изменить их снаружи нельзя.
  */
 import { isReservedSlug } from "@/lib/slug";
+import type { Occasion } from "@/lib/types";
 import type { Repo } from "./repo";
 import type {
   Lang,
@@ -107,8 +108,9 @@ export class MemoryRepo implements Repo {
   }
 
   // ── Музыка ──
-  async listMusic() {
-    return clone([...this.music].sort((a, b) => a.sort - b.sort));
+  async listMusic(occasion?: Occasion) {
+    const fits = (m: MusicRecord) => !occasion || !m.occasion || m.occasion === occasion;
+    return clone([...this.music].filter(fits).sort((a, b) => a.sort - b.sort));
   }
 
   async setMusicTelegramFileId(musicId: string, fileId: string) {

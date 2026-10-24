@@ -17,7 +17,7 @@ import type {
   Stats,
   UserRecord,
 } from "@/lib/domain";
-import type { EventKind, Relation } from "@/lib/types";
+import type { EventKind, Occasion, Relation } from "@/lib/types";
 import { db, type Sql, type Tx } from "@/lib/db";
 import { env } from "@/lib/env";
 import { isReservedSlug } from "@/lib/slug";
@@ -99,6 +99,8 @@ type MusicRow = {
   file_url: string;
   telegram_file_id: string | null;
   sort: number;
+  occasion: Occasion | null;
+  is_artist: boolean;
 };
 
 // ── Преобразования ──
@@ -192,6 +194,8 @@ function toMusicRecord(r: MusicRow): MusicRecord {
     fileUrl: r.file_url,
     telegramFileId: r.telegram_file_id,
     sort: r.sort,
+    occasion: r.occasion,
+    isArtist: r.is_artist,
   };
 }
 
@@ -351,10 +355,13 @@ export class PgRepo implements Repo {
   }
 
   // ── Музыка ──
-  async listMusic() {
+  async listMusic(occasion?: Occasion) {
+    const o = occasion ?? null;
     const rows = await this.sql<MusicRow[]>`
-      select id, title_uz, title_ru, file_url, telegram_file_id, sort
-      from public.music where is_active order by sort, id`;
+      select id, title_uz, title_ru, file_url, telegram_file_id, sort, occasion, is_artist
+      from public.music
+      where is_active and (${o}::text is null or occasion is null or occasion = ${o})
+      order by sort, id`;
     return rows.map(toMusicRecord);
   }
 

@@ -17,7 +17,8 @@ export async function startRu(sim: Sim, id: number, payload = "") {
 }
 
 /** Никоҳ на ўзбекском до сводки: один тадбир (никоҳ базми 14 ноября 18:00), 1-й текст, без музыки */
-export async function nikohToReview(sim: Sim, id: number, names: [string, string] = ["Азиз", "Мадина"]) {
+/** Никоҳ до шага «Мусиқа» (вопрос о музыке уже задан) */
+export async function nikohToMusic(sim: Sim, id: number, names: [string, string] = ["Азиз", "Мадина"]) {
   await startUz(sim, id);
   await sim.click(id, uz.category.nikoh);
   await sim.click(id, /Анимацияли/);
@@ -34,6 +35,10 @@ export async function nikohToReview(sim: Sim, id: number, names: [string, string
   await sim.text(id, uz.event.skip);
   await sim.click(id, uz.event.noMore);
   await sim.click(id, uz.text.pick(1));
+}
+
+export async function nikohToReview(sim: Sim, id: number, names: [string, string] = ["Азиз", "Мадина"]) {
+  await nikohToMusic(sim, id, names);
   await sim.click(id, uz.music.none);
 }
 

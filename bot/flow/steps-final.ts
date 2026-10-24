@@ -45,7 +45,7 @@ export const textOwn: Step = {
 
 export const music: Step = {
   async ask(c) {
-    const list = await c.deps.repo.listMusic();
+    const list = await c.deps.repo.listMusic(c.s.occasion);
     const rows: InlineButton[][] = [];
     if (list.length) rows.push([ib(c, c.tx.music.fromList, "list")]);
     rows.push([ib(c, c.tx.music.own, "own")], [ib(c, c.tx.music.none, "none")], backRow(c));
@@ -66,12 +66,12 @@ const trackTitle = (c: Ctx, m: { titleUz: string; titleRu: string }) => (c.lang 
 
 export const musicList: Step = {
   async ask(c) {
-    const list = await c.deps.repo.listMusic();
+    const list = await c.deps.repo.listMusic(c.s.occasion);
     const rows = list.map((m) => [ib(c, c.tx.music.play(trackTitle(c, m)), `p:${m.id}`), ib(c, c.tx.music.choose, `s:${m.id}`)]);
     await send(c, c.tx.music.listAsk, inline([...rows, backRow(c)]));
   },
   async onButton(c, v) {
-    const list = await c.deps.repo.listMusic();
+    const list = await c.deps.repo.listMusic(c.s.occasion);
     const m = list.find((x) => x.id === v.slice(2));
     if (!m) return null;
     if (v.startsWith("p:")) {
@@ -120,7 +120,7 @@ export const musicOwn: Step = {
 async function musicLine(c: Ctx) {
   const m = c.s.music ?? { kind: "none" };
   if (m.kind === "list") {
-    const rec = (await c.deps.repo.listMusic()).find((x) => x.id === m.musicId);
+    const rec = (await c.deps.repo.listMusic(c.s.occasion)).find((x) => x.id === m.musicId);
     return c.tx.review.musicList(rec ? trackTitle(c, rec) : m.musicId);
   }
   if (m.kind === "own") return c.tx.review.musicOwn(m.title ?? "🎵");

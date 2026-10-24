@@ -142,9 +142,25 @@ describe.skipIf(!hasDb)("PgRepo (Supabase)", () => {
       const r = await repo();
       const mine = (await r.listMusic()).filter((m) => m.id.startsWith(`t-${tag}-`));
       expect(mine.map((m) => m.id)).toEqual([a, b]);
-      expect(mine[0]).toEqual({ id: a, titleUz: "А", titleRu: "А", fileUrl: "https://x/a.mp3", telegramFileId: null, sort: -2 });
+      expect(mine[0]).toEqual({
+        id: a, titleUz: "А", titleRu: "А", fileUrl: "https://x/a.mp3", telegramFileId: null, sort: -2, occasion: null, isArtist: false,
+      });
       await r.setMusicTelegramFileId(b, "TG_B");
       expect((await r.listMusic()).find((m) => m.id === b)?.telegramFileId).toBe("TG_B");
+    });
+
+    it("listMusic(occasion) — только треки тадбира и треки без тадбира", async () => {
+      const { db } = await import("@/lib/db");
+      const n = `t-${tag}-nikoh`;
+      const s = `t-${tag}-sunnat`;
+      await db()`insert into public.music (id, title_uz, title_ru, file_url, sort, is_active, occasion, is_artist) values
+        (${n}, 'Н', 'Н', 'https://x/n.mp3', -5, true, 'nikoh', true),
+        (${s}, 'С', 'С', 'https://x/s.mp3', -4, true, 'sunnat', false)`;
+      const r = await repo();
+      const nikoh = (await r.listMusic("nikoh")).filter((m) => m.id.startsWith(`t-${tag}-`)).map((m) => m.id);
+      expect(nikoh).toContain(n);
+      expect(nikoh).not.toContain(s);
+      expect((await r.listMusic("nikoh")).find((m) => m.id === n)?.isArtist).toBe(true);
     });
 
     it("stats: новые заказы и выручка попадают в «сегодня», источник считается", async () => {

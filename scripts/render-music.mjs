@@ -1,4 +1,5 @@
-// Мелодии дизайнов → MP3 для «нашего списка» в боте: public/music/<id>.mp3 (~75 с, 128 кбит/с).
+// Мелодии дизайнов → MP3 (временные треки «нашего списка»): public/music/<папка тадбира>/<id>.mp3 (~75 с, 128 кбит/с).
+// После — node --env-file=.env.local scripts/music-sync.mjs (загрузка и таблица music).
 // Запуск (dev-сервер работает): node scripts/render-music.mjs [секунд]
 import { chromium } from "playwright-core";
 import { Mp3Encoder } from "@breezystack/lamejs";
@@ -6,7 +7,8 @@ import { mkdirSync, writeFileSync } from "node:fs";
 
 const BASE = process.env.BASE ?? "http://localhost:3000";
 const SECONDS = Number(process.argv[2] ?? 75);
-mkdirSync("public/music", { recursive: true });
+// в какой папке тадбира лежит мелодия дизайна
+const FOLDER = { "oltin-monogramma": "nikoh", sapfir: "nikoh", "oq-ot": "sunnat", "tonggi-qozon": "nahorgi-osh", "pion-guldasta": "yubiley" };
 
 const browser = await chromium.launch({ channel: "chrome" });
 const page = await browser.newPage();
@@ -26,7 +28,9 @@ for (const id of ids) {
   }
   chunks.push(Buffer.from(enc.flush()));
   const mp3 = Buffer.concat(chunks);
-  writeFileSync(`public/music/${id}.mp3`, mp3);
-  console.log(`${id}.mp3 — ${Math.round(mp3.length / 1024)} КБ`);
+  const dir = `public/music/${FOLDER[id] ?? "nikoh"}`;
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(`${dir}/${id}.mp3`, mp3);
+  console.log(`${dir}/${id}.mp3 — ${Math.round(mp3.length / 1024)} КБ`);
 }
 await browser.close();

@@ -14,6 +14,7 @@ import type {
   Stats,
   UserRecord,
 } from "@/lib/domain";
+import type { Occasion } from "@/lib/types";
 
 export interface Repo {
   // ── Пользователи ──
@@ -36,7 +37,8 @@ export interface Repo {
   listAdminIds(): Promise<number[]>;
 
   // ── Музыка ──
-  listMusic(): Promise<MusicRecord[]>;
+  /** Активные треки по sort; с occasion — только треки этого тадбира (и треки без тадбира) */
+  listMusic(occasion?: Occasion): Promise<MusicRecord[]>;
   setMusicTelegramFileId(musicId: string, fileId: string): Promise<void>;
 
   // ── Заказы ──

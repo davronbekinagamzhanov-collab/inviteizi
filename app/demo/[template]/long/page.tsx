@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { demoMusicUrl } from "@/lib/music";
 import { designs, existingArt, getDesign, longSample } from "@/templates/registry";
 
 /**
@@ -18,5 +19,5 @@ export default async function DemoLongPage({ params }: PageProps<"/demo/[templat
   if (!design) notFound();
 
   const { default: Design } = await design.load();
-  return <Design data={longSample(design)} mode="full" art={existingArt(design)} />;
+  return <Design data={{ ...longSample(design), musicUrl: demoMusicUrl(design.occasion) }} mode="full" art={existingArt(design)} />;
 }

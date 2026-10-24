@@ -1,5 +1,6 @@
 // Загружает картинки и музыку проекта в хранилище Supabase (через edge-функцию storage-gate):
-//   public/covers/* → previews,  public/art/* → art,  public/music/* → music.
+//   public/covers/* → previews,  public/art/* → art.
+// Музыку загружает scripts/music-sync.mjs (по папкам тадбиров, с таблицей music).
 // Идемпотентно: файл с тем же размером уже лежит в бакете — пропускается; иначе перезаписывается.
 // Запуск: node --env-file=.env.local scripts/upload-assets.mjs [--force]
 import "./ts-hooks.mjs";
@@ -22,7 +23,6 @@ const TYPES = {
 const SOURCES = [
   ["public/covers", "previews"],
   ["public/art", "art"],
-  ["public/music", "music"],
 ];
 
 /** Сеть бывает нестабильной: до 4 попыток с паузой */
