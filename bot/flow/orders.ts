@@ -58,6 +58,10 @@ export async function confirmDraft(c: Ctx): Promise<Result> {
     return { done: true };
   }
 
+  // Двойное нажатие: параллельный запрос уже создаёт заказ по этой же сводке — молча выходим
+  if (!(await repo.claimStep(c.user.id, c.q0, c.q0 + 1))) return { done: true };
+  c.s.q = Math.max(c.s.q ?? 0, c.q0 + 1);
+
   const slugBase = data.occasion === "nikoh" ? slugify(data.groom ?? "", data.bride ?? "") : slugify(data.person ?? "");
   const o = await repo.createOrder({
     userId: c.user.id,
@@ -253,19 +257,35 @@ export async function approve(c: Ctx, n: number) {
   const o = o0 && (await c.deps.repo.transition(o0.id, ["receipt_sent"], "active", { paidAt: now, expiresAt: expiresAt(o0.data) }));
   if (!o) return already(c);
   await c.deps.tg.editMessageReplyMarkup(c.chatId, c.u.messageId, null).catch(() => {});
-  await send(c, c.tx.admin.approved(n));
 
+  // Заказ уже оплачен. Каждая отправка клиенту — отдельно: сбой одной не отменяет остальные.
+  // Админу пишем по итогу: дошла ли до клиента главная — ссылка.
   const client = o.userId;
   const tx = txFor(await langOf(c.deps, client));
   const url = pageUrl(c, o.slug);
   const tg = c.deps.tg;
-  await tg.sendMessage(client, tx.pay.paid(url), { markup: mainMenu(tx) });
-  const png = await QRCode.toBuffer(url, { width: 600, margin: 2 });
-  await tg.sendPhoto(client, new Uint8Array(png), { caption: tx.pay.qrCaption });
-  await tg.sendMessage(client, tx.pay.shareIntro);
+  const attempt = async (what: string, fn: () => Promise<unknown>) => {
+    try {
+      await fn();
+      return true;
+    } catch (e) {
+      console.error("approve: не отправлено клиенту", what, e instanceof Error ? e.message : e);
+      return false;
+    }
+  };
+  const linkSent = await attempt("ссылка", () => tg.sendMessage(client, tx.pay.paid(url), { markup: mainMenu(tx) }));
+  await attempt("QR", async () => {
+    const png = await QRCode.toBuffer(url, { width: 600, margin: 2 });
+    await tg.sendPhoto(client, new Uint8Array(png), { caption: tx.pay.qrCaption });
+  });
+  await attempt("пояснение", () => tg.sendMessage(client, tx.pay.shareIntro));
   const share = guestShareText(o, url);
   const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(share.replace(url, "").trim())}`;
-  await tg.sendMessage(client, share, { markup: inline([[{ text: tx.pay.shareButton, url: shareUrl }]]) });
+  const shareSent = await attempt("текст для гостей", () =>
+    tg.sendMessage(client, share, { markup: inline([[{ text: tx.pay.shareButton, url: shareUrl }]]) }),
+  );
+
+  await send(c, linkSent && shareSent ? c.tx.admin.approved(n) : c.tx.admin.approvedFailed(n));
 }
 
 const REASONS = ["money", "sum", "other"] as const;

@@ -233,6 +233,8 @@ export const uz = {
     reasonAsk: "Сабабини танланг 👇",
     reasons: { money: "Пул келмади", sum: "Сумма нотўғри", other: "Бошқа чек" } as Record<string, string>,
     approved: (n: number) => `✅ #${n} тасдиқланди. Мижозга ҳавола юборилди.`,
+    approvedFailed: (n: number) =>
+      `⚠️ #${n} тасдиқланди, лекин мижозга ҳавола етиб бормади (ботни блоклаган бўлиши мумкин). Мижозга ўзингиз ёзинг: ҳавола «/find ${n}» да.`,
     rejectedDone: (n: number, reason: string) => `❌ #${n} рад этилди: ${reason}`,
     notAdmin: "Бу тугма фақат админлар учун.",
     already: "Бу буюртма аллақачон кўриб чиқилган.",

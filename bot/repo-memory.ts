@@ -87,6 +87,13 @@ export class MemoryRepo implements Repo {
     u.state = clone(state);
   }
 
+  async claimStep(id: number, expectedQ: number, nextQ: number) {
+    const u = this.mustUser(id);
+    if (Number(u.state.q ?? 0) !== expectedQ) return false;
+    u.state = { ...u.state, q: nextQ };
+    return true;
+  }
+
   // ── Админы ──
   async isAdmin(id: number) {
     return this.adminIds.includes(id);

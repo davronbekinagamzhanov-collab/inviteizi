@@ -241,6 +241,8 @@ export const ru = {
     reasonAsk: "Выберите причину 👇",
     reasons: { money: "Деньги не пришли", sum: "Неверная сумма", other: "Чужой чек" } as Record<string, string>,
     approved: (n: number) => `✅ #${n} подтверждён. Клиенту отправлена ссылка.`,
+    approvedFailed: (n: number) =>
+      `⚠️ #${n} подтверждён, но ссылка до клиента не дошла (возможно, он заблокировал бота). Напишите клиенту сами: ссылка — в «/find ${n}».`,
     rejectedDone: (n: number, reason: string) => `❌ #${n} отклонён: ${reason}`,
     notAdmin: "Эта кнопка только для админов.",
     already: "Этот заказ уже рассмотрен.",

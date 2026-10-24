@@ -95,6 +95,17 @@ export function repoContract(makeRepo: () => Promise<Repo>) {
       expect(u?.state).toEqual({ occasion: "nikoh", n: 1, list: ["a"] });
     });
 
+    it("claimStep: занимает ответ один раз, остальное состояние не трогает", async () => {
+      const repo = await makeRepo();
+      const id = uid();
+      await repo.touchUser({ id });
+      await repo.saveStep(id, "review", { q: 7, templateId: "sapfir" });
+      const [a, b] = await Promise.all([repo.claimStep(id, 7, 8), repo.claimStep(id, 7, 8)]);
+      expect([a, b].filter(Boolean)).toHaveLength(1);
+      expect((await repo.getUser(id))?.state).toEqual({ q: 8, templateId: "sapfir" });
+      expect(await repo.claimStep(id, 7, 8)).toBe(false);
+    });
+
     // ── Заказы ──
     it("createOrder: номер по порядку, статус draft по умолчанию, slug = slugBase", async () => {
       const repo = await makeRepo();

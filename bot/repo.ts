@@ -23,6 +23,12 @@ export interface Repo {
   setLang(id: number, lang: Lang): Promise<void>;
   /** Сохранить шаг диалога и его данные (бот помнит, где клиент остановился) */
   saveStep(id: number, step: string, state: Record<string, unknown>): Promise<void>;
+  /**
+   * Атомарно «занять» ответ: номер вопроса в state.q меняется с expectedQ на nextQ,
+   * только если он всё ещё expectedQ. false — этот ответ уже обработал параллельный запрос
+   * (Telegram шлёт webhook параллельно: двойное нажатие не должно создать два заказа).
+   */
+  claimStep(id: number, expectedQ: number, nextQ: number): Promise<boolean>;
 
   // ── Админы ──
   /** Админ — если id есть в ADMIN_IDS (env) или в таблице admins */
