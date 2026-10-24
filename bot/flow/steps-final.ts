@@ -162,6 +162,7 @@ async function summary(c: Ctx) {
     const label = d.occasion === "nikoh" ? c.tx.form.relationsNikoh[d.relation] : c.tx.form.relations[d.relation];
     lines.push(r.relation(label ?? d.relation));
   }
+  if (d.occasion === "yubiley" && d.age) lines.push(r.age(d.age));
   if (d.occasion === "nahorgi" && d.cause) lines.push(r.cause(c.tx.form.causes[d.cause as "nikoh" | "sunnat"] ?? d.cause));
   lines.push(r.hosts(d.hosts ?? ""));
   if (d.sides?.bride) lines.push(r.sideBride(d.sides.bride));
@@ -193,6 +194,7 @@ export const review: Step = {
     const row2 = [ib(c, r.editHosts, "hosts")];
     if (d.occasion === "nikoh") row2.push(ib(c, r.editSides, "sides"));
     if (d.occasion === "nahorgi") row2.push(ib(c, r.editCause, "cause"));
+    if (d.occasion === "yubiley") row2.push(ib(c, r.editAge, "age"));
     rows.push(row2);
     d.events.forEach((e, i) => rows.push([ib(c, r.editEvent(i + 1, eventLabel(c.tx, e.kind)), `ev:${i}`)]));
     rows.push([ib(c, r.editText, "text"), ib(c, r.editMusic, "music"), ib(c, r.editDesign, "design")]);
@@ -213,6 +215,8 @@ export const review: Step = {
         return edit("sideAsk");
       case "cause":
         return edit("cause");
+      case "age":
+        return edit("age");
       case "text":
         return edit("text");
       case "music":
@@ -238,7 +242,7 @@ export const review: Step = {
   },
 };
 
-function goEdit(c: Ctx, to: "groom" | "person" | "relation" | "hosts" | "sideAsk" | "cause" | "text" | "music" | "fmt" | "catalog"): Result {
+function goEdit(c: Ctx, to: "groom" | "person" | "relation" | "hosts" | "sideAsk" | "cause" | "age" | "text" | "music" | "fmt" | "catalog"): Result {
   c.s.ret = "review";
   return { to };
 }

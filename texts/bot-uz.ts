@@ -57,6 +57,7 @@ export const uz = {
     nikoh: "💍 Никоҳ тўйи",
     nahorgi: "🍚 Наҳорги ош",
     sunnat: "👦 Суннат тўйи",
+    yubiley: "🎂 Юбилей",
   },
 
   format: {
@@ -87,6 +88,9 @@ export const uz = {
     sideNo: "➡️ Йўқ, шарт эмас",
     sideBride: "Келин томони оиласи?\nМасалан: Юсуповлар оиласи",
     personNahorgi: "🍚 Наҳорги ош кимнинг тўйи муносабати билан?\nИсмини ёзинг. Масалан: Жасурбек",
+    personYubiley: "🎂 Юбилярнинг исми?\nМасалан: Мукаррам опа",
+    age: "🎂 Нечи ёшга тўлади?\nРақам билан ёзинг. Масалан: 60",
+    badAge: "Ёшни рақам билан ёзинг 🙂\nМасалан: 60",
     personSunnat: "👦 Ўғил боланинг исми?\nМасалан: Муҳаммадали\nИккита бўлса: Абдураҳмонжон ва Абдуллоҳжон",
     relationPerson: (name: string) => `${name} сизга ким бўлади? 👇`,
     relations,
@@ -157,6 +161,7 @@ export const uz = {
     bride: (s: string) => `Келин: ${s}`,
     person: (s: string) => `Исм: ${s}`,
     relation: (s: string) => `Ким бўлади: ${s}`,
+    age: (n: number) => `Ёши: ${n}`,
     cause: (s: string) => `Қайси тўй: ${s}`,
     hosts: (s: string) => `Таклиф қилувчи: ${s}`,
     sideBride: (s: string) => `Келин томони: ${s}`,
@@ -171,6 +176,7 @@ export const uz = {
     musicNone: "Мусиқа: йўқ",
     editNames: "✏️ Исмлар",
     editRelation: "✏️ Ким бўлади",
+    editAge: "✏️ Ёши",
     editCause: "✏️ Қайси тўй",
     editHosts: "✏️ Таклиф қилувчи",
     editSides: "✏️ Келин томони",

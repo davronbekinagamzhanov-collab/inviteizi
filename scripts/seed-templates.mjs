@@ -3,7 +3,7 @@
 // Запуск: node --env-file=.env.local scripts/seed-templates.mjs
 import "./ts-hooks.mjs";
 
-const { designs, PRICES } = await import("../templates/registry.ts");
+const { designs, PRICES, ACCEPTED } = await import("../templates/registry.ts");
 const { db, closeDb } = await import("../lib/db.ts");
 
 const rows = designs.map((d) => ({
@@ -14,7 +14,7 @@ const rows = designs.map((d) => ({
   with_photo: d.withPhoto,
   price: PRICES[d.format],
   cover_url: d.cover,
-  is_active: true,
+  is_active: ACCEPTED.has(d.id), // клиенты видят только принятые
   sort: d.number,
 }));
 
@@ -30,7 +30,7 @@ try {
         with_photo = excluded.with_photo,
         price = excluded.price,
         cover_url = excluded.cover_url,
-        is_active = true,
+        is_active = excluded.is_active,
         sort = excluded.sort`;
     const off = await tx`
       update public.templates set is_active = false

@@ -74,6 +74,7 @@ export const ru = {
     nikoh: "💍 Свадьба (никоҳ)",
     nahorgi: "🍚 Наҳорги ош",
     sunnat: "👦 Суннат той",
+    yubiley: "🎂 Юбилей",
   },
 
   format: {
@@ -104,6 +105,9 @@ export const ru = {
     sideNo: "➡️ Нет, не нужно",
     sideBride: "Семья невесты?\nНапример: Юсуповлар оиласи",
     personNahorgi: "🍚 По чьему тою наҳорги ош?\nНапишите имя. Например: Жасурбек",
+    personYubiley: "🎂 Имя юбиляра?\nНапример: Мукаррам опа",
+    age: "🎂 Сколько исполняется лет?\nНапишите цифрами. Например: 60",
+    badAge: "Напишите возраст цифрами 🙂\nНапример: 60",
     personSunnat: "👦 Имя мальчика?\nНапример: Муҳаммадали\nЕсли двое: Абдураҳмонжон ва Абдуллоҳжон",
     relationPerson: (name: string) => `Кем вам приходится ${name}? 👇`,
     relations,
@@ -174,6 +178,7 @@ export const ru = {
     bride: (s: string) => `Невеста: ${s}`,
     person: (s: string) => `Имя: ${s}`,
     relation: (s: string) => `Кем приходится: ${s}`,
+    age: (n: number) => `Возраст: ${n}`,
     cause: (s: string) => `Какой той: ${s}`,
     hosts: (s: string) => `Приглашают: ${s}`,
     sideBride: (s: string) => `Семья невесты: ${s}`,
@@ -188,6 +193,7 @@ export const ru = {
     musicNone: "Музыка: нет",
     editNames: "✏️ Имена",
     editRelation: "✏️ Кем приходится",
+    editAge: "✏️ Возраст",
     editCause: "✏️ Какой той",
     editHosts: "✏️ Кто приглашает",
     editSides: "✏️ Семья невесты",

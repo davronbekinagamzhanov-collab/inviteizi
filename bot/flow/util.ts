@@ -3,7 +3,7 @@ import type { InlineButton, Markup } from "../tg";
 import type { Ctx, Draft, DraftData } from "./types";
 import type { InvitationData, InvitationEvent, Lang, Occasion, OrderRecord, OrderStatus } from "@/lib/domain";
 import type { EventKind } from "@/lib/types";
-import { designs, getDesign, PRICES, type Format } from "@/templates/registry";
+import { designs, getDesign, PRICES, type Format, activeDesigns } from "@/templates/registry";
 import { t } from "@/texts/uz-cyrl";
 import { uz, type BotTexts } from "@/texts/bot-uz";
 import { ru } from "@/texts/bot-ru";
@@ -57,7 +57,7 @@ export const eventLabel = (tx: BotTexts, kind: EventKind) => tx.event.kinds[kind
 // ── Дизайны ──
 
 export function designsFor(occasion: Occasion, format: Format) {
-  return designs.filter((d) => d.occasion === occasion && d.format === format).sort((a, b) => a.number - b.number);
+  return activeDesigns().filter((d) => d.occasion === occasion && d.format === format).sort((a, b) => a.number - b.number);
 }
 
 export function formatsFor(occasion: Occasion): Format[] {

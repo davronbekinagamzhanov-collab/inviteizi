@@ -32,6 +32,7 @@ export type StepId =
   | "relation"
   | "person"
   | "cause"
+  | "age"
   | "hosts"
   | "sideAsk"
   | "sideBride"

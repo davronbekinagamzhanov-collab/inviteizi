@@ -6,11 +6,11 @@ import { PRICES } from "@/templates/registry";
 import { after, backRow, coverUrl, data, demoUrl, designName, designsFor, formatsFor, ib, inline, price, send } from "./util";
 import type { InlineButton } from "../tg";
 
-const OCCASIONS: Occasion[] = ["nikoh", "nahorgi", "sunnat"];
+const OCCASIONS: Occasion[] = ["nikoh", "nahorgi", "sunnat", "yubiley"];
 
 export const cat: Step = {
   async ask(c) {
-    const rows = OCCASIONS.map((o) => [ib(c, c.tx.category[o as "nikoh" | "nahorgi" | "sunnat"], o)]);
+    const rows = OCCASIONS.map((o) => [ib(c, c.tx.category[o], o)]);
     await send(c, c.tx.category.ask, inline([...rows, backRow(c)]));
   },
   async onButton(c, v) {

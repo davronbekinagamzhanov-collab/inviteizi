@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Cormorant_Garamond, PT_Serif } from "next/font/google";
 import { t } from "@/texts/uz-cyrl";
 import type { Occasion } from "@/lib/types";
-import { designs, PRICES } from "@/templates/registry";
+import { activeDesigns, PRICES } from "@/templates/registry";
 
 const display = Cormorant_Garamond({
   variable: "--font-catalog-display",
@@ -43,7 +43,7 @@ export default function CatalogPage() {
       </header>
 
       {ORDER.map((occasion) => {
-        const list = designs.filter((d) => d.occasion === occasion);
+        const list = activeDesigns().filter((d) => d.occasion === occasion);
         if (!list.length) return null;
         return (
           <section key={occasion} className="mt-12">

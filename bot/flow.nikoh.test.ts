@@ -26,7 +26,7 @@ describe("весь путь никоҳ на ўзбекском", () => {
     expect(cat.type).toBe("photo");
     expect(cat.media).toBe(`${BASE}/covers/oltin-monogramma.jpg`);
     expect(cat.text).toMatch(/^№1 · Олтин монограмма\nАнимацияли · 10.000 ₸$/);
-    expect(buttonLabels(cat)).toEqual(expect.arrayContaining(["◀", "1/7", "▶", uz.catalog.demo, uz.catalog.buy]));
+    expect(buttonLabels(cat)).toEqual(expect.arrayContaining(["◀", "1/3", "▶", uz.catalog.demo, uz.catalog.buy]));
     expect(inlineButtons(cat).find((b) => b.text === uz.catalog.demo)).toEqual({
       text: uz.catalog.demo,
       url: `${BASE}/demo/oltin-monogramma`, // каталог — чистое демо без надписи
@@ -35,7 +35,7 @@ describe("весь путь никоҳ на ўзбекском", () => {
     expect(sim.last(id).id).toBe(cat.id);
     expect(cat.media).toBe(`${BASE}/covers/ganch-peshtoq.jpg`);
     expect(cat.text).toMatch(/^№61 · Ганч пештоқ/);
-    expect(buttonLabels(cat)).toContain("2/7");
+    expect(buttonLabels(cat)).toContain("2/3");
     await sim.click(id, uz.catalog.buy);
 
     // Анкета
@@ -185,11 +185,11 @@ describe("весь путь никоҳ на ўзбекском", () => {
     await sim.click(1, uz.category.nikoh);
     await sim.click(1, /Оддий/);
     const cat = sim.last(1);
-    expect(buttonLabels(cat)).toContain("1/5");
+    expect(buttonLabels(cat)).toContain("1/2");
     await sim.click(1, "◀");
-    expect(buttonLabels(cat)).toContain("5/5");
+    expect(buttonLabels(cat)).toContain("2/2");
     await sim.click(1, "▶");
-    expect(buttonLabels(cat)).toContain("1/5");
+    expect(buttonLabels(cat)).toContain("1/2");
   });
 
   it("формат без дизайнов не показывается (суннат — только анимацияли)", async () => {

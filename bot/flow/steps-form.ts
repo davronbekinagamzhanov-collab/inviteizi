@@ -48,7 +48,12 @@ export const bride = textStep((c) => c.tx.form.bride, NAME_MAX, (c, v) => {
 });
 
 export const person = textStep(
-  (c) => (c.s.occasion === "sunnat" ? c.tx.form.personSunnat : c.tx.form.personNahorgi),
+  (c) =>
+    c.s.occasion === "sunnat"
+      ? c.tx.form.personSunnat
+      : c.s.occasion === "yubiley"
+        ? c.tx.form.personYubiley
+        : c.tx.form.personNahorgi,
   NAME_MAX * 2,
   (c, v) => {
     data(c).person = v;
@@ -56,10 +61,11 @@ export const person = textStep(
   },
 );
 
-const RELATIONS: Record<"nikoh" | "nahorgi" | "sunnat", Relation[]> = {
+const RELATIONS: Record<"nikoh" | "nahorgi" | "sunnat" | "yubiley", Relation[]> = {
   nikoh: ["farzand", "nabira", "ozimiz"],
   nahorgi: ["ogil", "qiz", "nabira", "uka", "ozimiz"],
   sunnat: ["ogil", "nabira", "uka", "farzand"],
+  yubiley: ["ona", "ota", "ozimiz"],
 };
 
 const relationsFor = (c: Ctx) => RELATIONS[(c.s.occasion ?? "nikoh") as "nikoh"] ?? RELATIONS.nikoh;
@@ -75,7 +81,7 @@ export const relation: Step = {
   async onButton(c, v) {
     if (!relationsFor(c).includes(v as Relation)) return null;
     data(c).relation = v as Relation;
-    return { to: after(c, c.s.occasion === "nahorgi" ? "cause" : "hosts") };
+    return { to: after(c, c.s.occasion === "nahorgi" ? "cause" : c.s.occasion === "yubiley" ? "age" : "hosts") };
   },
 };
 
@@ -118,3 +124,17 @@ export const sideBride = textStep((c) => c.tx.form.sideBride, 60, (c, v) => {
   d.sides = { groom: d.hosts, bride: v };
   return toFirstEvent(c);
 });
+
+/** Юбилей: сколько лет исполняется (1–120) */
+export const age: Step = {
+  async ask(c) {
+    await send(c, c.tx.form.age, inline([backRow(c)]));
+  },
+  async onMessage(c) {
+    if (c.u.kind !== "text") return null;
+    const n = Number(c.u.text.trim());
+    if (!Number.isInteger(n) || n < 1 || n > 120) return { hint: c.tx.form.badAge };
+    data(c).age = n;
+    return { to: after(c, "hosts") };
+  },
+};

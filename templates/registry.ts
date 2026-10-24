@@ -132,6 +132,18 @@ export const designs: Design[] = [
   design("oltin-ot", 76, "sunnat", "animated", false, () => import("./themes/oltin-ot/Design")),
 ];
 
+/**
+ * Принятые дизайны (прошли приёмку) — только их видят клиенты в боте и на /catalog.
+ * Остальные в работе: код остаётся, демо открывается по прямой ссылке, но в каталоге их нет.
+ */
+export const ACCEPTED = new Set([
+  "oltin-monogramma", "sapfir", "oq-ot", "tonggi-qozon", "pion-guldasta",
+  "tandir-nuri", "ganch-peshtoq", "ipak-romol", "anor-bogi", "oltin-ot",
+]);
+
+/** Дизайны для клиентов: только принятые */
+export const activeDesigns = () => designs.filter((d) => ACCEPTED.has(d.id));
+
 export function getDesign(id: string) {
   return designs.find((d) => d.id === id);
 }
