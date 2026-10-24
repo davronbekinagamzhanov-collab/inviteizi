@@ -193,6 +193,7 @@ export const uz = {
     pay: (price: string) => `💳 Тўлаш — ${price}`,
     edit: "✏️ Ўзгартириш",
     notFound: "Буюртма топилмади 🙁",
+    closed: "🔒 Ҳавола берилган — таклифнома ёпилган.\nЎзгартириш керак бўлса, эгаси қўлда қилиб беради (2 000 ₸). Боғланинг 👇",
   },
 
   pay: {
@@ -209,6 +210,8 @@ export const uz = {
     qrCaption: "📷 QR-код: телефон камерасини қаратсангиз, таклифнома очилади.",
     shareIntro: "👇 Бу хабарни меҳмонларга юборинг (WhatsApp, Telegram):",
     shareButton: "📤 Меҳмонларга юбориш",
+    thanks: "🙏 Раҳмат! Тўйингиз муборак бўлсин!\nЯна таклифнома керак бўлса — пастдаги тугмани босинг 👇",
+    newOrder: "🆕 Янги таклифнома",
     rejected: (n: number, reason: string) =>
       `😔 #${n} буюртма тўлови тасдиқланмади.\nСабаби: ${reason}\nТекшириб, чекни қайта юборинг.`,
     resend: "📎 Чекни қайта юбориш",
@@ -262,11 +265,6 @@ export const uz = {
     item: (n: number, title: string, status: string, url: string) => `#${n} · ${title}\n${status}\n${url}`,
     statuses,
     link: "🔗 Ҳавола",
-    slugAsk: (url: string) =>
-      `Ҳозирги ҳавола:\n${url}\n\nЯнги номини лотин ҳарфларида ёзинг.\nМасалан: aziz-madina`,
-    slugTaken: (s: string) => `«${s}» банд 🙁 Бошқасини ёзинг.\nМасалан: ${s}-toy`,
-    slugBad: "Фақат лотин ҳарфлари, рақамлар ва «-».\nМасалан: aziz-madina",
-    slugChanged: (url: string) => `✅ Янги ҳавола:\n${url}\nЭски ҳавола ҳам шу таклифномага олиб боради.`,
   },
 };
 

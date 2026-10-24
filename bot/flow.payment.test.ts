@@ -108,7 +108,8 @@ describe("подтверждение админом", () => {
     expect(paid?.expiresAt?.toISOString()).toBe("2026-12-14T18:59:59.000Z"); // 14.11 23:59:59 (+05) + 30 дней
     const url = `${BASE}/aziz-madina`;
     const toClient = sim.tg.to(1).filter((m) => m.id >= mark);
-    expect(toClient.map((m) => m.type)).toEqual(["text", "photo", "text", "text"]);
+    expect(toClient.map((m) => m.type)).toEqual(["text", "photo", "text", "text", "text"]);
+    expect(toClient[4].text).toBe(uz.pay.thanks);
     expect(toClient[0].text).toBe(uz.pay.paid(url));
     const png = toClient[1].media as Uint8Array;
     expect(Array.from(png.slice(1, 4))).toEqual([0x50, 0x4e, 0x47]); // «PNG»
@@ -221,34 +222,8 @@ describe("мои приглашения, правка, ссылка", () => {
     expect(old.text).toContain(`#${paid.number}`);
     expect(old.text).toContain(uz.my.statuses.active);
     expect(buttonLabels(old).some((l) => l.startsWith("💳"))).toBe(false);
-    expect(buttonLabels(old)).toEqual(expect.arrayContaining([uz.order.edit, uz.my.link, uz.contact]));
+    expect(buttonLabels(old)).toEqual([uz.my.link, uz.contact]); // заказ закрыт: правки только через владельца
     expect(inlineButtons(old).find((b) => b.text === uz.contact)).toEqual({ text: uz.contact, url: "https://t.me/inviteizi_owner" });
-  });
-
-  it("правка данных после оплаты не меняет slug и цену", async () => {
-    const sim = new Sim();
-    await admins(sim);
-    const o = await nikohWithReceipt(sim, 1);
-    await sim.click(ADMIN, uz.admin.approve);
-    await sim.text(1, uz.menu.my);
-    await sim.click(1, uz.order.edit);
-    expect(sim.lastText(1)).toContain(uz.review.title);
-    await sim.click(1, uz.review.editNames);
-    await sim.text(1, "Азизбек");
-    await sim.text(1, "Мадина");
-    expect(sim.lastText(1)).toContain(uz.review.groom("Азизбек"));
-    // Дизайн у оплаченного — только тот же формат: сразу каталог
-    await sim.click(1, uz.review.editDesign);
-    expect(sim.last(1).type).toBe("photo");
-    expect(sim.last(1).text).toContain("Анимацияли");
-    await sim.click(1, "▶");
-    await sim.click(1, uz.catalog.buy);
-    await sim.click(1, uz.review.confirm);
-    const after = await sim.repo.getOrder(o.id);
-    expect(after).toMatchObject({ slug: "aziz-madina", status: "active", amount: 10_000, format: "animated", templateId: "ganch-peshtoq" }); // был oltin-monogramma, ▶ — следующий
-    expect(after?.data.groom).toBe("Азизбек");
-    expect(sim.lastText(1)).toBe(uz.order.updated(`${BASE}/aziz-madina`));
-    expect(await sim.repo.listOrdersByUser(1)).toHaveLength(1);
   });
 
   it("правка неоплаченного: смена формата меняет цену, slug тот же", async () => {
@@ -278,24 +253,7 @@ describe("мои приглашения, правка, ссылка", () => {
     expect((await sim.repo.getOrder(o.id))?.data.events[0].time).toBe("19:00");
   });
 
-  it("смена ссылки: проверка формата и занятости", async () => {
-    const sim = new Sim();
-    await nikohOrder(sim, 2, ["Жасур", "Нилуфар"]);
-    const o = await nikohOrder(sim, 1);
-    await sim.text(1, uz.menu.my);
-    await sim.click(1, uz.my.link);
-    expect(sim.lastText(1)).toBe(uz.my.slugAsk(`${BASE}/aziz-madina`));
-    await sim.text(1, "Азиз Мадина!");
-    expect(sim.tg.to(1).at(-2)?.text).toBe(uz.my.slugBad);
-    await sim.text(1, "jasur-nilufar");
-    expect(sim.tg.to(1).at(-2)?.text).toBe(uz.my.slugTaken("jasur-nilufar"));
-    await sim.text(1, "demo");
-    expect(sim.tg.to(1).at(-2)?.text).toBe(uz.my.slugTaken("demo"));
-    await sim.text(1, "Aziz-Va-Madina");
-    expect((await sim.repo.getOrder(o.id))?.slug).toBe("aziz-va-madina");
-    expect(sim.lastText(1)).toBe(uz.my.slugChanged(`${BASE}/aziz-va-madina`));
-    expect((await sim.user(1))?.step).toBe("idle");
-  });
+
 });
 
 describe("команды админа", () => {
@@ -323,5 +281,65 @@ describe("команды админа", () => {
     expect(sim.lastText(1)).toContain(uz.unknown);
     await sim.command(1, "stats");
     expect(sim.lastText(1)).toContain(uz.unknown);
+  });
+
+  it("после выдачи ссылки заказ закрыт: «Ўзгартириш» нет, поддельная кнопка правки — отказ и «Боғланиш»", async () => {
+    const sim = new Sim();
+    await admins(sim);
+    const o = await nikohWithReceipt(sim, 1);
+    await sim.click(ADMIN, uz.admin.approve);
+    await sim.callback(1, `edit:${o.number}`, 1);
+    expect(sim.lastText(1)).toBe(uz.order.closed);
+    expect(inlineButtons(sim.last(1))).toEqual([{ text: uz.contact, url: "https://t.me/inviteizi_owner" }]);
+    expect((await sim.user(1))?.step).toBe("idle");
+    expect((await sim.repo.getOrder(o.id))?.data.groom).toBe("Азиз");
+  });
+
+  it("пока чек на проверке — правки нет, повторный чек не создаёт заказ", async () => {
+    const sim = new Sim();
+    await admins(sim);
+    const o = await nikohWithReceipt(sim, 1);
+    await sim.callback(1, `edit:${o.number}`, 1);
+    expect(sim.lastText(1)).toBe(uz.pay.waiting);
+    await sim.photo(1, "RECEIPT_2");
+    expect(await sim.repo.listOrdersByUser(1)).toHaveLength(1);
+    expect((await sim.repo.getOrder(o.id))?.status).toBe("receipt_sent");
+  });
+
+  it("смены ссылки клиентом больше нет: старая кнопка не срабатывает", async () => {
+    const sim = new Sim();
+    const o = await nikohOrder(sim, 1);
+    await sim.callback(1, `slug:${o.number}`, 1);
+    expect((await sim.repo.getOrder(o.id))?.slug).toBe("aziz-madina");
+    expect(sim.tg.answers.at(-1)?.text).toBe(uz.oldButton);
+  });
+
+  it("«🔗 Ҳавола» у оплаченного — ссылка, QR и текст для гостей заново", async () => {
+    const sim = new Sim();
+    await admins(sim);
+    await nikohWithReceipt(sim, 1);
+    await sim.click(ADMIN, uz.admin.approve);
+    await sim.text(1, uz.menu.my);
+    const mark = sim.mark();
+    await sim.click(1, uz.my.link);
+    const toClient = sim.tg.to(1).filter((m) => m.id >= mark);
+    expect(toClient.map((m) => m.type)).toEqual(["text", "photo", "text", "text"]);
+    expect(toClient[0].text).toBe(uz.pay.paid(`${BASE}/aziz-madina`));
+  });
+
+  it("после оплаты — спасибо и одна кнопка «🆕 Янги таклифнома»: новый заказ с нуля", async () => {
+    const sim = new Sim();
+    await admins(sim);
+    await nikohWithReceipt(sim, 1);
+    await sim.click(ADMIN, uz.admin.approve);
+    const last = sim.last(1);
+    expect(last.text).toBe(uz.pay.thanks);
+    expect(buttonLabels(last)).toEqual([uz.pay.newOrder]);
+    await sim.click(1, uz.pay.newOrder);
+    expect(sim.lastText(1)).toBe(uz.category.ask);
+    const u = await sim.user(1);
+    expect(u?.step).toBe("cat");
+    expect((u?.state as { data?: unknown; orderId?: string }).data).toBeUndefined();
+    expect((u?.state as { orderId?: string }).orderId).toBeUndefined();
   });
 });

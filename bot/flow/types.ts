@@ -50,8 +50,7 @@ export type StepId =
   | "musicOwn"
   | "review"
   | "evMenu"
-  | "receipt"
-  | "slug";
+  | "receipt";
 
 /** Данные анкеты по ходу заполнения (тадбиры могут быть недозаполнены) */
 export type DraftData = Omit<Partial<InvitationData>, "events"> & { events?: Partial<InvitationEvent>[] };

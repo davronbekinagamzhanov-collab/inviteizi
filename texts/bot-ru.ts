@@ -210,6 +210,7 @@ export const ru = {
     pay: (price: string) => `💳 Оплатить — ${price}`,
     edit: "✏️ Изменить",
     notFound: "Заказ не найден 🙁",
+    closed: "🔒 Ссылка выдана — приглашение закрыто.\nЕсли нужно что-то изменить, владелец сделает это вручную (2 000 ₸). Свяжитесь 👇",
   },
 
   pay: {
@@ -226,6 +227,8 @@ export const ru = {
     qrCaption: "📷 QR-код: наведите камеру телефона — откроется приглашение.",
     shareIntro: "👇 Перешлите это сообщение гостям (WhatsApp, Telegram):",
     shareButton: "📤 Отправить гостям",
+    thanks: "🙏 Спасибо! Пусть той пройдёт счастливо!\nНужно ещё одно приглашение — нажмите кнопку ниже 👇",
+    newOrder: "🆕 Новое приглашение",
     rejected: (n: number, reason: string) =>
       `😔 Оплата заказа #${n} не подтверждена.\nПричина: ${reason}\nПроверьте и пришлите чек ещё раз.`,
     resend: "📎 Отправить чек заново",
@@ -270,10 +273,6 @@ export const ru = {
     item: (n: number, title: string, status: string, url: string) => `#${n} · ${title}\n${status}\n${url}`,
     statuses,
     link: "🔗 Ссылка",
-    slugAsk: (url: string) => `Сейчас ссылка:\n${url}\n\nНапишите новое название латиницей.\nНапример: aziz-madina`,
-    slugTaken: (s: string) => `«${s}» занято 🙁 Напишите другое.\nНапример: ${s}-toy`,
-    slugBad: "Только латинские буквы, цифры и «-».\nНапример: aziz-madina",
-    slugChanged: (url: string) => `✅ Новая ссылка:\n${url}\nСтарая ссылка тоже ведёт на это приглашение.`,
   },
 } satisfies BotTexts;
 

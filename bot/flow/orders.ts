@@ -6,7 +6,7 @@ import type { InlineButton } from "../tg";
 import { PRICES } from "@/templates/registry";
 import { t } from "@/texts/uz-cyrl";
 import { uz } from "@/texts/bot-uz";
-import { isReservedSlug, slugify } from "@/lib/slug";
+import { slugify } from "@/lib/slug";
 import {
   backRow,
   designName,
@@ -88,8 +88,17 @@ async function ownOrder(c: Ctx, n: number) {
 /** Открыть заказ на правку: сводка с данными заказа (slug не меняется) */
 export async function editOrder(c: Ctx, n: number): Promise<Result> {
   const o = await ownOrder(c, n);
-  if (!o || o.status === "archived") {
+  if (!o) {
     await send(c, c.tx.order.notFound);
+    return { done: true };
+  }
+  // Чек на проверке — ждём ответа; ссылка выдана — заказ закрыт, правки только через владельца (2 000 ₸)
+  if (o.status === "receipt_sent") {
+    await send(c, c.tx.pay.waiting);
+    return { done: true };
+  }
+  if (PAID_STATUSES.includes(o.status)) {
+    await send(c, c.tx.order.closed, inline([[{ text: c.tx.contact, url: ownerUrl(c) }]]));
     return { done: true };
   }
   c.s = {
@@ -250,26 +259,22 @@ export function guestShareText(o: OrderRecord, url: string) {
   return g.share(what, first ? `${fmtDate(first.date)}, ${first.time}` : "", url);
 }
 
-export async function approve(c: Ctx, n: number) {
-  if (!(await guardAdmin(c))) return;
-  const o0 = await c.deps.repo.getOrderByNumber(n);
-  const now = c.deps.now();
-  const o = o0 && (await c.deps.repo.transition(o0.id, ["receipt_sent"], "active", { paidAt: now, expiresAt: expiresAt(o0.data) }));
-  if (!o) return already(c);
-  await c.deps.tg.editMessageReplyMarkup(c.chatId, c.u.messageId, null).catch(() => {});
-
-  // Заказ уже оплачен. Каждая отправка клиенту — отдельно: сбой одной не отменяет остальные.
-  // Админу пишем по итогу: дошла ли до клиента главная — ссылка.
+/**
+ * Клиенту: ссылка, QR-код, текст для гостей с кнопкой «Меҳмонларга юбориш».
+ * Каждая отправка отдельно: сбой одной не отменяет остальные.
+ * afterPayment — сразу после ✅: в конце спасибо и ОДНА кнопка «🆕 Янги таклифнома».
+ */
+async function sendLinkPack(deps: Deps, o: OrderRecord, afterPayment: boolean) {
   const client = o.userId;
-  const tx = txFor(await langOf(c.deps, client));
-  const url = pageUrl(c, o.slug);
-  const tg = c.deps.tg;
+  const tx = txFor(await langOf(deps, client));
+  const url = `${deps.env.publicBaseUrl}/${o.slug}`;
+  const tg = deps.tg;
   const attempt = async (what: string, fn: () => Promise<unknown>) => {
     try {
       await fn();
       return true;
     } catch (e) {
-      console.error("approve: не отправлено клиенту", what, e instanceof Error ? e.message : e);
+      console.error("клиенту не отправлено:", what, e instanceof Error ? e.message : e);
       return false;
     }
   };
@@ -284,7 +289,33 @@ export async function approve(c: Ctx, n: number) {
   const shareSent = await attempt("текст для гостей", () =>
     tg.sendMessage(client, share, { markup: inline([[{ text: tx.pay.shareButton, url: shareUrl }]]) }),
   );
+  if (afterPayment) {
+    await attempt("спасибо", () => tg.sendMessage(client, tx.pay.thanks, { markup: inline([[{ text: tx.pay.newOrder, data: "new" }]]) }));
+  }
+  return { linkSent, shareSent };
+}
 
+/** «🔗 Ҳавола» в «Менинг таклифномаларим»: оплаченному — ссылка, QR и текст заново; неоплаченному — ссылка НАМУНА */
+export async function resendLink(c: Ctx, n: number): Promise<Result> {
+  const o = await ownOrder(c, n);
+  if (!o) {
+    await send(c, c.tx.order.notFound);
+    return { done: true };
+  }
+  if (o.status === "active") await sendLinkPack(c.deps, o, false);
+  else await send(c, c.tx.my.item(o.number, namesOf(o.data), c.tx.my.statuses[o.status], pageUrl(c, o.slug)));
+  return { done: true };
+}
+
+export async function approve(c: Ctx, n: number) {
+  if (!(await guardAdmin(c))) return;
+  const o0 = await c.deps.repo.getOrderByNumber(n);
+  const now = c.deps.now();
+  const o = o0 && (await c.deps.repo.transition(o0.id, ["receipt_sent"], "active", { paidAt: now, expiresAt: expiresAt(o0.data) }));
+  if (!o) return already(c);
+  await c.deps.tg.editMessageReplyMarkup(c.chatId, c.u.messageId, null).catch(() => {});
+
+  const { linkSent, shareSent } = await sendLinkPack(c.deps, o, true);
   await send(c, linkSent && shareSent ? c.tx.admin.approved(n) : c.tx.admin.approvedFailed(n));
 }
 
@@ -325,40 +356,17 @@ export async function myOrders(c: Ctx) {
     return;
   }
   for (const o of list) {
+    // До оплаты — всё можно менять; чек на проверке — ждём; ссылка выдана — заказ закрыт
     const rows: InlineButton[][] = [];
-    const first: InlineButton[] = [];
-    if (o.status !== "archived") first.push({ text: c.tx.order.edit, data: `edit:${o.number}` });
-    if (PAYABLE_STATUSES.includes(o.status)) first.push({ text: c.tx.order.pay(price(o.amount)), data: `pay:${o.number}` });
-    if (first.length) rows.push(first);
-    rows.push([{ text: c.tx.my.link, data: `slug:${o.number}` }, { text: c.tx.contact, url: ownerUrl(c) }]);
+    if (PAYABLE_STATUSES.includes(o.status)) {
+      rows.push([
+        { text: c.tx.order.edit, data: `edit:${o.number}` },
+        { text: c.tx.order.pay(price(o.amount)), data: `pay:${o.number}` },
+      ]);
+    }
+    const last: InlineButton[] = o.status === "active" ? [{ text: c.tx.my.link, data: `link:${o.number}` }] : [];
+    rows.push([...last, { text: c.tx.contact, url: ownerUrl(c) }]);
     const title = `${namesOf(o.data)} · ${designName(o.templateId)}`;
     await send(c, c.tx.my.item(o.number, title, c.tx.my.statuses[o.status], pageUrl(c, o.slug)), inline(rows));
   }
 }
-
-export async function askSlug(c: Ctx, n: number): Promise<Result> {
-  const o = await ownOrder(c, n);
-  if (!o || o.status === "archived") {
-    await send(c, c.tx.order.notFound);
-    return { done: true };
-  }
-  c.s = { orderId: o.id };
-  return { enter: "slug" };
-}
-
-export const slug: Step = {
-  async ask(c) {
-    const o = await c.deps.repo.getOrder(c.s.orderId ?? "");
-    await send(c, c.tx.my.slugAsk(pageUrl(c, o?.slug ?? "")), inline([backRow(c)]));
-  },
-  async onMessage(c): Promise<Result> {
-    if (c.u.kind !== "text") return null;
-    const v = c.u.text.trim().toLowerCase();
-    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(v) || v.length < 3 || v.length > 40) return { hint: c.tx.my.slugBad };
-    const id = c.s.orderId ?? "";
-    if (isReservedSlug(v) || (await c.deps.repo.isSlugTaken(v, id))) return { hint: c.tx.my.slugTaken(v) };
-    const o = await c.deps.repo.updateOrder(id, { slug: v });
-    await send(c, c.tx.my.slugChanged(pageUrl(c, o.slug)), mainMenu(c.tx));
-    return { done: true };
-  },
-};

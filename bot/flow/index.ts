@@ -8,7 +8,7 @@ import { cat, catalog, fmt } from "./steps-order";
 import { bride, cause, groom, hosts, person, relation, sideAsk, sideBride } from "./steps-form";
 import { evAddress, evDate, evLoc, evSameDay, evTime, evTimeCustom, evVenue, more } from "./steps-event";
 import { evMenu, music, musicList, musicOwn, review, text, textOwn } from "./steps-final";
-import { approve, askReceipt, askRejectReason, askSlug, editOrder, myOrders, payOrder, receipt, reject, slug } from "./orders";
+import { approve, askReceipt, askRejectReason, editOrder, myOrders, payOrder, receipt, reject, resendLink } from "./orders";
 import { cmdFind, cmdOrders, cmdStats } from "./admin";
 import { mainMenu, send, texts, txFor } from "./util";
 import type { Lang } from "@/lib/domain";
@@ -48,7 +48,6 @@ export const steps: Record<StepId, Step> = {
   review,
   evMenu,
   receipt,
-  slug,
 };
 
 const BACK_LIMIT = 60;
@@ -290,8 +289,12 @@ async function onCallback(c: Ctx, d: string) {
       return apply(c, await askReceipt(c, n));
     case "edit":
       return apply(c, await editOrder(c, n));
-    case "slug":
-      return apply(c, await askSlug(c, n));
+    case "link":
+      return apply(c, await resendLink(c, n));
+    case "new":
+      // «🆕 Янги таклифнома» после оплаты: всё с нуля, старые данные не подставляем
+      c.s = { q: c.s.q };
+      return enter(c, "cat");
     case "ok":
       return approve(c, n);
     case "no":
