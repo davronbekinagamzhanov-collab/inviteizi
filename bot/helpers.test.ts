@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { parseTime, isMapLink } from "./parse";
 import { calendarMonth, kzToday, addMonths } from "./calendar";
-import { slugify } from "./slug";
+import { slugify } from "@/lib/slug";
 import { normalizeUpdate } from "./update";
 
 describe("parseTime", () => {
@@ -71,7 +71,7 @@ describe("календарь", () => {
   });
 });
 
-describe("slugify (временный, до lib/slug.ts БЭКЕНДа)", () => {
+describe("slugify (lib/slug.ts) — случаи, нужные боту", () => {
   it.each([
     [["Азиз", "Мадина"], "aziz-madina"],
     [["Ғайрат", "Ҳилола"], "gayrat-hilola"],

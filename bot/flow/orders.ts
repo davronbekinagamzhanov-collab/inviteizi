@@ -6,7 +6,7 @@ import type { InlineButton } from "../tg";
 import { PRICES } from "@/templates/registry";
 import { t } from "@/texts/uz-cyrl";
 import { uz } from "@/texts/bot-uz";
-import { slugify } from "../slug";
+import { isReservedSlug, slugify } from "@/lib/slug";
 import {
   backRow,
   designName,
@@ -327,9 +327,6 @@ export async function askSlug(c: Ctx, n: number): Promise<Result> {
   return { enter: "slug" };
 }
 
-/** Адреса, занятые страницами сайта */
-const RESERVED = new Set(["api", "demo", "catalog", "covers", "art", "music", "pilots", "dev", "admin", "_next", "favicon.ico"]);
-
 export const slug: Step = {
   async ask(c) {
     const o = await c.deps.repo.getOrder(c.s.orderId ?? "");
@@ -340,7 +337,7 @@ export const slug: Step = {
     const v = c.u.text.trim().toLowerCase();
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(v) || v.length < 3 || v.length > 40) return { hint: c.tx.my.slugBad };
     const id = c.s.orderId ?? "";
-    if (RESERVED.has(v) || (await c.deps.repo.isSlugTaken(v, id))) return { hint: c.tx.my.slugTaken(v) };
+    if (isReservedSlug(v) || (await c.deps.repo.isSlugTaken(v, id))) return { hint: c.tx.my.slugTaken(v) };
     const o = await c.deps.repo.updateOrder(id, { slug: v });
     await send(c, c.tx.my.slugChanged(pageUrl(c, o.slug)), mainMenu(c.tx));
     return { done: true };
