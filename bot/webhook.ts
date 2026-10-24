@@ -1,0 +1,50 @@
+/**
+ * HTTP-обработчики без привязки к Next: app/api/bot и app/api/cron только передают сюда запрос.
+ * Так их можно проверить тестами с FakeTg и MemoryRepo.
+ */
+import { timingSafeEqual } from "node:crypto";
+import type { Update } from "grammy/types";
+import type { Deps } from "./flow/types";
+import { handle } from "./flow";
+import { normalizeUpdate } from "./update";
+import { runCron } from "./cron";
+
+function sameSecret(got: string | null, want: string) {
+  if (!got || !want) return false;
+  const a = Buffer.from(got);
+  const b = Buffer.from(want);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
+const json = (body: unknown, status = 200) => Response.json(body, { status });
+
+/** Telegram → POST /api/bot. Заголовок X-Telegram-Bot-Api-Secret-Token = TELEGRAM_WEBHOOK_SECRET, иначе 401 */
+export async function handleWebhookRequest(req: Request, opts: { secret: string; getDeps: () => Deps }): Promise<Response> {
+  if (!sameSecret(req.headers.get("x-telegram-bot-api-secret-token"), opts.secret)) return json({ ok: false }, 401);
+  let update: Update;
+  try {
+    update = (await req.json()) as Update;
+  } catch {
+    return json({ ok: false }, 400);
+  }
+  const u = normalizeUpdate(update);
+  if (!u) return json({ ok: true });
+  try {
+    await handle(opts.getDeps(), u);
+  } catch (e) {
+    // Отвечаем 200: иначе Telegram будет присылать это обновление снова и снова
+    console.error("bot handle", update.update_id, e instanceof Error ? e.message : e);
+  }
+  return json({ ok: true });
+}
+
+/** pg_cron → POST /api/cron с x-cron-secret (проверка — в базе, см. lib/cron-auth.ts) */
+export async function handleCronRequest(
+  req: Request,
+  opts: { check: (secret: string) => Promise<boolean>; getDeps: () => Deps },
+): Promise<Response> {
+  const secret = req.headers.get("x-cron-secret");
+  if (!secret || !(await opts.check(secret))) return json({ ok: false }, 401);
+  const result = await runCron(opts.getDeps());
+  return json({ ok: true, ...result });
+}
