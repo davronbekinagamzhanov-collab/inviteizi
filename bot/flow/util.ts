@@ -49,7 +49,7 @@ export const ownerUrl = (c: Pick<Ctx, "deps">) => `https://t.me/${c.deps.env.own
 
 /** «Азиз ва Мадина» / «Жасурбек» */
 export function namesOf(d: Partial<InvitationData>) {
-  return d.occasion === "nikoh" ? `${d.groom ?? ""} ва ${d.bride ?? ""}` : (d.person ?? "");
+  return d.occasion === "nikoh" ? `${d.groom ?? ""} ${t.cover.andWord} ${d.bride ?? ""}` : (d.person ?? "");
 }
 
 export const eventLabel = (tx: BotTexts, kind: EventKind) => tx.event.kinds[kind];

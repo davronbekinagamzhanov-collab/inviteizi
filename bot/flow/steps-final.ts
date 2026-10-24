@@ -122,10 +122,17 @@ export const musicOwn: Step = {
     const title =
       (u.kind === "audio" && [u.performer, u.title].filter(Boolean).join(" — ")) || (file.fileName ?? "").replace(AUDIO_EXT, "") || undefined;
     let url: string | undefined;
-    try {
-      url = await c.deps.saveMusic?.(file.fileId, c.user.id);
-    } catch (e) {
-      console.error("saveMusic", e);
+    if (c.deps.saveMusic) {
+      try {
+        url = await c.deps.saveMusic(file.fileId, c.user.id);
+      } catch (e) {
+        console.error("saveMusic", e instanceof Error ? e.message : e);
+      }
+      // без копии в хранилище гости не услышат песню — не делаем вид, что всё хорошо
+      if (!url) {
+        await send(c, c.tx.music.saveFailed);
+        return { stay: true };
+      }
     }
     c.s.music = { kind: "own", fileId: file.fileId, ...(url ? { url } : {}), ...(title ? { title } : {}) };
     await send(c, c.tx.music.saved);

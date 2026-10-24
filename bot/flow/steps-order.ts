@@ -61,13 +61,24 @@ export function formStart(c: Ctx): StepId {
 export const catalog: Step = {
   async ask(c) {
     const v = catalogView(c);
-    await c.deps.tg.sendPhoto(c.chatId, v.photo, { caption: v.caption, markup: v.markup });
+    try {
+      await c.deps.tg.sendPhoto(c.chatId, v.photo, { caption: v.caption, markup: v.markup });
+    } catch (e) {
+      // обложки нет или Telegram её не скачал — каталог текстом, клиент не застревает
+      console.error("каталог: обложка", v.d.id, e instanceof Error ? e.message : e);
+      await send(c, v.caption, v.markup);
+    }
   },
   async onButton(c, value): Promise<Result> {
     if (value === "prev" || value === "next") {
       c.s.catIdx = (c.s.catIdx ?? 0) + (value === "next" ? 1 : -1);
       const v = catalogView(c);
-      await c.deps.tg.editMessageMedia(c.chatId, c.u.messageId, v.photo, v.caption, v.markup);
+      try {
+        await c.deps.tg.editMessageMedia(c.chatId, c.u.messageId, v.photo, v.caption, v.markup);
+      } catch {
+        // сообщение текстовое (обложки не было) или фото не загрузилось
+        await c.deps.tg.editMessageText(c.chatId, c.u.messageId, v.caption, { markup: v.markup }).catch(() => send(c, v.caption, v.markup));
+      }
       return { stay: true };
     }
     if (value === "buy") {

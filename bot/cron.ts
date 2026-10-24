@@ -37,7 +37,7 @@ export async function runCron(deps: Deps): Promise<CronResult> {
           });
         } catch (e) {
           r.errors++;
-          console.error("cron admin remind", adminId, e);
+          console.error("cron admin remind", adminId, e instanceof Error ? e.message : e);
         }
       }
       await repo.updateOrder(o.id, { adminRemindedAt: now });
@@ -55,7 +55,7 @@ export async function runCron(deps: Deps): Promise<CronResult> {
       r.clientReminded++;
     } catch (e) {
       r.errors++;
-      console.error("cron client remind", o.userId, e);
+      console.error("cron client remind", o.userId, e instanceof Error ? e.message : e);
     }
     await repo.updateOrder(o.id, { paymentRemindedAt: now });
   }

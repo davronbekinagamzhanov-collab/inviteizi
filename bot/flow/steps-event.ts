@@ -83,6 +83,10 @@ export const evDate: Step = {
     if (value.startsWith("d:")) {
       const date = value.slice(2);
       if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+      // кнопку могли подделать: проверяем, что такой день есть в календаре и он не дальше 12 месяцев
+      const real = new Date(`${date}T00:00:00Z`);
+      if (Number.isNaN(real.getTime()) || real.toISOString().slice(0, 10) !== date) return null;
+      if (date.slice(0, 7) > addMonths(today.slice(0, 7), 12)) return null;
       if (date < today) return { hint: c.tx.event.pastDate };
       curEvent(c).date = date;
       delete c.s.calMonth;

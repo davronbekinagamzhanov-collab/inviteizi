@@ -75,6 +75,10 @@ export async function handle(deps: Deps, u: BotUpdate): Promise<void> {
   };
   try {
     await route(c);
+  } catch (e) {
+    // Никогда не молчим: клиенту — короткое «хатолик, қайта уриниб кўринг», в лог — только текст ошибки
+    console.error("bot route", u.kind, e instanceof Error ? e.message : e);
+    await deps.tg.sendMessage(u.chatId, c.tx.error).catch(() => {});
   } finally {
     if (u.kind === "callback" && !c.answered) await deps.tg.answerCallbackQuery(u.callbackId).catch(() => {});
   }

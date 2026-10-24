@@ -136,7 +136,7 @@ export async function payOrder(c: Ctx, n: number): Promise<Result> {
     inline([[{ text: c.tx.pay.copy, copy: env.kaspiPhone.replace(/[^\d+]/g, "") }], [{ text: c.tx.pay.sendReceipt, data: `rcpt:${o.number}` }]]),
   );
   // Чек можно прислать сразу, не нажимая «Чекни юбориш»
-  c.s = { orderId: o.id };
+  c.s = { q: c.s.q, orderId: o.id };
   return { wait: "receipt" };
 }
 
@@ -155,7 +155,7 @@ export async function askReceipt(c: Ctx, n: number): Promise<Result> {
     await send(c, c.tx.pay.waiting);
     return { done: true };
   }
-  c.s = { orderId: o.id };
+  c.s = { q: c.s.q, orderId: o.id };
   return { enter: "receipt" };
 }
 
@@ -226,7 +226,7 @@ export async function notifyAdmins(deps: Deps, o: OrderRecord, prefix = "") {
       else await deps.tg.sendMessage(adminId, caption, { markup: opts.markup });
     } catch (e) {
       // Админ мог не запускать бота — остальным всё равно отправляем
-      console.error("notifyAdmins", adminId, e);
+      console.error("notifyAdmins", adminId, e instanceof Error ? e.message : e);
     }
   }
 }

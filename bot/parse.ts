@@ -10,7 +10,8 @@ export function parseTime(s: string): string | null {
   return `${String(h).padStart(2, "0")}:${m[2]}`;
 }
 
-const MAP_HOSTS = /^(?:[\w-]+\.)*(?:2gis\.(?:kz|ru|com|uz)|goo\.gl|google\.[a-z.]+|yandex\.[a-z.]+)$/i;
+// точные домены (google.evil.com и 2gis.kz.evil.com — не карты)
+const MAP_HOSTS = /^(?:[\w-]+\.)*(?:2gis\.(?:kz|ru|com|uz)|goo\.gl|google\.(?:com|kz|ru|uz|co\.uz)|yandex\.(?:ru|kz|uz|com))$/i;
 
 /** Ссылка 2GIS / Google Maps / Яндекс Карт, которую клиент прислал вместо локации */
 export function isMapLink(s: string): boolean {
