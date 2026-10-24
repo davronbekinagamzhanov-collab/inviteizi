@@ -23,6 +23,15 @@ const statuses: Record<OrderStatus, string> = {
 const relations: Record<Relation, string> = { ...t.relationLabel };
 
 export const uz = {
+  /** Профиль бота в Telegram (scripts/telegram-setup.mjs) */
+  profile: {
+    name: "InviteIZI — онлайн таклифнома",
+    short: "Тўй, наҳорги ош, суннат ва юбилей учун чиройли онлайн таклифнома. 5 дақиқада, Kaspi орқали тўлов.",
+    description:
+      "💌 Ўзбекча онлайн таклифномалар: никоҳ тўйи, наҳорги ош, суннат тўйи, юбилей.\n✨ Чиройли дизайн, мусиқа, харита ва таймер — меҳмонларга битта ҳавола.\n⏱ 5 дақиқада тайёр, тўлов Kaspi орқали.\nБошлаш учун «Start» тугмасини босинг.",
+    commands: { start: "Бошлаш", my: "Менинг таклифномаларим", help: "Ёрдам" },
+  },
+
   langName: "Ўзбекча",
   chooseLang: "Тилни танланг / Выберите язык 👇",
   langUz: "🇺🇿 Ўзбекча",
