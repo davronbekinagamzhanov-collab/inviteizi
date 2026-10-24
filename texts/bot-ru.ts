@@ -57,7 +57,7 @@ export const ru = {
     `Здравствуйте${name ? `, ${name}` : ""}! 🌸\nЯ сделаю красивое приглашение на ваш той — оно открывается на телефоне.\nЧтобы начать, нажмите «💌 Создать приглашение».`,
   idle: "Чтобы начать, нажмите «💌 Создать приглашение» 👇",
   help:
-    "❓ Как это работает:\n1. Выбираете той и дизайн.\n2. Пишете имена, дату и место.\n3. Смотрите образец и платите через Kaspi.\n4. Отправляете ссылку гостям.\n\nРучные изменения дизайна — 2 000 ₸. Есть вопросы — напишите 👇",
+    "❓ Как это работает:\n1. Выбираете той и дизайн.\n2. Пишете имена, дату и место.\n3. Смотрите образец и платите через Kaspi.\n4. Отправляете ссылку гостям.\n\nДополнительные изменения (владелец делает вручную) — 2 000 ₸. Есть вопросы — напишите 👇",
   contact: "📞 Связаться",
 
   back: "⬅️ Назад",
@@ -72,7 +72,7 @@ export const ru = {
     ask: "На какой той нужно приглашение? 👇",
     nikoh: "💍 Свадьба (никоҳ)",
     nahorgi: "🍚 Наҳорги ош",
-    sunnat: "🎉 Суннат",
+    sunnat: "👦 Суннат той",
   },
 
   format: {
@@ -81,7 +81,7 @@ export const ru = {
     simple: (price: string) => `📄 Простое — ${price}`,
     info: "ℹ️ В чём разница?",
     infoText:
-      "✨ Анимированное: эффект открытия и листание.\n📄 Простое: одна страница, мягкое появление.\nМузыка есть в обоих.",
+      "✨ Анимированное: сначала открывается конверт или дверь, потом листаете вниз.\n📄 Простое: одна красивая страница.\nМузыка есть в обоих.",
     names: { animated: "Анимированное", simple: "Простое" },
   },
 
@@ -96,18 +96,18 @@ export const ru = {
     groom: "🤵 Имя жениха?\nНапример: Азиз",
     bride: "👰 Имя невесты?\nНапример: Мадина",
     relationNikoh: "Чья свадьба? 👇",
-    relationsNikoh: { farzand: "Наших детей", nabira: "Наших внуков", ozimiz: "Наша собственная" } as Partial<Record<Relation, string>>,
+    relationsNikoh: { farzand: "Наших детей", nabira: "Наших внуков", ozimiz: "Наша свадьба" } as Partial<Record<Relation, string>>,
     hosts: "👨‍👩‍👧 Кто приглашает?\nНапример: Каримовлар оиласи",
     sideAsk: "Написать и семью невесты?\nНапример: Юсуповлар оиласи",
     sideYes: "✍️ Да, напишу",
-    sideNo: "Нет",
+    sideNo: "➡️ Нет, не нужно",
     sideBride: "Семья невесты?\nНапример: Юсуповлар оиласи",
     personNahorgi: "🍚 По чьему тою наҳорги ош?\nНапишите имя. Например: Жасурбек",
     personSunnat: "👦 Имя мальчика?\nНапример: Муҳаммадали\nЕсли двое: Абдураҳмонжон ва Абдуллоҳжон",
     relationPerson: (name: string) => `Кем вам приходится ${name}? 👇`,
     relations,
     cause: "По какому поводу? 👇",
-    causes: { nikoh: "💍 Свадьба (никоҳ)", sunnat: "🎉 Суннат" },
+    causes: { nikoh: "💍 Свадьба (никоҳ)", sunnat: "👦 Суннат той" },
   },
 
   event: {
@@ -131,7 +131,7 @@ export const ru = {
     skip: "⏭ Пропустить",
     badLocation: "Отправьте локацию или ссылку 2GIS / Google Maps 🙂\nЕсли не нужно — «⏭ Пропустить».",
     locationSaved: "✅ Место сохранено.",
-    more: (list: string) => `Сейчас мероприятия:\n${list}\n\nДобавить ещё? 👇`,
+    more: (list: string) => `Добавлены мероприятия:\n${list}\n\nДобавить ещё одно? 👇`,
     addNahorgi: "🍚 Наҳорги ош",
     addKelinSalom: "🌸 Келин салом",
     addBazm: "🎊 Свадебный вечер",
@@ -141,6 +141,7 @@ export const ru = {
   },
 
   text: {
+    more: "🔄 Другие варианты",
     ask: (options: string) => `✍️ Выберите текст приглашения (он на узбекском — его читают гости):\n\n${options}`,
     option: (i: number, greeting: string, body: string) => `${i}) ${greeting}\n${body}`,
     pick: (i: number) => `Текст ${i}`,
@@ -171,7 +172,7 @@ export const ru = {
     bride: (s: string) => `Невеста: ${s}`,
     person: (s: string) => `Имя: ${s}`,
     relation: (s: string) => `Кем приходится: ${s}`,
-    cause: (s: string) => `Повод: ${s}`,
+    cause: (s: string) => `Какой той: ${s}`,
     hosts: (s: string) => `Приглашают: ${s}`,
     sideBride: (s: string) => `Семья невесты: ${s}`,
     event: (i: number, kind: string, date: string, time: string, venue: string, address: string, map: string) =>
@@ -185,7 +186,7 @@ export const ru = {
     musicNone: "Музыка: нет",
     editNames: "✏️ Имена",
     editRelation: "✏️ Кем приходится",
-    editCause: "✏️ Повод",
+    editCause: "✏️ Какой той",
     editHosts: "✏️ Кто приглашает",
     editSides: "✏️ Семья невесты",
     editEvent: (i: number, kind: string) => `✏️ ${i}. ${kind}`,
@@ -222,7 +223,7 @@ export const ru = {
     alreadyPaid: "Этот заказ уже оплачен ✅",
     waiting: "Ваш чек проверяется ⏳ Обычно 5–30 минут.",
     paid: (url: string) => `🎉 Оплата подтверждена! Приглашение готово:\n${url}`,
-    qrCaption: "QR-код: наведите камеру телефона — откроется приглашение.",
+    qrCaption: "📷 QR-код: наведите камеру телефона — откроется приглашение.",
     shareIntro: "👇 Перешлите это сообщение гостям (WhatsApp, Telegram):",
     shareButton: "📤 Отправить гостям",
     rejected: (n: number, reason: string) =>
@@ -272,7 +273,7 @@ export const ru = {
     slugAsk: (url: string) => `Сейчас ссылка:\n${url}\n\nНапишите новое название латиницей.\nНапример: aziz-madina`,
     slugTaken: (s: string) => `«${s}» занято 🙁 Напишите другое.\nНапример: ${s}-toy`,
     slugBad: "Только латинские буквы, цифры и «-».\nНапример: aziz-madina",
-    slugChanged: (url: string) => `✅ Новая ссылка:\n${url}\nСтарая больше не откроется.`,
+    slugChanged: (url: string) => `✅ Новая ссылка:\n${url}\nСтарая ссылка тоже ведёт на это приглашение.`,
   },
 } satisfies BotTexts;
 

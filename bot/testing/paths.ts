@@ -37,6 +37,25 @@ export async function nikohToMusic(sim: Sim, id: number, names: [string, string]
   await sim.click(id, uz.text.pick(1));
 }
 
+/** Никоҳ до шага «Матн» (варианты текста уже показаны) */
+export async function nikohToText(sim: Sim, id: number) {
+  await startUz(sim, id);
+  await sim.click(id, uz.category.nikoh);
+  await sim.click(id, /Анимацияли/);
+  await sim.click(id, uz.catalog.buy);
+  await sim.text(id, "Азиз");
+  await sim.text(id, "Мадина");
+  await sim.click(id, "Фарзандларимиз");
+  await sim.text(id, "Каримовлар оиласи");
+  await sim.click(id, uz.form.sideNo);
+  await sim.click(id, "14");
+  await sim.click(id, "18:00");
+  await sim.text(id, "«Наврўз» тўйхонаси");
+  await sim.text(id, "Сайрам, Амир Темур кўчаси 45");
+  await sim.text(id, uz.event.skip);
+  await sim.click(id, uz.event.noMore);
+}
+
 export async function nikohToReview(sim: Sim, id: number, names: [string, string] = ["Азиз", "Мадина"]) {
   await nikohToMusic(sim, id, names);
   await sim.click(id, uz.music.none);

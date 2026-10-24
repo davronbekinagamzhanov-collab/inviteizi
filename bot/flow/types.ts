@@ -72,6 +72,8 @@ export type Draft = {
   format?: Format;
   templateId?: string;
   catIdx?: number;
+  /** Страница вариантов текста (по 3) */
+  textPage?: number;
   data?: DraftData;
   /** Индекс тадбира, который сейчас заполняется */
   ev?: number;

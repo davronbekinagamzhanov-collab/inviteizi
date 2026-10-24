@@ -5,23 +5,41 @@ import { t } from "@/texts/uz-cyrl";
 import { designsFor, backRow, data, designLine, eventLabel, finalData, fmtDate, ib, inline, MAX_CUSTOM_TEXT, MAX_MUSIC_BYTES, send } from "./util";
 import { confirmDraft } from "./orders";
 
-const MAX_OPTIONS = 3;
-const options = (c: Ctx) => t.inviteOptions(finalData(c.s)).slice(0, MAX_OPTIONS);
+/** Варианты текста показываем по 3, «🔄 Бошқа вариантлар» листает дальше по кругу */
+const PAGE = 3;
+const options = (c: Ctx) => t.inviteOptions(finalData(c.s));
+
+function textScreen(c: Ctx) {
+  const all = options(c);
+  const pages = Math.ceil(all.length / PAGE);
+  const page = ((c.s.textPage ?? 0) % pages + pages) % pages;
+  const shown = all.slice(page * PAGE, page * PAGE + PAGE);
+  const body = shown.map((o, i) => c.tx.text.option(page * PAGE + i + 1, o.greeting, o.body)).join("\n\n");
+  const picks = shown.map((_, i) => ib(c, c.tx.text.pick(page * PAGE + i + 1), `p:${page * PAGE + i}`));
+  const rows = [picks, ...(pages > 1 ? [[ib(c, c.tx.text.more, "more")]] : []), [ib(c, c.tx.text.own, "own")], backRow(c)];
+  return { text: c.tx.text.ask(body), markup: inline(rows) };
+}
 
 export const text: Step = {
   async ask(c) {
-    const list = options(c);
-    const body = list.map((o, i) => c.tx.text.option(i + 1, o.greeting, o.body)).join("\n\n");
-    const picks = list.map((_, i) => ib(c, c.tx.text.pick(i + 1), `p:${i}`));
-    await send(c, c.tx.text.ask(body), inline([picks, [ib(c, c.tx.text.own, "own")], backRow(c)]));
+    const s = textScreen(c);
+    await send(c, s.text, s.markup);
   },
   async onButton(c, v) {
     if (v === "own") return { to: "textOwn" };
+    if (v === "more") {
+      c.s.textPage = (c.s.textPage ?? 0) + 1;
+      const s = textScreen(c);
+      // то же сообщение, новые варианты — чат не засоряется
+      await c.deps.tg.editMessageText(c.chatId, c.u.messageId, s.text, { markup: s.markup });
+      return { stay: true };
+    }
     const o = v.startsWith("p:") ? options(c)[Number(v.slice(2))] : undefined;
     if (!o) return null;
     const d = data(c);
     d.textId = o.id;
     delete d.customText;
+    delete c.s.textPage;
     return { to: c.s.ret ?? "music" };
   },
 };
