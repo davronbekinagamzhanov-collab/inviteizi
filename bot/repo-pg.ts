@@ -394,7 +394,11 @@ export class PgRepo implements Repo {
 
   /** slugBase, если свободен; иначе slugBase-2, -3… */
   private async freeSlug(tx: Tx, base: string) {
+    // и текущие адреса, и все прежние (slug_history): адрес не переиспользуется никогда
     const rows = await tx<{ slug: string }[]>`
+      select slug from public.slug_history
+      where slug = ${base} or (left(slug, ${base.length + 1}) = ${base + "-"} and substr(slug, ${base.length + 2}) ~ '^[0-9]+$')
+      union
       select slug from public.orders
       where slug = ${base} or (left(slug, ${base.length + 1}) = ${base + "-"} and substr(slug, ${base.length + 2}) ~ '^[0-9]+$')`;
     const taken = new Set(rows.map((r) => r.slug));
@@ -473,10 +477,22 @@ export class PgRepo implements Repo {
 
   async isSlugTaken(slug: string, exceptOrderId?: string) {
     if (isReservedSlug(slug)) return true;
+    const except = exceptOrderId ?? null;
     const [r] = await this.sql`
       select 1 from public.orders
-      where slug = ${slug} and (${exceptOrderId ?? null}::text is null or id::text <> ${exceptOrderId ?? null})`;
+      where slug = ${slug} and (${except}::text is null or id::text <> ${except})
+      union all
+      select 1 from public.slug_history
+      where slug = ${slug} and (${except}::text is null or order_id::text <> ${except})
+      limit 1`;
     return Boolean(r);
+  }
+
+  async resolveSlug(slug: string) {
+    const [r] = await this.sql<{ slug: string }[]>`
+      select o.slug from public.slug_history h join public.orders o on o.id = h.order_id
+      where h.slug = ${slug}`;
+    return r?.slug ?? null;
   }
 
   // ── Напоминания и статистика ──

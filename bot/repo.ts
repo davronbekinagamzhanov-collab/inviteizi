@@ -55,7 +55,13 @@ export interface Repo {
    * Возвращает null, если статус уже другой (двойное нажатие «Тасдиқлаш»).
    */
   transition(id: string, from: OrderStatus[], to: OrderStatus, patch?: OrderPatch): Promise<OrderRecord | null>;
+  /**
+   * Адрес занят: запретный (demo, catalog…), у другого заказа сейчас или БЫЛ когда-либо раньше.
+   * Адрес никогда не переиспользуется — гости со старой ссылкой не увидят чужой тўй.
+   */
   isSlugTaken(slug: string, exceptOrderId?: string): Promise<boolean>;
+  /** Текущий адрес заказа, которому когда-либо принадлежал slug (старая ссылка → новая). Нет — null */
+  resolveSlug(slug: string): Promise<string | null>;
 
   // ── Напоминания и статистика ──
   /** receipt_sent, чек пришёл раньше before и админу ещё не напоминали */

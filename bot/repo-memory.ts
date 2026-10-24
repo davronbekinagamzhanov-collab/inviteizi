@@ -2,6 +2,7 @@
  * Repo в памяти — для тестов бота. Поведение то же, что у bot/repo-pg.ts (см. bot/repo.contract.ts).
  * Записи отдаются копиями (как из базы): изменить их снаружи нельзя.
  */
+import { isReservedSlug } from "@/lib/slug";
 import type { Repo } from "./repo";
 import type {
   Lang,
@@ -32,6 +33,8 @@ const DAY = 24 * 60 * 60_000;
 export class MemoryRepo implements Repo {
   private users = new Map<number, UserRecord>();
   private orders = new Map<string, OrderRecord>();
+  /** Все адреса, которые когда-либо были у заказов: slug → id заказа (как таблица slug_history) */
+  private slugHistory = new Map<string, string>();
   private music: MusicRecord[];
   private adminIds: number[];
   private now: () => Date;
@@ -118,6 +121,7 @@ export class MemoryRepo implements Repo {
     const now = this.now();
     let slug = o.slugBase;
     for (let i = 2; await this.isSlugTaken(slug); i++) slug = `${o.slugBase}-${i}`;
+    this.slugHistory.set(slug, `00000000-0000-4000-8000-${String(this.nextId).padStart(12, "0")}`);
     const rec: OrderRecord = {
       id: `00000000-0000-4000-8000-${String(this.nextId++).padStart(12, "0")}`,
       number: this.nextNumber++,
@@ -181,6 +185,11 @@ export class MemoryRepo implements Repo {
   async updateOrder(id: string, patch: OrderPatch) {
     const o = this.orders.get(id);
     if (!o) throw new Error(`Заказ не найден: ${id}`);
+    if (patch.slug !== undefined && patch.slug !== o.slug) {
+      // как триггер в базе: чужой (в т.ч. прежний чужой) адрес — ошибка уникальности
+      if (await this.isSlugTaken(patch.slug, id)) throw new Error(`Адрес занят: ${patch.slug}`);
+      this.slugHistory.set(patch.slug, id);
+    }
     Object.assign(o, clone(patch), { updatedAt: this.now() });
     return clone(o);
   }
@@ -192,8 +201,15 @@ export class MemoryRepo implements Repo {
   }
 
   async isSlugTaken(slug: string, exceptOrderId?: string) {
+    if (isReservedSlug(slug)) return true;
     for (const o of this.orders.values()) if (o.slug === slug && o.id !== exceptOrderId) return true;
-    return false;
+    const owner = this.slugHistory.get(slug);
+    return owner !== undefined && owner !== exceptOrderId;
+  }
+
+  async resolveSlug(slug: string) {
+    const owner = this.slugHistory.get(slug);
+    return owner ? (this.orders.get(owner)?.slug ?? null) : null;
   }
 
   // ── Напоминания и статистика ──

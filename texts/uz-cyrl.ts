@@ -163,6 +163,18 @@ function inviteTexts(d: InvitationData): InviteText[] {
   }
 }
 
+/** Страница /{slug}: «Азиз ва Мадина» · «Жасурбек» · «Каримовлар оиласи» */
+function pageNames(d: InvitationData): string {
+  return d.groom && d.bride ? `${d.groom} ва ${d.bride}` : d.person || d.groom || d.bride || d.hosts;
+}
+
+const pageInviteTo = {
+  nikoh: "Тўйга таклиф этамиз",
+  sunnat: "Суннат тўйига таклиф этамиз",
+  nahorgi: "Наҳорги ошга таклиф этамиз",
+  yubiley: "Юбилейга таклиф этамиз",
+} satisfies Record<Occasion, string>;
+
 export const t = {
   site: {
     title: "InviteIZI — онлайн таклифномалар",
@@ -365,8 +377,14 @@ export const t = {
     "ganch-peshtoq": {}, // тексты ganch-peshtoq
     "zarhal-eshik": {}, // тексты zarhal-eshik
     "atlas-tolqin": {}, // тексты atlas-tolqin
-    "anor-bogi": {}, // тексты anor-bogi
-    "bodom-guli": {}, // тексты bodom-guli
+    "anor-bogi": {
+      // тилак под оқ фотиҳа: анор — символ большой дружной семьи и достатка
+      anorWish: "Ёшларимиз анор доналаридек аҳил, хонадонлари анордек тўкин-сочин бўлсин!",
+    }, // тексты anor-bogi
+    "bodom-guli": {
+      // тилак под оқ фотиҳа: бодом гули — баҳорнинг биринчи гули, янги ҳаёт рамзи
+      bodomWish: "Ёшларимизнинг ҳаёти баҳордаги бодом гулидек доимо гуллаб-яшнасин!",
+    }, // тексты bodom-guli
     "samarqand-kitob": {}, // тексты samarqand-kitob
     "ipak-romol": {}, // тексты ipak-romol
     "rishton-koshin": {}, // тексты rishton-koshin
@@ -378,6 +396,23 @@ export const t = {
     "tonggi-choy": {}, // тексты tonggi-choy
     "paxta-gul": {}, // тексты paxta-gul
     "oltin-ot": {}, // тексты oltin-ot
+  },
+
+  /** Страница заказа /{slug}: заголовок ссылки в мессенджерах, картинка-превью, заглушка после тўя */
+  invitationPage: {
+    names: pageNames,
+    inviteTo: pageInviteTo,
+    /** Заголовок вкладки и ссылки: «Азиз ва Мадина — Никоҳ тўйи» */
+    metaTitle: (d: InvitationData) => `${pageNames(d)} — ${occasionTitles[d.occasion]}`,
+    /** «Тўйга таклиф этамиз · 12 декабр, 2026 йил» */
+    metaDescription: (d: InvitationData, dateText?: string) =>
+      [pageInviteTo[d.occasion], dateText].filter(Boolean).join(" · "),
+    loading: "Таклифнома очилмоқда…",
+    expired: {
+      title: "Таклифнома муддати тугади",
+      body: "Тадбир ўтиб кетди. Ташрифингиз ва яхши тилакларингиз учун катта раҳмат!",
+      brand: "InviteIZI — онлайн таклифномалар",
+    },
   },
 
   footer: {

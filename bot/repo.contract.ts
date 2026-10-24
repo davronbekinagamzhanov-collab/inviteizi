@@ -232,6 +232,36 @@ export function repoContract(makeRepo: () => Promise<Repo>) {
       expect(await repo.isSlugTaken(`t-${tag}-free`)).toBe(false);
     });
 
+    // ── Адрес никогда не переиспользуется (старые гости не увидят чужой тўй) ──
+    it("сменённый адрес остаётся занятым: новый заказ его не получит, старый адрес ведёт на новый", async () => {
+      const repo = await makeRepo();
+      const base = `t-${tag}-hist`;
+      const a = await newOrder(repo, uid(), { slugBase: base });
+      await repo.updateOrder(a.id, { slug: `${base}-yangi` });
+      expect(await repo.isSlugTaken(base)).toBe(true);
+      expect(await repo.isSlugTaken(base, a.id)).toBe(false); // свой старый адрес можно вернуть
+      const b = await newOrder(repo, uid(), { slugBase: base });
+      expect(b.slug).toBe(`${base}-2`);
+      expect(await repo.resolveSlug(base)).toBe(`${base}-yangi`);
+      expect(await repo.resolveSlug(b.slug)).toBe(b.slug);
+      expect(await repo.resolveSlug(`t-${tag}-nobody`)).toBeNull();
+    });
+
+    it("чужой старый адрес занять нельзя даже прямой правкой", async () => {
+      const repo = await makeRepo();
+      const base = `t-${tag}-steal`;
+      const a = await newOrder(repo, uid(), { slugBase: base });
+      await repo.updateOrder(a.id, { slug: `${base}-new` });
+      const b = await newOrder(repo, uid(), { slugBase: `t-${tag}-other` });
+      await expect(repo.updateOrder(b.id, { slug: base })).rejects.toThrow();
+      expect((await repo.getOrder(b.id))?.slug).toBe(`t-${tag}-other`);
+    });
+
+    it("запретные адреса (demo, catalog, api…) заняты всегда", async () => {
+      const repo = await makeRepo();
+      for (const s of ["demo", "catalog", "api", "admin", "namuna"]) expect(await repo.isSlugTaken(s)).toBe(true);
+    });
+
     // ── Напоминания ──
     it("ordersAwaitingAdmin: чек раньше before и админу ещё не напоминали", async () => {
       const repo = await makeRepo();

@@ -6,7 +6,11 @@
     "dev": "next dev -H 0.0.0.0",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest run",
+    "test:pg": "node --env-file=.env.local node_modules/vitest/vitest.mjs run bot/repo-pg.test.ts",
+    "db:seed-templates": "node --env-file=.env.local scripts/seed-templates.mjs",
+    "assets:upload": "node --env-file=.env.local scripts/upload-assets.mjs"
   },
   "dependencies": {
     "grammy": "^1.46.0",
