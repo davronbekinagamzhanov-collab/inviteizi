@@ -2,7 +2,10 @@
 
 import { motion } from "motion/react";
 import type { ReactNode } from "react";
-import { t } from "@/texts/uz-cyrl";
+import { designTexts } from "@/texts/uz-cyrl";
+
+// свои заголовки дизайна (texts/uz-cyrl.ts → headings)
+const t = designTexts("tandir-nuri");
 import type { InvitationData } from "@/lib/types";
 import type { TemplateProps } from "../types";
 import { useInvitation, type Invitation, type InvitationEventView } from "../../blocks/useInvitation";

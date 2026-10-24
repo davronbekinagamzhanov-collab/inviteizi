@@ -2,7 +2,10 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
-import { t } from "@/texts/uz-cyrl";
+import { designTexts } from "@/texts/uz-cyrl";
+
+// свои заголовки дизайна (texts/uz-cyrl.ts → headings)
+const t = designTexts("tandir-nuri");
 import type { Invitation } from "../../blocks/useInvitation";
 import { MILK } from "./style";
 import { round } from "./decor";

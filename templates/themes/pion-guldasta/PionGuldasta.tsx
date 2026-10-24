@@ -3,7 +3,10 @@
 import Image from "next/image";
 import { motion } from "motion/react";
 import type { ReactNode } from "react";
-import { t } from "@/texts/uz-cyrl";
+import { designTexts } from "@/texts/uz-cyrl";
+
+// свои заголовки дизайна (texts/uz-cyrl.ts → headings)
+const t = designTexts("pion-guldasta");
 import type { TemplateProps } from "../types";
 import { useInvitation } from "../../blocks/useInvitation";
 import { InvitationShell } from "../../blocks/InvitationShell";

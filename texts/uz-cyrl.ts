@@ -263,7 +263,8 @@ export const t = {
   ageLabel: "ёш",
 
   /** Суннат: «набирамиз» над именем мальчика */
-  relationWord: (r: Relation) => cap(relations[r]),
+  /** person — чтобы для двух мальчиков («А ва Б») было «Набираларимиз», а не «Набирамиз» */
+  relationWord: (r: Relation, person?: string) => cap((/ ва /.test(person ?? "") ? relationsPlural : relations)[r]),
   /** Подпись «кем приходится» для кнопок и проверки данных */
   relationLabel: {
     farzand: "Фарзандимиз",
@@ -421,3 +422,83 @@ export const t = {
 } as const;
 
 export type Texts = typeof t;
+
+/**
+ * Свои заголовки для каждого дизайна: у клиентов в каталоге не должно быть
+ * одинаковых «Тўйгача қолди / Тўй дастури» во всех шаблонах.
+ * Дизайн берёт тексты так: `const t = designTexts("ganch-peshtoq")` — всё остальное как в `t`.
+ * Нет записи — общие заголовки из `t`.
+ */
+type Headings = {
+  countdown?: string; // «… гача қолди»
+  date?: string; // «Тўй санаси»
+  program?: string; // «Тўй дастури»
+  venue?: string; // «Ўтказилиш жойи»
+  heart?: string; // «Чин юракдан»
+  blessing?: string; // «Оқ фотиҳа»
+  tap?: string; // «Очиш учун босинг»
+  thanks?: string; // «Ташрифингиздан мамнун бўламиз!»
+  waiting?: string; // «Кутиб қоламиз!»
+};
+
+const headings: Record<string, Headings> = {
+  // №1 — эталон: общие заголовки
+  "oltin-monogramma": {},
+  "oq-ot": { countdown: "Қутлуғ кунгача", date: "Қутлуғ сана", venue: "Тўй манзили", tap: "Пардани очинг" },
+  "tonggi-qozon": { countdown: "Тонгги дастурхонгача", date: "Ош санаси", venue: "Ош манзили", tap: "Таклифномани очиш учун босинг" },
+  "pion-guldasta": { countdown: "Муборак кунгача", date: "Юбилей куни", venue: "Базм манзили", tap: "Конвертни очинг" },
+  "tandir-nuri": {
+    countdown: "Ош кунигача қолди",
+    date: "Тонгги ош куни",
+    program: "Тадбир тартиби",
+    venue: "Дастурхон манзили",
+    blessing: "Дуо",
+    tap: "Таклифномани очинг",
+  },
+  "ganch-peshtoq": {
+    countdown: "Бахтли кунгача",
+    date: "Никоҳ куни",
+    program: "Тўй тартиби",
+    heart: "Қалбдан сўз",
+    tap: "Очиш учун енгил босинг",
+  },
+  "ipak-romol": {
+    countdown: "Қутлуғ онгача",
+    program: "Тадбирлар",
+    blessing: "Эзгу тилак",
+    thanks: "Ташрифингизни интизорлик билан кутамиз!",
+  },
+  "anor-bogi": {
+    countdown: "Тўй куни яқин",
+    date: "Бахтли сана",
+    program: "Тўй кунлари",
+    blessing: "Ниятимиз",
+    tap: "Очиш учун тегининг",
+    waiting: "Сизни кутамиз!",
+  },
+  "oltin-ot": {
+    countdown: "Шаҳзодамиз тўйигача",
+    program: "Тадбирлар тартиби",
+    heart: "Дилдан сўз",
+    blessing: "Дуо",
+    tap: "Қутичани очинг",
+    thanks: "Ташрифингиз — биз учун шараф!",
+  },
+};
+
+const allOccasions = (s: string) => ({ nikoh: s, sunnat: s, nahorgi: s, yubiley: s }) satisfies Record<Occasion, string>;
+
+/** Тексты для дизайна: общие `t` + свои заголовки этого дизайна */
+export function designTexts(id: string): Texts {
+  const h = headings[id] ?? {};
+  return {
+    ...t,
+    countdown: { ...t.countdown, title: h.countdown ? allOccasions(h.countdown) : t.countdown.title },
+    date: { ...t.date, title: h.date ? allOccasions(h.date) : t.date.title },
+    venue: { ...t.venue, programTitle: h.program ?? t.venue.programTitle, title: h.venue ?? t.venue.title },
+    heart: { ...t.heart, title: h.heart ?? t.heart.title },
+    blessing: { ...t.blessing, title: h.blessing ?? t.blessing.title },
+    opening: { ...t.opening, tapToOpen: h.tap ?? t.opening.tapToOpen },
+    hosts: { ...t.hosts, thanks: h.thanks ?? t.hosts.thanks, waiting: h.waiting ?? t.hosts.waiting },
+  } as unknown as Texts;
+}

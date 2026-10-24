@@ -2,7 +2,10 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef } from "react";
-import { t } from "@/texts/uz-cyrl";
+import { designTexts } from "@/texts/uz-cyrl";
+
+// свои заголовки дизайна (texts/uz-cyrl.ts → headings)
+const t = designTexts("tonggi-qozon");
 import type { Invitation } from "../../blocks/useInvitation";
 
 const RISE_S = 2.1;

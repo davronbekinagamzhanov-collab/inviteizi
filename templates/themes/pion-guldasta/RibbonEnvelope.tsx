@@ -2,7 +2,10 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef } from "react";
-import { t } from "@/texts/uz-cyrl";
+import { designTexts } from "@/texts/uz-cyrl";
+
+// свои заголовки дизайна (texts/uz-cyrl.ts → headings)
+const t = designTexts("pion-guldasta");
 import type { Invitation } from "../../blocks/useInvitation";
 import { Bow } from "./decor";
 import { CREAM } from "./style";

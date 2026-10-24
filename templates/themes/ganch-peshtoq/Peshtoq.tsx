@@ -2,7 +2,10 @@
 
 import { motion } from "motion/react";
 import { useEffect, useRef } from "react";
-import { t } from "@/texts/uz-cyrl";
+import { designTexts } from "@/texts/uz-cyrl";
+
+// свои заголовки дизайна (texts/uz-cyrl.ts → headings)
+const t = designTexts("ganch-peshtoq");
 import type { Invitation } from "../../blocks/useInvitation";
 import { Kitoba, PeshtoqArt, archPath, peshtoqGeo, starPoints, useSize, type Peshtoq } from "./decor";
 import { PLASTER, SURFACE } from "./style";

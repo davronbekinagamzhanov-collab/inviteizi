@@ -3,7 +3,10 @@
 import Image from "next/image";
 import { motion } from "motion/react";
 import type { ReactNode } from "react";
-import { t } from "@/texts/uz-cyrl";
+import { designTexts } from "@/texts/uz-cyrl";
+
+// свои заголовки дизайна (texts/uz-cyrl.ts → headings)
+const t = designTexts("oq-ot");
 import type { TemplateProps } from "../types";
 import { useInvitation } from "../../blocks/useInvitation";
 import { InvitationShell } from "../../blocks/InvitationShell";
@@ -187,12 +190,12 @@ function Hero({ inv, art, name }: { inv: Inv; art?: string; name: string }) {
           <Swirl className="mx-auto mt-3 h-5 w-36" />
         </motion.div>
         <motion.p {...show(1.2)} className="mt-3 font-display text-[21px] text-muted italic">
-          {inv.data.relation && t.relationWord(inv.data.relation)}
+          {inv.data.relation && t.relationWord(inv.data.relation, name)}
         </motion.p>
         <motion.h1
           {...show(1.35)}
-          className="font-display text-[clamp(40px,12.4vw,54px)] leading-[1.05] font-semibold"
-          style={{ color: ROYAL, textShadow: "0 2px 18px rgba(247,241,230,0.9)" }}
+          className="font-display leading-[1.05] font-semibold"
+          style={{ color: ROYAL, textShadow: "0 2px 18px rgba(247,241,230,0.9)", fontSize: nameSize(name) }}
         >
           {name}
         </motion.h1>
@@ -237,4 +240,13 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
       {children}
     </section>
   );
+}
+
+/**
+ * Кегль имени: обычно 40–54px, но самое длинное слово («Абдураҳмонжон») всегда целиком
+ * помещается в колонку (ширина экрана, не больше 430px, минус поля 48px).
+ */
+function nameSize(name: string) {
+  const longest = Math.max(4, ...name.split(/\s+/).map((w) => w.length));
+  return `min(54px, 12.4vw, calc((min(100vw, 430px) - 56px) / ${(longest * 0.62).toFixed(2)}))`;
 }

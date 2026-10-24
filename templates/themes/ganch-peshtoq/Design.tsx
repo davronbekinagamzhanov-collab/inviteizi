@@ -1,7 +1,10 @@
 "use client";
 
 import { Fragment, type ReactNode } from "react";
-import { t } from "@/texts/uz-cyrl";
+import { designTexts } from "@/texts/uz-cyrl";
+
+// свои заголовки дизайна (texts/uz-cyrl.ts → headings)
+const t = designTexts("ganch-peshtoq");
 import type { TemplateProps } from "../types";
 import { useInvitation, type Invitation, type InvitationEventView } from "../../blocks/useInvitation";
 import { InvitationShell } from "../../blocks/InvitationShell";
