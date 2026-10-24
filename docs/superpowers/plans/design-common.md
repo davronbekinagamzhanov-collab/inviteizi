@@ -24,7 +24,7 @@
 - `templates/themes/types.ts` — `TemplateProps {data, mode}`, `Palette`, `DesignFonts`, `designVars()`.
 - `templates/registry.ts` уже ссылается на `templates/themes/<id>/Design.tsx` (default export). Сейчас там ЗАГЛУШКА — замени файл целиком. Реестр не меняй.
 - Демо: `/demo/<id>` (полная), `/demo/<id>/namuna` (водяной знак, без музыки), `/demo/<id>/long` (трудные данные).
-- Сервер разработки уже запущен: http://localhost:3000. Не запускай второй, не запускай `npm run build`.
+- Сервер разработки уже запущен: http://localhost:3000. Не запускай второй, не запускай `npm run build`. Если он не отвечает — запусти его через `mcp__Claude_Browser__preview_start` с `{name: "inviteizi-dev"}` (если сервер жив, команда его переиспользует). Твой код никогда не должен ронять компиляцию (сломанный импорт шрифта ломает сервер ВСЕМ агентам) — проверяй `/catalog` после правок шрифтов.
 
 ## Где работать
 Только в `templates/themes/<id>/` (+ своя строка `t.design["<id>"]` в `texts/uz-cyrl.ts`, + свои файлы `public/art/<id>*.webp`). Общие блоки и чужие папки НЕ меняй — если без правки никак, опиши в отчёте. Не делай git commit.
