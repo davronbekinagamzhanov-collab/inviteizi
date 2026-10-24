@@ -37,7 +37,7 @@ describe("юбилей (шаг 6)", () => {
 });
 
 describe("каталог для клиентов (шаг 6)", () => {
-  it("в боте только 10 принятых шаблонов, у каждого тадбира есть хотя бы один формат", async () => {
+  it("в боте только принятые шаблоны, у каждого тадбира есть хотя бы один формат", async () => {
     const { designsFor, formatsFor } = await import("./flow/util");
     const { ACCEPTED } = await import("@/templates/registry");
     const shown = (["nikoh", "nahorgi", "sunnat", "yubiley"] as const).flatMap((o) =>

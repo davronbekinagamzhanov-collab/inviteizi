@@ -138,7 +138,8 @@ export const designs: Design[] = [
  */
 export const ACCEPTED = new Set([
   "oltin-monogramma", "sapfir", "oq-ot", "tonggi-qozon", "pion-guldasta",
-  "tandir-nuri", "ganch-peshtoq", "ipak-romol", "anor-bogi", "oltin-ot",
+  "tandir-nuri", "ganch-peshtoq", "ipak-romol", "oltin-ot",
+  // "anor-bogi" — скрыт по замечанию владельца 24.10 (код остаётся)
 ]);
 
 /** Дизайны для клиентов: только принятые */
