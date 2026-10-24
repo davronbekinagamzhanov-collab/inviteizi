@@ -4,7 +4,7 @@ import type { ComponentType } from "react";
 import type { TemplateProps } from "./themes/types";
 import type { InvitationData, Occasion } from "@/lib/types";
 import { pilotSamples } from "@/lib/pilot-samples";
-import { longSamples, samples } from "@/lib/samples";
+import { longSamples, sampleFor } from "@/lib/samples";
 
 export type { TemplateProps };
 export type Format = "animated" | "simple";
@@ -49,7 +49,7 @@ function design(
   load: Loader,
   extra: Partial<Design> = {},
 ): Design {
-  return { id, number, occasion, format, withPhoto, sample: samples[occasion], cover: cover(id), load, ...extra };
+  return { id, number, occasion, format, withPhoto, sample: sampleFor(id, occasion), cover: cover(id), load, ...extra };
 }
 
 export const designs: Design[] = [

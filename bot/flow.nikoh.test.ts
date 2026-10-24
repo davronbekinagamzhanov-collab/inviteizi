@@ -29,7 +29,7 @@ describe("весь путь никоҳ на ўзбекском", () => {
     expect(buttonLabels(cat)).toEqual(expect.arrayContaining(["◀", "1/7", "▶", uz.catalog.demo, uz.catalog.buy]));
     expect(inlineButtons(cat).find((b) => b.text === uz.catalog.demo)).toEqual({
       text: uz.catalog.demo,
-      url: `${BASE}/demo/oltin-monogramma/namuna`,
+      url: `${BASE}/demo/oltin-monogramma`, // каталог — чистое демо без надписи
     });
     await sim.click(id, "▶");
     expect(sim.last(id).id).toBe(cat.id);

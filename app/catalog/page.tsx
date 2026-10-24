@@ -80,20 +80,12 @@ export default function CatalogPage() {
                     {t.designs[d.id]}
                   </p>
                   <p className="text-[16px] font-bold">{t.price(PRICES[d.format])}</p>
-                  <div className="mt-2 flex flex-col gap-2">
-                    <Link
-                      href={`/demo/${d.id}`}
-                      className="gold-fill rounded-full py-2.5 text-center text-[16px] font-bold text-[#3b2a1e]"
-                    >
-                      {t.catalog.open}
-                    </Link>
-                    <Link
-                      href={`/demo/${d.id}/namuna`}
-                      className="rounded-full py-2.5 text-center text-[16px] ring-1 ring-[#b8892f]/60"
-                    >
-                      {t.catalog.watermark}
-                    </Link>
-                  </div>
+                  <Link
+                    href={`/demo/${d.id}`}
+                    className="gold-fill mt-2 block rounded-full py-2.5 text-center text-[16px] font-bold text-[#3b2a1e]"
+                  >
+                    {t.catalog.open}
+                  </Link>
                 </li>
               ))}
             </ul>

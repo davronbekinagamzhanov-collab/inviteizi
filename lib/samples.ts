@@ -143,3 +143,48 @@ export const longSamples = {
   },
   yubiley: samples.yubiley,
 } satisfies Record<Occasion, InvitationData>;
+
+/**
+ * Демо из каталога: у каждого шаблона свои примерные имена, хозяева и дата
+ * (не везде «Азиз ва Мадина»). Реальные местные имена, даты в будущем.
+ */
+type DemoOverride = Pick<InvitationData, "groom" | "bride" | "person" | "hosts" | "sides" | "relation"> & {
+  /** Дата главного тадбира; остальные тадбиры сдвигаются вместе с ней */
+  date: string;
+};
+
+const demo: Record<string, DemoOverride> = {
+  // никоҳ
+  "ganch-peshtoq": { groom: "Жаҳонгир", bride: "Мафтуна", hosts: "Ҳамидовлар оиласи", sides: { groom: "Ҳамидовлар оиласи", bride: "Раҳмоновлар оиласи" }, date: "2026-11-21" },
+  "zarhal-eshik": { groom: "Бобур", bride: "Шаҳзода", hosts: "Каримовлар оиласи", sides: { groom: "Каримовлар оиласи", bride: "Мирзаевлар оиласи" }, date: "2026-11-28" },
+  "atlas-tolqin": { groom: "Санжар", bride: "Малика", hosts: "Турсуновлар оиласи", date: "2026-12-05" },
+  "anor-bogi": { groom: "Улуғбек", bride: "Нигора", hosts: "Юсуповлар оиласи", sides: { groom: "Юсуповлар оиласи", bride: "Азимовлар оиласи" }, date: "2026-12-12" },
+  "bodom-guli": { groom: "Отабек", bride: "Зарина", hosts: "Абдуллаевлар оиласи", date: "2027-04-10" },
+  "samarqand-kitob": { groom: "Шерзод", bride: "Гулноза", hosts: "Норматовлар оиласи", sides: { groom: "Норматовлар оиласи", bride: "Қодировлар оиласи" }, date: "2027-05-15" },
+  "ipak-romol": { groom: "Фаррух", bride: "Сабина", hosts: "Саидовлар оиласи", sides: { groom: "Саидовлар оиласи", bride: "Холматовлар оиласи" }, date: "2026-12-19" },
+  "rishton-koshin": { groom: "Дилшод", bride: "Камола", hosts: "Эргашевлар оиласи", date: "2027-01-16" },
+  atirgul: { groom: "Жасур", bride: "Нилуфар", hosts: "Раҳимовлар оиласи", date: "2027-02-13" },
+  "shohona-baxmal": { groom: "Шоҳрух", bride: "Феруза", hosts: "Исмоиловлар оиласи", sides: { groom: "Исмоиловлар оиласи", bride: "Убайдуллаевлар оиласи" }, date: "2026-12-26" },
+  // наҳорги ош
+  "tandir-nuri": { person: "Санжарбек", relation: "ogil", hosts: "Ҳакимовлар оиласи", date: "2026-11-29" },
+  dasturxon: { person: "Даврон", relation: "ogil", hosts: "Қурбоновлар оиласи", date: "2026-12-06" },
+  "non-muhr": { person: "Шерзодбек", relation: "uka", hosts: "Мўминовлар оиласи", date: "2027-01-10" },
+  "tonggi-choy": { person: "Беҳзод", relation: "nabira", hosts: "Тўрахоновлар оиласи", date: "2026-12-20" },
+  "paxta-gul": { person: "Илҳомжон", relation: "ogil", hosts: "Зокировлар оиласи", date: "2027-02-07" },
+  // суннат
+  "oltin-ot": { person: "Абдулазиз", relation: "ogil", hosts: "Ғофуровлар оиласи", date: "2027-04-24" },
+};
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+const shift = (date: string, days: number) => new Date(Date.parse(`${date}T00:00:00Z`) + days * DAY_MS).toISOString().slice(0, 10);
+
+/** Данные демо шаблона: образец тадбира + свои имена и дата этого шаблона */
+export function sampleFor(id: string, occasion: Occasion): InvitationData {
+  const base = samples[occasion] as InvitationData;
+  const o = demo[id];
+  if (!o) return base;
+  const { date, ...names } = o;
+  // насколько сдвинуть все тадбиры, чтобы главный пришёлся на дату шаблона
+  const delta = Math.round((Date.parse(`${date}T00:00:00Z`) - Date.parse(`${base.events[0].date}T00:00:00Z`)) / DAY_MS);
+  return { ...base, ...names, events: base.events.map((e) => ({ ...e, date: shift(e.date, delta) })) };
+}

@@ -58,6 +58,7 @@ export function InvitationShell({
               playing={inv.playing}
               onToggle={inv.toggleMusic}
               className={musicButtonClassName}
+              raised={inv.mode === "demo"}
             />
           )}
           {inv.mode === "demo" && <Watermark />}

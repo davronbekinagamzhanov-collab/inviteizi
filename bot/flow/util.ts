@@ -43,7 +43,8 @@ export const fmtDate = (date: string) => date.split("-").reverse().join(".");
 export const designName = (id: string) => t.designs[id] ?? id;
 export const pageUrl = (c: Pick<Ctx, "deps">, slug: string) => `${c.deps.env.publicBaseUrl}/${slug}`;
 export const coverUrl = (c: Pick<Ctx, "deps">, id: string) => `${c.deps.env.publicBaseUrl}/covers/${id}.jpg`;
-export const demoUrl = (c: Pick<Ctx, "deps">, id: string) => `${c.deps.env.publicBaseUrl}/demo/${id}/namuna`;
+// «👁 Намуна» в каталоге — чистое демо без надписи НАМУНА (личная НАМУНА — по ссылке заказа)
+export const demoUrl = (c: Pick<Ctx, "deps">, id: string) => `${c.deps.env.publicBaseUrl}/demo/${id}`;
 export const ownerUrl = (c: Pick<Ctx, "deps">) => `https://t.me/${c.deps.env.ownerUsername.replace(/^@/, "")}`;
 
 /** «Азиз ва Мадина» / «Жасурбек» */

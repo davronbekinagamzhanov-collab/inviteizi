@@ -5,7 +5,10 @@ import { t } from "@/texts/uz-cyrl";
 
 // right: на компьютере кнопка стоит в углу колонки шириной 430px, а не в углу экрана
 const BASE =
-  "fixed right-[max(1rem,calc((100vw-430px)/2+1rem))] bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 flex h-12 w-12 items-center justify-center active:scale-90";
+  "fixed right-[max(1rem,calc((100vw-430px)/2+1rem))] z-40 flex h-12 w-12 items-center justify-center active:scale-90";
+// в НАМУНА внизу плашка «Тўловдан сўнг…» — кнопку поднимаем над ней
+const BOTTOM = "bottom-[calc(1rem+env(safe-area-inset-bottom))]";
+const BOTTOM_RAISED = "bottom-[calc(3.5rem+env(safe-area-inset-bottom))]";
 const DEFAULT_LOOK =
   "rounded-full bg-primary text-gold-light shadow-xl shadow-black/30 ring-1 ring-gold/70";
 
@@ -14,10 +17,12 @@ export function MusicButton({
   playing,
   onToggle,
   className,
+  raised = false,
 }: {
   playing: boolean;
   onToggle: () => void;
   className?: string;
+  raised?: boolean;
 }) {
   return (
     <motion.button
@@ -27,7 +32,7 @@ export function MusicButton({
       initial={{ opacity: 0, scale: 0.6 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: 0.3, duration: 0.4 }}
-      className={`${BASE} ${className ?? DEFAULT_LOOK}`}
+      className={`${BASE} ${raised ? BOTTOM_RAISED : BOTTOM} ${className ?? DEFAULT_LOOK}`}
     >
       {playing && (
         <span className="absolute inset-0 animate-ping rounded-[inherit] ring-1 ring-current opacity-40 [animation-duration:2.4s]" />

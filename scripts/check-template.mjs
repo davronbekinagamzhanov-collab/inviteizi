@@ -236,7 +236,7 @@ for (const v of report.viewports) {
   p(!v.hasOpening && !v.musicButton, "нет кнопки музыки");
   p(v.namunaWatermark === false, "в НАМУНА нет водяного знака");
   p(v.namunaNote === false, "в НАМУНА нет подписи «Тўловдан сўнг…»");
-  p(v.namunaMusicButton === true, "в НАМУНА есть музыка");
+  p(v.namunaMusicButton === false, "в НАМУНА нет кнопки музыки (личная НАМУНА — с музыкой)");
 }
 report.problems = problems;
 console.log(JSON.stringify(report, null, 2));

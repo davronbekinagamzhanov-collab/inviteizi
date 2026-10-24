@@ -28,7 +28,9 @@ export function useInvitation(data: InvitationData, mode: InvitationMode, opts: 
   const synth = useRef<SynthPlayer | null>(null);
 
   // В демо до оплаты музыки нет. Своя песня клиента важнее мелодии дизайна.
-  const musicOff = mode === "demo" || data.noMusic;
+  // Личная НАМУНА до оплаты тоже с музыкой (решение владельца 24.10): клиент слышит свой выбор,
+  // включает и выключает кнопкой ▶/⏸. Защита от рассылки без оплаты — надпись НАМУНА.
+  const musicOff = data.noMusic;
   const musicUrl = musicOff ? undefined : data.musicUrl;
   const melody = musicOff || musicUrl ? undefined : opts.melody;
 
