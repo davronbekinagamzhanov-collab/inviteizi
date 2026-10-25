@@ -3,6 +3,7 @@
  * Записи отдаются копиями (как из базы): изменить их снаружи нельзя.
  */
 import { isReservedSlug } from "@/lib/slug";
+import { summarize, type MetricEvent, type EventKind, type Period } from "@/lib/analytics";
 import type { Occasion } from "@/lib/types";
 import type { Repo } from "./repo";
 import type {
@@ -17,6 +18,8 @@ import type {
 } from "@/lib/domain";
 
 type Options = {
+  ownerId?: number;
+  analyticsAdminIds?: number[];
   adminIds?: number[];
   music?: MusicRecord[];
   /** Часы (в тестах — управляемые) */
@@ -32,6 +35,31 @@ const TZ_OFFSET_MS = 5 * 60 * 60_000;
 const DAY = 24 * 60 * 60_000;
 
 export class MemoryRepo implements Repo {
+  private favorites = new Map<number, Set<string>>();
+  private analyticsEvents = new Map<string, MetricEvent>();
+  private ownerId?: number;
+  private analyticsAdminIds: number[];
+  private trackingSince: Date;
+
+  async isOwner(id: number) { return this.ownerId === id; }
+  async canAnalyze(id: number) { return await this.isOwner(id) || (await this.isAdmin(id) && this.analyticsAdminIds.includes(id)); }
+  async analytics(actorId: number, period: Period, now: Date, customers = false) {
+    const owner = await this.isOwner(actorId);
+    if (!(await this.canAnalyze(actorId)) || (customers && !owner)) throw new Error("Analytics access denied");
+    return summarize({ orders: [...this.orders.values()], users: [...this.users.values()], events: [...this.analyticsEvents.values()], since: this.trackingSince, music: this.music }, period, now, customers && owner);
+  }
+  async listFavorites(userId: number) { return [...(this.favorites.get(userId) ?? [])]; }
+  async setFavorite(userId: number, templateId: string, saved: boolean) {
+    if (!this.favorites.has(userId)) this.favorites.set(userId, new Set());
+    const set = this.favorites.get(userId)!;
+    if (!saved) { set.delete(templateId); return; }
+    set.add(templateId);
+    this.analyticsEvents.set(`favorite:${userId}:${templateId}`, this.analyticsEvents.get(`favorite:${userId}:${templateId}`) ?? { kind: "design_favorited", userId, target: templateId, createdAt: this.now() });
+  }
+  async recordEvent(userId: number, kind: Extract<EventKind, "demo_opened" | "design_selected">, target: string, key: string) {
+    const id = `${kind}:${userId}:${key}`;
+    if (!this.analyticsEvents.has(id)) this.analyticsEvents.set(id, { kind, userId, target, createdAt: this.now() });
+  }
   private users = new Map<number, UserRecord>();
   private orders = new Map<string, OrderRecord>();
   /** Все адреса, которые когда-либо были у заказов: slug → id заказа (как таблица slug_history) */
@@ -43,6 +71,9 @@ export class MemoryRepo implements Repo {
   private nextId = 1;
 
   constructor(o: Options = {}) {
+    this.ownerId = o.ownerId;
+    this.analyticsAdminIds = o.analyticsAdminIds ?? [];
+    this.trackingSince = o.now?.() ?? new Date();
     this.adminIds = o.adminIds ?? [];
     this.music = clone(o.music ?? []);
     this.now = o.now ?? (() => new Date());

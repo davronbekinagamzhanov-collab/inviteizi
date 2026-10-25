@@ -38,7 +38,7 @@ export class Sim {
 
   constructor(opts: { now?: string; admins?: number[]; music?: MusicRecord[] } = {}) {
     this.clock = new Date(opts.now ?? "2026-11-01T07:00:00Z"); // 12:00 в Сайраме
-    this.repo = new MemoryRepo({ adminIds: opts.admins ?? [ADMIN, ADMIN2], music: opts.music ?? testMusic, now: () => this.clock });
+    this.repo = new MemoryRepo({ ownerId: ADMIN, analyticsAdminIds: [ADMIN2], adminIds: opts.admins ?? [ADMIN, ADMIN2], music: opts.music ?? testMusic, now: () => this.clock });
     this.deps = {
       repo: this.repo,
       tg: this.tg,

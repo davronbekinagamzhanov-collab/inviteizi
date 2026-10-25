@@ -61,12 +61,20 @@ describe("pageMode", () => {
 
   it("до подтверждения оплаты (и после отказа) → НАМУНА", () => {
     for (const status of ["draft", "preview", "awaiting_payment", "receipt_sent", "rejected"] as const) {
-      expect(pageMode(order({ status }), before)).toBe("demo");
+      expect(pageMode(order({ status }), new Date("2026-11-01T20:00:00Z"))).toBe("demo");
     }
   });
 
   it("archived → заглушка", () => {
     expect(pageMode(order({ status: "archived" }), before)).toBe("expired");
+  });
+
+  it("демо истекает ровно через 24 часа; правка не продлевает, оплата восстанавливает", () => {
+    const o = order({ status: "preview" });
+    const deadline = new Date(o.createdAt.getTime() + 86400000);
+    expect(pageMode(o, new Date(+deadline - 1))).toBe("demo");
+    expect(pageMode({ ...o, updatedAt: deadline }, deadline)).toBe("expired");
+    expect(pageMode({ ...o, status: "active", paidAt: deadline }, deadline)).toBe("full");
   });
 
   it("после срока → заглушка (срок из заказа или по тадбирам)", () => {
@@ -92,6 +100,10 @@ describe("invitationData — музыка заказа для шаблона", (
     const d = invitationData(order({ music: { kind: "none" } }));
     expect(d.noMusic).toBe(true);
     expect(d.musicUrl).toBeUndefined();
+  });
+  it("missing historical track never plays a different template melody instead", () => {
+    expect(invitationData(order({ music: { kind: "list", musicId: "missing" } })).noMusic).toBe(true);
+    expect(invitationData(order({ music: { kind: "own", fileId: "old" } })).noMusic).toBe(true);
   });
 
   it("остальные данные не меняются", () => {

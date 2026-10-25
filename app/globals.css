@@ -115,7 +115,7 @@ body {
   position: absolute;
   top: 0;
   animation: fall linear infinite;
-  will-change: transform, opacity;
+  /* No permanent GPU layers after the finite petal animation ends. */
 }
 
 /* Мягкая пульсация подсказки «Очиш учун босинг» */

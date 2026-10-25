@@ -21,6 +21,8 @@ export type InvitationPage = {
 const DAY = 24 * 60 * 60_000;
 /** Ссылка работает до последнего тадбира + столько дней */
 export const LINK_DAYS_AFTER_EVENT = 30;
+/** Персональная НАМУНА: ровно 24 часа с создания, правки срок не продлевают. */
+export const DEMO_HOURS = 24;
 
 /** Последний тадбир + 30 дней, до конца того дня по времени Казахстана (UTC+5). Нет тадбиров — null */
 export function computeExpiresAt(events: InvitationEvent[]): Date | null {
@@ -40,16 +42,19 @@ export function pageMode(order: OrderRecord, now: Date): PageMode {
   if (order.status === "archived") return "expired";
   const exp = expiresAtOf(order);
   if (exp && now.getTime() > exp.getTime()) return "expired";
+  if (order.status !== "active" && now.getTime() >= order.createdAt.getTime() + DAY) return "expired";
   return order.status === "active" ? "full" : "demo";
 }
 
 /** Данные шаблона: музыка из списка → её файл; своя → файл в бакете music; без музыки → noMusic */
 export function invitationData(order: OrderRecord, listMusicUrl?: string | null): InvitationData {
-  const { musicUrl: _u, noMusic: _n, ...rest } = order.data;
+  const rest = { ...order.data };
+  delete rest.musicUrl;
+  delete rest.noMusic;
   const m = order.music;
   if (m.kind === "none") return { ...rest, noMusic: true };
   const url = m.kind === "list" ? listMusicUrl : m.url;
-  return url ? { ...rest, musicUrl: url } : rest;
+  return url ? { ...rest, musicUrl: url } : { ...rest, noMusic: true };
 }
 
 async function musicFileUrl(musicId: string): Promise<string | null> {

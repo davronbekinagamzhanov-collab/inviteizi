@@ -29,7 +29,7 @@ const hasCover = (src: string) => existsSync(path.join(process.cwd(), "public", 
 export default function CatalogPage() {
   return (
     <main
-      className={`${display.variable} ${body.variable} mx-auto min-h-svh max-w-[480px] px-4 pt-12 pb-16 text-[#3b2a1e]`}
+      className={`${display.variable} ${body.variable} mx-auto min-h-svh max-w-[430px] px-4 pt-12 pb-16 text-[#3b2a1e]`}
       style={{ fontFamily: "var(--font-catalog-body)" }}
     >
       <header className="text-center">

@@ -2,28 +2,15 @@ import { ImageResponse } from "next/og";
 import { getInvitationBySlug } from "@/lib/orders";
 import { parseWeddingDate } from "@/lib/wedding-date";
 import { t } from "@/texts/uz-cyrl";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { getDesign } from "@/templates/registry";
+import { reportFont, reportText } from "@/lib/chart";
 
 // Картинка ссылки в WhatsApp / Telegram: имена и дата на молочном фоне
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const alt = t.site.title;
-
-/**
- * Шрифт с кириллицей (ў қ ғ ҳ) с Google Fonts: только нужные буквы (параметр text), формат TTF.
- * Не получилось — картинка рисуется без своего шрифта (не падаем).
- */
-async function googleFont(family: string, weight: number, text: string): Promise<ArrayBuffer | null> {
-  try {
-    const css = await fetch(
-      `https://fonts.googleapis.com/css2?family=${family.replace(/ /g, "+")}:wght@${weight}&text=${encodeURIComponent(text)}`,
-    ).then((r) => r.text());
-    const src = /src: url\((.+?)\) format\('(?:opentype|truetype)'\)/.exec(css)?.[1];
-    if (!src) return null;
-    return await fetch(src).then((r) => r.arrayBuffer());
-  } catch {
-    return null;
-  }
-}
 
 export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -31,23 +18,19 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   const d = page && page.mode !== "expired" ? page.data : null;
 
   const eyebrow = d ? t.invitationPage.inviteTo[d.occasion] : t.site.title;
-  const names = d ? t.invitationPage.names(d) : "InviteIZI";
+  const rawNames = reportText(d ? t.invitationPage.names(d) : "InviteIZI");
+  const names = Array.from(rawNames).slice(0, 100).join("") + (rawNames.length > 100 ? "…" : "");
   const first = d?.events[0];
   const w = first ? parseWeddingDate(first.date, first.time) : null;
   const date = w ? `${t.date.long(w.day, w.monthIndex, w.year)} · ${t.date.at(first!.time)}` : "";
   const brand = "InviteIZI";
 
-  const all = `${eyebrow}${names}${date}${brand}`;
-  const [display, body] = await Promise.all([
-    googleFont("Cormorant Garamond", 600, names + brand),
-    googleFont("PT Serif", 400, all),
-  ]);
-  const fonts = [
-    display && { name: "Display", data: display, weight: 600 as const, style: "normal" as const },
-    body && { name: "Body", data: body, weight: 400 as const, style: "normal" as const },
-  ].filter((f) => !!f);
-
-  const namesSize = names.length > 28 ? 64 : names.length > 18 ? 80 : 96;
+  const font = await reportFont();
+  const fonts = [{ name: "Body", data: font, weight: 400 as const, style: "normal" as const }];
+  const design = d && page ? getDesign(page.order.templateId) : undefined;
+  // Only project-owned covers; never a customer-supplied URL or private event address.
+  const cover = design ? await readFile(path.join(process.cwd(), "public/og", `${design.id}.jpg`)).then(bytes => `data:image/jpeg;base64,${bytes.toString("base64")}`).catch(() => null) : null;
+  const namesSize = names.length > 45 ? 42 : names.length > 28 ? 54 : 68;
 
   return new ImageResponse(
     (
@@ -63,6 +46,9 @@ export default async function Image({ params }: { params: Promise<{ slug: string
           color: "#3b2a1e",
         }}
       >
+        {/* ImageResponse requires a native img element, not next/image. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        {cover ? <img src={cover} alt="" width={380} height={550} style={{ position: "absolute", left: 40, top: 40, objectFit: "cover", borderRadius: 20 }} /> : null}
         <div
           style={{
             position: "absolute",
@@ -87,19 +73,19 @@ export default async function Image({ params }: { params: Promise<{ slug: string
             display: "flex",
           }}
         />
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "0 110px", textAlign: "center" }}>
-          <div style={{ fontSize: 34, letterSpacing: 4, color: "#a87a28" }}>{eyebrow}</div>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: cover ? 680 : 1000, marginLeft: cover ? 420 : 0, padding: "0 42px", textAlign: "center" }}>
+          <div style={{ fontSize: 27, letterSpacing: 2, color: "#a87a28" }}>{eyebrow}</div>
           <div style={{ display: "flex", alignItems: "center", marginTop: 26, marginBottom: 22 }}>
             <div style={{ width: 120, height: 2, background: "#b8892f" }} />
             <div style={{ width: 16, height: 16, margin: "0 18px", transform: "rotate(45deg)", border: "2px solid #b8892f" }} />
             <div style={{ width: 120, height: 2, background: "#b8892f" }} />
           </div>
-          <div style={{ fontFamily: "Display", fontSize: namesSize, lineHeight: 1.1, fontWeight: 600 }}>{names}</div>
-          {date ? <div style={{ marginTop: 30, fontSize: 36, color: "#6f5a46" }}>{date}</div> : null}
-          <div style={{ marginTop: 44, fontSize: 24, letterSpacing: 6, color: "#b8892f" }}>{brand}</div>
+          <div style={{ fontSize: namesSize, lineHeight: 1.15, overflowWrap: "break-word" }}>{names}</div>
+          {date ? <div style={{ marginTop: 30, fontSize: 28, color: "#6f5a46" }}>{date}</div> : null}
+          <div style={{ marginTop: 36, fontSize: 22, letterSpacing: 5, color: "#b8892f" }}>{brand}</div>
         </div>
       </div>
     ),
-    { ...size, fonts: fonts.length ? fonts : undefined },
+    { ...size, fonts, headers: { "Cache-Control": "no-store" } },
   );
 }

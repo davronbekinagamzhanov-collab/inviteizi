@@ -12,6 +12,10 @@ import { approve, askReceipt, askRejectReason, editOrder, myOrders, payOrder, re
 import { cmdFind, cmdOrders, cmdStats } from "./admin";
 import { mainMenu, send, texts, txFor } from "./util";
 import type { Lang } from "@/lib/domain";
+import { dashboard } from "./dashboard";
+import { favorites, favoriteAction } from "./favorites";
+import { activeDesigns } from "@/templates/registry";
+import { designsFor } from "./util";
 
 const idle: Step = {
   async ask(c) {
@@ -258,6 +262,12 @@ async function route(c: Ctx) {
 }
 
 async function onCommand(c: Ctx, command: string, args: string) {
+  if (command === "favorites") return favorites(c);
+  if (command === "dashboard" || command === "customers") return dashboard(c, command === "customers" ? "customers" : "general");
+  if (command === "stats") {
+    if (c.chatId !== c.user.id || !(await c.deps.repo.canAnalyze(c.user.id))) return unknown(c);
+    return cmdStats(c);
+  }
   switch (command) {
     case "help":
       return help(c);
@@ -269,9 +279,8 @@ async function onCommand(c: Ctx, command: string, args: string) {
     case "new":
       return enter(c, "cat");
   }
-  if (["orders", "stats", "find"].includes(command) && (await c.deps.repo.isAdmin(c.user.id))) {
+  if (["orders", "find"].includes(command) && c.chatId === c.user.id && (await c.deps.repo.isAdmin(c.user.id))) {
     if (command === "orders") return cmdOrders(c);
-    if (command === "stats") return cmdStats(c);
     return cmdFind(c, args);
   }
   return unknown(c);
@@ -283,6 +292,16 @@ async function toast(c: Ctx, text: string) {
 }
 
 async function onCallback(c: Ctx, d: string) {
+  if (d === "favorites") return favorites(c);
+  if (d.startsWith("dash:")) { const [, view, period] = d.split(":"); return dashboard(c, view, period); }
+  if (d.startsWith("fav:")) {
+    const [, action, id] = d.split(":");
+    if (action !== "choose") return favoriteAction(c, action, id);
+    if (c.chatId !== c.user.id || !(await c.deps.repo.listFavorites(c.user.id)).includes(id)) return;
+    const design = activeDesigns().find(d => d.id === id);
+    if (!design) return;
+    return enter(c, "catalog", { occasion: design.occasion, format: design.format, catIdx: designsFor(design.occasion, design.format).findIndex(d => d.id === id) });
+  }
   const [kind, a, b] = d.split(":");
   const n = Number(a);
   switch (kind) {

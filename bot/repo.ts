@@ -15,8 +15,15 @@ import type {
   UserRecord,
 } from "@/lib/domain";
 import type { Occasion } from "@/lib/types";
+import type { Analytics, Period, EventKind } from "@/lib/analytics";
 
 export interface Repo {
+  isOwner(id: number): Promise<boolean>;
+  canAnalyze(id: number): Promise<boolean>;
+  analytics(actorId: number, period: Period, now: Date, customers?: boolean): Promise<Analytics>;
+  listFavorites(userId: number): Promise<string[]>;
+  setFavorite(userId: number, templateId: string, saved: boolean): Promise<void>;
+  recordEvent(userId: number, kind: Extract<EventKind, "demo_opened" | "design_selected">, target: string, key: string): Promise<void>;
   // ── Пользователи ──
   getUser(id: number): Promise<UserRecord | null>;
   /** Создать при первом /start (source — метка ?start=…, только при создании) или обновить имя/username и lastSeenAt */

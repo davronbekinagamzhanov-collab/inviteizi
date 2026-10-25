@@ -3,10 +3,11 @@ import type { InlineButton, Markup } from "../tg";
 import type { Ctx, Draft, DraftData } from "./types";
 import type { InvitationData, InvitationEvent, Lang, Occasion, OrderRecord, OrderStatus } from "@/lib/domain";
 import type { EventKind } from "@/lib/types";
-import { designs, getDesign, PRICES, type Format, activeDesigns } from "@/templates/registry";
+import { getDesign, PRICES, type Format, activeDesigns } from "@/templates/registry";
 import { t } from "@/texts/uz-cyrl";
 import { uz, type BotTexts } from "@/texts/bot-uz";
 import { ru } from "@/texts/bot-ru";
+import { demoToken } from "@/lib/demo-tracking";
 
 export const texts: Record<Lang, BotTexts> = { uz, ru };
 export const txFor = (lang: Lang | null | undefined): BotTexts => texts[lang ?? "uz"];
@@ -44,7 +45,10 @@ export const designName = (id: string) => t.designs[id] ?? id;
 export const pageUrl = (c: Pick<Ctx, "deps">, slug: string) => `${c.deps.env.publicBaseUrl}/${slug}`;
 export const coverUrl = (c: Pick<Ctx, "deps">, id: string) => `${c.deps.env.publicBaseUrl}/covers/${id}.jpg`;
 // «👁 Намуна» в каталоге — чистое демо без надписи НАМУНА (личная НАМУНА — по ссылке заказа)
-export const demoUrl = (c: Pick<Ctx, "deps">, id: string) => `${c.deps.env.publicBaseUrl}/demo/${id}`;
+export const demoUrl = (c: Pick<Ctx, "deps"> & Partial<Pick<Ctx, "user">>, id: string) => {
+  const token = c.user ? demoToken(c.user.id, id, c.deps.now()) : undefined;
+  return `${c.deps.env.publicBaseUrl}/demo/${id}${token ? `#dt=${token}` : ""}`;
+};
 export const ownerUrl = (c: Pick<Ctx, "deps">) => `https://t.me/${c.deps.env.ownerUsername.replace(/^@/, "")}`;
 
 /** «Азиз ва Мадина» / «Жасурбек» */

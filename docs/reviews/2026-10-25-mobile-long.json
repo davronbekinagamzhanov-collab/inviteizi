@@ -1,0 +1,87 @@
+{
+  "results": [
+    {
+      "design": "oltin-monogramma",
+      "width": 375,
+      "long": true,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "sapfir",
+      "width": 375,
+      "long": true,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "oq-ot",
+      "width": 375,
+      "long": true,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "tonggi-qozon",
+      "width": 375,
+      "long": true,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "pion-guldasta",
+      "width": 375,
+      "long": true,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "ganch-peshtoq",
+      "width": 375,
+      "long": true,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "ipak-romol",
+      "width": 375,
+      "long": true,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "tandir-nuri",
+      "width": 375,
+      "long": true,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "oltin-ot",
+      "width": 375,
+      "long": true,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    }
+  ],
+  "reducedMotionVisible": true,
+  "passed": true
+}

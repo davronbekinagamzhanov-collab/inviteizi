@@ -18,7 +18,7 @@ const PETALS = [
 
 export function Petals() {
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 z-30 overflow-hidden">
+    <div aria-hidden className="pointer-events-none fixed inset-0 z-30 overflow-hidden motion-reduce:hidden">
       {PETALS.map((p, i) => (
         <span
           key={i}

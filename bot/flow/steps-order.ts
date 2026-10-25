@@ -49,6 +49,7 @@ function catalogView(c: Ctx) {
   const rows: InlineButton[][] = [];
   if (list.length > 1) rows.push([ib(c, "◀", "prev"), ib(c, `${i + 1}/${list.length}`, "x"), ib(c, "▶", "next")]);
   rows.push([{ text: c.tx.catalog.demo, url: demoUrl(c, d.id) }, ib(c, c.tx.catalog.buy, "buy")]);
+  rows.push([{ text: c.tx.dashboard.favoriteAdd, data: `fav:add:${d.id}` }, { text: c.tx.dashboard.favoriteList, data: "favorites" }]);
   rows.push(backRow(c));
   return { d, caption, markup: inline(rows), photo: coverUrl(c, d.id), count: list.length };
 }
@@ -84,6 +85,7 @@ export const catalog: Step = {
     if (value === "buy") {
       const v = catalogView(c);
       c.s.templateId = v.d.id;
+      await c.deps.repo.recordEvent(c.user.id, "design_selected", v.d.id, `${v.d.id}:${c.s.q ?? 0}`);
       data(c).occasion = c.s.occasion;
       return { to: after(c, formStart(c)) };
     }
