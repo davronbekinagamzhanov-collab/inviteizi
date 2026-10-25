@@ -118,12 +118,12 @@ export const designs: Design[] = [
   design("samarqand-kitob", 66, "nikoh", "animated", true, () => import("./themes/samarqand-kitob/Design")),
   design("ipak-romol", 67, "nikoh", "simple", false, () => import("./themes/ipak-romol/Design")),
   design("rishton-koshin", 68, "nikoh", "simple", false, () => import("./themes/rishton-koshin/Design")),
-  design("atirgul", 69, "nikoh", "simple", true, () => import("./themes/atirgul/Design")),
+  design("atirgul", 69, "nikoh", "simple", true, () => import("./themes/atirgul/Design"), {art:"/art/atirgul.webp"}),
   design("shohona-baxmal", 70, "nikoh", "simple", false, () => import("./themes/shohona-baxmal/Design"), { dark: true }),
 
   // ── Наҳорги ош ──
   design("tandir-nuri", 71, "nahorgi", "animated", true, () => import("./themes/tandir-nuri/Design")),
-  design("dasturxon", 72, "nahorgi", "animated", false, () => import("./themes/dasturxon/Design")),
+  design("dasturxon", 72, "nahorgi", "animated", true, () => import("./themes/dasturxon/Design"), {art:"/art/dasturxon.webp"}),
   design("non-muhr", 73, "nahorgi", "animated", false, () => import("./themes/non-muhr/Design")),
   design("tonggi-choy", 74, "nahorgi", "simple", true, () => import("./themes/tonggi-choy/Design")),
   design("paxta-gul", 75, "nahorgi", "simple", false, () => import("./themes/paxta-gul/Design")),
@@ -139,6 +139,7 @@ export const designs: Design[] = [
 export const ACCEPTED = new Set([
   "oltin-monogramma", "sapfir", "oq-ot", "tonggi-qozon", "pion-guldasta",
   "tandir-nuri", "ganch-peshtoq", "ipak-romol", "oltin-ot",
+  "zarhal-eshik", "rishton-koshin", "atirgul", "dasturxon",
   // "anor-bogi" — скрыт по замечанию владельца 24.10 (код остаётся)
 ]);
 

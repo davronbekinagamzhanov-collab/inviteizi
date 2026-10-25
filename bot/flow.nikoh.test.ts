@@ -3,8 +3,11 @@ import { uz } from "@/texts/bot-uz";
 import { Sim } from "./testing/sim";
 import { buttonLabels, inlineButtons } from "./testing/fake-tg";
 import { nikohOrder, startUz } from "./testing/paths";
+import { activeDesigns } from "@/templates/registry";
 
 const BASE = "https://inviteizi.vercel.app";
+const animatedNikohCount=activeDesigns().filter(d=>d.occasion==="nikoh"&&d.format==="animated").length;
+const simpleNikoh=activeDesigns().filter(d=>d.occasion==="nikoh"&&d.format==="simple").sort((a,b)=>a.number-b.number);
 
 describe("весь путь никоҳ на ўзбекском", () => {
   it("от /start insta до ссылки на НАМУНА", async () => {
@@ -26,7 +29,7 @@ describe("весь путь никоҳ на ўзбекском", () => {
     expect(cat.type).toBe("photo");
     expect(cat.media).toBe(`${BASE}/covers/oltin-monogramma.jpg`);
     expect(cat.text).toMatch(/^№1 · Олтин монограмма\nАнимацияли · 10.000 ₸$/);
-    expect(buttonLabels(cat)).toEqual(expect.arrayContaining(["◀", "1/2", "▶", uz.catalog.demo, uz.catalog.buy]));
+    expect(buttonLabels(cat)).toEqual(expect.arrayContaining(["◀", `1/${animatedNikohCount}`, "▶", uz.catalog.demo, uz.catalog.buy]));
     expect(inlineButtons(cat).find((b) => b.text === uz.catalog.demo)).toEqual({
       text: uz.catalog.demo,
       url: `${BASE}/demo/oltin-monogramma`, // каталог — чистое демо без надписи
@@ -35,7 +38,7 @@ describe("весь путь никоҳ на ўзбекском", () => {
     expect(sim.last(id).id).toBe(cat.id);
     expect(cat.media).toBe(`${BASE}/covers/ganch-peshtoq.jpg`);
     expect(cat.text).toMatch(/^№61 · Ганч пештоқ/);
-    expect(buttonLabels(cat)).toContain("2/2");
+    expect(buttonLabels(cat)).toContain(`2/${animatedNikohCount}`);
     await sim.click(id, uz.catalog.buy);
 
     // Анкета
@@ -185,11 +188,14 @@ describe("весь путь никоҳ на ўзбекском", () => {
     await sim.click(1, uz.category.nikoh);
     await sim.click(1, /Оддий/);
     const cat = sim.last(1);
-    expect(buttonLabels(cat)).toContain("1/2");
+    expect(buttonLabels(cat)).toContain(`1/${simpleNikoh.length}`);
+    expect(cat.media).toBe(`${BASE}/covers/${simpleNikoh[0].id}.jpg`);
     await sim.click(1, "◀");
-    expect(buttonLabels(cat)).toContain("2/2");
+    expect(buttonLabels(cat)).toContain(`${simpleNikoh.length}/${simpleNikoh.length}`);
+    expect(cat.media).toBe(`${BASE}/covers/${simpleNikoh.at(-1)!.id}.jpg`);
     await sim.click(1, "▶");
-    expect(buttonLabels(cat)).toContain("1/2");
+    expect(buttonLabels(cat)).toContain(`1/${simpleNikoh.length}`);
+    expect(cat.media).toBe(`${BASE}/covers/${simpleNikoh[0].id}.jpg`);
   });
 
   it("формат без дизайнов не показывается (суннат — только анимацияли)", async () => {

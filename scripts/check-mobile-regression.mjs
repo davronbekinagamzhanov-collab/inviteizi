@@ -2,7 +2,10 @@
 import "./ts-hooks.mjs";
 import { chromium } from "playwright-core";
 import { mkdir, writeFile } from "node:fs/promises";
-const { activeDesigns } = await import("../templates/registry.ts");
+const { activeDesigns,designs } = await import("../templates/registry.ts");
+const ids=process.argv.slice(2);
+const targets=ids.length?designs.filter(d=>ids.includes(d.id)):activeDesigns();
+if(ids.some(id=>!targets.some(d=>d.id===id))) throw new Error("Unknown design ID");
 const base = process.env.CHECK_BASE_URL ?? "http://127.0.0.1:3100";
 const longOnly = process.env.CHECK_LONG_ONLY === "1";
 const out = `screens/mobile-regression${longOnly ? "-long" : ""}`;
@@ -10,8 +13,8 @@ await mkdir(out,{recursive:true});
 const browser = await chromium.launch({channel:"chrome",headless:true});
 const results = [];
 try {
-  for(const design of activeDesigns()) {
-    for (const test of longOnly ? [{width:375,long:true}] : [{width:360,long:false},{width:375,long:false},{width:430,long:false}]) {
+  for(const design of targets) {
+    for (const test of longOnly ? [{width:320,long:true},{width:375,long:true}] : [{width:320,long:false},{width:360,long:false},{width:375,long:false},{width:430,long:false}]) {
       const context = await browser.newContext({viewport:{width:test.width,height:812},isMobile:true,hasTouch:true,deviceScaleFactor:1});
       const page = await context.newPage();
       const errors=[];

@@ -5,7 +5,7 @@
 // Отчёт (JSON): ошибки консоли, горизонтальная прокрутка, вылезающие элементы, пустые экраны
 // при быстром листании, мелкий текст, буквы ў қ ғ ҳ в запасном шрифте, карта, музыка, НАМУНА.
 import { chromium } from "playwright-core";
-import { mkdirSync } from "node:fs";
+import { mkdirSync,writeFileSync } from "node:fs";
 
 const id = process.argv[2];
 if (!id) throw new Error("Нужно: node scripts/check-template.mjs <id>");
@@ -239,5 +239,7 @@ for (const v of report.viewports) {
   p(v.namunaMusicButton === false, "в НАМУНА нет кнопки музыки (личная НАМУНА — с музыкой)");
 }
 report.problems = problems;
+writeFileSync(`screens/${id}${LONG ? "-long" : ""}/report.json`, JSON.stringify(report, null, 2));
 console.log(JSON.stringify(report, null, 2));
 console.log(problems.length ? `\nПРОБЛЕМЫ (${problems.length}):\n- ${problems.join("\n- ")}` : "\nOK: проблем не найдено");
+if (problems.length) process.exitCode = 1;

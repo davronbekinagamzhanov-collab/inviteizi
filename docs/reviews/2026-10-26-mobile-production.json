@@ -1,0 +1,474 @@
+{
+  "results": [
+    {
+      "design": "oltin-monogramma",
+      "width": 320,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "oltin-monogramma",
+      "width": 360,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "oltin-monogramma",
+      "width": 375,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "oltin-monogramma",
+      "width": 430,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "sapfir",
+      "width": 320,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "sapfir",
+      "width": 360,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "sapfir",
+      "width": 375,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "sapfir",
+      "width": 430,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "oq-ot",
+      "width": 320,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "oq-ot",
+      "width": 360,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "oq-ot",
+      "width": 375,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "oq-ot",
+      "width": 430,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "tonggi-qozon",
+      "width": 320,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "tonggi-qozon",
+      "width": 360,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "tonggi-qozon",
+      "width": 375,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "tonggi-qozon",
+      "width": 430,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "pion-guldasta",
+      "width": 320,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "pion-guldasta",
+      "width": 360,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "pion-guldasta",
+      "width": 375,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "pion-guldasta",
+      "width": 430,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "ganch-peshtoq",
+      "width": 320,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "ganch-peshtoq",
+      "width": 360,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "ganch-peshtoq",
+      "width": 375,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "ganch-peshtoq",
+      "width": 430,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "zarhal-eshik",
+      "width": 320,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "zarhal-eshik",
+      "width": 360,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "zarhal-eshik",
+      "width": 375,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "zarhal-eshik",
+      "width": 430,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "ipak-romol",
+      "width": 320,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "ipak-romol",
+      "width": 360,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "ipak-romol",
+      "width": 375,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "ipak-romol",
+      "width": 430,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "rishton-koshin",
+      "width": 320,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "rishton-koshin",
+      "width": 360,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "rishton-koshin",
+      "width": 375,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "rishton-koshin",
+      "width": 430,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "atirgul",
+      "width": 320,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "atirgul",
+      "width": 360,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "atirgul",
+      "width": 375,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "atirgul",
+      "width": 430,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "tandir-nuri",
+      "width": 320,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "tandir-nuri",
+      "width": 360,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "tandir-nuri",
+      "width": 375,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "tandir-nuri",
+      "width": 430,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "dasturxon",
+      "width": 320,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "dasturxon",
+      "width": 360,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "dasturxon",
+      "width": 375,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "dasturxon",
+      "width": 430,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "oltin-ot",
+      "width": 320,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "oltin-ot",
+      "width": 360,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "oltin-ot",
+      "width": 375,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "oltin-ot",
+      "width": 430,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    }
+  ],
+  "reducedMotionVisible": true,
+  "passed": true
+}

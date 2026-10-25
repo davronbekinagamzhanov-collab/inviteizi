@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
+import { demoMusicUrl } from "@/lib/music";
 import { designs, existingArt, getDesign } from "@/templates/registry";
 
-/** Так клиент увидит своё демо до оплаты: водяной знак «НАМУНА», без музыки */
+/** Каталожный образец личного демо: НАМУНА и музыка выбранного тадбира. */
 export const instant = false;
 
 export function generateStaticParams() {
@@ -14,5 +15,5 @@ export default async function DemoWatermarkPage({ params }: PageProps<"/demo/[te
   if (!design) notFound();
 
   const { default: Design } = await design.load();
-  return <Design data={design.sample} mode="demo" art={existingArt(design)} />;
+  return <Design data={{ ...design.sample, musicUrl: demoMusicUrl(design.occasion) }} mode="demo" art={existingArt(design)} />;
 }

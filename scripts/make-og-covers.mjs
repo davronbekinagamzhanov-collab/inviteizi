@@ -13,7 +13,14 @@ const crops = {
 for (const [id, crop] of Object.entries(crops)) {
   await sharp(`public/covers/${id}.jpg`).extract(crop).resize(420,620,{fit:"cover"}).jpeg({quality:86}).toFile(`public/og/${id}.jpg`);
 }
-for (const id of ["tandir-nuri", "anor-bogi"]) await sharp(`public/art/${id}.webp`).resize(420,620,{fit:"cover"}).jpeg({quality:86}).toFile(`public/og/${id}.jpg`);
+for (const id of ["tandir-nuri", "anor-bogi", "atirgul", "dasturxon"]) await sharp(`public/art/${id}.webp`).resize(420,620,{fit:"cover"}).jpeg({quality:86}).toFile(`public/og/${id}.jpg`);
+
+// These ornaments reproduce their design's own shapes, without sample/customer text.
+const ornaments={
+  "zarhal-eshik":`<rect width="420" height="620" fill="#fff9ef"/><g fill="none" stroke="#b18b4d"><path d="M32 590V154Q32 70 210 25Q388 70 388 154V590Z"/><path d="M45 575V160Q45 85 210 42Q375 85 375 160V575Z"/><path d="M32 154Q120 140 210 58Q300 140 388 154M45 550H375"/><path d="M210 100l16 22-16 22-16-22Z"/>${[0,1,2,3].map(i=>`<path d="M38 ${200+i*80}q25 10 0 30q25 10 0 30M382 ${200+i*80}q-25 10 0 30q-25 10 0 30"/>`).join("")}</g>`,
+  "rishton-koshin":`<rect width="420" height="620" fill="#fbf8ee"/><g stroke="#306f75" fill="none">${[0,1,2,3,4,5].map(row=>[0,1,2,3].map(col=>`<g transform="translate(${col*105+7} ${row*103+4})"><path d="M45 2 88 45 45 88 2 45Z" stroke-opacity=".35"/><path d="M45 12c-2 15-24 14-22 29c2 9 15 6 22 19c7-13 20-10 22-19C69 26 47 27 45 12Z" fill="#306f75" fill-opacity=".72"/><path d="M45 24v52M45 62Q13 46 19 70Q33 78 45 62M45 62Q77 46 71 70Q57 78 45 62" stroke="#648d76"/></g>`).join("")).join("")}</g>`,
+};
+for(const [id,ornament] of Object.entries(ornaments))await sharp(Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="420" height="620">${ornament}</svg>`)).jpeg({quality:88}).toFile(`public/og/${id}.jpg`);
 
 const leaf = (x,y,rotate=0,color="#b8892f") => `<ellipse cx="${x}" cy="${y}" rx="8" ry="22" fill="none" stroke="${color}" stroke-width="2" transform="rotate(${rotate} ${x} ${y})"/>`;
 for (const id of ["oltin-monogramma","sapfir","ipak-romol"]) {
