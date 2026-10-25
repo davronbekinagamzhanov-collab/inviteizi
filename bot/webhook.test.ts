@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { uz } from "@/texts/bot-uz";
 import { handleCronRequest, handleWebhookRequest } from "./webhook";
 import { Sim } from "./testing/sim";
-import { nikohOrder } from "./testing/paths";
+import { nikohOrder, startUz } from "./testing/paths";
 
 const SECRET = "s3cr3t-webhook";
 
@@ -51,7 +51,7 @@ describe("webhook /api/bot", () => {
     expect(sim.tg.messages).toEqual([]);
   });
 
-  it("ошибка в логике — всё равно 200 (Telegram не будет слать повторно)", async () => {
+  it("временная ошибка — 503, Telegram может повторить доставку", async () => {
     const sim = new Sim();
     sim.tg.sendMessage = async () => {
       throw new Error("Telegram упал");
@@ -61,9 +61,45 @@ describe("webhook /api/bot", () => {
       secret: SECRET,
       getDeps: () => sim.deps,
     });
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(503);
     expect(log).toHaveBeenCalled();
     log.mockRestore();
+  });
+  it("сбой базы до обработки не подтверждает потерянное обновление",async()=>{
+    const sim=new Sim(); vi.spyOn(sim.repo,"touchUser").mockRejectedValueOnce(new Error("database unavailable"));
+    const opts={secret:SECRET,getDeps:()=>sim.deps},h={"x-telegram-bot-api-secret-token":SECRET};
+    expect((await handleWebhookRequest(req(startUpdate(1),h),opts)).status).toBe(503);
+    expect((await handleWebhookRequest(req(startUpdate(1),h),opts)).status).toBe(200);
+    expect(sim.lastText(1)).toBe(uz.chooseLang);
+  });
+  it("потеря ответа COMMIT: повтор текста не становится ответом следующего поля",async()=>{
+    const sim=new Sim(); await startUz(sim,1); await sim.click(1,uz.category.nikoh); await sim.click(1,/Анимацияли/); await sim.click(1,uz.catalog.buy);
+    const save=sim.repo.saveStep.bind(sim.repo);
+    vi.spyOn(sim.repo,"saveStep").mockImplementationOnce(async(...args)=>{await save(...args);throw new Error("lost commit acknowledgement");});
+    const opts={secret:SECRET,getDeps:()=>sim.deps},h={"x-telegram-bot-api-secret-token":SECRET};
+    const body={...startUpdate(1,"Азиз"),update_id:100};
+    expect((await handleWebhookRequest(req(body,h),opts)).status).toBe(503);
+    expect((await handleWebhookRequest(req(body,h),opts)).status).toBe(200);
+    const user=(await sim.user(1))!;
+    expect(user.step).toBe("bride");
+    expect((user.state as {data:{bride?:string}}).data.bride).toBeUndefined();
+  });
+  it("null и некорректная структура — 400 без исключения",async()=>{
+    const sim=new Sim();const opts={secret:SECRET,getDeps:()=>sim.deps},h={"x-telegram-bot-api-secret-token":SECRET};
+    expect((await handleWebhookRequest(req(null,h),opts)).status).toBe(400);
+    expect((await handleWebhookRequest(req({update_id:1,message:{}},h),opts)).status).toBe(400);
+  });
+  it("ошибки не выводят токены, URL файлов или Telegram ID в журнал",async()=>{
+    const sim=new Sim();await sim.start(1);await sim.click(1,uz.langUz);
+    vi.spyOn(sim.repo,"stats").mockRejectedValueOnce(new Error("https://api.telegram.org/file/bot111:PRIVATE_TOKEN/123456789/file"));
+    const log=vi.spyOn(console,"error").mockImplementation(()=>{});
+    try {
+      // A direct route error uses the same protected error boundary as network/database failures.
+      vi.spyOn(sim.repo,"canAnalyze").mockRejectedValueOnce(new Error("PRIVATE_TOKEN 123456789"));
+      await sim.command(1,"stats");
+      expect(JSON.stringify(log.mock.calls)).not.toContain("PRIVATE_TOKEN");
+      expect(JSON.stringify(log.mock.calls)).not.toContain("123456789");
+    } finally { log.mockRestore(); }
   });
 });
 

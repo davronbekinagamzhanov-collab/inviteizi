@@ -16,6 +16,7 @@ import { dashboard } from "./dashboard";
 import { favorites, favoriteAction } from "./favorites";
 import { activeDesigns } from "@/templates/registry";
 import { designsFor } from "./util";
+import { rememberUpdate } from "../update";
 
 const idle: Step = {
   async ask(c) {
@@ -58,7 +59,7 @@ export const steps: Record<StepId, Step> = {
 const BACK_LIMIT = 60;
 const isStep = (s: string): s is StepId => s in steps;
 
-export async function handle(deps: Deps, u: BotUpdate): Promise<void> {
+export async function handle(deps: Deps, u: BotUpdate): Promise<boolean> {
   const isStart = u.kind === "command" && u.command === "start";
   const user = await deps.repo.touchUser({
     id: u.from.id,
@@ -66,6 +67,10 @@ export async function handle(deps: Deps, u: BotUpdate): Promise<void> {
     firstName: u.from.firstName,
     source: isStart && u.args ? u.args.slice(0, 64) : null,
   });
+  if (u.updateId !== undefined && rememberUpdate(user.state.handledUpdates).includes(u.updateId)) {
+    if (u.kind === "callback") await deps.tg.answerCallbackQuery(u.callbackId).catch(() => {});
+    return true;
+  }
   const c: Ctx = {
     deps,
     u,
@@ -80,10 +85,12 @@ export async function handle(deps: Deps, u: BotUpdate): Promise<void> {
   };
   try {
     await route(c);
+    return true;
   } catch (e) {
     // Никогда не молчим: клиенту — короткое «хатолик, қайта уриниб кўринг», в лог — только текст ошибки
-    console.error("bot route", u.kind, e instanceof Error ? e.message : e);
+    console.error("bot route", u.kind, e instanceof Error ? e.name : "Error");
     await deps.tg.sendMessage(u.chatId, c.tx.error).catch(() => {});
+    return false;
   } finally {
     if (u.kind === "callback" && !c.answered) await deps.tg.answerCallbackQuery(u.callbackId).catch(() => {});
   }
@@ -92,6 +99,7 @@ export async function handle(deps: Deps, u: BotUpdate): Promise<void> {
 // ── Переходы ──
 
 async function save(c: Ctx) {
+  if (c.u.updateId !== undefined || c.user.state.handledUpdates) c.s.handledUpdates = rememberUpdate(c.user.state.handledUpdates,c.u.updateId);
   await c.deps.repo.saveStep(c.user.id, c.step, c.s as Record<string, unknown>);
 }
 

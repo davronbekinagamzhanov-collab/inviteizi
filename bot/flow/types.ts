@@ -61,6 +61,7 @@ export type BackEntry = { step: StepId; ev?: number; ret?: "review" };
 
 /** Черновик заказа и положение в диалоге (users.state) */
 export type Draft = {
+  handledUpdates?: number[];
   /** Номер вопроса: кнопки старых вопросов не срабатывают */
   q?: number;
   back?: BackEntry[];

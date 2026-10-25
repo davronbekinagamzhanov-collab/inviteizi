@@ -6,7 +6,13 @@ import type { Update } from "grammy/types";
 
 export type From = { id: number; username: string | null; firstName: string | null };
 
-type Base = { from: From; chatId: number; messageId: number };
+type Base = { from: From; chatId: number; messageId: number; updateId?: number };
+
+/** Bounded retry history, not a monotonic high-water mark: Telegram may randomize IDs after inactivity. */
+export function rememberUpdate(history: unknown, id?: number): number[] {
+  const ids = Array.isArray(history) ? history.filter(n => Number.isSafeInteger(n) && n >= 0) as number[] : [];
+  return [...new Set(id === undefined ? ids : [...ids,id])].slice(-64);
+}
 
 export type BotUpdate =
   | (Base & { kind: "text"; text: string })
@@ -37,6 +43,7 @@ export function normalizeUpdate(u: Update): BotUpdate | null {
     if (!chat || chat.type !== "private" || !q.message) return null;
     return {
       kind: "callback",
+      updateId: u.update_id,
       from: toFrom(q.from),
       chatId: chat.id,
       messageId: q.message.message_id,
@@ -46,7 +53,7 @@ export function normalizeUpdate(u: Update): BotUpdate | null {
   }
   const m = u.message;
   if (!m || m.chat.type !== "private" || !m.from) return null;
-  const base: Base = { from: toFrom(m.from), chatId: m.chat.id, messageId: m.message_id };
+  const base: Base = { from: toFrom(m.from), chatId: m.chat.id, messageId: m.message_id, updateId: u.update_id };
 
   if (typeof m.text === "string") {
     const cmd = /^\/([a-z0-9_]+)(?:@\w+)?(?:\s+([\s\S]*))?$/i.exec(m.text.trim());

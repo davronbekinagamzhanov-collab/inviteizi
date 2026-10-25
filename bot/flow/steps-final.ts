@@ -126,7 +126,7 @@ export const musicOwn: Step = {
       try {
         url = await c.deps.saveMusic(file.fileId, c.user.id);
       } catch (e) {
-        console.error("saveMusic", e instanceof Error ? e.message : e);
+        console.error("saveMusic", e instanceof Error ? e.name : "Error");
       }
       // без копии в хранилище гости не услышат песню — не делаем вид, что всё хорошо
       if (!url) {

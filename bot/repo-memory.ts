@@ -150,12 +150,12 @@ export class MemoryRepo implements Repo {
   }
 
   // ── Заказы ──
-  async createOrderFromDraft(o: NewOrder, expectedQ: number) {
+  async createOrderFromDraft(o: NewOrder, expectedQ: number, handledUpdates?: number[]) {
     const user = this.mustUser(o.userId);
     if (user.step !== "review" || Number(user.state.q ?? 0) !== expectedQ) return null;
     const previous = { step: user.step, state: clone(user.state) };
     user.step = "idle";
-    user.state = { q: expectedQ + 1 };
+    user.state = { q: expectedQ + 1, ...(handledUpdates ? {handledUpdates} : {}) };
     try { return await this.createOrder(o); }
     catch (error) {
       if (user.step === "idle" && user.state.q === expectedQ + 1) Object.assign(user, previous);

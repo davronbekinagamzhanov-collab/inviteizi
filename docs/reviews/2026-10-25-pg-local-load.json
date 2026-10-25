@@ -1,0 +1,15 @@
+{
+  "scope": "PgRepo + postgres.js + loopback + PGlite; one connection; not native multi-backend PostgreSQL or production throughput",
+  "loadResults": [
+    {
+      "clients": 100,
+      "ms": 913,
+      "revenueDelta": 1000000
+    },
+    {
+      "clients": 1000,
+      "ms": 7868,
+      "revenueDelta": 10000000
+    }
+  ]
+}

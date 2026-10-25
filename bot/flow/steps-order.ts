@@ -66,7 +66,7 @@ export const catalog: Step = {
       await c.deps.tg.sendPhoto(c.chatId, v.photo, { caption: v.caption, markup: v.markup });
     } catch (e) {
       // обложки нет или Telegram её не скачал — каталог текстом, клиент не застревает
-      console.error("каталог: обложка", v.d.id, e instanceof Error ? e.message : e);
+      console.error("каталог: обложка", v.d.id, e instanceof Error ? e.name : "Error");
       await send(c, v.caption, v.markup);
     }
   },

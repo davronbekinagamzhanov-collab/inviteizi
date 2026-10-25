@@ -26,6 +26,7 @@ import {
   txFor,
 } from "./util";
 import { getDesign } from "@/templates/registry";
+import { rememberUpdate } from "../update";
 
 // ── Создание / сохранение из сводки ──
 
@@ -77,7 +78,7 @@ export async function confirmDraft(c: Ctx): Promise<Result> {
     amount: PRICES[s.format],
     status: "preview",
     slugBase,
-  }, c.q0);
+  }, c.q0, c.u.updateId === undefined ? undefined : rememberUpdate(c.user.state.handledUpdates,c.u.updateId));
   if (!o) return { ignore: true };
   await send(c, c.tx.order.created(pageUrl(c, o.slug)), inline(orderButtons(c, o)));
   // Repo already finished this draft in the same transaction. Do not overwrite a newer dialog.
@@ -232,7 +233,7 @@ export async function notifyAdmins(deps: Deps, o: OrderRecord, prefix = "") {
       else await deps.tg.sendMessage(adminId, caption, { markup: opts.markup });
     } catch (e) {
       // Админ мог не запускать бота — остальным всё равно отправляем
-      console.error("notifyAdmins", adminId, e instanceof Error ? e.message : e);
+      console.error("notifyAdmins", e instanceof Error ? e.name : "Error");
     }
   }
 }
@@ -280,7 +281,7 @@ async function sendLinkPack(deps: Deps, o: OrderRecord, afterPayment: boolean) {
       await fn();
       return true;
     } catch (e) {
-      console.error("клиенту не отправлено:", what, e instanceof Error ? e.message : e);
+      console.error("клиенту не отправлено:", what, e instanceof Error ? e.name : "Error");
       return false;
     }
   };
