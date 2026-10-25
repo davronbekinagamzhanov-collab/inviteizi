@@ -150,10 +150,23 @@ export class MemoryRepo implements Repo {
   }
 
   // ── Заказы ──
+  async createOrderFromDraft(o: NewOrder, expectedQ: number) {
+    const user = this.mustUser(o.userId);
+    if (user.step !== "review" || Number(user.state.q ?? 0) !== expectedQ) return null;
+    const previous = { step: user.step, state: clone(user.state) };
+    user.step = "idle";
+    user.state = { q: expectedQ + 1 };
+    try { return await this.createOrder(o); }
+    catch (error) {
+      if (user.step === "idle" && user.state.q === expectedQ + 1) Object.assign(user, previous);
+      throw error;
+    }
+  }
+
   async createOrder(o: NewOrder) {
     const now = this.now();
     let slug = o.slugBase;
-    for (let i = 2; await this.isSlugTaken(slug); i++) slug = `${o.slugBase}-${i}`;
+    for (let i = 2; this.slugHistory.has(slug) || isReservedSlug(slug); i++) slug = `${o.slugBase}-${i}`;
     this.slugHistory.set(slug, `00000000-0000-4000-8000-${String(this.nextId).padStart(12, "0")}`);
     const rec: OrderRecord = {
       id: `00000000-0000-4000-8000-${String(this.nextId++).padStart(12, "0")}`,

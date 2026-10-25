@@ -46,24 +46,28 @@ export async function confirmDraft(c: Ctx): Promise<Result> {
   if (s.orderId) {
     const old = await repo.getOrder(s.orderId);
     if (!old || old.userId !== c.user.id) return { hint: c.tx.order.notFound };
-    const canChangePrice = PAYABLE_STATUSES.includes(old.status);
-    const o = await repo.updateOrder(old.id, {
+    // The status guard belongs in the UPDATE, not only in the earlier read.
+    if (!PAYABLE_STATUSES.includes(old.status)) {
+      await send(c, old.status === "receipt_sent" ? c.tx.pay.waiting : c.tx.order.closed);
+      return { done: true };
+    }
+    const o = await repo.transition(old.id, PAYABLE_STATUSES, old.status, {
       data,
       music,
       templateId: s.templateId,
-      ...(canChangePrice ? { format: s.format, amount: PRICES[s.format] } : {}),
-      ...(PAID_STATUSES.includes(old.status) ? { expiresAt: expiresAt(data) } : {}),
+      format: s.format, amount: PRICES[s.format],
     });
+    if (!o) {
+      const current = await repo.getOrder(old.id);
+      await send(c, current?.status === "receipt_sent" ? c.tx.pay.waiting : c.tx.order.closed);
+      return { done: true };
+    }
     await send(c, c.tx.order.updated(pageUrl(c, o.slug)), inline(orderButtons(c, o)));
     return { done: true };
   }
 
-  // Двойное нажатие: параллельный запрос уже создаёт заказ по этой же сводке — молча выходим
-  if (!(await repo.claimStep(c.user.id, c.q0, c.q0 + 1))) return { done: true };
-  c.s.q = Math.max(c.s.q ?? 0, c.q0 + 1);
-
   const slugBase = data.occasion === "nikoh" ? slugify(data.groom ?? "", data.bride ?? "") : slugify(data.person ?? "");
-  const o = await repo.createOrder({
+  const o = await repo.createOrderFromDraft({
     userId: c.user.id,
     occasion: data.occasion,
     format: s.format,
@@ -73,9 +77,11 @@ export async function confirmDraft(c: Ctx): Promise<Result> {
     amount: PRICES[s.format],
     status: "preview",
     slugBase,
-  });
+  }, c.q0);
+  if (!o) return { ignore: true };
   await send(c, c.tx.order.created(pageUrl(c, o.slug)), inline(orderButtons(c, o)));
-  return { done: true };
+  // Repo already finished this draft in the same transaction. Do not overwrite a newer dialog.
+  return { ignore: true };
 }
 
 // ── Свои заказы ──

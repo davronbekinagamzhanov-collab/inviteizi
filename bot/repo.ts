@@ -51,6 +51,8 @@ export interface Repo {
   // ── Заказы ──
   /** Создаёт заказ: номер по порядку, slug = slugBase или slugBase-2, -3… если занят */
   createOrder(o: NewOrder): Promise<OrderRecord>;
+  /** Atomically consume the review question and create the order; failure rolls both back. */
+  createOrderFromDraft(o: NewOrder, expectedQ: number): Promise<OrderRecord | null>;
   getOrder(id: string): Promise<OrderRecord | null>;
   getOrderByNumber(n: number): Promise<OrderRecord | null>;
   getOrderBySlug(slug: string): Promise<OrderRecord | null>;

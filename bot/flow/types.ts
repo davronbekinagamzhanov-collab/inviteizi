@@ -102,6 +102,7 @@ export type Ctx = {
 
 /** Итог обработки ответа на шаге */
 export type Result =
+  | { ignore: true } // persistence already committed, or another request consumed this answer
   | { to: StepId } // ответ принят — следующий вопрос
   | { enter: StepId } // начать с этого вопроса заново (стек «Назад» пустой)
   | { wait: StepId } // перейти на шаг молча: вопрос уже показан (реквизиты оплаты → ждём чек)

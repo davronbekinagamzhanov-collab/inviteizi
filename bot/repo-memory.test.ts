@@ -5,6 +5,27 @@ import { MemoryRepo } from "./repo-memory";
 repoContract(async () => new MemoryRepo());
 
 describe("MemoryRepo (своё, вне общего контракта)", () => {
+  it.each([100,1000])("%i клиентов: повторные сохранения, оплаты и избранное не дублируются",async n=>{
+    const now=new Date("2026-10-25T12:00:00Z");
+    const repo=new MemoryRepo({ownerId:99000,now:()=>now});
+    const data={occasion:"sunnat" as const,person:"Тест",hosts:"Тест оила",events:[]};
+    await Promise.all(Array.from({length:n},async(_,i)=>{
+      const userId=i+1;
+      await repo.touchUser({id:userId}); await repo.saveStep(userId,"review",{q:5});
+      const order={userId,occasion:"sunnat" as const,format:"animated" as const,templateId:"oq-ot",data,music:{kind:"none" as const},amount:10000,slugBase:"load-test",status:"preview" as const};
+      const attempts=await Promise.all(Array.from({length:3},()=>repo.createOrderFromDraft(order,5)));
+      expect(attempts.filter(Boolean)).toHaveLength(1);
+      const created=attempts.find(Boolean)!;
+      await repo.transition(created.id,["preview"],"receipt_sent");
+      const paid=await Promise.all(Array.from({length:3},()=>repo.transition(created.id,["receipt_sent"],"active",{paidAt:now})));
+      expect(paid.filter(Boolean)).toHaveLength(1);
+      await Promise.all(Array.from({length:3},()=>repo.setFavorite(userId,"oq-ot",true)));
+    }));
+    const orders=await repo.listOrdersByStatus(["active"]);
+    expect(orders).toHaveLength(n); expect(new Set(orders.map(o=>o.slug)).size).toBe(n);
+    const report=await repo.analytics(99000,"all",now);
+    expect(report.revenue).toBe(n*10000); expect(report.paid).toBe(n); expect(report.designs[0].favorites).toBe(n);
+  },30000);
   it("isAdmin и listAdminIds — из adminIds", async () => {
     const repo = new MemoryRepo({ adminIds: [111, 222] });
     expect(await repo.isAdmin(111)).toBe(true);

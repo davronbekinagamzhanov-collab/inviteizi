@@ -417,11 +417,20 @@ export class PgRepo implements Repo {
   }
 
   // ── Заказы ──
-  async createOrder(o: NewOrder): Promise<OrderRecord> {
+  async createOrder(o: NewOrder): Promise<OrderRecord> { return (await this.insertOrder(o))!; }
+
+  async createOrderFromDraft(o: NewOrder, expectedQ: number) { return this.insertOrder(o, expectedQ); }
+
+  private async insertOrder(o: NewOrder, expectedQ?: number): Promise<OrderRecord | null> {
     // Одинаковый slugBase одновременно: блокировка в транзакции + повтор при гонке
     for (let attempt = 0; ; attempt++) {
       try {
         return await this.sql.begin(async (tx) => {
+          if (expectedQ !== undefined) {
+            const claimed = await tx`update public.users set step = 'idle', state = jsonb_build_object('q', ${expectedQ + 1}::int)
+              where id = ${o.userId} and step = 'review' and coalesce((state->>'q')::int,0) = ${expectedQ} returning id`;
+            if (!claimed.length) return null;
+          }
           await tx`select pg_advisory_xact_lock(hashtext(${"slug:" + o.slugBase}))`;
           const slug = await this.freeSlug(tx, o.slugBase);
           const cols: Columns = {

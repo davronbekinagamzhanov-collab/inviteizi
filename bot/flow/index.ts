@@ -115,6 +115,7 @@ async function finish(c: Ctx) {
 }
 
 async function apply(c: Ctx, r: Result) {
+  if (r && "ignore" in r) return;
   if (r === null) {
     const current = steps[c.step];
     await send(c, current.onMessage ? c.tx.sendText : c.tx.pressButton);
