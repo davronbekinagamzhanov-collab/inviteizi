@@ -348,6 +348,7 @@ export const t = {
 
   formats: {
     animated: "Анимацияли",
+    scroll: "Варақланадиган",
     simple: "Оддий",
   },
   price: (tenge: number) => `${tenge.toLocaleString("ru-RU").replace(/ /g, " ")} ₸`,

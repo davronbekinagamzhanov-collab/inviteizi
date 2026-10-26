@@ -1,9 +1,11 @@
 // Переносит дизайны из templates/registry.ts в таблицу templates (идемпотентно: upsert по id).
 // Дизайны, которых больше нет в реестре, помечаются is_active = false (заказы на них не ломаются).
 // Запуск: node --env-file=.env.local scripts/seed-templates.mjs
+// Сначала применить 20261026120000_scroll_format.sql. Upsert меняет только templates,
+// не пересчитывает orders.format/amount; прежние оплаченные ссылки сохраняются.
 import "./ts-hooks.mjs";
 
-const { designs, PRICES, ACCEPTED } = await import("../templates/registry.ts");
+const { designs, PRICES, ACCEPTED, FORMATS } = await import("../templates/registry.ts");
 const { db, closeDb } = await import("../lib/db.ts");
 
 const rows = designs.map((d) => ({
@@ -18,6 +20,9 @@ const rows = designs.map((d) => ({
   sort: d.number,
 }));
 
+if (rows.some((r) => !FORMATS.includes(r.format) || !Number.isInteger(r.price))) {
+  throw new Error("Unknown catalog format or price");
+}
 const sql = db();
 try {
   await sql.begin(async (tx) => {

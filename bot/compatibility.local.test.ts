@@ -18,7 +18,7 @@ describe.skipIf(process.env.INVITEIZI_LOCAL_PG!=="1")("compatibility with main b
     pg=new PGlite();
     await pg.exec("create role anon; create role authenticated; create role inviteizi_server;");
     for(const file of ["20261023180530_schema.sql","20261024031409_slug_reserved_dev.sql","20261024120000_slug_history.sql","20261024150000_music_occasion.sql"])await pg.exec(await readFile(`supabase/migrations/${file}`,"utf8"));
-    for(const d of designs)await pg.query("insert into public.templates(id,number,occasion,format,price) values($1,$2,$3,$4,$5)",[d.id,d.number,d.occasion,d.format,PRICES[d.format]]);
+    for(const d of designs)await pg.query("insert into public.templates(id,number,occasion,format,price) values($1,$2,$3,$4,$5)",[d.id,d.number,d.occasion,d.format==="scroll"?"simple":d.format,PRICES[d.format==="scroll"?"simple":d.format]]);
     server=new PGLiteSocketServer({db:pg,host:"127.0.0.1",port:0,maxConnections:1});await server.start();
     sql=postgres({host:"127.0.0.1",port:Number(server.getServerConn().split(":").at(-1)),username:"postgres",password:"postgres",database:"postgres",ssl:false,max:1,prepare:false,connect_timeout:5,onnotice:()=>{},types:{bigint:{to:20,from:[20],serialize:String,parse:Number}}});
     await sql`set role inviteizi_server`;repo=new PgRepo(sql);

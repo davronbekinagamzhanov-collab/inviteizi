@@ -7,10 +7,11 @@ import { pilotSamples } from "@/lib/pilot-samples";
 import { longSamples, sampleFor } from "@/lib/samples";
 
 export type { TemplateProps };
-export type Format = "animated" | "simple";
+export const FORMATS = ["animated", "scroll", "simple"] as const;
+export type Format = typeof FORMATS[number];
 
 /** Цена формата, ₸ (музыка входит в цену) */
-export const PRICES: Record<Format, number> = { animated: 10_000, simple: 7_000 };
+export const PRICES: Record<Format, number> = { animated: 10_000, scroll: 8_000, simple: 7_000 };
 
 type Loader = () => Promise<{ default: ComponentType<TemplateProps> }>;
 
@@ -119,14 +120,14 @@ export const designs: Design[] = [
   design("ipak-romol", 67, "nikoh", "simple", false, () => import("./themes/ipak-romol/Design")),
   design("rishton-koshin", 68, "nikoh", "simple", false, () => import("./themes/rishton-koshin/Design")),
   design("atirgul", 69, "nikoh", "simple", true, () => import("./themes/atirgul/Design"), {art:"/art/atirgul.webp"}),
-  design("shohona-baxmal", 70, "nikoh", "simple", false, () => import("./themes/shohona-baxmal/Design"), { dark: true }),
+  design("shohona-baxmal", 70, "nikoh", "scroll", false, () => import("./themes/shohona-baxmal/Design"), { dark: true }),
 
   // ── Наҳорги ош ──
   design("tandir-nuri", 71, "nahorgi", "animated", true, () => import("./themes/tandir-nuri/Design")),
   design("dasturxon", 72, "nahorgi", "animated", true, () => import("./themes/dasturxon/Design"), {art:"/art/dasturxon.webp"}),
   design("non-muhr", 73, "nahorgi", "animated", false, () => import("./themes/non-muhr/Design")),
-  design("tonggi-choy", 74, "nahorgi", "simple", true, () => import("./themes/tonggi-choy/Design"), {art:"/art/tonggi-choy.webp"}),
-  design("paxta-gul", 75, "nahorgi", "simple", false, () => import("./themes/paxta-gul/Design")),
+  design("tonggi-choy", 74, "nahorgi", "scroll", true, () => import("./themes/tonggi-choy/Design"), {art:"/art/tonggi-choy.webp"}),
+  design("paxta-gul", 75, "nahorgi", "scroll", false, () => import("./themes/paxta-gul/Design")),
 
   // ── Суннат ──
   design("oltin-ot", 76, "sunnat", "animated", false, () => import("./themes/oltin-ot/Design")),

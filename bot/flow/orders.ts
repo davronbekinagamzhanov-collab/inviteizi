@@ -56,7 +56,9 @@ export async function confirmDraft(c: Ctx): Promise<Result> {
       data,
       music,
       templateId: s.templateId,
-      format: s.format, amount: PRICES[s.format],
+      // Keep the saved quote when only names/text/music change, including legacy designs.
+      // An explicit format change uses the current tariff; paid statuses are guarded above and in SQL.
+      format: s.format, amount: s.format === old.format ? old.amount : PRICES[s.format],
     });
     if (!o) {
       const current = await repo.getOrder(old.id);

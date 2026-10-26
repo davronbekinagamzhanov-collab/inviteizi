@@ -1,7 +1,7 @@
 import type { Ctx } from "./types";
 import { inline, send, price, designName } from "./util";
 import { PERIODS, type Period, type Metric } from "@/lib/analytics";
-import { activeDesigns, designs } from "@/templates/registry";
+import { activeDesigns, designs, FORMATS, type Format } from "@/templates/registry";
 import { renderChart, type ChartPoint } from "@/lib/chart";
 import { cmdOrders } from "./admin";
 
@@ -37,8 +37,8 @@ export async function dashboard(c: Ctx, view = "general", period = "all") {
   const top = (items: Metric[], key: "paid" | "revenue" | "demos" | "selected", title: string) => `${title}\n${items.slice(0,10).map((m,i) => `${i+1}. ${designName(m.id)}: ${key === "revenue" ? price(m[key]) : m[key]}`).join("\n") || tx.empty}`;
   if (v === "general") {
     const keys = ["clients", "newUsers", "orders", "paid", "revenue", "average", "unpaid", "waiting", "rejected", "buyers", "repeat"] as const;
-    await send(c, `${header}\n\n${keys.map(k => `${tx.labels[k]}: ${k === "revenue" || k === "average" ? price(Math.round(s[k])) : s[k]}`).join("\n")}\n\n${s.formats.map(f => `${c.tx.format.names[f.id as "simple" | "animated"]}: ${f.paid} · ${price(f.revenue)}`).join("\n")}`, nav);
-    await chart(tx.formats, s.formats.map(f => ({ label: c.tx.format.names[f.id as "simple" | "animated"], value: f.paid })));
+    await send(c, `${header}\n\n${keys.map(k => `${tx.labels[k]}: ${k === "revenue" || k === "average" ? price(Math.round(s[k])) : s[k]}`).join("\n")}\n\n${s.formats.map(f => `${c.tx.format.names[f.id as Format]}: ${f.paid} · ${price(f.revenue)}`).join("\n")}`, nav);
+    await chart(tx.formats, s.formats.map(f => ({ label: c.tx.format.names[f.id as Format], value: f.paid })));
     await chart(tx.categories, s.categories.map(f => ({ label: c.tx.category[f.id as "nikoh"], value: f.paid })));
   } else if (v === "designs") {
     if (!s.designs.length) {
@@ -49,7 +49,7 @@ export async function dashboard(c: Ctx, view = "general", period = "all") {
     const rows = [...s.designs, ...activeDesigns().filter(d => !s.designs.some(m => m.id === d.id)).map(d => ({ id: d.id, orders: 0, paid: 0, revenue: 0, demos: 0, favorites: 0, selected: 0, conversion: 0 }))];
     const sorted = (key: "paid" | "revenue" | "demos" | "selected", asc = false) => [...rows].sort((a,b) => (a[key]-b[key]) * (asc ? 1 : -1));
     await send(c, `${header}\n${note}\n\n${top(sorted("demos"), "demos", tx.viewed)}\n\n${top(sorted("paid"), "paid", tx.purchased)}\n\n${top(sorted("revenue"), "revenue", tx.profitable)}\n\n${top(sorted("selected", true), "selected", tx.unpopular)}`, nav);
-    for (const format of ["animated", "simple"] as const) await send(c, top(sorted("paid").filter(m => designs.find(d => d.id === m.id)?.format === format), "paid", c.tx.format.names[format]));
+    for (const format of FORMATS) await send(c, top(sorted("paid").filter(m => designs.find(d => d.id === m.id)?.format === format), "paid", c.tx.format.names[format]));
     for (const r of sorted("selected").slice(0,10)) await send(c, `${designName(r.id)}: ${tx.demos} ${r.demos} · ${tx.favorites} ${r.favorites} · ${tx.selections} ${r.selected} · ${tx.labels.orders} ${r.orders} · ${tx.labels.paid} ${r.paid} · ${price(r.revenue)} · ${r.conversion.toFixed(1)}%`);
     await chart(tx.designs, sorted("paid").slice(0,10).map(m => ({ label: designName(m.id), value: m.paid })));
   } else if (v === "music") {

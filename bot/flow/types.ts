@@ -73,6 +73,8 @@ export type Draft = {
   format?: Format;
   templateId?: string;
   catIdx?: number;
+  /** IDs shown with this catalog question; a changed tariff/catalog requires a fresh choice. */
+  catRevision?: string;
   /** Страница вариантов текста (по 3) */
   textPage?: number;
   data?: DraftData;

@@ -1,6 +1,7 @@
 /** Готовые пути по боту для сценарных тестов */
 import { uz } from "@/texts/bot-uz";
 import { ru } from "@/texts/bot-ru";
+import type { Format } from "@/lib/domain";
 import type { Sim } from "./sim";
 
 /** /start → язык → «Создать» (клиент стоит на выборе тадбира) */
@@ -18,10 +19,10 @@ export async function startRu(sim: Sim, id: number, payload = "") {
 
 /** Никоҳ на ўзбекском до сводки: один тадбир (никоҳ базми 14 ноября 18:00), 1-й текст, без музыки */
 /** Никоҳ до шага «Мусиқа» (вопрос о музыке уже задан) */
-export async function nikohToMusic(sim: Sim, id: number, names: [string, string] = ["Азиз", "Мадина"]) {
+export async function nikohToMusic(sim: Sim, id: number, names: [string, string] = ["Азиз", "Мадина"], format: Format = "animated") {
   await startUz(sim, id);
   await sim.click(id, uz.category.nikoh);
-  await sim.click(id, /Анимацияли/);
+  await sim.click(id, new RegExp(uz.format.names[format]));
   await sim.click(id, uz.catalog.buy);
   await sim.text(id, names[0]);
   await sim.text(id, names[1]);
@@ -38,10 +39,10 @@ export async function nikohToMusic(sim: Sim, id: number, names: [string, string]
 }
 
 /** Никоҳ до шага «Матн» (варианты текста уже показаны) */
-export async function nikohToText(sim: Sim, id: number) {
+export async function nikohToText(sim: Sim, id: number, format: Format = "animated") {
   await startUz(sim, id);
   await sim.click(id, uz.category.nikoh);
-  await sim.click(id, /Анимацияли/);
+  await sim.click(id, new RegExp(uz.format.names[format]));
   await sim.click(id, uz.catalog.buy);
   await sim.text(id, "Азиз");
   await sim.text(id, "Мадина");
@@ -56,14 +57,14 @@ export async function nikohToText(sim: Sim, id: number) {
   await sim.click(id, uz.event.noMore);
 }
 
-export async function nikohToReview(sim: Sim, id: number, names: [string, string] = ["Азиз", "Мадина"]) {
-  await nikohToMusic(sim, id, names);
+export async function nikohToReview(sim: Sim, id: number, names: [string, string] = ["Азиз", "Мадина"], format: Format = "animated") {
+  await nikohToMusic(sim, id, names, format);
   await sim.click(id, uz.music.none);
 }
 
 /** Никоҳ до созданного заказа (status preview) — возвращает заказ */
-export async function nikohOrder(sim: Sim, id: number, names: [string, string] = ["Азиз", "Мадина"]) {
-  await nikohToReview(sim, id, names);
+export async function nikohOrder(sim: Sim, id: number, names: [string, string] = ["Азиз", "Мадина"], format: Format = "animated") {
+  await nikohToReview(sim, id, names, format);
   await sim.click(id, uz.review.confirm);
   const [order] = await sim.repo.listOrdersByUser(id);
   return order;

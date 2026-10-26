@@ -3,7 +3,7 @@ import type { InlineButton, Markup } from "../tg";
 import type { Ctx, Draft, DraftData } from "./types";
 import type { InvitationData, InvitationEvent, Lang, Occasion, OrderRecord, OrderStatus } from "@/lib/domain";
 import type { EventKind } from "@/lib/types";
-import { getDesign, PRICES, type Format, activeDesigns } from "@/templates/registry";
+import { getDesign, PRICES, FORMATS, type Format, activeDesigns } from "@/templates/registry";
 import { t } from "@/texts/uz-cyrl";
 import { uz, type BotTexts } from "@/texts/bot-uz";
 import { ru } from "@/texts/bot-ru";
@@ -65,12 +65,12 @@ export function designsFor(occasion: Occasion, format: Format) {
 }
 
 export function formatsFor(occasion: Occasion): Format[] {
-  return (["animated", "simple"] as Format[]).filter((f) => designsFor(occasion, f).length > 0);
+  return FORMATS.filter((f) => designsFor(occasion, f).length > 0);
 }
 
-export function designLine(tx: BotTexts, templateId: string, format: Format) {
+export function designLine(tx: BotTexts, templateId: string, format: Format, amount = PRICES[format]) {
   const d = getDesign(templateId);
-  return tx.review.design(d?.number ?? 0, designName(templateId), tx.format.names[format], price(PRICES[format]));
+  return tx.review.design(d?.number ?? 0, designName(templateId), tx.format.names[format], price(amount));
 }
 
 // ── Черновик ──

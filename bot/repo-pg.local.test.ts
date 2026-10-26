@@ -1,3 +1,5 @@
+import {formatFlowContract} from "./testing/formats.contract";
+import {Sim} from "./testing/sim";
 /** Isolated wire-protocol integration. Never reads DATABASE_URL or any production credentials. */
 import { beforeAll, afterAll, describe, it, expect, vi } from "vitest";
 import { PGlite } from "@electric-sql/pglite";
@@ -15,7 +17,7 @@ describe.skipIf(process.env.INVITEIZI_LOCAL_PG !== "1")("PgRepo through isolated
   beforeAll(async()=>{
     pg=new PGlite();
     await pg.exec("create role anon; create role authenticated; create role inviteizi_server;");
-    for(const name of ["20261023180530_schema.sql","20261024031409_slug_reserved_dev.sql","20261024120000_slug_history.sql","20261024150000_music_occasion.sql","20261025120000_analytics_favorites.sql"]) await pg.exec(await readFile(`supabase/migrations/${name}`,"utf8"));
+    for(const name of ["20261023180530_schema.sql","20261024031409_slug_reserved_dev.sql","20261024120000_slug_history.sql","20261024150000_music_occasion.sql","20261025120000_analytics_favorites.sql","20261026120000_scroll_format.sql"]) await pg.exec(await readFile(`supabase/migrations/${name}`,"utf8"));
     for(const d of designs) await pg.query("insert into public.templates(id,number,occasion,format,price) values($1,$2,$3,$4,$5)",[d.id,d.number,d.occasion,d.format,PRICES[d.format]]);
     await pg.exec("insert into public.music(id,title_uz,title_ru,file_url) values('yor-yor','Ёр-ёр','Ёр-ёр','https://fixture.invalid/music.mp3');");
     server=new PGLiteSocketServer({db:pg,host:"127.0.0.1",port:0,maxConnections:1});
@@ -27,6 +29,7 @@ describe.skipIf(process.env.INVITEIZI_LOCAL_PG !== "1")("PgRepo through isolated
   },30000);
   afterAll(async()=>{if(sql)await sql.end({timeout:2});if(server)await server.stop();if(pg)await pg.close();vi.unstubAllEnvs();if(process.env.INVITEIZI_WRITE_REPORTS==="1")await writeFile("docs/reviews/2026-10-25-pg-local-load.json",JSON.stringify({scope:"PgRepo + postgres.js + loopback + PGlite; one connection; not native multi-backend PostgreSQL or production throughput",loadResults},null,2)+"\n");});
   repoContract(async()=>repo);
+  formatFlowContract(()=>{const sim=new Sim();sim.deps.repo=repo;return{sim,repo};},750001);
   it("failed draft insert rolls back question; repeated confirmation inserts exactly one order",async()=>{
     const userId=80000001;
     await repo.touchUser({id:userId});await repo.saveStep(userId,"review",{q:10});

@@ -5,6 +5,7 @@
 import type { InvitationData, InvitationEvent, Occasion } from "./types";
 import type { Format } from "@/templates/registry";
 
+// Format derives from the single catalog: animated / scroll / simple.
 export type { Format };
 export type Lang = "uz" | "ru";
 
@@ -68,7 +69,7 @@ export type OrderRecord = {
   data: InvitationData;
   music: MusicChoice;
   slug: string;
-  amount: number; // ₸
+  amount: number; // ₸, saved purchase price; never recompute from the current registry on read
   receipt: Receipt | null;
   rejectReason: string | null;
   createdAt: Date;

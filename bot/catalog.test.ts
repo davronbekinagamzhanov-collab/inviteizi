@@ -9,7 +9,7 @@ describe("catalog photo attribution",()=>{
   for(const lang of ["uz","ru"] as const)it(`${lang}: keeps photo author/source when paging, without stale credits on another design`,async()=>{
     const sim=new Sim();await (lang==="uz"?startUz:startRu)(sim,1);
     const tx=lang==="uz"?uz:ru;
-    await sim.click(1,tx.category.nahorgi);await sim.click(1,new RegExp(tx.format.names.simple));
+    await sim.click(1,tx.category.nahorgi);await sim.click(1,new RegExp(tx.format.names.scroll));
     const credit=photoAttributions["tonggi-choy"]!;
     expect(sim.last(1).media).toContain("/covers/tonggi-choy.jpg");
     expect(sim.lastText(1)).toContain(tx.catalog.photoCredit(credit.author,credit.license,credit.source));

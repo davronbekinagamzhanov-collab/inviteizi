@@ -4,6 +4,14 @@ import {ACCEPTED,activeDesigns,designs,PRICES} from "./registry";
 import {photoAttributions} from "@/texts/uz-cyrl";
 
 describe("catalog acceptance integrity",()=>{
+  it("classifies by functionality and preserves ambiguous tariffs pending owner review",()=>{
+    expect(activeDesigns().filter(d=>d.format==="scroll").map(d=>d.id).sort()).toEqual(["paxta-gul","shohona-baxmal","tonggi-choy"]);
+    for(const id of ["sapfir","ipak-romol","rishton-koshin","atirgul"])expect(designs.find(d=>d.id===id)?.format).toBe("simple");
+    for(const d of activeDesigns().filter(d=>d.format==="scroll")){
+      const source=readFileSync(`templates/themes/${d.id}/Design.tsx`,"utf8");
+      expect(source).toContain("opening:false");expect(source).toContain("inv.program.map");
+    }
+  });
   it("retains required public attribution in each downloadable preview",()=>{
     for(const d of activeDesigns()){
       const credit=photoAttributions[d.id];if(!credit)continue;
@@ -20,7 +28,7 @@ describe("catalog acceptance integrity",()=>{
     expect(new Set(designs.map(d=>d.number)).size).toBe(designs.length);
     for(const id of ACCEPTED)expect(designs.some(d=>d.id===id),id).toBe(true);
     expect(ACCEPTED.has("anor-bogi")).toBe(false);
-    expect(PRICES).toEqual({animated:10000,simple:7000});
+    expect(PRICES).toEqual({animated:10000,scroll:8000,simple:7000});
   });
   it("only publishes completed code with both bot and web covers and private-data-free OG art",()=>{
     const pilots:Record<string,string>={"oltin-monogramma":"OltinMonogramma",sapfir:"Sapfir","oq-ot":"OqOt","tonggi-qozon":"TonggiQozon","pion-guldasta":"PionGuldasta"};

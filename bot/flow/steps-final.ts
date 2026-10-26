@@ -155,7 +155,9 @@ async function musicLine(c: Ctx) {
 async function summary(c: Ctx) {
   const r = c.tx.review;
   const d = finalData(c.s);
-  const lines = [r.title, "", designLine(c.tx, c.s.templateId ?? "", c.s.format ?? "animated")];
+  const old = c.s.orderId ? await c.deps.repo.getOrder(c.s.orderId) : null;
+  const quoted = old?.userId === c.user.id && old.format === c.s.format ? old.amount : undefined;
+  const lines = [r.title, "", designLine(c.tx, c.s.templateId ?? "", c.s.format ?? "animated", quoted)];
   if (d.occasion === "nikoh") lines.push(r.groom(d.groom ?? ""), r.bride(d.bride ?? ""));
   else lines.push(r.person(d.person ?? ""));
   if (d.relation) {
