@@ -44,8 +44,12 @@ try {
   const page=await context.newPage();
   await page.goto(`${base}/demo/ipak-romol`);
   await page.evaluate(()=>window.scrollTo(0,document.documentElement.scrollHeight));
-  await page.waitForTimeout(200);
-  const reducedMotionVisible=await page.evaluate(()=>[...document.querySelectorAll('[data-reveal]')].every(el=>getComputedStyle(el).opacity==="1"));
+  await page.evaluate(()=>document.fonts.ready);
+  // Hydration on a cold dev build may take longer than a fixed 200 ms.
+  const reducedMotionVisible=await page.waitForFunction(()=>{
+    const blocks=[...document.querySelectorAll('[data-reveal]')];
+    return blocks.length>0&&blocks.every(el=>getComputedStyle(el).opacity==="1");
+  },undefined,{timeout:5000}).then(()=>true).catch(()=>false);
   const summary={results,reducedMotionVisible,passed:results.every(r=>r.status===200&&!r.overflow&&!r.visibleHidden&&!r.errors.length)&&reducedMotionVisible};
   await writeFile(`${out}/report.json`,JSON.stringify(summary,null,2));
   console.log(JSON.stringify({passed:summary.passed,cases:results.length,reducedMotionVisible}));

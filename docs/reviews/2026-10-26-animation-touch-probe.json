@@ -1,0 +1,81 @@
+{
+  "environment": "Local Chrome headless; warmed pages; CPU x4; 375x812 DPR2. Touch input; opening recording starts in pointerdown capture before React, excluding pre-input Playwright actionability checks. requestAnimationFrame times; not a physical-device guarantee.",
+  "noSvgFilters": false,
+  "results": [
+    {
+      "design": "ganch-peshtoq",
+      "phase": "opening",
+      "cpuThrottle": 4,
+      "noSvgFilters": false,
+      "frames": 172,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 183.3,
+      "over50Ms": 2,
+      "over100Ms": 2,
+      "stalls": [
+        {
+          "atMs": 190.3,
+          "durationMs": 183.3
+        },
+        {
+          "atMs": 373.7,
+          "durationMs": 166.8
+        }
+      ]
+    },
+    {
+      "design": "ganch-peshtoq",
+      "phase": "scroll",
+      "cpuThrottle": 4,
+      "noSvgFilters": false,
+      "frames": 171,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 99.9,
+      "over50Ms": 2,
+      "over100Ms": 0,
+      "stalls": [
+        {
+          "atMs": 233.3,
+          "durationMs": 99.9
+        },
+        {
+          "atMs": 1333.3,
+          "durationMs": 66.6
+        }
+      ]
+    },
+    {
+      "design": "oltin-ot",
+      "phase": "opening",
+      "cpuThrottle": 4,
+      "noSvgFilters": false,
+      "frames": 176,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 116.6,
+      "over50Ms": 1,
+      "over100Ms": 1,
+      "stalls": [
+        {
+          "atMs": 1525,
+          "durationMs": 116.6
+        }
+      ]
+    },
+    {
+      "design": "oltin-ot",
+      "phase": "scroll",
+      "cpuThrottle": 4,
+      "noSvgFilters": false,
+      "frames": 180,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 50,
+      "over50Ms": 0,
+      "over100Ms": 0,
+      "stalls": []
+    }
+  ]
+}

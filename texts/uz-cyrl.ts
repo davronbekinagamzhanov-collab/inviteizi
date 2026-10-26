@@ -302,6 +302,10 @@ const pageInviteTo = {
 } satisfies Record<Occasion, string>;
 
 export const t = {
+  photoCredits: {
+    by: (author: string) => `Сурат: ${author}`,
+    adapted: "Сурат ўлчами ва кўриниши мослаштирилган.",
+  },
   site: {
     title: "InviteIZI — онлайн таклифномалар",
     description: "Чиройли, мусиқали тўй таклифномаси. Битта ҳавола — барча меҳмонлар учун.",
@@ -547,6 +551,11 @@ export const t = {
 } as const;
 
 export type Texts = typeof t;
+
+/** Public attribution metadata for photographs that require it, reused in bot/assets/pages. */
+export const photoAttributions: Record<string,{author:string;license:string;licenseUrl:string;source:string}|undefined> = {
+  "tonggi-choy": {author:"Ekaterina Kvelidze",license:"CC BY-SA 4.0",licenseUrl:"https://creativecommons.org/licenses/by-sa/4.0/",source:"https://commons.wikimedia.org/wiki/File:Uzbek_tea_couple_with_traditional_coloration.jpg"},
+};
 
 /**
  * Свои заголовки для каждого дизайна: у клиентов в каталоге не должно быть

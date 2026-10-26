@@ -1,0 +1,291 @@
+{
+  "environment": "Local Chrome headless; warmed pages; CPU x4; 375x812 DPR2. Frame times are measured with requestAnimationFrame; this is not a physical-device guarantee.",
+  "results": [
+    {
+      "design": "oltin-monogramma",
+      "phase": "opening",
+      "cpuThrottle": 4,
+      "frames": 186,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 49.9,
+      "over50Ms": 0,
+      "over100Ms": 0
+    },
+    {
+      "design": "oltin-monogramma",
+      "phase": "scroll",
+      "cpuThrottle": 4,
+      "frames": 180,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 33.3,
+      "over50Ms": 0,
+      "over100Ms": 0
+    },
+    {
+      "design": "oq-ot",
+      "phase": "opening",
+      "cpuThrottle": 4,
+      "frames": 186,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 50,
+      "over50Ms": 0,
+      "over100Ms": 0
+    },
+    {
+      "design": "oq-ot",
+      "phase": "scroll",
+      "cpuThrottle": 4,
+      "frames": 181,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 16.8,
+      "over50Ms": 0,
+      "over100Ms": 0
+    },
+    {
+      "design": "tonggi-qozon",
+      "phase": "opening",
+      "cpuThrottle": 4,
+      "frames": 186,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 33.4,
+      "over50Ms": 0,
+      "over100Ms": 0
+    },
+    {
+      "design": "tonggi-qozon",
+      "phase": "scroll",
+      "cpuThrottle": 4,
+      "frames": 181,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 16.9,
+      "over50Ms": 0,
+      "over100Ms": 0
+    },
+    {
+      "design": "pion-guldasta",
+      "phase": "opening",
+      "cpuThrottle": 4,
+      "frames": 184,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 50.2,
+      "over50Ms": 1,
+      "over100Ms": 0
+    },
+    {
+      "design": "pion-guldasta",
+      "phase": "scroll",
+      "cpuThrottle": 4,
+      "frames": 181,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 16.8,
+      "over50Ms": 0,
+      "over100Ms": 0
+    },
+    {
+      "design": "ganch-peshtoq",
+      "phase": "opening",
+      "cpuThrottle": 4,
+      "frames": 181,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 183.3,
+      "over50Ms": 2,
+      "over100Ms": 1
+    },
+    {
+      "design": "ganch-peshtoq",
+      "phase": "scroll",
+      "cpuThrottle": 4,
+      "frames": 177,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 83.5,
+      "over50Ms": 1,
+      "over100Ms": 0
+    },
+    {
+      "design": "zarhal-eshik",
+      "phase": "opening",
+      "cpuThrottle": 4,
+      "frames": 189,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 33.4,
+      "over50Ms": 0,
+      "over100Ms": 0
+    },
+    {
+      "design": "zarhal-eshik",
+      "phase": "scroll",
+      "cpuThrottle": 4,
+      "frames": 180,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 16.8,
+      "over50Ms": 0,
+      "over100Ms": 0
+    },
+    {
+      "design": "atlas-tolqin",
+      "phase": "opening",
+      "cpuThrottle": 4,
+      "frames": 189,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 16.8,
+      "over50Ms": 0,
+      "over100Ms": 0
+    },
+    {
+      "design": "atlas-tolqin",
+      "phase": "scroll",
+      "cpuThrottle": 4,
+      "frames": 181,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 16.9,
+      "over50Ms": 0,
+      "over100Ms": 0
+    },
+    {
+      "design": "bodom-guli",
+      "phase": "opening",
+      "cpuThrottle": 4,
+      "frames": 188,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 16.9,
+      "over50Ms": 0,
+      "over100Ms": 0
+    },
+    {
+      "design": "bodom-guli",
+      "phase": "scroll",
+      "cpuThrottle": 4,
+      "frames": 180,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 16.9,
+      "over50Ms": 0,
+      "over100Ms": 0
+    },
+    {
+      "design": "samarqand-kitob",
+      "phase": "opening",
+      "cpuThrottle": 4,
+      "frames": 188,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 16.9,
+      "over50Ms": 0,
+      "over100Ms": 0
+    },
+    {
+      "design": "samarqand-kitob",
+      "phase": "scroll",
+      "cpuThrottle": 4,
+      "frames": 182,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 16.8,
+      "over50Ms": 0,
+      "over100Ms": 0
+    },
+    {
+      "design": "tandir-nuri",
+      "phase": "opening",
+      "cpuThrottle": 4,
+      "frames": 188,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 49.9,
+      "over50Ms": 0,
+      "over100Ms": 0
+    },
+    {
+      "design": "tandir-nuri",
+      "phase": "scroll",
+      "cpuThrottle": 4,
+      "frames": 181,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 16.8,
+      "over50Ms": 0,
+      "over100Ms": 0
+    },
+    {
+      "design": "dasturxon",
+      "phase": "opening",
+      "cpuThrottle": 4,
+      "frames": 188,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 16.8,
+      "over50Ms": 0,
+      "over100Ms": 0
+    },
+    {
+      "design": "dasturxon",
+      "phase": "scroll",
+      "cpuThrottle": 4,
+      "frames": 182,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 16.9,
+      "over50Ms": 0,
+      "over100Ms": 0
+    },
+    {
+      "design": "non-muhr",
+      "phase": "opening",
+      "cpuThrottle": 4,
+      "frames": 187,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 33.4,
+      "over50Ms": 0,
+      "over100Ms": 0
+    },
+    {
+      "design": "non-muhr",
+      "phase": "scroll",
+      "cpuThrottle": 4,
+      "frames": 179,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 16.8,
+      "over50Ms": 0,
+      "over100Ms": 0
+    },
+    {
+      "design": "oltin-ot",
+      "phase": "opening",
+      "cpuThrottle": 4,
+      "frames": 180,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 116.6,
+      "over50Ms": 2,
+      "over100Ms": 1
+    },
+    {
+      "design": "oltin-ot",
+      "phase": "scroll",
+      "cpuThrottle": 4,
+      "frames": 180,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 33.3,
+      "over50Ms": 0,
+      "over100Ms": 0
+    }
+  ]
+}

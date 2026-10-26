@@ -5,6 +5,7 @@ import type { Format } from "@/templates/registry";
 import { PRICES } from "@/templates/registry";
 import { after, backRow, coverUrl, data, demoUrl, designName, designsFor, formatsFor, ib, inline, price, send } from "./util";
 import type { InlineButton } from "../tg";
+import { photoAttributions } from "@/texts/uz-cyrl";
 
 const OCCASIONS: Occasion[] = ["nikoh", "nahorgi", "sunnat", "yubiley"];
 
@@ -45,7 +46,8 @@ function catalogView(c: Ctx) {
   c.s.catIdx = i;
   const d = list[i];
   const fmtName = c.tx.format.names[d.format];
-  const caption = c.tx.catalog.caption(d.number, designName(d.id), fmtName, price(PRICES[d.format]));
+  const credit = photoAttributions[d.id];
+  const caption = c.tx.catalog.caption(d.number, designName(d.id), fmtName, price(PRICES[d.format])) + (credit ? `\n\n${c.tx.catalog.photoCredit(credit.author,credit.license,credit.source)}` : "");
   const rows: InlineButton[][] = [];
   if (list.length > 1) rows.push([ib(c, "◀", "prev"), ib(c, `${i + 1}/${list.length}`, "x"), ib(c, "▶", "next")]);
   rows.push([{ text: c.tx.catalog.demo, url: demoUrl(c, d.id) }, ib(c, c.tx.catalog.buy, "buy")]);

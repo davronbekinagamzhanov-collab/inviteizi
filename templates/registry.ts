@@ -114,8 +114,8 @@ export const designs: Design[] = [
   design("zarhal-eshik", 62, "nikoh", "animated", false, () => import("./themes/zarhal-eshik/Design")),
   design("atlas-tolqin", 63, "nikoh", "animated", false, () => import("./themes/atlas-tolqin/Design")),
   design("anor-bogi", 64, "nikoh", "animated", true, () => import("./themes/anor-bogi/Design")),
-  design("bodom-guli", 65, "nikoh", "animated", true, () => import("./themes/bodom-guli/Design")),
-  design("samarqand-kitob", 66, "nikoh", "animated", true, () => import("./themes/samarqand-kitob/Design")),
+  design("bodom-guli", 65, "nikoh", "animated", true, () => import("./themes/bodom-guli/Design"), {art:"/art/bodom-guli.webp"}),
+  design("samarqand-kitob", 66, "nikoh", "animated", true, () => import("./themes/samarqand-kitob/Design"), {art:"/art/samarqand-kitob.webp"}),
   design("ipak-romol", 67, "nikoh", "simple", false, () => import("./themes/ipak-romol/Design")),
   design("rishton-koshin", 68, "nikoh", "simple", false, () => import("./themes/rishton-koshin/Design")),
   design("atirgul", 69, "nikoh", "simple", true, () => import("./themes/atirgul/Design"), {art:"/art/atirgul.webp"}),
@@ -125,7 +125,7 @@ export const designs: Design[] = [
   design("tandir-nuri", 71, "nahorgi", "animated", true, () => import("./themes/tandir-nuri/Design")),
   design("dasturxon", 72, "nahorgi", "animated", true, () => import("./themes/dasturxon/Design"), {art:"/art/dasturxon.webp"}),
   design("non-muhr", 73, "nahorgi", "animated", false, () => import("./themes/non-muhr/Design")),
-  design("tonggi-choy", 74, "nahorgi", "simple", true, () => import("./themes/tonggi-choy/Design")),
+  design("tonggi-choy", 74, "nahorgi", "simple", true, () => import("./themes/tonggi-choy/Design"), {art:"/art/tonggi-choy.webp"}),
   design("paxta-gul", 75, "nahorgi", "simple", false, () => import("./themes/paxta-gul/Design")),
 
   // ── Суннат ──
@@ -140,6 +140,7 @@ export const ACCEPTED = new Set([
   "oltin-monogramma", "sapfir", "oq-ot", "tonggi-qozon", "pion-guldasta",
   "tandir-nuri", "ganch-peshtoq", "ipak-romol", "oltin-ot",
   "zarhal-eshik", "rishton-koshin", "atirgul", "dasturxon",
+  "atlas-tolqin", "non-muhr", "shohona-baxmal", "paxta-gul", "bodom-guli", "samarqand-kitob", "tonggi-choy",
   // "anor-bogi" — скрыт по замечанию владельца 24.10 (код остаётся)
 ]);
 

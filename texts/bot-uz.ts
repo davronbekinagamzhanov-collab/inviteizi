@@ -80,6 +80,7 @@ export const uz = {
   },
 
   catalog: {
+    photoCredit: (author: string, license: string, source: string) => `Сурат: ${author} · ${license}\n${source}`,
     caption: (n: number, name: string, format: string, price: string) => `№${n} · ${name}\n${format} · ${price}`,
     demo: "👁 Намуна",
     buy: "🛒 Сотиб олиш",

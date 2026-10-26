@@ -97,6 +97,7 @@ export const ru = {
   },
 
   catalog: {
+    photoCredit: (author: string, license: string, source: string) => `Фото: ${author} · ${license}\n${source}`,
     caption: (n: number, name: string, format: string, price: string) => `№${n} · ${name}\n${format} · ${price}`,
     demo: "👁 Образец",
     buy: "🛒 Купить",

@@ -1,8 +1,20 @@
 import {existsSync,readFileSync} from "node:fs";
 import {describe,it,expect} from "vitest";
 import {ACCEPTED,activeDesigns,designs,PRICES} from "./registry";
+import {photoAttributions} from "@/texts/uz-cyrl";
 
 describe("catalog acceptance integrity",()=>{
+  it("retains required public attribution in each downloadable preview",()=>{
+    for(const d of activeDesigns()){
+      const credit=photoAttributions[d.id];if(!credit)continue;
+      expect(readFileSync("public/art/CREDITS.md","utf8")).toContain(credit.source);
+      for(const file of [`public${d.cover}`,`public/covers/${d.id}.jpg`,`public/og/${d.id}.jpg`]){
+        const bytes=readFileSync(file);
+        expect(bytes.includes(Buffer.from(credit.author)),file).toBe(true);
+        expect(bytes.includes(Buffer.from(credit.source)),file).toBe(true);
+      }
+    }
+  });
   it("has unique registered identities and no unknown accepted design",()=>{
     expect(new Set(designs.map(d=>d.id)).size).toBe(designs.length);
     expect(new Set(designs.map(d=>d.number)).size).toBe(designs.length);

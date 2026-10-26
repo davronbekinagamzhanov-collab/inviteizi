@@ -2,6 +2,8 @@
 // Derived only from existing project artwork / ornaments, not new invitation designs.
 import sharp from "sharp";
 import { mkdir } from "node:fs/promises";
+import {chromium} from "playwright-core";
+import {withAssetCredit} from "./asset-credit.mjs";
 await mkdir("public/og", { recursive: true });
 const crops = {
   "oq-ot": { left: 0, top: 960, width: 1080, height: 750 },
@@ -13,7 +15,27 @@ const crops = {
 for (const [id, crop] of Object.entries(crops)) {
   await sharp(`public/covers/${id}.jpg`).extract(crop).resize(420,620,{fit:"cover"}).jpeg({quality:86}).toFile(`public/og/${id}.jpg`);
 }
-for (const id of ["tandir-nuri", "anor-bogi", "atirgul", "dasturxon"]) await sharp(`public/art/${id}.webp`).resize(420,620,{fit:"cover"}).jpeg({quality:86}).toFile(`public/og/${id}.jpg`);
+for (const id of ["tandir-nuri", "anor-bogi", "atirgul", "dasturxon", "bodom-guli", "samarqand-kitob", "tonggi-choy"]) {
+  const photo=await sharp(`public/art/${id}.webp`).resize(420,620,{fit:"cover",position:id==="tonggi-choy"?"bottom":"centre"}).png().toBuffer();
+  await sharp(await withAssetCredit(photo,id)).withMetadata().jpeg({quality:86}).toFile(`public/og/${id}.jpg`);
+}
+
+// Reuse the actual native ornament from these designs instead of making another copy.
+// Only an aria-hidden decoration is extracted; customer/sample text is never included.
+const browser=await chromium.launch({channel:"chrome",headless:true});
+try{
+  for(const [id,bg] of [["atlas-tolqin","#fcf7ef"],["non-muhr","#fcf5e6"],["shohona-baxmal","#31584d"],["paxta-gul","#f9f8ee"]]){
+    const page=await browser.newPage({viewport:{width:375,height:812}});
+    await page.goto(`${process.env.BASE??"http://127.0.0.1:3102"}/demo/${id}`,{waitUntil:"load"});
+    const svg=await page.locator('svg[data-decor][aria-hidden="true"]').first().evaluate(el=>{
+      const clone=el.cloneNode(true);clone.removeAttribute("class");clone.setAttribute("xmlns","http://www.w3.org/2000/svg");clone.setAttribute("width","420");clone.setAttribute("height","620");
+      if(clone.querySelector("text,foreignObject,image"))throw new Error("OG ornament must contain only native decorative geometry");
+      return clone.outerHTML;
+    });
+    await sharp(Buffer.from(svg)).flatten({background:bg}).jpeg({quality:88}).toFile(`public/og/${id}.jpg`);
+    await page.close();
+  }
+}finally{await browser.close();}
 
 // These ornaments reproduce their design's own shapes, without sample/customer text.
 const ornaments={
