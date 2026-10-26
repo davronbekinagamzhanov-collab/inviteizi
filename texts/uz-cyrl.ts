@@ -344,6 +344,11 @@ export const t = {
     "tonggi-choy": "Тонгги чой",
     "paxta-gul": "Пахта гул",
     "oltin-ot": "Олтин от",
+    "oq-chinni": "Оқ чинни",
+    doppicha: "Дўппича",
+    "sayram-hovli": "Сайрам ҳовлиси",
+    zarvaraq: "Зарварақ",
+    "umr-daraxti": "Умр дарахти",
   } as Record<string, string>,
 
   formats: {
@@ -577,6 +582,11 @@ type Headings = {
 };
 
 const headings: Record<string, Headings> = {
+  "oq-chinni": {program:"Тонгги учрашув",waiting:"Дастурхонимизга марҳамат!"},
+  doppicha: {program:"Қувончли кунимиз",waiting:"Тўйимизга марҳамат!"},
+  "sayram-hovli": {date:"Тўй куни",countdown:"Қувончли кунгача",program:"Тўй кунининг тартиби",blessing:"Эзгу дуолар",thanks:"Қувончимизга шерик бўлинг!"},
+  zarvaraq: {program:"Муборак учрашув",waiting:"Ташрифингиз биз учун азиз!"},
+  "umr-daraxti": {date:"Қадрли сана",countdown:"Муборак санагача",program:"Дийдорлашув дастури",blessing:"Меҳр ва дуо",waiting:"Сизни интизорлик билан кутамиз!"},
   // №1 — эталон: общие заголовки
   "oltin-monogramma": {},
   "oq-ot": { countdown: "Қутлуғ кунгача", date: "Қутлуғ сана", venue: "Тўй манзили", tap: "Пардани очинг" },

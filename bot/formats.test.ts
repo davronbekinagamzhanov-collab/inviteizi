@@ -1,5 +1,6 @@
 import {afterEach,describe,it,expect,vi} from "vitest";
 import {FORMATS,PRICES,getDesign} from "@/templates/registry";
+import * as registry from "@/templates/registry";
 import {formatFlowContract} from "./testing/formats.contract";
 import {Sim,ADMIN} from "./testing/sim";
 import {nikohOrder,startUz,startRu} from "./testing/paths";
@@ -8,7 +9,7 @@ import {ru} from "@/texts/bot-ru";
 import {formatsFor} from "./flow/util";
 import {buttonLabels} from "./testing/fake-tg";
 
-afterEach(()=>vi.unstubAllEnvs());
+afterEach(()=>{vi.unstubAllEnvs();vi.restoreAllMocks();});
 describe("three invitation formats",()=>{
   formatFlowContract(()=>{const sim=new Sim();return{sim,repo:sim.repo};},740001);
   it.each(["uz","ru"] as const)("%s: all three choices show registry prices and correct catalogs",async lang=>{
@@ -39,6 +40,9 @@ describe("three invitation formats",()=>{
     expect(metrics.formats.some(f=>f.id==="scroll")).toBe(false);
   });
   it.each(["buy","next","prev"])("old empty Simple catalog callback %s returns format selection",async value=>{
+    // Batch four fills this former gap; keep exercising an empty offer explicitly.
+    const active=registry.activeDesigns();
+    vi.spyOn(registry,"activeDesigns").mockReturnValue(active.filter(d=>d.occasion!=="nahorgi"||d.format!=="simple"));
     const s=new Sim();await startUz(s,4);
     await s.repo.saveStep(4,"catalog",{q:50,occasion:"nahorgi",format:"simple",catIdx:0});
     await s.callback(4,`a:50:${value}`,1);

@@ -131,6 +131,13 @@ export const designs: Design[] = [
 
   // ── Суннат ──
   design("oltin-ot", 76, "sunnat", "animated", false, () => import("./themes/oltin-ot/Design")),
+
+  // Партия 4: пять пустых сочетаний тадбира/формата, без повторения готовых композиций.
+  design("oq-chinni", 77, "nahorgi", "simple", false, () => import("./themes/oq-chinni/Design")),
+  design("doppicha", 78, "sunnat", "simple", false, () => import("./themes/doppicha/Design")),
+  design("sayram-hovli", 79, "sunnat", "scroll", false, () => import("./themes/sayram-hovli/Design")),
+  design("zarvaraq", 80, "yubiley", "simple", false, () => import("./themes/zarvaraq/Design")),
+  design("umr-daraxti", 81, "yubiley", "scroll", false, () => import("./themes/umr-daraxti/Design")),
 ];
 
 /**
@@ -142,6 +149,7 @@ export const ACCEPTED = new Set([
   "tandir-nuri", "ganch-peshtoq", "ipak-romol", "oltin-ot",
   "zarhal-eshik", "rishton-koshin", "atirgul", "dasturxon",
   "atlas-tolqin", "non-muhr", "shohona-baxmal", "paxta-gul", "bodom-guli", "samarqand-kitob", "tonggi-choy",
+  "oq-chinni", "doppicha", "sayram-hovli", "zarvaraq", "umr-daraxti",
   // "anor-bogi" — скрыт по замечанию владельца 24.10 (код остаётся)
 ]);
 

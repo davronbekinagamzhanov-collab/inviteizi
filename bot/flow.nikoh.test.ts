@@ -198,13 +198,13 @@ describe("весь путь никоҳ на ўзбекском", () => {
     expect(cat.media).toBe(`${BASE}/covers/${simpleNikoh[0].id}.jpg`);
   });
 
-  it("формат без дизайнов не показывается (суннат — только анимацияли)", async () => {
+  it("суннат показывает форматы по текущему принятому каталогу", async () => {
     const sim = new Sim();
     await startUz(sim, 1);
     await sim.click(1, uz.category.sunnat);
     const labels = buttonLabels(sim.last(1));
-    expect(labels.some((l) => l.includes("Анимацияли"))).toBe(true);
-    expect(labels.some((l) => l.includes("Оддий"))).toBe(false);
+    for(const f of ["animated","scroll","simple"] as const)
+      expect(labels.some(l=>l.includes(uz.format.names[f]))).toBe(activeDesigns().some(d=>d.occasion==="sunnat"&&d.format===f));
   });
 
   it("ℹ️ — объяснение разницы форматов всплывающим окном", async () => {
