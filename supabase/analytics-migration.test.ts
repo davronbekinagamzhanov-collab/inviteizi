@@ -13,17 +13,25 @@ beforeAll(async () => {
     set role inviteizi_server;`);
 }, 30000);
 afterAll(async () => pg.close());
+it("analytics trigger accepts music identifiers supported by the existing music/order schema",async()=>{
+  const musicId="legacy-"+"track".repeat(30);
+  await pg.query("insert into public.music(id,title_uz,title_ru,file_url) values($1,'Fixture','Fixture','https://fixture.invalid/music.mp3')",[musicId]);
+  await pg.query("insert into public.orders(user_id,occasion,format,template_id,music_kind,music_id,slug,amount,status) values(1,'sunnat','animated','oq-ot','list',$1,'long-music-id',10000,'preview')",[musicId]);
+  const rows=await pg.query<{target:string}>("select target from public.analytics_events where kind='music_selected' and target=$1",[musicId]);
+  expect(rows.rows).toHaveLength(1);expect(rows.rows[0].target).toBe(musicId);
+});
 it("migration installs on the actual base schema; financial events are transactional and idempotent", async () => {
+  const ownEvents=(kind:string)=>pg.query("select target from public.analytics_events where kind=$1 and dedupe_key=$2",[kind,"00000000-0000-4000-8000-000000000001"]);
   await pg.exec(`insert into public.orders(id,user_id,occasion,format,template_id,music_kind,music_id,slug,amount,status)
     values('00000000-0000-4000-8000-000000000001',1,'sunnat','animated','oq-ot','list','hidden','test',10000,'preview');
     update public.orders set status='receipt_sent' where slug='test';`);
-  expect((await pg.query("select * from public.analytics_events where kind='payment_confirmed'")).rows).toHaveLength(0);
+  expect((await ownEvents("payment_confirmed")).rows).toHaveLength(0);
   await pg.exec(`update public.orders set status='active', paid_at=now() where slug='test' and status='receipt_sent';
     update public.orders set status='active', paid_at=now() where slug='test' and status='receipt_sent';
     update public.orders set status='archived' where slug='test';`);
-  expect((await pg.query("select * from public.analytics_events where kind='payment_confirmed'")).rows).toHaveLength(1);
-  expect((await pg.query("select * from public.analytics_events where kind='order_created'")).rows).toHaveLength(1);
-  expect((await pg.query("select target from public.analytics_events where kind='music_selected'")).rows).toEqual([{target:"hidden"}]);
+  expect((await ownEvents("payment_confirmed")).rows).toHaveLength(1);
+  expect((await ownEvents("order_created")).rows).toHaveLength(1);
+  expect((await ownEvents("music_selected")).rows).toEqual([{target:"hidden"}]);
 });
 it("favorite constraints and event keys reject duplicates with the production conflict clauses", async () => {
   for(let i=0;i<2;i++) await pg.exec(`insert into public.design_favorites(user_id,template_id) values(1,'oq-ot') on conflict do nothing;

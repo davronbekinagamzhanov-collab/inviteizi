@@ -16,7 +16,9 @@ create table public.design_favorites (
 create table public.analytics_events (
   kind text not null check(kind in ('demo_opened','design_favorited','design_selected','order_created','payment_confirmed','music_selected')),
   user_id bigint not null references public.users(id) on delete cascade,
-  target text not null check(char_length(target) between 1 and 100),
+  -- Existing music/template identifiers are text without a 100-character limit.
+  -- Telemetry must not reject otherwise valid order inserts in the trigger.
+  target text not null check(char_length(target) >= 1),
   dedupe_key text not null check(char_length(dedupe_key) between 1 and 160),
   created_at timestamptz not null default now(),
   primary key(kind, user_id, dedupe_key)

@@ -35,7 +35,7 @@ const TZ_OFFSET_MS = 5 * 60 * 60_000;
 const DAY = 24 * 60 * 60_000;
 
 export class MemoryRepo implements Repo {
-  private favorites = new Map<number, Set<string>>();
+  private favorites = new Map<number, Map<string,number>>();
   private analyticsEvents = new Map<string, MetricEvent>();
   private ownerId?: number;
   private analyticsAdminIds: number[];
@@ -48,12 +48,15 @@ export class MemoryRepo implements Repo {
     if (!(await this.canAnalyze(actorId)) || (customers && !owner)) throw new Error("Analytics access denied");
     return summarize({ orders: [...this.orders.values()], users: [...this.users.values()], events: [...this.analyticsEvents.values()], since: this.trackingSince, music: this.music }, period, now, customers && owner);
   }
-  async listFavorites(userId: number) { return [...(this.favorites.get(userId) ?? [])]; }
+  async listFavorites(userId: number) {
+    return [...(this.favorites.get(userId)??new Map<string,number>())]
+      .sort((a,b)=>b[1]-a[1]||(a[0]<b[0]?-1:a[0]>b[0]?1:0)).map(([id])=>id);
+  }
   async setFavorite(userId: number, templateId: string, saved: boolean) {
-    if (!this.favorites.has(userId)) this.favorites.set(userId, new Set());
+    if (!this.favorites.has(userId)) this.favorites.set(userId, new Map());
     const set = this.favorites.get(userId)!;
     if (!saved) { set.delete(templateId); return; }
-    set.add(templateId);
+    if(!set.has(templateId))set.set(templateId,this.now().getTime());
     this.analyticsEvents.set(`favorite:${userId}:${templateId}`, this.analyticsEvents.get(`favorite:${userId}:${templateId}`) ?? { kind: "design_favorited", userId, target: templateId, createdAt: this.now() });
   }
   async recordEvent(userId: number, kind: Extract<EventKind, "demo_opened" | "design_selected">, target: string, key: string) {

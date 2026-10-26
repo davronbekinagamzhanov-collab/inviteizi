@@ -21,6 +21,7 @@ export interface Repo {
   isOwner(id: number): Promise<boolean>;
   canAnalyze(id: number): Promise<boolean>;
   analytics(actorId: number, period: Period, now: Date, customers?: boolean): Promise<Analytics>;
+  /** Newest saved first, template ID ascending on equal timestamps; repeat add keeps its place. */
   listFavorites(userId: number): Promise<string[]>;
   setFavorite(userId: number, templateId: string, saved: boolean): Promise<void>;
   recordEvent(userId: number, kind: Extract<EventKind, "demo_opened" | "design_selected">, target: string, key: string): Promise<void>;

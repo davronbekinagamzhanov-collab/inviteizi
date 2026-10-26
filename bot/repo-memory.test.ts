@@ -5,6 +5,21 @@ import { MemoryRepo } from "./repo-memory";
 repoContract(async () => new MemoryRepo());
 
 describe("MemoryRepo (своё, вне общего контракта)", () => {
+  it("favorites use PostgreSQL ordering: newest first, repeated add does not move an item",async()=>{
+    let clock=new Date("2026-10-26T00:00:00Z");const repo=new MemoryRepo({now:()=>clock});
+    await repo.touchUser({id:1});await repo.setFavorite(1,"oq-ot",true);
+    clock=new Date(+clock+1000);await repo.setFavorite(1,"ganch-peshtoq",true);
+    expect(await repo.listFavorites(1)).toEqual(["ganch-peshtoq","oq-ot"]);
+    clock=new Date(+clock+1000);await repo.setFavorite(1,"oq-ot",true);
+    expect(await repo.listFavorites(1)).toEqual(["ganch-peshtoq","oq-ot"]);
+    await repo.setFavorite(1,"oq-ot",false);await repo.setFavorite(1,"oq-ot",true);
+    expect(await repo.listFavorites(1)).toEqual(["oq-ot","ganch-peshtoq"]);
+  });
+  it("favorites with equal timestamps use the SQL template-ID tie break",async()=>{
+    const repo=new MemoryRepo({now:()=>new Date("2026-10-26T00:00:00Z")});
+    await repo.touchUser({id:1});await repo.setFavorite(1,"oq-ot",true);await repo.setFavorite(1,"ganch-peshtoq",true);
+    expect(await repo.listFavorites(1)).toEqual(["ganch-peshtoq","oq-ot"]);
+  });
   it.each([100,1000])("%i клиентов: повторные сохранения, оплаты и избранное не дублируются",async n=>{
     const now=new Date("2026-10-25T12:00:00Z");
     const repo=new MemoryRepo({ownerId:99000,now:()=>now});

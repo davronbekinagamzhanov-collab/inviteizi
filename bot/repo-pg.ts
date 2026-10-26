@@ -304,8 +304,15 @@ export class PgRepo implements Repo {
     if (await this.isOwner(id)) return true;
     if (!(await this.isAdmin(id))) return false;
     if (env.analyticsAdminIds().includes(id)) return true;
-    const [r] = await this.sql`select 1 from public.admins where telegram_id = ${id} and can_analytics`;
-    return Boolean(r);
+    try {
+      const [r] = await this.sql`select 1 from public.admins where telegram_id = ${id} and can_analytics`;
+      return Boolean(r);
+    } catch(error) {
+      // Before the optional analytics migration there is no database grant to consult.
+      // Deny by default; do not infer analytics access from payment-admin rights.
+      if(typeof error==="object"&&error!==null&&"code" in error&&error.code==="42703")return false;
+      throw error;
+    }
   }
 
   async analytics(actorId: number, period: Period, now: Date, customers = false) {

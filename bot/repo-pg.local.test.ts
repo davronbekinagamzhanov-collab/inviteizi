@@ -6,7 +6,7 @@ import postgres from "postgres";
 import { readFile, writeFile } from "node:fs/promises";
 import { PgRepo } from "./repo-pg";
 import { repoContract } from "./repo.contract";
-import { designs } from "@/templates/registry";
+import { designs,PRICES } from "@/templates/registry";
 import type { Sql } from "@/lib/db";
 
 describe.skipIf(process.env.INVITEIZI_LOCAL_PG !== "1")("PgRepo through isolated PGlite PostgreSQL protocol",()=>{
@@ -16,7 +16,7 @@ describe.skipIf(process.env.INVITEIZI_LOCAL_PG !== "1")("PgRepo through isolated
     pg=new PGlite();
     await pg.exec("create role anon; create role authenticated; create role inviteizi_server;");
     for(const name of ["20261023180530_schema.sql","20261024031409_slug_reserved_dev.sql","20261024120000_slug_history.sql","20261024150000_music_occasion.sql","20261025120000_analytics_favorites.sql"]) await pg.exec(await readFile(`supabase/migrations/${name}`,"utf8"));
-    for(const d of designs) await pg.query("insert into public.templates(id,number,occasion,format,price) values($1,$2,$3,$4,$5)",[d.id,d.number,d.occasion,d.format,10000]);
+    for(const d of designs) await pg.query("insert into public.templates(id,number,occasion,format,price) values($1,$2,$3,$4,$5)",[d.id,d.number,d.occasion,d.format,PRICES[d.format]]);
     await pg.exec("insert into public.music(id,title_uz,title_ru,file_url) values('yor-yor','Ёр-ёр','Ёр-ёр','https://fixture.invalid/music.mp3');");
     server=new PGLiteSocketServer({db:pg,host:"127.0.0.1",port:0,maxConnections:1});
     await server.start();
@@ -45,6 +45,16 @@ describe.skipIf(process.env.INVITEIZI_LOCAL_PG !== "1")("PgRepo through isolated
     const report=await repo.analytics(989898,"all",new Date(Date.now()+1000),true);
     expect(report.designs.find(d=>d.id==="oq-ot")?.favorites).toBe(1);
     await expect(repo.analytics(80000001,"all",new Date(),true)).rejects.toThrow("access denied");
+  });
+  it("favorites ordering matches the shared contract and repeat add keeps its creation time",async()=>{
+    await repo.touchUser({id:80000002});
+    await sql`insert into public.design_favorites(user_id,template_id,created_at) values
+      (80000002,'oq-ot','2020-01-01T00:00:00Z'),(80000002,'ganch-peshtoq','2020-01-01T00:00:01Z')`;
+    expect(await repo.listFavorites(80000002)).toEqual(["ganch-peshtoq","oq-ot"]);
+    await repo.setFavorite(80000002,"oq-ot",true);
+    expect(await repo.listFavorites(80000002)).toEqual(["ganch-peshtoq","oq-ot"]);
+    await repo.setFavorite(80000002,"oq-ot",false);await repo.setFavorite(80000002,"oq-ot",true);
+    expect(await repo.listFavorites(80000002)).toEqual(["oq-ot","ganch-peshtoq"]);
   });
   it.each([100,1000])("%i isolated SQL customers preserve orders, money and favorites under queued retries",async n=>{
     vi.stubEnv("OWNER_TELEGRAM_ID","989898");

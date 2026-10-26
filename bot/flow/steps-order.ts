@@ -87,7 +87,10 @@ export const catalog: Step = {
     if (value === "buy") {
       const v = catalogView(c);
       c.s.templateId = v.d.id;
-      await c.deps.repo.recordEvent(c.user.id, "design_selected", v.d.id, `${v.d.id}:${c.s.q ?? 0}`);
+      // Optional telemetry must not block the existing purchase flow during rollout/outage.
+      await c.deps.repo.recordEvent(c.user.id, "design_selected", v.d.id, `${v.d.id}:${c.s.q ?? 0}`).catch(error=>{
+        console.warn("design selection analytics",error instanceof Error?error.name:"Error");
+      });
       data(c).occasion = c.s.occasion;
       return { to: after(c, formStart(c)) };
     }
