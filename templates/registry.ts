@@ -143,6 +143,11 @@ export const designs: Design[] = [
   design("suzani-yol", 84, "nikoh", "scroll", false, () => import("./themes/suzani-yol/Design")),
   design("bugdoy-boshoq", 85, "nahorgi", "simple", false, () => import("./themes/bugdoy-boshoq/Design")),
   design("lola-ehtirom", 86, "yubiley", "scroll", true, () => import("./themes/lola-ehtirom/Design"), {art:"/art/lola-ehtirom.webp"}),
+  design("zarhal-lavha", 87, "yubiley", "animated", false, () => import("./themes/zarhal-lavha/Design")),
+  design("adras-nishon", 88, "sunnat", "simple", false, () => import("./themes/adras-nishon/Design")),
+  design("mis-kafgir", 89, "nahorgi", "simple", false, () => import("./themes/mis-kafgir/Design")),
+  design("rayhon-sahari", 90, "nahorgi", "scroll", false, () => import("./themes/rayhon-sahari/Design")),
+  design("visol-rishta", 91, "nikoh", "animated", false, () => import("./themes/visol-rishta/Design")),
 ];
 
 /**
@@ -156,6 +161,7 @@ export const ACCEPTED = new Set([
   "atlas-tolqin", "non-muhr", "shohona-baxmal", "paxta-gul", "bodom-guli", "samarqand-kitob", "tonggi-choy",
   "oq-chinni", "doppicha", "sayram-hovli", "zarvaraq", "umr-daraxti",
   "marvarid-satr", "gulbog-sahifa", "suzani-yol", "bugdoy-boshoq", "lola-ehtirom",
+  "zarhal-lavha", "adras-nishon", "mis-kafgir", "rayhon-sahari", "visol-rishta",
   // "anor-bogi" — скрыт по замечанию владельца 24.10 (код остаётся)
 ]);
 
