@@ -85,6 +85,14 @@ export const MAIN_EVENT: Record<Occasion, EventKind> = {
 export function data(c: Ctx) {
   c.s.data ??= { occasion: c.s.occasion, events: [] };
   c.s.data.events ??= [];
+  // JSON serializes sparse draft arrays as null. Preserve real entries and their back-stack indexes.
+  const events=c.s.data.events;
+  if(events.some(e=>e==null)){
+    const compactIndex=(i:number)=>events.slice(0,i).filter(e=>e!=null).length;
+    if(c.s.ev!==undefined)c.s.ev=compactIndex(c.s.ev);
+    for(const entry of c.s.back??[])if(entry.ev!==undefined)entry.ev=compactIndex(entry.ev);
+    c.s.data.events=events.filter(e=>e!=null);
+  }
   return c.s.data as DraftData & { events: Partial<InvitationEvent>[] };
 }
 
@@ -96,8 +104,8 @@ export function curEvent(c: Ctx): Partial<InvitationEvent> {
   return evs[i];
 }
 
-export const isCompleteEvent = (e: Partial<InvitationEvent>): e is InvitationEvent =>
-  !!(e.kind && e.date && e.time && e.venueName && e.address);
+export const isCompleteEvent = (e: Partial<InvitationEvent> | null | undefined): e is InvitationEvent =>
+  !!(e?.kind && e.date && e.time && e.venueName && e.address);
 
 /** Черновик → данные пригласительного (только законченные тадбиры) */
 export function finalData(s: Draft): InvitationData {

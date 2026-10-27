@@ -52,13 +52,17 @@ export async function confirmDraft(c: Ctx): Promise<Result> {
       await send(c, old.status === "receipt_sent" ? c.tx.pay.waiting : c.tx.order.closed);
       return { done: true };
     }
+    const selected=getDesign(s.templateId);
+    if(s.format!==old.format||(s.templateId!==old.templateId&&(!selected||selected.format!==old.format||selected.occasion!==old.occasion))){
+      s.format=old.format;s.templateId=old.templateId;
+      return {hint:c.tx.order.formatLocked};
+    }
     const o = await repo.transition(old.id, PAYABLE_STATUSES, old.status, {
       data,
       music,
       templateId: s.templateId,
-      // Keep the saved quote when only names/text/music change, including legacy designs.
-      // An explicit format change uses the current tariff; paid statuses are guarded above and in SQL.
-      format: s.format, amount: s.format === old.format ? old.amount : PRICES[s.format],
+      // A saved order keeps its agreed amount; catalog changes must not reprice it.
+      format: s.format, amount: old.amount,
     });
     if (!o) {
       const current = await repo.getOrder(old.id);
@@ -69,6 +73,12 @@ export async function confirmDraft(c: Ctx): Promise<Result> {
     return { done: true };
   }
 
+  const selected=getDesign(s.templateId);
+  if(!selected||selected.format!==s.format||selected.occasion!==data.occasion){
+    s.ret="review";
+    await send(c,c.tx.order.catalogChanged);
+    return {to:"fmt"};
+  }
   const slugBase = data.occasion === "nikoh" ? slugify(data.groom ?? "", data.bride ?? "") : slugify(data.person ?? "");
   const o = await repo.createOrderFromDraft({
     userId: c.user.id,
@@ -139,10 +149,14 @@ export async function payOrder(c: Ctx, n: number): Promise<Result> {
   }
   await c.deps.repo.transition(o.id, PAYABLE_STATUSES, "awaiting_payment");
   const env = c.deps.env;
+  const card=env.paymentCardNumber?.trim();
+  const paymentRows:InlineButton[][]=[[{text:c.tx.pay.copy,copy:env.kaspiPhone.replace(/[^\d+]/g,"")}]];
+  if(card)paymentRows.push([{text:c.tx.pay.copyCard,copy:card}]);
+  paymentRows.push([{text:c.tx.pay.sendReceipt,data:`rcpt:${o.number}`}]);
   await send(
     c,
-    c.tx.pay.info(price(o.amount), env.kaspiPhone, env.kaspiName, o.number),
-    inline([[{ text: c.tx.pay.copy, copy: env.kaspiPhone.replace(/[^\d+]/g, "") }], [{ text: c.tx.pay.sendReceipt, data: `rcpt:${o.number}` }]]),
+    c.tx.pay.info(price(o.amount), env.kaspiPhone, env.kaspiName, o.number)+(card?"\n\n"+c.tx.pay.card(card):""),
+    inline(paymentRows),
   );
   // Чек можно прислать сразу, не нажимая «Чекни юбориш»
   c.s = { q: c.s.q, orderId: o.id };

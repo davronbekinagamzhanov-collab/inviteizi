@@ -1,0 +1,95 @@
+{
+  "scope": "read-only public URL check; owner addresses preserved, no coordinates inferred",
+  "results": [
+    {
+      "url": "https://go.2gis.com/ew6G4",
+      "status": 200,
+      "finalUrl": "https://2gis.kz/shymkent/search/%D1%82%D0%BE%D0%B9%D1%85%D0%B0%D0%BD%D0%B0/rubricId/10803/firm/70000001033995862?m=69.768665%2C42.303147%2F14.34",
+      "title": "Saltanat, банкетный зал на карте, Банкетные залы, Шымкент — 2ГИС",
+      "publicDescriptionChecked": true,
+      "addressVerification": "owner-supplied address preserved; not independently confirmed by public metadata",
+      "coordinatesUsed": false
+    },
+    {
+      "url": "https://go.2gis.com/JReZD",
+      "status": 200,
+      "finalUrl": "https://2gis.kz/shymkent/search/%D1%82%D0%BE%D0%B9%D1%85%D0%B0%D0%BD%D0%B0/rubricId/10803/firm/70000001059414020?m=69.764194%2C42.302028%2F14.89",
+      "title": "Nayryz, тойхана на карте, Банкетные залы, Шымкент — 2ГИС",
+      "publicDescriptionChecked": true,
+      "addressVerification": "owner-supplied address preserved; not independently confirmed by public metadata",
+      "coordinatesUsed": false
+    },
+    {
+      "url": "https://go.2gis.com/lnTA6",
+      "status": 200,
+      "finalUrl": "https://2gis.kz/shymkent/search/%D1%82%D0%BE%D0%B9%D1%85%D0%B0%D0%BD%D0%B0/rubricId/10803/firm/70000001026718842?m=69.764194%2C42.302028%2F14.89",
+      "title": "Ақ Ниет, банкетный зал на карте, Банкетные залы, Шымкент — 2ГИС",
+      "publicDescriptionChecked": true,
+      "addressVerification": "owner-supplied address preserved; not independently confirmed by public metadata",
+      "coordinatesUsed": false
+    },
+    {
+      "url": "https://go.2gis.com/vpRv9",
+      "status": 200,
+      "finalUrl": "https://2gis.kz/shymkent/search/%D1%82%D0%BE%D0%B9%D1%85%D0%B0%D0%BD%D0%B0/rubricId/10803/firm/70000001089013785?m=69.768665%2C42.303147%2F14.34",
+      "title": "Nur, тойхана на карте, Банкетные залы, Шымкент — 2ГИС",
+      "publicDescriptionChecked": true,
+      "addressVerification": "owner-supplied address preserved; not independently confirmed by public metadata",
+      "coordinatesUsed": false
+    },
+    {
+      "url": "https://go.2gis.com/z0z43",
+      "status": 200,
+      "finalUrl": "https://2gis.kz/shymkent/search/%D1%82%D0%BE%D0%B9%D1%85%D0%B0%D0%BD%D0%B0/rubricId/10803/firm/70000001106116680?m=69.768665%2C42.303147%2F14.34",
+      "title": "AQ Tilek, банкетный зал на карте, Банкетные залы, Шымкент — 2ГИС",
+      "publicDescriptionChecked": true,
+      "addressVerification": "owner-supplied address preserved; not independently confirmed by public metadata",
+      "coordinatesUsed": false
+    },
+    {
+      "url": "https://go.2gis.com/GJoAF",
+      "status": 200,
+      "finalUrl": "https://2gis.kz/shymkent/search/%D1%82%D0%BE%D0%B9%D1%85%D0%B0%D0%BD%D0%B0/rubricId/10803/firm/70000001026865531?m=69.775587%2C42.301735%2F14.34",
+      "title": "Гулрух, тойхана на карте, Банкетные залы, Шымкент — 2ГИС",
+      "publicDescriptionChecked": true,
+      "addressVerification": "owner-supplied address preserved; not independently confirmed by public metadata",
+      "coordinatesUsed": false
+    },
+    {
+      "url": "https://go.2gis.com/catip",
+      "status": 200,
+      "finalUrl": "https://2gis.kz/shymkent/search/%D1%82%D0%BE%D0%B9%D1%85%D0%B0%D0%BD%D0%B0/rubricId/10803/firm/70000001088197903?m=69.775587%2C42.301735%2F14.34",
+      "title": "Shinar, тойхана на карте, Банкетные залы, Шымкент — 2ГИС",
+      "publicDescriptionChecked": true,
+      "addressVerification": "owner-supplied address preserved; not independently confirmed by public metadata",
+      "coordinatesUsed": false
+    },
+    {
+      "url": "https://go.2gis.com/eFcoe",
+      "status": 200,
+      "finalUrl": "https://2gis.kz/shymkent/search/%D1%82%D0%BE%D0%B9%D1%85%D0%B0%D0%BD%D0%B0/rubricId/10803/firm/70000001068801376?m=69.798681%2C42.292195%2F13.13",
+      "title": "Didar, тойхана на карте, Банкетные залы, Шымкент — 2ГИС",
+      "publicDescriptionChecked": true,
+      "addressVerification": "owner-supplied address preserved; not independently confirmed by public metadata",
+      "coordinatesUsed": false
+    },
+    {
+      "url": "https://go.2gis.com/yWw5R",
+      "status": 200,
+      "finalUrl": "https://2gis.kz/shymkent/search/%D1%82%D0%BE%D0%B9%D1%85%D0%B0%D0%BD%D0%B0/rubricId/10803/firm/70000001026857796?m=69.746441%2C42.306833%2F14.15",
+      "title": "Шахризода, тойхана на карте, Банкетные залы, Шымкент — 2ГИС",
+      "publicDescriptionChecked": true,
+      "addressVerification": "owner-supplied address preserved; not independently confirmed by public metadata",
+      "coordinatesUsed": false
+    },
+    {
+      "url": "https://go.2gis.com/xDjrK",
+      "status": 200,
+      "finalUrl": "https://2gis.kz/shymkent/search/%D1%82%D0%BE%D0%B9%D1%85%D0%B0%D0%BD%D0%B0/rubricId/10803/firm/70000001037479063?m=69.757069%2C42.303374%2F13.12",
+      "title": "Достар, тойхана на карте, Банкетные залы, Шымкент — 2ГИС",
+      "publicDescriptionChecked": true,
+      "addressVerification": "owner-supplied address preserved; not independently confirmed by public metadata",
+      "coordinatesUsed": false
+    }
+  ]
+}

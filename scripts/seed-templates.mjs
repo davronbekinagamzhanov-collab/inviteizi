@@ -23,6 +23,8 @@ const rows = designs.map((d) => ({
 if (rows.some((r) => !FORMATS.includes(r.format) || !Number.isInteger(r.price))) {
   throw new Error("Unknown catalog format or price");
 }
+// Review the exact registry-derived rows without credentials or a database connection.
+if(process.argv.includes("--dry-run")){console.log(JSON.stringify(rows));process.exit(0);}
 const sql = db();
 try {
   await sql.begin(async (tx) => {

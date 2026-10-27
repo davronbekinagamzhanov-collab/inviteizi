@@ -18,14 +18,16 @@ describe("three invitation formats",()=>{
     expect(buttonLabels(s.last(1))).toEqual(expect.arrayContaining(FORMATS.map(f=>tx.format[f](`${PRICES[f].toLocaleString("ru-RU").replace(/\u00a0/g," ")} ₸`))));
     await s.click(1,new RegExp(tx.format.names.scroll));
     expect(s.last(1).media).toContain("shohona-baxmal.jpg");
-    expect(s.lastText(1)).toContain("8 000 ₸");
+    expect(s.lastText(1)).toContain("6 000 ₸");
   });
-  it.each(FORMATS)("explicit switch from animated to %s uses its price and keeps the slug",async format=>{
+  it.each(FORMATS)("saved orders reject a forged %s format change without repricing",async format=>{
     const s=new Sim(),o=await nikohOrder(s,2);
-    await s.callback(2,`edit:${o.number}`,1);await s.click(2,uz.review.editDesign);
-    await s.click(2,new RegExp(uz.format.names[format]));await s.click(2,uz.catalog.buy);await s.click(2,uz.review.confirm);
-    expect(await s.repo.getOrder(o.id)).toMatchObject({format,amount:PRICES[format],slug:o.slug});
+    await s.repo.saveStep(2,"review",{q:200,orderId:o.id,occasion:o.occasion,templateId:o.templateId,format,data:o.data,music:o.music});
+    await s.callback(2,"a:200:ok",1);
+    expect(await s.repo.getOrder(o.id)).toMatchObject({format:o.format,amount:o.amount,slug:o.slug});
+    if(format!==o.format)expect(s.tg.to(2).some(m=>m.text===uz.order.formatLocked)).toBe(true);
   });
+
   it("old Simple quote survives registry reclassification, edit and payment",async()=>{
     const s=new Sim(),o=await nikohOrder(s,3);
     await s.repo.updateOrder(o.id,{format:"simple",templateId:"shohona-baxmal",amount:6543});

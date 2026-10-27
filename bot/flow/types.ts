@@ -10,6 +10,8 @@ export type BotEnv = {
   kaspiName: string;
   /** https://inviteizi.vercel.app (без «/» в конце) */
   publicBaseUrl: string;
+  paymentCardNumber?: string;
+  venueMapPickerUrl?: string;
 };
 
 export type Deps = {
@@ -43,6 +45,10 @@ export type StepId =
   | "evVenue"
   | "evAddress"
   | "evLoc"
+  | "evPlaces"
+  | "evVenueName"
+  | "evMap"
+  | "evLink"
   | "more"
   | "text"
   | "textOwn"
@@ -81,6 +87,8 @@ export type Draft = {
   /** Индекс тадбира, который сейчас заполняется */
   ev?: number;
   calMonth?: string;
+  venuePage?: number;
+  venueNameInput?: string;
   music?: MusicChoice;
   /** Правка существующего заказа / оплата / смена ссылки */
   orderId?: string;

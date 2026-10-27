@@ -19,6 +19,7 @@ export type BotUpdate =
   | (Base & { kind: "command"; command: string; args: string })
   | (Base & { kind: "callback"; callbackId: string; data: string })
   | (Base & { kind: "location"; lat: number; lng: number })
+  | (Base & { kind: "venue"; title: string; address: string; lat: number; lng: number })
   | (Base & { kind: "photo"; fileId: string })
   | (Base & { kind: "document"; fileId: string; fileName: string | null; mimeType: string | null; fileSize: number | null })
   | (Base & {
@@ -60,6 +61,7 @@ export function normalizeUpdate(u: Update): BotUpdate | null {
     if (cmd) return { ...base, kind: "command", command: cmd[1].toLowerCase(), args: (cmd[2] ?? "").trim() };
     return { ...base, kind: "text", text: m.text };
   }
+  if (m.venue) return {...base,kind:"venue",title:m.venue.title,address:m.venue.address,lat:m.venue.location.latitude,lng:m.venue.location.longitude};
   if (m.location) return { ...base, kind: "location", lat: m.location.latitude, lng: m.location.longitude };
   if (m.photo?.length) {
     const biggest = [...m.photo].sort((a, b) => b.width * b.height - a.width * a.height)[0];

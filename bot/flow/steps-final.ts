@@ -156,7 +156,7 @@ async function summary(c: Ctx) {
   const r = c.tx.review;
   const d = finalData(c.s);
   const old = c.s.orderId ? await c.deps.repo.getOrder(c.s.orderId) : null;
-  const quoted = old?.userId === c.user.id && old.format === c.s.format ? old.amount : undefined;
+  const quoted = old?.userId === c.user.id ? old.amount : undefined;
   const lines = [r.title, "", designLine(c.tx, c.s.templateId ?? "", c.s.format ?? "animated", quoted)];
   if (d.occasion === "nikoh") lines.push(r.groom(d.groom ?? ""), r.bride(d.bride ?? ""));
   else lines.push(r.person(d.person ?? ""));
@@ -167,6 +167,7 @@ async function summary(c: Ctx) {
   if (d.occasion === "yubiley" && d.age) lines.push(r.age(d.age));
   if (d.occasion === "nahorgi" && d.cause) lines.push(r.cause(c.tx.form.causes[d.cause as "nikoh" | "sunnat"] ?? d.cause));
   lines.push(r.hosts(d.hosts ?? ""));
+  if (d.sides?.groom) lines.push(c.tx.review.sideGroom(d.sides.groom));
   if (d.sides?.bride) lines.push(r.sideBride(d.sides.bride));
   lines.push("");
   d.events.forEach((e, i) => {
@@ -224,8 +225,8 @@ export const review: Step = {
       case "music":
         return edit("music");
       case "design":
-        if (c.s.paid) {
-          // Оплачен: меняем дизайн только в том же формате (цена та же)
+        if (c.s.paid || c.s.orderId) {
+          // A saved quote fixes format and amount; otherwise a cheap order could be upgraded for free.
           const list = designsFor(c.s.occasion ?? "nikoh", c.s.format ?? "animated");
           c.s.catIdx = Math.max(0, list.findIndex((x) => x.id === c.s.templateId));
           return edit("catalog");

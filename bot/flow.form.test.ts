@@ -15,7 +15,7 @@ describe("весь путь наҳорги ош на русском", () => {
     expect((await sim.user(id))?.source).toBe("qr_sayram");
     await sim.click(id, ru.category.nahorgi);
     await sim.click(id, /Анимированное/);
-    expect(sim.last(id).text).toMatch(/^№41 · Тонгги қозон\nАнимированное · 10.000 ₸$/);
+    expect(sim.last(id).text).toMatch(/^№41 · Тонгги қозон\nАнимированное · 8.000 ₸$/);
     await sim.click(id, ru.catalog.buy);
 
     expect(sim.lastText(id)).toBe(ru.form.personNahorgi);
@@ -80,7 +80,7 @@ describe("весь путь наҳорги ош на русском", () => {
     await sim.click(id, ru.review.confirm);
 
     const [o] = await sim.repo.listOrdersByUser(id);
-    expect(o).toMatchObject({ slug: "jasurbek", status: "preview", occasion: "nahorgi", templateId: "tonggi-qozon", amount: 10_000 });
+    expect(o).toMatchObject({ slug: "jasurbek", status: "preview", occasion: "nahorgi", templateId: "tonggi-qozon", amount: 8_000 });
     expect(o.data).toMatchObject({ person: "Жасурбек", relation: "ogil", cause: "nikoh", hosts: "Раҳимовлар оиласи", customText: own });
     expect(o.data.textId).toBeUndefined();
     expect(o.data.events.map((e) => [e.kind, e.date, e.time])).toEqual([
@@ -139,7 +139,7 @@ describe("«Назад» на каждом шаге анкеты", () => {
     const plan: [() => Promise<void>, string][] = [
       [() => sim.click(id, uz.category.nikoh), uz.category.ask],
       [() => sim.click(id, /Анимацияли/), uz.format.ask],
-      [() => sim.click(id, uz.catalog.buy), "№1 · Олтин монограмма\nАнимацияли · 10 000 ₸"],
+      [() => sim.click(id, uz.catalog.buy), "№1 · Олтин монограмма\nАнимацияли · 8 000 ₸"],
       [() => sim.text(id, "Азиз"), uz.form.groom],
       [() => sim.text(id, "Мадина"), uz.form.bride],
       [() => sim.click(id, "Ўзимизники"), uz.form.relationNikoh],

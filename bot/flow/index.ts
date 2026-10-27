@@ -6,7 +6,7 @@ import type { BotUpdate } from "../update";
 import type { Ctx, Deps, Draft, Result, Step, StepId } from "./types";
 import { cat, catalog, fmt } from "./steps-order";
 import { age, bride, cause, groom, hosts, person, relation, sideAsk, sideBride } from "./steps-form";
-import { evAddress, evDate, evLoc, evSameDay, evTime, evTimeCustom, evVenue, more } from "./steps-event";
+import { evPlaces, evVenueName, evMap, evLink, evAddress, evDate, evLoc, evSameDay, evTime, evTimeCustom, evVenue, more } from "./steps-event";
 import { evMenu, music, musicList, musicOwn, review, text, textOwn } from "./steps-final";
 import { approve, askReceipt, askRejectReason, editOrder, myOrders, payOrder, receipt, reject, resendLink } from "./orders";
 import { cmdFind, cmdOrders, cmdStats } from "./admin";
@@ -44,7 +44,7 @@ export const steps: Record<StepId, Step> = {
   evTimeCustom,
   evVenue,
   evAddress,
-  evLoc,
+  evLoc, evPlaces, evVenueName, evMap, evLink,
   more,
   text,
   textOwn,
@@ -150,6 +150,7 @@ async function apply(c: Ctx, r: Result) {
 }
 
 async function goBack(c: Ctx) {
+  delete c.s.venueNameInput;
   if (steps[c.step].replyKeyboard) await send(c, c.tx.ok, mainMenu(c.tx));
   const prev = c.s.back?.pop();
   if (!prev) {

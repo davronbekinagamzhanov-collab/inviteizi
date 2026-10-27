@@ -25,6 +25,8 @@ export function createBotDeps(): Deps {
       kaspiPhone: env.kaspiPhone(),
       kaspiName: env.kaspiName(),
       publicBaseUrl: env.publicBaseUrl(),
+      paymentCardNumber: env.paymentCardNumber(),
+      venueMapPickerUrl: env.venueMapPickerUrl(),
     },
     now: () => new Date(),
     /** Песня клиента: файл из Telegram → бакет music (адрес файла Telegram содержит токен — не логируем) */

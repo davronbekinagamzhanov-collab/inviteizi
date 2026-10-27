@@ -1,4 +1,5 @@
 /** Тадбир: дата (календарь), время, место, адрес, локация; «ещё тадбир?» */
+import { VENUES, venuePickerUrl } from "../venues";
 import type { Ctx, Result, Step } from "./types";
 import type { EventKind } from "@/lib/types";
 import type { InlineButton } from "../tg";
@@ -161,13 +162,17 @@ function textOf(c: Ctx, max: number): string | Result {
 }
 
 export const evVenue: Step = {
+  onButton: placeButton,
   async ask(c) {
-    await send(c, c.tx.event.venue(kindLabel(c)), inline([backRow(c)]));
+    await send(c, c.tx.event.venue(kindLabel(c)), placeChoices(c));
   },
   async onMessage(c) {
+    if(c.u.kind==="venue"||c.u.kind==="location"||(c.u.kind==="text"&&isMapLink(c.u.text)))return mapMessage(c);
     const v = textOf(c, 80);
     if (typeof v !== "string") return v;
-    curEvent(c).venueName = v;
+    const e=curEvent(c);
+    if(e.venueName&&e.venueName!==v){delete e.location;delete e.mapUrl;}
+    e.venueName = v;
     return { to: after(c, "evAddress") };
   },
 };
@@ -179,7 +184,13 @@ export const evAddress: Step = {
   async onMessage(c) {
     const v = textOf(c, 150);
     if (typeof v !== "string") return v;
-    curEvent(c).address = v;
+    const e=curEvent(c);
+    if(c.s.venueNameInput!==undefined){
+      if(e.venueName){delete e.location;delete e.mapUrl;}
+      e.venueName=c.s.venueNameInput;e.address=v;delete c.s.venueNameInput;
+      return e.location||e.mapUrl?afterEvent(c):{to:"evLoc"};
+    }
+    e.address = v;
     return { to: after(c, "evLoc") };
   },
 };
@@ -187,7 +198,7 @@ export const evAddress: Step = {
 /** Какие тадбиры можно добавить (без уже добавленных) */
 function addable(c: Ctx): EventKind[] {
   const d = data(c);
-  const have = new Set(d.events.map((e) => e.kind));
+  const have = new Set(d.events.filter(isCompleteEvent).map((e) => e.kind));
   const bazm: EventKind = d.cause === "sunnat" ? "sunnatBazm" : "nikohBazm";
   const options: EventKind[] =
     c.s.occasion === "nikoh" ? ["nahorgi", "kelinSalom"] : c.s.occasion === "nahorgi" ? [bazm] : ["nahorgi"];
@@ -196,6 +207,11 @@ function addable(c: Ctx): EventKind[] {
 
 /** После локации: ещё тадбир? (если есть место и что добавить) */
 async function afterEvent(c: Ctx): Promise<Result> {
+  if(!curEvent(c).date)return {to:"evDate"};
+  if(!curEvent(c).time)return {to:"evTime"};
+  if(!curEvent(c).venueName)return {to:"evVenueName"};
+  if(!curEvent(c).address)return {to:"evAddress"};
+  delete c.s.venueNameInput;
   if (c.s.ret) return { to: "review" };
   const count = data(c).events.filter(isCompleteEvent).length;
   if (count >= MAX_EVENTS) {
@@ -205,36 +221,83 @@ async function afterEvent(c: Ctx): Promise<Result> {
   return { to: addable(c).length ? "more" : "text" };
 }
 
-export const evLoc: Step = {
-  replyKeyboard: true,
-  async ask(c) {
-    await send(c, c.tx.event.location, {
-      reply: [[{ text: c.tx.event.sendLocation, location: true }], [{ text: c.tx.event.skip }], [{ text: c.tx.back }]],
-    });
+function placeChoices(c:Ctx){
+  const t=c.tx.event;
+  return inline([[ib(c,t.readyVenues,"places")],[ib(c,t.mapChoice,"map")],[ib(c,t.linkChoice,"link")],[ib(c,t.manualChoice,"manual")],[ib(c,t.skip,"skip")],backRow(c)]);
+}
+async function placeButton(c:Ctx,v:string):Promise<Result>{
+  if(v==="places"){c.s.venuePage=0;return {to:"evPlaces"};}
+  if(v==="map")return {to:"evMap"};
+  if(v==="link")return {to:"evLink"};
+  if(v==="manual")return {to:"evVenueName"};
+  if(v==="skip")return afterEvent(c);
+  return null;
+}
+export const evVenueName:Step={
+  async ask(c){await send(c,c.tx.event.manualPrompt,inline([backRow(c)]));},
+  async onMessage(c){
+    const v=textOf(c,80);if(typeof v!=="string")return v;
+    // Apply name and address together; Back must not leave a half-replaced existing event.
+    c.s.venueNameInput=v;
+    return {to:"evAddress"};
   },
-  async onMessage(c) {
-    const e = curEvent(c);
-    if (c.u.kind === "location") {
-      e.location = { lat: c.u.lat, lng: c.u.lng };
-      delete e.mapUrl;
-      await send(c, c.tx.event.locationSaved, mainMenu(c.tx));
-      return afterEvent(c);
+};
+function placesView(c:Ctx){
+  const list=VENUES.slice((c.s.venuePage??0)*5,(c.s.venuePage??0)*5+5);
+  return {text:list.map(p=>p.name+"\n"+p.address).join("\n\n")+"\n\n"+c.tx.event.venuesPrompt,
+    markup:inline([...list.map(p=>[{text:`🗺 ${p.name}`,url:p.mapUrl},ib(c,`✅ ${p.name}`,"venue:"+p.id)]),[ib(c,"◀","previous"),ib(c,"▶","next")],backRow(c)])};
+}
+export const evPlaces:Step={
+  async ask(c){const v=placesView(c);await send(c,v.text,v.markup);},
+  async onButton(c,v){
+    if(v==="next"||v==="previous"){
+      c.s.venuePage=((c.s.venuePage??0)+1)%2;const page=placesView(c);
+      await c.deps.tg.editMessageText(c.chatId,c.u.messageId,page.text,{markup:page.markup});return {stay:true};
     }
-    if (c.u.kind === "text") {
-      const v = c.u.text.trim();
-      if (v === c.tx.event.skip) {
-        await send(c, c.tx.ok, mainMenu(c.tx));
-        return afterEvent(c);
-      }
-      if (isMapLink(v)) {
-        e.mapUrl = v;
-        delete e.location;
-        await send(c, c.tx.event.locationSaved, mainMenu(c.tx));
-        return afterEvent(c);
-      }
-    }
-    return { hint: c.tx.event.badLocation };
+    const place=VENUES.find(p=>v==="venue:"+p.id);if(!place)return null;
+    Object.assign(curEvent(c),{venueName:place.name,address:place.address,mapUrl:place.mapUrl});delete curEvent(c).location;
+    return afterEvent(c);
   },
+};
+async function mapMessage(c:Ctx):Promise<Result>{
+  const e=curEvent(c),u=c.u;
+  if(u.kind==="location"||u.kind==="venue"){
+    if(!Number.isFinite(u.lat)||!Number.isFinite(u.lng)||Math.abs(u.lat)>90||Math.abs(u.lng)>180)return {hint:c.tx.event.badLocation};
+    if(u.kind==="venue"){
+      if(!u.title.trim()||!u.address.trim())return {hint:c.tx.event.badLocation};
+      if(u.title.length>80||u.address.length>150)return {hint:c.tx.tooLong(u.title.length>80?80:150)};
+      e.venueName=u.title;e.address=u.address;
+    }
+    e.location={lat:u.lat,lng:u.lng};delete e.mapUrl;
+    await send(c,c.tx.event.locationSaved,mainMenu(c.tx));return afterEvent(c);
+  }
+  if(u.kind==="text"){
+    const v=u.text.trim();
+    // Old reply-keyboard messages remain readable after upgrading to inline controls.
+    if(v===c.tx.event.skip){await send(c,c.tx.ok,mainMenu(c.tx));return afterEvent(c);}
+    if(isMapLink(v)){e.mapUrl=v;delete e.location;await send(c,c.tx.event.locationSaved,mainMenu(c.tx));return afterEvent(c);}
+  }
+  return {hint:c.tx.event.badLocation};
+}
+export const evLoc:Step={
+  // Clear an old persistent request_location keyboard on Back; new prompts are inline only.
+  replyKeyboard:true,
+  async ask(c){await send(c,c.tx.event.location,placeChoices(c));},
+  onButton:placeButton,onMessage:mapMessage,
+};
+export const evLink:Step={
+  async ask(c){await send(c,c.tx.event.linkPrompt,inline([[ib(c,c.tx.event.skip,"skip")],backRow(c)]));},
+  onButton:placeButton,onMessage:mapMessage,
+};
+export const evMap:Step={
+  async ask(c){
+    const url=venuePickerUrl(c.deps.env.venueMapPickerUrl,c.deps.env.publicBaseUrl);
+    const rows:InlineButton[][]=[[{text:c.tx.event.openPlace,url:"https://2gis.kz/"}]];
+    if(url)rows.push([{text:c.tx.event.mapChoice,url}]);
+    rows.push([ib(c,c.tx.event.linkChoice,"link")],[ib(c,c.tx.event.skip,"skip")],backRow(c));
+    await send(c,c.tx.event.mapPrompt,inline(rows));
+  },
+  onButton:placeButton,onMessage:mapMessage,
 };
 
 const ADD_LABEL = (c: Ctx, k: EventKind) =>

@@ -1,3 +1,5 @@
+import {nikohToReview} from "./testing/paths";
+import {uz} from "@/texts/bot-uz";
 import {formatFlowContract} from "./testing/formats.contract";
 import {Sim} from "./testing/sim";
 /** Isolated wire-protocol integration. Never reads DATABASE_URL or any production credentials. */
@@ -28,6 +30,34 @@ describe.skipIf(process.env.INVITEIZI_LOCAL_PG !== "1")("PgRepo through isolated
     repo=new PgRepo(sql);
   },30000);
   afterAll(async()=>{if(sql)await sql.end({timeout:2});if(server)await server.stop();if(pg)await pg.close();vi.unstubAllEnvs();if(process.env.INVITEIZI_WRITE_REPORTS==="1")await writeFile("docs/reviews/2026-10-25-pg-local-load.json",JSON.stringify({scope:"PgRepo + postgres.js + loopback + PGlite; one connection; not native multi-backend PostgreSQL or production throughput",loadResults},null,2)+"\n");});
+  it("venue stage: SQL roundtrip preserves both families and owner place fields",async()=>{
+    const sim=new Sim();sim.deps.repo=repo;
+    await nikohToReview(sim,760001);await sim.click(760001,uz.review.editSides);await sim.click(760001,uz.form.sideYes);await sim.text(760001,"Юсуповлар оиласи");
+    await sim.click(760001,uz.review.editEvent(1,"Никоҳ базми"));await sim.click(760001,uz.review.evLocation);await sim.click(760001,uz.event.readyVenues);await sim.click(760001,"✅ Nayryz");await sim.click(760001,uz.review.confirm);
+    const [o]=await repo.listOrdersByUser(760001);
+    expect(o.data.sides).toEqual({groom:"Каримовлар оиласи",bride:"Юсуповлар оиласи"});
+    expect(o.data.events[0]).toMatchObject({venueName:"Nayryz",address:"Ибрагим Ата, 174",mapUrl:"https://go.2gis.com/JReZD"});
+    expect((await repo.getOrderBySlug(o.slug))?.data).toEqual(o.data);
+  });
+  it("venue stage: SQL saved quote rejects format changes and counts payment once",async()=>{
+    vi.stubEnv("ADMIN_IDS","500");vi.stubEnv("OWNER_TELEGRAM_ID","500");
+    const sim=new Sim();sim.deps.repo=repo;await nikohToReview(sim,760002);await sim.click(760002,uz.review.confirm);const [o]=await repo.listOrdersByUser(760002);
+    await repo.updateOrder(o.id,{amount:10000});await sim.callback(760002,`edit:${o.number}`,1);await sim.click(760002,uz.review.editDesign);await sim.click(760002,"▶");await sim.click(760002,uz.catalog.buy);await sim.click(760002,uz.review.confirm);
+    expect(await repo.getOrder(o.id)).toMatchObject({amount:10000,format:"animated"});
+    await repo.saveStep(760002,"review",{q:200,orderId:o.id,occasion:o.occasion,format:"simple",templateId:"sapfir",data:o.data,music:o.music});await sim.callback(760002,"a:200:ok",1);
+    expect(await repo.getOrder(o.id)).toMatchObject({format:"animated",amount:10000});
+    const before=(await repo.analytics(500,"all",sim.clock)).revenue;
+    await sim.callback(760002,`pay:${o.number}`,1);await sim.photo(760002,"receipt");await sim.callback(500,`ok:${o.number}`,1);await sim.callback(500,`ok:${o.number}`,1);
+    expect(await repo.getOrder(o.id)).toMatchObject({amount:10000,format:"animated",status:"active",slug:o.slug});
+    expect((await repo.analytics(500,"all",sim.clock)).revenue-before).toBe(10000);
+  });
+  it("venue stage: SQL JSON null holes are normalized without losing completed events",async()=>{
+    const sim=new Sim();sim.deps.repo=repo;const id=760003;
+    await repo.touchUser({id});await repo.setLang(id,"uz");const e={kind:"nikohBazm",date:"2026-11-14",time:"18:00",venueName:"Fixture",address:"Address"};
+    await repo.saveStep(id,"evLoc",{q:10,occasion:"nikoh",ev:2,data:{occasion:"nikoh",groom:"Азиз",bride:"Мадина",hosts:"Оила",events:[e,null,{...e,kind:"nahorgi",time:"06:00"}]}});
+    await sim.text(id,uz.event.skip);expect((await repo.getUser(id))?.step).toBe("more");
+    expect((await repo.getUser(id))?.state).toMatchObject({ev:1,data:{events:[e,{...e,kind:"nahorgi",time:"06:00"}]}});
+  });
   repoContract(async()=>repo);
   formatFlowContract(()=>{const sim=new Sim();sim.deps.repo=repo;return{sim,repo};},750001);
   it("failed draft insert rolls back question; repeated confirmation inserts exactly one order",async()=>{

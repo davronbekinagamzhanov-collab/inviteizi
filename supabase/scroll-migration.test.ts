@@ -15,7 +15,7 @@ it("new format checks accept Scroll, reject unknown formats and preserve old pai
     await pg.exec(await readFile("supabase/migrations/20261026120000_scroll_format.sql","utf8"));
     // Same metadata upsert as seed-templates: changes templates only.
     for(const d of designs)await pg.query("insert into public.templates(id,number,occasion,format,price) values($1,$2,$3,$4,$5) on conflict(id) do update set format=excluded.format,price=excluded.price",[d.id,d.number,d.occasion,d.format,PRICES[d.format]]);
-    expect((await pg.query("select format,price from public.templates where id='shohona-baxmal'")).rows).toEqual([{format:"scroll",price:8000}]);
+    expect((await pg.query("select format,price from public.templates where id='shohona-baxmal'")).rows).toEqual([{format:"scroll",price:PRICES.scroll}]);
     expect((await pg.query("select format,amount,status,slug from public.orders where slug='legacy-paid'")).rows).toEqual([{format:"simple",amount:4321,status:"active",slug:"legacy-paid"}]);
     await pg.exec("insert into public.orders(user_id,occasion,format,template_id,slug,amount) values(1,'nikoh','scroll','shohona-baxmal','scroll-new',8000)");
     await expect(pg.exec("insert into public.templates(id,number,occasion,format,price) values('invalid',999,'nikoh','video',8000)")).rejects.toMatchObject({code:"23514"});

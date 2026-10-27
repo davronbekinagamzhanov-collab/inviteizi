@@ -25,6 +25,8 @@ function optional(name: string): string | undefined {
 }
 
 export const env = {
+  paymentCardNumber: () => optional("PAYMENT_CARD_NUMBER"),
+  venueMapPickerUrl: () => optional("VENUE_MAP_PICKER_URL"),
   /** Explicit immutable Telegram ID. Missing configuration disables private reports. */
   ownerId: (): number | undefined => {
     const id = Number(optional("OWNER_TELEGRAM_ID"));

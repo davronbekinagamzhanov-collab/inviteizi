@@ -28,7 +28,7 @@ describe("catalog acceptance integrity",()=>{
     expect(new Set(designs.map(d=>d.number)).size).toBe(designs.length);
     for(const id of ACCEPTED)expect(designs.some(d=>d.id===id),id).toBe(true);
     expect(ACCEPTED.has("anor-bogi")).toBe(false);
-    expect(PRICES).toEqual({animated:10000,scroll:8000,simple:7000});
+    expect(PRICES).toEqual({animated:8000,scroll:6000,simple:5000});
   });
   it("only publishes completed code with both bot and web covers and private-data-free OG art",()=>{
     const pilots:Record<string,string>={"oltin-monogramma":"OltinMonogramma",sapfir:"Sapfir","oq-ot":"OqOt","tonggi-qozon":"TonggiQozon","pion-guldasta":"PionGuldasta"};

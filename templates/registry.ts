@@ -11,7 +11,7 @@ export const FORMATS = ["animated", "scroll", "simple"] as const;
 export type Format = typeof FORMATS[number];
 
 /** Цена формата, ₸ (музыка входит в цену) */
-export const PRICES: Record<Format, number> = { animated: 10_000, scroll: 8_000, simple: 7_000 };
+export const PRICES: Record<Format, number> = { animated: 8_000, scroll: 6_000, simple: 5_000 };
 
 type Loader = () => Promise<{ default: ComponentType<TemplateProps> }>;
 
