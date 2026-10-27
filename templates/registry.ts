@@ -138,6 +138,11 @@ export const designs: Design[] = [
   design("sayram-hovli", 79, "sunnat", "scroll", false, () => import("./themes/sayram-hovli/Design")),
   design("zarvaraq", 80, "yubiley", "simple", false, () => import("./themes/zarvaraq/Design")),
   design("umr-daraxti", 81, "yubiley", "scroll", false, () => import("./themes/umr-daraxti/Design")),
+  design("marvarid-satr", 82, "nikoh", "simple", false, () => import("./themes/marvarid-satr/Design")),
+  design("gulbog-sahifa", 83, "nikoh", "scroll", true, () => import("./themes/gulbog-sahifa/Design"), {art:"/art/gulbog-sahifa.webp"}),
+  design("suzani-yol", 84, "nikoh", "scroll", false, () => import("./themes/suzani-yol/Design")),
+  design("bugdoy-boshoq", 85, "nahorgi", "simple", false, () => import("./themes/bugdoy-boshoq/Design")),
+  design("lola-ehtirom", 86, "yubiley", "scroll", true, () => import("./themes/lola-ehtirom/Design"), {art:"/art/lola-ehtirom.webp"}),
 ];
 
 /**
@@ -150,6 +155,7 @@ export const ACCEPTED = new Set([
   "zarhal-eshik", "rishton-koshin", "atirgul", "dasturxon",
   "atlas-tolqin", "non-muhr", "shohona-baxmal", "paxta-gul", "bodom-guli", "samarqand-kitob", "tonggi-choy",
   "oq-chinni", "doppicha", "sayram-hovli", "zarvaraq", "umr-daraxti",
+  "marvarid-satr", "gulbog-sahifa", "suzani-yol", "bugdoy-boshoq", "lola-ehtirom",
   // "anor-bogi" — скрыт по замечанию владельца 24.10 (код остаётся)
 ]);
 

@@ -349,6 +349,11 @@ export const t = {
     "sayram-hovli": "Сайрам ҳовлиси",
     zarvaraq: "Зарварақ",
     "umr-daraxti": "Умр дарахти",
+    "marvarid-satr": "Марварид сатри",
+    "gulbog-sahifa": "Гулбоғ саҳифаси",
+    "suzani-yol": "Сўзана йўли",
+    "bugdoy-boshoq": "Буғдой бошоғи",
+    "lola-ehtirom": "Лола эҳтироми",
   } as Record<string, string>,
 
   formats: {
@@ -582,6 +587,11 @@ type Headings = {
 };
 
 const headings: Record<string, Headings> = {
+  "marvarid-satr": {program:"Азиз учрашув",waiting:"Қувончимизга шерик бўлинг!"},
+  "gulbog-sahifa": {date:"Гўзал сана",countdown:"Бахтли онларгача",program:"Бахтли кун дастури",waiting:"Гулдек кунларимизга марҳамат!"},
+  "suzani-yol": {date:"Қутлуғ кун",countdown:"Тўйимизгача",program:"Тўйимиз тартиби",thanks:"Ташрифингиздан мамнун бўламиз!"},
+  "bugdoy-boshoq": {program:"Тонгги дастурхон",waiting:"Хонадонимизга марҳамат!"},
+  "lola-ehtirom": {date:"Эъзозли сана",countdown:"Дийдорлашувгача",program:"Байрам дастури",waiting:"Дийдорингиз биз учун азиз!"},
   "oq-chinni": {program:"Тонгги учрашув",waiting:"Дастурхонимизга марҳамат!"},
   doppicha: {program:"Қувончли кунимиз",waiting:"Тўйимизга марҳамат!"},
   "sayram-hovli": {date:"Тўй куни",countdown:"Қувончли кунгача",program:"Тўй кунининг тартиби",blessing:"Эзгу дуолар",thanks:"Қувончимизга шерик бўлинг!"},

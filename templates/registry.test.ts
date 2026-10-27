@@ -5,7 +5,7 @@ import {photoAttributions} from "@/texts/uz-cyrl";
 
 describe("catalog acceptance integrity",()=>{
   it("classifies by functionality and preserves ambiguous tariffs pending owner review",()=>{
-    expect(activeDesigns().filter(d=>d.format==="scroll").map(d=>d.id).sort()).toEqual(["paxta-gul","sayram-hovli","shohona-baxmal","tonggi-choy","umr-daraxti"]);
+    expect(activeDesigns().filter(d=>d.format==="scroll"&&d.number<=81).map(d=>d.id).sort()).toEqual(["paxta-gul","sayram-hovli","shohona-baxmal","tonggi-choy","umr-daraxti"]);
     for(const id of ["sapfir","ipak-romol","rishton-koshin","atirgul"])expect(designs.find(d=>d.id===id)?.format).toBe("simple");
     for(const d of activeDesigns().filter(d=>d.format==="scroll")){
       const source=readFileSync(`templates/themes/${d.id}/Design.tsx`,"utf8");

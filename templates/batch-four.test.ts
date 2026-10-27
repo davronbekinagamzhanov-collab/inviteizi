@@ -16,10 +16,11 @@ const batch=[
 
 describe("batch four: exactly five new complete designs",()=>{
   it("preserves previous accepted designs and fills five empty category/format cells",()=>{
-    expect(ACCEPTED.size).toBe(25);expect(designs).toHaveLength(26);expect(ACCEPTED.has("anor-bogi")).toBe(false);
-    expect(activeDesigns().filter(d=>d.number>76).map(d=>d.id).sort()).toEqual(batch.map(([id])=>id).sort());
+    const previous=activeDesigns().filter(d=>d.number<=81);
+    expect(previous).toHaveLength(25);expect(designs.filter(d=>d.number<=81)).toHaveLength(26);expect(ACCEPTED.has("anor-bogi")).toBe(false);
+    expect(previous.filter(d=>d.number>76).map(d=>d.id).sort()).toEqual(batch.map(([id])=>id).sort());
     for(const [o,counts] of [["nikoh",[4,1,6]],["nahorgi",[1,2,4]],["sunnat",[1,1,2]],["yubiley",[1,1,1]]] as const)
-      expect(["simple","scroll","animated"].map(f=>activeDesigns().filter(d=>d.occasion===o&&d.format===f).length)).toEqual(counts);
+      expect(["simple","scroll","animated"].map(f=>previous.filter(d=>d.occasion===o&&d.format===f).length)).toEqual(counts);
   });
   for(const [id,occasion,format,number] of batch){
     it(`${id}: accepted identity, covers/OG and genuinely difficult sample data`,async()=>{

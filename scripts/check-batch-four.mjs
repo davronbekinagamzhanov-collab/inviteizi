@@ -5,9 +5,9 @@ import {mkdir,writeFile} from "node:fs/promises";
 const {getDesign,longSample}=await import("../templates/registry.ts");
 const {mapLink}=await import("../lib/map-link.ts");
 const {t}=await import("../texts/uz-cyrl.ts");
-const ids=["oq-chinni","doppicha","sayram-hovli","zarvaraq","umr-daraxti"];
+const ids=process.argv.slice(2).length?process.argv.slice(2):["oq-chinni","doppicha","sayram-hovli","zarvaraq","umr-daraxti"];
 const base=process.env.CHECK_BASE_URL??"http://127.0.0.1:3104";
-const out="screens/batch-four";
+const out=process.env.CHECK_OUT??"screens/batch-four";
 await mkdir(out,{recursive:true});
 // A short PCM fixture exercises actual HTMLAudio decoding/play/pause without relying on a remote song.
 const samples=16000,pcm=Buffer.alloc(44+samples*2);
@@ -40,7 +40,8 @@ try{
       await page.evaluate(()=>scrollTo(0,0));
       const metrics=await page.evaluate(()=>({width:innerWidth,scrollWidth:document.documentElement.scrollWidth,height:document.documentElement.scrollHeight,audioPaused:document.querySelector("audio")?.paused,opener:!!document.querySelector("[data-open]")}));
       if(width===375||width===320)await page.screenshot({path:`${out}/${id}-${width}${long?"-long":""}.png`,fullPage:true});
-      const result={id,width,long,status:response.status(),events,expectedEvents:data.events.length,nameCorrect:name.replace(/\s+/g," ").trim()===data.person,mapsCorrect:JSON.stringify(maps.sort())===JSON.stringify(expectedMaps),overflow:metrics.scrollWidth>width,clippedWords:clipped,hidden,autoplay:metrics.audioPaused===false,hasOpening:metrics.opener,height:metrics.height,errors:[...new Set(errors)]};
+      const expectedName=data.occasion==="nikoh"?`${data.groom} ${t.cover.andWord} ${data.bride}`:data.person;
+      const result={id,width,long,status:response.status(),events,expectedEvents:data.events.length,nameCorrect:name.replace(/\s+/g," ").trim()===expectedName,mapsCorrect:JSON.stringify(maps.sort())===JSON.stringify(expectedMaps),overflow:metrics.scrollWidth>width,clippedWords:clipped,hidden,autoplay:metrics.audioPaused===false,hasOpening:metrics.opener,height:metrics.height,errors:[...new Set(errors)]};
       results.push(result);console.log(JSON.stringify(result));await context.close();
     }
     const context=await browser.newContext({viewport:{width:320,height:812},reducedMotion:"reduce",isMobile:true,hasTouch:true});

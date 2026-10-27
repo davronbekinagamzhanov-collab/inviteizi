@@ -2,10 +2,16 @@
 import {chromium} from "playwright-core";
 import sharp from "sharp";
 const base=process.env.BASE??"http://127.0.0.1:3104";
-const colors={"oq-chinni":"#fcf9ef",doppicha:"#fff9ed","sayram-hovli":"#fbf8ee",zarvaraq:"#fbf4e6","umr-daraxti":"#fcf7ec"};
+const colors={"oq-chinni":"#fcf9ef",doppicha:"#fff9ed","sayram-hovli":"#fbf8ee",zarvaraq:"#fbf4e6","umr-daraxti":"#fcf7ec","marvarid-satr":"#fcf7f0","suzani-yol":"#faf5e9","bugdoy-boshoq":"#fcf8eb","gulbog-sahifa":"#fff8ed","lola-ehtirom":"#fcf7ef"};
+const ids=process.argv.slice(2).length?process.argv.slice(2):["oq-chinni","doppicha","sayram-hovli","zarvaraq","umr-daraxti"];
+if(ids.some(id=>!(id in colors)))throw new Error("Unknown OG design");
 const browser=await chromium.launch({channel:"chrome",headless:true});
 try{
-  for(const [id,bg] of Object.entries(colors)){
+  for(const id of ids){
+    const bg=colors[id];
+    if(["gulbog-sahifa","lola-ehtirom"].includes(id)){
+      await sharp(`public/art/${id}.webp`).resize(420,620,{fit:"cover"}).jpeg({quality:88}).toFile(`public/og/${id}.jpg`);console.log(id);continue;
+    }
     const page=await browser.newPage();await page.goto(`${base}/demo/${id}`);
     const svg=await page.locator('svg[data-decor][aria-hidden="true"]').first().evaluate(el=>{
       const clone=el.cloneNode(true);clone.removeAttribute("class");clone.setAttribute("xmlns","http://www.w3.org/2000/svg");clone.setAttribute("x","20");clone.setAttribute("y","60");clone.setAttribute("width","380");clone.setAttribute("height","500");

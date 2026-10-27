@@ -15,3 +15,7 @@
 - `samarqand-kitob.webp` — Bernard Gagnon; [Registan 01.jpg](https://commons.wikimedia.org/wiki/File:Registan_01.jpg); CC0 1.0, http://creativecommons.org/publicdomain/zero/1.0/deed.en. Проверено 26.10.2026. Изменения: уменьшение до 1080 px, мягкое размытие, WebP.
 
 - `tonggi-choy.webp` — Ekaterina Kvelidze; [Uzbek tea couple with traditional coloration.jpg](https://commons.wikimedia.org/wiki/File:Uzbek_tea_couple_with_traditional_coloration.jpg); CC BY-SA 4.0, https://creativecommons.org/licenses/by-sa/4.0. Проверено 26.10.2026. Изменения: уменьшение до 1080 px, мягкое размытие, WebP. Производные фото, включая кадры в covers/ и og/, распространяются под CC BY-SA 4.0; код и данные заказа отдельно. На пригласительной сохраняется атрибуция и ссылка лицензии.
+
+- `gulbog-sahifa.webp` — Vladislav Litvinov; [Rose Garden (50131461538).jpg](https://commons.wikimedia.org/wiki/File:Rose_Garden_(50131461538).jpg); CC0 1.0, http://creativecommons.org/publicdomain/zero/1.0/deed.en. Проверено 27.10.2026. Изменения: уменьшение до 1080 px, мягкое размытие, WebP.
+
+- `lola-ehtirom.webp` — Mustang Joe; [Tulip (32689468476).jpg](https://commons.wikimedia.org/wiki/File:Tulip_(32689468476).jpg); CC0 1.0, http://creativecommons.org/publicdomain/zero/1.0/deed.en. Проверено 27.10.2026. Изменения: уменьшение до 1080 px, мягкое размытие, WebP.

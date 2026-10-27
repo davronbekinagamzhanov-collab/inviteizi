@@ -156,6 +156,11 @@ type DemoOverride = Pick<InvitationData, "groom" | "bride" | "person" | "hosts" 
 };
 
 const demo: Record<string, DemoOverride> = {
+  "marvarid-satr": {groom:"Ислом",bride:"Зуҳра",hosts:"Эргашевлар оиласи",sides:{groom:"Эргашевлар оиласи",bride:"Ҳамроевлар оиласи"},date:"2027-02-20"},
+  "gulbog-sahifa": {groom:"Рустам",bride:"Муниса",hosts:"Қодировлар оиласи",sides:{groom:"Қодировлар оиласи",bride:"Ғаниевлар оиласи"},date:"2027-05-22"},
+  "suzani-yol": {groom:"Шоҳрух",bride:"Дилноза",hosts:"Мирзаевлар оиласи",sides:{groom:"Мирзаевлар оиласи",bride:"Нурматовлар оиласи"},date:"2027-03-06"},
+  "bugdoy-boshoq": {person:"Сардор",hosts:"Турсуновлар оиласи",date:"2027-02-27"},
+  "lola-ehtirom": {person:"Робия ая",relation:"ona",age:75,hosts:"Фарзандлари ва набиралари",date:"2027-03-21"},
   "oq-chinni": {person:"Отабек",hosts:"Ҳамроевлар оиласи",date:"2026-12-19"},
   doppicha: {person:"Мустафо",hosts:"Нурматовлар оиласи",date:"2026-12-26"},
   "sayram-hovli": {person:"Абдуллоҳ",hosts:"Ғаниевлар оиласи",date:"2027-01-09"},
