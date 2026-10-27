@@ -1,0 +1,9 @@
+.cover{position:absolute;inset:0 0 auto;z-index:40;height:100svh;min-height:560px;width:100%;overflow:hidden;color:#78594e}
+.paper{position:absolute;inset:0;background:#f0e5d2;opacity:1;transition:opacity .75s .5s;will-change:opacity}
+.stroke{position:absolute;inset:19% 6% auto;transition:opacity .4s 1s;will-change:opacity}
+.stroke path{stroke-dasharray:1;stroke-dashoffset:1}
+.words{position:absolute;inset:44% 8% auto;transition:opacity .3s .6s;}
+.cover[data-started=true] .stroke path{animation:draw .85s cubic-bezier(.25,0,.35,1) both}
+.cover[data-started=true] .paper,.cover[data-started=true] .words,.cover[data-started=true] .stroke{opacity:0}
+@keyframes draw{to{stroke-dashoffset:0}}
+@media(prefers-reduced-motion:reduce){.paper,.stroke,.words{transition:none}.stroke path{animation:none!important}}

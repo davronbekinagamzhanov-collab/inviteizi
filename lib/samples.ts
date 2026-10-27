@@ -156,6 +156,11 @@ type DemoOverride = Pick<InvitationData, "groom" | "bride" | "person" | "hosts" 
 };
 
 const demo: Record<string, DemoOverride> = {
+  "uzum-hovli": {groom:"Беҳзод",bride:"Сабоҳат",hosts:"Ҳакимовлар оиласи",sides:{groom:"Ҳакимовлар оиласи",bride:"Содиқовлар оиласи"},date:"2027-07-10"},
+  "sopol-navo": {groom:"Шаҳриёр",bride:"Моҳинур",hosts:"Набиевлар оиласи",sides:{groom:"Набиевлар оиласи",bride:"Икромовлар оиласи"},date:"2027-07-17"},
+  "girih-nur": {groom:"Фарҳод",bride:"Шабнам",hosts:"Зокировлар оиласи",sides:{groom:"Зокировлар оиласи",bride:"Салимовлар оиласи"},date:"2027-06-26"},
+  "siyoh-duo": {groom:"Комрон",bride:"Феруза",hosts:"Ражабовлар оиласи",sides:{groom:"Ражабовлар оиласи",bride:"Маҳмудовлар оиласи"},date:"2027-08-14"},
+  "kabutar-salom": {groom:"Саиджон",bride:"Муслима",hosts:"Ҳамроевлар оиласи",sides:{groom:"Ҳамроевлар оиласи",bride:"Абдуллаевлар оиласи"},date:"2027-08-21"},
   "zarhal-lavha": {person:"Абдуқаҳҳор ота",relation:"ota",age:70,hosts:"Фарзандлари ва набиралари",date:"2027-06-12"},
   "adras-nishon": {person:"Абдулазиз",hosts:"Ҳакимовлар оиласи",date:"2027-04-17"},
   "mis-kafgir": {person:"Музаффар",hosts:"Саидовлар оиласи",date:"2027-05-08"},

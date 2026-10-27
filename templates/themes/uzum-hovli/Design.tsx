@@ -1,0 +1,28 @@
+"use client";
+import localFont from "next/font/local";
+import {designVars,type TemplateProps} from "../types";
+import {useInvitation} from "../../blocks/useInvitation";
+import {InvitationShell} from "../../blocks/InvitationShell";
+import {Words,useFitWords} from "../../blocks/FitWords";
+import {Reveal} from "../../blocks/Reveal";
+import {Calendar} from "../../blocks/Calendar";
+import {MapButton} from "../../blocks/MapButton";
+import {designTexts} from "@/texts/uz-cyrl";
+const font=localFont({src:[{path:"../../../assets/fonts/Lora-Regular.ttf"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--uh-font",display:"swap"});
+const vars=designVars({primary:"#596850",primaryDark:"#394933",gold:"#a28a60",goldLight:"#e4d4b6",paper:"#faf6e9",ink:"#454b3d",muted:"#5e6652"},{display:"var(--uh-font)",accent:"var(--uh-font)",body:"var(--uh-font)"});
+const t=designTexts("uzum-hovli");
+/** A grape pergola over a courtyard: an architectural garden, not a floral album. */
+export default function Design({data,mode}:TemplateProps){
+  const inv=useInvitation(data,mode,{opening:false}),names=useFitWords<HTMLHeadingElement>(45),hosts=useFitWords<HTMLParagraphElement>(25),groom=useFitWords<HTMLParagraphElement>(24),bride=useFitWords<HTMLParagraphElement>(24);
+  return <InvitationShell inv={inv} style={vars} fontsClassName={font.variable} backdropClassName="bg-[#dfe2cf]" className="bg-paper text-ink [overflow-wrap:anywhere]">
+    <header className="relative pt-6 pb-10"><Pergola/><div className="px-7 text-center"><p className="mt-2 text-[12px] uppercase tracking-[.2em] text-muted">{t.opening.invitation}</p><h1 ref={names} className="mt-7 w-full leading-tight [--fit:45px]"><span className="block text-[length:var(--fit)]"><Words text={data.groom??""}/></span><span className="my-4 block text-[22px] italic text-primary">{t.cover.andWord}</span><span className="block text-[length:var(--fit)]"><Words text={data.bride??""}/></span></h1><p className="mt-7 text-[20px] italic text-primary">{t.occasionTitles[inv.occasion]}</p></div></header>
+    <main>
+      <Reveal className="mx-5 border-double border-y-4 border-gold/40 px-3 py-8 text-center"><h2 className="text-[29px] italic leading-snug">{inv.text.greeting}</h2><p className="mt-6 text-[20px] leading-[1.85]">{inv.text.body}</p></Reveal>
+      {inv.sides&&<section className="grid gap-7 px-7 py-11"><div className="border-l-2 border-primary/40 pl-5"><p className="text-[14px] text-muted">{t.sides.groom}</p><p ref={groom} className="mt-3 w-full leading-snug [--fit:24px]"><span className="text-[length:var(--fit)]"><Words text={inv.sides.groom??""}/></span></p></div><div className="border-r-2 border-primary/40 pr-5 text-right"><p className="text-[14px] text-muted">{t.sides.bride}</p><p ref={bride} className="mt-3 w-full leading-snug [--fit:24px]"><span className="text-[length:var(--fit)]"><Words text={inv.sides.bride??""}/></span></p></div></section>}
+      <section className="bg-[#e9ecdc] px-7 py-10"><Reveal><p className="mb-6 text-center text-[29px] text-primary">{t.date.title[inv.occasion]}</p><Calendar date={inv.main.when} marker="circle" markerClassName="text-primary" markedDayClassName="text-paper"/></Reveal><p className="mt-6 text-center text-[18px] text-muted">{t.date.long(inv.main.when.day,inv.main.when.monthIndex,inv.main.when.year)}</p></section>
+      <section className="px-7 pt-12"><h2 className="mb-8 text-[31px] italic">{t.venue.programTitle}</h2>{inv.program.map((e,i)=><Reveal key={i} className="mb-9"><div data-event className="relative border border-primary/25 px-5 pt-7 pb-6"><span aria-hidden className="absolute -top-3 left-5 bg-paper px-2 text-[14px] text-primary">0{i+1}</span><h3 className="text-[25px] leading-snug">{e.title}</h3><p className="mt-5 text-[15px] text-muted">{t.date.long(e.when.day,e.when.monthIndex,e.when.year)}</p><p className="mt-2 text-[31px] text-primary">{t.date.at(e.time)}</p><p className="mt-5 text-[21px] leading-snug">{e.venueName}</p><p className="mt-2 text-[17px] leading-relaxed text-muted">{e.address}</p><MapButton href={e.mapHref} className="mt-5 border-b border-primary/50 pb-2 text-primary" iconClassName="text-primary"/></div></Reveal>)}</section>
+      <Reveal className="px-7 pt-4 pb-24 text-center"><p className="text-[23px] italic leading-[1.8]">{inv.blessing}</p><p className="mt-10 text-[15px] text-muted">{t.hosts.respectDeep}</p><p ref={hosts} className="mt-3 w-full leading-snug [--fit:25px]"><span className="text-[length:var(--fit)]"><Words text={data.hosts}/></span></p><p className="mt-5 text-[18px] text-primary">{t.hosts.waiting}</p></Reveal>
+    </main>
+  </InvitationShell>;
+}
+function Pergola(){return <svg data-decor aria-hidden="true" viewBox="0 0 360 230" className="w-full" fill="none"><path d="M22 220V69H338V220M16 69H344M36 82H324M54 18V69M116 18V69M180 18V69M244 18V69M306 18V69M32 31H328" stroke="#baad88" strokeWidth="2"/><path d="M20 115Q61 35 119 84T234 70Q278 20 339 95M74 69Q80 120 143 119M232 73q-4 52 59 47" stroke="#718060" strokeWidth="2"/>{[[49,80,-30],[91,66,20],[131,83,60],[178,81,-25],[226,64,15],[268,55,60],[303,79,55],[126,120,-20],[275,117,45]].map(([x,y,r],i)=><path key={i} d="m0 0-19-7 5-8-10-13 17 2 7-12 8 13 16-3-9 15 5 8Z" transform={`translate(${x} ${y}) rotate(${r})`} fill={i%2?"#a5ad80":"#82936e"} stroke="#657b58" strokeWidth=".6"/>)}{[[63,98],[191,94],[312,108]].map(([x,y],i)=><g key={i} transform={`translate(${x} ${y})`} fill="#a59aa0" stroke="#837985" strokeWidth=".6">{[[0,0],[10,2],[-8,8],[3,11],[12,13],[-3,20],[6,23],[1,32]].map(([a,b],j)=><circle key={j} cx={a} cy={b} r="5.5"/>)}</g>)}<path d="M46 216H314M65 222H295" stroke="#baad88" strokeWidth="1"/></svg>;}

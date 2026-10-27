@@ -359,6 +359,11 @@ export const t = {
     "mis-kafgir": "Мис капгир",
     "rayhon-sahari": "Райҳон саҳари",
     "visol-rishta": "Висол риштаси",
+    "uzum-hovli": "Узум ҳовлиси",
+    "sopol-navo": "Сопол навоси",
+    "girih-nur": "Гиреҳ нури",
+    "siyoh-duo": "Сиёҳ дуоси",
+    "kabutar-salom": "Кабутар саломи",
   } as Record<string, string>,
 
   formats: {

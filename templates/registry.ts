@@ -148,6 +148,11 @@ export const designs: Design[] = [
   design("mis-kafgir", 89, "nahorgi", "simple", false, () => import("./themes/mis-kafgir/Design")),
   design("rayhon-sahari", 90, "nahorgi", "scroll", false, () => import("./themes/rayhon-sahari/Design")),
   design("visol-rishta", 91, "nikoh", "animated", false, () => import("./themes/visol-rishta/Design")),
+  design("uzum-hovli", 92, "nikoh", "scroll", false, () => import("./themes/uzum-hovli/Design")),
+  design("sopol-navo", 93, "nikoh", "scroll", false, () => import("./themes/sopol-navo/Design")),
+  design("girih-nur", 94, "nikoh", "animated", false, () => import("./themes/girih-nur/Design")),
+  design("siyoh-duo", 95, "nikoh", "animated", false, () => import("./themes/siyoh-duo/Design")),
+  design("kabutar-salom", 96, "nikoh", "animated", false, () => import("./themes/kabutar-salom/Design")),
 ];
 
 /**
@@ -162,6 +167,7 @@ export const ACCEPTED = new Set([
   "oq-chinni", "doppicha", "sayram-hovli", "zarvaraq", "umr-daraxti",
   "marvarid-satr", "gulbog-sahifa", "suzani-yol", "bugdoy-boshoq", "lola-ehtirom",
   "zarhal-lavha", "adras-nishon", "mis-kafgir", "rayhon-sahari", "visol-rishta",
+  "uzum-hovli", "sopol-navo", "girih-nur", "siyoh-duo", "kabutar-salom",
   // "anor-bogi" — скрыт по замечанию владельца 24.10 (код остаётся)
 ]);
 
