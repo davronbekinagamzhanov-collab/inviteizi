@@ -4,6 +4,11 @@ import {ACCEPTED,activeDesigns,designs,PRICES} from "./registry";
 import {photoAttributions} from "@/texts/uz-cyrl";
 
 describe("catalog acceptance integrity",()=>{
+  it("finishes the owner's exact 50-design quotas without publishing anor-bogi",()=>{
+    const expected={nikoh:{simple:5,scroll:10,animated:15},nahorgi:{simple:3,scroll:3,animated:4},sunnat:{simple:2,scroll:1,animated:2},yubiley:{simple:1,scroll:2,animated:2}} as const;
+    expect(activeDesigns()).toHaveLength(50);expect(ACCEPTED.size).toBe(50);expect(ACCEPTED.has('anor-bogi')).toBe(false);
+    for(const occasion of Object.keys(expected) as (keyof typeof expected)[]){const list=activeDesigns().filter(d=>d.occasion===occasion);expect({simple:list.filter(d=>d.format==='simple').length,scroll:list.filter(d=>d.format==='scroll').length,animated:list.filter(d=>d.format==='animated').length}).toEqual(expected[occasion]);}
+  });
   it("classifies by functionality and preserves ambiguous tariffs pending owner review",()=>{
     expect(activeDesigns().filter(d=>d.format==="scroll"&&d.number<=81).map(d=>d.id).sort()).toEqual(["paxta-gul","sayram-hovli","shohona-baxmal","tonggi-choy","umr-daraxti"]);
     for(const id of ["sapfir","ipak-romol","rishton-koshin","atirgul"])expect(designs.find(d=>d.id===id)?.format).toBe("simple");

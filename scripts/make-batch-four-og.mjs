@@ -6,6 +6,7 @@ const colors={"oq-chinni":"#fcf9ef",doppicha:"#fff9ed","sayram-hovli":"#fbf8ee",
 Object.assign(colors,{"zarhal-lavha":"#fcf6eb","adras-nishon":"#fcf4e9","mis-kafgir":"#fbf7ee","rayhon-sahari":"#f7f7ec","visol-rishta":"#fcf7f1"});
 Object.assign(colors,{"uzum-hovli":"#faf6e9","sopol-navo":"#fcf5e9","girih-nur":"#faf6e9","siyoh-duo":"#fcf7ee","kabutar-salom":"#fcf7f0"});
 Object.assign(colors,{"shirin-tilak":"#fcf6e8","minor-satr":"#f9f5e9","kumush-taroq":"#f8f7f0","shabnam-visol":"#f7f8f0","visol-soati":"#faf6e9"});
+Object.assign(colors,{"dutor-navosi":"#fcf5e9","tut-qogozi":"#fbf7ed","qosh-uzuk":"#fcf6e9","yelpigich-ziynat":"#f5f7ef","saodat-kaliti":"#fcf5ec"});
 const ids=process.argv.slice(2).length?process.argv.slice(2):["oq-chinni","doppicha","sayram-hovli","zarvaraq","umr-daraxti"];
 if(ids.some(id=>!(id in colors)))throw new Error("Unknown OG design");
 const browser=await chromium.launch({channel:"chrome",headless:true});

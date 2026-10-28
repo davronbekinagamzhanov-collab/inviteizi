@@ -156,6 +156,11 @@ type DemoOverride = Pick<InvitationData, "groom" | "bride" | "person" | "hosts" 
 };
 
 const demo: Record<string, DemoOverride> = {
+  "dutor-navosi": {groom:"Суҳроб",bride:"Шаҳло",hosts:"Аҳмедовлар оиласи",sides:{groom:"Аҳмедовлар оиласи",bride:"Раҳматовлар оиласи"},date:"2027-10-02"},
+  "tut-qogozi": {groom:"Шуҳрат",bride:"Мафтуна",hosts:"Ҳамдамовлар оиласи",sides:{groom:"Ҳамдамовлар оиласи",bride:"Муродовлар оиласи"},date:"2027-10-09"},
+  "qosh-uzuk": {groom:"Алишер",bride:"Латофат",hosts:"Абдураҳмоновлар оиласи",sides:{groom:"Абдураҳмоновлар оиласи",bride:"Саидовлар оиласи"},date:"2027-10-16"},
+  "yelpigich-ziynat": {groom:"Илҳом",bride:"Дилрабо",hosts:"Файзиевлар оиласи",sides:{groom:"Файзиевлар оиласи",bride:"Шукуровлар оиласи"},date:"2027-10-23"},
+  "saodat-kaliti": {groom:"Абдураҳмон",bride:"Гулруҳ",hosts:"Ҳусановлар оиласи",sides:{groom:"Ҳусановлар оиласи",bride:"Раҳмоновлар оиласи"},date:"2027-10-30"},
   "shirin-tilak": {groom:"Умиджон",bride:"Нозима",hosts:"Раҳимовлар оиласи",sides:{groom:"Раҳимовлар оиласи",bride:"Рўзиевлар оиласи"},date:"2027-08-28"},
   "minor-satr": {groom:"Нодирбек",bride:"Гулбаҳор",hosts:"Қосимовлар оиласи",sides:{groom:"Қосимовлар оиласи",bride:"Эшоновлар оиласи"},date:"2027-09-04"},
   "kumush-taroq": {groom:"Дониёр",bride:"Зебо",hosts:"Рустамовлар оиласи",sides:{groom:"Рустамовлар оиласи",bride:"Муҳаммадиевлар оиласи"},date:"2027-09-11"},
