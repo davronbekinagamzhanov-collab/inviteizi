@@ -26,6 +26,7 @@ export default function OltinMonogramma({ data, mode }: TemplateProps) {
   const initials: [string, string] = [data.groom?.charAt(0) ?? "", data.bride?.charAt(0) ?? ""];
   const { main } = inv;
   const groomFamily=useFitWords<HTMLParagraphElement>(26),brideFamily=useFitWords<HTMLParagraphElement>(26);
+  const hosts=useFitWords<HTMLParagraphElement>(26);
 
   return (
     <InvitationShell
@@ -120,6 +121,7 @@ export default function OltinMonogramma({ data, mode }: TemplateProps) {
               <p className="mt-8 font-display text-[40px] leading-none font-semibold">{t.hosts.waiting}</p>
               <p className="mt-6 text-[17px] text-muted italic">{t.hosts.respectDeep}:</p>
               {inv.sides ? <div className="mt-5 space-y-5 text-center [overflow-wrap:anywhere]"><div><p className="text-[14px] text-muted">{t.sides.groom}</p><p ref={groomFamily} className="mt-2 w-full [--fit:26px]"><span className="text-[length:var(--fit)]"><Words text={inv.sides.groom??""}/></span></p></div><div><p className="text-[14px] text-muted">{t.sides.bride}</p><p ref={brideFamily} className="mt-2 w-full [--fit:26px]"><span className="text-[length:var(--fit)]"><Words text={inv.sides.bride??""}/></span></p></div></div> : <p className="gold-text mt-2 font-display text-[34px] leading-tight font-semibold">{data.hosts}</p>}
+              {inv.sides && data.hosts && ![inv.sides.groom,inv.sides.bride].includes(data.hosts) && <p ref={hosts} className="gold-text mt-5 w-full font-display [--fit:26px]"><span className="text-[length:var(--fit)]"><Words text={data.hosts}/></span></p>}
               <MiniMonogram initials={initials} />
             </div>
           </Reveal>

@@ -13,7 +13,7 @@ export const texts: Record<Lang, BotTexts> = { uz, ru };
 export const txFor = (lang: Lang | null | undefined): BotTexts => texts[lang ?? "uz"];
 
 /** Песня клиента — до 20 МБ */
-export const MAX_MUSIC_BYTES = 20 * 1024 * 1024;
+export { MAX_MUSIC_BYTES } from "../audio-type";
 export const MAX_CUSTOM_TEXT = 600;
 export const MAX_EVENTS = 3;
 /** Статусы «уже оплачено» */

@@ -119,6 +119,20 @@ export default function OqOt({ data, mode, art }: TemplateProps) {
           </Reveal>
         </Section>
 
+        {inv.program.some(e => e !== main) && <Section title={t.venue.programTitle}>
+          <div className="space-y-5">
+            {inv.program.filter(e => e !== main).map((event, i) => <Reveal key={i}>
+              <div className="rounded-[22px] border border-primary/20 bg-white/60 px-5 py-6 text-center [overflow-wrap:anywhere]">
+                <p className="font-display text-[25px] leading-snug text-primary">{event.title}</p>
+                <p className="mt-3 text-[17px]">{t.date.long(event.when.day, event.when.monthIndex, event.when.year)} · {t.date.at(event.time)}</p>
+                <p className="mt-4 font-display text-[25px] leading-snug">{event.venueName}</p>
+                <p className="mt-2 text-[17px] text-muted">{event.address}</p>
+                <MapButton href={event.mapHref} className="mt-5 rounded-full border border-primary/40 px-5 py-3 text-primary" iconClassName="text-primary"/>
+              </div>
+            </Reveal>)}
+          </div>
+        </Section>}
+
         {/* Чин юракдан и хозяева */}
         <Reveal>
           <div className="mt-16 text-center">
