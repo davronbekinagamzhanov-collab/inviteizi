@@ -9,6 +9,10 @@ import { PGLiteSocketServer } from "@electric-sql/pglite-socket";
 import postgres from "postgres";
 import { readFile, writeFile } from "node:fs/promises";
 import { PgRepo } from "./repo-pg";
+import { execFileSync } from "node:child_process";
+import ts from "typescript";
+import { isReservedSlug } from "@/lib/slug";
+import { env } from "@/lib/env";
 import { repoContract } from "./repo.contract";
 import { designs,PRICES } from "@/templates/registry";
 import type { Sql } from "@/lib/db";
@@ -38,6 +42,32 @@ describe.skipIf(process.env.INVITEIZI_LOCAL_PG !== "1")("PgRepo through isolated
     expect(o.data.sides).toEqual({groom:"Каримовлар оиласи",bride:"Юсуповлар оиласи"});
     expect(o.data.events[0]).toMatchObject({venueName:"Nayryz",address:"Ибрагим Ата, 174",mapUrl:"https://go.2gis.com/JReZD"});
     expect((await repo.getOrderBySlug(o.slug))?.data).toEqual(o.data);
+  });
+  it("release: pinned main SQL code operates on future schema without changing saved prices",async()=>{
+    const root=process.cwd().replaceAll("\\","/");
+    const source=execFileSync("git",["-c",`safe.directory=${root}`,"show","ab5eb2ee1925e75a733e7a186fe510f28d9b85c7:bot/repo-pg.ts"],{encoding:"utf8"});
+    const js=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
+    const exported:{PgRepo?:typeof PgRepo}={};
+    // Execute only the pinned repository SQL adapter; a default/production DB connection is forbidden.
+    new Function("require","exports",js)((id:string)=>{
+      if(id==="@/lib/db")return {db:()=>{throw Error("Explicit isolated SQL required");}};
+      if(id==="@/lib/env")return {env};
+      if(id==="@/lib/slug")return {isReservedSlug};
+      throw Error("Unexpected baseline dependency");
+    },exported);
+    const old=new exported.PgRepo!(sql);
+    const userId=890000001;await old.touchUser({id:userId});
+    const data={occasion:"nikoh" as const,groom:"Азиз",bride:"Мадина",hosts:"Оила",events:[]};
+    const historical=await old.createOrder({userId,occasion:"nikoh",format:"simple",templateId:"sapfir",data,music:{kind:"none"},amount:4321,slugBase:"release-old-main",status:"preview"});
+    await old.transition(historical.id,["preview"],"receipt_sent");
+    expect(await old.transition(historical.id,["receipt_sent"],"active",{paidAt:new Date()})).not.toBeNull();
+    expect(await old.transition(historical.id,["receipt_sent"],"active",{paidAt:new Date()})).toBeNull();
+    expect(await repo.getOrder(historical.id)).toMatchObject({amount:4321,format:"simple",slug:historical.slug,status:"active"});
+    const events=await sql`select kind from public.analytics_events where kind='payment_confirmed' and dedupe_key=${historical.id}`;
+    expect(events).toHaveLength(1);
+    const scroll=await repo.createOrder({userId,occasion:"nikoh",format:"scroll",templateId:"shohona-baxmal",data,music:{kind:"none"},amount:PRICES.scroll,slugBase:"release-new-scroll",status:"active"});
+    expect(await old.getOrder(scroll.id)).toMatchObject({amount:6000,format:"scroll",slug:scroll.slug,status:"active"});
+    // This proves SQL read compatibility, not that the old renderer knows every new template ID.
   });
   it("venue stage: SQL saved quote rejects format changes and counts payment once",async()=>{
     vi.stubEnv("ADMIN_IDS","500");vi.stubEnv("OWNER_TELEGRAM_ID","500");

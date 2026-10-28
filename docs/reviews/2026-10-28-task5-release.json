@@ -1,0 +1,717 @@
+{
+  "checkedAt": "2026-10-28T14:31:10.748Z",
+  "auditedRuntimeSha": "700b25484af6028b28d1c3aeb4ff80db25d300cd",
+  "mainSha": "ab5eb2ee1925e75a733e7a186fe510f28d9b85c7",
+  "runtimeChangesInTask5": false,
+  "prices": {
+    "animated": 8000,
+    "scroll": 6000,
+    "simple": 5000
+  },
+  "quotas": {
+    "nikoh": {
+      "simple": 5,
+      "scroll": 10,
+      "animated": 15
+    },
+    "sunnat": {
+      "simple": 2,
+      "scroll": 1,
+      "animated": 2
+    },
+    "nahorgi": {
+      "simple": 3,
+      "scroll": 3,
+      "animated": 4
+    },
+    "yubiley": {
+      "simple": 1,
+      "scroll": 2,
+      "animated": 2
+    }
+  },
+  "accepted": [
+    {
+      "id": "oltin-monogramma",
+      "title": "Олтин монограмма",
+      "occasion": "nikoh",
+      "format": "animated",
+      "price": 8000
+    },
+    {
+      "id": "sapfir",
+      "title": "Сапфир",
+      "occasion": "nikoh",
+      "format": "simple",
+      "price": 5000
+    },
+    {
+      "id": "oq-ot",
+      "title": "Оқ от",
+      "occasion": "sunnat",
+      "format": "animated",
+      "price": 8000
+    },
+    {
+      "id": "tonggi-qozon",
+      "title": "Тонгги қозон",
+      "occasion": "nahorgi",
+      "format": "animated",
+      "price": 8000
+    },
+    {
+      "id": "pion-guldasta",
+      "title": "Пион гулдаста",
+      "occasion": "yubiley",
+      "format": "animated",
+      "price": 8000
+    },
+    {
+      "id": "ganch-peshtoq",
+      "title": "Ганч пештоқ",
+      "occasion": "nikoh",
+      "format": "animated",
+      "price": 8000
+    },
+    {
+      "id": "zarhal-eshik",
+      "title": "Зарҳал эшик",
+      "occasion": "nikoh",
+      "format": "animated",
+      "price": 8000
+    },
+    {
+      "id": "atlas-tolqin",
+      "title": "Атлас тўлқини",
+      "occasion": "nikoh",
+      "format": "animated",
+      "price": 8000
+    },
+    {
+      "id": "bodom-guli",
+      "title": "Бодом гули",
+      "occasion": "nikoh",
+      "format": "animated",
+      "price": 8000
+    },
+    {
+      "id": "samarqand-kitob",
+      "title": "Самарқанд",
+      "occasion": "nikoh",
+      "format": "animated",
+      "price": 8000
+    },
+    {
+      "id": "ipak-romol",
+      "title": "Ипак рўмол",
+      "occasion": "nikoh",
+      "format": "simple",
+      "price": 5000
+    },
+    {
+      "id": "rishton-koshin",
+      "title": "Риштон кошин",
+      "occasion": "nikoh",
+      "format": "simple",
+      "price": 5000
+    },
+    {
+      "id": "atirgul",
+      "title": "Атиргул",
+      "occasion": "nikoh",
+      "format": "simple",
+      "price": 5000
+    },
+    {
+      "id": "shohona-baxmal",
+      "title": "Шоҳона бахмал",
+      "occasion": "nikoh",
+      "format": "scroll",
+      "price": 6000
+    },
+    {
+      "id": "tandir-nuri",
+      "title": "Тандир нури",
+      "occasion": "nahorgi",
+      "format": "animated",
+      "price": 8000
+    },
+    {
+      "id": "dasturxon",
+      "title": "Дастурхон",
+      "occasion": "nahorgi",
+      "format": "animated",
+      "price": 8000
+    },
+    {
+      "id": "non-muhr",
+      "title": "Нон муҳри",
+      "occasion": "nahorgi",
+      "format": "animated",
+      "price": 8000
+    },
+    {
+      "id": "tonggi-choy",
+      "title": "Тонгги чой",
+      "occasion": "nahorgi",
+      "format": "scroll",
+      "price": 6000
+    },
+    {
+      "id": "paxta-gul",
+      "title": "Пахта гул",
+      "occasion": "nahorgi",
+      "format": "scroll",
+      "price": 6000
+    },
+    {
+      "id": "oltin-ot",
+      "title": "Олтин от",
+      "occasion": "sunnat",
+      "format": "animated",
+      "price": 8000
+    },
+    {
+      "id": "oq-chinni",
+      "title": "Оқ чинни",
+      "occasion": "nahorgi",
+      "format": "simple",
+      "price": 5000
+    },
+    {
+      "id": "doppicha",
+      "title": "Дўппича",
+      "occasion": "sunnat",
+      "format": "simple",
+      "price": 5000
+    },
+    {
+      "id": "sayram-hovli",
+      "title": "Сайрам ҳовлиси",
+      "occasion": "sunnat",
+      "format": "scroll",
+      "price": 6000
+    },
+    {
+      "id": "zarvaraq",
+      "title": "Зарварақ",
+      "occasion": "yubiley",
+      "format": "simple",
+      "price": 5000
+    },
+    {
+      "id": "umr-daraxti",
+      "title": "Умр дарахти",
+      "occasion": "yubiley",
+      "format": "scroll",
+      "price": 6000
+    },
+    {
+      "id": "marvarid-satr",
+      "title": "Марварид сатри",
+      "occasion": "nikoh",
+      "format": "simple",
+      "price": 5000
+    },
+    {
+      "id": "gulbog-sahifa",
+      "title": "Гулбоғ саҳифаси",
+      "occasion": "nikoh",
+      "format": "scroll",
+      "price": 6000
+    },
+    {
+      "id": "suzani-yol",
+      "title": "Сўзана йўли",
+      "occasion": "nikoh",
+      "format": "scroll",
+      "price": 6000
+    },
+    {
+      "id": "bugdoy-boshoq",
+      "title": "Буғдой бошоғи",
+      "occasion": "nahorgi",
+      "format": "simple",
+      "price": 5000
+    },
+    {
+      "id": "lola-ehtirom",
+      "title": "Лола эҳтироми",
+      "occasion": "yubiley",
+      "format": "scroll",
+      "price": 6000
+    },
+    {
+      "id": "zarhal-lavha",
+      "title": "Зарҳал лавҳа",
+      "occasion": "yubiley",
+      "format": "animated",
+      "price": 8000
+    },
+    {
+      "id": "adras-nishon",
+      "title": "Адрас нишони",
+      "occasion": "sunnat",
+      "format": "simple",
+      "price": 5000
+    },
+    {
+      "id": "mis-kafgir",
+      "title": "Мис капгир",
+      "occasion": "nahorgi",
+      "format": "simple",
+      "price": 5000
+    },
+    {
+      "id": "rayhon-sahari",
+      "title": "Райҳон саҳари",
+      "occasion": "nahorgi",
+      "format": "scroll",
+      "price": 6000
+    },
+    {
+      "id": "visol-rishta",
+      "title": "Висол риштаси",
+      "occasion": "nikoh",
+      "format": "animated",
+      "price": 8000
+    },
+    {
+      "id": "uzum-hovli",
+      "title": "Узум ҳовлиси",
+      "occasion": "nikoh",
+      "format": "scroll",
+      "price": 6000
+    },
+    {
+      "id": "sopol-navo",
+      "title": "Сопол навоси",
+      "occasion": "nikoh",
+      "format": "scroll",
+      "price": 6000
+    },
+    {
+      "id": "girih-nur",
+      "title": "Гиреҳ нури",
+      "occasion": "nikoh",
+      "format": "animated",
+      "price": 8000
+    },
+    {
+      "id": "siyoh-duo",
+      "title": "Сиёҳ дуоси",
+      "occasion": "nikoh",
+      "format": "animated",
+      "price": 8000
+    },
+    {
+      "id": "kabutar-salom",
+      "title": "Кабутар саломи",
+      "occasion": "nikoh",
+      "format": "animated",
+      "price": 8000
+    },
+    {
+      "id": "shirin-tilak",
+      "title": "Ширин тилак",
+      "occasion": "nikoh",
+      "format": "scroll",
+      "price": 6000
+    },
+    {
+      "id": "minor-satr",
+      "title": "Минор сатри",
+      "occasion": "nikoh",
+      "format": "scroll",
+      "price": 6000
+    },
+    {
+      "id": "kumush-taroq",
+      "title": "Кумуш тароқ",
+      "occasion": "nikoh",
+      "format": "scroll",
+      "price": 6000
+    },
+    {
+      "id": "shabnam-visol",
+      "title": "Шабнам висоли",
+      "occasion": "nikoh",
+      "format": "animated",
+      "price": 8000
+    },
+    {
+      "id": "visol-soati",
+      "title": "Висол соати",
+      "occasion": "nikoh",
+      "format": "animated",
+      "price": 8000
+    },
+    {
+      "id": "dutor-navosi",
+      "title": "Дутор навоси",
+      "occasion": "nikoh",
+      "format": "scroll",
+      "price": 6000
+    },
+    {
+      "id": "tut-qogozi",
+      "title": "Тут қоғози",
+      "occasion": "nikoh",
+      "format": "scroll",
+      "price": 6000
+    },
+    {
+      "id": "qosh-uzuk",
+      "title": "Қўш узук",
+      "occasion": "nikoh",
+      "format": "animated",
+      "price": 8000
+    },
+    {
+      "id": "yelpigich-ziynat",
+      "title": "Елпиғич зийнати",
+      "occasion": "nikoh",
+      "format": "animated",
+      "price": 8000
+    },
+    {
+      "id": "saodat-kaliti",
+      "title": "Саодат калити",
+      "occasion": "nikoh",
+      "format": "animated",
+      "price": 8000
+    }
+  ],
+  "seed": {
+    "mode": "dry-run only",
+    "rows": 51,
+    "active": 50,
+    "hidden": [
+      "anor-bogi"
+    ],
+    "paidOrderTemplatesInProduction": "not verified without read-only DB access"
+  },
+  "baselineRegistry": {
+    "ids": [
+      "oltin-monogramma",
+      "sapfir",
+      "oq-ot",
+      "tonggi-qozon",
+      "pion-guldasta",
+      "ganch-peshtoq",
+      "zarhal-eshik",
+      "atlas-tolqin",
+      "anor-bogi",
+      "bodom-guli",
+      "samarqand-kitob",
+      "ipak-romol",
+      "rishton-koshin",
+      "atirgul",
+      "shohona-baxmal",
+      "tandir-nuri",
+      "dasturxon",
+      "non-muhr",
+      "tonggi-choy",
+      "paxta-gul",
+      "oltin-ot"
+    ],
+    "removed": [],
+    "newActiveIdsUnknownToMain": [
+      "oq-chinni",
+      "doppicha",
+      "sayram-hovli",
+      "zarvaraq",
+      "umr-daraxti",
+      "marvarid-satr",
+      "gulbog-sahifa",
+      "suzani-yol",
+      "bugdoy-boshoq",
+      "lola-ehtirom",
+      "zarhal-lavha",
+      "adras-nishon",
+      "mis-kafgir",
+      "rayhon-sahari",
+      "visol-rishta",
+      "uzum-hovli",
+      "sopol-navo",
+      "girih-nur",
+      "siyoh-duo",
+      "kabutar-salom",
+      "shirin-tilak",
+      "minor-satr",
+      "kumush-taroq",
+      "shabnam-visol",
+      "visol-soati",
+      "dutor-navosi",
+      "tut-qogozi",
+      "qosh-uzuk",
+      "yelpigich-ziynat",
+      "saodat-kaliti"
+    ]
+  },
+  "migrations": [
+    {
+      "file": "20261023180530_schema.sql",
+      "sha256": "a750dc25598a35c35f14a19149a240c394430018343be4cf989dd9d8ff7ea6f3",
+      "appliedInProduction": "unknown"
+    },
+    {
+      "file": "20261023180625_storage_buckets.sql",
+      "sha256": "4d1f8c58b04d8aad0c4c93c882eb90dffe93f2927f8d51b74245cfc5f5966f51",
+      "appliedInProduction": "unknown"
+    },
+    {
+      "file": "20261023221315_cron.sql",
+      "sha256": "6f9edc00e343fdd28d1e40daf3fc2d2566d0ed80fbfcf9b842321ac564ac0891",
+      "appliedInProduction": "unknown"
+    },
+    {
+      "file": "20261024031409_slug_reserved_dev.sql",
+      "sha256": "f09ab5f18378e7feee7c5417508b5ecb16dc53fdd7b1d245fc3651b9ed8f66ba",
+      "appliedInProduction": "unknown"
+    },
+    {
+      "file": "20261024120000_slug_history.sql",
+      "sha256": "a0057227a67a896e050d6c3caa8369c525374d8a1a87c82602131f97463a2db2",
+      "appliedInProduction": "unknown"
+    },
+    {
+      "file": "20261024150000_music_occasion.sql",
+      "sha256": "bd96f3808fcd79387ba1b61736e629805d8da1b00ed4e1a227fcd82dbb3931ed",
+      "appliedInProduction": "unknown"
+    },
+    {
+      "file": "20261025120000_analytics_favorites.sql",
+      "sha256": "48cdd4226e77973a8fe917a9e857602f55b57cd6975249b59112ab315482e9df",
+      "appliedInProduction": "unknown"
+    },
+    {
+      "file": "20261026120000_scroll_format.sql",
+      "sha256": "6723766b29675a329a41236ade4ff762ccdf36dc45813b4a1c02a822343bd17f",
+      "appliedInProduction": "unknown"
+    }
+  ],
+  "configuration": {
+    "scope": "local process env; no secret values; not Vercel configuration evidence",
+    "passed": false,
+    "rows": [
+      {
+        "key": "TELEGRAM_BOT_TOKEN",
+        "status": "missing",
+        "required": true
+      },
+      {
+        "key": "TELEGRAM_WEBHOOK_SECRET",
+        "status": "missing",
+        "required": true
+      },
+      {
+        "key": "OWNER_USERNAME",
+        "status": "missing",
+        "required": true
+      },
+      {
+        "key": "OWNER_TELEGRAM_ID",
+        "status": "missing",
+        "required": true
+      },
+      {
+        "key": "ADMIN_IDS",
+        "status": "not-set",
+        "required": false
+      },
+      {
+        "key": "ANALYTICS_ADMIN_IDS",
+        "status": "not-set",
+        "required": false
+      },
+      {
+        "key": "ANALYTICS_SIGNING_SECRET",
+        "status": "missing",
+        "required": true
+      },
+      {
+        "key": "KASPI_PHONE",
+        "status": "missing",
+        "required": true
+      },
+      {
+        "key": "KASPI_NAME",
+        "status": "missing",
+        "required": true
+      },
+      {
+        "key": "PAYMENT_CARD_NUMBER",
+        "status": "not-set",
+        "required": false
+      },
+      {
+        "key": "STORAGE_GATE_SECRET",
+        "status": "missing",
+        "required": true
+      },
+      {
+        "key": "DB_SERVER_PASSWORD",
+        "status": "missing",
+        "required": true
+      },
+      {
+        "key": "PUBLIC_BASE_URL",
+        "status": "default-valid",
+        "required": false
+      },
+      {
+        "key": "SUPABASE_URL",
+        "status": "default-valid",
+        "required": false
+      },
+      {
+        "key": "VENUE_MAP_PICKER_URL",
+        "status": "not-set",
+        "required": false
+      }
+    ],
+    "warnings": [
+      "Format checks only: no authentication, DB grants, deployed env or Storage-gate secret match was verified.",
+      "Preview must not reuse production write credentials; this script never connects to a service.",
+      "ADMIN_IDS not set: confirm existing public.admins authorizes receipt confirmation."
+    ]
+  },
+  "preview": {
+    "checkedHead": "700b25484af6028b28d1c3aeb4ff80db25d300cd",
+    "githubVercelStatus": "success",
+    "deploymentDashboard": "https://vercel.com/scanizi/inviteizi/HXRxRhC6dpDJZd9tEtVhwjP4fJJe",
+    "branchUrl": "https://inviteizi-git-feature-inviteizi-upgrade-scanizi.vercel.app",
+    "smoke": "BLOCKED_AUTH",
+    "routes": [
+      "/",
+      "/catalog",
+      "/demo/saodat-kaliti"
+    ],
+    "observed": "GET redirects to vercel.com login; final HTTP 200 is not app success",
+    "browser": "Computer Use stopped: current browser URL could not be determined reliably; no further UI automation attempted"
+  },
+  "music": {
+    "checkedAt": "2026-10-28T14:32:30.731Z",
+    "mode": "HEAD only, known paths, no customer objects",
+    "knownPaths": [
+      {
+        "name": "atlas-ozbekiston",
+        "occasion": "nikoh",
+        "status": 200,
+        "type": "audio/mpeg",
+        "bytes": 5534208
+      },
+      {
+        "name": "debussy-clair-de-lune",
+        "occasion": "nikoh",
+        "status": 200,
+        "type": "audio/mpeg",
+        "bytes": 9210984
+      },
+      {
+        "name": "pachelbel-kanon",
+        "occasion": "nikoh",
+        "status": 200,
+        "type": "audio/mpeg",
+        "bytes": 5170944
+      },
+      {
+        "name": "nozik-fortepiano",
+        "occasion": "nikoh",
+        "status": 200,
+        "type": "audio/mpeg",
+        "bytes": 5416704
+      },
+      {
+        "name": "janob-rasul-toy-toy",
+        "occasion": "nikoh",
+        "status": 200,
+        "type": "audio/mpeg",
+        "bytes": 3684675
+      },
+      {
+        "name": "umidaxon-toy-qilamiz",
+        "occasion": "nikoh",
+        "status": 200,
+        "type": "audio/mpeg",
+        "bytes": 3138904
+      },
+      {
+        "name": "vohid-abdulhakim-kelin-kuyov",
+        "occasion": "nikoh",
+        "status": 200,
+        "type": "audio/mpeg",
+        "bytes": 2707941
+      },
+      {
+        "name": "dildora-kunuzokova-ozbegim-toylari",
+        "occasion": "nikoh",
+        "status": 200,
+        "type": "audio/mpeg",
+        "bytes": 5192641
+      },
+      {
+        "name": "nilufar-usmonova-yor-yor",
+        "occasion": "nikoh",
+        "status": 200,
+        "type": "audio/mpeg",
+        "bytes": 8737353
+      },
+      {
+        "name": "oltin-monogramma",
+        "occasion": "nikoh",
+        "status": 200,
+        "type": "audio/mpeg",
+        "bytes": 1200796
+      },
+      {
+        "name": "sapfir",
+        "occasion": "nikoh",
+        "status": 200,
+        "type": "audio/mpeg",
+        "bytes": 1200796
+      },
+      {
+        "name": "masrur-usmonov-toylar-muborak",
+        "occasion": "nahorgi",
+        "status": 200,
+        "type": "audio/mpeg",
+        "bytes": 7125100
+      },
+      {
+        "name": "tonggi-qozon",
+        "occasion": "nahorgi",
+        "status": 200,
+        "type": "audio/mpeg",
+        "bytes": 1200796
+      },
+      {
+        "name": "ravshan-komilov-toy-bola",
+        "occasion": "sunnat",
+        "status": 200,
+        "type": "audio/mpeg",
+        "bytes": 6822121
+      },
+      {
+        "name": "oq-ot",
+        "occasion": "sunnat",
+        "status": 200,
+        "type": "audio/mpeg",
+        "bytes": 1200796
+      },
+      {
+        "name": "pion-guldasta",
+        "occasion": "yubiley",
+        "status": 200,
+        "type": "audio/mpeg",
+        "bytes": 1200796
+      }
+    ],
+    "available": 16,
+    "actualPlaybackVerifiedPreviously": 4,
+    "verifiedCommercialLicenses": 0,
+    "localFiles": 1,
+    "localCatalogMp3": 0
+  }
+}
