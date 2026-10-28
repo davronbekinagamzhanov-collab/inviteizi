@@ -93,7 +93,15 @@ export const musicList: Step = {
     const m = list.find((x) => x.id === v.slice(2));
     if (!m) return null;
     if (v.startsWith("p:")) {
-      const sent = await c.deps.tg.sendAudio(c.chatId, m.telegramFileId ?? m.fileUrl, { title: trackTitle(c, m) });
+      let sent;
+      try {
+        sent = await c.deps.tg.sendAudio(c.chatId, m.telegramFileId ?? m.fileUrl, { title: trackTitle(c, m) });
+      } catch (e) {
+        // No URL/token in logs; a failed preview must not change the chosen music.
+        console.error("previewMusic", e instanceof Error ? e.name : "Error");
+        await send(c, c.tx.music.previewFailed);
+        return { stay: true };
+      }
       if (!m.telegramFileId && sent.fileId) await c.deps.repo.setMusicTelegramFileId(m.id, sent.fileId);
       return { stay: true };
     }
@@ -128,11 +136,11 @@ export const musicOwn: Step = {
       } catch (e) {
         console.error("saveMusic", e instanceof Error ? e.name : "Error");
       }
-      // без копии в хранилище гости не услышат песню — не делаем вид, что всё хорошо
-      if (!url) {
-        await send(c, c.tx.music.saveFailed);
-        return { stay: true };
-      }
+    }
+    // This is also required when the storage dependency is missing.
+    if (!url) {
+      await send(c, c.tx.music.saveFailed);
+      return { stay: true };
     }
     c.s.music = { kind: "own", fileId: file.fileId, ...(url ? { url } : {}), ...(title ? { title } : {}) };
     await send(c, c.tx.music.saved);
