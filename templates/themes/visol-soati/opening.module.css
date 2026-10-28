@@ -1,0 +1,11 @@
+.cover{position:absolute;inset:0 0 auto;width:100%;height:100svh;min-height:560px;z-index:40;overflow:hidden;color:#584d30}
+.paper{position:absolute;inset:0;background:#eee7ce;transition:opacity .6s .6s;will-change:opacity}
+.clock{position:absolute;left:calc(50% - 115px);top:20%;width:230px;transition:opacity .35s .95s;will-change:opacity}
+.hour,.minute{transform-origin:100px 100px;will-change:transform}
+.hour{transform:rotate(var(--hour))}.minute{transform:rotate(var(--minute))}
+.dial .hour,.dial .minute{transform:rotate(0deg)}
+.cover[data-started=true] .hour{transform:rotate(calc(360deg + var(--hour)));transition:transform 1.05s cubic-bezier(.35,0,.2,1)}
+.cover[data-started=true] .minute{transform:rotate(calc(360deg + var(--minute)));transition:transform .95s cubic-bezier(.35,0,.2,1)}
+.label{position:absolute;inset:62% 6% auto;transition:opacity .3s .7s}
+.cover[data-started=true] .paper,.cover[data-started=true] .clock,.cover[data-started=true] .label{opacity:0}
+@media(prefers-reduced-motion:reduce){.paper,.clock,.label,.hour,.minute{transition:none!important}}

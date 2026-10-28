@@ -5,6 +5,7 @@ const base=process.env.BASE??"http://127.0.0.1:3104";
 const colors={"oq-chinni":"#fcf9ef",doppicha:"#fff9ed","sayram-hovli":"#fbf8ee",zarvaraq:"#fbf4e6","umr-daraxti":"#fcf7ec","marvarid-satr":"#fcf7f0","suzani-yol":"#faf5e9","bugdoy-boshoq":"#fcf8eb","gulbog-sahifa":"#fff8ed","lola-ehtirom":"#fcf7ef"};
 Object.assign(colors,{"zarhal-lavha":"#fcf6eb","adras-nishon":"#fcf4e9","mis-kafgir":"#fbf7ee","rayhon-sahari":"#f7f7ec","visol-rishta":"#fcf7f1"});
 Object.assign(colors,{"uzum-hovli":"#faf6e9","sopol-navo":"#fcf5e9","girih-nur":"#faf6e9","siyoh-duo":"#fcf7ee","kabutar-salom":"#fcf7f0"});
+Object.assign(colors,{"shirin-tilak":"#fcf6e8","minor-satr":"#f9f5e9","kumush-taroq":"#f8f7f0","shabnam-visol":"#f7f8f0","visol-soati":"#faf6e9"});
 const ids=process.argv.slice(2).length?process.argv.slice(2):["oq-chinni","doppicha","sayram-hovli","zarvaraq","umr-daraxti"];
 if(ids.some(id=>!(id in colors)))throw new Error("Unknown OG design");
 const browser=await chromium.launch({channel:"chrome",headless:true});

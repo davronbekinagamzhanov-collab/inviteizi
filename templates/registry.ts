@@ -153,6 +153,11 @@ export const designs: Design[] = [
   design("girih-nur", 94, "nikoh", "animated", false, () => import("./themes/girih-nur/Design")),
   design("siyoh-duo", 95, "nikoh", "animated", false, () => import("./themes/siyoh-duo/Design")),
   design("kabutar-salom", 96, "nikoh", "animated", false, () => import("./themes/kabutar-salom/Design")),
+  design("shirin-tilak", 97, "nikoh", "scroll", false, () => import("./themes/shirin-tilak/Design")),
+  design("minor-satr", 98, "nikoh", "scroll", false, () => import("./themes/minor-satr/Design")),
+  design("kumush-taroq", 99, "nikoh", "scroll", false, () => import("./themes/kumush-taroq/Design")),
+  design("shabnam-visol", 100, "nikoh", "animated", false, () => import("./themes/shabnam-visol/Design")),
+  design("visol-soati", 101, "nikoh", "animated", false, () => import("./themes/visol-soati/Design")),
 ];
 
 /**
@@ -168,6 +173,7 @@ export const ACCEPTED = new Set([
   "marvarid-satr", "gulbog-sahifa", "suzani-yol", "bugdoy-boshoq", "lola-ehtirom",
   "zarhal-lavha", "adras-nishon", "mis-kafgir", "rayhon-sahari", "visol-rishta",
   "uzum-hovli", "sopol-navo", "girih-nur", "siyoh-duo", "kabutar-salom",
+  "shirin-tilak", "minor-satr", "kumush-taroq", "shabnam-visol", "visol-soati",
   // "anor-bogi" — скрыт по замечанию владельца 24.10 (код остаётся)
 ]);
 

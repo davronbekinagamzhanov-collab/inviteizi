@@ -6,7 +6,7 @@ import {mapLink} from "@/lib/map-link";
 import {t} from "@/texts/uz-cyrl";
 import {VENUES} from "@/bot/venues";
 vi.mock("next/font/local",()=>({default:()=>({variable:"test-font"})}));
-const cases=[['zarhal-lavha','yubiley','animated'],['adras-nishon','sunnat','simple'],['mis-kafgir','nahorgi','simple'],['rayhon-sahari','nahorgi','scroll'],['visol-rishta','nikoh','animated'],['uzum-hovli','nikoh','scroll'],['sopol-navo','nikoh','scroll'],['girih-nur','nikoh','animated'],['siyoh-duo','nikoh','animated'],['kabutar-salom','nikoh','animated']] as const;
+const cases=[['zarhal-lavha','yubiley','animated'],['adras-nishon','sunnat','simple'],['mis-kafgir','nahorgi','simple'],['rayhon-sahari','nahorgi','scroll'],['visol-rishta','nikoh','animated'],['uzum-hovli','nikoh','scroll'],['sopol-navo','nikoh','scroll'],['girih-nur','nikoh','animated'],['siyoh-duo','nikoh','animated'],['kabutar-salom','nikoh','animated'],['shirin-tilak','nikoh','scroll'],['minor-satr','nikoh','scroll'],['kumush-taroq','nikoh','scroll'],['shabnam-visol','nikoh','animated'],['visol-soati','nikoh','animated']] as const;
 describe("stage 2 real invitation components",()=>{
   for(const [id,occasion,format] of cases)for(const long of [false,true])for(const mode of ["demo","full"] as const)it(`${id} ${long?'long':'normal'} ${mode}: all supplied fields and venue URLs`,async()=>{
     const d=getDesign(id)!;expect(d).toMatchObject({occasion,format,withPhoto:false});
@@ -22,5 +22,13 @@ describe("stage 2 real invitation components",()=>{
     if(data.sides){expect(plain).toContain(t.sides.groom);expect(plain).toContain(t.sides.bride);}
     expect(html.includes('data-open=')).toBe(format==='animated');
     expect(plain.includes('НАМУНА')).toBe(mode==='demo');expect(html.match(/data-event=/g)).toHaveLength(data.events.length);
+  });
+});
+
+describe("submitted clock time",()=>{
+  it.each(["demo","full"] as const)("keeps 19:25 in the hands and event text / %s",async mode=>{
+    const d=getDesign("visol-soati")!,{default:Design}=await d.load(),data=structuredClone(d.sample);data.events[0].time="19:25";
+    const html=renderToStaticMarkup(createElement(Design,{data:{...data,noMusic:true},mode}));
+    expect(html).toContain("--hour:222.5deg");expect(html).toContain("--minute:150deg");expect(html).toContain("19:25");
   });
 });

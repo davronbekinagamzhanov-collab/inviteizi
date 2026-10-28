@@ -156,6 +156,11 @@ type DemoOverride = Pick<InvitationData, "groom" | "bride" | "person" | "hosts" 
 };
 
 const demo: Record<string, DemoOverride> = {
+  "shirin-tilak": {groom:"Умиджон",bride:"Нозима",hosts:"Раҳимовлар оиласи",sides:{groom:"Раҳимовлар оиласи",bride:"Рўзиевлар оиласи"},date:"2027-08-28"},
+  "minor-satr": {groom:"Нодирбек",bride:"Гулбаҳор",hosts:"Қосимовлар оиласи",sides:{groom:"Қосимовлар оиласи",bride:"Эшоновлар оиласи"},date:"2027-09-04"},
+  "kumush-taroq": {groom:"Дониёр",bride:"Зебо",hosts:"Рустамовлар оиласи",sides:{groom:"Рустамовлар оиласи",bride:"Муҳаммадиевлар оиласи"},date:"2027-09-11"},
+  "shabnam-visol": {groom:"Жавоҳир",bride:"Дилором",hosts:"Сафаровлар оиласи",sides:{groom:"Сафаровлар оиласи",bride:"Ғуломовлар оиласи"},date:"2027-09-18"},
+  "visol-soati": {groom:"Баҳодир",bride:"Раъно",hosts:"Носировлар оиласи",sides:{groom:"Носировлар оиласи",bride:"Шариповлар оиласи"},date:"2027-09-25"},
   "uzum-hovli": {groom:"Беҳзод",bride:"Сабоҳат",hosts:"Ҳакимовлар оиласи",sides:{groom:"Ҳакимовлар оиласи",bride:"Содиқовлар оиласи"},date:"2027-07-10"},
   "sopol-navo": {groom:"Шаҳриёр",bride:"Моҳинур",hosts:"Набиевлар оиласи",sides:{groom:"Набиевлар оиласи",bride:"Икромовлар оиласи"},date:"2027-07-17"},
   "girih-nur": {groom:"Фарҳод",bride:"Шабнам",hosts:"Зокировлар оиласи",sides:{groom:"Зокировлар оиласи",bride:"Салимовлар оиласи"},date:"2027-06-26"},

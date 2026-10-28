@@ -1,0 +1,23 @@
+{
+  "scope": "Local DOM endpoint geometry, CSS drop animation finished for measurement; full natural openings checked separately",
+  "results": [
+    {
+      "height": 640,
+      "dropCenter": 264.09375762939453,
+      "rippleCenter": 264.59375,
+      "offset": 0.49999237060546875
+    },
+    {
+      "height": 812,
+      "dropCenter": 331.1781463623047,
+      "rippleCenter": 331.671875,
+      "offset": 0.4937286376953125
+    },
+    {
+      "height": 900,
+      "dropCenter": 365.49998474121094,
+      "rippleCenter": 366,
+      "offset": 0.5000152587890625
+    }
+  ]
+}
