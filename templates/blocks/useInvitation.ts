@@ -106,6 +106,7 @@ export function useInvitation(data: InvitationData, mode: InvitationMode, opts: 
           preload: "none",
           onPlay: () => setPlaying(true),
           onPause: () => setPlaying(false),
+          onError: () => setPlaying(false),
         })
       : null,
     started,

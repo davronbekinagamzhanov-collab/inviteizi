@@ -23,7 +23,9 @@
   },
   "devDependencies": {
     "@breezystack/lamejs": "^1.2.7",
-    "@tailwindcss/turbopack": "^4",
+    "@electric-sql/pglite": "^0.5.11",
+    "@electric-sql/pglite-socket": "^0.2.14",
+    "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^20",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
@@ -31,6 +33,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.4.2",
     "playwright-core": "^1.56.1",
+    "sharp": "^0.35.5",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^3.2.7"

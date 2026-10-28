@@ -1,4 +1,5 @@
-import { Lora, Playfair } from "next/font/google";
+import { Playfair } from "next/font/google";
+import localFont from "next/font/local";
 import { designVars } from "../types";
 
 // Playfair Display без cyrillic-ext (нет қ ғ ҳ), поэтому новая версия семейства — Playfair
@@ -9,11 +10,13 @@ const display = Playfair({
   subsets: ["cyrillic", "cyrillic-ext"],
 });
 
-const body = Lora({
+const body = localFont({
   variable: "--sf-body",
-  weight: ["400", "500"],
-  style: ["normal", "italic"],
-  subsets: ["cyrillic", "cyrillic-ext"],
+  src: [
+    { path: "../../../assets/fonts/Lora-Regular.ttf", weight: "400 700", style: "normal" },
+    { path: "../../../assets/fonts/Lora-Italic.ttf", weight: "400 700", style: "italic" },
+  ],
+  display: "swap",
 });
 
 export const fontClasses = `${display.variable} ${body.variable}`;

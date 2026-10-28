@@ -26,6 +26,7 @@ import {
   txFor,
 } from "./util";
 import { getDesign } from "@/templates/registry";
+import { rememberUpdate } from "../update";
 
 // ── Создание / сохранение из сводки ──
 
@@ -46,24 +47,40 @@ export async function confirmDraft(c: Ctx): Promise<Result> {
   if (s.orderId) {
     const old = await repo.getOrder(s.orderId);
     if (!old || old.userId !== c.user.id) return { hint: c.tx.order.notFound };
-    const canChangePrice = PAYABLE_STATUSES.includes(old.status);
-    const o = await repo.updateOrder(old.id, {
+    // The status guard belongs in the UPDATE, not only in the earlier read.
+    if (!PAYABLE_STATUSES.includes(old.status)) {
+      await send(c, old.status === "receipt_sent" ? c.tx.pay.waiting : c.tx.order.closed);
+      return { done: true };
+    }
+    const selected=getDesign(s.templateId);
+    if(s.format!==old.format||(s.templateId!==old.templateId&&(!selected||selected.format!==old.format||selected.occasion!==old.occasion))){
+      s.format=old.format;s.templateId=old.templateId;
+      return {hint:c.tx.order.formatLocked};
+    }
+    const o = await repo.transition(old.id, PAYABLE_STATUSES, old.status, {
       data,
       music,
       templateId: s.templateId,
-      ...(canChangePrice ? { format: s.format, amount: PRICES[s.format] } : {}),
-      ...(PAID_STATUSES.includes(old.status) ? { expiresAt: expiresAt(data) } : {}),
+      // A saved order keeps its agreed amount; catalog changes must not reprice it.
+      format: s.format, amount: old.amount,
     });
+    if (!o) {
+      const current = await repo.getOrder(old.id);
+      await send(c, current?.status === "receipt_sent" ? c.tx.pay.waiting : c.tx.order.closed);
+      return { done: true };
+    }
     await send(c, c.tx.order.updated(pageUrl(c, o.slug)), inline(orderButtons(c, o)));
     return { done: true };
   }
 
-  // Двойное нажатие: параллельный запрос уже создаёт заказ по этой же сводке — молча выходим
-  if (!(await repo.claimStep(c.user.id, c.q0, c.q0 + 1))) return { done: true };
-  c.s.q = Math.max(c.s.q ?? 0, c.q0 + 1);
-
+  const selected=getDesign(s.templateId);
+  if(!selected||selected.format!==s.format||selected.occasion!==data.occasion){
+    s.ret="review";
+    await send(c,c.tx.order.catalogChanged);
+    return {to:"fmt"};
+  }
   const slugBase = data.occasion === "nikoh" ? slugify(data.groom ?? "", data.bride ?? "") : slugify(data.person ?? "");
-  const o = await repo.createOrder({
+  const o = await repo.createOrderFromDraft({
     userId: c.user.id,
     occasion: data.occasion,
     format: s.format,
@@ -73,9 +90,11 @@ export async function confirmDraft(c: Ctx): Promise<Result> {
     amount: PRICES[s.format],
     status: "preview",
     slugBase,
-  });
+  }, c.q0, c.u.updateId === undefined ? undefined : rememberUpdate(c.user.state.handledUpdates,c.u.updateId));
+  if (!o) return { ignore: true };
   await send(c, c.tx.order.created(pageUrl(c, o.slug)), inline(orderButtons(c, o)));
-  return { done: true };
+  // Repo already finished this draft in the same transaction. Do not overwrite a newer dialog.
+  return { ignore: true };
 }
 
 // ── Свои заказы ──
@@ -130,10 +149,14 @@ export async function payOrder(c: Ctx, n: number): Promise<Result> {
   }
   await c.deps.repo.transition(o.id, PAYABLE_STATUSES, "awaiting_payment");
   const env = c.deps.env;
+  const card=env.paymentCardNumber?.trim();
+  const paymentRows:InlineButton[][]=[[{text:c.tx.pay.copy,copy:env.kaspiPhone.replace(/[^\d+]/g,"")}]];
+  if(card)paymentRows.push([{text:c.tx.pay.copyCard,copy:card}]);
+  paymentRows.push([{text:c.tx.pay.sendReceipt,data:`rcpt:${o.number}`}]);
   await send(
     c,
-    c.tx.pay.info(price(o.amount), env.kaspiPhone, env.kaspiName, o.number),
-    inline([[{ text: c.tx.pay.copy, copy: env.kaspiPhone.replace(/[^\d+]/g, "") }], [{ text: c.tx.pay.sendReceipt, data: `rcpt:${o.number}` }]]),
+    c.tx.pay.info(price(o.amount), env.kaspiPhone, env.kaspiName, o.number)+(card?"\n\n"+c.tx.pay.card(card):""),
+    inline(paymentRows),
   );
   // Чек можно прислать сразу, не нажимая «Чекни юбориш»
   c.s = { q: c.s.q, orderId: o.id };
@@ -226,7 +249,7 @@ export async function notifyAdmins(deps: Deps, o: OrderRecord, prefix = "") {
       else await deps.tg.sendMessage(adminId, caption, { markup: opts.markup });
     } catch (e) {
       // Админ мог не запускать бота — остальным всё равно отправляем
-      console.error("notifyAdmins", adminId, e instanceof Error ? e.message : e);
+      console.error("notifyAdmins", e instanceof Error ? e.name : "Error");
     }
   }
 }
@@ -274,7 +297,7 @@ async function sendLinkPack(deps: Deps, o: OrderRecord, afterPayment: boolean) {
       await fn();
       return true;
     } catch (e) {
-      console.error("клиенту не отправлено:", what, e instanceof Error ? e.message : e);
+      console.error("клиенту не отправлено:", what, e instanceof Error ? e.name : "Error");
       return false;
     }
   };

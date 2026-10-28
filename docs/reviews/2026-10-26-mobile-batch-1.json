@@ -1,0 +1,186 @@
+{
+  "results": [
+    {
+      "design": "zarhal-eshik",
+      "width": 320,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "zarhal-eshik",
+      "width": 360,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "zarhal-eshik",
+      "width": 375,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "zarhal-eshik",
+      "width": 430,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "ipak-romol",
+      "width": 320,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "ipak-romol",
+      "width": 360,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "ipak-romol",
+      "width": 375,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "ipak-romol",
+      "width": 430,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "rishton-koshin",
+      "width": 320,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "rishton-koshin",
+      "width": 360,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "rishton-koshin",
+      "width": 375,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "rishton-koshin",
+      "width": 430,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "atirgul",
+      "width": 320,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "atirgul",
+      "width": 360,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "atirgul",
+      "width": 375,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "atirgul",
+      "width": 430,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "dasturxon",
+      "width": 320,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "dasturxon",
+      "width": 360,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "dasturxon",
+      "width": 375,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "dasturxon",
+      "width": 430,
+      "long": false,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    }
+  ],
+  "reducedMotionVisible": true,
+  "passed": true
+}

@@ -3,16 +3,17 @@ import type { InlineButton, Markup } from "../tg";
 import type { Ctx, Draft, DraftData } from "./types";
 import type { InvitationData, InvitationEvent, Lang, Occasion, OrderRecord, OrderStatus } from "@/lib/domain";
 import type { EventKind } from "@/lib/types";
-import { designs, getDesign, PRICES, type Format, activeDesigns } from "@/templates/registry";
+import { getDesign, PRICES, FORMATS, type Format, activeDesigns } from "@/templates/registry";
 import { t } from "@/texts/uz-cyrl";
 import { uz, type BotTexts } from "@/texts/bot-uz";
 import { ru } from "@/texts/bot-ru";
+import { demoToken } from "@/lib/demo-tracking";
 
 export const texts: Record<Lang, BotTexts> = { uz, ru };
 export const txFor = (lang: Lang | null | undefined): BotTexts => texts[lang ?? "uz"];
 
 /** Песня клиента — до 20 МБ */
-export const MAX_MUSIC_BYTES = 20 * 1024 * 1024;
+export { MAX_MUSIC_BYTES } from "../audio-type";
 export const MAX_CUSTOM_TEXT = 600;
 export const MAX_EVENTS = 3;
 /** Статусы «уже оплачено» */
@@ -44,7 +45,10 @@ export const designName = (id: string) => t.designs[id] ?? id;
 export const pageUrl = (c: Pick<Ctx, "deps">, slug: string) => `${c.deps.env.publicBaseUrl}/${slug}`;
 export const coverUrl = (c: Pick<Ctx, "deps">, id: string) => `${c.deps.env.publicBaseUrl}/covers/${id}.jpg`;
 // «👁 Намуна» в каталоге — чистое демо без надписи НАМУНА (личная НАМУНА — по ссылке заказа)
-export const demoUrl = (c: Pick<Ctx, "deps">, id: string) => `${c.deps.env.publicBaseUrl}/demo/${id}`;
+export const demoUrl = (c: Pick<Ctx, "deps"> & Partial<Pick<Ctx, "user">>, id: string) => {
+  const token = c.user ? demoToken(c.user.id, id, c.deps.now()) : undefined;
+  return `${c.deps.env.publicBaseUrl}/demo/${id}${token ? `#dt=${token}` : ""}`;
+};
 export const ownerUrl = (c: Pick<Ctx, "deps">) => `https://t.me/${c.deps.env.ownerUsername.replace(/^@/, "")}`;
 
 /** «Азиз ва Мадина» / «Жасурбек» */
@@ -61,12 +65,12 @@ export function designsFor(occasion: Occasion, format: Format) {
 }
 
 export function formatsFor(occasion: Occasion): Format[] {
-  return (["animated", "simple"] as Format[]).filter((f) => designsFor(occasion, f).length > 0);
+  return FORMATS.filter((f) => designsFor(occasion, f).length > 0);
 }
 
-export function designLine(tx: BotTexts, templateId: string, format: Format) {
+export function designLine(tx: BotTexts, templateId: string, format: Format, amount = PRICES[format]) {
   const d = getDesign(templateId);
-  return tx.review.design(d?.number ?? 0, designName(templateId), tx.format.names[format], price(PRICES[format]));
+  return tx.review.design(d?.number ?? 0, designName(templateId), tx.format.names[format], price(amount));
 }
 
 // ── Черновик ──
@@ -81,6 +85,14 @@ export const MAIN_EVENT: Record<Occasion, EventKind> = {
 export function data(c: Ctx) {
   c.s.data ??= { occasion: c.s.occasion, events: [] };
   c.s.data.events ??= [];
+  // JSON serializes sparse draft arrays as null. Preserve real entries and their back-stack indexes.
+  const events=c.s.data.events;
+  if(events.some(e=>e==null)){
+    const compactIndex=(i:number)=>events.slice(0,i).filter(e=>e!=null).length;
+    if(c.s.ev!==undefined)c.s.ev=compactIndex(c.s.ev);
+    for(const entry of c.s.back??[])if(entry.ev!==undefined)entry.ev=compactIndex(entry.ev);
+    c.s.data.events=events.filter(e=>e!=null);
+  }
   return c.s.data as DraftData & { events: Partial<InvitationEvent>[] };
 }
 
@@ -92,8 +104,8 @@ export function curEvent(c: Ctx): Partial<InvitationEvent> {
   return evs[i];
 }
 
-export const isCompleteEvent = (e: Partial<InvitationEvent>): e is InvitationEvent =>
-  !!(e.kind && e.date && e.time && e.venueName && e.address);
+export const isCompleteEvent = (e: Partial<InvitationEvent> | null | undefined): e is InvitationEvent =>
+  !!(e?.kind && e.date && e.time && e.venueName && e.address);
 
 /** Черновик → данные пригласительного (только законченные тадбиры) */
 export function finalData(s: Draft): InvitationData {

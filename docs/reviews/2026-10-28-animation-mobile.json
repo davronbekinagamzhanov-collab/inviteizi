@@ -1,0 +1,151 @@
+{
+  "scope": "local Chrome, full opening/scroll; music replaced with existing local WAV, not a remote license audit",
+  "results": [
+    {
+      "design": "zarhal-lavha",
+      "width": 320,
+      "long": false,
+      "status": 200,
+      "missingFields": [],
+      "missingMaps": [],
+      "clippedWords": 0,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "zarhal-lavha",
+      "width": 360,
+      "long": false,
+      "status": 200,
+      "missingFields": [],
+      "missingMaps": [],
+      "clippedWords": 0,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "zarhal-lavha",
+      "width": 375,
+      "long": false,
+      "status": 200,
+      "missingFields": [],
+      "missingMaps": [],
+      "clippedWords": 0,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "zarhal-lavha",
+      "width": 430,
+      "long": false,
+      "status": 200,
+      "missingFields": [],
+      "missingMaps": [],
+      "clippedWords": 0,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "visol-rishta",
+      "width": 320,
+      "long": false,
+      "status": 200,
+      "missingFields": [],
+      "missingMaps": [],
+      "clippedWords": 0,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "visol-rishta",
+      "width": 360,
+      "long": false,
+      "status": 200,
+      "missingFields": [],
+      "missingMaps": [],
+      "clippedWords": 0,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "visol-rishta",
+      "width": 375,
+      "long": false,
+      "status": 200,
+      "missingFields": [],
+      "missingMaps": [],
+      "clippedWords": 0,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "visol-rishta",
+      "width": 430,
+      "long": false,
+      "status": 200,
+      "missingFields": [],
+      "missingMaps": [],
+      "clippedWords": 0,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "kabutar-salom",
+      "width": 320,
+      "long": false,
+      "status": 200,
+      "missingFields": [],
+      "missingMaps": [],
+      "clippedWords": 0,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "kabutar-salom",
+      "width": 360,
+      "long": false,
+      "status": 200,
+      "missingFields": [],
+      "missingMaps": [],
+      "clippedWords": 0,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "kabutar-salom",
+      "width": 375,
+      "long": false,
+      "status": 200,
+      "missingFields": [],
+      "missingMaps": [],
+      "clippedWords": 0,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "kabutar-salom",
+      "width": 430,
+      "long": false,
+      "status": 200,
+      "missingFields": [],
+      "missingMaps": [],
+      "clippedWords": 0,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    }
+  ],
+  "reducedMotionVisible": true,
+  "passed": true
+}

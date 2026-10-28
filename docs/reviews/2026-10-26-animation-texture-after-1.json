@@ -1,0 +1,89 @@
+{
+  "environment": "Local Chrome headless; warmed pages; CPU x4; 375x812 DPR2. Frame times are measured with requestAnimationFrame; this is not a physical-device guarantee.",
+  "noSvgFilters": false,
+  "results": [
+    {
+      "design": "ganch-peshtoq",
+      "phase": "opening",
+      "cpuThrottle": 4,
+      "noSvgFilters": false,
+      "frames": 175,
+      "p50Ms": 16.7,
+      "p95Ms": 33.2,
+      "maxMs": 166.7,
+      "over50Ms": 4,
+      "over100Ms": 2,
+      "stalls": [
+        {
+          "atMs": 99.9,
+          "durationMs": 66.6
+        },
+        {
+          "atMs": 183.2,
+          "durationMs": 66.6
+        },
+        {
+          "atMs": 349.9,
+          "durationMs": 166.7
+        },
+        {
+          "atMs": 516.6,
+          "durationMs": 166.7
+        }
+      ]
+    },
+    {
+      "design": "ganch-peshtoq",
+      "phase": "scroll",
+      "cpuThrottle": 4,
+      "noSvgFilters": false,
+      "frames": 174,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 100,
+      "over50Ms": 1,
+      "over100Ms": 0,
+      "stalls": [
+        {
+          "atMs": 183.2,
+          "durationMs": 100
+        }
+      ]
+    },
+    {
+      "design": "oltin-ot",
+      "phase": "opening",
+      "cpuThrottle": 4,
+      "noSvgFilters": false,
+      "frames": 180,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 116.7,
+      "over50Ms": 2,
+      "over100Ms": 1,
+      "stalls": [
+        {
+          "atMs": 149.9,
+          "durationMs": 50.1
+        },
+        {
+          "atMs": 1616.5,
+          "durationMs": 116.7
+        }
+      ]
+    },
+    {
+      "design": "oltin-ot",
+      "phase": "scroll",
+      "cpuThrottle": 4,
+      "noSvgFilters": false,
+      "frames": 179,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 49.9,
+      "over50Ms": 0,
+      "over100Ms": 0,
+      "stalls": []
+    }
+  ]
+}

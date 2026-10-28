@@ -1,0 +1,22 @@
+{
+  "scope": "isolated in-memory algorithm; not a production throughput benchmark",
+  "node": "v24.13.1",
+  "results": [
+    {
+      "clients": 100,
+      "orders": 1000,
+      "events": 3000,
+      "baselineMs": 14.06,
+      "currentMs": 3.95,
+      "sameResults": true
+    },
+    {
+      "clients": 1000,
+      "orders": 10000,
+      "events": 30000,
+      "baselineMs": 458.15,
+      "currentMs": 29.64,
+      "sameResults": true
+    }
+  ]
+}

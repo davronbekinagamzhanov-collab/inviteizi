@@ -20,7 +20,7 @@ describe("оплата Kaspi и чек", () => {
     const o = await nikohOrder(sim, 1);
     await sim.click(1, /^💳 Тўлаш/);
     const m = sim.last(1);
-    expect(m.text).toMatch(/^💳 Kaspi орқали 10.000 ₸ ўтказинг:/);
+    expect(m.text).toMatch(/^💳 Kaspi орқали 8.000 ₸ ўтказинг:/);
     expect(m.text).toContain("📱 +7 700 000 00 00");
     expect(m.text).toContain("👤 Давронбек И.");
     expect(m.text).toContain(`#${o.number}`);
@@ -226,18 +226,17 @@ describe("мои приглашения, правка, ссылка", () => {
     expect(inlineButtons(old).find((b) => b.text === uz.contact)).toEqual({ text: uz.contact, url: "https://t.me/inviteizi_owner" });
   });
 
-  it("правка неоплаченного: смена формата меняет цену, slug тот же", async () => {
+  it("правка неоплаченного: смена дизайна сохраняет формат и согласованную сумму, slug тот же", async () => {
     const sim = new Sim();
     const o = await nikohOrder(sim, 1);
     await sim.click(1, uz.order.edit);
     await sim.click(1, uz.review.editDesign);
-    expect(sim.lastText(1)).toBe(uz.format.ask);
-    await sim.click(1, /Оддий/);
+    await sim.click(1, "▶");
     await sim.click(1, uz.catalog.buy);
-    expect(sim.lastText(1)).toContain("Дизайн: №23 Сапфир");
+    expect(sim.lastText(1)).toContain("Дизайн: №61 Ганч пештоқ");
     await sim.click(1, uz.review.confirm);
-    expect(await sim.repo.getOrder(o.id)).toMatchObject({ slug: "aziz-madina", format: "simple", amount: 7_000, templateId: "sapfir" });
-    expect(buttonLabels(sim.last(1)).some((l) => /^💳 Тўлаш — 7.000 ₸$/.test(l))).toBe(true);
+    expect(await sim.repo.getOrder(o.id)).toMatchObject({ slug: "aziz-madina", format: "animated", amount: 8_000, templateId: "ganch-peshtoq" });
+    expect(buttonLabels(sim.last(1)).some((l) => /^💳 Тўлаш — 8.000 ₸$/.test(l))).toBe(true);
   });
 
   it("правка тадбира из сводки: время", async () => {

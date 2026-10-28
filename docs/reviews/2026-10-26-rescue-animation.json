@@ -1,0 +1,124 @@
+{
+  "environment": "Local Chrome headless; warmed pages; CPU x4; 375x812 DPR2. Touch input; opening recording starts in pointerdown capture before React, excluding pre-input Playwright actionability checks. requestAnimationFrame times; not a physical-device guarantee.",
+  "noSvgFilters": false,
+  "results": [
+    {
+      "design": "atlas-tolqin",
+      "phase": "opening",
+      "cpuThrottle": 4,
+      "noSvgFilters": false,
+      "frames": 184,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 49.9,
+      "over50Ms": 0,
+      "over100Ms": 0,
+      "stalls": []
+    },
+    {
+      "design": "atlas-tolqin",
+      "phase": "scroll",
+      "cpuThrottle": 4,
+      "noSvgFilters": false,
+      "frames": 181,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 16.9,
+      "over50Ms": 0,
+      "over100Ms": 0,
+      "stalls": []
+    },
+    {
+      "design": "bodom-guli",
+      "phase": "opening",
+      "cpuThrottle": 4,
+      "noSvgFilters": false,
+      "frames": 180,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 83.3,
+      "over50Ms": 1,
+      "over100Ms": 0,
+      "stalls": [
+        {
+          "atMs": 1860.6,
+          "durationMs": 83.3
+        }
+      ]
+    },
+    {
+      "design": "bodom-guli",
+      "phase": "scroll",
+      "cpuThrottle": 4,
+      "noSvgFilters": false,
+      "frames": 180,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 17.4,
+      "over50Ms": 0,
+      "over100Ms": 0,
+      "stalls": []
+    },
+    {
+      "design": "samarqand-kitob",
+      "phase": "opening",
+      "cpuThrottle": 4,
+      "noSvgFilters": false,
+      "frames": 185,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 50,
+      "over50Ms": 0,
+      "over100Ms": 0,
+      "stalls": []
+    },
+    {
+      "design": "samarqand-kitob",
+      "phase": "scroll",
+      "cpuThrottle": 4,
+      "noSvgFilters": false,
+      "frames": 180,
+      "p50Ms": 16.7,
+      "p95Ms": 16.7,
+      "maxMs": 16.8,
+      "over50Ms": 0,
+      "over100Ms": 0,
+      "stalls": []
+    },
+    {
+      "design": "non-muhr",
+      "phase": "opening",
+      "cpuThrottle": 4,
+      "noSvgFilters": false,
+      "frames": 181,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 100,
+      "over50Ms": 2,
+      "over100Ms": 0,
+      "stalls": [
+        {
+          "atMs": 110.5,
+          "durationMs": 100
+        },
+        {
+          "atMs": 227.1,
+          "durationMs": 99.9
+        }
+      ]
+    },
+    {
+      "design": "non-muhr",
+      "phase": "scroll",
+      "cpuThrottle": 4,
+      "noSvgFilters": false,
+      "frames": 180,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 16.8,
+      "over50Ms": 0,
+      "over100Ms": 0,
+      "stalls": []
+    }
+  ]
+}

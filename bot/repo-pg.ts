@@ -21,6 +21,7 @@ import type { EventKind, Occasion, Relation } from "@/lib/types";
 import { db, type Sql, type Tx } from "@/lib/db";
 import { env } from "@/lib/env";
 import { isReservedSlug } from "@/lib/slug";
+import { summarize, type AnalyticsInput, type EventKind as AnalyticsEventKind, type MetricOrder, type MetricEvent, type MetricUser, type Period } from "@/lib/analytics";
 
 const PAID: OrderStatus[] = ["active", "archived"];
 const TZ_OFFSET_MS = 5 * 60 * 60_000; // Казахстан: UTC+5 круглый год
@@ -297,6 +298,59 @@ const isUniqueSlugViolation = (e: unknown) =>
   String((e as { constraint_name?: string }).constraint_name ?? "").includes("slug");
 
 export class PgRepo implements Repo {
+  async isOwner(id: number) { return env.ownerId() === id; }
+
+  async canAnalyze(id: number) {
+    if (await this.isOwner(id)) return true;
+    if (!(await this.isAdmin(id))) return false;
+    if (env.analyticsAdminIds().includes(id)) return true;
+    try {
+      const [r] = await this.sql`select 1 from public.admins where telegram_id = ${id} and can_analytics`;
+      return Boolean(r);
+    } catch(error) {
+      // Before the optional analytics migration there is no database grant to consult.
+      // Deny by default; do not infer analytics access from payment-admin rights.
+      if(typeof error==="object"&&error!==null&&"code" in error&&error.code==="42703")return false;
+      throw error;
+    }
+  }
+
+  async analytics(actorId: number, period: Period, now: Date, customers = false) {
+    const owner = await this.isOwner(actorId);
+    if (!(await this.canAnalyze(actorId)) || (customers && !owner)) throw new Error("Analytics access denied");
+    // One consistent snapshot; only necessary columns, never event addresses or receipt files.
+    const input = await this.sql.begin("isolation level repeatable read read only", async tx => {
+      const orders = await tx<MetricOrder[]>`select id, user_id as "userId", status, occasion, format, template_id as "templateId",
+        amount, created_at as "createdAt", paid_at as "paidAt", updated_at as "updatedAt",
+        case when music_kind = 'list' then jsonb_build_object('kind','list','musicId',music_id)
+          else jsonb_build_object('kind',music_kind) end as music from public.orders`;
+      const users = customers
+        ? await tx<MetricUser[]>`select id, username, first_name as "firstName", created_at as "createdAt" from public.users`
+        : await tx<MetricUser[]>`select id, null::text as username, null::text as "firstName", created_at as "createdAt" from public.users`;
+      const events = await tx<MetricEvent[]>`select kind, user_id as "userId", target, created_at as "createdAt" from public.analytics_events`;
+      const [config] = await tx<{ started_at: Date }[]>`select started_at from public.analytics_config where singleton`;
+      const music = await tx<{ id: string; titleRu: string; titleUz: string }[]>`select id, title_ru as "titleRu", title_uz as "titleUz" from public.music`;
+      return { orders: [...orders], users: [...users], events: [...events], since: config.started_at, music: [...music] } satisfies AnalyticsInput;
+    });
+    return summarize(input, period, now, customers && owner);
+  }
+
+  async listFavorites(userId: number) {
+    const rows = await this.sql<{ template_id: string }[]>`select template_id from public.design_favorites where user_id = ${userId} order by created_at desc, template_id`;
+    return rows.map(r => r.template_id);
+  }
+
+  async setFavorite(userId: number, templateId: string, saved: boolean) {
+    await this.sql.begin(async tx => {
+      if (!saved) { await tx`delete from public.design_favorites where user_id = ${userId} and template_id = ${templateId}`; return; }
+      await tx`insert into public.design_favorites(user_id, template_id) values(${userId},${templateId}) on conflict do nothing`;
+      await tx`insert into public.analytics_events(kind,user_id,target,dedupe_key) values('design_favorited',${userId},${templateId},${templateId}) on conflict do nothing`;
+    });
+  }
+
+  async recordEvent(userId: number, kind: Extract<AnalyticsEventKind, "demo_opened" | "design_selected">, target: string, key: string) {
+    await this.sql`insert into public.analytics_events(kind,user_id,target,dedupe_key) values(${kind},${userId},${target},${key}) on conflict do nothing`;
+  }
   private sql: Sql;
 
   constructor(sql: Sql = db()) {
@@ -370,11 +424,21 @@ export class PgRepo implements Repo {
   }
 
   // ── Заказы ──
-  async createOrder(o: NewOrder): Promise<OrderRecord> {
+  async createOrder(o: NewOrder): Promise<OrderRecord> { return (await this.insertOrder(o))!; }
+
+  async createOrderFromDraft(o: NewOrder, expectedQ: number, handledUpdates?: number[]) { return this.insertOrder(o, expectedQ, handledUpdates); }
+
+  private async insertOrder(o: NewOrder, expectedQ?: number, handledUpdates?: number[]): Promise<OrderRecord | null> {
     // Одинаковый slugBase одновременно: блокировка в транзакции + повтор при гонке
     for (let attempt = 0; ; attempt++) {
       try {
         return await this.sql.begin(async (tx) => {
+          if (expectedQ !== undefined) {
+            const state = {q:expectedQ+1,...(handledUpdates ? {handledUpdates} : {})};
+            const claimed = await tx`update public.users set step = 'idle', state = ${tx.json(state)}
+              where id = ${o.userId} and step = 'review' and coalesce((state->>'q')::int,0) = ${expectedQ} returning id`;
+            if (!claimed.length) return null;
+          }
           await tx`select pg_advisory_xact_lock(hashtext(${"slug:" + o.slugBase}))`;
           const slug = await this.freeSlug(tx, o.slugBase);
           const cols: Columns = {

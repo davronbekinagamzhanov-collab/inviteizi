@@ -302,6 +302,10 @@ const pageInviteTo = {
 } satisfies Record<Occasion, string>;
 
 export const t = {
+  photoCredits: {
+    by: (author: string) => `Сурат: ${author}`,
+    adapted: "Сурат ўлчами ва кўриниши мослаштирилган.",
+  },
   site: {
     title: "InviteIZI — онлайн таклифномалар",
     description: "Чиройли, мусиқали тўй таклифномаси. Битта ҳавола — барча меҳмонлар учун.",
@@ -340,10 +344,41 @@ export const t = {
     "tonggi-choy": "Тонгги чой",
     "paxta-gul": "Пахта гул",
     "oltin-ot": "Олтин от",
+    "oq-chinni": "Оқ чинни",
+    doppicha: "Дўппича",
+    "sayram-hovli": "Сайрам ҳовлиси",
+    zarvaraq: "Зарварақ",
+    "umr-daraxti": "Умр дарахти",
+    "marvarid-satr": "Марварид сатри",
+    "gulbog-sahifa": "Гулбоғ саҳифаси",
+    "suzani-yol": "Сўзана йўли",
+    "bugdoy-boshoq": "Буғдой бошоғи",
+    "lola-ehtirom": "Лола эҳтироми",
+    "zarhal-lavha": "Зарҳал лавҳа",
+    "adras-nishon": "Адрас нишони",
+    "mis-kafgir": "Мис капгир",
+    "rayhon-sahari": "Райҳон саҳари",
+    "visol-rishta": "Висол риштаси",
+    "uzum-hovli": "Узум ҳовлиси",
+    "sopol-navo": "Сопол навоси",
+    "girih-nur": "Гиреҳ нури",
+    "siyoh-duo": "Сиёҳ дуоси",
+    "kabutar-salom": "Кабутар саломи",
+    "shirin-tilak": "Ширин тилак",
+    "minor-satr": "Минор сатри",
+    "kumush-taroq": "Кумуш тароқ",
+    "shabnam-visol": "Шабнам висоли",
+    "visol-soati": "Висол соати",
+    "dutor-navosi": "Дутор навоси",
+    "tut-qogozi": "Тут қоғози",
+    "qosh-uzuk": "Қўш узук",
+    "yelpigich-ziynat": "Елпиғич зийнати",
+    "saodat-kaliti": "Саодат калити",
   } as Record<string, string>,
 
   formats: {
     animated: "Анимацияли",
+    scroll: "Варақланадиган",
     simple: "Оддий",
   },
   price: (tenge: number) => `${tenge.toLocaleString("ru-RU").replace(/ /g, " ")} ₸`,
@@ -548,6 +583,11 @@ export const t = {
 
 export type Texts = typeof t;
 
+/** Public attribution metadata for photographs that require it, reused in bot/assets/pages. */
+export const photoAttributions: Record<string,{author:string;license:string;licenseUrl:string;source:string}|undefined> = {
+  "tonggi-choy": {author:"Ekaterina Kvelidze",license:"CC BY-SA 4.0",licenseUrl:"https://creativecommons.org/licenses/by-sa/4.0/",source:"https://commons.wikimedia.org/wiki/File:Uzbek_tea_couple_with_traditional_coloration.jpg"},
+};
+
 /**
  * Свои заголовки для каждого дизайна: у клиентов в каталоге не должно быть
  * одинаковых «Тўйгача қолди / Тўй дастури» во всех шаблонах.
@@ -567,6 +607,16 @@ type Headings = {
 };
 
 const headings: Record<string, Headings> = {
+  "marvarid-satr": {program:"Азиз учрашув",waiting:"Қувончимизга шерик бўлинг!"},
+  "gulbog-sahifa": {date:"Гўзал сана",countdown:"Бахтли онларгача",program:"Бахтли кун дастури",waiting:"Гулдек кунларимизга марҳамат!"},
+  "suzani-yol": {date:"Қутлуғ кун",countdown:"Тўйимизгача",program:"Тўйимиз тартиби",thanks:"Ташрифингиздан мамнун бўламиз!"},
+  "bugdoy-boshoq": {program:"Тонгги дастурхон",waiting:"Хонадонимизга марҳамат!"},
+  "lola-ehtirom": {date:"Эъзозли сана",countdown:"Дийдорлашувгача",program:"Байрам дастури",waiting:"Дийдорингиз биз учун азиз!"},
+  "oq-chinni": {program:"Тонгги учрашув",waiting:"Дастурхонимизга марҳамат!"},
+  doppicha: {program:"Қувончли кунимиз",waiting:"Тўйимизга марҳамат!"},
+  "sayram-hovli": {date:"Тўй куни",countdown:"Қувончли кунгача",program:"Тўй кунининг тартиби",blessing:"Эзгу дуолар",thanks:"Қувончимизга шерик бўлинг!"},
+  zarvaraq: {program:"Муборак учрашув",waiting:"Ташрифингиз биз учун азиз!"},
+  "umr-daraxti": {date:"Қадрли сана",countdown:"Муборак санагача",program:"Дийдорлашув дастури",blessing:"Меҳр ва дуо",waiting:"Сизни интизорлик билан кутамиз!"},
   // №1 — эталон: общие заголовки
   "oltin-monogramma": {},
   "oq-ot": { countdown: "Қутлуғ кунгача", date: "Қутлуғ сана", venue: "Тўй манзили", tap: "Пардани очинг" },

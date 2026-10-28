@@ -5,6 +5,7 @@ import { designVars } from "../types";
 // Libertinus Serif, курсив — каллиграфичный «почерк пером» для имён и заголовков.
 // (По каталогу был Great Vibes, но в нём нет ў қ ғ ҳ — проверено скриптом.)
 const display = Libertinus_Serif({
+  adjustFontFallback: false,
   variable: "--ab-display",
   weight: ["400", "600"],
   style: ["italic"],

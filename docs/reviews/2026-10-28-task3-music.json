@@ -1,0 +1,381 @@
+{
+  "checkedAt": "2026-10-28T13:14:57.479Z",
+  "scope": "read-only known public paths, local production app, actual demo MP3 bytes; no production DB/Telegram/customer file access; no license verification",
+  "titles": 16,
+  "databaseRows": null,
+  "storageListing": null,
+  "verifiedLicenses": 0,
+  "assets": [
+    {
+      "occasion": "nikoh",
+      "name": "atlas-ozbekiston",
+      "url": "https://hjakyirmyauqhurkqhsn.supabase.co/storage/v1/object/public/music/nikoh/atlas-ozbekiston.mp3",
+      "status": 200,
+      "contentType": "audio/mpeg",
+      "bytes": 5534208,
+      "licenseVerified": false,
+      "sha256": "dc68dbc5cbb4b73062bb19eb1a25133e92f78bbab5d90246d1afa3bdf00569f3"
+    },
+    {
+      "occasion": "nikoh",
+      "name": "debussy-clair-de-lune",
+      "url": "https://hjakyirmyauqhurkqhsn.supabase.co/storage/v1/object/public/music/nikoh/debussy-clair-de-lune.mp3",
+      "status": 200,
+      "contentType": "audio/mpeg",
+      "bytes": 9210984,
+      "licenseVerified": false
+    },
+    {
+      "occasion": "nikoh",
+      "name": "pachelbel-kanon",
+      "url": "https://hjakyirmyauqhurkqhsn.supabase.co/storage/v1/object/public/music/nikoh/pachelbel-kanon.mp3",
+      "status": 200,
+      "contentType": "audio/mpeg",
+      "bytes": 5170944,
+      "licenseVerified": false
+    },
+    {
+      "occasion": "nikoh",
+      "name": "nozik-fortepiano",
+      "url": "https://hjakyirmyauqhurkqhsn.supabase.co/storage/v1/object/public/music/nikoh/nozik-fortepiano.mp3",
+      "status": 200,
+      "contentType": "audio/mpeg",
+      "bytes": 5416704,
+      "licenseVerified": false
+    },
+    {
+      "occasion": "nikoh",
+      "name": "janob-rasul-toy-toy",
+      "url": "https://hjakyirmyauqhurkqhsn.supabase.co/storage/v1/object/public/music/nikoh/janob-rasul-toy-toy.mp3",
+      "status": 200,
+      "contentType": "audio/mpeg",
+      "bytes": 3684675,
+      "licenseVerified": false
+    },
+    {
+      "occasion": "nikoh",
+      "name": "umidaxon-toy-qilamiz",
+      "url": "https://hjakyirmyauqhurkqhsn.supabase.co/storage/v1/object/public/music/nikoh/umidaxon-toy-qilamiz.mp3",
+      "status": 200,
+      "contentType": "audio/mpeg",
+      "bytes": 3138904,
+      "licenseVerified": false
+    },
+    {
+      "occasion": "nikoh",
+      "name": "vohid-abdulhakim-kelin-kuyov",
+      "url": "https://hjakyirmyauqhurkqhsn.supabase.co/storage/v1/object/public/music/nikoh/vohid-abdulhakim-kelin-kuyov.mp3",
+      "status": 200,
+      "contentType": "audio/mpeg",
+      "bytes": 2707941,
+      "licenseVerified": false
+    },
+    {
+      "occasion": "nikoh",
+      "name": "dildora-kunuzokova-ozbegim-toylari",
+      "url": "https://hjakyirmyauqhurkqhsn.supabase.co/storage/v1/object/public/music/nikoh/dildora-kunuzokova-ozbegim-toylari.mp3",
+      "status": 200,
+      "contentType": "audio/mpeg",
+      "bytes": 5192641,
+      "licenseVerified": false
+    },
+    {
+      "occasion": "nikoh",
+      "name": "nilufar-usmonova-yor-yor",
+      "url": "https://hjakyirmyauqhurkqhsn.supabase.co/storage/v1/object/public/music/nikoh/nilufar-usmonova-yor-yor.mp3",
+      "status": 200,
+      "contentType": "audio/mpeg",
+      "bytes": 8737353,
+      "licenseVerified": false
+    },
+    {
+      "occasion": "nikoh",
+      "name": "oltin-monogramma",
+      "url": "https://hjakyirmyauqhurkqhsn.supabase.co/storage/v1/object/public/music/nikoh/oltin-monogramma.mp3",
+      "status": 200,
+      "contentType": "audio/mpeg",
+      "bytes": 1200796,
+      "licenseVerified": false
+    },
+    {
+      "occasion": "nikoh",
+      "name": "sapfir",
+      "url": "https://hjakyirmyauqhurkqhsn.supabase.co/storage/v1/object/public/music/nikoh/sapfir.mp3",
+      "status": 200,
+      "contentType": "audio/mpeg",
+      "bytes": 1200796,
+      "licenseVerified": false
+    },
+    {
+      "occasion": "nahorgi",
+      "name": "masrur-usmonov-toylar-muborak",
+      "url": "https://hjakyirmyauqhurkqhsn.supabase.co/storage/v1/object/public/music/nahorgi-osh/masrur-usmonov-toylar-muborak.mp3",
+      "status": 200,
+      "contentType": "audio/mpeg",
+      "bytes": 7125100,
+      "licenseVerified": false,
+      "sha256": "a2405aa9559e05544b1fc4b8f4ce7e44fe144249069cfcccc04db556325a075c"
+    },
+    {
+      "occasion": "nahorgi",
+      "name": "tonggi-qozon",
+      "url": "https://hjakyirmyauqhurkqhsn.supabase.co/storage/v1/object/public/music/nahorgi-osh/tonggi-qozon.mp3",
+      "status": 200,
+      "contentType": "audio/mpeg",
+      "bytes": 1200796,
+      "licenseVerified": false
+    },
+    {
+      "occasion": "sunnat",
+      "name": "ravshan-komilov-toy-bola",
+      "url": "https://hjakyirmyauqhurkqhsn.supabase.co/storage/v1/object/public/music/sunnat/ravshan-komilov-toy-bola.mp3",
+      "status": 200,
+      "contentType": "audio/mpeg",
+      "bytes": 6822121,
+      "licenseVerified": false,
+      "sha256": "c1e2dccf03ee208f9d83e025aa952f288084f59c864e1b9bf73eb8839574e9c0"
+    },
+    {
+      "occasion": "sunnat",
+      "name": "oq-ot",
+      "url": "https://hjakyirmyauqhurkqhsn.supabase.co/storage/v1/object/public/music/sunnat/oq-ot.mp3",
+      "status": 200,
+      "contentType": "audio/mpeg",
+      "bytes": 1200796,
+      "licenseVerified": false
+    },
+    {
+      "occasion": "yubiley",
+      "name": "pion-guldasta",
+      "url": "https://hjakyirmyauqhurkqhsn.supabase.co/storage/v1/object/public/music/yubiley/pion-guldasta.mp3",
+      "status": 200,
+      "contentType": "audio/mpeg",
+      "bytes": 1200796,
+      "licenseVerified": false,
+      "sha256": "c9b08e2f4a0afddb088861197495271204f7d1dec0c77e6a2dc56671a73f0955"
+    }
+  ],
+  "local": {
+    "path": "public/music/namuna-kuy.wav",
+    "bytes": 948194,
+    "sha256": "1adbde6da8e34db27cd1f555ec74a7bf56946eca21170fc21c2b9dd7a3a75e60",
+    "purpose": "generated test placeholder, not an accepted licensed catalog composition",
+    "decoded": {
+      "duration": 21.5,
+      "channels": 1,
+      "sampleRate": 48000
+    }
+  },
+  "playback": [
+    {
+      "occasion": "nikoh",
+      "design": "sapfir",
+      "width": 320,
+      "source": "https://hjakyirmyauqhurkqhsn.supabase.co/storage/v1/object/public/music/nikoh/atlas-ozbekiston.mp3",
+      "duration": 172.944,
+      "noAutoplay": true,
+      "plays": true,
+      "pauses": true,
+      "errorResetsButton": true,
+      "missingDoesNotPlay": true,
+      "missingButton": true
+    },
+    {
+      "occasion": "nikoh",
+      "design": "sapfir",
+      "width": 360,
+      "source": "https://hjakyirmyauqhurkqhsn.supabase.co/storage/v1/object/public/music/nikoh/atlas-ozbekiston.mp3",
+      "duration": 172.944,
+      "noAutoplay": true,
+      "plays": true,
+      "pauses": true,
+      "errorResetsButton": true,
+      "missingDoesNotPlay": true,
+      "missingButton": true
+    },
+    {
+      "occasion": "nikoh",
+      "design": "sapfir",
+      "width": 375,
+      "source": "https://hjakyirmyauqhurkqhsn.supabase.co/storage/v1/object/public/music/nikoh/atlas-ozbekiston.mp3",
+      "duration": 172.944,
+      "noAutoplay": true,
+      "plays": true,
+      "pauses": true,
+      "errorResetsButton": true,
+      "missingDoesNotPlay": true,
+      "missingButton": true
+    },
+    {
+      "occasion": "nikoh",
+      "design": "sapfir",
+      "width": 430,
+      "source": "https://hjakyirmyauqhurkqhsn.supabase.co/storage/v1/object/public/music/nikoh/atlas-ozbekiston.mp3",
+      "duration": 172.944,
+      "noAutoplay": true,
+      "plays": true,
+      "pauses": true,
+      "errorResetsButton": true,
+      "missingDoesNotPlay": true,
+      "missingButton": true
+    },
+    {
+      "occasion": "nahorgi",
+      "design": "oq-chinni",
+      "width": 320,
+      "source": "https://hjakyirmyauqhurkqhsn.supabase.co/storage/v1/object/public/music/nahorgi-osh/masrur-usmonov-toylar-muborak.mp3",
+      "duration": 221.134567,
+      "noAutoplay": true,
+      "plays": true,
+      "pauses": true,
+      "errorResetsButton": true,
+      "missingDoesNotPlay": true,
+      "missingButton": true
+    },
+    {
+      "occasion": "nahorgi",
+      "design": "oq-chinni",
+      "width": 360,
+      "source": "https://hjakyirmyauqhurkqhsn.supabase.co/storage/v1/object/public/music/nahorgi-osh/masrur-usmonov-toylar-muborak.mp3",
+      "duration": 221.134567,
+      "noAutoplay": true,
+      "plays": true,
+      "pauses": true,
+      "errorResetsButton": true,
+      "missingDoesNotPlay": true,
+      "missingButton": true
+    },
+    {
+      "occasion": "nahorgi",
+      "design": "oq-chinni",
+      "width": 375,
+      "source": "https://hjakyirmyauqhurkqhsn.supabase.co/storage/v1/object/public/music/nahorgi-osh/masrur-usmonov-toylar-muborak.mp3",
+      "duration": 221.134567,
+      "noAutoplay": true,
+      "plays": true,
+      "pauses": true,
+      "errorResetsButton": true,
+      "missingDoesNotPlay": true,
+      "missingButton": true
+    },
+    {
+      "occasion": "nahorgi",
+      "design": "oq-chinni",
+      "width": 430,
+      "source": "https://hjakyirmyauqhurkqhsn.supabase.co/storage/v1/object/public/music/nahorgi-osh/masrur-usmonov-toylar-muborak.mp3",
+      "duration": 221.134567,
+      "noAutoplay": true,
+      "plays": true,
+      "pauses": true,
+      "errorResetsButton": true,
+      "missingDoesNotPlay": true,
+      "missingButton": true
+    },
+    {
+      "occasion": "sunnat",
+      "design": "doppicha",
+      "width": 320,
+      "source": "https://hjakyirmyauqhurkqhsn.supabase.co/storage/v1/object/public/music/sunnat/ravshan-komilov-toy-bola.mp3",
+      "duration": 212.327281,
+      "noAutoplay": true,
+      "plays": true,
+      "pauses": true,
+      "errorResetsButton": true,
+      "missingDoesNotPlay": true,
+      "missingButton": true
+    },
+    {
+      "occasion": "sunnat",
+      "design": "doppicha",
+      "width": 360,
+      "source": "https://hjakyirmyauqhurkqhsn.supabase.co/storage/v1/object/public/music/sunnat/ravshan-komilov-toy-bola.mp3",
+      "duration": 212.327281,
+      "noAutoplay": true,
+      "plays": true,
+      "pauses": true,
+      "errorResetsButton": true,
+      "missingDoesNotPlay": true,
+      "missingButton": true
+    },
+    {
+      "occasion": "sunnat",
+      "design": "doppicha",
+      "width": 375,
+      "source": "https://hjakyirmyauqhurkqhsn.supabase.co/storage/v1/object/public/music/sunnat/ravshan-komilov-toy-bola.mp3",
+      "duration": 212.327281,
+      "noAutoplay": true,
+      "plays": true,
+      "pauses": true,
+      "errorResetsButton": true,
+      "missingDoesNotPlay": true,
+      "missingButton": true
+    },
+    {
+      "occasion": "sunnat",
+      "design": "doppicha",
+      "width": 430,
+      "source": "https://hjakyirmyauqhurkqhsn.supabase.co/storage/v1/object/public/music/sunnat/ravshan-komilov-toy-bola.mp3",
+      "duration": 212.327281,
+      "noAutoplay": true,
+      "plays": true,
+      "pauses": true,
+      "errorResetsButton": true,
+      "missingDoesNotPlay": true,
+      "missingButton": true
+    },
+    {
+      "occasion": "yubiley",
+      "design": "zarvaraq",
+      "width": 320,
+      "source": "https://hjakyirmyauqhurkqhsn.supabase.co/storage/v1/object/public/music/yubiley/pion-guldasta.mp3",
+      "duration": 75.04975,
+      "noAutoplay": true,
+      "plays": true,
+      "pauses": true,
+      "errorResetsButton": true,
+      "missingDoesNotPlay": true,
+      "missingButton": true
+    },
+    {
+      "occasion": "yubiley",
+      "design": "zarvaraq",
+      "width": 360,
+      "source": "https://hjakyirmyauqhurkqhsn.supabase.co/storage/v1/object/public/music/yubiley/pion-guldasta.mp3",
+      "duration": 75.04975,
+      "noAutoplay": true,
+      "plays": true,
+      "pauses": true,
+      "errorResetsButton": true,
+      "missingDoesNotPlay": true,
+      "missingButton": true
+    },
+    {
+      "occasion": "yubiley",
+      "design": "zarvaraq",
+      "width": 375,
+      "source": "https://hjakyirmyauqhurkqhsn.supabase.co/storage/v1/object/public/music/yubiley/pion-guldasta.mp3",
+      "duration": 75.04975,
+      "noAutoplay": true,
+      "plays": true,
+      "pauses": true,
+      "errorResetsButton": true,
+      "missingDoesNotPlay": true,
+      "missingButton": true
+    },
+    {
+      "occasion": "yubiley",
+      "design": "zarvaraq",
+      "width": 430,
+      "source": "https://hjakyirmyauqhurkqhsn.supabase.co/storage/v1/object/public/music/yubiley/pion-guldasta.mp3",
+      "duration": 75.04975,
+      "noAutoplay": true,
+      "plays": true,
+      "pauses": true,
+      "errorResetsButton": true,
+      "missingDoesNotPlay": true,
+      "missingButton": true
+    }
+  ],
+  "failures": [],
+  "passed": true
+}

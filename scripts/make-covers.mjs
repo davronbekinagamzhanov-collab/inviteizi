@@ -3,6 +3,7 @@
 // Без аргументов — все дизайны из templates/registry.ts.
 import { chromium } from "playwright-core";
 import sharp from "sharp";
+import {withAssetCredit} from "./asset-credit.mjs";
 import { mkdirSync, readFileSync } from "node:fs";
 
 const BASE = process.env.BASE ?? "http://localhost:3000";
@@ -24,10 +25,10 @@ for (const id of ids) {
   await page.waitForTimeout(4000);
   // кнопка музыки на превью не нужна
   await page.addStyleTag({ content: "[aria-label^='Мусиқани'] { display: none !important; }" });
-  const png = await page.screenshot();
-  await sharp(png).resize(1080, 1920).webp({ quality: 82 }).toFile(`public/covers/${id}.webp`);
+  const png = await withAssetCredit(await page.screenshot(),id);
+  await sharp(png).resize(1080, 1920).withMetadata().webp({ quality: 82 }).toFile(`public/covers/${id}.webp`);
   // Telegram показывает фото только в JPG/PNG — для каталога в боте
-  await sharp(png).resize(1080, 1920).jpeg({ quality: 82, mozjpeg: true }).toFile(`public/covers/${id}.jpg`);
+  await sharp(png).resize(1080, 1920).withMetadata().jpeg({ quality: 82, mozjpeg: true }).toFile(`public/covers/${id}.jpg`);
   console.log("ok", id);
   await page.close();
 }

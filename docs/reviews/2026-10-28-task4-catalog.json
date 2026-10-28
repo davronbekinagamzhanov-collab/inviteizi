@@ -1,0 +1,1763 @@
+{
+  "scope": "Local production catalog DOM at 375px, 50 read-only demo responses, 150 image responses; not an audit of production orders",
+  "passed": true,
+  "results": [
+    {
+      "catalogStatus": 200,
+      "cards": 50,
+      "hidden": 0,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "id": "oltin-monogramma",
+      "format": "animated",
+      "price": 8000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/oltin-monogramma.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 76756
+        },
+        {
+          "url": "/covers/oltin-monogramma.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 51184
+        },
+        {
+          "url": "/og/oltin-monogramma.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 24517
+        }
+      ]
+    },
+    {
+      "id": "sapfir",
+      "format": "simple",
+      "price": 5000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/sapfir.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 162263
+        },
+        {
+          "url": "/covers/sapfir.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 103694
+        },
+        {
+          "url": "/og/sapfir.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 14145
+        }
+      ]
+    },
+    {
+      "id": "oq-ot",
+      "format": "animated",
+      "price": 8000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/oq-ot.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 70002
+        },
+        {
+          "url": "/covers/oq-ot.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 41222
+        },
+        {
+          "url": "/og/oq-ot.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 12864
+        }
+      ]
+    },
+    {
+      "id": "tonggi-qozon",
+      "format": "animated",
+      "price": 8000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/tonggi-qozon.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 68473
+        },
+        {
+          "url": "/covers/tonggi-qozon.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 46650
+        },
+        {
+          "url": "/og/tonggi-qozon.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 14964
+        }
+      ]
+    },
+    {
+      "id": "pion-guldasta",
+      "format": "animated",
+      "price": 8000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/pion-guldasta.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 85017
+        },
+        {
+          "url": "/covers/pion-guldasta.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 55562
+        },
+        {
+          "url": "/og/pion-guldasta.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 32601
+        }
+      ]
+    },
+    {
+      "id": "ganch-peshtoq",
+      "format": "animated",
+      "price": 8000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/ganch-peshtoq.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 172148
+        },
+        {
+          "url": "/covers/ganch-peshtoq.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 99734
+        },
+        {
+          "url": "/og/ganch-peshtoq.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 42240
+        }
+      ]
+    },
+    {
+      "id": "zarhal-eshik",
+      "format": "animated",
+      "price": 8000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/zarhal-eshik.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 80864
+        },
+        {
+          "url": "/covers/zarhal-eshik.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 50986
+        },
+        {
+          "url": "/og/zarhal-eshik.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 16831
+        }
+      ]
+    },
+    {
+      "id": "atlas-tolqin",
+      "format": "animated",
+      "price": 8000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/atlas-tolqin.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 79912
+        },
+        {
+          "url": "/covers/atlas-tolqin.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 49332
+        },
+        {
+          "url": "/og/atlas-tolqin.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 18355
+        }
+      ]
+    },
+    {
+      "id": "bodom-guli",
+      "format": "animated",
+      "price": 8000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/bodom-guli.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 79767
+        },
+        {
+          "url": "/covers/bodom-guli.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 48076
+        },
+        {
+          "url": "/og/bodom-guli.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 27041
+        }
+      ]
+    },
+    {
+      "id": "samarqand-kitob",
+      "format": "animated",
+      "price": 8000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/samarqand-kitob.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 92994
+        },
+        {
+          "url": "/covers/samarqand-kitob.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 52732
+        },
+        {
+          "url": "/og/samarqand-kitob.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 24600
+        }
+      ]
+    },
+    {
+      "id": "ipak-romol",
+      "format": "simple",
+      "price": 5000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/ipak-romol.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 142694
+        },
+        {
+          "url": "/covers/ipak-romol.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 94744
+        },
+        {
+          "url": "/og/ipak-romol.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 17565
+        }
+      ]
+    },
+    {
+      "id": "rishton-koshin",
+      "format": "simple",
+      "price": 5000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/rishton-koshin.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 108628
+        },
+        {
+          "url": "/covers/rishton-koshin.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 69812
+        },
+        {
+          "url": "/og/rishton-koshin.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 49472
+        }
+      ]
+    },
+    {
+      "id": "atirgul",
+      "format": "simple",
+      "price": 5000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/atirgul.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 86263
+        },
+        {
+          "url": "/covers/atirgul.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 52472
+        },
+        {
+          "url": "/og/atirgul.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 35527
+        }
+      ]
+    },
+    {
+      "id": "shohona-baxmal",
+      "format": "scroll",
+      "price": 6000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/shohona-baxmal.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 117510
+        },
+        {
+          "url": "/covers/shohona-baxmal.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 57088
+        },
+        {
+          "url": "/og/shohona-baxmal.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 14511
+        }
+      ]
+    },
+    {
+      "id": "tandir-nuri",
+      "format": "animated",
+      "price": 8000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/tandir-nuri.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 130730
+        },
+        {
+          "url": "/covers/tandir-nuri.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 87540
+        },
+        {
+          "url": "/og/tandir-nuri.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 45515
+        }
+      ]
+    },
+    {
+      "id": "dasturxon",
+      "format": "animated",
+      "price": 8000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/dasturxon.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 129964
+        },
+        {
+          "url": "/covers/dasturxon.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 90834
+        },
+        {
+          "url": "/og/dasturxon.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 60347
+        }
+      ]
+    },
+    {
+      "id": "non-muhr",
+      "format": "animated",
+      "price": 8000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/non-muhr.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 93277
+        },
+        {
+          "url": "/covers/non-muhr.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 66748
+        },
+        {
+          "url": "/og/non-muhr.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 30480
+        }
+      ]
+    },
+    {
+      "id": "tonggi-choy",
+      "format": "scroll",
+      "price": 6000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/tonggi-choy.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 107016
+        },
+        {
+          "url": "/covers/tonggi-choy.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 75306
+        },
+        {
+          "url": "/og/tonggi-choy.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 55402
+        }
+      ]
+    },
+    {
+      "id": "paxta-gul",
+      "format": "scroll",
+      "price": 6000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/paxta-gul.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 69458
+        },
+        {
+          "url": "/covers/paxta-gul.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 46550
+        },
+        {
+          "url": "/og/paxta-gul.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 11415
+        }
+      ]
+    },
+    {
+      "id": "oltin-ot",
+      "format": "animated",
+      "price": 8000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/oltin-ot.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 129970
+        },
+        {
+          "url": "/covers/oltin-ot.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 78982
+        },
+        {
+          "url": "/og/oltin-ot.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 37716
+        }
+      ]
+    },
+    {
+      "id": "oq-chinni",
+      "format": "simple",
+      "price": 5000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/oq-chinni.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 113413
+        },
+        {
+          "url": "/covers/oq-chinni.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 78880
+        },
+        {
+          "url": "/og/oq-chinni.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 11369
+        }
+      ]
+    },
+    {
+      "id": "doppicha",
+      "format": "simple",
+      "price": 5000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/doppicha.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 100098
+        },
+        {
+          "url": "/covers/doppicha.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 65758
+        },
+        {
+          "url": "/og/doppicha.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 13817
+        }
+      ]
+    },
+    {
+      "id": "sayram-hovli",
+      "format": "scroll",
+      "price": 6000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/sayram-hovli.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 61434
+        },
+        {
+          "url": "/covers/sayram-hovli.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 34152
+        },
+        {
+          "url": "/og/sayram-hovli.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 12149
+        }
+      ]
+    },
+    {
+      "id": "zarvaraq",
+      "format": "simple",
+      "price": 5000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/zarvaraq.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 97529
+        },
+        {
+          "url": "/covers/zarvaraq.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 65550
+        },
+        {
+          "url": "/og/zarvaraq.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 12607
+        }
+      ]
+    },
+    {
+      "id": "umr-daraxti",
+      "format": "scroll",
+      "price": 6000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/umr-daraxti.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 60988
+        },
+        {
+          "url": "/covers/umr-daraxti.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 39166
+        },
+        {
+          "url": "/og/umr-daraxti.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 14495
+        }
+      ]
+    },
+    {
+      "id": "marvarid-satr",
+      "format": "simple",
+      "price": 5000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/marvarid-satr.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 90999
+        },
+        {
+          "url": "/covers/marvarid-satr.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 62210
+        },
+        {
+          "url": "/og/marvarid-satr.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 6739
+        }
+      ]
+    },
+    {
+      "id": "gulbog-sahifa",
+      "format": "scroll",
+      "price": 6000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/gulbog-sahifa.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 104598
+        },
+        {
+          "url": "/covers/gulbog-sahifa.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 66236
+        },
+        {
+          "url": "/og/gulbog-sahifa.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 49140
+        }
+      ]
+    },
+    {
+      "id": "suzani-yol",
+      "format": "scroll",
+      "price": 6000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/suzani-yol.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 64917
+        },
+        {
+          "url": "/covers/suzani-yol.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 40798
+        },
+        {
+          "url": "/og/suzani-yol.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 16659
+        }
+      ]
+    },
+    {
+      "id": "bugdoy-boshoq",
+      "format": "simple",
+      "price": 5000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/bugdoy-boshoq.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 117030
+        },
+        {
+          "url": "/covers/bugdoy-boshoq.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 84298
+        },
+        {
+          "url": "/og/bugdoy-boshoq.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 29087
+        }
+      ]
+    },
+    {
+      "id": "lola-ehtirom",
+      "format": "scroll",
+      "price": 6000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/lola-ehtirom.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 60079
+        },
+        {
+          "url": "/covers/lola-ehtirom.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 36832
+        },
+        {
+          "url": "/og/lola-ehtirom.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 21320
+        }
+      ]
+    },
+    {
+      "id": "zarhal-lavha",
+      "format": "animated",
+      "price": 8000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/zarhal-lavha.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 80033
+        },
+        {
+          "url": "/covers/zarhal-lavha.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 52256
+        },
+        {
+          "url": "/og/zarhal-lavha.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 7660
+        }
+      ]
+    },
+    {
+      "id": "adras-nishon",
+      "format": "simple",
+      "price": 5000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/adras-nishon.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 93542
+        },
+        {
+          "url": "/covers/adras-nishon.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 65728
+        },
+        {
+          "url": "/og/adras-nishon.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 15379
+        }
+      ]
+    },
+    {
+      "id": "mis-kafgir",
+      "format": "simple",
+      "price": 5000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/mis-kafgir.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 94046
+        },
+        {
+          "url": "/covers/mis-kafgir.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 68038
+        },
+        {
+          "url": "/og/mis-kafgir.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 13317
+        }
+      ]
+    },
+    {
+      "id": "rayhon-sahari",
+      "format": "scroll",
+      "price": 6000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/rayhon-sahari.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 60895
+        },
+        {
+          "url": "/covers/rayhon-sahari.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 40674
+        },
+        {
+          "url": "/og/rayhon-sahari.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 10895
+        }
+      ]
+    },
+    {
+      "id": "visol-rishta",
+      "format": "animated",
+      "price": 8000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/visol-rishta.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 56533
+        },
+        {
+          "url": "/covers/visol-rishta.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 34638
+        },
+        {
+          "url": "/og/visol-rishta.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 9568
+        }
+      ]
+    },
+    {
+      "id": "uzum-hovli",
+      "format": "scroll",
+      "price": 6000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/uzum-hovli.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 71071
+        },
+        {
+          "url": "/covers/uzum-hovli.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 41042
+        },
+        {
+          "url": "/og/uzum-hovli.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 14784
+        }
+      ]
+    },
+    {
+      "id": "sopol-navo",
+      "format": "scroll",
+      "price": 6000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/sopol-navo.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 62685
+        },
+        {
+          "url": "/covers/sopol-navo.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 38366
+        },
+        {
+          "url": "/og/sopol-navo.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 12962
+        }
+      ]
+    },
+    {
+      "id": "girih-nur",
+      "format": "animated",
+      "price": 8000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/girih-nur.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 60432
+        },
+        {
+          "url": "/covers/girih-nur.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 38338
+        },
+        {
+          "url": "/og/girih-nur.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 19031
+        }
+      ]
+    },
+    {
+      "id": "siyoh-duo",
+      "format": "animated",
+      "price": 8000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/siyoh-duo.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 67016
+        },
+        {
+          "url": "/covers/siyoh-duo.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 46032
+        },
+        {
+          "url": "/og/siyoh-duo.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 10618
+        }
+      ]
+    },
+    {
+      "id": "kabutar-salom",
+      "format": "animated",
+      "price": 8000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/kabutar-salom.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 63974
+        },
+        {
+          "url": "/covers/kabutar-salom.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 43396
+        },
+        {
+          "url": "/og/kabutar-salom.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 9175
+        }
+      ]
+    },
+    {
+      "id": "shirin-tilak",
+      "format": "scroll",
+      "price": 6000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/shirin-tilak.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 64888
+        },
+        {
+          "url": "/covers/shirin-tilak.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 40356
+        },
+        {
+          "url": "/og/shirin-tilak.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 12513
+        }
+      ]
+    },
+    {
+      "id": "minor-satr",
+      "format": "scroll",
+      "price": 6000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/minor-satr.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 66141
+        },
+        {
+          "url": "/covers/minor-satr.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 40786
+        },
+        {
+          "url": "/og/minor-satr.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 8954
+        }
+      ]
+    },
+    {
+      "id": "kumush-taroq",
+      "format": "scroll",
+      "price": 6000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/kumush-taroq.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 62117
+        },
+        {
+          "url": "/covers/kumush-taroq.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 37184
+        },
+        {
+          "url": "/og/kumush-taroq.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 12264
+        }
+      ]
+    },
+    {
+      "id": "shabnam-visol",
+      "format": "animated",
+      "price": 8000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/shabnam-visol.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 60850
+        },
+        {
+          "url": "/covers/shabnam-visol.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 40778
+        },
+        {
+          "url": "/og/shabnam-visol.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 8290
+        }
+      ]
+    },
+    {
+      "id": "visol-soati",
+      "format": "animated",
+      "price": 8000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/visol-soati.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 73531
+        },
+        {
+          "url": "/covers/visol-soati.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 45106
+        },
+        {
+          "url": "/og/visol-soati.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 15182
+        }
+      ]
+    },
+    {
+      "id": "dutor-navosi",
+      "format": "scroll",
+      "price": 6000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/dutor-navosi.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 58287
+        },
+        {
+          "url": "/covers/dutor-navosi.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 39894
+        },
+        {
+          "url": "/og/dutor-navosi.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 9061
+        }
+      ]
+    },
+    {
+      "id": "tut-qogozi",
+      "format": "scroll",
+      "price": 6000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/tut-qogozi.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 84902
+        },
+        {
+          "url": "/covers/tut-qogozi.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 55938
+        },
+        {
+          "url": "/og/tut-qogozi.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 7892
+        }
+      ]
+    },
+    {
+      "id": "qosh-uzuk",
+      "format": "animated",
+      "price": 8000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/qosh-uzuk.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 68313
+        },
+        {
+          "url": "/covers/qosh-uzuk.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 41696
+        },
+        {
+          "url": "/og/qosh-uzuk.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 9433
+        }
+      ]
+    },
+    {
+      "id": "yelpigich-ziynat",
+      "format": "animated",
+      "price": 8000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/yelpigich-ziynat.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 63495
+        },
+        {
+          "url": "/covers/yelpigich-ziynat.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 41780
+        },
+        {
+          "url": "/og/yelpigich-ziynat.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 11959
+        }
+      ]
+    },
+    {
+      "id": "saodat-kaliti",
+      "format": "animated",
+      "price": 8000,
+      "card": true,
+      "name": true,
+      "formatCorrect": true,
+      "priceCorrect": true,
+      "coverCorrect": true,
+      "demoStatus": 200,
+      "templateMounted": true,
+      "assets": [
+        {
+          "url": "/covers/saodat-kaliti.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 71334
+        },
+        {
+          "url": "/covers/saodat-kaliti.webp",
+          "status": 200,
+          "mime": "image/webp",
+          "expectedMime": "image/webp",
+          "bytes": 47296
+        },
+        {
+          "url": "/og/saodat-kaliti.jpg",
+          "status": 200,
+          "mime": "image/jpeg",
+          "expectedMime": "image/jpeg",
+          "bytes": 8085
+        }
+      ]
+    }
+  ]
+}

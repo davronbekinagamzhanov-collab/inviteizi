@@ -1,0 +1,132 @@
+{
+  "results": [
+    {
+      "design": "atlas-tolqin",
+      "width": 320,
+      "long": true,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "atlas-tolqin",
+      "width": 375,
+      "long": true,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "bodom-guli",
+      "width": 320,
+      "long": true,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "bodom-guli",
+      "width": 375,
+      "long": true,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "samarqand-kitob",
+      "width": 320,
+      "long": true,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "samarqand-kitob",
+      "width": 375,
+      "long": true,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "shohona-baxmal",
+      "width": 320,
+      "long": true,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "shohona-baxmal",
+      "width": 375,
+      "long": true,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "non-muhr",
+      "width": 320,
+      "long": true,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "non-muhr",
+      "width": 375,
+      "long": true,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "tonggi-choy",
+      "width": 320,
+      "long": true,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "tonggi-choy",
+      "width": 375,
+      "long": true,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "paxta-gul",
+      "width": 320,
+      "long": true,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    },
+    {
+      "design": "paxta-gul",
+      "width": 375,
+      "long": true,
+      "status": 200,
+      "overflow": false,
+      "visibleHidden": 0,
+      "errors": []
+    }
+  ],
+  "reducedMotionVisible": true,
+  "passed": true
+}

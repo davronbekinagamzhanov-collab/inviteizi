@@ -11,7 +11,7 @@ export async function checkCronSecret(secret: string): Promise<boolean> {
     const [r] = await db()<{ ok: boolean }[]>`select public.check_cron_secret(${secret}) as ok`;
     return r?.ok === true;
   } catch (e) {
-    console.error("checkCronSecret: нет доступа к базе", e instanceof Error ? e.message : e);
+    console.error("checkCronSecret: нет доступа к базе", e instanceof Error ? e.name : "Error");
     return false;
   }
 }

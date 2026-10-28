@@ -22,18 +22,21 @@ const json = (body: unknown, status = 200) => Response.json(body, { status });
 export async function handleWebhookRequest(req: Request, opts: { secret: string; getDeps: () => Deps }): Promise<Response> {
   if (!sameSecret(req.headers.get("x-telegram-bot-api-secret-token"), opts.secret)) return json({ ok: false }, 401);
   let update: Update;
+  let u;
   try {
     update = (await req.json()) as Update;
+    if (!update || typeof update !== "object" || !Number.isSafeInteger(update.update_id)) return json({ok:false},400);
+    u = normalizeUpdate(update);
   } catch {
     return json({ ok: false }, 400);
   }
-  const u = normalizeUpdate(update);
   if (!u) return json({ ok: true });
   try {
-    await handle(opts.getDeps(), u);
+    if (!(await handle(opts.getDeps(), u))) return json({ok:false},503);
   } catch (e) {
-    // Отвечаем 200: иначе Telegram будет присылать это обновление снова и снова
-    console.error("bot handle", update.update_id, e instanceof Error ? e.message : e);
+    // Do not acknowledge an update lost before processing. No tokens or identifiers in logs.
+    console.error("bot handle failed", e instanceof Error ? e.name : "Error");
+    return json({ok:false},503);
   }
   return json({ ok: true });
 }

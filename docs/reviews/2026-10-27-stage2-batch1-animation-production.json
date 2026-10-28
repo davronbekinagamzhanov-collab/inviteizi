@@ -1,0 +1,70 @@
+{
+  "environment": "Local Chrome headless; warmed pages; CPU x4; 375x812 DPR2. Touch input; opening recording starts in pointerdown capture before React, excluding pre-input Playwright actionability checks. requestAnimationFrame times; not a physical-device guarantee.",
+  "noSvgFilters": false,
+  "results": [
+    {
+      "design": "zarhal-lavha",
+      "phase": "opening",
+      "cpuThrottle": 4,
+      "noSvgFilters": false,
+      "frames": 183,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 66.5,
+      "over50Ms": 1,
+      "over100Ms": 0,
+      "stalls": [
+        {
+          "atMs": 74.8,
+          "durationMs": 66.5
+        }
+      ]
+    },
+    {
+      "design": "zarhal-lavha",
+      "phase": "scroll",
+      "cpuThrottle": 4,
+      "noSvgFilters": false,
+      "frames": 180,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 17,
+      "over50Ms": 0,
+      "over100Ms": 0,
+      "stalls": []
+    },
+    {
+      "design": "visol-rishta",
+      "phase": "opening",
+      "cpuThrottle": 4,
+      "noSvgFilters": false,
+      "frames": 183,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 66.8,
+      "over50Ms": 1,
+      "over100Ms": 0,
+      "stalls": [
+        {
+          "atMs": 75.2,
+          "durationMs": 66.8
+        }
+      ]
+    },
+    {
+      "design": "visol-rishta",
+      "phase": "scroll",
+      "cpuThrottle": 4,
+      "noSvgFilters": false,
+      "frames": 180,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 17,
+      "over50Ms": 0,
+      "over100Ms": 0,
+      "stalls": []
+    }
+  ],
+  "buildMode": "Local next start, one production build; not Vercel deployment",
+  "limit": "One initial input frame over 50 ms per design remains (66.5 / 66.8 ms); no claim of zero long frames"
+}

@@ -1,0 +1,28 @@
+[
+  {
+    "id": "gulbog-sahifa",
+    "source": "https://commons.wikimedia.org/wiki/File:Rose_Garden_(50131461538).jpg",
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/1/17/Rose_Garden_%2850131461538%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "author": "Vladislav Litvinov",
+    "license": "CC0",
+    "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "reviewed": "2026-10-27",
+    "realPhotograph": true,
+    "processing": "resize to 1080 px, slight blur, WebP; display crops/fades in component",
+    "bytes": 55586,
+    "sha256": "3c051069ccd89847ebe34c1a829e2e8c7f35b1bd0730d108071fb39087357979"
+  },
+  {
+    "id": "lola-ehtirom",
+    "source": "https://commons.wikimedia.org/wiki/File:Tulip_(32689468476).jpg",
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/4/43/Tulip_%2832689468476%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "author": "Mustang Joe",
+    "license": "CC0",
+    "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "reviewed": "2026-10-27",
+    "realPhotograph": true,
+    "processing": "resize to 1080 px, slight blur, WebP; display crops/fades in component",
+    "bytes": 14396,
+    "sha256": "dadf89737dc423b4de3a7d5172a459d6de79137aaefe4781d51fa4b320bccc9c"
+  }
+]

@@ -1,0 +1,90 @@
+{
+  "scope": "local production Chrome; 320 px; actual HTMLAudio existing local WAV, not remote licensed tracks; normal/reduced motion and page reload",
+  "rows": [
+    {
+      "id": "kabutar-salom",
+      "reduced": false,
+      "noAutoplay": true,
+      "openMs": 1407,
+      "pauses": true,
+      "noReopen": true,
+      "unlocked": true,
+      "content": true,
+      "freshCover": true,
+      "reloadNoAutoplay": true,
+      "secondOpening": true,
+      "errors": []
+    },
+    {
+      "id": "kabutar-salom",
+      "reduced": true,
+      "noAutoplay": true,
+      "openMs": 52,
+      "pauses": true,
+      "noReopen": true,
+      "unlocked": true,
+      "content": true,
+      "freshCover": true,
+      "reloadNoAutoplay": true,
+      "secondOpening": true,
+      "errors": []
+    },
+    {
+      "id": "visol-rishta",
+      "reduced": false,
+      "noAutoplay": true,
+      "openMs": 1376,
+      "pauses": true,
+      "noReopen": true,
+      "unlocked": true,
+      "content": true,
+      "freshCover": true,
+      "reloadNoAutoplay": true,
+      "secondOpening": true,
+      "errors": []
+    },
+    {
+      "id": "visol-rishta",
+      "reduced": true,
+      "noAutoplay": true,
+      "openMs": 48,
+      "pauses": true,
+      "noReopen": true,
+      "unlocked": true,
+      "content": true,
+      "freshCover": true,
+      "reloadNoAutoplay": true,
+      "secondOpening": true,
+      "errors": []
+    },
+    {
+      "id": "zarhal-lavha",
+      "reduced": false,
+      "noAutoplay": true,
+      "openMs": 1392,
+      "pauses": true,
+      "noReopen": true,
+      "unlocked": true,
+      "content": true,
+      "freshCover": true,
+      "reloadNoAutoplay": true,
+      "secondOpening": true,
+      "errors": []
+    },
+    {
+      "id": "zarhal-lavha",
+      "reduced": true,
+      "noAutoplay": true,
+      "openMs": 60,
+      "pauses": true,
+      "noReopen": true,
+      "unlocked": true,
+      "content": true,
+      "freshCover": true,
+      "reloadNoAutoplay": true,
+      "secondOpening": true,
+      "errors": []
+    }
+  ],
+  "passed": true
+}

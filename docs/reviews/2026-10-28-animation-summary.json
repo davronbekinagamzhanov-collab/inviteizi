@@ -1,0 +1,148 @@
+{
+  "baselineRuntimeSha": "60802bb08b6e1cd10f392b0446249b0ac5c6ac7f",
+  "productionRuntimeChanged": false,
+  "comparison": [
+    {
+      "id": "kabutar-salom",
+      "currentOpening": {
+        "runs": 3,
+        "p95Ms": 16.8,
+        "maxMs": 16.9,
+        "over50Ms": 0,
+        "over100Ms": 0,
+        "maxPerRun": [
+          16.8,
+          16.9,
+          16.9
+        ]
+      },
+      "currentScroll": {
+        "runs": 3,
+        "p95Ms": 16.8,
+        "maxMs": 16.9,
+        "over50Ms": 0,
+        "over100Ms": 0,
+        "maxPerRun": [
+          16.8,
+          16.9,
+          16.8
+        ]
+      },
+      "prewarmOpening": null,
+      "decision": "No stall reproduced; unchanged"
+    },
+    {
+      "id": "visol-rishta",
+      "currentOpening": {
+        "runs": 3,
+        "p95Ms": 16.8,
+        "maxMs": 33.4,
+        "over50Ms": 0,
+        "over100Ms": 0,
+        "maxPerRun": [
+          33.3,
+          33.4,
+          16.9
+        ]
+      },
+      "currentScroll": {
+        "runs": 3,
+        "p95Ms": 16.8,
+        "maxMs": 16.9,
+        "over50Ms": 0,
+        "over100Ms": 0,
+        "maxPerRun": [
+          16.8,
+          16.8,
+          16.9
+        ]
+      },
+      "prewarmOpening": {
+        "runs": 3,
+        "p95Ms": 16.8,
+        "maxMs": 33.3,
+        "over50Ms": 0,
+        "over100Ms": 0,
+        "maxPerRun": [
+          33.3,
+          33.3,
+          16.8
+        ]
+      },
+      "decision": "No repeatable prewarm benefit; runtime unchanged"
+    },
+    {
+      "id": "zarhal-lavha",
+      "currentOpening": {
+        "runs": 3,
+        "p95Ms": 16.8,
+        "maxMs": 33.4,
+        "over50Ms": 0,
+        "over100Ms": 0,
+        "maxPerRun": [
+          33.4,
+          16.9,
+          16.9
+        ]
+      },
+      "currentScroll": {
+        "runs": 3,
+        "p95Ms": 16.8,
+        "maxMs": 16.9,
+        "over50Ms": 0,
+        "over100Ms": 0,
+        "maxPerRun": [
+          16.9,
+          16.8,
+          16.9
+        ]
+      },
+      "prewarmOpening": {
+        "runs": 3,
+        "p95Ms": 16.8,
+        "maxMs": 33.4,
+        "over50Ms": 0,
+        "over100Ms": 0,
+        "maxPerRun": [
+          33.3,
+          33.4,
+          33.3
+        ]
+      },
+      "decision": "No repeatable prewarm benefit; runtime unchanged"
+    }
+  ],
+  "trace": [
+    {
+      "id": "visol-rishta",
+      "scope": "diagnostic tracing, first 150 ms after click; not comparable frame benchmark",
+      "clickDispatchMs": 34.113,
+      "maxLayoutMs": 0.417,
+      "maxPaintMs": 0.803
+    },
+    {
+      "id": "zarhal-lavha",
+      "scope": "diagnostic tracing, first 150 ms after click; not comparable frame benchmark",
+      "clickDispatchMs": 37.303,
+      "maxLayoutMs": 0.625,
+      "maxPaintMs": 0.423
+    }
+  ],
+  "tests": {
+    "targetedPassed": 17,
+    "intentionallyFiltered": 70,
+    "mobilePassed": 12,
+    "normalReducedReloadPassed": 6,
+    "typeScript": "passed",
+    "eslint": "passed",
+    "productionWebpackBuild": "passed before measurement; no runtime changes after build"
+  },
+  "release": {
+    "backupGitBranch": "backup/main-before-inviteizi-release-2026-10-28",
+    "backupGitSha": "ab5eb2ee1925e75a733e7a186fe510f28d9b85c7",
+    "databaseAndStorageBackup": "not verified; Git branch is not data backup",
+    "supabase": "no connector or local credentials; no production SQL/Storage access",
+    "preview": "Vercel success on baseline SHA; branch URL redirects302 to Vercel SSO, application smoke not verified",
+    "go": "NO-GO production"
+  }
+}

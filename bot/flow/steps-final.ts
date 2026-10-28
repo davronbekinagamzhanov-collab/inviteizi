@@ -93,7 +93,15 @@ export const musicList: Step = {
     const m = list.find((x) => x.id === v.slice(2));
     if (!m) return null;
     if (v.startsWith("p:")) {
-      const sent = await c.deps.tg.sendAudio(c.chatId, m.telegramFileId ?? m.fileUrl, { title: trackTitle(c, m) });
+      let sent;
+      try {
+        sent = await c.deps.tg.sendAudio(c.chatId, m.telegramFileId ?? m.fileUrl, { title: trackTitle(c, m) });
+      } catch (e) {
+        // No URL/token in logs; a failed preview must not change the chosen music.
+        console.error("previewMusic", e instanceof Error ? e.name : "Error");
+        await send(c, c.tx.music.previewFailed);
+        return { stay: true };
+      }
       if (!m.telegramFileId && sent.fileId) await c.deps.repo.setMusicTelegramFileId(m.id, sent.fileId);
       return { stay: true };
     }
@@ -126,13 +134,13 @@ export const musicOwn: Step = {
       try {
         url = await c.deps.saveMusic(file.fileId, c.user.id);
       } catch (e) {
-        console.error("saveMusic", e instanceof Error ? e.message : e);
+        console.error("saveMusic", e instanceof Error ? e.name : "Error");
       }
-      // без копии в хранилище гости не услышат песню — не делаем вид, что всё хорошо
-      if (!url) {
-        await send(c, c.tx.music.saveFailed);
-        return { stay: true };
-      }
+    }
+    // This is also required when the storage dependency is missing.
+    if (!url) {
+      await send(c, c.tx.music.saveFailed);
+      return { stay: true };
     }
     c.s.music = { kind: "own", fileId: file.fileId, ...(url ? { url } : {}), ...(title ? { title } : {}) };
     await send(c, c.tx.music.saved);
@@ -155,7 +163,9 @@ async function musicLine(c: Ctx) {
 async function summary(c: Ctx) {
   const r = c.tx.review;
   const d = finalData(c.s);
-  const lines = [r.title, "", designLine(c.tx, c.s.templateId ?? "", c.s.format ?? "animated")];
+  const old = c.s.orderId ? await c.deps.repo.getOrder(c.s.orderId) : null;
+  const quoted = old?.userId === c.user.id ? old.amount : undefined;
+  const lines = [r.title, "", designLine(c.tx, c.s.templateId ?? "", c.s.format ?? "animated", quoted)];
   if (d.occasion === "nikoh") lines.push(r.groom(d.groom ?? ""), r.bride(d.bride ?? ""));
   else lines.push(r.person(d.person ?? ""));
   if (d.relation) {
@@ -165,6 +175,7 @@ async function summary(c: Ctx) {
   if (d.occasion === "yubiley" && d.age) lines.push(r.age(d.age));
   if (d.occasion === "nahorgi" && d.cause) lines.push(r.cause(c.tx.form.causes[d.cause as "nikoh" | "sunnat"] ?? d.cause));
   lines.push(r.hosts(d.hosts ?? ""));
+  if (d.sides?.groom) lines.push(c.tx.review.sideGroom(d.sides.groom));
   if (d.sides?.bride) lines.push(r.sideBride(d.sides.bride));
   lines.push("");
   d.events.forEach((e, i) => {
@@ -222,8 +233,8 @@ export const review: Step = {
       case "music":
         return edit("music");
       case "design":
-        if (c.s.paid) {
-          // Оплачен: меняем дизайн только в том же формате (цена та же)
+        if (c.s.paid || c.s.orderId) {
+          // A saved quote fixes format and amount; otherwise a cheap order could be upgraded for free.
           const list = designsFor(c.s.occasion ?? "nikoh", c.s.format ?? "animated");
           c.s.catIdx = Math.max(0, list.findIndex((x) => x.id === c.s.templateId));
           return edit("catalog");

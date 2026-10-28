@@ -65,43 +65,25 @@ export function Reveal({
   );
 }
 
-/**
- * Проверяем положение при каждом кадре скролла (а не только «пересечение»):
- * даже если гость пролистал блок за долю секунды, он всё равно появится.
- */
+/** Browser observes blocks without a scroll/resize handler for every paragraph. */
 function useRevealState(ref: React.RefObject<HTMLElement | null>) {
   const [state, setState] = useState<State>("hidden");
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    let frame = 0;
-    let first = true;
-
-    const check = () => {
-      frame = 0;
-      const { top } = el.getBoundingClientRect();
-      const h = window.innerHeight;
-      if (top < h * 1.25) {
-        // уже глубоко на экране после быстрого листания — без анимации
-        setState(!first && top < h * 0.85 ? "instant" : "animate");
-        stop();
-      }
-      first = false;
-    };
-    const onScroll = () => {
-      if (!frame) frame = requestAnimationFrame(check);
-    };
-    function stop() {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-      cancelAnimationFrame(frame);
+    if (!("IntersectionObserver" in window) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const frame = requestAnimationFrame(() => setState("instant"));
+      return () => cancelAnimationFrame(frame);
     }
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    check();
-    return stop;
+    const observer = new IntersectionObserver(entries => {
+      const entry = entries[0];
+      if (!entry?.isIntersecting) return;
+      setState(entry.boundingClientRect.top < window.innerHeight * 0.85 ? "instant" : "animate");
+      observer.disconnect();
+    }, { rootMargin: "25% 0px" });
+    observer.observe(el);
+    return () => observer.disconnect();
   }, [ref]);
 
   return state;

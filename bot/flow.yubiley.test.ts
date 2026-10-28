@@ -39,9 +39,9 @@ describe("юбилей (шаг 6)", () => {
 describe("каталог для клиентов (шаг 6)", () => {
   it("в боте только принятые шаблоны, у каждого тадбира есть хотя бы один формат", async () => {
     const { designsFor, formatsFor } = await import("./flow/util");
-    const { ACCEPTED } = await import("@/templates/registry");
+    const { ACCEPTED, FORMATS } = await import("@/templates/registry");
     const shown = (["nikoh", "nahorgi", "sunnat", "yubiley"] as const).flatMap((o) =>
-      (["animated", "simple"] as const).flatMap((f) => designsFor(o, f).map((d) => d.id)),
+      FORMATS.flatMap((f) => designsFor(o, f).map((d) => d.id)),
     );
     expect(new Set(shown)).toEqual(ACCEPTED);
     for (const o of ["nikoh", "nahorgi", "sunnat", "yubiley"] as const) expect(formatsFor(o).length, o).toBeGreaterThan(0);

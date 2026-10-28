@@ -1,11 +1,14 @@
-import { Alegreya_Sans, Lora } from "next/font/google";
+import { Alegreya_Sans } from "next/font/google";
+import localFont from "next/font/local";
 import { designVars } from "../types";
 
-const display = Lora({
+const display = localFont({
   variable: "--oo-display",
-  weight: ["500", "600", "700"],
-  style: ["normal", "italic"],
-  subsets: ["cyrillic", "cyrillic-ext"],
+  src: [
+    { path: "../../../assets/fonts/Lora-Regular.ttf", weight: "400 700", style: "normal" },
+    { path: "../../../assets/fonts/Lora-Italic.ttf", weight: "400 700", style: "italic" },
+  ],
+  display: "swap",
 });
 
 const body = Alegreya_Sans({

@@ -3,8 +3,11 @@ import { uz } from "@/texts/bot-uz";
 import { Sim } from "./testing/sim";
 import { buttonLabels, inlineButtons } from "./testing/fake-tg";
 import { nikohOrder, startUz } from "./testing/paths";
+import { activeDesigns } from "@/templates/registry";
 
 const BASE = "https://inviteizi.vercel.app";
+const animatedNikohCount=activeDesigns().filter(d=>d.occasion==="nikoh"&&d.format==="animated").length;
+const simpleNikoh=activeDesigns().filter(d=>d.occasion==="nikoh"&&d.format==="simple").sort((a,b)=>a.number-b.number);
 
 describe("весь путь никоҳ на ўзбекском", () => {
   it("от /start insta до ссылки на НАМУНА", async () => {
@@ -17,16 +20,16 @@ describe("весь путь никоҳ на ўзбекском", () => {
     await sim.click(id, uz.category.nikoh);
     expect(sim.lastText(id)).toBe(uz.format.ask);
     const fmt = buttonLabels(sim.last(id));
-    expect(fmt.some((l) => /^✨ Анимацияли — 10.000 ₸$/.test(l))).toBe(true);
-    expect(fmt.some((l) => /^📄 Оддий — 7.000 ₸$/.test(l))).toBe(true);
+    expect(fmt.some((l) => /^✨ Анимацияли — 8.000 ₸$/.test(l))).toBe(true);
+    expect(fmt.some((l) => /^📄 Оддий — 5.000 ₸$/.test(l))).toBe(true);
     await sim.click(id, /Анимацияли/);
 
     // Каталог: одно сообщение с фото, листаем ▶ в том же сообщении
     const cat = sim.last(id);
     expect(cat.type).toBe("photo");
     expect(cat.media).toBe(`${BASE}/covers/oltin-monogramma.jpg`);
-    expect(cat.text).toMatch(/^№1 · Олтин монограмма\nАнимацияли · 10.000 ₸$/);
-    expect(buttonLabels(cat)).toEqual(expect.arrayContaining(["◀", "1/2", "▶", uz.catalog.demo, uz.catalog.buy]));
+    expect(cat.text).toMatch(/^№1 · Олтин монограмма\nАнимацияли · 8.000 ₸$/);
+    expect(buttonLabels(cat)).toEqual(expect.arrayContaining(["◀", `1/${animatedNikohCount}`, "▶", uz.catalog.demo, uz.catalog.buy]));
     expect(inlineButtons(cat).find((b) => b.text === uz.catalog.demo)).toEqual({
       text: uz.catalog.demo,
       url: `${BASE}/demo/oltin-monogramma`, // каталог — чистое демо без надписи
@@ -35,7 +38,7 @@ describe("весь путь никоҳ на ўзбекском", () => {
     expect(sim.last(id).id).toBe(cat.id);
     expect(cat.media).toBe(`${BASE}/covers/ganch-peshtoq.jpg`);
     expect(cat.text).toMatch(/^№61 · Ганч пештоқ/);
-    expect(buttonLabels(cat)).toContain("2/2");
+    expect(buttonLabels(cat)).toContain(`2/${animatedNikohCount}`);
     await sim.click(id, uz.catalog.buy);
 
     // Анкета
@@ -65,9 +68,8 @@ describe("весь путь никоҳ на ўзбекском", () => {
     await sim.text(id, "Сайрам, Амир Темур кўчаси 45");
     const loc = sim.last(id);
     expect(loc.text).toBe(uz.event.location);
-    expect(loc.markup && "reply" in loc.markup && loc.markup.reply.flat()).toEqual(
-      expect.arrayContaining([{ text: uz.event.sendLocation, location: true }, { text: uz.event.skip }, { text: uz.back }]),
-    );
+    expect(buttonLabels(loc)).toEqual(expect.arrayContaining([uz.event.readyVenues,uz.event.mapChoice,uz.event.linkChoice,uz.event.manualChoice,uz.event.skip,uz.back]));
+    expect(JSON.stringify(loc.markup)).not.toContain("location");
     await sim.location(id, 42.3005, 69.7612);
     expect(sim.tg.to(id).some((m) => m.text === uz.event.locationSaved && buttonLabels(m).includes(uz.menu.create))).toBe(true);
 
@@ -133,7 +135,7 @@ describe("весь путь никоҳ на ўзбекском", () => {
       format: "animated",
       templateId: "ganch-peshtoq",
       slug: "aziz-madina",
-      amount: 10_000,
+      amount: 8_000,
       music: { kind: "list", musicId: "yor-yor" },
     });
     expect(o.data).toMatchObject({
@@ -165,7 +167,7 @@ describe("весь путь никоҳ на ўзбекском", () => {
     ]);
     const done = sim.last(id);
     expect(done.text).toBe(uz.order.created(`${BASE}/aziz-madina`));
-    expect(buttonLabels(done).some((l) => /^💳 Тўлаш — 10.000 ₸$/.test(l))).toBe(true);
+    expect(buttonLabels(done).some((l) => /^💳 Тўлаш — 8.000 ₸$/.test(l))).toBe(true);
     expect(buttonLabels(done)).toContain(uz.order.edit);
     expect((await sim.user(id))?.step).toBe("idle");
   });
@@ -185,20 +187,23 @@ describe("весь путь никоҳ на ўзбекском", () => {
     await sim.click(1, uz.category.nikoh);
     await sim.click(1, /Оддий/);
     const cat = sim.last(1);
-    expect(buttonLabels(cat)).toContain("1/2");
+    expect(buttonLabels(cat)).toContain(`1/${simpleNikoh.length}`);
+    expect(cat.media).toBe(`${BASE}/covers/${simpleNikoh[0].id}.jpg`);
     await sim.click(1, "◀");
-    expect(buttonLabels(cat)).toContain("2/2");
+    expect(buttonLabels(cat)).toContain(`${simpleNikoh.length}/${simpleNikoh.length}`);
+    expect(cat.media).toBe(`${BASE}/covers/${simpleNikoh.at(-1)!.id}.jpg`);
     await sim.click(1, "▶");
-    expect(buttonLabels(cat)).toContain("1/2");
+    expect(buttonLabels(cat)).toContain(`1/${simpleNikoh.length}`);
+    expect(cat.media).toBe(`${BASE}/covers/${simpleNikoh[0].id}.jpg`);
   });
 
-  it("формат без дизайнов не показывается (суннат — только анимацияли)", async () => {
+  it("суннат показывает форматы по текущему принятому каталогу", async () => {
     const sim = new Sim();
     await startUz(sim, 1);
     await sim.click(1, uz.category.sunnat);
     const labels = buttonLabels(sim.last(1));
-    expect(labels.some((l) => l.includes("Анимацияли"))).toBe(true);
-    expect(labels.some((l) => l.includes("Оддий"))).toBe(false);
+    for(const f of ["animated","scroll","simple"] as const)
+      expect(labels.some(l=>l.includes(uz.format.names[f]))).toBe(activeDesigns().some(d=>d.occasion==="sunnat"&&d.format===f));
   });
 
   it("ℹ️ — объяснение разницы форматов всплывающим окном", async () => {

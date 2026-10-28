@@ -10,6 +10,8 @@ export type BotEnv = {
   kaspiName: string;
   /** https://inviteizi.vercel.app (без «/» в конце) */
   publicBaseUrl: string;
+  paymentCardNumber?: string;
+  venueMapPickerUrl?: string;
 };
 
 export type Deps = {
@@ -43,6 +45,10 @@ export type StepId =
   | "evVenue"
   | "evAddress"
   | "evLoc"
+  | "evPlaces"
+  | "evVenueName"
+  | "evMap"
+  | "evLink"
   | "more"
   | "text"
   | "textOwn"
@@ -61,6 +67,7 @@ export type BackEntry = { step: StepId; ev?: number; ret?: "review" };
 
 /** Черновик заказа и положение в диалоге (users.state) */
 export type Draft = {
+  handledUpdates?: number[];
   /** Номер вопроса: кнопки старых вопросов не срабатывают */
   q?: number;
   back?: BackEntry[];
@@ -72,12 +79,16 @@ export type Draft = {
   format?: Format;
   templateId?: string;
   catIdx?: number;
+  /** IDs shown with this catalog question; a changed tariff/catalog requires a fresh choice. */
+  catRevision?: string;
   /** Страница вариантов текста (по 3) */
   textPage?: number;
   data?: DraftData;
   /** Индекс тадбира, который сейчас заполняется */
   ev?: number;
   calMonth?: string;
+  venuePage?: number;
+  venueNameInput?: string;
   music?: MusicChoice;
   /** Правка существующего заказа / оплата / смена ссылки */
   orderId?: string;
@@ -102,6 +113,7 @@ export type Ctx = {
 
 /** Итог обработки ответа на шаге */
 export type Result =
+  | { ignore: true } // persistence already committed, or another request consumed this answer
   | { to: StepId } // ответ принят — следующий вопрос
   | { enter: StepId } // начать с этого вопроса заново (стек «Назад» пустой)
   | { wait: StepId } // перейти на шаг молча: вопрос уже показан (реквизиты оплаты → ждём чек)

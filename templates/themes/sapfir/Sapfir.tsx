@@ -1,5 +1,6 @@
 "use client";
 
+import {Words,useFitWords} from "../../blocks/FitWords";
 import { motion } from "motion/react";
 import { t } from "@/texts/uz-cyrl";
 import type { TemplateProps } from "../types";
@@ -24,6 +25,9 @@ const NOISE = `url("data:image/svg+xml,${encodeURIComponent(
 export default function Sapfir({ data, mode }: TemplateProps) {
   const inv = useInvitation(data, mode, { melody, opening: false });
   const { main } = inv;
+  const names=useFitWords<HTMLHeadingElement>(48);
+  const groomFamily=useFitWords<HTMLParagraphElement>(21),brideFamily=useFitWords<HTMLParagraphElement>(21);
+  const hosts=useFitWords<HTMLParagraphElement>(21);
   const { when } = main;
 
   const appear = (i: number) => ({
@@ -45,7 +49,7 @@ export default function Sapfir({ data, mode }: TemplateProps) {
     >
       <GoldDefs />
       <div
-        className="relative flex h-svh min-h-[560px] flex-col items-center justify-center overflow-hidden px-[38px] text-center"
+        className="relative flex min-h-[max(560px,100svh)] flex-col items-center justify-center overflow-hidden px-[38px] pt-10 pb-24 text-center"
         style={{ background: `linear-gradient(180deg, ${VELVET_TOP} 0%, ${VELVET_BOTTOM} 100%)` }}
       >
         {/* бархат: шум, блик сверху, тень по краям */}
@@ -77,10 +81,10 @@ export default function Sapfir({ data, mode }: TemplateProps) {
             {t.occasionTitles[inv.occasion]}
           </motion.p>
 
-          <motion.h1 {...appear(1)} className="mt-[2.4svh] font-display leading-[0.98] font-normal">
-            <span className="block text-[clamp(40px,min(12.5vw,7.4svh),54px)] italic">{data.groom}</span>
+          <motion.h1 ref={names} {...appear(1)} className="mt-[2.4svh] w-full font-display leading-[0.98] font-normal [--fit:48px]">
+            <span className="block text-[length:var(--fit)] italic"><Words text={data.groom??""}/></span>
             <span className="gold-text block text-[clamp(26px,4.6svh,34px)] italic">{t.cover.and}</span>
-            <span className="block text-[clamp(40px,min(12.5vw,7.4svh),54px)] italic">{data.bride}</span>
+            <span className="block text-[length:var(--fit)] italic"><Words text={data.bride??""}/></span>
           </motion.h1>
 
           <motion.p {...appear(2)} className="mt-[2.4svh] text-[16px] leading-[1.6] text-muted">
@@ -131,9 +135,14 @@ export default function Sapfir({ data, mode }: TemplateProps) {
             )}
           </motion.div>
 
-          <motion.div {...appear(6)} className="mt-[2.8svh]">
+          <motion.div {...appear(6)} className="mt-[2.8svh] w-full max-w-full">
+            {inv.program.filter(e=>e!==main).map((e,i)=><div key={i} className="mb-6 border-t border-gold/30 pt-5 text-[16px] leading-relaxed [overflow-wrap:anywhere]">
+              <p className="text-gold-light">{e.title}</p><p className="mt-2">{t.date.long(e.when.day,e.when.monthIndex,e.when.year)} · {t.date.at(e.time)}</p>
+              <p className="mt-2 text-[18px]">{e.venueName}</p><p className="mt-1 text-muted">{e.address}</p><MapButton href={e.mapHref} className="mt-3 border-b border-gold/50 pb-1 text-gold-light" iconClassName="text-gold-light"/>
+            </div>)}
             <p className="text-[15px] text-muted italic">{t.hosts.respect}</p>
-            <p className="gold-text mt-0.5 font-display text-[22px] font-medium">{data.hosts}</p>
+            {inv.sides ? <div className="mt-5 space-y-5 text-center [overflow-wrap:anywhere]"><div><p className="text-[14px] text-muted">{t.sides.groom}</p><p ref={groomFamily} className="mt-2 w-full [--fit:21px]"><span className="text-[length:var(--fit)]"><Words text={inv.sides.groom??""}/></span></p></div><div><p className="text-[14px] text-muted">{t.sides.bride}</p><p ref={brideFamily} className="mt-2 w-full [--fit:21px]"><span className="text-[length:var(--fit)]"><Words text={inv.sides.bride??""}/></span></p></div></div> : <p className="gold-text mt-0.5 font-display text-[22px] font-medium">{data.hosts}</p>}
+            {inv.sides && data.hosts && ![inv.sides.groom,inv.sides.bride].includes(data.hosts) && <p ref={hosts} className="gold-text mt-5 w-full font-display [--fit:21px]"><span className="text-[length:var(--fit)]"><Words text={data.hosts}/></span></p>}
           </motion.div>
         </div>
       </div>

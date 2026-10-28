@@ -6,12 +6,17 @@ import type { BotUpdate } from "../update";
 import type { Ctx, Deps, Draft, Result, Step, StepId } from "./types";
 import { cat, catalog, fmt } from "./steps-order";
 import { age, bride, cause, groom, hosts, person, relation, sideAsk, sideBride } from "./steps-form";
-import { evAddress, evDate, evLoc, evSameDay, evTime, evTimeCustom, evVenue, more } from "./steps-event";
+import { evPlaces, evVenueName, evMap, evLink, evAddress, evDate, evLoc, evSameDay, evTime, evTimeCustom, evVenue, more } from "./steps-event";
 import { evMenu, music, musicList, musicOwn, review, text, textOwn } from "./steps-final";
 import { approve, askReceipt, askRejectReason, editOrder, myOrders, payOrder, receipt, reject, resendLink } from "./orders";
 import { cmdFind, cmdOrders, cmdStats } from "./admin";
 import { mainMenu, send, texts, txFor } from "./util";
 import type { Lang } from "@/lib/domain";
+import { dashboard } from "./dashboard";
+import { favorites, favoriteAction } from "./favorites";
+import { activeDesigns } from "@/templates/registry";
+import { designsFor } from "./util";
+import { rememberUpdate } from "../update";
 
 const idle: Step = {
   async ask(c) {
@@ -39,7 +44,7 @@ export const steps: Record<StepId, Step> = {
   evTimeCustom,
   evVenue,
   evAddress,
-  evLoc,
+  evLoc, evPlaces, evVenueName, evMap, evLink,
   more,
   text,
   textOwn,
@@ -54,7 +59,7 @@ export const steps: Record<StepId, Step> = {
 const BACK_LIMIT = 60;
 const isStep = (s: string): s is StepId => s in steps;
 
-export async function handle(deps: Deps, u: BotUpdate): Promise<void> {
+export async function handle(deps: Deps, u: BotUpdate): Promise<boolean> {
   const isStart = u.kind === "command" && u.command === "start";
   const user = await deps.repo.touchUser({
     id: u.from.id,
@@ -62,6 +67,10 @@ export async function handle(deps: Deps, u: BotUpdate): Promise<void> {
     firstName: u.from.firstName,
     source: isStart && u.args ? u.args.slice(0, 64) : null,
   });
+  if (u.updateId !== undefined && rememberUpdate(user.state.handledUpdates).includes(u.updateId)) {
+    if (u.kind === "callback") await deps.tg.answerCallbackQuery(u.callbackId).catch(() => {});
+    return true;
+  }
   const c: Ctx = {
     deps,
     u,
@@ -76,10 +85,12 @@ export async function handle(deps: Deps, u: BotUpdate): Promise<void> {
   };
   try {
     await route(c);
+    return true;
   } catch (e) {
     // Никогда не молчим: клиенту — короткое «хатолик, қайта уриниб кўринг», в лог — только текст ошибки
-    console.error("bot route", u.kind, e instanceof Error ? e.message : e);
+    console.error("bot route", u.kind, e instanceof Error ? e.name : "Error");
     await deps.tg.sendMessage(u.chatId, c.tx.error).catch(() => {});
+    return false;
   } finally {
     if (u.kind === "callback" && !c.answered) await deps.tg.answerCallbackQuery(u.callbackId).catch(() => {});
   }
@@ -88,6 +99,7 @@ export async function handle(deps: Deps, u: BotUpdate): Promise<void> {
 // ── Переходы ──
 
 async function save(c: Ctx) {
+  if (c.u.updateId !== undefined || c.user.state.handledUpdates) c.s.handledUpdates = rememberUpdate(c.user.state.handledUpdates,c.u.updateId);
   await c.deps.repo.saveStep(c.user.id, c.step, c.s as Record<string, unknown>);
 }
 
@@ -111,6 +123,7 @@ async function finish(c: Ctx) {
 }
 
 async function apply(c: Ctx, r: Result) {
+  if (r && "ignore" in r) return;
   if (r === null) {
     const current = steps[c.step];
     await send(c, current.onMessage ? c.tx.sendText : c.tx.pressButton);
@@ -137,6 +150,7 @@ async function apply(c: Ctx, r: Result) {
 }
 
 async function goBack(c: Ctx) {
+  delete c.s.venueNameInput;
   if (steps[c.step].replyKeyboard) await send(c, c.tx.ok, mainMenu(c.tx));
   const prev = c.s.back?.pop();
   if (!prev) {
@@ -258,6 +272,12 @@ async function route(c: Ctx) {
 }
 
 async function onCommand(c: Ctx, command: string, args: string) {
+  if (command === "favorites") return favorites(c);
+  if (command === "dashboard" || command === "customers") return dashboard(c, command === "customers" ? "customers" : "general");
+  if (command === "stats") {
+    if (c.chatId !== c.user.id || !(await c.deps.repo.canAnalyze(c.user.id))) return unknown(c);
+    return cmdStats(c);
+  }
   switch (command) {
     case "help":
       return help(c);
@@ -269,9 +289,8 @@ async function onCommand(c: Ctx, command: string, args: string) {
     case "new":
       return enter(c, "cat");
   }
-  if (["orders", "stats", "find"].includes(command) && (await c.deps.repo.isAdmin(c.user.id))) {
+  if (["orders", "find"].includes(command) && c.chatId === c.user.id && (await c.deps.repo.isAdmin(c.user.id))) {
     if (command === "orders") return cmdOrders(c);
-    if (command === "stats") return cmdStats(c);
     return cmdFind(c, args);
   }
   return unknown(c);
@@ -283,6 +302,16 @@ async function toast(c: Ctx, text: string) {
 }
 
 async function onCallback(c: Ctx, d: string) {
+  if (d === "favorites") return favorites(c);
+  if (d.startsWith("dash:")) { const [, view, period] = d.split(":"); return dashboard(c, view, period); }
+  if (d.startsWith("fav:")) {
+    const [, action, id] = d.split(":");
+    if (action !== "choose") return favoriteAction(c, action, id);
+    if (c.chatId !== c.user.id || !(await c.deps.repo.listFavorites(c.user.id)).includes(id)) return;
+    const design = activeDesigns().find(d => d.id === id);
+    if (!design) return;
+    return enter(c, "catalog", { occasion: design.occasion, format: design.format, catIdx: designsFor(design.occasion, design.format).findIndex(d => d.id === id) });
+  }
   const [kind, a, b] = d.split(":");
   const n = Number(a);
   switch (kind) {

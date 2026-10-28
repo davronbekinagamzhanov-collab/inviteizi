@@ -1,0 +1,60 @@
+{
+  "environment": "Local Chrome headless; warmed pages; CPU x4; 375x812 DPR2. Touch input; opening recording starts in pointerdown capture before React, excluding pre-input Playwright actionability checks. requestAnimationFrame times; not a physical-device guarantee.",
+  "noSvgFilters": false,
+  "results": [
+    {
+      "design": "shabnam-visol",
+      "phase": "opening",
+      "cpuThrottle": 4,
+      "noSvgFilters": false,
+      "frames": 180,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 50,
+      "over50Ms": 0,
+      "over100Ms": 0,
+      "stalls": []
+    },
+    {
+      "design": "shabnam-visol",
+      "phase": "scroll",
+      "cpuThrottle": 4,
+      "noSvgFilters": false,
+      "frames": 181,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 17.1,
+      "over50Ms": 0,
+      "over100Ms": 0,
+      "stalls": []
+    },
+    {
+      "design": "visol-soati",
+      "phase": "opening",
+      "cpuThrottle": 4,
+      "noSvgFilters": false,
+      "frames": 182,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 50,
+      "over50Ms": 0,
+      "over100Ms": 0,
+      "stalls": []
+    },
+    {
+      "design": "visol-soati",
+      "phase": "scroll",
+      "cpuThrottle": 4,
+      "noSvgFilters": false,
+      "frames": 181,
+      "p50Ms": 16.7,
+      "p95Ms": 16.8,
+      "maxMs": 16.8,
+      "over50Ms": 0,
+      "over100Ms": 0,
+      "stalls": []
+    }
+  ],
+  "buildMode": "Local next start, one production build; not Vercel deployment",
+  "limit": "Opening max 50.0 ms remains for both designs. No claim of zero latency or guaranteed physical-phone FPS."
+}

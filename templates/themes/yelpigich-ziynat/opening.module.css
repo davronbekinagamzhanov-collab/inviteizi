@@ -1,0 +1,10 @@
+.cover{position:absolute;inset:0 0 auto;width:100%;height:100svh;min-height:560px;z-index:40;overflow:hidden;color:#344d59}
+.paper{position:absolute;inset:0;background:#e4ecdf;transition:opacity .55s .65s;will-change:opacity}
+.fan{position:absolute;left:calc(50% - 140px);top:34%;width:280px;height:195px;transition:transform .45s .85s,opacity .4s .9s;will-change:transform,opacity}
+.leaf{position:absolute;left:112px;top:0;width:56px;height:160px;transform-origin:28px 158px;transform:rotate(var(--angle));transition:transform .65s cubic-bezier(.4,0,.2,1);will-change:transform}
+.pin{position:absolute;left:137px;top:157px;width:6px;height:35px;background:#aa9871;border-radius:3px}
+.label{position:absolute;inset:12% 6% auto;transition:opacity .3s .7s}.prompt{position:absolute;inset:auto 6% 14%;font-size:17px;transition:opacity .3s .7s}
+.cover[data-started=true] .leaf{transform:rotate(0deg)}
+.cover[data-started=true] .fan{transform:translateY(80px);opacity:0}
+.cover[data-started=true] .paper,.cover[data-started=true] .label,.cover[data-started=true] .prompt{opacity:0}
+@media(prefers-reduced-motion:reduce){.paper,.fan,.leaf,.label,.prompt{transition:none}}

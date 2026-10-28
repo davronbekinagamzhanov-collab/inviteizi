@@ -3,6 +3,7 @@
  * Записи отдаются копиями (как из базы): изменить их снаружи нельзя.
  */
 import { isReservedSlug } from "@/lib/slug";
+import { summarize, type MetricEvent, type EventKind, type Period } from "@/lib/analytics";
 import type { Occasion } from "@/lib/types";
 import type { Repo } from "./repo";
 import type {
@@ -17,6 +18,8 @@ import type {
 } from "@/lib/domain";
 
 type Options = {
+  ownerId?: number;
+  analyticsAdminIds?: number[];
   adminIds?: number[];
   music?: MusicRecord[];
   /** Часы (в тестах — управляемые) */
@@ -32,6 +35,34 @@ const TZ_OFFSET_MS = 5 * 60 * 60_000;
 const DAY = 24 * 60 * 60_000;
 
 export class MemoryRepo implements Repo {
+  private favorites = new Map<number, Map<string,number>>();
+  private analyticsEvents = new Map<string, MetricEvent>();
+  private ownerId?: number;
+  private analyticsAdminIds: number[];
+  private trackingSince: Date;
+
+  async isOwner(id: number) { return this.ownerId === id; }
+  async canAnalyze(id: number) { return await this.isOwner(id) || (await this.isAdmin(id) && this.analyticsAdminIds.includes(id)); }
+  async analytics(actorId: number, period: Period, now: Date, customers = false) {
+    const owner = await this.isOwner(actorId);
+    if (!(await this.canAnalyze(actorId)) || (customers && !owner)) throw new Error("Analytics access denied");
+    return summarize({ orders: [...this.orders.values()], users: [...this.users.values()], events: [...this.analyticsEvents.values()], since: this.trackingSince, music: this.music }, period, now, customers && owner);
+  }
+  async listFavorites(userId: number) {
+    return [...(this.favorites.get(userId)??new Map<string,number>())]
+      .sort((a,b)=>b[1]-a[1]||(a[0]<b[0]?-1:a[0]>b[0]?1:0)).map(([id])=>id);
+  }
+  async setFavorite(userId: number, templateId: string, saved: boolean) {
+    if (!this.favorites.has(userId)) this.favorites.set(userId, new Map());
+    const set = this.favorites.get(userId)!;
+    if (!saved) { set.delete(templateId); return; }
+    if(!set.has(templateId))set.set(templateId,this.now().getTime());
+    this.analyticsEvents.set(`favorite:${userId}:${templateId}`, this.analyticsEvents.get(`favorite:${userId}:${templateId}`) ?? { kind: "design_favorited", userId, target: templateId, createdAt: this.now() });
+  }
+  async recordEvent(userId: number, kind: Extract<EventKind, "demo_opened" | "design_selected">, target: string, key: string) {
+    const id = `${kind}:${userId}:${key}`;
+    if (!this.analyticsEvents.has(id)) this.analyticsEvents.set(id, { kind, userId, target, createdAt: this.now() });
+  }
   private users = new Map<number, UserRecord>();
   private orders = new Map<string, OrderRecord>();
   /** Все адреса, которые когда-либо были у заказов: slug → id заказа (как таблица slug_history) */
@@ -43,6 +74,9 @@ export class MemoryRepo implements Repo {
   private nextId = 1;
 
   constructor(o: Options = {}) {
+    this.ownerId = o.ownerId;
+    this.analyticsAdminIds = o.analyticsAdminIds ?? [];
+    this.trackingSince = o.now?.() ?? new Date();
     this.adminIds = o.adminIds ?? [];
     this.music = clone(o.music ?? []);
     this.now = o.now ?? (() => new Date());
@@ -119,10 +153,23 @@ export class MemoryRepo implements Repo {
   }
 
   // ── Заказы ──
+  async createOrderFromDraft(o: NewOrder, expectedQ: number, handledUpdates?: number[]) {
+    const user = this.mustUser(o.userId);
+    if (user.step !== "review" || Number(user.state.q ?? 0) !== expectedQ) return null;
+    const previous = { step: user.step, state: clone(user.state) };
+    user.step = "idle";
+    user.state = { q: expectedQ + 1, ...(handledUpdates ? {handledUpdates} : {}) };
+    try { return await this.createOrder(o); }
+    catch (error) {
+      if (user.step === "idle" && user.state.q === expectedQ + 1) Object.assign(user, previous);
+      throw error;
+    }
+  }
+
   async createOrder(o: NewOrder) {
     const now = this.now();
     let slug = o.slugBase;
-    for (let i = 2; await this.isSlugTaken(slug); i++) slug = `${o.slugBase}-${i}`;
+    for (let i = 2; this.slugHistory.has(slug) || isReservedSlug(slug); i++) slug = `${o.slugBase}-${i}`;
     this.slugHistory.set(slug, `00000000-0000-4000-8000-${String(this.nextId).padStart(12, "0")}`);
     const rec: OrderRecord = {
       id: `00000000-0000-4000-8000-${String(this.nextId++).padStart(12, "0")}`,

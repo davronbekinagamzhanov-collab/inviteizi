@@ -183,6 +183,7 @@ export default function Design({ data, mode }: TemplateProps) {
           <Reveal className="mt-[2.6svh] w-full max-w-[340px]">
             <p className="text-[16px] text-muted italic">{t.hosts.respectDeep}</p>
             {sides ? <Sides groom={sides.groom} bride={sides.bride} /> : <Family text={data.hosts} size={24} />}
+            {sides && data.hosts && ![sides.groom,sides.bride].includes(data.hosts) && <div className="mt-5"><Family text={data.hosts} size={24}/></div>}
           </Reveal>
         </div>
 
