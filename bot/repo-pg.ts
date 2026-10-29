@@ -320,7 +320,7 @@ export class PgRepo implements Repo {
     if (!(await this.canAnalyze(actorId)) || (customers && !owner)) throw new Error("Analytics access denied");
     // One consistent snapshot; only necessary columns, never event addresses or receipt files.
     const input = await this.sql.begin("isolation level repeatable read read only", async tx => {
-      const orders = await tx<MetricOrder[]>`select id, user_id as "userId", status, occasion, format, template_id as "templateId",
+      const orders = await tx<MetricOrder[]>`select id, number, user_id as "userId", status, occasion, format, template_id as "templateId",
         amount, created_at as "createdAt", paid_at as "paidAt", updated_at as "updatedAt",
         case when music_kind = 'list' then jsonb_build_object('kind','list','musicId',music_id)
           else jsonb_build_object('kind',music_kind) end as music from public.orders`;

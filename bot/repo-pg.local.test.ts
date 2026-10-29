@@ -119,6 +119,19 @@ describe.skipIf(process.env.INVITEIZI_LOCAL_PG !== "1")("PgRepo through isolated
     await repo.setFavorite(80000002,"oq-ot",false);await repo.setFavorite(80000002,"oq-ot",true);
     expect(await repo.listFavorites(80000002)).toEqual(["oq-ot","ganch-peshtoq"]);
   });
+  it("private analytics uses the existing SQL projection for custom dates and zero dimensions",async()=>{
+    vi.stubEnv("OWNER_TELEGRAM_ID","989898");
+    const now=new Date(Date.now()+3600000);
+    const report=await repo.analytics(989898,"date=2020-01-01..2020-01-02",now);
+    expect(report.categories.map(c=>c.id)).toEqual(["nikoh","nahorgi","sunnat","yubiley"]);
+    expect(report.formats.map(f=>f.id)).toEqual(["simple","scroll","animated"]);
+    expect(report.revenue).toBe(0);expect(report.details).toEqual([]);
+    await expect(repo.analytics(80000001,"date=2020-01-01",now)).rejects.toThrow("access denied");
+    const all=await repo.analytics(989898,"all",now);
+    expect(all.categories.reduce((n,c)=>n+c.revenue,0)).toBe(all.revenue);
+    expect(all.formats.reduce((n,f)=>n+f.paid,0)).toBe(all.paid);
+    expect(all.details.every(o=>!Object.hasOwn(o,"userId"))).toBe(true);
+  });
   it.each([100,1000])("%i isolated SQL customers preserve orders, money and favorites under queued retries",async n=>{
     vi.stubEnv("OWNER_TELEGRAM_ID","989898");
     const start=performance.now(),base=81000000+n*10;

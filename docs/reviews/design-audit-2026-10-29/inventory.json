@@ -1,0 +1,2149 @@
+{
+  "fontLimitation": "Google font domains were denied; next/font/google used development fallbacks. Local fonts and local artwork are real. Repeat final typography checks after network access is applied.",
+  "scope": "Local demo fixtures at 375x812; closed, opened, scrolled event view; remote requests blocked; no production orders; events counts only data-event markers (older templates use other markup)",
+  "results": [
+    {
+      "id": "oltin-monogramma",
+      "number": 1,
+      "name": "Олтин монограмма",
+      "format": "animated",
+      "occasion": "nikoh",
+      "status": 200,
+      "opening": true,
+      "height": 3694,
+      "events": 0,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "Азиз&Мадина",
+          "y": 464,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй санаси",
+          "y": 1157,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўйгача қолди",
+          "y": 1822,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй дастури",
+          "y": 2055,
+          "align": "center"
+        }
+      ]
+    },
+    {
+      "id": "sapfir",
+      "number": 23,
+      "name": "Сапфир",
+      "format": "simple",
+      "occasion": "nikoh",
+      "status": 200,
+      "opening": false,
+      "height": 812,
+      "events": 0,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "Сардор&Дилноза",
+          "y": 138,
+          "align": "center"
+        }
+      ]
+    },
+    {
+      "id": "oq-ot",
+      "number": 31,
+      "name": "Оқ от",
+      "format": "animated",
+      "occasion": "sunnat",
+      "status": 200,
+      "opening": true,
+      "height": 2693,
+      "events": 0,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "Муҳаммадали",
+          "y": 170,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Қутлуғ сана",
+          "y": 1157,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Қутлуғ кунгача",
+          "y": 1501,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй манзили",
+          "y": 1755,
+          "align": "center"
+        }
+      ]
+    },
+    {
+      "id": "tonggi-qozon",
+      "number": 41,
+      "name": "Тонгги қозон",
+      "format": "animated",
+      "occasion": "nahorgi",
+      "status": 200,
+      "opening": true,
+      "height": 2455,
+      "events": 0,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "Наҳорги ош",
+          "y": 98,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Ош санаси",
+          "y": 1023,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Ош манзили",
+          "y": 1455,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тонгги дастурхонгача",
+          "y": 1841,
+          "align": "center"
+        }
+      ]
+    },
+    {
+      "id": "pion-guldasta",
+      "number": 51,
+      "name": "Пион гулдаста",
+      "format": "animated",
+      "occasion": "yubiley",
+      "status": 200,
+      "opening": true,
+      "height": 2586,
+      "events": 0,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Юбилей куни",
+          "y": 1059,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Муборак кунгача",
+          "y": 1489,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Базм манзили",
+          "y": 1730,
+          "align": "center"
+        }
+      ]
+    },
+    {
+      "id": "ganch-peshtoq",
+      "number": 61,
+      "name": "Ганч пештоқ",
+      "format": "animated",
+      "occasion": "nikoh",
+      "status": 200,
+      "opening": true,
+      "height": 5051,
+      "events": 0,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "ЖаҳонгирваМафтуна",
+          "y": 365,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Никоҳ куни",
+          "y": 1456,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Бахтли кунгача",
+          "y": 2390,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй тартиби",
+          "y": 2775,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Қалбдан сўз",
+          "y": 3921,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Оқ фотиҳа",
+          "y": 4210,
+          "align": "center"
+        }
+      ]
+    },
+    {
+      "id": "zarhal-eshik",
+      "number": 62,
+      "name": "Зарҳал эшик",
+      "format": "animated",
+      "occasion": "nikoh",
+      "status": 200,
+      "opening": true,
+      "height": 2869,
+      "events": 0,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "БобурваШаҳзода",
+          "y": 234,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй санаси",
+          "y": 946,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўйгача қолди",
+          "y": 1439,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй дастури",
+          "y": 1670,
+          "align": "center"
+        }
+      ]
+    },
+    {
+      "id": "atlas-tolqin",
+      "number": 63,
+      "name": "Атлас тўлқини",
+      "format": "animated",
+      "occasion": "nikoh",
+      "status": 200,
+      "opening": true,
+      "height": 2328,
+      "events": 0,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "СанжарваМалика",
+          "y": 149,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Ҳурматли меҳмон!",
+          "y": 532,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй дастури",
+          "y": 955,
+          "align": "start"
+        }
+      ]
+    },
+    {
+      "id": "bodom-guli",
+      "number": 65,
+      "name": "Бодом гули",
+      "format": "animated",
+      "occasion": "nikoh",
+      "status": 200,
+      "opening": true,
+      "height": 2495,
+      "events": 0,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "ОтабекваЗарина",
+          "y": 341,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Ҳурматли меҳмон!",
+          "y": 631,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй дастури",
+          "y": 1051,
+          "align": "center"
+        }
+      ]
+    },
+    {
+      "id": "samarqand-kitob",
+      "number": 66,
+      "name": "Самарқанд",
+      "format": "animated",
+      "occasion": "nikoh",
+      "status": 200,
+      "opening": true,
+      "height": 2237,
+      "events": 0,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "ШерзодваГулноза",
+          "y": 303,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Ҳурматли меҳмон!",
+          "y": 599,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй дастури",
+          "y": 849,
+          "align": "start"
+        }
+      ]
+    },
+    {
+      "id": "ipak-romol",
+      "number": 67,
+      "name": "Ипак рўмол",
+      "format": "simple",
+      "occasion": "nikoh",
+      "status": 200,
+      "opening": false,
+      "height": 1320,
+      "events": 0,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "ФаррухваСабина",
+          "y": 132,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тадбирлар",
+          "y": 592,
+          "align": "center"
+        }
+      ],
+      "priorAttempts": [
+        {
+          "errors": [
+            "Internal Next.js error: Router action dispatched before initialization."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rishton-koshin",
+      "number": 68,
+      "name": "Риштон кошин",
+      "format": "simple",
+      "occasion": "nikoh",
+      "status": 200,
+      "opening": false,
+      "height": 1669,
+      "events": 0,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "ДилшодваКамола",
+          "y": 179,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй дастури",
+          "y": 816,
+          "align": "start"
+        }
+      ]
+    },
+    {
+      "id": "atirgul",
+      "number": 69,
+      "name": "Атиргул",
+      "format": "simple",
+      "occasion": "nikoh",
+      "status": 200,
+      "opening": false,
+      "height": 1885,
+      "events": 0,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "ЖасурваНилуфар",
+          "y": 158,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Ҳурматли меҳмон!",
+          "y": 655,
+          "align": "center"
+        }
+      ]
+    },
+    {
+      "id": "shohona-baxmal",
+      "number": 70,
+      "name": "Шоҳона бахмал",
+      "format": "scroll",
+      "occasion": "nikoh",
+      "status": 200,
+      "opening": false,
+      "height": 2402,
+      "events": 0,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "ШоҳрухваФеруза",
+          "y": 120,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Ҳурматли меҳмон!",
+          "y": 587,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй дастури",
+          "y": 1022,
+          "align": "center"
+        }
+      ]
+    },
+    {
+      "id": "tandir-nuri",
+      "number": 71,
+      "name": "Тандир нури",
+      "format": "animated",
+      "occasion": "nahorgi",
+      "status": 200,
+      "opening": true,
+      "height": 3494,
+      "events": 0,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "Наҳорги ош",
+          "y": 53,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тонгги ош куни",
+          "y": 1103,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Ош кунигача қолди",
+          "y": 1914,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Дастурхон манзили",
+          "y": 2181,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Дуо",
+          "y": 2692,
+          "align": "center"
+        }
+      ]
+    },
+    {
+      "id": "dasturxon",
+      "number": 72,
+      "name": "Дастурхон",
+      "format": "animated",
+      "occasion": "nahorgi",
+      "status": 200,
+      "opening": true,
+      "height": 2354,
+      "events": 0,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "Даврон",
+          "y": 179,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Ҳурматли меҳмон!",
+          "y": 707,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Сана ва вақт",
+          "y": 942,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй дастури",
+          "y": 1545,
+          "align": "start"
+        }
+      ]
+    },
+    {
+      "id": "non-muhr",
+      "number": 73,
+      "name": "Нон муҳри",
+      "format": "animated",
+      "occasion": "nahorgi",
+      "status": 200,
+      "opening": true,
+      "height": 2287,
+      "events": 0,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "Шерзодбек",
+          "y": 419,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Ҳурматли меҳмон!",
+          "y": 661,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй дастури",
+          "y": 1450,
+          "align": "center"
+        }
+      ]
+    },
+    {
+      "id": "tonggi-choy",
+      "number": 74,
+      "name": "Тонгги чой",
+      "format": "scroll",
+      "occasion": "nahorgi",
+      "status": 200,
+      "opening": false,
+      "height": 1996,
+      "events": 0,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "Беҳзод",
+          "y": 435,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Ҳурматли меҳмон!",
+          "y": 682,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй дастури",
+          "y": 1067,
+          "align": "start"
+        }
+      ]
+    },
+    {
+      "id": "paxta-gul",
+      "number": 75,
+      "name": "Пахта гул",
+      "format": "scroll",
+      "occasion": "nahorgi",
+      "status": 200,
+      "opening": false,
+      "height": 1909,
+      "events": 0,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "Илҳомжон",
+          "y": 307,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Ҳурматли меҳмон!",
+          "y": 603,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй дастури",
+          "y": 971,
+          "align": "center"
+        }
+      ]
+    },
+    {
+      "id": "oltin-ot",
+      "number": 76,
+      "name": "Олтин от",
+      "format": "animated",
+      "occasion": "sunnat",
+      "status": 200,
+      "opening": true,
+      "height": 4175,
+      "events": 0,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "Абдулазиз",
+          "y": 546,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй санаси",
+          "y": 1188,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Шаҳзодамиз тўйигача",
+          "y": 2071,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тадбирлар тартиби",
+          "y": 2360,
+          "align": "center"
+        }
+      ]
+    },
+    {
+      "id": "oq-chinni",
+      "number": 77,
+      "name": "Оқ чинни",
+      "format": "simple",
+      "occasion": "nahorgi",
+      "status": 200,
+      "opening": false,
+      "height": 947,
+      "events": 1,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Наҳорги ош",
+          "y": 212,
+          "align": "center"
+        },
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "Отабек",
+          "y": 263,
+          "align": "center"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "Наҳорги ош6:0019 декабр, 2026 йилРаҳимовлар хонадониСайрам, Юсуф Сарёмий кўчаси 17Харитада очиш",
+          "y": 605,
+          "align": "left"
+        }
+      ]
+    },
+    {
+      "id": "doppicha",
+      "number": 78,
+      "name": "Дўппича",
+      "format": "simple",
+      "occasion": "sunnat",
+      "status": 200,
+      "opening": false,
+      "height": 1210,
+      "events": 2,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "Мустафо",
+          "y": 285,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Суннат тўйи",
+          "y": 341,
+          "align": "center"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "Наҳорги ош26 декабр, 2026 йилсоат 06:00Тошматовлар хонадониСайрам, Навоий кўчаси 8Харитада очиш",
+          "y": 555,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "Суннат тўйи базми26 декабр, 2026 йилсоат 17:00«Ақ Ниет» тўйхонасиСайрамХаритада очиш",
+          "y": 806,
+          "align": "start"
+        }
+      ]
+    },
+    {
+      "id": "sayram-hovli",
+      "number": 79,
+      "name": "Сайрам ҳовлиси",
+      "format": "scroll",
+      "occasion": "sunnat",
+      "status": 200,
+      "opening": false,
+      "height": 3028,
+      "events": 2,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "Абдуллоҳ",
+          "y": 121,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй куни",
+          "y": 979,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй кунининг тартиби",
+          "y": 1671,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "9 январ, 2027 йил6:00Наҳорги ошТошматовлар хонадониСайрам, Навоий кўчаси 8Харитада очиш",
+          "y": 1787,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "9 январ, 2027 йил17:00Суннат тўйи базми«Ақ Ниет» тўйхонасиСайрамХаритада очиш",
+          "y": 2115,
+          "align": "start"
+        }
+      ]
+    },
+    {
+      "id": "zarvaraq",
+      "number": 80,
+      "name": "Зарварақ",
+      "format": "simple",
+      "occasion": "yubiley",
+      "status": 200,
+      "opening": false,
+      "height": 930,
+      "events": 1,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "Ҳалима ая",
+          "y": 246,
+          "align": "center"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "Юбилей базми20декабр 2026соат 18:00«Ширин» рестораниШымкентХаритада очиш",
+          "y": 537,
+          "align": "start"
+        }
+      ]
+    },
+    {
+      "id": "umr-daraxti",
+      "number": 81,
+      "name": "Умр дарахти",
+      "format": "scroll",
+      "occasion": "yubiley",
+      "status": 200,
+      "opening": false,
+      "height": 2773,
+      "events": 1,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "Ҳамид ота",
+          "y": 370,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Қадрли меҳмонлар!",
+          "y": 586,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Дийдорлашув дастури",
+          "y": 1561,
+          "align": "center"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "110 январ, 2027 йил18:00Юбилей базми«Ширин» рестораниШымкентХаритада очиш",
+          "y": 1690,
+          "align": "start"
+        }
+      ]
+    },
+    {
+      "id": "marvarid-satr",
+      "number": 82,
+      "name": "Марварид сатри",
+      "format": "simple",
+      "occasion": "nikoh",
+      "status": 200,
+      "opening": false,
+      "height": 1141,
+      "events": 2,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "ИсломваЗуҳра",
+          "y": 126,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "Наҳорги ош6:0020 феврал, 2027 йилКаримовлар хонадониСайрам, Амир Темур кўчаси 45Харитада очиш",
+          "y": 536,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "Никоҳ базми18:0020 феврал, 2027 йил«Наврўз» тўйхонасиСайрам, Ибрагимов кўчаси 12Харитада очиш",
+          "y": 726,
+          "align": "start"
+        }
+      ]
+    },
+    {
+      "id": "gulbog-sahifa",
+      "number": 83,
+      "name": "Гулбоғ саҳифаси",
+      "format": "scroll",
+      "occasion": "nikoh",
+      "status": 200,
+      "opening": false,
+      "height": 3201,
+      "events": 2,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "РустамваМуниса",
+          "y": 86,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Бахтли кун дастури",
+          "y": 1621,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "016:0022 май, 2027 йилНаҳорги ошКаримовлар хонадониСайрам, Амир Темур кўчаси 45Харитада очиш",
+          "y": 1705,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "0218:0022 май, 2027 йилНикоҳ базми«Наврўз» тўйхонасиСайрам, Ибрагимов кўчаси 12Харитада очиш",
+          "y": 2061,
+          "align": "start"
+        }
+      ]
+    },
+    {
+      "id": "suzani-yol",
+      "number": 84,
+      "name": "Сўзана йўли",
+      "format": "scroll",
+      "occasion": "nikoh",
+      "status": 200,
+      "opening": false,
+      "height": 2900,
+      "events": 2,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "ШоҳрухваДилноза",
+          "y": 304,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Ҳурматли меҳмон!",
+          "y": 631,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўйимиз тартиби",
+          "y": 1563,
+          "align": "center"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "Наҳорги ош6:006 март, 2027 йилКаримовлар хонадониСайрам, Амир Темур кўчаси 45Харитада очиш",
+          "y": 1641,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "Никоҳ базми18:006 март, 2027 йил«Наврўз» тўйхонасиСайрам, Ибрагимов кўчаси 12Харитада очиш",
+          "y": 1919,
+          "align": "start"
+        }
+      ]
+    },
+    {
+      "id": "bugdoy-boshoq",
+      "number": 85,
+      "name": "Буғдой бошоғи",
+      "format": "simple",
+      "occasion": "nahorgi",
+      "status": 200,
+      "opening": false,
+      "height": 848,
+      "events": 1,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "Сардор",
+          "y": 155,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "Наҳорги ош · 27 феврал, 2027 йилсоат 06:00Раҳимовлар хонадониСайрам, Юсуф Сарёмий кўчаси 17Харитада очиш",
+          "y": 457,
+          "align": "start"
+        }
+      ]
+    },
+    {
+      "id": "lola-ehtirom",
+      "number": 86,
+      "name": "Лола эҳтироми",
+      "format": "scroll",
+      "occasion": "yubiley",
+      "status": 200,
+      "opening": false,
+      "height": 2605,
+      "events": 1,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "Робия ая",
+          "y": 394,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Қадрли меҳмонлар!",
+          "y": 666,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Байрам дастури",
+          "y": 1621,
+          "align": "center"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "21 март, 2027 йил18:00Юбилей базми«Ширин» рестораниШымкентХаритада очиш",
+          "y": 1704,
+          "align": "start"
+        }
+      ],
+      "priorAttempts": [
+        {
+          "errors": [
+            "Internal Next.js error: Router action dispatched before initialization."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zarhal-lavha",
+      "number": 87,
+      "name": "Зарҳал лавҳа",
+      "format": "animated",
+      "occasion": "yubiley",
+      "status": 200,
+      "opening": true,
+      "height": 2132,
+      "events": 1,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "Абдуқаҳҳор ота",
+          "y": 266,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Қадрли меҳмонлар!",
+          "y": 514,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй дастури",
+          "y": 1255,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "01Юбилей базми12 июн, 2027 йилсоат 18:00«Ширин» рестораниШымкентХаритада очиш",
+          "y": 1325,
+          "align": "start"
+        }
+      ]
+    },
+    {
+      "id": "adras-nishon",
+      "number": 88,
+      "name": "Адрас нишони",
+      "format": "simple",
+      "occasion": "sunnat",
+      "status": 200,
+      "opening": false,
+      "height": 1125,
+      "events": 2,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "Абдулазиз",
+          "y": 232,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "17апрел2027Наҳорги ошсоат 06:00Тошматовлар хонадониСайрам, Навоий кўчаси 8Харитада очиш",
+          "y": 462,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "17апрел2027Суннат тўйи базмисоат 17:00«Ақ Ниет» тўйхонасиСайрамХаритада очиш",
+          "y": 709,
+          "align": "start"
+        }
+      ]
+    },
+    {
+      "id": "mis-kafgir",
+      "number": 89,
+      "name": "Мис капгир",
+      "format": "simple",
+      "occasion": "nahorgi",
+      "status": 200,
+      "opening": false,
+      "height": 955,
+      "events": 1,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "Музаффар",
+          "y": 304,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "Наҳорги ош6:008 май, 2027 йилРаҳимовлар хонадониСайрам, Юсуф Сарёмий кўчаси 17Харитада очиш",
+          "y": 592,
+          "align": "start"
+        }
+      ]
+    },
+    {
+      "id": "rayhon-sahari",
+      "number": 90,
+      "name": "Райҳон саҳари",
+      "format": "scroll",
+      "occasion": "nahorgi",
+      "status": 200,
+      "opening": false,
+      "height": 2827,
+      "events": 1,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "Баҳром",
+          "y": 468,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Ҳурматли меҳмон!",
+          "y": 822,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Сана ва вақт",
+          "y": 1160,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй дастури",
+          "y": 1885,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "29 май, 2027 йил6:00Наҳорги ошРаҳимовлар хонадониСайрам, Юсуф Сарёмий кўчаси 17Харитада очиш",
+          "y": 1960,
+          "align": "start"
+        }
+      ]
+    },
+    {
+      "id": "visol-rishta",
+      "number": 91,
+      "name": "Висол риштаси",
+      "format": "animated",
+      "occasion": "nikoh",
+      "status": 200,
+      "opening": true,
+      "height": 2642,
+      "events": 2,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "АбдурауфваРайҳона",
+          "y": 295,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Ҳурматли меҳмон!",
+          "y": 643,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй дастури",
+          "y": 1285,
+          "align": "center"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "19 июн, 2027 йил6:00Наҳорги ошКаримовлар хонадониСайрам, Амир Темур кўчаси 45Харитада очиш",
+          "y": 1364,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "19 июн, 2027 йил18:00Никоҳ базми«Наврўз» тўйхонасиСайрам, Ибрагимов кўчаси 12Харитада очиш",
+          "y": 1676,
+          "align": "start"
+        }
+      ]
+    },
+    {
+      "id": "uzum-hovli",
+      "number": 92,
+      "name": "Узум ҳовлиси",
+      "format": "scroll",
+      "occasion": "nikoh",
+      "status": 200,
+      "opening": false,
+      "height": 2899,
+      "events": 2,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "БеҳзодваСабоҳат",
+          "y": 318,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Ҳурматли меҳмон!",
+          "y": 624,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй дастури",
+          "y": 1658,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "01Наҳорги ош10 июл, 2027 йилсоат 06:00Каримовлар хонадониСайрам, Амир Темур кўчаси 45Харитада очиш",
+          "y": 1737,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "02Никоҳ базми10 июл, 2027 йилсоат 18:00«Наврўз» тўйхонасиСайрам, Ибрагимов кўчаси 12Харитада очиш",
+          "y": 2094,
+          "align": "start"
+        }
+      ]
+    },
+    {
+      "id": "sopol-navo",
+      "number": 93,
+      "name": "Сопол навоси",
+      "format": "scroll",
+      "occasion": "nikoh",
+      "status": 200,
+      "opening": false,
+      "height": 2679,
+      "events": 2,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "ШаҳриёрваМоҳинур",
+          "y": 333,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Ҳурматли меҳмон!",
+          "y": 625,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй дастури",
+          "y": 1414,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "01 · 17 июл, 2027 йилНаҳорги ош6:00Каримовлар хонадониСайрам, Амир Темур кўчаси 45Харитада очиш",
+          "y": 1492,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "02 · 17 июл, 2027 йилНикоҳ базми18:00«Наврўз» тўйхонасиСайрам, Ибрагимов кўчаси 12Харитада очиш",
+          "y": 1841,
+          "align": "start"
+        }
+      ]
+    },
+    {
+      "id": "girih-nur",
+      "number": 94,
+      "name": "Гиреҳ нури",
+      "format": "animated",
+      "occasion": "nikoh",
+      "status": 200,
+      "opening": true,
+      "height": 2299,
+      "events": 2,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "ФарҳодваШабнам",
+          "y": 270,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Ҳурматли меҳмон!",
+          "y": 572,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй дастури",
+          "y": 1143,
+          "align": "center"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "16:00Наҳорги ош26 июн, 2027 йилКаримовлар хонадониСайрам, Амир Темур кўчаси 45Харитада очиш",
+          "y": 1220,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "218:00Никоҳ базми26 июн, 2027 йил«Наврўз» тўйхонасиСайрам, Ибрагимов кўчаси 12Харитада очиш",
+          "y": 1566,
+          "align": "start"
+        }
+      ]
+    },
+    {
+      "id": "siyoh-duo",
+      "number": 95,
+      "name": "Сиёҳ дуоси",
+      "format": "animated",
+      "occasion": "nikoh",
+      "status": 200,
+      "opening": true,
+      "height": 2762,
+      "events": 2,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "КомронваФеруза",
+          "y": 239,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Ҳурматли меҳмон!",
+          "y": 550,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй дастури",
+          "y": 1585,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "14 август, 2027 йил1.Наҳорги ош6:00Каримовлар хонадониСайрам, Амир Темур кўчаси 45Харитада очиш",
+          "y": 1664,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "14 август, 2027 йил2.Никоҳ базми18:00«Наврўз» тўйхонасиСайрам, Ибрагимов кўчаси 12Харитада очиш",
+          "y": 2002,
+          "align": "start"
+        }
+      ]
+    },
+    {
+      "id": "kabutar-salom",
+      "number": 96,
+      "name": "Кабутар саломи",
+      "format": "animated",
+      "occasion": "nikoh",
+      "status": 200,
+      "opening": true,
+      "height": 2506,
+      "events": 2,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "СаиджонваМуслима",
+          "y": 256,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Ҳурматли меҳмон!",
+          "y": 552,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй дастури",
+          "y": 1128,
+          "align": "center"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "21 август, 2027 йил6:00Наҳорги ошКаримовлар хонадониСайрам, Амир Темур кўчаси 45Харитада очиш",
+          "y": 1205,
+          "align": "center"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "21 август, 2027 йил18:00Никоҳ базми«Наврўз» тўйхонасиСайрам, Ибрагимов кўчаси 12Харитада очиш",
+          "y": 1569,
+          "align": "center"
+        }
+      ]
+    },
+    {
+      "id": "shirin-tilak",
+      "number": 97,
+      "name": "Ширин тилак",
+      "format": "scroll",
+      "occasion": "nikoh",
+      "status": 200,
+      "opening": false,
+      "height": 2639,
+      "events": 2,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "УмиджонваНозима",
+          "y": 283,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Ҳурматли меҳмон!",
+          "y": 590,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй дастури",
+          "y": 1375,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "01 · 28 август, 2027 йилНаҳорги ош6:00Каримовлар хонадониСайрам, Амир Темур кўчаси 45Харитада очиш",
+          "y": 1454,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "02 · 28 август, 2027 йилНикоҳ базми18:00«Наврўз» тўйхонасиСайрам, Ибрагимов кўчаси 12Харитада очиш",
+          "y": 1801,
+          "align": "start"
+        }
+      ]
+    },
+    {
+      "id": "minor-satr",
+      "number": 98,
+      "name": "Минор сатри",
+      "format": "scroll",
+      "occasion": "nikoh",
+      "status": 200,
+      "opening": false,
+      "height": 2721,
+      "events": 2,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "НодирбекваГулбаҳор",
+          "y": 296,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Ҳурматли меҳмон!",
+          "y": 539,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй дастури",
+          "y": 1526,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "01Наҳорги ош4 сентябр, 2027 йил6:00Каримовлар хонадониСайрам, Амир Темур кўчаси 45Харитада очиш",
+          "y": 1599,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "02Никоҳ базми4 сентябр, 2027 йил18:00«Наврўз» тўйхонасиСайрам, Ибрагимов кўчаси 12Харитада очиш",
+          "y": 1927,
+          "align": "start"
+        }
+      ]
+    },
+    {
+      "id": "kumush-taroq",
+      "number": 99,
+      "name": "Кумуш тароқ",
+      "format": "scroll",
+      "occasion": "nikoh",
+      "status": 200,
+      "opening": false,
+      "height": 2522,
+      "events": 2,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "ДониёрваЗебо",
+          "y": 274,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Ҳурматли меҳмон!",
+          "y": 588,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй дастури",
+          "y": 1333,
+          "align": "center"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "1111 сентябр, 2027 йил6:00Наҳорги ошКаримовлар хонадониСайрам, Амир Темур кўчаси 45Харитада очиш",
+          "y": 1410,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "1111 сентябр, 2027 йил18:00Никоҳ базми«Наврўз» тўйхонасиСайрам, Ибрагимов кўчаси 12Харитада очиш",
+          "y": 1748,
+          "align": "start"
+        }
+      ]
+    },
+    {
+      "id": "shabnam-visol",
+      "number": 100,
+      "name": "Шабнам висоли",
+      "format": "animated",
+      "occasion": "nikoh",
+      "status": 200,
+      "opening": true,
+      "height": 2506,
+      "events": 2,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "ЖавоҳирваДилором",
+          "y": 241,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Ҳурматли меҳмон!",
+          "y": 568,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй дастури",
+          "y": 1112,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "18 сентябр, 2027 йил6:00Наҳорги ошКаримовлар хонадониСайрам, Амир Темур кўчаси 45Харитада очиш",
+          "y": 1190,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "18 сентябр, 2027 йил18:00Никоҳ базми«Наврўз» тўйхонасиСайрам, Ибрагимов кўчаси 12Харитада очиш",
+          "y": 1538,
+          "align": "start"
+        }
+      ],
+      "priorAttempts": [
+        {
+          "errors": [
+            "Internal Next.js error: Router action dispatched before initialization."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "visol-soati",
+      "number": 101,
+      "name": "Висол соати",
+      "format": "animated",
+      "occasion": "nikoh",
+      "status": 200,
+      "opening": true,
+      "height": 2738,
+      "events": 2,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "БаҳодирваРаъно",
+          "y": 165,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Ҳурматли меҳмон!",
+          "y": 501,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй дастури",
+          "y": 1511,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "01 · 25 сентябр, 2027 йил6:00Наҳорги ошКаримовлар хонадониСайрам, Амир Темур кўчаси 45Харитада очиш",
+          "y": 1588,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "02 · 25 сентябр, 2027 йил18:00Никоҳ базми«Наврўз» тўйхонасиСайрам, Ибрагимов кўчаси 12Харитада очиш",
+          "y": 1922,
+          "align": "start"
+        }
+      ]
+    },
+    {
+      "id": "dutor-navosi",
+      "number": 102,
+      "name": "Дутор навоси",
+      "format": "scroll",
+      "occasion": "nikoh",
+      "status": 200,
+      "opening": false,
+      "height": 2634,
+      "events": 2,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "СуҳробваШаҳло",
+          "y": 78,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Ҳурматли меҳмон!",
+          "y": 617,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй дастури",
+          "y": 1379,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "01 · 2 октябр, 2027 йилНаҳорги ош6:00Каримовлар хонадониСайрам, Амир Темур кўчаси 45Харитада очиш",
+          "y": 1457,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "02 · 2 октябр, 2027 йилНикоҳ базми18:00«Наврўз» тўйхонасиСайрам, Ибрагимов кўчаси 12Харитада очиш",
+          "y": 1800,
+          "align": "start"
+        }
+      ]
+    },
+    {
+      "id": "tut-qogozi",
+      "number": 103,
+      "name": "Тут қоғози",
+      "format": "scroll",
+      "occasion": "nikoh",
+      "status": 200,
+      "opening": false,
+      "height": 2717,
+      "events": 2,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "ШуҳратваМафтуна",
+          "y": 144,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Ҳурматли меҳмон!",
+          "y": 433,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй дастури",
+          "y": 1497,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "1.9 октябр, 2027 йил6:00Наҳорги ошКаримовлар хонадониСайрам, Амир Темур кўчаси 45Харитада очиш",
+          "y": 1574,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "2.9 октябр, 2027 йил18:00Никоҳ базми«Наврўз» тўйхонасиСайрам, Ибрагимов кўчаси 12Харитада очиш",
+          "y": 1900,
+          "align": "start"
+        }
+      ]
+    },
+    {
+      "id": "qosh-uzuk",
+      "number": 104,
+      "name": "Қўш узук",
+      "format": "animated",
+      "occasion": "nikoh",
+      "status": 200,
+      "opening": true,
+      "height": 2825,
+      "events": 2,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "АлишерваЛатофат",
+          "y": 235,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Ҳурматли меҳмон!",
+          "y": 547,
+          "align": "center"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй дастури",
+          "y": 1609,
+          "align": "center"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "16 октябр, 2027 йил6:00Наҳорги ошКаримовлар хонадониСайрам, Амир Темур кўчаси 45Харитада очиш",
+          "y": 1686,
+          "align": "center"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "16 октябр, 2027 йил18:00Никоҳ базми«Наврўз» тўйхонасиСайрам, Ибрагимов кўчаси 12Харитада очиш",
+          "y": 2042,
+          "align": "center"
+        }
+      ]
+    },
+    {
+      "id": "yelpigich-ziynat",
+      "number": 105,
+      "name": "Елпиғич зийнати",
+      "format": "animated",
+      "occasion": "nikoh",
+      "status": 200,
+      "opening": true,
+      "height": 2500,
+      "events": 2,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "ИлҳомваДилрабо",
+          "y": 273,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Ҳурматли меҳмон!",
+          "y": 566,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй дастури",
+          "y": 1300,
+          "align": "center"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "23 октябр, 2027 йил6:00Наҳорги ошКаримовлар хонадониСайрам, Амир Темур кўчаси 45Харитада очиш",
+          "y": 1377,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "23 октябр, 2027 йил18:00Никоҳ базми«Наврўз» тўйхонасиСайрам, Ибрагимов кўчаси 12Харитада очиш",
+          "y": 1725,
+          "align": "start"
+        }
+      ]
+    },
+    {
+      "id": "saodat-kaliti",
+      "number": 106,
+      "name": "Саодат калити",
+      "format": "animated",
+      "occasion": "nikoh",
+      "status": 200,
+      "opening": true,
+      "height": 2764,
+      "events": 2,
+      "overflow": false,
+      "errors": [],
+      "layout": [
+        {
+          "tag": "H1",
+          "event": false,
+          "text": "АбдураҳмонваГулруҳ",
+          "y": 220,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Ҳурматли меҳмон!",
+          "y": 525,
+          "align": "start"
+        },
+        {
+          "tag": "H2",
+          "event": false,
+          "text": "Тўй дастури",
+          "y": 1548,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "01 · 30 октябр, 2027 йилНаҳорги ош6:00Каримовлар хонадониСайрам, Амир Темур кўчаси 45Харитада очиш",
+          "y": 1625,
+          "align": "start"
+        },
+        {
+          "tag": "DIV",
+          "event": true,
+          "text": "02 · 30 октябр, 2027 йилНикоҳ базми18:00«Наврўз» тўйхонасиСайрам, Ибрагимов кўчаси 12Харитада очиш",
+          "y": 1982,
+          "align": "start"
+        }
+      ]
+    }
+  ]
+}

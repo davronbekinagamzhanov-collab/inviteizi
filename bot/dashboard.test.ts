@@ -23,10 +23,11 @@ describe("dashboard security and favorites", () => {
     const r = new MemoryRepo({ adminIds: [1] });
     expect(await r.canAnalyze(1)).toBe(false); expect(await r.isOwner(1)).toBe(false);
   });
-  it.each(["designs","music","customers","revenue","conversion"])("%s section sends a real PNG even without orders", async view => {
+  it.each(["designs","music","customers","revenue","conversion"])("%s section sends text without empty charts", async view => {
     const s = new Sim(); await prepare(s,ADMIN);
     await s.callback(ADMIN,`dash:${view}:week`,1);
-    expect(s.last(ADMIN).type).toBe("photo");
+    expect(s.last(ADMIN).type).toBe("text");
+    expect(s.tg.to(ADMIN).filter(m => m.type === "photo")).toHaveLength(0);
     expect(s.tg.to(ADMIN).some(m => m.text === ru.error)).toBe(false);
   });
   it("favorites persist across /start, repeated add creates one row and one analytic event", async () => {
@@ -65,4 +66,94 @@ describe("dashboard security and favorites", () => {
     await s.command(ADMIN,"orders"); expect(s.lastText(ADMIN)).toContain(ru.admin.ordersRecent);
     await s.command(ADMIN,"stats"); expect(s.lastText(ADMIN)).toContain("8 000 ₸");
   });
+});
+
+describe("owner dashboard readable reports", () => {
+  it("general text includes zero categories/formats and separates activity from sales", async () => {
+    const s = new Sim(); await prepare(s,ADMIN);
+    await s.command(ADMIN,"dashboard");
+    const text = s.tg.to(ADMIN).map(m=>m.text).join("\n");
+    for (const name of ["Никоҳ","Наҳорги ош","Суннат","Юбилей","Simple","Scroll","Animated"]) expect(text).toContain(name);
+    expect(text).toContain(ru.dashboard.activity);
+    expect(text).toContain("0.0%");
+    expect(s.tg.to(ADMIN).filter(m=>m.type === "photo")).toHaveLength(0);
+  });
+  it("date range carries across navigation, stays within Telegram limits, and rejects bad dates", async () => {
+    const s = new Sim(); await prepare(s,ADMIN);
+    await s.command(ADMIN,"dashboard","2026-10-01 2026-11-01");
+    expect(s.lastText(ADMIN)).toContain("2026-10-01 — 2026-11-01");
+    const {inlineButtons} = await import("./testing/fake-tg");
+    const buttons = inlineButtons(s.last(ADMIN));
+    expect(buttons.some(b=>"data" in b && b.data === "dash:orders:date=2026-10-01..2026-11-01")).toBe(true);
+    expect(buttons.every(b=>Buffer.byteLength("data" in b ? b.data : "") <= 64)).toBe(true);
+    await s.command(ADMIN,"dashboard","2026-02-30");
+    expect(s.lastText(ADMIN)).toContain(ru.dashboard.invalidDates);
+    await s.callback(ADMIN,"dash:dates:all",1);
+    expect(s.lastText(ADMIN)).toBe(ru.dashboard.dateHelp);
+  });
+  it("order details show Almaty time, design number/name/format/cue, and no customer identity", async () => {
+    const s = new Sim(); await prepare(s,ADMIN);
+    const o = await nikohWithReceipt(s,1); await s.callback(ADMIN,`ok:${o.number}`,1);
+    const before = s.tg.to(ADMIN).length;
+    await s.callback(ADMIN,"dash:orders:today",1);
+    const messages = s.tg.to(ADMIN).slice(before);
+    const text = messages.map(m=>m.text).join("\n");
+    expect(text).toContain(`#${o.number}`);
+    expect(text).toContain("01.11.2026, 12:00");
+    expect(text).toContain("Animated"); expect(text).toContain("№");
+    expect(text).not.toContain("@user1"); expect(text).not.toContain(o.slug);
+    expect(messages.every(m=>m.text.length <= 4096)).toBe(true);
+  });
+  it("allowed analytics admin can read anonymous orders but not customer reports", async () => {
+    const s = new Sim(); await prepare(s,ADMIN2);
+    await s.callback(ADMIN2,"dash:orders:all",1);
+    expect(s.lastText(ADMIN2)).toContain(ru.dashboard.detailsNote);
+    await s.callback(ADMIN2,"dash:customers:date=2026-10-01",1);
+    expect(s.lastText(ADMIN2)).toBe(ru.dashboard.denied);
+  });
+  it.each(["orders","dates","general"])("forged %s custom-date callbacks remain private", async view => {
+    const s = new Sim(); await prepare(s,1); await prepare(s,ADMIN);
+    await s.callback(1,`dash:${view}:date=2026-10-01`,1);
+    expect(s.lastText(1)).toBe(ru.dashboard.denied);
+    await s.callback(ADMIN,`dash:${view}:date=2026-10-01`,1,-123);
+    expect(s.lastText(-123)).toBe(ru.dashboard.denied);
+  });
+  it("supports Uzbek reports and date guidance", async () => {
+    const s = new Sim(); await s.start(ADMIN);
+    const {uz} = await import("@/texts/bot-uz");
+    await s.click(ADMIN,uz.langUz);
+    await s.command(ADMIN,"dashboard");
+    expect(s.lastText(ADMIN)).toContain(uz.dashboard.financialNote);
+    await s.callback(ADMIN,"dash:dates:all",1);
+    expect(s.lastText(ADMIN)).toBe(uz.dashboard.dateHelp);
+  });
+});
+
+
+it("design pagination exposes all 50 visual cues without oversized Telegram messages", async () => {
+  const s = new Sim(); await prepare(s,ADMIN);
+  const before=s.tg.to(ADMIN).length;
+  for(let page=0;page<5;page++) await s.callback(ADMIN,`dash:designs:all:${page}`,1);
+  const messages=s.tg.to(ADMIN).slice(before);
+  const text=messages.map(m=>m.text).join("\n");
+  const {activeDesigns}=await import("@/templates/registry");
+  const {designVisuals}=await import("@/texts/design-visuals");
+  for(const d of activeDesigns()) {
+    expect(text).toContain(`№${d.number} —`);
+    expect(text).toContain(designVisuals[d.id].ru);
+    expect(designVisuals[d.id].uz).toBeTruthy();
+  }
+  expect(messages.every(m=>m.text.length<=4096)).toBe(true);
+});
+
+
+it("order details keep the saved historical format despite catalog reclassification", async () => {
+  const s=new Sim();await prepare(s,ADMIN);
+  const o=await nikohWithReceipt(s,1);
+  await s.repo.updateOrder(o.id,{templateId:"shohona-baxmal",format:"simple",amount:6543});
+  const before=s.tg.to(ADMIN).length;
+  await s.callback(ADMIN,"dash:orders:all",1);
+  const text=s.tg.to(ADMIN).slice(before).map(m=>m.text).join("\n");
+  expect(text).toContain("— Simple —");expect(text).toContain("6 543 ₸");
+  expect(text).not.toContain("— Scroll —");
 });

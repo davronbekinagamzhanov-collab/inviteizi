@@ -39,7 +39,7 @@ describe("three invitation formats",()=>{
     expect(await s.repo.getOrder(o.id)).toMatchObject({format:"simple",amount:6543,slug:o.slug,status:"active"});
     const metrics=await s.repo.analytics(ADMIN,"all",s.clock);
     expect(metrics.formats.find(f=>f.id==="simple")?.revenue).toBe(6543);
-    expect(metrics.formats.some(f=>f.id==="scroll")).toBe(false);
+    expect(metrics.formats.find(f=>f.id==="scroll")).toMatchObject({paid:0,revenue:0,share:0});
   });
   it.each(["buy","next","prev"])("old empty Simple catalog callback %s returns format selection",async value=>{
     // Batch four fills this former gap; keep exercising an empty offer explicitly.
@@ -71,7 +71,7 @@ describe("three invitation formats",()=>{
     expect(general).toBeDefined();
     for(const f of FORMATS)expect(general?.text).toContain(`${uz.format.names[f]}: 1`);
     await s.callback(ADMIN,"dash:designs:all",1);
-    for(const f of FORMATS)expect(s.tg.to(ADMIN).some(m=>m.text?.startsWith(`${uz.format.names[f]}\n`))).toBe(true);
+    for(const f of FORMATS)expect(s.tg.to(ADMIN).some(m=>m.text?.includes(f[0].toUpperCase()+f.slice(1)))).toBe(true);
     expect(s.tg.to(ADMIN).some(m=>m.text?.includes("undefined"))).toBe(false);
   });
 });

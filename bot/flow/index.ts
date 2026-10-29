@@ -12,7 +12,7 @@ import { approve, askReceipt, askRejectReason, editOrder, myOrders, payOrder, re
 import { cmdFind, cmdOrders, cmdStats } from "./admin";
 import { mainMenu, send, texts, txFor } from "./util";
 import type { Lang } from "@/lib/domain";
-import { dashboard } from "./dashboard";
+import { dashboard, dashboardPeriod } from "./dashboard";
 import { favorites, favoriteAction } from "./favorites";
 import { activeDesigns } from "@/templates/registry";
 import { designsFor } from "./util";
@@ -273,7 +273,7 @@ async function route(c: Ctx) {
 
 async function onCommand(c: Ctx, command: string, args: string) {
   if (command === "favorites") return favorites(c);
-  if (command === "dashboard" || command === "customers") return dashboard(c, command === "customers" ? "customers" : "general");
+  if (command === "dashboard" || command === "customers") return dashboard(c, command === "customers" ? "customers" : "general", dashboardPeriod(args));
   if (command === "stats") {
     if (c.chatId !== c.user.id || !(await c.deps.repo.canAnalyze(c.user.id))) return unknown(c);
     return cmdStats(c);
@@ -303,7 +303,7 @@ async function toast(c: Ctx, text: string) {
 
 async function onCallback(c: Ctx, d: string) {
   if (d === "favorites") return favorites(c);
-  if (d.startsWith("dash:")) { const [, view, period] = d.split(":"); return dashboard(c, view, period); }
+  if (d.startsWith("dash:")) { const [, view, period, page] = d.split(":"); return dashboard(c, view, period, Number(page ?? 0)); }
   if (d.startsWith("fav:")) {
     const [, action, id] = d.split(":");
     if (action !== "choose") return favoriteAction(c, action, id);
