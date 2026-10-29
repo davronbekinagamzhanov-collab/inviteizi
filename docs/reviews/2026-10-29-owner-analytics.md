@@ -40,3 +40,7 @@
 Применить сетевые дополнения в настройках среды; затем повторить production build, съёмку для окончательной типографики и создание PR. Публикация облачной среды через настройки — отдельное действие после успешной настройки. Merge и Deploy не выполняются.
 
 Production Supabase, пользователи, заказы, цены, оплаченные данные, старые ссылки, webhook, токены и `main` не изменены. Установка выполнена через `npm ci`, package.json и package-lock.json сохранены без изменений.
+
+## Состояние передачи
+
+Feature-ветка опубликована на origin. Попытка `gh pr create --draft` выполнена, но PR **не создан**: `Post https://api.github.com/graphql: Forbidden`. [Подготовленный текст PR](2026-10-29-pr-description.md). После разрешения API нужно повторить создание PR; можно также [открыть форму PR на GitHub](https://github.com/davronbekinagamzhanov-collab/inviteizi/pull/new/feature/owner-analytics-design-audit). Это ссылка на форму, не существующий PR.
