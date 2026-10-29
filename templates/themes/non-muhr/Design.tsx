@@ -4,7 +4,7 @@ import type { TemplateProps } from "../types";
 import { designVars } from "../types";
 import { useEffect,useRef } from "react";
 import { motion,useReducedMotion } from "motion/react";
-import { Vollkorn,PT_Serif } from "next/font/google";
+import localFont from "next/font/local";
 import { useInvitation } from "../../blocks/useInvitation";
 import { InvitationShell } from "../../blocks/InvitationShell";
 import { Words,useFitWords } from "../../blocks/FitWords";
@@ -14,8 +14,8 @@ import { Countdown } from "../../blocks/Countdown";
 import { MapButton } from "../../blocks/MapButton";
 import { designTexts } from "@/texts/uz-cyrl";
 
-const display=Vollkorn({variable:"--nm-display",subsets:["cyrillic","cyrillic-ext"],weight:["400","500"],style:["normal","italic"]});
-const body=PT_Serif({variable:"--nm-body",subsets:["cyrillic","cyrillic-ext"],weight:["400"]});
+const displayFonteb350f38=localFont({src: [{path: "../../../assets/fonts/google/vollkorn/Vollkorn[wght].woff2", weight: "400 500", style: "normal"}, {path: "../../../assets/fonts/google/vollkorn/Vollkorn-Italic[wght].woff2", weight: "400 500", style: "italic"}], display: "swap", preload: false, variable: "--nm-display"});
+const bodyFonteb350f38=localFont({src: [{path: "../../../assets/fonts/google/ptserif/PT_Serif-Web-Regular.woff2", weight: "400", style: "normal"}], display: "swap", preload: false, variable: "--nm-body"});
 const vars=designVars({primary:"#94683e",primaryDark:"#65492f",gold:"#b68b51",goldLight:"#e9d4a8",paper:"#fcf5e6",ink:"#564632",muted:"#8d795f",accent:"#b37f54"},{display:"var(--nm-display)",accent:"var(--nm-display)",body:"var(--nm-body)"});
 const t=designTexts("non-muhr");
 
@@ -25,7 +25,7 @@ export default function Design({data,mode}:TemplateProps){
   const name=useFitWords<HTMLHeadingElement>(45),timer=useRef<ReturnType<typeof setTimeout>|undefined>(undefined);
   useEffect(()=>()=>clearTimeout(timer.current),[]);
   const open=()=>{if(inv.started)return;inv.start();timer.current=setTimeout(inv.finishOpening,reduced?100:1500);};
-  return <InvitationShell inv={inv} style={vars} fontsClassName={`${display.variable} ${body.variable}`} backdropClassName="bg-[#e9dfc9]" className="bg-paper text-ink [overflow-wrap:anywhere]">
+  return <InvitationShell inv={inv} style={vars} fontsClassName={`${displayFonteb350f38.variable} ${bodyFonteb350f38.variable}`} backdropClassName="bg-[#e9dfc9]" className="bg-paper text-ink [overflow-wrap:anywhere]">
     <header className="px-7 pt-10 pb-8 text-center"><p className="text-[14px] tracking-[.18em] text-muted uppercase">{t.opening.invitation}</p>
       <div className="relative mx-auto mt-7 h-[240px] w-[240px]"><Seal className="absolute inset-0 h-full w-full"/><div className="absolute inset-x-10 top-[60px]"><p className="font-display text-[50px] leading-none">{when.day}</p><p className="mt-2 text-[17px]">{t.months[when.monthIndex]}</p><p className="mt-1 text-[14px] text-muted">{when.year}</p></div></div>
       <p className="mt-6 font-display text-[36px]">{t.occasionTitles[inv.occasion]}</p><h1 ref={name} className="mt-3 w-full font-display leading-tight [--fit:45px]"><span className="text-[length:var(--fit)]"><Words text={data.person??""}/></span></h1><p className="mx-auto mt-3 max-w-[300px] text-[18px] leading-relaxed italic text-muted">{t.causeLine(data)}</p>

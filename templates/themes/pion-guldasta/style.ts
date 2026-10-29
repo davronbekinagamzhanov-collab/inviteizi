@@ -1,17 +1,12 @@
-import { Cormorant_Garamond } from "next/font/google";
 import localFont from "next/font/local";
+
 import { designVars } from "../types";
 
 // Здесь Cormorant используется курсивом: цифра и имя — герои, в отличие от прямой монограммы №1.
 // Прямое начертание тоже подключаем — с одним курсивом turbopack не собирает шрифт
-const display = Cormorant_Garamond({
-  variable: "--pg-display",
-  weight: ["500", "600", "700"],
-  style: ["normal", "italic"],
-  subsets: ["cyrillic", "cyrillic-ext"],
-});
+const displayFont65ce76b1 = localFont({src: [{path: "../../../assets/fonts/google/cormorantgaramond/CormorantGaramond[wght].woff2", weight: "500 700", style: "normal"}, {path: "../../../assets/fonts/google/cormorantgaramond/CormorantGaramond-Italic[wght].woff2", weight: "500 700", style: "italic"}], display: "swap", preload: false, variable: "--pg-display"});
 
-const body = localFont({
+const bodyFont65ce76b1 = localFont({
   variable: "--pg-body",
   src: [
     { path: "../../../assets/fonts/Lora-Regular.ttf", weight: "400 700", style: "normal" },
@@ -20,7 +15,7 @@ const body = localFont({
   display: "swap",
 });
 
-export const fontClasses = `${display.variable} ${body.variable}`;
+export const fontClasses = `${displayFont65ce76b1.variable} ${bodyFont65ce76b1.variable}`;
 
 /** Пудра, бордо, золото, крем */
 export const POWDER = "#F6E4E1";

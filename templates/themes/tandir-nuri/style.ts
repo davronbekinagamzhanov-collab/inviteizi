@@ -1,24 +1,16 @@
-import { Piazzolla, Podkova } from "next/font/google";
+import localFont from "next/font/local";
 import type { CSSProperties } from "react";
 import { designVars } from "../types";
 
 // Podkova — тёплый брусковый шрифт с мягкими, «лепными» засечками: плотный, как корочка нона.
 // По каталогу был Kurale, но в нём нет буквы ҳ (браузер подставлял Times) — заменён.
 // cyrillic-ext — в нём ў қ ғ ҳ
-const display = Podkova({
-  variable: "--tn-display",
-  weight: ["400", "500", "600"],
-  subsets: ["cyrillic", "cyrillic-ext"],
-});
+const displayFont4839d3a4 = localFont({src: [{path: "../../../assets/fonts/google/podkova/Podkova[wght].woff2", weight: "400 600", style: "normal"}], display: "swap", preload: false, variable: "--tn-display"});
 
 // Piazzolla — книжный текст с оптическим размером (opsz): мелкий кегль плотнее, крупный тоньше
-const body = Piazzolla({
-  variable: "--tn-body",
-  style: ["normal", "italic"],
-  subsets: ["cyrillic", "cyrillic-ext"],
-});
+const bodyFont4839d3a4 = localFont({src: [{path: "../../../assets/fonts/google/piazzolla/Piazzolla[opsz,wght].woff2", weight: "100.0 900.0", style: "normal"}, {path: "../../../assets/fonts/google/piazzolla/Piazzolla-Italic[opsz,wght].woff2", weight: "100.0 900.0", style: "italic"}], display: "swap", preload: false, variable: "--tn-body"});
 
-export const fontClasses = `${display.variable} ${body.variable}`;
+export const fontClasses = `${displayFont4839d3a4.variable} ${bodyFont4839d3a4.variable}`;
 
 /** Молоко, песок, тёплый янтарь, глина тандира */
 export const MILK = "#FBF5EA";

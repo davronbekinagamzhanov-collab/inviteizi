@@ -1,16 +1,11 @@
-import { Playfair } from "next/font/google";
 import localFont from "next/font/local";
+
 import { designVars } from "../types";
 
 // Playfair Display без cyrillic-ext (нет қ ғ ҳ), поэтому новая версия семейства — Playfair
-const display = Playfair({
-  variable: "--sf-display",
-  weight: ["400", "500", "600"],
-  style: ["normal", "italic"],
-  subsets: ["cyrillic", "cyrillic-ext"],
-});
+const displayFonta8ea0899 = localFont({src: [{path: "../../../assets/fonts/google/playfair/Playfair[opsz,wdth,wght].woff2", weight: "400 600", style: "normal"}, {path: "../../../assets/fonts/google/playfair/Playfair-Italic[opsz,wdth,wght].woff2", weight: "400 600", style: "italic"}], display: "swap", preload: false, variable: "--sf-display"});
 
-const body = localFont({
+const bodyFonta8ea0899 = localFont({
   variable: "--sf-body",
   src: [
     { path: "../../../assets/fonts/Lora-Regular.ttf", weight: "400 700", style: "normal" },
@@ -19,7 +14,7 @@ const body = localFont({
   display: "swap",
 });
 
-export const fontClasses = `${display.variable} ${body.variable}`;
+export const fontClasses = `${displayFonta8ea0899.variable} ${bodyFonta8ea0899.variable}`;
 
 /** Сапфировый бархат и золото */
 export const VELVET_TOP = "#14204A";

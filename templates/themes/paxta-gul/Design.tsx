@@ -2,7 +2,7 @@
 
 import type { TemplateProps } from "../types";
 import { designVars } from "../types";
-import { Bitter,Source_Sans_3 } from "next/font/google";
+import localFont from "next/font/local";
 import { useInvitation } from "../../blocks/useInvitation";
 import { InvitationShell } from "../../blocks/InvitationShell";
 import { Words,useFitWords } from "../../blocks/FitWords";
@@ -11,15 +11,15 @@ import { Countdown } from "../../blocks/Countdown";
 import { MapButton } from "../../blocks/MapButton";
 import { designTexts } from "@/texts/uz-cyrl";
 
-const display=Bitter({variable:"--pg-display",subsets:["cyrillic","cyrillic-ext"],weight:["400","500"],style:["normal","italic"]});
-const body=Source_Sans_3({variable:"--pg-body",subsets:["cyrillic","cyrillic-ext"],weight:["400"]});
+const displayFont71693b34=localFont({src: [{path: "../../../assets/fonts/google/bitter/Bitter[wght].woff2", weight: "400 500", style: "normal"}, {path: "../../../assets/fonts/google/bitter/Bitter-Italic[wght].woff2", weight: "400 500", style: "italic"}], display: "swap", preload: false, variable: "--pg-display"});
+const bodyFont71693b34=localFont({src: [{path: "../../../assets/fonts/google/sourcesans3/SourceSans3[wght].woff2", weight: "400 400", style: "normal"}], display: "swap", preload: false, variable: "--pg-body"});
 const vars=designVars({primary:"#63785d",primaryDark:"#43553e",gold:"#a99c70",goldLight:"#e1d8b9",paper:"#f9f8ee",ink:"#464e3e",muted:"#7b806e",accent:"#a4b498"},{display:"var(--pg-display)",accent:"var(--pg-display)",body:"var(--pg-body)"});
 const t=designTexts("paxta-gul");
 
 /** Botanical cotton on an open linen sheet, a split date and softly arched program cards. */
 export default function Design({data,mode}:TemplateProps){
   const inv=useInvitation(data,mode,{opening:false}),when=inv.main.when,name=useFitWords<HTMLHeadingElement>(43);
-  return <InvitationShell inv={inv} style={vars} fontsClassName={`${display.variable} ${body.variable}`} backdropClassName="bg-[#e2e6d9]" className="bg-paper text-ink [overflow-wrap:anywhere]">
+  return <InvitationShell inv={inv} style={vars} fontsClassName={`${displayFont71693b34.variable} ${bodyFont71693b34.variable}`} backdropClassName="bg-[#e2e6d9]" className="bg-paper text-ink [overflow-wrap:anywhere]">
     <header className="relative px-7 pt-9 pb-7 text-center"><p className="text-[14px] tracking-[.23em] text-muted uppercase">{t.opening.invitation}</p><Cotton className="mx-auto mt-3 h-[175px] w-[260px] max-w-full"/>
       <p className="font-display text-[31px]">{t.occasionTitles[inv.occasion]}</p><h1 ref={name} className="mt-4 w-full font-display leading-tight [--fit:43px]"><span className="text-[length:var(--fit)]"><Words text={data.person??""}/></span></h1><p className="mx-auto mt-3 max-w-[295px] text-[20px] leading-snug italic text-muted">{t.causeLine(data)}</p>
       <div className="mx-auto mt-7 flex w-fit max-w-full items-center gap-5 border-y border-primary/25 py-3"><p className="font-display text-[62px] leading-none">{when.day}</p><div className="text-left text-[19px]"><p>{t.months[when.monthIndex]} {when.year}</p><p className="mt-1 text-muted">{t.weekdays[when.weekdayIndex]}</p><p className="mt-1">{t.date.at(inv.main.time)}</p></div></div>

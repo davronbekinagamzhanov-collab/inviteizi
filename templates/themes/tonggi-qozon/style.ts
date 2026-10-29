@@ -1,21 +1,11 @@
-import { Alegreya, PT_Serif } from "next/font/google";
+import localFont from "next/font/local";
 import { designVars } from "../types";
 
-const display = Alegreya({
-  variable: "--tq-display",
-  weight: ["500", "700", "800"],
-  style: ["normal", "italic"],
-  subsets: ["cyrillic", "cyrillic-ext"],
-});
+const displayFont590e8552 = localFont({src: [{path: "../../../assets/fonts/google/alegreya/Alegreya[wght].woff2", weight: "500 800", style: "normal"}, {path: "../../../assets/fonts/google/alegreya/Alegreya-Italic[wght].woff2", weight: "500 800", style: "italic"}], display: "swap", preload: false, variable: "--tq-display"});
 
-const body = PT_Serif({
-  variable: "--tq-body",
-  weight: ["400", "700"],
-  style: ["normal", "italic"],
-  subsets: ["cyrillic", "cyrillic-ext"],
-});
+const bodyFont590e8552 = localFont({src: [{path: "../../../assets/fonts/google/ptserif/PT_Serif-Web-Regular.woff2", weight: "400", style: "normal"}, {path: "../../../assets/fonts/google/ptserif/PT_Serif-Web-Italic.woff2", weight: "400", style: "italic"}, {path: "../../../assets/fonts/google/ptserif/PT_Serif-Web-Bold.woff2", weight: "700", style: "normal"}, {path: "../../../assets/fonts/google/ptserif/PT_Serif-Web-BoldItalic.woff2", weight: "700", style: "italic"}], display: "swap", preload: false, variable: "--tq-body"});
 
-export const fontClasses = `${display.variable} ${body.variable}`;
+export const fontClasses = `${displayFont590e8552.variable} ${bodyFont590e8552.variable}`;
 
 /** Рассветный крем, шафран, гранат, тёплый коричневый */
 export const CREAM = "#FBF4E8";

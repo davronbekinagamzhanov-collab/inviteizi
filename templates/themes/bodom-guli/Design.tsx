@@ -4,7 +4,7 @@ import type { TemplateProps } from "../types";
 import { designVars } from "../types";
 import { useEffect,useRef } from "react";
 import { motion,useReducedMotion } from "motion/react";
-import { EB_Garamond,PT_Serif } from "next/font/google";
+import localFont from "next/font/local";
 import { useInvitation } from "../../blocks/useInvitation";
 import { InvitationShell } from "../../blocks/InvitationShell";
 import { Words,useFitWords } from "../../blocks/FitWords";
@@ -14,8 +14,8 @@ import { Countdown } from "../../blocks/Countdown";
 import { MapButton } from "../../blocks/MapButton";
 import { designTexts } from "@/texts/uz-cyrl";
 
-const display=EB_Garamond({variable:"--bg-display",subsets:["cyrillic","cyrillic-ext"],weight:["400","500"],style:["normal","italic"]});
-const body=PT_Serif({variable:"--bg-body",subsets:["cyrillic","cyrillic-ext"],weight:["400"]});
+const displayFont73e4890c=localFont({src: [{path: "../../../assets/fonts/google/ebgaramond/EBGaramond[wght].woff2", weight: "400 500", style: "normal"}, {path: "../../../assets/fonts/google/ebgaramond/EBGaramond-Italic[wght].woff2", weight: "400 500", style: "italic"}], display: "swap", preload: false, variable: "--bg-display"});
+const bodyFont73e4890c=localFont({src: [{path: "../../../assets/fonts/google/ptserif/PT_Serif-Web-Regular.woff2", weight: "400", style: "normal"}], display: "swap", preload: false, variable: "--bg-body"});
 const vars=designVars({primary:"#698b9e",primaryDark:"#48677b",gold:"#bca16f",goldLight:"#e6d7b4",paper:"#fbf8f1",ink:"#485b62",muted:"#87918e",accent:"#c6b7ba"},{display:"var(--bg-display)",accent:"var(--bg-display)",body:"var(--bg-body)"});
 const t=designTexts("bodom-guli");
 
@@ -24,7 +24,7 @@ export default function Design({data,mode,art}:TemplateProps){
   const inv=useInvitation(data,mode),when=inv.main.when,reduced=useReducedMotion(),names=useFitWords<HTMLHeadingElement>(51);
   const timer=useRef<ReturnType<typeof setTimeout>|undefined>(undefined);useEffect(()=>()=>clearTimeout(timer.current),[]);
   const open=()=>{if(inv.started)return;inv.start();timer.current=setTimeout(inv.finishOpening,reduced?100:1750);};
-  return <InvitationShell inv={inv} style={vars} fontsClassName={`${display.variable} ${body.variable}`} backdropClassName="bg-[#e1e8e8]" className="bg-paper text-ink [overflow-wrap:anywhere]">
+  return <InvitationShell inv={inv} style={vars} fontsClassName={`${displayFont73e4890c.variable} ${bodyFont73e4890c.variable}`} backdropClassName="bg-[#e1e8e8]" className="bg-paper text-ink [overflow-wrap:anywhere]">
     <header className="text-center"><p className="px-7 pt-8 text-[13px] tracking-[.2em] text-primary uppercase">{t.opening.invitation}</p><div className="relative mt-4 h-[230px]"><PhotoBackdrop src={art??"/art/bodom-guli.webp"} fade="both" color="#fbf8f1" position="65% 45%" opacity={.7} strength={.45} priority/></div>
       <div className="px-7"><p className="text-[18px] text-muted">{t.occasionTitles[inv.occasion]}</p><h1 ref={names} className="mt-4 w-full font-display leading-[1.05] [--fit:51px]"><span className="block text-[length:var(--fit)]"><Words text={data.groom??""}/></span><span className="my-2 block text-[28px] italic text-primary">{t.cover.andWord}</span><span className="block text-[length:var(--fit)]"><Words text={data.bride??""}/></span></h1><p className="mt-6 font-display text-[27px]">{t.date.long(when.day,when.monthIndex,when.year)}</p><p className="mt-3 text-[17px] text-muted">{t.weekdays[when.weekdayIndex]} · {t.date.at(inv.main.time)}</p></div>
     </header>

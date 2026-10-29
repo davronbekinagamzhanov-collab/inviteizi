@@ -4,7 +4,7 @@ import type { TemplateProps } from "../types";
 import { designVars } from "../types";
 import { useEffect,useRef } from "react";
 import { motion,useReducedMotion } from "motion/react";
-import { Noto_Serif,Noto_Sans } from "next/font/google";
+import localFont from "next/font/local";
 import { useInvitation } from "../../blocks/useInvitation";
 import { InvitationShell } from "../../blocks/InvitationShell";
 import { Words,useFitWords } from "../../blocks/FitWords";
@@ -14,8 +14,8 @@ import { Countdown } from "../../blocks/Countdown";
 import { MapButton } from "../../blocks/MapButton";
 import { designTexts } from "@/texts/uz-cyrl";
 
-const display=Noto_Serif({variable:"--sk-display",subsets:["cyrillic","cyrillic-ext"],weight:["400","500"],style:["normal","italic"]});
-const body=Noto_Sans({variable:"--sk-body",subsets:["cyrillic","cyrillic-ext"],weight:["400"]});
+const displayFont710b1430=localFont({src: [{path: "../../../assets/fonts/google/notoserif/NotoSerif[wdth,wght].woff2", weight: "400 500", style: "normal"}, {path: "../../../assets/fonts/google/notoserif/NotoSerif-Italic[wdth,wght].woff2", weight: "400 500", style: "italic"}], display: "swap", preload: false, variable: "--sk-display"});
+const bodyFont710b1430=localFont({src: [{path: "../../../assets/fonts/google/notosans/NotoSans[wdth,wght].woff2", weight: "400 400", style: "normal"}], display: "swap", preload: false, variable: "--sk-body"});
 const vars=designVars({primary:"#466e72",primaryDark:"#315157",gold:"#b09966",goldLight:"#e5d6b3",paper:"#faf5e9",ink:"#3e4d4d",muted:"#7e8881",accent:"#b1bcb4"},{display:"var(--sk-display)",accent:"var(--sk-display)",body:"var(--sk-body)"});
 const t=designTexts("samarqand-kitob");
 
@@ -24,7 +24,7 @@ export default function Design({data,mode,art}:TemplateProps){
   const inv=useInvitation(data,mode),when=inv.main.when,reduced=useReducedMotion(),names=useFitWords<HTMLHeadingElement>(40);
   const timer=useRef<ReturnType<typeof setTimeout>|undefined>(undefined);useEffect(()=>()=>clearTimeout(timer.current),[]);
   const open=()=>{if(inv.started)return;inv.start();timer.current=setTimeout(inv.finishOpening,reduced?100:2000);};
-  return <InvitationShell inv={inv} style={vars} fontsClassName={`${display.variable} ${body.variable}`} backdropClassName="bg-[#dce3dc]" className="bg-paper text-ink [overflow-wrap:anywhere]">
+  return <InvitationShell inv={inv} style={vars} fontsClassName={`${displayFont710b1430.variable} ${bodyFont710b1430.variable}`} backdropClassName="bg-[#dce3dc]" className="bg-paper text-ink [overflow-wrap:anywhere]">
     <div className="relative border-l-[9px] border-[#6d8b83]/25 pl-2"><div aria-hidden className="absolute inset-y-0 left-1 w-px bg-primary/20"/>
       <header className="px-7 pt-9 pb-8 text-center"><p className="text-[12px] tracking-[.15em] text-muted uppercase">{t.opening.invitation}</p><div className="relative mt-6 h-[155px] overflow-hidden border border-gold/40"><PhotoBackdrop src={art??"/art/samarqand-kitob.webp"} fade="both" color="#faf5e9" position="50% 50%" opacity={.83} strength={.1} priority/></div>
         <p className="mt-6 text-[17px] text-primary">{t.occasionTitles[inv.occasion]}</p><h1 ref={names} className="mt-5 w-full font-display font-normal leading-[1.18] [--fit:40px]"><span className="block text-[length:var(--fit)]"><Words text={data.groom??""}/></span><span className="my-3 block text-[24px] italic text-primary">{t.cover.andWord}</span><span className="block text-[length:var(--fit)]"><Words text={data.bride??""}/></span></h1>

@@ -2,7 +2,7 @@
 
 import type { TemplateProps } from "../types";
 import { designVars } from "../types";
-import { Cormorant_Garamond,PT_Serif } from "next/font/google";
+import localFont from "next/font/local";
 import { useInvitation } from "../../blocks/useInvitation";
 import { InvitationShell } from "../../blocks/InvitationShell";
 import { Words,useFitWords } from "../../blocks/FitWords";
@@ -11,15 +11,15 @@ import { Countdown } from "../../blocks/Countdown";
 import { MapButton } from "../../blocks/MapButton";
 import { designTexts } from "@/texts/uz-cyrl";
 
-const display=Cormorant_Garamond({variable:"--sb-display",subsets:["cyrillic","cyrillic-ext"],weight:["500","600"],style:["normal","italic"]});
-const body=PT_Serif({variable:"--sb-body",subsets:["cyrillic","cyrillic-ext"],weight:["400"]});
+const displayFont971b7eb7=localFont({src: [{path: "../../../assets/fonts/google/cormorantgaramond/CormorantGaramond[wght].woff2", weight: "500 600", style: "normal"}, {path: "../../../assets/fonts/google/cormorantgaramond/CormorantGaramond-Italic[wght].woff2", weight: "500 600", style: "italic"}], display: "swap", preload: false, variable: "--sb-display"});
+const bodyFont971b7eb7=localFont({src: [{path: "../../../assets/fonts/google/ptserif/PT_Serif-Web-Regular.woff2", weight: "400", style: "normal"}], display: "swap", preload: false, variable: "--sb-body"});
 const vars=designVars({primary:"#315c4f",primaryDark:"#26483e",gold:"#b39a64",goldLight:"#eadbb6",paper:"#faf5e9",ink:"#344b41",muted:"#798274",accent:"#beae85"},{display:"var(--sb-display)",accent:"var(--sb-display)",body:"var(--sb-body)"});
 const t=designTexts("shohona-baxmal");
 
 /** Deep green velvet on the cover, gold-stitched cornerwork and a cream event card below. */
 export default function Design({data,mode}:TemplateProps){
   const inv=useInvitation(data,mode,{opening:false}),when=inv.main.when,names=useFitWords<HTMLHeadingElement>(57);
-  return <InvitationShell inv={inv} style={vars} fontsClassName={`${display.variable} ${body.variable}`} backdropClassName="bg-[#d6ded5]" className="bg-paper text-ink [overflow-wrap:anywhere]">
+  return <InvitationShell inv={inv} style={vars} fontsClassName={`${displayFont971b7eb7.variable} ${bodyFont971b7eb7.variable}`} backdropClassName="bg-[#d6ded5]" className="bg-paper text-ink [overflow-wrap:anywhere]">
     <header className="relative m-3 overflow-hidden bg-[#31584d] px-7 py-12 text-[#f5ead0]" style={{backgroundImage:"radial-gradient(ellipse at 20% 15%,#72917b55,transparent 60%),repeating-linear-gradient(90deg,transparent 0 2px,#ffffff03 2px 3px)"}}>
       <Stitches/>
       <p className="relative text-center text-[13px] tracking-[.2em] uppercase text-[#e3d2a8]">{t.opening.invitation}</p>

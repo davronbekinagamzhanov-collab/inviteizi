@@ -2,21 +2,13 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import Image from "next/image";
 import Link from "next/link";
-import { Cormorant_Garamond, PT_Serif } from "next/font/google";
+import localFont from "next/font/local";
 import { t } from "@/texts/uz-cyrl";
 import type { Occasion } from "@/lib/types";
 import { activeDesigns, PRICES } from "@/templates/registry";
 
-const display = Cormorant_Garamond({
-  variable: "--font-catalog-display",
-  weight: ["500", "600"],
-  subsets: ["cyrillic", "cyrillic-ext"],
-});
-const body = PT_Serif({
-  variable: "--font-catalog-body",
-  weight: ["400", "700"],
-  subsets: ["cyrillic", "cyrillic-ext"],
-});
+const displayFonta98c6d20 = localFont({src: [{path: "../../assets/fonts/google/cormorantgaramond/CormorantGaramond[wght].woff2", weight: "500 600", style: "normal"}], display: "swap", preload: false, variable: "--font-catalog-display"});
+const bodyFonta98c6d20 = localFont({src: [{path: "../../assets/fonts/google/ptserif/PT_Serif-Web-Regular.woff2", weight: "400", style: "normal"}, {path: "../../assets/fonts/google/ptserif/PT_Serif-Web-Bold.woff2", weight: "700", style: "normal"}], display: "swap", preload: false, variable: "--font-catalog-body"});
 
 export const metadata = { title: t.catalog.title };
 
@@ -29,7 +21,7 @@ const hasCover = (src: string) => existsSync(path.join(process.cwd(), "public", 
 export default function CatalogPage() {
   return (
     <main
-      className={`${display.variable} ${body.variable} mx-auto min-h-svh max-w-[430px] px-4 pt-12 pb-16 text-[#3b2a1e]`}
+      className={`${displayFonta98c6d20.variable} ${bodyFonta98c6d20.variable} mx-auto min-h-svh max-w-[430px] px-4 pt-12 pb-16 text-[#3b2a1e]`}
       style={{ fontFamily: "var(--font-catalog-body)" }}
     >
       <header className="text-center">

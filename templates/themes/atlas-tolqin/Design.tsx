@@ -4,8 +4,8 @@ import type { TemplateProps } from "../types";
 import { designVars } from "../types";
 import { useEffect,useId,useRef } from "react";
 import { motion,useReducedMotion } from "motion/react";
-import { PT_Sans } from "next/font/google";
 import localFont from "next/font/local";
+
 import { useInvitation } from "../../blocks/useInvitation";
 import { InvitationShell } from "../../blocks/InvitationShell";
 import { Words,useFitWords } from "../../blocks/FitWords";
@@ -14,8 +14,8 @@ import { Countdown } from "../../blocks/Countdown";
 import { MapButton } from "../../blocks/MapButton";
 import { designTexts } from "@/texts/uz-cyrl";
 
-const display=localFont({variable:"--at-display",src:[{path:"../../../assets/fonts/Lora-Regular.ttf",weight:"400 700",style:"normal"},{path:"../../../assets/fonts/Lora-Italic.ttf",weight:"400 700",style:"italic"}]});
-const body=PT_Sans({variable:"--at-body",subsets:["cyrillic","cyrillic-ext"],weight:["400"]});
+const displayFontb9ca810c=localFont({variable:"--at-display",src:[{path:"../../../assets/fonts/Lora-Regular.ttf",weight:"400 700",style:"normal"},{path:"../../../assets/fonts/Lora-Italic.ttf",weight:"400 700",style:"italic"}]});
+const bodyFontb9ca810c=localFont({src: [{path: "../../../assets/fonts/google/ptsans/PT_Sans-Web-Regular.woff2", weight: "400", style: "normal"}], display: "swap", preload: false, variable: "--at-body"});
 const vars=designVars({primary:"#725778",primaryDark:"#56405e",gold:"#b49a65",goldLight:"#ecdbb5",paper:"#fcf7ef",ink:"#433f4f",muted:"#807482",accent:"#b1797e"},{display:"var(--at-display)",accent:"var(--at-display)",body:"var(--at-body)"});
 const t=designTexts("atlas-tolqin");
 
@@ -25,7 +25,7 @@ export default function Design({data,mode}:TemplateProps){
   const names=useFitWords<HTMLHeadingElement>(44),timer=useRef<ReturnType<typeof setTimeout>|undefined>(undefined);
   useEffect(()=>()=>clearTimeout(timer.current),[]);
   const open=()=>{if(inv.started)return;inv.start();timer.current=setTimeout(inv.finishOpening,reduced?100:1750);};
-  return <InvitationShell inv={inv} style={vars} fontsClassName={`${display.variable} ${body.variable}`} backdropClassName="bg-[#e8e0e6]" className="bg-paper text-ink [overflow-wrap:anywhere]">
+  return <InvitationShell inv={inv} style={vars} fontsClassName={`${displayFontb9ca810c.variable} ${bodyFontb9ca810c.variable}`} backdropClassName="bg-[#e8e0e6]" className="bg-paper text-ink [overflow-wrap:anywhere]">
     <header className="relative overflow-hidden pr-7 pt-12 pb-10 pl-[21%]">
       <Ikat className="absolute inset-y-0 left-0 h-full w-[13%] opacity-80"/>
       <p className="text-[13px] tracking-[.16em] text-primary uppercase">{t.opening.invitation}</p><p className="mt-4 font-display text-[22px] italic">{t.occasionTitles[inv.occasion]}</p>

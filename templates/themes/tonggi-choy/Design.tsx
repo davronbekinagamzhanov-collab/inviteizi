@@ -2,7 +2,7 @@
 
 import type { TemplateProps } from "../types";
 import { designVars } from "../types";
-import { Alegreya,PT_Sans } from "next/font/google";
+import localFont from "next/font/local";
 import { useInvitation } from "../../blocks/useInvitation";
 import { InvitationShell } from "../../blocks/InvitationShell";
 import { Words,useFitWords } from "../../blocks/FitWords";
@@ -12,15 +12,15 @@ import { Countdown } from "../../blocks/Countdown";
 import { MapButton } from "../../blocks/MapButton";
 import { designTexts,photoAttributions } from "@/texts/uz-cyrl";
 
-const display=Alegreya({variable:"--tc-display",subsets:["cyrillic","cyrillic-ext"],weight:["400","500"],style:["normal","italic"]});
-const body=PT_Sans({variable:"--tc-body",subsets:["cyrillic","cyrillic-ext"],weight:["400"]});
+const displayFont53077063=localFont({src: [{path: "../../../assets/fonts/google/alegreya/Alegreya[wght].woff2", weight: "400 500", style: "normal"}, {path: "../../../assets/fonts/google/alegreya/Alegreya-Italic[wght].woff2", weight: "400 500", style: "italic"}], display: "swap", preload: false, variable: "--tc-display"});
+const bodyFont53077063=localFont({src: [{path: "../../../assets/fonts/google/ptsans/PT_Sans-Web-Regular.woff2", weight: "400", style: "normal"}], display: "swap", preload: false, variable: "--tc-body"});
 const vars=designVars({primary:"#455f85",primaryDark:"#2e4669",gold:"#b6a068",goldLight:"#e3d7b0",paper:"#faf8ed",ink:"#414d5b",muted:"#7c8790",accent:"#a8b9c5"},{display:"var(--tc-display)",accent:"var(--tc-display)",body:"var(--tc-body)"});
 const t=designTexts("tonggi-choy"); const credit=photoAttributions["tonggi-choy"]!;
 
 /** An open morning note, round real-photo tea portrait and a cobalt ripple rule. */
 export default function Design({data,mode,art}:TemplateProps){
   const inv=useInvitation(data,mode,{opening:false}),when=inv.main.when,name=useFitWords<HTMLHeadingElement>(45);
-  return <InvitationShell inv={inv} style={vars} fontsClassName={`${display.variable} ${body.variable}`} backdropClassName="bg-[#e1e6e5]" className="bg-paper text-ink [overflow-wrap:anywhere]">
+  return <InvitationShell inv={inv} style={vars} fontsClassName={`${displayFont53077063.variable} ${bodyFont53077063.variable}`} backdropClassName="bg-[#e1e6e5]" className="bg-paper text-ink [overflow-wrap:anywhere]">
     <header className="px-7 pt-9 pb-7"><p className="text-center text-[13px] tracking-[.23em] text-primary uppercase">{t.opening.invitation}</p><div className="relative mx-auto mt-6 h-[235px] w-[235px] max-w-full overflow-hidden rounded-full border-[6px] border-[#e3e9e4]"><PhotoBackdrop src={art??"/art/tonggi-choy.webp"} fade="radial" color="#faf8ed" position="50% 83%" opacity={.91} strength={.1} priority/></div><Ripples/>
       <p className="mt-6 font-display text-[32px]">{t.occasionTitles[inv.occasion]}</p><h1 ref={name} className="mt-2 w-full font-display leading-tight [--fit:45px]"><span className="text-[length:var(--fit)]"><Words text={data.person??""}/></span></h1><p className="mt-3 font-display text-[22px] leading-snug italic text-muted">{t.causeLine(data)}</p>
       <div className="mt-6 border-l-2 border-gold/50 pl-4"><p className="text-[20px]">{t.date.long(when.day,when.monthIndex,when.year)}</p><p className="mt-2 text-[19px] text-primary">{t.weekdays[when.weekdayIndex]} · {t.date.at(inv.main.time)}</p></div>

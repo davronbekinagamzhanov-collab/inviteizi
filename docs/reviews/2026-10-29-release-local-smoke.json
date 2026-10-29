@@ -1,0 +1,611 @@
+{
+  "scope": "Local production build; localhost only; external requests blocked; no database credentials, no bot calls, no production access",
+  "passed": true,
+  "results": [
+    {
+      "id": "catalog",
+      "status": 200,
+      "cards": 50
+    },
+    {
+      "id": "sapfir",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 4,
+        "failed": 0,
+        "systemFallbackUnavailable": 1
+      },
+      "errors": []
+    },
+    {
+      "id": "tonggi-qozon",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 5,
+        "failed": 0,
+        "systemFallbackUnavailable": 2
+      },
+      "errors": []
+    },
+    {
+      "id": "oq-ot",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 6,
+        "failed": 0,
+        "systemFallbackUnavailable": 1
+      },
+      "errors": []
+    },
+    {
+      "id": "oltin-monogramma",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 5,
+        "failed": 0,
+        "systemFallbackUnavailable": 2
+      },
+      "errors": []
+    },
+    {
+      "id": "pion-guldasta",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 3,
+        "failed": 0,
+        "systemFallbackUnavailable": 1
+      },
+      "errors": []
+    },
+    {
+      "id": "zarhal-eshik",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 2,
+        "failed": 0,
+        "systemFallbackUnavailable": 2
+      },
+      "errors": []
+    },
+    {
+      "id": "atlas-tolqin",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 3,
+        "failed": 0,
+        "systemFallbackUnavailable": 1
+      },
+      "errors": []
+    },
+    {
+      "id": "bodom-guli",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 3,
+        "failed": 0,
+        "systemFallbackUnavailable": 2
+      },
+      "errors": []
+    },
+    {
+      "id": "ganch-peshtoq",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 5,
+        "failed": 0,
+        "systemFallbackUnavailable": 2
+      },
+      "errors": []
+    },
+    {
+      "id": "ipak-romol",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 5,
+        "failed": 0,
+        "systemFallbackUnavailable": 3
+      },
+      "errors": []
+    },
+    {
+      "id": "rishton-koshin",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 2,
+        "failed": 0,
+        "systemFallbackUnavailable": 2
+      },
+      "errors": []
+    },
+    {
+      "id": "atirgul",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 3,
+        "failed": 0,
+        "systemFallbackUnavailable": 2
+      },
+      "errors": []
+    },
+    {
+      "id": "shohona-baxmal",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 3,
+        "failed": 0,
+        "systemFallbackUnavailable": 2
+      },
+      "errors": []
+    },
+    {
+      "id": "samarqand-kitob",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 3,
+        "failed": 0,
+        "systemFallbackUnavailable": 2
+      },
+      "errors": []
+    },
+    {
+      "id": "tonggi-choy",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 3,
+        "failed": 0,
+        "systemFallbackUnavailable": 2
+      },
+      "errors": []
+    },
+    {
+      "id": "paxta-gul",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 3,
+        "failed": 0,
+        "systemFallbackUnavailable": 2
+      },
+      "errors": []
+    },
+    {
+      "id": "non-muhr",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 3,
+        "failed": 0,
+        "systemFallbackUnavailable": 2
+      },
+      "errors": []
+    },
+    {
+      "id": "tandir-nuri",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 3,
+        "failed": 0,
+        "systemFallbackUnavailable": 2
+      },
+      "errors": []
+    },
+    {
+      "id": "dasturxon",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 3,
+        "failed": 0,
+        "systemFallbackUnavailable": 2
+      },
+      "errors": []
+    },
+    {
+      "id": "oq-chinni",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 48,
+        "failed": 0,
+        "systemFallbackUnavailable": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "doppicha",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 48,
+        "failed": 0,
+        "systemFallbackUnavailable": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "sayram-hovli",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 48,
+        "failed": 0,
+        "systemFallbackUnavailable": 30
+      },
+      "errors": []
+    },
+    {
+      "id": "zarvaraq",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 48,
+        "failed": 0,
+        "systemFallbackUnavailable": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "umr-daraxti",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 48,
+        "failed": 0,
+        "systemFallbackUnavailable": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "marvarid-satr",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 48,
+        "failed": 0,
+        "systemFallbackUnavailable": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "gulbog-sahifa",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 48,
+        "failed": 0,
+        "systemFallbackUnavailable": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "suzani-yol",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 48,
+        "failed": 0,
+        "systemFallbackUnavailable": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "bugdoy-boshoq",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 48,
+        "failed": 0,
+        "systemFallbackUnavailable": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "oltin-ot",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 4,
+        "failed": 0,
+        "systemFallbackUnavailable": 2
+      },
+      "errors": []
+    },
+    {
+      "id": "lola-ehtirom",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 48,
+        "failed": 0,
+        "systemFallbackUnavailable": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "adras-nishon",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 48,
+        "failed": 0,
+        "systemFallbackUnavailable": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "mis-kafgir",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 48,
+        "failed": 0,
+        "systemFallbackUnavailable": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "rayhon-sahari",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 48,
+        "failed": 0,
+        "systemFallbackUnavailable": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "uzum-hovli",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 48,
+        "failed": 0,
+        "systemFallbackUnavailable": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "zarhal-lavha",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 48,
+        "failed": 0,
+        "systemFallbackUnavailable": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "sopol-navo",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 30,
+        "failed": 0,
+        "systemFallbackUnavailable": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "visol-rishta",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 48,
+        "failed": 0,
+        "systemFallbackUnavailable": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "shirin-tilak",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 30,
+        "failed": 0,
+        "systemFallbackUnavailable": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "girih-nur",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 30,
+        "failed": 0,
+        "systemFallbackUnavailable": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "minor-satr",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 48,
+        "failed": 0,
+        "systemFallbackUnavailable": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "kabutar-salom",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 48,
+        "failed": 0,
+        "systemFallbackUnavailable": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "siyoh-duo",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 48,
+        "failed": 0,
+        "systemFallbackUnavailable": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "kumush-taroq",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 48,
+        "failed": 0,
+        "systemFallbackUnavailable": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "dutor-navosi",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 48,
+        "failed": 0,
+        "systemFallbackUnavailable": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "tut-qogozi",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 30,
+        "failed": 0,
+        "systemFallbackUnavailable": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "visol-soati",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 30,
+        "failed": 0,
+        "systemFallbackUnavailable": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "shabnam-visol",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 48,
+        "failed": 0,
+        "systemFallbackUnavailable": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "qosh-uzuk",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 30,
+        "failed": 0,
+        "systemFallbackUnavailable": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "yelpigich-ziynat",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 48,
+        "failed": 0,
+        "systemFallbackUnavailable": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "saodat-kaliti",
+      "status": 200,
+      "opened": true,
+      "overflow": false,
+      "fonts": {
+        "loaded": 48,
+        "failed": 0,
+        "systemFallbackUnavailable": 0
+      },
+      "errors": []
+    }
+  ]
+}

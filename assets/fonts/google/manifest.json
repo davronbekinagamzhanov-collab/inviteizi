@@ -1,0 +1,364 @@
+{
+  "Alegreya": [
+    {
+      "filename": "Alegreya[wght].ttf",
+      "style": "normal",
+      "weight": "400"
+    },
+    {
+      "filename": "Alegreya-Italic[wght].ttf",
+      "style": "italic",
+      "weight": "400"
+    }
+  ],
+  "Alegreya_Sans": [
+    {
+      "filename": "AlegreyaSans-Thin.ttf",
+      "style": "normal",
+      "weight": "100"
+    },
+    {
+      "filename": "AlegreyaSans-ThinItalic.ttf",
+      "style": "italic",
+      "weight": "100"
+    },
+    {
+      "filename": "AlegreyaSans-Light.ttf",
+      "style": "normal",
+      "weight": "300"
+    },
+    {
+      "filename": "AlegreyaSans-LightItalic.ttf",
+      "style": "italic",
+      "weight": "300"
+    },
+    {
+      "filename": "AlegreyaSans-Regular.ttf",
+      "style": "normal",
+      "weight": "400"
+    },
+    {
+      "filename": "AlegreyaSans-Italic.ttf",
+      "style": "italic",
+      "weight": "400"
+    },
+    {
+      "filename": "AlegreyaSans-Medium.ttf",
+      "style": "normal",
+      "weight": "500"
+    },
+    {
+      "filename": "AlegreyaSans-MediumItalic.ttf",
+      "style": "italic",
+      "weight": "500"
+    },
+    {
+      "filename": "AlegreyaSans-Bold.ttf",
+      "style": "normal",
+      "weight": "700"
+    },
+    {
+      "filename": "AlegreyaSans-BoldItalic.ttf",
+      "style": "italic",
+      "weight": "700"
+    },
+    {
+      "filename": "AlegreyaSans-ExtraBold.ttf",
+      "style": "normal",
+      "weight": "800"
+    },
+    {
+      "filename": "AlegreyaSans-ExtraBoldItalic.ttf",
+      "style": "italic",
+      "weight": "800"
+    },
+    {
+      "filename": "AlegreyaSans-Black.ttf",
+      "style": "normal",
+      "weight": "900"
+    },
+    {
+      "filename": "AlegreyaSans-BlackItalic.ttf",
+      "style": "italic",
+      "weight": "900"
+    }
+  ],
+  "Bitter": [
+    {
+      "filename": "Bitter[wght].ttf",
+      "style": "normal",
+      "weight": "400"
+    },
+    {
+      "filename": "Bitter-Italic[wght].ttf",
+      "style": "italic",
+      "weight": "400"
+    }
+  ],
+  "Cormorant_Garamond": [
+    {
+      "filename": "CormorantGaramond[wght].ttf",
+      "style": "normal",
+      "weight": "400"
+    },
+    {
+      "filename": "CormorantGaramond-Italic[wght].ttf",
+      "style": "italic",
+      "weight": "400"
+    }
+  ],
+  "Cormorant_Unicase": [
+    {
+      "filename": "CormorantUnicase-Light.ttf",
+      "style": "normal",
+      "weight": "300"
+    },
+    {
+      "filename": "CormorantUnicase-Regular.ttf",
+      "style": "normal",
+      "weight": "400"
+    },
+    {
+      "filename": "CormorantUnicase-Medium.ttf",
+      "style": "normal",
+      "weight": "500"
+    },
+    {
+      "filename": "CormorantUnicase-SemiBold.ttf",
+      "style": "normal",
+      "weight": "600"
+    },
+    {
+      "filename": "CormorantUnicase-Bold.ttf",
+      "style": "normal",
+      "weight": "700"
+    }
+  ],
+  "EB_Garamond": [
+    {
+      "filename": "EBGaramond[wght].ttf",
+      "style": "normal",
+      "weight": "400"
+    },
+    {
+      "filename": "EBGaramond-Italic[wght].ttf",
+      "style": "italic",
+      "weight": "400"
+    }
+  ],
+  "Gentium_Book_Plus": [
+    {
+      "filename": "GentiumBookPlus-Regular.ttf",
+      "style": "normal",
+      "weight": "400"
+    },
+    {
+      "filename": "GentiumBookPlus-Italic.ttf",
+      "style": "italic",
+      "weight": "400"
+    },
+    {
+      "filename": "GentiumBookPlus-Bold.ttf",
+      "style": "normal",
+      "weight": "700"
+    },
+    {
+      "filename": "GentiumBookPlus-BoldItalic.ttf",
+      "style": "italic",
+      "weight": "700"
+    }
+  ],
+  "Libertinus_Serif": [
+    {
+      "filename": "LibertinusSerif-Regular.ttf",
+      "style": "normal",
+      "weight": "400"
+    },
+    {
+      "filename": "LibertinusSerif-Italic.ttf",
+      "style": "italic",
+      "weight": "400"
+    },
+    {
+      "filename": "LibertinusSerif-SemiBold.ttf",
+      "style": "normal",
+      "weight": "600"
+    },
+    {
+      "filename": "LibertinusSerif-SemiBoldItalic.ttf",
+      "style": "italic",
+      "weight": "600"
+    },
+    {
+      "filename": "LibertinusSerif-Bold.ttf",
+      "style": "normal",
+      "weight": "700"
+    },
+    {
+      "filename": "LibertinusSerif-BoldItalic.ttf",
+      "style": "italic",
+      "weight": "700"
+    }
+  ],
+  "Marck_Script": [
+    {
+      "filename": "MarckScript-Regular.ttf",
+      "style": "normal",
+      "weight": "400"
+    }
+  ],
+  "Merriweather": [
+    {
+      "filename": "Merriweather[opsz,wdth,wght].ttf",
+      "style": "normal",
+      "weight": "400"
+    },
+    {
+      "filename": "Merriweather-Italic[opsz,wdth,wght].ttf",
+      "style": "italic",
+      "weight": "400"
+    }
+  ],
+  "Noto_Sans": [
+    {
+      "filename": "NotoSans[wdth,wght].ttf",
+      "style": "normal",
+      "weight": "400"
+    },
+    {
+      "filename": "NotoSans-Italic[wdth,wght].ttf",
+      "style": "italic",
+      "weight": "400"
+    }
+  ],
+  "Noto_Serif": [
+    {
+      "filename": "NotoSerif[wdth,wght].ttf",
+      "style": "normal",
+      "weight": "400"
+    },
+    {
+      "filename": "NotoSerif-Italic[wdth,wght].ttf",
+      "style": "italic",
+      "weight": "400"
+    }
+  ],
+  "PT_Sans": [
+    {
+      "filename": "PT_Sans-Web-Regular.ttf",
+      "style": "normal",
+      "weight": "400"
+    },
+    {
+      "filename": "PT_Sans-Web-Italic.ttf",
+      "style": "italic",
+      "weight": "400"
+    },
+    {
+      "filename": "PT_Sans-Web-Bold.ttf",
+      "style": "normal",
+      "weight": "700"
+    },
+    {
+      "filename": "PT_Sans-Web-BoldItalic.ttf",
+      "style": "italic",
+      "weight": "700"
+    }
+  ],
+  "PT_Serif": [
+    {
+      "filename": "PT_Serif-Web-Regular.ttf",
+      "style": "normal",
+      "weight": "400"
+    },
+    {
+      "filename": "PT_Serif-Web-Italic.ttf",
+      "style": "italic",
+      "weight": "400"
+    },
+    {
+      "filename": "PT_Serif-Web-Bold.ttf",
+      "style": "normal",
+      "weight": "700"
+    },
+    {
+      "filename": "PT_Serif-Web-BoldItalic.ttf",
+      "style": "italic",
+      "weight": "700"
+    }
+  ],
+  "Piazzolla": [
+    {
+      "filename": "Piazzolla[opsz,wght].ttf",
+      "style": "normal",
+      "weight": "400"
+    },
+    {
+      "filename": "Piazzolla-Italic[opsz,wght].ttf",
+      "style": "italic",
+      "weight": "400"
+    }
+  ],
+  "Playfair": [
+    {
+      "filename": "Playfair[opsz,wdth,wght].ttf",
+      "style": "normal",
+      "weight": "400"
+    },
+    {
+      "filename": "Playfair-Italic[opsz,wdth,wght].ttf",
+      "style": "italic",
+      "weight": "400"
+    }
+  ],
+  "Podkova": [
+    {
+      "filename": "Podkova[wght].ttf",
+      "style": "normal",
+      "weight": "400"
+    }
+  ],
+  "Source_Sans_3": [
+    {
+      "filename": "SourceSans3[wght].ttf",
+      "style": "normal",
+      "weight": "400"
+    },
+    {
+      "filename": "SourceSans3-Italic[wght].ttf",
+      "style": "italic",
+      "weight": "400"
+    }
+  ],
+  "Source_Serif_4": [
+    {
+      "filename": "SourceSerif4[opsz,wght].ttf",
+      "style": "normal",
+      "weight": "400"
+    },
+    {
+      "filename": "SourceSerif4-Italic[opsz,wght].ttf",
+      "style": "italic",
+      "weight": "400"
+    }
+  ],
+  "Viaoda_Libre": [
+    {
+      "filename": "ViaodaLibre-Regular.ttf",
+      "style": "normal",
+      "weight": "400"
+    }
+  ],
+  "Vollkorn": [
+    {
+      "filename": "Vollkorn[wght].ttf",
+      "style": "normal",
+      "weight": "400"
+    },
+    {
+      "filename": "Vollkorn-Italic[wght].ttf",
+      "style": "italic",
+      "weight": "400"
+    }
+  ]
+}

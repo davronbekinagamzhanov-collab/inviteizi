@@ -1,22 +1,14 @@
-import { Cormorant_Garamond, PT_Serif } from "next/font/google";
+import localFont from "next/font/local";
 import { t } from "@/texts/uz-cyrl";
 
-const display = Cormorant_Garamond({
-  variable: "--font-expired-display",
-  weight: ["600"],
-  subsets: ["cyrillic", "cyrillic-ext"],
-});
-const body = PT_Serif({
-  variable: "--font-expired-body",
-  weight: ["400"],
-  subsets: ["cyrillic", "cyrillic-ext"],
-});
+const displayFont31d0c769 = localFont({src: [{path: "../../assets/fonts/google/cormorantgaramond/CormorantGaramond[wght].woff2", weight: "600 600", style: "normal"}], display: "swap", preload: false, variable: "--font-expired-display"});
+const bodyFont31d0c769 = localFont({src: [{path: "../../assets/fonts/google/ptserif/PT_Serif-Web-Regular.woff2", weight: "400", style: "normal"}], display: "swap", preload: false, variable: "--font-expired-body"});
 
 /** Заглушка после срока ссылки (последний тадбир + 30 дней) или для архивного заказа */
 export default function Expired() {
   return (
     <main
-      className={`${display.variable} ${body.variable} flex min-h-svh items-center justify-center bg-[#f7efe3] px-4 text-[#3b2a1e]`}
+      className={`${displayFont31d0c769.variable} ${bodyFont31d0c769.variable} flex min-h-svh items-center justify-center bg-[#f7efe3] px-4 text-[#3b2a1e]`}
       style={{
         fontFamily: "var(--font-expired-body)",
         backgroundImage: "radial-gradient(120% 80% at 50% 0%, #fffaf2 0%, #f7efe3 55%, #efe2cf 100%)",

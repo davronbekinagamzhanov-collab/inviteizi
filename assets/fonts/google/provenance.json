@@ -1,0 +1,276 @@
+{
+  "source": "https://github.com/google/fonts/tree/main/ofl",
+  "conversion": "fontTools TTFont flavor=woff2, full glyph set, no subsetting",
+  "files": [
+    {
+      "source": "alegreya/Alegreya-Italic[wght].ttf",
+      "source_sha256": "fa915eec76227935dc5fb678953c94b71287c360928013cfdb441dfe52f5a391",
+      "woff2": "alegreya/Alegreya-Italic[wght].woff2",
+      "woff2_sha256": "0262da11cc8002f8d3762b5293fe2119d1dfdf6c261e853c7ca5d8406b54d0de"
+    },
+    {
+      "source": "alegreya/Alegreya[wght].ttf",
+      "source_sha256": "ba5564634b93a8f8ba57b48cd4f1ae7417d2b4656fbac779028679b00de3cf12",
+      "woff2": "alegreya/Alegreya[wght].woff2",
+      "woff2_sha256": "993a8a12f2eea3b1c618f79a5ec7dd02fc5ea0883a8e9ebcc9fa99496cba6efe"
+    },
+    {
+      "source": "alegreyasans/AlegreyaSans-Bold.ttf",
+      "source_sha256": "a3055a1893759bdbd7504bb22abc583769e7974c49353176eac0b03792c9fb8e",
+      "woff2": "alegreyasans/AlegreyaSans-Bold.woff2",
+      "woff2_sha256": "b4c483345513acc76e0a6f1c93f02c813fd9bfd4663cf566b7309078cfa0763e"
+    },
+    {
+      "source": "alegreyasans/AlegreyaSans-BoldItalic.ttf",
+      "source_sha256": "6a5550f0e4c3021e7e2e83ac4814e8c649a0fe20385489ce7609f00802097b4d",
+      "woff2": "alegreyasans/AlegreyaSans-BoldItalic.woff2",
+      "woff2_sha256": "fe55f4ea045b344332934492b1f7bfabf6c669a55fe6b53623af894f6229f17a"
+    },
+    {
+      "source": "alegreyasans/AlegreyaSans-Italic.ttf",
+      "source_sha256": "f49f6f2bdd84df850b25b0f8185d8a051e1d1eb2dd08e2f91b8c7b86d9a9e1a6",
+      "woff2": "alegreyasans/AlegreyaSans-Italic.woff2",
+      "woff2_sha256": "5b7de7ddb23cd53cbed1dbd52396961205e49a9cbbe97a94bcfcfe0c4fea6f1b"
+    },
+    {
+      "source": "alegreyasans/AlegreyaSans-Medium.ttf",
+      "source_sha256": "4b89fe7804fd1485ec2757795a53ffdb66e1206dd56f844c2d72b3c944815b43",
+      "woff2": "alegreyasans/AlegreyaSans-Medium.woff2",
+      "woff2_sha256": "af08dd0215a42a16c46b131623adbc5c4dbc03d97439a11710ca7a1f67630195"
+    },
+    {
+      "source": "alegreyasans/AlegreyaSans-MediumItalic.ttf",
+      "source_sha256": "0c79da462ae637d7f95f428c935cac7a9c22cb99655c5cd37b87080861dd73ec",
+      "woff2": "alegreyasans/AlegreyaSans-MediumItalic.woff2",
+      "woff2_sha256": "de7b678e5f5117c271d05b149e7e4b08e90a367911dcbf1e263f3afdf9d772bd"
+    },
+    {
+      "source": "alegreyasans/AlegreyaSans-Regular.ttf",
+      "source_sha256": "8fab634196007afca839f1e5a6fb300976daff55d8528b590ef032f01b14ea10",
+      "woff2": "alegreyasans/AlegreyaSans-Regular.woff2",
+      "woff2_sha256": "bad18834319e170362fb07bb3660d5ae718836d3d35203061b6305138b827624"
+    },
+    {
+      "source": "bitter/Bitter-Italic[wght].ttf",
+      "source_sha256": "5e6e0af503171c9d7b4be7a22c16f474d7a638cf83a80051d825bcc58d664bc3",
+      "woff2": "bitter/Bitter-Italic[wght].woff2",
+      "woff2_sha256": "6138c26e15939eb763b1fe5d3902e38a6dc52579f5956b7913b0fc76bd34211e"
+    },
+    {
+      "source": "bitter/Bitter[wght].ttf",
+      "source_sha256": "ef2b9a711fb02f1e5823b34da1b7450e0fc76793b7d733a8b41006e24916d4a7",
+      "woff2": "bitter/Bitter[wght].woff2",
+      "woff2_sha256": "cc5cdac8ebbcc4ac6f28e53765026a2c6378f879b9f1cbbb7b7501a8caac8633"
+    },
+    {
+      "source": "cormorantgaramond/CormorantGaramond-Italic[wght].ttf",
+      "source_sha256": "0f48ea6abb2084537854f7174c470991a463b13036309e3b50a81511611c530d",
+      "woff2": "cormorantgaramond/CormorantGaramond-Italic[wght].woff2",
+      "woff2_sha256": "aab3f4a6ba7344e1e7b4fdb5e193394ba1ad9666ff07fea43ce0ac4c4f7acc0f"
+    },
+    {
+      "source": "cormorantgaramond/CormorantGaramond[wght].ttf",
+      "source_sha256": "b20b7d9626dd956b2c5e558692ad328b1f19e3275e2782db4fa07670d83f35e0",
+      "woff2": "cormorantgaramond/CormorantGaramond[wght].woff2",
+      "woff2_sha256": "b39cd5ec7a7e63e5162faef20230278057849e51596baa9448ca5d1f5abb1850"
+    },
+    {
+      "source": "cormorantunicase/CormorantUnicase-Medium.ttf",
+      "source_sha256": "057870894f166505a6587135e7a2586253a0ee96a35332507e2730ae36dca33f",
+      "woff2": "cormorantunicase/CormorantUnicase-Medium.woff2",
+      "woff2_sha256": "636cc7d9318d1da991ca2041a8c75e6d17a1fe142983d93677ddecd7a9b7a0ba"
+    },
+    {
+      "source": "cormorantunicase/CormorantUnicase-Regular.ttf",
+      "source_sha256": "8fadf0a9ddf4b7d20fbc7c330a740378469fe4f4422c225dd23e6fc5dc028921",
+      "woff2": "cormorantunicase/CormorantUnicase-Regular.woff2",
+      "woff2_sha256": "7e582fb051cc45d19320ada3d7666e8944395f8b35ed3ab0c404f31edd077865"
+    },
+    {
+      "source": "cormorantunicase/CormorantUnicase-SemiBold.ttf",
+      "source_sha256": "8e74b41f55bc7e0f199b91086916ad64ed83b7284352d5f4bd39d18ef279238b",
+      "woff2": "cormorantunicase/CormorantUnicase-SemiBold.woff2",
+      "woff2_sha256": "24931bd6a2a7f60a90e7da40f86f53b281bc64c74fb9e70df850fc5d877bfc0b"
+    },
+    {
+      "source": "ebgaramond/EBGaramond-Italic[wght].ttf",
+      "source_sha256": "bba2c4499c93c9612b90b9825d32b07da52fce2fe57562a1eb6b833553f93c4e",
+      "woff2": "ebgaramond/EBGaramond-Italic[wght].woff2",
+      "woff2_sha256": "324a9dd1cc00f7b05420d56a721251fb8db7d145697ff5a90235ba9e6fc2a052"
+    },
+    {
+      "source": "ebgaramond/EBGaramond[wght].ttf",
+      "source_sha256": "ef9512f92f6d579e5dc75af59a5a4b1b8b47d2eda89e00b954d44520e5369027",
+      "woff2": "ebgaramond/EBGaramond[wght].woff2",
+      "woff2_sha256": "076ca908150008a7f7c2474edf3e3afd057fdf2401d8659777b2aefa0f0018da"
+    },
+    {
+      "source": "gentiumbookplus/GentiumBookPlus-Bold.ttf",
+      "source_sha256": "b39c3fb12e2e15e2336f2ec6d051c778618ec25f7360bc4765bfe755b408c011",
+      "woff2": "gentiumbookplus/GentiumBookPlus-Bold.woff2",
+      "woff2_sha256": "fa32bf7e2e0f0a25bc18b9b75797cd9447ab2539c58f1e0a9361de4a9cd8be6d"
+    },
+    {
+      "source": "gentiumbookplus/GentiumBookPlus-BoldItalic.ttf",
+      "source_sha256": "e557dd7a7f818fa482c3e63c7576c6d455f6f2e3bf9d84e0a11d1617e2bc1383",
+      "woff2": "gentiumbookplus/GentiumBookPlus-BoldItalic.woff2",
+      "woff2_sha256": "67c5c2d1339bcf984b1d97715aea67728258486d99ce16e575b3de6b8d77659a"
+    },
+    {
+      "source": "gentiumbookplus/GentiumBookPlus-Italic.ttf",
+      "source_sha256": "7a0ab4bd78701fa46d325e362654c41a47e2a0a5cb4a3eebc94dce89c2ee7df1",
+      "woff2": "gentiumbookplus/GentiumBookPlus-Italic.woff2",
+      "woff2_sha256": "4108f3f8a538684baa63564e97539cde4d0a95c1dc09c87a2ef9650cea1842c5"
+    },
+    {
+      "source": "gentiumbookplus/GentiumBookPlus-Regular.ttf",
+      "source_sha256": "fe7b64eeacc430fcf46836a6f0dfe00d2c5a15483ed36692a2a185cb23ec2a5c",
+      "woff2": "gentiumbookplus/GentiumBookPlus-Regular.woff2",
+      "woff2_sha256": "24734a1d6260c9cf0fffb8b32852f101848f459364fa8cb827cf05749fca64c0"
+    },
+    {
+      "source": "libertinusserif/LibertinusSerif-Italic.ttf",
+      "source_sha256": "c8d62202ff921968c491bbbd05f9794213e98e1317c8cbf5edc1d8043f4a21d6",
+      "woff2": "libertinusserif/LibertinusSerif-Italic.woff2",
+      "woff2_sha256": "aad0a91864d727dc5033141a5317c46d7cb0d0acceb6d9a7615cb7c114896304"
+    },
+    {
+      "source": "libertinusserif/LibertinusSerif-SemiBoldItalic.ttf",
+      "source_sha256": "24f97903c512561e8a2499ca755afa45db89721c15c7ff62f728f0a1530e334d",
+      "woff2": "libertinusserif/LibertinusSerif-SemiBoldItalic.woff2",
+      "woff2_sha256": "e13b886d9bf233383d7bc43ca57fbbffbc93f1e3e0a8d9dfd52a278b761e2e9c"
+    },
+    {
+      "source": "marckscript/MarckScript-Regular.ttf",
+      "source_sha256": "504de8cc6f919163bc9afb67b9bc208d258230c5e8d00cb82ec52474f9fafc3b",
+      "woff2": "marckscript/MarckScript-Regular.woff2",
+      "woff2_sha256": "32adedf20655fae9e5cb66a2b332fb935f0ab9cbcc2353f91b64e49e3ff1f9a8"
+    },
+    {
+      "source": "merriweather/Merriweather-Italic[opsz,wdth,wght].ttf",
+      "source_sha256": "f68a8f4989258679e4fbaf50aa42400132b5373c2d9d2514ba82ef6e85947a0b",
+      "woff2": "merriweather/Merriweather-Italic[opsz,wdth,wght].woff2",
+      "woff2_sha256": "3390800028b1c4e787fdbb777a03d0b012d4f870dc95ed638782e00758ca4045"
+    },
+    {
+      "source": "merriweather/Merriweather[opsz,wdth,wght].ttf",
+      "source_sha256": "d0ed0e359e396af7ad05e73dffd11a3a4c326ea0d0283c56bd9361cb2cc86a96",
+      "woff2": "merriweather/Merriweather[opsz,wdth,wght].woff2",
+      "woff2_sha256": "98cbc71804ef925c224a7f636ba879bed9e1efbc9f7aef33b2546583a710258d"
+    },
+    {
+      "source": "notosans/NotoSans[wdth,wght].ttf",
+      "source_sha256": "bfb7bb691513f12e734dc346c03a03f784912432d7e3fa8e56efcf906fe86b3d",
+      "woff2": "notosans/NotoSans[wdth,wght].woff2",
+      "woff2_sha256": "c82cbdc03a60e5cacf38ed457a164de63e353c9417f62baa0edf6060242ea7fa"
+    },
+    {
+      "source": "notoserif/NotoSerif-Italic[wdth,wght].ttf",
+      "source_sha256": "e87acbc6c0efd0d9a20d6a8cbbda2b266c14be3a3a6f5af8ec9d7b2460570ad1",
+      "woff2": "notoserif/NotoSerif-Italic[wdth,wght].woff2",
+      "woff2_sha256": "368091716cd2de2f990b597b642d0cb16bcaf9f0b5fce53b7da1fe4dea02ba73"
+    },
+    {
+      "source": "notoserif/NotoSerif[wdth,wght].ttf",
+      "source_sha256": "4d8e6761424656867019081a1a01336f3cb086982682698714054fc33f782713",
+      "woff2": "notoserif/NotoSerif[wdth,wght].woff2",
+      "woff2_sha256": "f95c50200226f1b288be6284299deccfba2b1a5b44a469e3f9eca3db76b04be7"
+    },
+    {
+      "source": "piazzolla/Piazzolla-Italic[opsz,wght].ttf",
+      "source_sha256": "ffeb38d0c9b332f6ef685352bfbae5e65775ccdc2ae142f49ac8ed2d7d215268",
+      "woff2": "piazzolla/Piazzolla-Italic[opsz,wght].woff2",
+      "woff2_sha256": "6a487c8f8e8e1c50c8c0a84e533b03d9d101e4830eb6399d78d0705b889a3c0b"
+    },
+    {
+      "source": "piazzolla/Piazzolla[opsz,wght].ttf",
+      "source_sha256": "b6b6451daba93a4b71f88ca8e37a66c3fd2b4e57ec54a407cddf6ae65b62c7b7",
+      "woff2": "piazzolla/Piazzolla[opsz,wght].woff2",
+      "woff2_sha256": "4d8f3341fca5cdde4b8bafebb8cf2a3a32c874b17c11385f4c11252997e9cc14"
+    },
+    {
+      "source": "playfair/Playfair-Italic[opsz,wdth,wght].ttf",
+      "source_sha256": "ae0d7a72a93804925040c277b4cd7e0607f48bb68dbbce70e3da6b5949f911ca",
+      "woff2": "playfair/Playfair-Italic[opsz,wdth,wght].woff2",
+      "woff2_sha256": "141046110855c20003f14b16ca838822fecfd41b0681ec0e161132f306cc6e7b"
+    },
+    {
+      "source": "playfair/Playfair[opsz,wdth,wght].ttf",
+      "source_sha256": "33cfecbc9948cf9eafe54dc9f36d19a03b393cf12221b20be235926d1ca1db61",
+      "woff2": "playfair/Playfair[opsz,wdth,wght].woff2",
+      "woff2_sha256": "40f0b3c012c49b301556bd8e0ee0d1fad2572773068864ead690fb94c5b60b28"
+    },
+    {
+      "source": "podkova/Podkova[wght].ttf",
+      "source_sha256": "a7be6732a489b1c5c7c37a5c2e816fad901563ccd882e9bbc56d13eeebf4a4e7",
+      "woff2": "podkova/Podkova[wght].woff2",
+      "woff2_sha256": "9d1d3872668e54e900649761a0ad05d9f6aa9e084fbfabc475fd50d3949fd0d2"
+    },
+    {
+      "source": "ptsans/PT_Sans-Web-Regular.ttf",
+      "source_sha256": "9cc831490532009bae2b3ce0d39c62adfc889060beb421593bfd9d2396d0f10a",
+      "woff2": "ptsans/PT_Sans-Web-Regular.woff2",
+      "woff2_sha256": "7bc54ba020bf1ed5764db7a2e358d8219f959cb64dee674878a55c3d7ffb5031"
+    },
+    {
+      "source": "ptserif/PT_Serif-Web-Bold.ttf",
+      "source_sha256": "038ba7336bd7ea14f12ad155bed51a4345cac5153275d521dec3ba04021c526e",
+      "woff2": "ptserif/PT_Serif-Web-Bold.woff2",
+      "woff2_sha256": "da1ee43cf6f859aaa1b42331525842d495dfbf24b07297243971e269f0cedd59"
+    },
+    {
+      "source": "ptserif/PT_Serif-Web-BoldItalic.ttf",
+      "source_sha256": "f003788ba08981eb0988b3557a6f224a53dab49c20e283e8b74d5af3c466f8be",
+      "woff2": "ptserif/PT_Serif-Web-BoldItalic.woff2",
+      "woff2_sha256": "5ee517434e905675c19209fca173a0fbc19aac654a5f34139699a3dac82ae29c"
+    },
+    {
+      "source": "ptserif/PT_Serif-Web-Italic.ttf",
+      "source_sha256": "f57e95ff9dc85691a3b2e193f2028db36f6663939a46c0fc4f286d618b80b7ce",
+      "woff2": "ptserif/PT_Serif-Web-Italic.woff2",
+      "woff2_sha256": "9970fa894e52b0edf88e49a94a8f6ab606e67c54558c20a3450d8ec3ede74f99"
+    },
+    {
+      "source": "ptserif/PT_Serif-Web-Regular.ttf",
+      "source_sha256": "a4951fade06ff8f09b7673aa81ffb65a8cd409e24d3289a6dc670bc4dda2557a",
+      "woff2": "ptserif/PT_Serif-Web-Regular.woff2",
+      "woff2_sha256": "25e47ae6296dc50f6c3c8ba22db59af24becdd9378bfb6a1e37f661ff88bffee"
+    },
+    {
+      "source": "sourcesans3/SourceSans3[wght].ttf",
+      "source_sha256": "042fe2cc0b933e328410d7acbd0aa6a1873dca5aef81875f4bc214b08825c7b9",
+      "woff2": "sourcesans3/SourceSans3[wght].woff2",
+      "woff2_sha256": "d9e64b3c2585039646c94e5fa19a1fcc9fc5e48e9e2cbf7668d9981165667054"
+    },
+    {
+      "source": "sourceserif4/SourceSerif4-Italic[opsz,wght].ttf",
+      "source_sha256": "15fbc7e4679489a501998c3669272637a6646388ef7e4bd77eebb5bf967a1f42",
+      "woff2": "sourceserif4/SourceSerif4-Italic[opsz,wght].woff2",
+      "woff2_sha256": "db712d6308ae41c7ea34023d45a6f17374d9cda05744f85cec3c064cd9331d70"
+    },
+    {
+      "source": "sourceserif4/SourceSerif4[opsz,wght].ttf",
+      "source_sha256": "97b2d4da6e3cb494b5a1e66ae176914d852ccabef49e0c02c0df25f3e39aca0b",
+      "woff2": "sourceserif4/SourceSerif4[opsz,wght].woff2",
+      "woff2_sha256": "aa0f5780c99a83bf6ec8c34696f79d7568318f6fe39290a1c51eb9a9f85dc38b"
+    },
+    {
+      "source": "viaodalibre/ViaodaLibre-Regular.ttf",
+      "source_sha256": "adb53ede25107c5ed4c45f993fd014a21ef82ac82b2327a564fe8e994e228942",
+      "woff2": "viaodalibre/ViaodaLibre-Regular.woff2",
+      "woff2_sha256": "f27be76399ff9a82aafc7fc42d2f0213210a4097d7a9830d5f5c0e387f49301f"
+    },
+    {
+      "source": "vollkorn/Vollkorn-Italic[wght].ttf",
+      "source_sha256": "cd947ae49b5d46e812d8d09434fbe8ec452286cd5557ef6a762a3562e2c8d300",
+      "woff2": "vollkorn/Vollkorn-Italic[wght].woff2",
+      "woff2_sha256": "bb5b89668d8fee95f180bbc38528ece8cdb27e110303244c45c6aa323514bb7f"
+    },
+    {
+      "source": "vollkorn/Vollkorn[wght].ttf",
+      "source_sha256": "4ebef434f76f80286204840354a84db79a0dc3c87deeeb791e015b70b2ade49d",
+      "woff2": "vollkorn/Vollkorn[wght].woff2",
+      "woff2_sha256": "5926cb50698428a2b10347e432bcbc1c15413bd870fe70fb16a221a3d7ca5c61"
+    }
+  ]
+}

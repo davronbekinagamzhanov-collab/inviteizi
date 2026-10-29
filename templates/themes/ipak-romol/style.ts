@@ -1,30 +1,17 @@
-import { Gentium_Book_Plus, Marck_Script, Viaoda_Libre } from "next/font/google";
+import localFont from "next/font/local";
 import type { CSSProperties } from "react";
 import { designVars } from "../types";
 
 // Имена и цифры. Marck Script (из каталога) не знает қ ғ ҳ, поэтому имена — Viaoda Libre:
 // высокий контрастный шрифт с «каплями» на концах, похож на шёлковую нить.
-const display = Viaoda_Libre({
-  variable: "--ir-display",
-  weight: "400",
-  subsets: ["cyrillic", "cyrillic-ext"],
-});
+const displayFonte3d89d21 = localFont({src: [{path: "../../../assets/fonts/google/viaodalibre/ViaodaLibre-Regular.woff2", weight: "400", style: "normal"}], display: "swap", preload: false, variable: "--ir-display"});
 
 // Marck Script — только для «ва» между именами (в этом слове нет ў қ ғ ҳ)
-const script = Marck_Script({
-  variable: "--ir-script",
-  weight: "400",
-  subsets: ["cyrillic"],
-});
+const scriptFonte3d89d21 = localFont({src: [{path: "../../../assets/fonts/google/marckscript/MarckScript-Regular.woff2", weight: "400", style: "normal"}], display: "swap", preload: false, variable: "--ir-script"});
 
-const body = Gentium_Book_Plus({
-  variable: "--ir-body",
-  weight: ["400", "700"],
-  style: ["normal", "italic"],
-  subsets: ["cyrillic", "cyrillic-ext"],
-});
+const bodyFonte3d89d21 = localFont({src: [{path: "../../../assets/fonts/google/gentiumbookplus/GentiumBookPlus-Regular.woff2", weight: "400", style: "normal"}, {path: "../../../assets/fonts/google/gentiumbookplus/GentiumBookPlus-Italic.woff2", weight: "400", style: "italic"}, {path: "../../../assets/fonts/google/gentiumbookplus/GentiumBookPlus-Bold.woff2", weight: "700", style: "normal"}, {path: "../../../assets/fonts/google/gentiumbookplus/GentiumBookPlus-BoldItalic.woff2", weight: "700", style: "italic"}], display: "swap", preload: false, variable: "--ir-body"});
 
-export const fontClasses = `${display.variable} ${script.variable} ${body.variable}`;
+export const fontClasses = `${displayFonte3d89d21.variable} ${scriptFonte3d89d21.variable} ${bodyFonte3d89d21.variable}`;
 
 /** Лавандовый шёлк */
 export const SILK = "#E9E2F0"; // основной тон рўмола
