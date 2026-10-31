@@ -107,10 +107,15 @@ describe("шаг «своя музыка»", () => {
     expect(sim.savedMusic).toEqual([]);
   });
 
-  it("подсказка содержит совет про Apple Music и mp3 на обоих языках", () => {
-    expect(uz.music.sendFile).toContain("Apple Music қўшиқларини юбориб бўлмайди, mp3 файл юборинг");
-    expect(ru.music.sendFile).toMatch(/Apple Music/);
-    expect(ru.music.sendFile).toMatch(/mp3/);
+  it("подсказка объясняет forward и раздел «Музыка» на обоих языках", () => {
+    for (const text of [uz.music.ownAsk, uz.music.sendFile]) {
+      expect(text).toContain("Қўшиқни Telegram'даги каналдан шу ерга юборинг (forward) ёки mp3 файл юборинг");
+      expect(text).toContain('Телефондаги "Музыка" бўлимидан юбориб бўлмайди');
+    }
+    for (const text of [ru.music.ownAsk, ru.music.sendFile]) {
+      expect(text).toContain("forward");
+      expect(text).toContain("Из раздела «Музыка» на телефоне отправить нельзя");
+    }
   });
 
   it("файл больше 20 МБ не скачивается", async () => {

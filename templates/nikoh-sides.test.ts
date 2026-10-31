@@ -36,3 +36,12 @@ describe("every accepted Nikoh design renders both families",()=>{
     if(mode==="demo")expect(html).toContain("НАМУНА");
   });
 });
+describe("Nikoh designs hide family blocks when the client gave none",()=>{
+  for(const d of activeDesigns().filter(d=>d.occasion==="nikoh"))it(d.id,async()=>{
+    const {default:Design}=await d.load();
+    const data={...longSample(d),noMusic:true};
+    delete data.sides;
+    const html=renderToStaticMarkup(createElement(Design,{data,mode:"full"}));
+    expect(html).not.toContain(t.sides.groom);expect(html).not.toContain(t.sides.bride);
+  });
+});

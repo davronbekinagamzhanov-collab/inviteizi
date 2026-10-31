@@ -3,7 +3,7 @@ import { VENUES, venuePickerUrl } from "../venues";
 import type { Ctx, Result, Step } from "./types";
 import type { EventKind } from "@/lib/types";
 import type { InlineButton } from "../tg";
-import { addMonths, calendarMonth, kzToday } from "../calendar";
+import { addMonths, calendarMonth, kzTime, kzToday } from "../calendar";
 import { isMapLink, parseTime } from "../parse";
 import {
   after,
@@ -36,11 +36,17 @@ const ADDED_NAHORGI_TIME = "06:00";
 const kindLabel = (c: Ctx) => eventLabel(c.tx, curEvent(c).kind ?? "nikohBazm");
 const isAddedNahorgi = (c: Ctx) => (c.s.ev ?? 0) > 0 && curEvent(c).kind === "nahorgi";
 
+/** Тадбир сегодня, а это время уже прошло (Asia/Almaty) */
+const isPastTime = (c: Ctx, time: string) => curEvent(c).date === kzToday(c.deps.now()) && time < kzTime(c.deps.now());
+
 /** После даты: время (или сразу место для добавленного наҳорги) */
 function afterDate(c: Ctx): Result {
-  if (c.s.ret) return { to: "review" };
+  const time = curEvent(c).time;
+  if (c.s.ret) return time && isPastTime(c, time) ? { to: "evTime" } : { to: "review" };
   if (isAddedNahorgi(c)) {
-    curEvent(c).time ??= ADDED_NAHORGI_TIME;
+    const chosen = time ?? ADDED_NAHORGI_TIME;
+    if (isPastTime(c, chosen)) return { to: "evTime" };
+    curEvent(c).time = chosen;
     return { to: "evVenue" };
   }
   return { to: "evTime" };
@@ -118,13 +124,14 @@ export const evSameDay: Step = {
 };
 
 function acceptTime(c: Ctx, time: string): Result {
+  if (isPastTime(c, time)) return { hint: c.tx.event.pastTime };
   curEvent(c).time = time;
   return { to: after(c, "evVenue") };
 }
 
 export const evTime: Step = {
   async ask(c) {
-    const times = TIMES[curEvent(c).kind ?? "nikohBazm"];
+    const times = TIMES[curEvent(c).kind ?? "nikohBazm"].filter((x) => !isPastTime(c, x));
     const rows: InlineButton[][] = [];
     for (let i = 0; i < times.length; i += 3) rows.push(times.slice(i, i + 3).map((x) => ib(c, x, `t:${x}`)));
     rows.push([ib(c, c.tx.event.timeOther, "other")], backRow(c));

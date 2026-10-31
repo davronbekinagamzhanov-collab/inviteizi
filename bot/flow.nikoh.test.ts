@@ -206,12 +206,12 @@ describe("весь путь никоҳ на ўзбекском", () => {
       expect(labels.some(l=>l.includes(uz.format.names[f]))).toBe(activeDesigns().some(d=>d.occasion==="sunnat"&&d.format===f));
   });
 
-  it("ℹ️ — объяснение разницы форматов всплывающим окном", async () => {
+  it("ℹ️ — объяснение разницы форматов обычным сообщением", async () => {
     const sim = new Sim();
     await startUz(sim, 1);
     await sim.click(1, uz.category.nikoh);
     await sim.click(1, uz.format.info);
-    expect(sim.tg.answers.at(-1)).toMatchObject({ text: uz.format.infoText, alert: true });
+    expect(sim.tg.to(1).some((m) => m.text === uz.format.infoText)).toBe(true);
     expect(sim.lastText(1)).toBe(uz.format.ask);
   });
 });

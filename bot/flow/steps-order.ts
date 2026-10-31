@@ -29,9 +29,8 @@ export const fmt: Step = {
   },
   async onButton(c, v) {
     if (v === "info") {
-      await c.deps.tg.answerCallbackQuery((c.u as { callbackId: string }).callbackId, { text: c.tx.format.infoText, alert: true });
-      c.answered = true;
-      return { stay: true };
+      // Обычным сообщением: у всплывающего окна лимит 200 символов. Кнопки тарифов показываем снова ниже
+      return { hint: c.tx.format.infoText };
     }
     if (!formatsFor(c.s.occasion ?? "nikoh").includes(v as Format)) return null;
     if (c.s.format !== v) c.s.catIdx = 0;
