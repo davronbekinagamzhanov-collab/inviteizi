@@ -173,12 +173,12 @@ const rawDesigns: RawDesign[] = [
 ];
 
 const STYLE_OF: Record<DesignStyle, string[]> = {
-  milk: ["atlas-tolqin", "zarvaraq", "marvarid-satr", "bugdoy-boshoq", "visol-rishta", "siyoh-duo", "kabutar-salom", "tut-qogozi", "yelpigich-ziynat", "saodat-kaliti"],
-  gold: ["oltin-monogramma", "oltin-ot", "zarhal-eshik", "zarhal-lavha", "qosh-uzuk", "shirin-tilak", "visol-soati"],
-  floral: ["pion-guldasta", "ipak-romol", "paxta-gul", "rayhon-sahari", "uzum-hovli", "shabnam-visol", "umr-daraxti", "anor-bogi"],
-  national: ["ganch-peshtoq", "rishton-koshin", "oq-ot", "tonggi-qozon", "non-muhr", "oq-chinni", "doppicha", "sayram-hovli", "suzani-yol", "adras-nishon", "mis-kafgir", "sopol-navo", "girih-nur", "minor-satr", "kumush-taroq", "dutor-navosi"],
+  milk: ["zarhal-eshik", "atlas-tolqin", "non-muhr", "marvarid-satr", "bugdoy-boshoq", "shirin-tilak", "visol-soati", "tut-qogozi"],
+  gold: ["oltin-monogramma", "oltin-ot", "zarhal-lavha", "qosh-uzuk", "zarvaraq", "saodat-kaliti"],
+  floral: ["pion-guldasta", "ipak-romol", "paxta-gul", "visol-rishta", "kabutar-salom", "umr-daraxti", "rayhon-sahari", "siyoh-duo", "shabnam-visol", "uzum-hovli"],
+  national: ["ganch-peshtoq", "rishton-koshin", "oq-ot", "sayram-hovli", "doppicha", "adras-nishon", "suzani-yol", "sopol-navo", "girih-nur", "dutor-navosi", "minor-satr", "kumush-taroq", "mis-kafgir", "oq-chinni", "tonggi-qozon", "yelpigich-ziynat"],
   dark: ["sapfir", "shohona-baxmal"],
-  photo: ["tandir-nuri", "atirgul", "dasturxon", "bodom-guli", "samarqand-kitob", "tonggi-choy", "gulbog-sahifa", "lola-ehtirom"],
+  photo: ["tandir-nuri", "atirgul", "dasturxon", "bodom-guli", "samarqand-kitob", "tonggi-choy", "gulbog-sahifa", "lola-ehtirom", "anor-bogi"],
 };
 
 function styleOf(id: string): DesignStyle {
