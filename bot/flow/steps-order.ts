@@ -3,7 +3,7 @@ import type { Ctx, Result, Step, StepId } from "./types";
 import type { Occasion } from "@/lib/domain";
 import type { Format } from "@/templates/registry";
 import { PRICES } from "@/templates/registry";
-import { after, backRow, coverUrl, data, demoUrl, designName, designsFor, formatsFor, ib, inline, price, send } from "./util";
+import { after, backRow, coverUrl, data, demoUrl, designName, designsFor, formatsFor, ib, inline, price, priceNote, send } from "./util";
 import type { InlineButton } from "../tg";
 import { photoAttributions } from "@/texts/uz-cyrl";
 
@@ -25,7 +25,7 @@ export const cat: Step = {
 export const fmt: Step = {
   async ask(c) {
     const rows = formatsFor(c.s.occasion ?? "nikoh").map((f) => [ib(c, c.tx.format[f](price(PRICES[f])), f)]);
-    await send(c, c.tx.format.ask, inline([...rows, [ib(c, c.tx.format.info, "info")], backRow(c)]));
+    await send(c, `${c.tx.format.ask}\n\n${priceNote(c.tx)}`, inline([...rows, [ib(c, c.tx.format.info, "info")], backRow(c)]));
   },
   async onButton(c, v) {
     if (v === "info") {

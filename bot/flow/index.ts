@@ -7,8 +7,8 @@ import type { Ctx, Deps, Draft, Result, Step, StepId } from "./types";
 import { cat, catalog, fmt } from "./steps-order";
 import { age, bride, cause, groom, hosts, person, relation, sideAsk, sideBride } from "./steps-form";
 import { evPlaces, evVenueName, evMap, evLink, evAddress, evDate, evLoc, evSameDay, evTime, evTimeCustom, evVenue, more } from "./steps-event";
-import { evMenu, music, musicList, musicOwn, review, text, textOwn } from "./steps-final";
-import { approve, askReceipt, askRejectReason, editOrder, myOrders, payOrder, receipt, reject, resendLink } from "./orders";
+import { evMenu, music, musicList, musicOwn, review, rsvp, text, textOwn } from "./steps-final";
+import { approve, askReceipt, askRejectReason, editOrder, myOrders, payOrder, receipt, reject, resendLink, rsvpAnswers } from "./orders";
 import { cmdFind, cmdOrders, cmdStats } from "./admin";
 import { mainMenu, send, texts, txFor } from "./util";
 import type { Lang } from "@/lib/domain";
@@ -54,6 +54,7 @@ export const steps: Record<StepId, Step> = {
   music,
   musicList,
   musicOwn,
+  rsvp,
   review,
   evMenu,
   receipt,
@@ -364,6 +365,8 @@ async function onCallback(c: Ctx, d: string) {
       return apply(c, await editOrder(c, n));
     case "link":
       return apply(c, await resendLink(c, n));
+    case "rsvp":
+      return apply(c, await rsvpAnswers(c, n));
     case "new":
       // «🆕 Янги таклифнома» после оплаты: всё с нуля, старые данные не подставляем
       c.s = { q: c.s.q };

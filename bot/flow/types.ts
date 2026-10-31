@@ -55,6 +55,7 @@ export type StepId =
   | "music"
   | "musicList"
   | "musicOwn"
+  | "rsvp"
   | "review"
   | "evMenu"
   | "receipt"

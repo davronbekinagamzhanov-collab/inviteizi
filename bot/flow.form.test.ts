@@ -72,6 +72,7 @@ describe("весь путь наҳорги ош на русском", () => {
     await sim.voice(id);
     expect(sim.tg.to(id).at(-2)?.text).toBe(ru.music.sendFile);
     await sim.audio(id, "SONG1", 5 * 1024 * 1024, "Тўй муборак");
+    await sim.click(id, ru.rsvp.no);
     expect(sim.savedMusic).toEqual(["SONG1"]);
 
     expect(sim.lastText(id)).toContain(ru.review.title);
@@ -116,6 +117,7 @@ describe("суннат с двумя мальчиками", () => {
     expect(sim.lastText(id)).toContain("Сизни ўғилларимиз Абдураҳмонжон ва Абдуллоҳжоннинг суннат тўйига");
     await sim.click(id, uz.text.pick(1));
     await sim.click(id, uz.music.none);
+    await sim.click(id, uz.rsvp.no);
     expect(sim.lastText(id)).toContain(uz.review.person("Абдураҳмонжон ва Абдуллоҳжон"));
     await sim.click(id, uz.review.confirm);
     const [o] = await sim.repo.listOrdersByUser(id);
@@ -161,10 +163,11 @@ describe("«Назад» на каждом шаге анкеты", () => {
       [() => sim.click(id, uz.text.pick(1)), ""],
       [() => sim.click(id, uz.music.fromList), uz.music.ask],
       [() => sim.click(id, uz.music.choose), uz.music.listAsk],
+      [() => sim.click(id, uz.rsvp.no), uz.rsvp.ask],
     ];
     for (const [answer, question] of plan) {
       const before = sim.lastText(id).replace(/[\u00a0\u202f]/g, " ");
-      if (question) expect(before).toBe(question.replace(/[\u00a0\u202f]/g, " "));
+      if (question) expect(before).toContain(question.replace(/[\u00a0\u202f]/g, " "));
       await answer();
       const next = sim.lastText(id);
       await back();
@@ -174,6 +177,8 @@ describe("«Назад» на каждом шаге анкеты", () => {
     }
     // Сводка → «Назад» → музыка
     expect(sim.lastText(id)).toContain(uz.review.title);
+    await sim.click(id, uz.back);
+    expect(sim.lastText(id)).toBe(uz.rsvp.ask);
     await sim.click(id, uz.back);
     expect(sim.lastText(id)).toBe(uz.music.listAsk);
     await sim.click(id, uz.music.choose);
@@ -217,6 +222,7 @@ describe("«Назад» на каждом шаге анкеты", () => {
     await sim.click(id, uz.event.noMore);
     await sim.click(id, uz.text.pick(1));
     await sim.click(id, uz.music.none);
+    await sim.click(id, uz.rsvp.no);
     expect(buttonLabels(sim.last(id)).filter((l) => l.startsWith("✏️ 2."))).toEqual([]);
     await sim.click(id, uz.review.confirm);
     const [o] = await sim.repo.listOrdersByUser(id);

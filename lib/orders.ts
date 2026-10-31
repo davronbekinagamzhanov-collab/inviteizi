@@ -51,6 +51,8 @@ export function invitationData(order: OrderRecord, listMusicUrl?: string | null)
   const rest = { ...order.data };
   delete rest.musicUrl;
   delete rest.noMusic;
+  delete rest.rsvpSlug;
+  if (rest.rsvp) rest.rsvpSlug = order.slug;
   const m = order.music;
   if (m.kind === "none") return { ...rest, noMusic: true };
   const url = m.kind === "list" ? listMusicUrl : m.url;

@@ -9,6 +9,12 @@ export type MetricEvent = { kind: EventKind; userId: number; target: string; cre
 export type Metric = { id: string; orders: number; paid: number; revenue: number; selected: number; demos: number; favorites: number; conversion: number };
 export type AnalyticsInput = { orders: MetricOrder[]; users: MetricUser[]; events: MetricEvent[]; since: Date; music?: { id: string; titleRu: string; titleUz: string }[] };
 
+/** Owner and admins never appear in the numbers, whatever they do in the bot. */
+export function withoutStaffAnalytics<T extends AnalyticsInput>(input: T, staff: number[]): T {
+  const ids = new Set(staff);
+  return { ...input, orders: input.orders.filter((o) => !ids.has(o.userId)), users: input.users.filter((u) => !ids.has(u.id)), events: input.events.filter((e) => !ids.has(e.userId)) };
+}
+
 /** Calendar days in Asia/Almaty (UTC+5); today plus the preceding 6/29 days. */
 export function periodStart(period: Period, now: Date): Date {
   const midnight = Math.floor((+now + 18_000_000) / 86_400_000) * 86_400_000 - 18_000_000;

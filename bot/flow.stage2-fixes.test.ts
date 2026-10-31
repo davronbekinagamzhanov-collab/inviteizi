@@ -31,7 +31,7 @@ describe("кнопка «Фарқи нимада»", () => {
     expect(texts).toContain(tx.format.infoText);
     for (const name of Object.values(tx.format.names)) expect(tx.format.infoText).toContain(name);
     expect(texts).not.toContain(tx.error);
-    expect(sim.lastText(1)).toBe(tx.format.ask);
+    expect(sim.lastText(1)).toContain(tx.format.ask);
     expect(buttonLabels(sim.last(1)).some((l) => l.includes(tx.format.names.animated))).toBe(true);
   });
 });
@@ -124,6 +124,7 @@ describe("время в прошлом при дате «сегодня»", () =
     await sim.click(1, uz.event.noMore);
     await sim.click(1, uz.text.pick(1));
     await sim.click(1, uz.music.none);
+    await sim.click(1, uz.rsvp.no);
     await sim.click(1, /^✏️ 1\./);
     await sim.click(1, uz.review.evDate);
     await sim.click(1, "◀");
@@ -150,6 +151,7 @@ describe("пересланная песня", () => {
     await nikohToMusic(sim, 1);
     await sim.click(1, uz.music.own);
     await sim.send(forwarded({ audio: { file_id: "FWD", file_unique_id: "u", duration: 180, title: "Ёр-ёр", performer: "Ҳофиз" } }));
+    await sim.click(1, uz.rsvp.no);
     expect(sim.savedMusic).toEqual(["FWD"]);
     expect(sim.tg.to(1).some((m) => m.text === uz.music.saved)).toBe(true);
     await sim.click(1, uz.review.confirm);

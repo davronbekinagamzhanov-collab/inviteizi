@@ -5,6 +5,8 @@ import { useEffect, type CSSProperties, type ReactNode } from "react";
 import type { Invitation } from "./useInvitation";
 import { MusicButton } from "./MusicButton";
 import { Watermark } from "./Watermark";
+import { BrandBadge, BrandFooter } from "./Brand";
+import { Rsvp } from "./Rsvp";
 
 /**
  * Оболочка любого дизайна: колонка шириной телефона, аудио, кнопка ▶/⏸, водяной знак «НАМУНА».
@@ -53,6 +55,9 @@ export function InvitationShell({
 
           {children}
 
+          {inv.data.rsvpSlug && <Rsvp slug={inv.data.rsvpSlug} preview={inv.mode === "demo"} />}
+          <BrandFooter />
+
           {inv.hasMusic && inv.opened && (
             <MusicButton
               playing={inv.playing}
@@ -61,6 +66,7 @@ export function InvitationShell({
               raised={inv.mode === "demo"}
             />
           )}
+          {inv.opened && <BrandBadge raised={inv.mode === "demo"} />}
           {inv.mode === "demo" && <Watermark />}
         </div>
       </div>

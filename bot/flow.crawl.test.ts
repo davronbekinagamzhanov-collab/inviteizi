@@ -88,6 +88,7 @@ async function walk(lang: "uz" | "ru", occasion: Occasion, format: "animated" | 
       case "more": await press(sim, screen, tx.event.noMore); break;
       case "text": await press(sim, screen, tx.text.pick(1)); break;
       case "music": await press(sim, screen, tx.music.none); break;
+      case "rsvp": await press(sim, screen, tx.rsvp.no); break;
       case "review": await press(sim, screen, tx.review.confirm); break;
       default: throw new Error(`Обычный путь остановился на шаге ${step}`);
     }

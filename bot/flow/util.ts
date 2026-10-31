@@ -79,6 +79,12 @@ export function formatsFor(occasion: Occasion): Format[] {
   return FORMATS.filter((f) => designsFor(occasion, f).length > 0);
 }
 
+/** «Нарх ўзгармайди»: цифры только из PRICES */
+export function priceNote(tx: BotTexts) {
+  const n = (f: Format) => price(PRICES[f]).replace(/\s*₸$/, "");
+  return tx.pricing.note(n("animated"), n("scroll"), n("simple"));
+}
+
 export function designLine(tx: BotTexts, templateId: string, format: Format, amount = PRICES[format]) {
   const d = getDesign(templateId);
   return tx.review.design(d?.number ?? 0, designName(templateId), tx.format.names[format], price(amount));

@@ -60,6 +60,7 @@ export async function nikohToText(sim: Sim, id: number, format: Format = "animat
 export async function nikohToReview(sim: Sim, id: number, names: [string, string] = ["Азиз", "Мадина"], format: Format = "animated") {
   await nikohToMusic(sim, id, names, format);
   await sim.click(id, uz.music.none);
+  await sim.click(id, uz.rsvp.no);
 }
 
 /** Никоҳ до созданного заказа (status preview) — возвращает заказ */

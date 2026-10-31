@@ -88,7 +88,7 @@ describe("owner catalog and independent place entry",()=>{
   });
   it("catalog choices survive multiple events, saving, demo and full invitation data",async()=>{
     const s=await atVenue();await choose(s,0);await s.click(1,uz.event.addNahorgi);await s.click(1,uz.event.sameDayYes);await choose(s,6);
-    await s.click(1,uz.event.noMore);await s.click(1,uz.text.pick(1));await s.click(1,uz.music.none);await s.click(1,uz.review.confirm);
+    await s.click(1,uz.event.noMore);await s.click(1,uz.text.pick(1));await s.click(1,uz.music.none);await s.click(1,uz.rsvp.no);await s.click(1,uz.review.confirm);
     const [o]=await s.repo.listOrdersByUser(1);
     expect(o.data.events).toHaveLength(2);expect(o.data.events.map(e=>e.mapUrl)).toEqual([VENUES[0].mapUrl,VENUES[6].mapUrl]);
     expect(o.data.sides).toEqual({groom:"Куёвлар оиласи",bride:"Келинлар оиласи"});

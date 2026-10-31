@@ -26,8 +26,19 @@ async function api(method, body = {}) {
 const me = await api("getMe");
 console.log(`Бот: @${me.username}`);
 
-// --admin-commands — только меню команд для ADMIN_IDS (webhook и профиль не меняются)
-if (process.argv.includes("--admin-commands")) {
+// --commands — только меню команд: у всех клиентов и у ADMIN_IDS (webhook и профиль не меняются)
+// --admin-commands — то же только для ADMIN_IDS
+const allCommands = process.argv.includes("--commands");
+if (allCommands) {
+  for (const [lang, tx] of [["uz", uz], ["ru", ru], ["", uz]]) {
+    await api("setMyCommands", {
+      commands: Object.entries(tx.profile.commands).map(([command, description]) => ({ command, description })),
+      ...(lang ? { language_code: lang } : {}),
+    });
+  }
+  console.log("Меню команд клиентов обновлено");
+}
+if (allCommands || process.argv.includes("--admin-commands")) {
   const ids = (process.env.ADMIN_IDS ?? "").split(",").map((s) => Number(s.trim())).filter((n) => Number.isSafeInteger(n) && n > 0);
   for (const chat_id of ids) {
     for (const [lang, tx] of [["uz", uz], ["ru", ru], ["", uz]]) {

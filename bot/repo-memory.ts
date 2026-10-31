@@ -1,3 +1,4 @@
+import { RSVP_IP_HOUR_LIMIT, RSVP_ORDER_LIMIT, type RsvpInput, type RsvpRecord } from "@/lib/rsvp";
 import type { PanelOrder, PanelSnapshot, Partner, PartnerEarning, PartnerPayout } from "@/lib/owner-panel";
 import type { BotErrorEntry } from "./errors";
 /**
@@ -5,7 +6,7 @@ import type { BotErrorEntry } from "./errors";
  * Записи отдаются копиями (как из базы): изменить их снаружи нельзя.
  */
 import { isReservedSlug } from "@/lib/slug";
-import { summarize, type MetricEvent, type EventKind, type Period } from "@/lib/analytics";
+import { summarize, withoutStaffAnalytics, type MetricEvent, type EventKind, type Period } from "@/lib/analytics";
 import type { Occasion } from "@/lib/types";
 import type { Repo } from "./repo";
 import type {
@@ -42,6 +43,26 @@ export class MemoryRepo implements Repo {
   payouts: PartnerPayout[] = [];
   /** Как до применения миграции партнёров */
   partnersReady = true;
+  rsvp: (RsvpInput & { createdAt: Date; updatedAt: Date })[] = [];
+  async staffIds() {
+    return [...new Set([...this.adminIds, ...(this.ownerId ? [this.ownerId] : [])])];
+  }
+  async saveRsvp(input: RsvpInput) {
+    const now = this.now();
+    const old = this.rsvp.find((r) => r.orderId === input.orderId && r.visitorKey === input.visitorKey);
+    if (old) {
+      Object.assign(old, input, { updatedAt: now });
+      return "ok" as const;
+    }
+    const order = this.rsvp.filter((r) => r.orderId === input.orderId);
+    const hour = order.filter((r) => r.ipHash === input.ipHash && +r.createdAt > +now - 3_600_000);
+    if (order.length >= RSVP_ORDER_LIMIT || hour.length >= RSVP_IP_HOUR_LIMIT) return "limited" as const;
+    this.rsvp.push({ ...input, createdAt: now, updatedAt: now });
+    return "ok" as const;
+  }
+  async listRsvp(orderId: string): Promise<RsvpRecord[]> {
+    return this.rsvp.filter((r) => r.orderId === orderId).sort((a, b) => +b.updatedAt - +a.updatedAt).map(({ name, guests, attending, updatedAt }) => ({ name, guests, attending, updatedAt }));
+  }
   async panelSnapshot(): Promise<PanelSnapshot> {
     const orders = [...this.orders.values()].map((o): PanelOrder => {
       const u = this.users.get(o.userId);
@@ -89,7 +110,8 @@ export class MemoryRepo implements Repo {
   }
   async recordPartnerPayout(partnerId: number, expected: number, createdBy: number) {
     void createdBy;
-    const earned = this.earnings.filter((e) => e.partnerId === partnerId).reduce((n, e) => n + e.amount, 0);
+    const staff = await this.staffIds();
+    const earned = this.earnings.filter((e) => e.partnerId === partnerId && !staff.includes(this.orders.get(e.orderId)?.userId ?? 0)).reduce((n, e) => n + e.amount, 0);
     const paid = this.payouts.filter((p) => p.partnerId === partnerId).reduce((n, p) => n + p.amount, 0);
     if (expected <= 0 || earned - paid !== expected) return false;
     this.payouts.push({ partnerId, amount: expected, createdAt: this.now() });
@@ -117,7 +139,7 @@ export class MemoryRepo implements Repo {
   async analytics(actorId: number, period: Period, now: Date, customers = false) {
     const owner = await this.isOwner(actorId);
     if (!(await this.canAnalyze(actorId)) || (customers && !owner)) throw new Error("Analytics access denied");
-    return summarize({ orders: [...this.orders.values()], users: [...this.users.values()], events: [...this.analyticsEvents.values()], since: this.trackingSince, music: this.music }, period, now, customers && owner);
+    return summarize(withoutStaffAnalytics({ orders: [...this.orders.values()], users: [...this.users.values()], events: [...this.analyticsEvents.values()], since: this.trackingSince, music: this.music }, await this.staffIds()), period, now, customers && owner);
   }
   async listFavorites(userId: number) {
     return [...(this.favorites.get(userId)??new Map<string,number>())]
@@ -352,7 +374,8 @@ export class MemoryRepo implements Repo {
     // «Сегодня» — с полуночи по времени Казахстана; неделя — 7 суток; месяц — 30 суток
     const localMidnight = Math.floor((now.getTime() + TZ_OFFSET_MS) / DAY) * DAY - TZ_OFFSET_MS;
     const since = { today: localMidnight, week: now.getTime() - 7 * DAY, month: now.getTime() - 30 * DAY, total: -Infinity };
-    const all = [...this.orders.values()];
+    const staff = await this.staffIds();
+    const all = [...this.orders.values()].filter((o) => !staff.includes(o.userId));
     const paid = all.filter((o) => PAID.includes(o.status));
     const count = (from: number) => all.filter((o) => o.createdAt.getTime() >= from).length;
     const sum = (from: number) =>
@@ -361,6 +384,7 @@ export class MemoryRepo implements Repo {
     for (const o of all) byStatus[o.status] = (byStatus[o.status] ?? 0) + 1;
     const sources = new Map<string, { source: string; users: number; paid: number }>();
     for (const u of this.users.values()) {
+      if (staff.includes(u.id)) continue;
       const key = u.source ?? "—";
       const row = sources.get(key) ?? { source: key, users: 0, paid: 0 };
       row.users++;

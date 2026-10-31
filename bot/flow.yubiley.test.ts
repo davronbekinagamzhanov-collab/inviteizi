@@ -27,6 +27,7 @@ describe("юбилей (шаг 6)", () => {
     await sim.click(5, ru.event.noMore);
     await sim.click(5, ru.text.pick(1));
     await sim.click(5, ru.music.none);
+    await sim.click(5, ru.rsvp.no);
     expect(sim.lastText(5)).toContain(ru.review.age(60));
     await sim.click(5, ru.review.confirm);
     const [o] = await sim.repo.listOrdersByUser(5);

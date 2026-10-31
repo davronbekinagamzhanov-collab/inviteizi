@@ -18,6 +18,7 @@ import type { Occasion } from "@/lib/types";
 import type { Analytics, Period, EventKind } from "@/lib/analytics";
 import type { BotErrorEntry } from "./errors";
 import type { PanelSnapshot, Partner } from "@/lib/owner-panel";
+import type { RsvpInput, RsvpRecord } from "@/lib/rsvp";
 
 export interface Repo {
   /** Журнал ошибок бота: entry уже очищен от личных данных */
@@ -88,6 +89,12 @@ export interface Repo {
 
   // ── Панель владельца и партнёры (права проверяет логика бота) ──
   panelSnapshot(): Promise<PanelSnapshot>;
+  /** Владелец и админы: их действия не считаются в статистике */
+  staffIds(): Promise<number[]>;
+  /** Ответ гостя: повтор с того же устройства заменяет прежний */
+  saveRsvp(input: RsvpInput): Promise<"ok" | "limited">;
+  /** Новые ответы сверху. Таблицы ещё нет — пусто */
+  listRsvp(orderId: string): Promise<RsvpRecord[]>;
   createPartner(p: { code: string; name: string; telegramId: number | null; username: string | null; rate: number }): Promise<Partner>;
   getPartner(id: number): Promise<Partner | null>;
   setPartnerRate(id: number, rate: number): Promise<void>;
