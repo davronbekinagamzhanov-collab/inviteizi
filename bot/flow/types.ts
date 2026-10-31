@@ -57,7 +57,11 @@ export type StepId =
   | "musicOwn"
   | "review"
   | "evMenu"
-  | "receipt";
+  | "receipt"
+  | "partnerName"
+  | "partnerContact"
+  | "partnerRate"
+  | "partnerRateEdit";
 
 /** Данные анкеты по ходу заполнения (тадбиры могут быть недозаполнены) */
 export type DraftData = Omit<Partial<InvitationData>, "events"> & { events?: Partial<InvitationEvent>[] };
@@ -94,6 +98,10 @@ export type Draft = {
   orderId?: string;
   /** Заказ уже оплачен: формат (и цену) менять нельзя */
   paid?: boolean;
+  /** Новый партнёр, пока его заполняют */
+  partnerDraft?: { name?: string; telegramId?: number | null; username?: string | null };
+  /** Партнёр, которому меняют ставку */
+  partnerId?: number;
 };
 
 export type Ctx = {

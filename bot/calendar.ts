@@ -14,6 +14,11 @@ export function kzToday(now: Date): string {
   return new Date(now.getTime() + KZ_OFFSET_MS).toISOString().slice(0, 10);
 }
 
+/** Текущее время в Казахстане: «18:30» */
+export function kzTime(now: Date): string {
+  return new Date(now.getTime() + KZ_OFFSET_MS).toISOString().slice(11, 16);
+}
+
 /** «2026-12» + 1 → «2027-01» */
 export function addMonths(month: string, delta: number): string {
   const [y, m] = month.split("-").map(Number);

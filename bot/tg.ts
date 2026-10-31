@@ -9,7 +9,9 @@ export type InlineButton =
   | { text: string; data: string }
   | { text: string; url: string }
   /** Кнопка «скопировать текст» (copy_text, Bot API 7.11) */
-  | { text: string; copy: string };
+  | { text: string; copy: string }
+  /** Открыть страницу окном внутри Telegram (только личные чаты, только https) */
+  | { text: string; webApp: string };
 
 export type ReplyButton = { text: string; location?: boolean };
 
@@ -37,4 +39,6 @@ export interface Tg {
   answerCallbackQuery(callbackId: string, opts?: { text?: string; alert?: boolean }): Promise<void>;
   /** Временная ссылка на файл Telegram (для копирования песни клиента в Storage) */
   getFileUrl(fileId: string): Promise<string>;
+  /** Имя бота без @ (для ссылок t.me) */
+  botUsername(): Promise<string>;
 }

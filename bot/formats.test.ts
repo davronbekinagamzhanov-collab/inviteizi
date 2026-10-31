@@ -67,11 +67,11 @@ describe("three invitation formats",()=>{
       await s.callback(100+i,`pay:${o.number}`,1);await s.photo(100+i,"dashboard-format");await s.callback(ADMIN,`ok:${o.number}`,1);
     }
     await s.start(ADMIN);await s.click(ADMIN,uz.langUz);await s.command(ADMIN,"dashboard");
-    const general=s.tg.to(ADMIN).find(m=>m.text?.includes(uz.dashboard.labels.revenue)&&m.text?.includes(uz.format.names.scroll));
-    expect(general).toBeDefined();
-    for(const f of FORMATS)expect(general?.text).toContain(`${uz.format.names[f]}: 1`);
-    await s.callback(ADMIN,"dash:designs:all",1);
-    for(const f of FORMATS)expect(s.tg.to(ADMIN).some(m=>m.text?.startsWith(`${uz.format.names[f]}\n`))).toBe(true);
+    const screen=s.last(ADMIN);
+    await s.callback(ADMIN,"dash:designs:all",screen.id);
+    for(const f of FORMATS)expect(screen.text).toContain(`${uz.format.names[f]}: 1`);
+    await s.callback(ADMIN,"dash:revenue:all",screen.id);
+    for(const f of FORMATS)expect(screen.text).toContain(uz.format.names[f]);
     expect(s.tg.to(ADMIN).some(m=>m.text?.includes("undefined"))).toBe(false);
   });
 });

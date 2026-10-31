@@ -13,6 +13,10 @@ export type Format = typeof FORMATS[number];
 /** Цена формата, ₸ (музыка входит в цену) */
 export const PRICES: Record<Format, number> = { animated: 8_000, scroll: 6_000, simple: 5_000 };
 
+/** Внешний вид дизайна (распределены по обложкам): для панели владельца */
+export const DESIGN_STYLES = ["milk", "gold", "floral", "national", "dark", "photo"] as const;
+export type DesignStyle = (typeof DESIGN_STYLES)[number];
+
 type Loader = () => Promise<{ default: ComponentType<TemplateProps> }>;
 
 /**
@@ -24,6 +28,7 @@ export type Design = {
   number: number;
   occasion: Occasion;
   format: Format;
+  style: DesignStyle;
   /** В дизайне есть фото (Pixabay), а не только орнаменты кодом */
   withPhoto: boolean;
   /** Тёмный фон (бархат) — в каталоге таких немного */
@@ -40,6 +45,8 @@ export type Design = {
 
 const cover = (id: string) => `/covers/${id}.webp`;
 
+type RawDesign = Omit<Design, "style">;
+
 /** Новый дизайн: данные демо берутся по тадбиру */
 function design(
   id: string,
@@ -48,12 +55,12 @@ function design(
   format: Format,
   withPhoto: boolean,
   load: Loader,
-  extra: Partial<Design> = {},
-): Design {
+  extra: Partial<RawDesign> = {},
+): RawDesign {
   return { id, number, occasion, format, withPhoto, sample: sampleFor(id, occasion), cover: cover(id), load, ...extra };
 }
 
-export const designs: Design[] = [
+const rawDesigns: RawDesign[] = [
   // ── Пилоты ──
   {
     id: "oltin-monogramma",
@@ -164,6 +171,23 @@ export const designs: Design[] = [
   design("yelpigich-ziynat", 105, "nikoh", "animated", false, () => import("./themes/yelpigich-ziynat/Design")),
   design("saodat-kaliti", 106, "nikoh", "animated", false, () => import("./themes/saodat-kaliti/Design")),
 ];
+
+const STYLE_OF: Record<DesignStyle, string[]> = {
+  milk: ["zarhal-eshik", "atlas-tolqin", "non-muhr", "marvarid-satr", "bugdoy-boshoq", "shirin-tilak", "visol-soati", "tut-qogozi"],
+  gold: ["oltin-monogramma", "oltin-ot", "zarhal-lavha", "qosh-uzuk", "zarvaraq", "saodat-kaliti"],
+  floral: ["pion-guldasta", "ipak-romol", "paxta-gul", "visol-rishta", "kabutar-salom", "umr-daraxti", "rayhon-sahari", "siyoh-duo", "shabnam-visol", "uzum-hovli"],
+  national: ["ganch-peshtoq", "rishton-koshin", "oq-ot", "sayram-hovli", "doppicha", "adras-nishon", "suzani-yol", "sopol-navo", "girih-nur", "dutor-navosi", "minor-satr", "kumush-taroq", "mis-kafgir", "oq-chinni", "tonggi-qozon", "yelpigich-ziynat"],
+  dark: ["sapfir", "shohona-baxmal"],
+  photo: ["tandir-nuri", "atirgul", "dasturxon", "bodom-guli", "samarqand-kitob", "tonggi-choy", "gulbog-sahifa", "lola-ehtirom", "anor-bogi"],
+};
+
+function styleOf(id: string): DesignStyle {
+  const style = DESIGN_STYLES.find((s) => STYLE_OF[s].includes(id));
+  if (!style) throw new Error(`Дизайну ${id} не назначен стиль`);
+  return style;
+}
+
+export const designs: Design[] = rawDesigns.map((d) => ({ ...d, style: styleOf(d.id) }));
 
 /**
  * Принятые дизайны (прошли приёмку) — только их видят клиенты в боте и на /catalog.

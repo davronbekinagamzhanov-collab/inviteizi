@@ -8,6 +8,7 @@
 import type { Deps } from "./flow/types";
 import { adminCard, decisionButtons } from "./flow/orders";
 import { inline, pageUrl, price, txFor } from "./flow/util";
+import { creditPartner } from "./flow/partners";
 
 export type CronResult = { adminReminded: number; clientReminded: number; archived: number; errors: number };
 
@@ -63,6 +64,14 @@ export async function runCron(deps: Deps): Promise<CronResult> {
   // ── Архив ──
   for (const o of await repo.listOrdersByStatus(["active"])) {
     if (o.expiresAt && o.expiresAt <= now && (await repo.transition(o.id, ["active"], "archived"))) r.archived++;
+  }
+
+  // ── Партнёры: оплаты, которые не начислились сразу (сбой в момент подтверждения) ──
+  try {
+    for (const o of await repo.uncreditedPartnerOrders()) await creditPartner(deps, o);
+  } catch (e) {
+    r.errors++;
+    console.error("cron partners", e instanceof Error ? e.name : "Error");
   }
 
   return r;

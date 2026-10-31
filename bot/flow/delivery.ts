@@ -54,6 +54,7 @@ export function beginAttempt(deps: Deps, updateId?: number): { tg: Tg; canRetry:
     editMessageReplyMarkup: (...args) => tg.editMessageReplyMarkup(...args),
     answerCallbackQuery: (...args) => tg.answerCallbackQuery(...args),
     getFileUrl: (...args) => tg.getFileUrl(...args),
+    botUsername: () => tg.botUsername(),
   };
   const map = ledger;
   return { tg: guarded, canRetry: entry.attempts < MAX_ATTEMPTS, finish: () => void map.delete(updateId) };
