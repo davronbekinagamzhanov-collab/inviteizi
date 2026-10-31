@@ -38,6 +38,18 @@ export type PanelSnapshot = {
   partnersReady: boolean;
 };
 
+/** Владелец и админы пользуются ботом как обычно, но в цифры не попадают */
+export function withoutStaff(s: PanelSnapshot, staff: number[]): PanelSnapshot {
+  const ids = new Set(staff);
+  const staffOrders = new Set(s.orders.filter((o) => ids.has(o.userId)).map((o) => o.id));
+  return {
+    ...s,
+    orders: s.orders.filter((o) => !staffOrders.has(o.id)),
+    users: s.users.filter((u) => !ids.has(u.id)),
+    earnings: s.earnings.filter((e) => !staffOrders.has(e.orderId)),
+  };
+}
+
 /** Метка партнёра в users.source: ?start=p_<код> */
 export const partnerSource = (code: string) => `p_${code}`;
 export const parsePartnerSource = (source: string | null) => /^p_([a-z0-9]{4,32})$/.exec(source ?? "")?.[1] ?? null;

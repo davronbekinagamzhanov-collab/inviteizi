@@ -49,3 +49,6 @@ next-env.d.ts
 
 # музыка «нашего списка»: файлы живут в хранилище Supabase (scripts/music-sync.mjs), не в git
 /public/music/*/
+
+/screens/stage3/
+/backups/

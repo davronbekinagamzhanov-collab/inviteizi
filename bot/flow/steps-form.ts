@@ -6,8 +6,10 @@ import { after, backRow, curEvent, data, ib, inline, MAIN_EVENT, send } from "./
 /** Текст ответа: обрезаем пробелы, проверяем длину. Не текст — null (общая подсказка) */
 function textAnswer(c: Ctx, max: number): string | { hint: string } | null {
   if (c.u.kind !== "text") return null;
-  const v = c.u.text.trim().replace(/\s+/g, " ");
+  // Невидимые символы (в том числе смена направления текста) в приглашение не попадают
+  const v = c.u.text.replace(/[\p{Cc}\p{Cf}]/gu, " ").trim().replace(/\s+/g, " ");
   if (!v) return null;
+  if (!/\p{L}/u.test(v)) return { hint: c.tx.needLetters };
   if (v.length > max) return { hint: c.tx.tooLong(max) };
   return v;
 }

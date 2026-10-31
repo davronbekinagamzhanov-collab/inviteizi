@@ -1,3 +1,4 @@
+import { rsvpTotals } from "@/lib/rsvp";
 /** Заказ: создание/сохранение, оплата Kaspi, чек, решение админа, «мои приглашения», смена ссылки */
 import QRCode from "qrcode";
 import type { Ctx, Deps, Result, Step } from "./types";
@@ -357,6 +358,27 @@ export async function resendLink(c: Ctx, n: number): Promise<Result> {
   return { done: true };
 }
 
+const RSVP_SHOWN = 40;
+
+/** Ответы гостей: видит только хозяин заказа */
+export async function rsvpAnswers(c: Ctx, n: number): Promise<Result> {
+  const o = await ownOrder(c, n);
+  if (!o) {
+    await send(c, c.tx.order.notFound);
+    return { stay: true };
+  }
+  const list = await c.deps.repo.listRsvp(o.id);
+  if (!list.length) {
+    await send(c, c.tx.rsvp.empty);
+    return { stay: true };
+  }
+  const total = rsvpTotals(list);
+  const lines = list.slice(0, RSVP_SHOWN).map((r) => (r.attending ? c.tx.rsvp.lineYes(r.name, r.guests) : c.tx.rsvp.lineNo(r.name)));
+  if (list.length > RSVP_SHOWN) lines.push(c.tx.rsvp.more(list.length - RSVP_SHOWN));
+  await send(c, [c.tx.rsvp.head(total.replies, total.people, total.declined), "", ...lines].join("\n"));
+  return { stay: true };
+}
+
 export async function approve(c: Ctx, n: number) {
   if (!(await guardAdmin(c))) return;
   const o0 = await c.deps.repo.getOrderByNumber(n);
@@ -416,6 +438,7 @@ export async function myOrders(c: Ctx) {
       ]);
     }
     const last: InlineButton[] = o.status === "active" ? [{ text: c.tx.my.link, data: `link:${o.number}` }] : [];
+    if (o.status === "active" && o.data.rsvp) rows.push([{ text: c.tx.rsvp.answers, data: `rsvp:${o.number}` }]);
     rows.push([...last, { text: c.tx.contact, url: ownerUrl(c) }]);
     const title = `${namesOf(o.data)} · ${designName(o.templateId)}`;
     await send(c, c.tx.my.item(o.number, title, c.tx.my.statuses[o.status], pageUrl(c, o.slug)), inline(rows));

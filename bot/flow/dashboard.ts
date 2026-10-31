@@ -9,7 +9,7 @@ import { demoUrl, designName, editOrSend, inline, price, send } from "./util";
 import { PERIODS, type Period } from "@/lib/analytics";
 import { designTypes, musicStats, orderPage, overview, partnerRows, revenueBreakdown, topDesigns, type PanelSnapshot } from "@/lib/owner-panel";
 import { DESIGN_STYLES, FORMATS, PRICES, type DesignStyle, type Format } from "@/templates/registry";
-import { partnerDetail, partnerList } from "./partners";
+import { panelData, partnerDetail, partnerList } from "./partners";
 
 const VIEWS = ["general", "revenue", "orders", "designs", "partners", "music"] as const;
 type View = (typeof VIEWS)[number];
@@ -120,7 +120,7 @@ export async function dashboard(c: Ctx, viewArg = "general", periodArg = "all", 
   const v = viewArg as View;
   const p = periodArg as Period;
   const now = c.deps.now();
-  const s = await c.deps.repo.panelSnapshot();
+  const s = await panelData(c.deps);
   const screen =
     v === "general" ? general(c, s, p, now)
     : v === "revenue" ? revenue(c, s, p, now)

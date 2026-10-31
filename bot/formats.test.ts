@@ -48,7 +48,7 @@ describe("three invitation formats",()=>{
     const s=new Sim();await startUz(s,4);
     await s.repo.saveStep(4,"catalog",{q:50,occasion:"nahorgi",format:"simple",catIdx:0});
     await s.callback(4,`a:50:${value}`,1);
-    expect((await s.user(4))?.step).toBe("fmt");expect(s.lastText(4)).toBe(uz.format.ask);
+    expect((await s.user(4))?.step).toBe("fmt");expect(s.lastText(4)).toContain(uz.format.ask);
     expect(formatsFor("nahorgi")).toEqual(["animated","scroll"]);
   });
   it("an old catalog index never silently selects a different design after tariff changes",async()=>{

@@ -18,7 +18,7 @@ describe("весь путь никоҳ на ўзбекском", () => {
     // Категория → формат
     expect(buttonLabels(sim.last(id))).toEqual(expect.arrayContaining([uz.category.nikoh, uz.category.nahorgi, uz.category.sunnat, uz.back]));
     await sim.click(id, uz.category.nikoh);
-    expect(sim.lastText(id)).toBe(uz.format.ask);
+    expect(sim.lastText(id)).toContain(uz.format.ask);
     const fmt = buttonLabels(sim.last(id));
     expect(fmt.some((l) => /^✨ Анимацияли — 8.000 ₸$/.test(l))).toBe(true);
     expect(fmt.some((l) => /^📄 Оддий — 5.000 ₸$/.test(l))).toBe(true);
@@ -101,6 +101,7 @@ describe("весь путь никоҳ на ўзбекском", () => {
     await sim.click(id, uz.music.play("Ёр-ёр"));
     expect(sim.last(id).media).toMatch(/^TGAUDIO_/); // второй раз — по file_id
     await sim.click(id, uz.music.choose);
+    await sim.click(id, uz.rsvp.no);
 
     // Сводка
     const review = sim.lastText(id);
@@ -212,6 +213,6 @@ describe("весь путь никоҳ на ўзбекском", () => {
     await sim.click(1, uz.category.nikoh);
     await sim.click(1, uz.format.info);
     expect(sim.tg.to(1).some((m) => m.text === uz.format.infoText)).toBe(true);
-    expect(sim.lastText(1)).toBe(uz.format.ask);
+    expect(sim.lastText(1)).toContain(uz.format.ask);
   });
 });

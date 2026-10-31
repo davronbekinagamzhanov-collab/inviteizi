@@ -83,7 +83,7 @@ describe("шаг «своя музыка»", () => {
     const sim = await atOwn();
     await sim.send(raw(fields));
     const user = (await sim.user(1))!;
-    expect(user.step).toBe("review");
+    expect(user.step).toBe("rsvp");
     expect(user.state.music).toMatchObject({ kind: "own", fileId, url: `https://cdn.test/music/own/${fileId}.mp3` });
     expect(sim.tg.to(1).some(m => m.text === uz.music.saved)).toBe(true);
     expect((user.state as { data: { groom?: string } }).data.groom).toBeTruthy();
@@ -184,6 +184,7 @@ describe("оплата и заказ: сбой сообщения после з�
     const sim = new Sim();
     await path(sim, 1);
     await sim.click(1, uz.music.none);
+    await sim.click(1, uz.rsvp.no);
     const log = vi.spyOn(console, "error").mockImplementation(() => {});
     try {
       const { msg, data } = sim.findButton(1, uz.review.confirm);

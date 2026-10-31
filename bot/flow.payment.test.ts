@@ -185,6 +185,7 @@ describe("подтверждение админом", () => {
     await sim.click(2, ru.event.noMore);
     await sim.click(2, ru.text.pick(1));
     await sim.click(2, ru.music.none);
+    await sim.click(2, ru.rsvp.no);
     await sim.click(2, ru.review.confirm);
     await sim.click(2, /^💳 Оплатить/);
     await sim.photo(2, "P");

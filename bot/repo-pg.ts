@@ -1,3 +1,4 @@
+import { RSVP_IP_HOUR_LIMIT, RSVP_ORDER_LIMIT, type RsvpInput, type RsvpRecord } from "@/lib/rsvp";
 import type { PanelOrder, PanelSnapshot, Partner, PartnerEarning, PartnerPayout, PanelUser } from "@/lib/owner-panel";
 import type { BotErrorEntry } from "./errors";
 /**
@@ -23,7 +24,7 @@ import type { EventKind, Occasion, Relation } from "@/lib/types";
 import { db, type Sql, type Tx } from "@/lib/db";
 import { env } from "@/lib/env";
 import { isReservedSlug } from "@/lib/slug";
-import { summarize, type AnalyticsInput, type EventKind as AnalyticsEventKind, type MetricOrder, type MetricEvent, type MetricUser, type Period } from "@/lib/analytics";
+import { summarize, withoutStaffAnalytics, type AnalyticsInput, type EventKind as AnalyticsEventKind, type MetricOrder, type MetricEvent, type MetricUser, type Period } from "@/lib/analytics";
 
 const PAID: OrderStatus[] = ["active", "archived"];
 const TZ_OFFSET_MS = 5 * 60 * 60_000; // Казахстан: UTC+5 круглый год
@@ -338,7 +339,7 @@ export class PgRepo implements Repo {
       const music = await tx<{ id: string; titleRu: string; titleUz: string }[]>`select id, title_ru as "titleRu", title_uz as "titleUz" from public.music`;
       return { orders: [...orders], users: [...users], events: [...events], since: config.started_at, music: [...music] } satisfies AnalyticsInput;
     });
-    return summarize(input, period, now, customers && owner);
+    return summarize(withoutStaffAnalytics(input, await this.staffIds()), period, now, customers && owner);
   }
 
   async listFavorites(userId: number) {
@@ -352,6 +353,37 @@ export class PgRepo implements Repo {
       await tx`insert into public.design_favorites(user_id, template_id) values(${userId},${templateId}) on conflict do nothing`;
       await tx`insert into public.analytics_events(kind,user_id,target,dedupe_key) values('design_favorited',${userId},${templateId},${templateId}) on conflict do nothing`;
     });
+  }
+
+  async staffIds() {
+    return [...new Set([...(await this.listAdminIds()), ...(env.ownerId() ? [env.ownerId() as number] : [])])];
+  }
+
+  async saveRsvp(input: RsvpInput) {
+    return this.sql.begin(async (tx) => {
+      // По очереди на заказ: лимиты нельзя обойти одновременными запросами
+      await tx`select pg_advisory_xact_lock(hashtext(${input.orderId}))`;
+      const [old] = await tx`update public.rsvp_responses set name=${input.name}, guests=${input.guests}, attending=${input.attending}, updated_at=now()
+        where order_id=${input.orderId} and visitor_key=${input.visitorKey} returning id`;
+      if (old) return "ok" as const;
+      const [n] = await tx<{ total: number; ip: number }[]>`select count(*)::int8 as total,
+        count(*) filter (where ip_hash=${input.ipHash} and created_at > now() - interval '1 hour')::int8 as ip
+        from public.rsvp_responses where order_id=${input.orderId}`;
+      if (n.total >= RSVP_ORDER_LIMIT || n.ip >= RSVP_IP_HOUR_LIMIT) return "limited" as const;
+      await tx`insert into public.rsvp_responses(order_id,visitor_key,name,guests,attending,ip_hash)
+        values(${input.orderId},${input.visitorKey},${input.name},${input.guests},${input.attending},${input.ipHash})`;
+      return "ok" as const;
+    });
+  }
+
+  async listRsvp(orderId: string) {
+    try {
+      const rows = await this.sql<RsvpRecord[]>`select name, guests, attending, updated_at as "updatedAt" from public.rsvp_responses where order_id=${orderId} order by updated_at desc`;
+      return [...rows];
+    } catch (e) {
+      if (isMissingTable(e)) return [];
+      throw e;
+    }
   }
 
   async panelSnapshot(): Promise<PanelSnapshot> {
@@ -424,12 +456,14 @@ export class PgRepo implements Repo {
   }
 
   async recordPartnerPayout(partnerId: number, expected: number, createdBy: number) {
+    const staff = this.sql.array((await this.staffIds()).map(String));
     return this.sql.begin(async (tx) => {
       // Блокировка партнёра: две одновременные выплаты идут по очереди
       const [p] = await tx`select id from public.partners where id = ${partnerId} for update`;
       if (!p || expected <= 0) return false;
       const [{ due }] = await tx<{ due: number }[]>`select
-        (select coalesce(sum(amount),0) from public.partner_earnings where partner_id = ${partnerId})::int
+        (select coalesce(sum(e.amount),0) from public.partner_earnings e join public.orders o on o.id = e.order_id
+          where e.partner_id = ${partnerId} and not (o.user_id = any(${staff}::text[]::bigint[])))::int
         - (select coalesce(sum(amount),0) from public.partner_payouts where partner_id = ${partnerId})::int as due`;
       if (due !== expected) return false;
       await tx`insert into public.partner_payouts(partner_id,amount,created_by) values(${partnerId},${expected},${createdBy})`;
@@ -697,6 +731,7 @@ export class PgRepo implements Repo {
     const week = new Date(now.getTime() - 7 * DAY);
     const month = new Date(now.getTime() - 30 * DAY);
     const paid = this.sql.array(PAID);
+    const staff = this.sql.array((await this.staffIds()).map(String));
     const [t] = await this.sql<Record<string, number>[]>`
       select
         count(*) filter (where created_at >= ${today})::int8 as o_today,
@@ -707,15 +742,16 @@ export class PgRepo implements Repo {
         coalesce(sum(amount) filter (where status = any(${paid}::text[]) and coalesce(paid_at, updated_at) >= ${week}), 0)::int8 as r_week,
         coalesce(sum(amount) filter (where status = any(${paid}::text[]) and coalesce(paid_at, updated_at) >= ${month}), 0)::int8 as r_month,
         coalesce(sum(amount) filter (where status = any(${paid}::text[])), 0)::int8 as r_total
-      from public.orders`;
+      from public.orders where not (user_id = any(${staff}::text[]::bigint[]))`;
     const statusRows = await this.sql<{ status: OrderStatus; n: number }[]>`
-      select status, count(*)::int8 as n from public.orders group by status`;
+      select status, count(*)::int8 as n from public.orders where not (user_id = any(${staff}::text[]::bigint[])) group by status`;
     const sourceRows = await this.sql<{ source: string; users: number; paid: number }[]>`
       select coalesce(u.source, '—') as source, count(*)::int8 as users, coalesce(sum(p.n), 0)::int8 as paid
       from public.users u
       left join (
         select user_id, count(*) as n from public.orders where status = any(${paid}::text[]) group by user_id
       ) p on p.user_id = u.id
+      where not (u.id = any(${staff}::text[]::bigint[]))
       group by 1
       order by 2 desc`;
     const byStatus: Stats["byStatus"] = {};

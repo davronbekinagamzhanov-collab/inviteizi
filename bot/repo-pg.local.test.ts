@@ -124,6 +124,37 @@ describe.skipIf(process.env.INVITEIZI_LOCAL_PG !== "1")("PgRepo through isolated
     expect((await repo.findPartnerForUser(770003,"oybek_uz"))?.telegramId).toBe(770003);
     expect((await repo.findPartnerForUser(770003,null))?.id).toBe(p.id);
   },60000);
+  it("stage 3: RSVP limits and staff exclusion through SQL",async()=>{
+    await sql`reset role`;
+    await sql.unsafe(await readFile("supabase/migrations/20261102120000_rsvp.sql","utf8"));
+    await sql`set role inviteizi_server`;
+    vi.stubEnv("ADMIN_IDS","771000");vi.stubEnv("OWNER_TELEGRAM_ID","771001");
+    expect(await repo.staffIds()).toEqual(expect.arrayContaining([771000,771001]));
+    const data={occasion:"nikoh" as const,groom:"Азиз",bride:"Мадина",hosts:"Оила",events:[]};
+    await repo.touchUser({id:771000});await repo.touchUser({id:771002});
+    const staff=await repo.createOrder({userId:771000,occasion:"nikoh",format:"simple",templateId:"sapfir",data,music:{kind:"none"},amount:5000,slugBase:"stage3-staff",status:"preview"});
+    const client=await repo.createOrder({userId:771002,occasion:"nikoh",format:"simple",templateId:"sapfir",data,music:{kind:"none"},amount:5000,slugBase:"stage3-client",status:"preview"});
+    const before=await repo.stats(new Date());
+    const key=(i:number)=>`guest-key-${String(i).padStart(10,"0")}`;
+    const row={orderId:client.id,visitorKey:key(0),name:"Ойбек",guests:2,attending:true,ipHash:"ip1"};
+    expect(await repo.saveRsvp(row)).toBe("ok");
+    expect(await repo.saveRsvp({...row,guests:4})).toBe("ok");
+    expect(await repo.listRsvp(client.id)).toMatchObject([{name:"Ойбек",guests:4,attending:true}]);
+    for(let i=1;i<20;i++) expect(await repo.saveRsvp({...row,visitorKey:key(i)})).toBe("ok");
+    expect(await repo.saveRsvp({...row,visitorKey:key(21)})).toBe("limited");
+    expect(await repo.saveRsvp({...row,visitorKey:key(21),ipHash:"ip2"})).toBe("ok");
+    await repo.transition(staff.id,["preview"],"active",{paidAt:new Date()});
+    await repo.transition(client.id,["preview"],"active",{paidAt:new Date()});
+    const after=await repo.stats(new Date());
+    expect(after.orders.total).toBe(before.orders.total);
+    expect(after.revenue.total-before.revenue.total).toBe(5000);
+    expect(after.bySource.flatMap(x=>x.source)).toBeTruthy();
+    const p=await repo.createPartner({code:"stage3p1",name:"П",telegramId:null,username:"stage3_p",rate:1000});
+    await sql`insert into public.partner_earnings(order_id,partner_id,amount) values(${staff.id},${p.id},1000),(${client.id},${p.id},1000)`;
+    expect(await repo.recordPartnerPayout(p.id,2000,1)).toBe(false);
+    expect(await repo.recordPartnerPayout(p.id,1000,1)).toBe(true);
+    vi.unstubAllEnvs();
+  },60000);
   repoContract(async()=>repo);
   formatFlowContract(()=>{const sim=new Sim();sim.deps.repo=repo;return{sim,repo};},750001);
   it("failed draft insert rolls back question; repeated confirmation inserts exactly one order",async()=>{

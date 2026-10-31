@@ -7,7 +7,7 @@ import { randomBytes } from "node:crypto";
 import QRCode from "qrcode";
 import type { Period } from "@/lib/analytics";
 import type { OrderRecord } from "@/lib/domain";
-import { parsePartnerSource, partnerRows, partnerSource, type PanelSnapshot, type Partner, type PartnerRow } from "@/lib/owner-panel";
+import { parsePartnerSource, partnerRows, partnerSource, withoutStaff, type PanelSnapshot, type Partner, type PartnerRow } from "@/lib/owner-panel";
 import type { InlineButton } from "../tg";
 import { recordBotError, toEntry } from "../errors";
 import { backRow, ib, inline, price, send, txFor } from "./util";
@@ -47,6 +47,9 @@ async function sendPack(c: Ctx, p: Partner) {
   const png = await QRCode.toBuffer(link, { width: 600, margin: 2 });
   await c.deps.tg.sendPhoto(c.chatId, new Uint8Array(png), { caption: c.tx.panel.partner.pack(p.name, link, price(p.rate)) });
 }
+
+/** Снимок для всех цифр панели и /hamkor: без владельца и админов */
+export const panelData = async (deps: Deps) => withoutStaff(await deps.repo.panelSnapshot(), await deps.repo.staffIds());
 
 // ── Экраны панели ──
 
@@ -208,6 +211,8 @@ async function recipientOf(deps: Deps, p: Partner) {
  * Ставка берётся на момент оплаты: смена ставки не меняет прошлые начисления.
  */
 export async function creditPartner(deps: Deps, order: Pick<OrderRecord, "id" | "userId">) {
+  // Заказ владельца или админа: ни начисления, ни сообщения партнёру
+  if ((await deps.repo.staffIds()).includes(order.userId)) return;
   const client = await deps.repo.getUser(order.userId);
   const code = parsePartnerSource(client?.source ?? null);
   if (!code) return;
@@ -241,7 +246,7 @@ export async function partnerStats(c: Ctx): Promise<boolean> {
   if (c.chatId !== c.user.id) return false;
   const partner = await c.deps.repo.findPartnerForUser(c.user.id, c.user.username);
   if (!partner) return false;
-  const row = partnerRows(await c.deps.repo.panelSnapshot(), "all", c.deps.now()).find((r) => r.partner.id === partner.id);
+  const row = partnerRows(await panelData(c.deps), "all", c.deps.now()).find((r) => r.partner.id === partner.id);
   if (!row) return false;
   await send(c, c.tx.partner.stats({
     link: await linkOf(c.deps, partner),
