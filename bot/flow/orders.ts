@@ -27,6 +27,25 @@ import {
 } from "./util";
 import { getDesign } from "@/templates/registry";
 import { rememberUpdate } from "../update";
+import { recordBotError, toEntry } from "../errors";
+
+/**
+ * Сообщение после уже записанного действия (заказ, чек, оплата): ошибка здесь не должна вызывать
+ * повтор update, потому что само действие выполнено. Одна быстрая повторная попытка, затем журнал.
+ */
+async function sendAfterCommit(c: Ctx, chatId: number, text: string, opts?: Parameters<Ctx["deps"]["tg"]["sendMessage"]>[2]) {
+  for (let left = 1; ; left--) {
+    try {
+      await c.deps.tg.sendMessage(chatId, text, opts);
+      return true;
+    } catch (e) {
+      if (left > 0) continue;
+      console.error("after commit", e instanceof Error ? e.name : "Error");
+      await recordBotError(c.deps, toEntry(e, c.u, c.step, "ack"));
+      return false;
+    }
+  }
+}
 
 // ── Создание / сохранение из сводки ──
 
@@ -92,7 +111,7 @@ export async function confirmDraft(c: Ctx): Promise<Result> {
     slugBase,
   }, c.q0, c.u.updateId === undefined ? undefined : rememberUpdate(c.user.state.handledUpdates,c.u.updateId));
   if (!o) return { ignore: true };
-  await send(c, c.tx.order.created(pageUrl(c, o.slug)), inline(orderButtons(c, o)));
+  await sendAfterCommit(c, c.chatId, c.tx.order.created(pageUrl(c, o.slug)), { markup: inline(orderButtons(c, o)) });
   // Repo already finished this draft in the same transaction. Do not overwrite a newer dialog.
   return { ignore: true };
 }
@@ -203,8 +222,15 @@ export const receipt: Step = {
       await send(c, c.tx.pay.waiting);
       return { done: true };
     }
-    await send(c, c.tx.pay.receiptGot, mainMenu(c.tx));
-    await notifyAdmins(c.deps, o);
+    // Сначала админы: при сбое ответа клиенту повтор уже не дойдёт до этого места (чек принят)
+    try {
+      await notifyAdmins(c.deps, o);
+    } catch (e) {
+      // Заказ остаётся в receipt_sent, cron напомнит админам
+      console.error("notifyAdmins", e instanceof Error ? e.name : "Error");
+      await recordBotError(c.deps, toEntry(e, c.u, c.step, "ack"));
+    }
+    await sendAfterCommit(c, c.chatId, c.tx.pay.receiptGot, { markup: mainMenu(c.tx) });
     return { done: true };
   },
 };
@@ -339,7 +365,7 @@ export async function approve(c: Ctx, n: number) {
   await c.deps.tg.editMessageReplyMarkup(c.chatId, c.u.messageId, null).catch(() => {});
 
   const { linkSent, shareSent } = await sendLinkPack(c.deps, o, true);
-  await send(c, linkSent && shareSent ? c.tx.admin.approved(n) : c.tx.admin.approvedFailed(n));
+  await sendAfterCommit(c, c.chatId, linkSent && shareSent ? c.tx.admin.approved(n) : c.tx.admin.approvedFailed(n));
 }
 
 const REASONS = ["money", "sum", "other"] as const;
@@ -361,11 +387,11 @@ export async function reject(c: Ctx, n: number, code: string) {
   const o = o0 && (await c.deps.repo.transition(o0.id, ["receipt_sent"], "rejected", { rejectReason: uz.admin.reasons[code] }));
   if (!o) return already(c);
   await c.deps.tg.editMessageReplyMarkup(c.chatId, c.u.messageId, null).catch(() => {});
-  await send(c, c.tx.admin.rejectedDone(n, c.tx.admin.reasons[code]));
-  const tx = txFor(await langOf(c.deps, o.userId));
-  await c.deps.tg.sendMessage(o.userId, tx.pay.rejected(n, tx.admin.reasons[code]), {
+  const tx = txFor(await langOf(c.deps, o.userId).catch(() => "uz" as const));
+  await sendAfterCommit(c, o.userId, tx.pay.rejected(n, tx.admin.reasons[code]), {
     markup: inline([[{ text: tx.pay.resend, data: `rcpt:${n}` }], [{ text: tx.contact, url: ownerUrl(c) }]]),
   });
+  await sendAfterCommit(c, c.chatId, c.tx.admin.rejectedDone(n, c.tx.admin.reasons[code]));
 }
 
 // ── «Менинг таклифномаларим» ──

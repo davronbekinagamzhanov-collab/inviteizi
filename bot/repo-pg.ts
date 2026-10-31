@@ -1,3 +1,4 @@
+import type { BotErrorEntry } from "./errors";
 /**
  * Repo на Postgres (Supabase) через lib/db.ts (роль inviteizi_server).
  * Поведение — как у bot/repo-memory.ts (общий набор тестов bot/repo.contract.ts).
@@ -348,6 +349,10 @@ export class PgRepo implements Repo {
     });
   }
 
+  async logBotError(e: BotErrorEntry) {
+    await this.sql`insert into public.bot_errors(step,update_kind,error_name,error_code,message,stack,outcome)
+      values(${e.step},${e.updateKind},${e.errorName},${e.errorCode},${e.message},${e.stack},${e.outcome})`;
+  }
   async recordEvent(userId: number, kind: Extract<AnalyticsEventKind, "demo_opened" | "design_selected">, target: string, key: string) {
     await this.sql`insert into public.analytics_events(kind,user_id,target,dedupe_key) values(${kind},${userId},${target},${key}) on conflict do nothing`;
   }

@@ -2,9 +2,10 @@
  * Адаптер grammY: интерфейс Tg поверх bot.api. Текст всегда без parse_mode.
  * Токен нужен только для адреса файла (getFileUrl) — этот адрес нельзя логировать.
  */
-import { GrammyError, InputFile, type Api } from "grammy";
+import { InputFile, type Api } from "grammy";
 import type { InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove } from "grammy/types";
 import type { InlineButton, Markup, SendOpts, Tg } from "./tg";
+import { isEditImpossible, isNotModified, isStaleCallback } from "./errors";
 
 function inlineKb(rows: InlineButton[][]): InlineKeyboardMarkup {
   return {
@@ -45,7 +46,7 @@ async function ignoreNotModified(p: Promise<unknown>) {
   try {
     await p;
   } catch (e) {
-    if (e instanceof GrammyError && /message is not modified/i.test(e.description)) return;
+    if (isNotModified(e)) return;
     throw e;
   }
 }
@@ -75,7 +76,12 @@ export function createTg(api: Api, token: string): Tg {
       );
     },
     async editMessageReplyMarkup(chatId, messageId, markup) {
-      await ignoreNotModified(api.editMessageReplyMarkup(chatId, messageId, markup ? { reply_markup: inlineKb(markup.inline) } : {}));
+      try {
+        await ignoreNotModified(api.editMessageReplyMarkup(chatId, messageId, markup ? { reply_markup: inlineKb(markup.inline) } : {}));
+      } catch (e) {
+        // Кнопки на удалённом или старом сообщении убирать незачем
+        if (!isEditImpossible(e)) throw e;
+      }
     },
     async sendPhoto(chatId, photo, opts = {}) {
       const file = typeof photo === "string" ? photo : new InputFile(photo, "qr.png");
@@ -94,10 +100,14 @@ export function createTg(api: Api, token: string): Tg {
       return { messageId: m.message_id, fileId: m.audio?.file_id ?? null };
     },
     async answerCallbackQuery(callbackId, opts = {}) {
-      await api.answerCallbackQuery(callbackId, {
-        ...(opts.text ? { text: opts.text } : {}),
-        ...(opts.alert ? { show_alert: true } : {}),
-      });
+      try {
+        await api.answerCallbackQuery(callbackId, {
+          ...(opts.text ? { text: opts.text } : {}),
+          ...(opts.alert ? { show_alert: true } : {}),
+        });
+      } catch (e) {
+        if (!isStaleCallback(e)) throw e;
+      }
     },
     async getFileUrl(fileId) {
       const f = await api.getFile(fileId);

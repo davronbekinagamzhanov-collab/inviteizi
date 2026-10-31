@@ -16,8 +16,11 @@ import type {
 } from "@/lib/domain";
 import type { Occasion } from "@/lib/types";
 import type { Analytics, Period, EventKind } from "@/lib/analytics";
+import type { BotErrorEntry } from "./errors";
 
 export interface Repo {
+  /** Журнал ошибок бота: entry уже очищен от личных данных */
+  logBotError(entry: BotErrorEntry): Promise<void>;
   isOwner(id: number): Promise<boolean>;
   canAnalyze(id: number): Promise<boolean>;
   analytics(actorId: number, period: Period, now: Date, customers?: boolean): Promise<Analytics>;
