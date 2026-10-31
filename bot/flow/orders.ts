@@ -28,6 +28,7 @@ import {
 import { getDesign } from "@/templates/registry";
 import { rememberUpdate } from "../update";
 import { recordBotError, toEntry } from "../errors";
+import { creditPartnerSafely } from "./partners";
 
 /**
  * Сообщение после уже записанного действия (заказ, чек, оплата): ошибка здесь не должна вызывать
@@ -364,6 +365,7 @@ export async function approve(c: Ctx, n: number) {
   if (!o) return already(c);
   await c.deps.tg.editMessageReplyMarkup(c.chatId, c.u.messageId, null).catch(() => {});
 
+  await creditPartnerSafely(c, o);
   const { linkSent, shareSent } = await sendLinkPack(c.deps, o, true);
   await sendAfterCommit(c, c.chatId, linkSent && shareSent ? c.tx.admin.approved(n) : c.tx.admin.approvedFailed(n));
 }

@@ -47,6 +47,8 @@ export const ru = {
     description:
       "💌 Онлайн-приглашения на узбекском: свадьба (никоҳ), наҳорги ош, суннат той, юбилей.\n✨ Красивый дизайн, музыка, карта и таймер — одна ссылка для всех гостей.\n⏱ Готово за 5 минут, оплата через Kaspi.\nНажмите «Start», чтобы начать.",
     commands: { start: "Начать", my: "Мои приглашения", favorites: "Избранные дизайны", help: "Помощь" },
+    /** Только у админов: scripts/telegram-setup.mjs --admin-commands */
+    adminCommands: { dashboard: "Панель управления" },
   },
 
   langName: "Русский",
@@ -273,15 +275,47 @@ export const ru = {
   guest: uz.guest,
 
   dashboard: {
-    title: "Панель InviteIZI", orders: "📦 Заказы", general: "📊 Общая статистика", designs: "🎨 Аналитика дизайнов", music: "🎵 Аналитика музыки", customers: "👥 Клиенты", revenue: "💰 Выручка", conversion: "📈 Конверсия",
-    periods: { today: "Сегодня", week: "7 дней", month: "30 дней", all: "Всё время" },
-    empty: "Пока недостаточно данных", denied: "Нет доступа к этому отчёту. Откройте панель в личном чате с ботом.",
-    tracking: "Просмотры каталога не отслеживаются. События демо, выбора и избранного собираются с",
-    cohort: "Конверсия дизайна: доля уникальных клиентов, выбравших его за период и затем купивших к моменту отчёта. Демо считается один раз за день на дизайн после взаимодействия по ссылке из бота. Этапы воронки — отдельные счётчики, не сквозные сессии.",
-    labels: { clients: "Всего клиентов", newUsers: "Новые за период", orders: "Заказы", paid: "Оплаченные", revenue: "Выручка", average: "Средний чек", unpaid: "Неоплаченные", waiting: "Чеки на проверке", rejected: "Отклонённые", buyers: "Покупатели", repeat: "Повторные", newBuyers: "Новые покупатели" },
-    demos: "Открытия демо", selections: "Выбор дизайна", favorites: "Избранное", viewed: "Чаще открывают демо", purchased: "Чаще покупают", profitable: "Выручка дизайнов", unpopular: "Меньше выбирают", formats: "Animated / Scroll / Simple", categories: "Категории", daily: "Выручка по дням (₸)", dailyNote: "За всё время график показывает последние 30 дней.",
-    none: "Без музыки", own: "Своя музыка", ownClients: "Клиентов со своей музыкой", musicShare: "Встроенная / своя (доля среди заказов с музыкой)", musicCategories: "Музыка по категориям: встроенная / своя / без музыки", lastPurchase: "Последняя покупка", favoriteCategories: "Частые категории", lifetime: "Покупки клиента за всё время; список покупателей выбранного периода.",
-    favoriteAdd: "🤍 В избранное", favoriteRemove: "❤️ Убрать из избранного", favoriteList: "❤️ Избранное", favoriteEmpty: "В избранном пока нет дизайнов. Добавьте понравившийся в каталоге.", favoriteSaved: "Сохранено. Список: /favorites", favoriteRemoved: "Убрано из избранного", unavailable: "Дизайн сохранён, но временно недоступен для нового заказа.",
+    denied: "Нет доступа к этому отчёту. Откройте его в личном чате с ботом.",
+    favoriteAdd: "🤍 В избранное", favoriteRemove: "❤️ Убрать из избранного", favoriteList: "❤️ Избранное", favoriteEmpty: "Пока нет избранных дизайнов. Добавьте их из каталога.", favoriteSaved: "Сохранено. Список: /favorites", favoriteRemoved: "Убрано из избранного", unavailable: "Дизайн сохранён, но для нового заказа временно недоступен.",
+  },
+  panel: {
+    title: "📊 Dashboard",
+    views: { general: "📈 Общее", revenue: "💰 Доход", orders: "🧾 Заказы", designs: "🎨 Дизайны", partners: "🤝 Партнёры", music: "🎵 Музыка" },
+    periods: { today: "Сегодня", week: "Неделя", month: "Месяц", all: "Всё время" },
+    labels: { clients: "Пришло клиентов", created: "Создано заказов", paid: "Оплачено", revenue: "Выручка", average: "Средний чек", waiting: "Ждут проверки чека" },
+    byFormat: "По тарифам:",
+    byOccasion: "По тадбирам:",
+    empty: "Пока нет данных",
+    showPaid: "✅ Только оплаченные",
+    showAll: "📋 Все",
+    styles: { milk: "🥛 Молочный", gold: "✨ Золотой", floral: "🌸 Цветочный", national: "🏺 Национальный", dark: "🌙 Тёмный", photo: "📷 С фото" },
+    musicList: "Из списка", musicOwn: "Своя", musicNone: "Без музыки",
+    partner: {
+      empty: "Партнёров пока нет",
+      notReady: "Раздел партнёров заработает после обновления базы.",
+      add: "➕ Новый партнёр",
+      scanned: "Сканировали", started: "Начали заказ", paid: "Оплатили", due: "К выплате", paidOut: "Выплачено",
+      undelivered: (n: number) => `⚠️ Не дошло сообщений: ${n}. Партнёр не нажимал /start в боте`,
+      rateValue: "Ставка",
+      qr: "🔗 Ссылка и QR", rate: "✏️ Ставка",
+      pay: (amount: string) => `✅ Выплачено — ${amount}`,
+      payConfirm: (name: string, amount: string) => `Подтвердить выплату ${amount} партнёру ${name}?`,
+      payYes: "✅ Да, выплачено",
+      paidDone: (name: string, amount: string) => `✅ ${name}: выплата ${amount} отмечена.`,
+      payStale: "Сумма изменилась или выплата уже отмечена. Откройте партнёра заново.",
+      askName: "Имя партнёра?",
+      askContact: "Telegram username или числовой ID?\nНапример: @username или 123456789",
+      badContact: "Не понял 🙂 Напишите @username или числовой ID.",
+      askRate: "Ставка за один оплаченный заказ? Нажмите кнопку или напишите сумму.",
+      badRate: "Напишите сумму цифрами. Например: 1000",
+      rateSaved: (amount: string) => `✅ Новая ставка: ${amount}. Действует со следующих оплат.`,
+      pack: (name: string, link: string, rate: string) => `🤝 ${name}\nСтавка: ${rate}\n${link}`,
+    },
+  },
+  partner: {
+    paidNotice: (amount: string) => `По вашему коду оплачен новый заказ ✅ +${amount}`,
+    stats: (s: { link: string; scanned: number; started: number; paid: number; earned: string; paidOut: string; due: string }) =>
+      `🤝 Ваши результаты\n\nСканировали: ${s.scanned}\nНачали заказ: ${s.started}\nОплатили: ${s.paid}\n\nВсего заработано: ${s.earned}\nВыплачено: ${s.paidOut}\nК выплате: ${s.due}\n\nВаша ссылка:\n${s.link}`,
   },
   admin: {
     card: (o: { n: number; amount: string; format: string; design: string; names: string; date: string; client: string; url: string }) =>

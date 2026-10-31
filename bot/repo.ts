@@ -17,6 +17,7 @@ import type {
 import type { Occasion } from "@/lib/types";
 import type { Analytics, Period, EventKind } from "@/lib/analytics";
 import type { BotErrorEntry } from "./errors";
+import type { PanelSnapshot, Partner } from "@/lib/owner-panel";
 
 export interface Repo {
   /** Журнал ошибок бота: entry уже очищен от личных данных */
@@ -84,4 +85,23 @@ export interface Repo {
   /** preview/awaiting_payment, заказ не менялся с before и клиенту ещё не напоминали */
   ordersAbandonedAtPayment(before: Date): Promise<OrderRecord[]>;
   stats(now: Date): Promise<Stats>;
+
+  // ── Панель владельца и партнёры (права проверяет логика бота) ──
+  panelSnapshot(): Promise<PanelSnapshot>;
+  createPartner(p: { code: string; name: string; telegramId: number | null; username: string | null; rate: number }): Promise<Partner>;
+  getPartner(id: number): Promise<Partner | null>;
+  setPartnerRate(id: number, rate: number): Promise<void>;
+  /** Партнёр этого человека: по id или по username (id тогда запоминается). Нет таблицы или партнёра — null */
+  findPartnerForUser(userId: number, username: string | null): Promise<Partner | null>;
+  findUserByUsername(username: string): Promise<UserRecord | null>;
+  /**
+   * Один раз начислить за оплаченный заказ по текущей ставке.
+   * null — уже начислено, партнёра нет или заказ сделал сам партнёр.
+   */
+  creditPartnerOrder(orderId: string, clientId: number, code: string): Promise<{ partner: Partner; amount: number } | null>;
+  markEarningDelivered(orderId: string): Promise<void>;
+  /** Выплата проходит, только если к выплате ровно expected */
+  recordPartnerPayout(partnerId: number, expected: number, createdBy: number): Promise<boolean>;
+  /** Оплаченные заказы пришедших от партнёра клиентов без начисления */
+  uncreditedPartnerOrders(): Promise<{ id: string; userId: number }[]>;
 }

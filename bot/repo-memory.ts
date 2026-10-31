@@ -1,3 +1,4 @@
+import type { PanelOrder, PanelSnapshot, Partner, PartnerEarning, PartnerPayout } from "@/lib/owner-panel";
 import type { BotErrorEntry } from "./errors";
 /**
  * Repo в памяти — для тестов бота. Поведение то же, что у bot/repo-pg.ts (см. bot/repo.contract.ts).
@@ -36,6 +37,71 @@ const TZ_OFFSET_MS = 5 * 60 * 60_000;
 const DAY = 24 * 60 * 60_000;
 
 export class MemoryRepo implements Repo {
+  partners: Partner[] = [];
+  earnings: PartnerEarning[] = [];
+  payouts: PartnerPayout[] = [];
+  /** Как до применения миграции партнёров */
+  partnersReady = true;
+  async panelSnapshot(): Promise<PanelSnapshot> {
+    const orders = [...this.orders.values()].map((o): PanelOrder => {
+      const u = this.users.get(o.userId);
+      return { id: o.id, number: o.number, userId: o.userId, username: u?.username ?? null, firstName: u?.firstName ?? null, status: o.status, occasion: o.occasion, format: o.format, templateId: o.templateId, musicKind: o.music.kind, amount: o.amount, createdAt: o.createdAt, paidAt: o.paidAt, updatedAt: o.updatedAt };
+    });
+    const users = [...this.users.values()].map((u) => ({ id: u.id, createdAt: u.createdAt, source: u.source }));
+    return { orders, users, partners: this.partners.map((p) => ({ ...p })), earnings: this.earnings.map((e) => ({ ...e })), payouts: this.payouts.map((p) => ({ ...p })), partnersReady: this.partnersReady };
+  }
+  async createPartner(p: { code: string; name: string; telegramId: number | null; username: string | null; rate: number }) {
+    const partner: Partner = { ...p, id: this.partners.length + 1, createdAt: this.now() };
+    this.partners.push(partner);
+    return { ...partner };
+  }
+  async getPartner(id: number) {
+    const p = this.partners.find((x) => x.id === id);
+    return p ? { ...p } : null;
+  }
+  async setPartnerRate(id: number, rate: number) {
+    const p = this.partners.find((x) => x.id === id);
+    if (p) p.rate = rate;
+  }
+  async findPartnerForUser(userId: number, username: string | null) {
+    if (!this.partnersReady) return null;
+    const name = username?.toLowerCase();
+    const p = this.partners.find((x) => x.telegramId === userId) ?? this.partners.find((x) => x.telegramId === null && !!name && x.username?.toLowerCase() === name);
+    if (!p) return null;
+    p.telegramId = userId;
+    return { ...p };
+  }
+  async findUserByUsername(username: string) {
+    const name = username.toLowerCase();
+    return [...this.users.values()].find((u) => u.username?.toLowerCase() === name) ?? null;
+  }
+  async creditPartnerOrder(orderId: string, clientId: number, code: string) {
+    const partner = this.partners.find((p) => p.code === code);
+    if (!partner || partner.telegramId === clientId || this.earnings.some((e) => e.orderId === orderId)) return null;
+    const client = this.users.get(clientId);
+    if (client?.username && client.username.toLowerCase() === partner.username?.toLowerCase()) return null;
+    this.earnings.push({ orderId, partnerId: partner.id, amount: partner.rate, delivered: false, createdAt: this.now() });
+    return { partner: { ...partner }, amount: partner.rate };
+  }
+  async markEarningDelivered(orderId: string) {
+    const e = this.earnings.find((x) => x.orderId === orderId);
+    if (e) e.delivered = true;
+  }
+  async recordPartnerPayout(partnerId: number, expected: number, createdBy: number) {
+    void createdBy;
+    const earned = this.earnings.filter((e) => e.partnerId === partnerId).reduce((n, e) => n + e.amount, 0);
+    const paid = this.payouts.filter((p) => p.partnerId === partnerId).reduce((n, p) => n + p.amount, 0);
+    if (expected <= 0 || earned - paid !== expected) return false;
+    this.payouts.push({ partnerId, amount: expected, createdAt: this.now() });
+    return true;
+  }
+  async uncreditedPartnerOrders() {
+    const credited = new Set(this.earnings.map((e) => e.orderId));
+    const codes = new Set(this.partners.map((p) => `p_${p.code}`));
+    return [...this.orders.values()]
+      .filter((o) => (o.status === "active" || o.status === "archived") && !credited.has(o.id) && codes.has(this.users.get(o.userId)?.source ?? ""))
+      .map((o) => ({ id: o.id, userId: o.userId }));
+  }
   botErrors: BotErrorEntry[] = [];
   async logBotError(entry: BotErrorEntry) {
     this.botErrors.push(entry);

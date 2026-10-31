@@ -15,7 +15,7 @@ export function periodStart(period: Period, now: Date): Date {
   return new Date(period === "all" ? 0 : midnight - (period === "week" ? 6 : period === "month" ? 29 : 0) * 86_400_000);
 }
 export const almatyDay = (d: Date) => new Date(+d + 18_000_000).toISOString().slice(0, 10);
-export const isPaid = (o: MetricOrder) => o.status === "active" || o.status === "archived";
+export const isPaid = (o: Pick<MetricOrder, "status">) => o.status === "active" || o.status === "archived";
 
 /** Financial truth is orders, never event counts. No addresses, receipts or invitation texts. */
 export function summarize(input: AnalyticsInput, period: Period, now: Date, owner = false) {

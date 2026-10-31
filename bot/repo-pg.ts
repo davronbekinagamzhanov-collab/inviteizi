@@ -1,3 +1,4 @@
+import type { PanelOrder, PanelSnapshot, Partner, PartnerEarning, PartnerPayout, PanelUser } from "@/lib/owner-panel";
 import type { BotErrorEntry } from "./errors";
 /**
  * Repo на Postgres (Supabase) через lib/db.ts (роль inviteizi_server).
@@ -298,6 +299,10 @@ const isUniqueSlugViolation = (e: unknown) =>
   typeof e === "object" && e !== null && (e as { code?: string }).code === "23505" &&
   String((e as { constraint_name?: string }).constraint_name ?? "").includes("slug");
 
+const PARTNER_COLUMNS = `id, code, name, telegram_id as "telegramId", username, rate, created_at as "createdAt"`;
+/** Миграция партнёров ещё не применена */
+const isMissingTable = (e: unknown) => (e as { code?: string } | null)?.code === "42P01";
+
 export class PgRepo implements Repo {
   async isOwner(id: number) { return env.ownerId() === id; }
 
@@ -347,6 +352,104 @@ export class PgRepo implements Repo {
       await tx`insert into public.design_favorites(user_id, template_id) values(${userId},${templateId}) on conflict do nothing`;
       await tx`insert into public.analytics_events(kind,user_id,target,dedupe_key) values('design_favorited',${userId},${templateId},${templateId}) on conflict do nothing`;
     });
+  }
+
+  async panelSnapshot(): Promise<PanelSnapshot> {
+    const base = await this.sql.begin("isolation level repeatable read read only", async (tx) => {
+      const orders = await tx<PanelOrder[]>`select o.id, o.number, o.user_id as "userId", u.username, u.first_name as "firstName", o.status, o.occasion, o.format,
+        o.template_id as "templateId", o.music_kind as "musicKind", o.amount, o.created_at as "createdAt", o.paid_at as "paidAt", o.updated_at as "updatedAt"
+        from public.orders o join public.users u on u.id = o.user_id`;
+      const users = await tx<PanelUser[]>`select id, created_at as "createdAt", source from public.users`;
+      return { orders: [...orders], users: [...users] };
+    });
+    try {
+      const partners = await this.sql<Partner[]>`select ${this.sql.unsafe(PARTNER_COLUMNS)} from public.partners order by id`;
+      const earnings = await this.sql<PartnerEarning[]>`select order_id as "orderId", partner_id as "partnerId", amount, delivered, created_at as "createdAt" from public.partner_earnings`;
+      const payouts = await this.sql<PartnerPayout[]>`select partner_id as "partnerId", amount, created_at as "createdAt" from public.partner_payouts`;
+      return { ...base, partners: [...partners], earnings: [...earnings], payouts: [...payouts], partnersReady: true };
+    } catch (e) {
+      if (!isMissingTable(e)) throw e;
+      return { ...base, partners: [], earnings: [], payouts: [], partnersReady: false };
+    }
+  }
+
+  async createPartner(p: { code: string; name: string; telegramId: number | null; username: string | null; rate: number }) {
+    const [r] = await this.sql<Partner[]>`insert into public.partners(code,name,telegram_id,username,rate)
+      values(${p.code},${p.name},${p.telegramId},${p.username},${p.rate}) returning ${this.sql.unsafe(PARTNER_COLUMNS)}`;
+    return r;
+  }
+
+  async getPartner(id: number) {
+    if (!Number.isSafeInteger(id)) return null;
+    const [r] = await this.sql<Partner[]>`select ${this.sql.unsafe(PARTNER_COLUMNS)} from public.partners where id = ${id}`;
+    return r ?? null;
+  }
+
+  async setPartnerRate(id: number, rate: number) {
+    await this.sql`update public.partners set rate = ${rate} where id = ${id}`;
+  }
+
+  async findPartnerForUser(userId: number, username: string | null) {
+    try {
+      const [byId] = await this.sql<Partner[]>`select ${this.sql.unsafe(PARTNER_COLUMNS)} from public.partners where telegram_id = ${userId} order by id limit 1`;
+      if (byId) return byId;
+      if (!username) return null;
+      const [bound] = await this.sql<Partner[]>`update public.partners set telegram_id = ${userId}
+        where id = (select id from public.partners where telegram_id is null and lower(username) = lower(${username}) order by id limit 1)
+        returning ${this.sql.unsafe(PARTNER_COLUMNS)}`;
+      return bound ?? null;
+    } catch (e) {
+      if (isMissingTable(e)) return null;
+      throw e;
+    }
+  }
+
+  async findUserByUsername(username: string) {
+    const [r] = await this.sql<UserRow[]>`select * from public.users where lower(username) = lower(${username}) limit 1`;
+    return r ? toUser(r) : null;
+  }
+
+  async creditPartnerOrder(orderId: string, clientId: number, code: string) {
+    const [partner] = await this.sql<Partner[]>`select ${this.sql.unsafe(PARTNER_COLUMNS)} from public.partners p where code = ${code}
+      and p.telegram_id is distinct from ${clientId}
+      and not exists (select 1 from public.users u where u.id = ${clientId} and p.username is not null and lower(u.username) = lower(p.username))`;
+    if (!partner) return null;
+    const [row] = await this.sql<{ amount: number }[]>`insert into public.partner_earnings(order_id,partner_id,amount)
+      values(${orderId},${partner.id},${partner.rate}) on conflict (order_id) do nothing returning amount`;
+    return row ? { partner, amount: row.amount } : null;
+  }
+
+  async markEarningDelivered(orderId: string) {
+    await this.sql`update public.partner_earnings set delivered = true where order_id = ${orderId}`;
+  }
+
+  async recordPartnerPayout(partnerId: number, expected: number, createdBy: number) {
+    return this.sql.begin(async (tx) => {
+      // Блокировка партнёра: две одновременные выплаты идут по очереди
+      const [p] = await tx`select id from public.partners where id = ${partnerId} for update`;
+      if (!p || expected <= 0) return false;
+      const [{ due }] = await tx<{ due: number }[]>`select
+        (select coalesce(sum(amount),0) from public.partner_earnings where partner_id = ${partnerId})::int
+        - (select coalesce(sum(amount),0) from public.partner_payouts where partner_id = ${partnerId})::int as due`;
+      if (due !== expected) return false;
+      await tx`insert into public.partner_payouts(partner_id,amount,created_by) values(${partnerId},${expected},${createdBy})`;
+      return true;
+    });
+  }
+
+  async uncreditedPartnerOrders() {
+    try {
+      const rows = await this.sql<{ id: string; userId: number }[]>`select o.id, o.user_id as "userId" from public.orders o
+        join public.users u on u.id = o.user_id
+        join public.partners p on 'p_' || p.code = u.source
+        where o.status in ('active','archived')
+          and p.telegram_id is distinct from o.user_id
+          and not exists (select 1 from public.partner_earnings e where e.order_id = o.id)`;
+      return [...rows];
+    } catch (e) {
+      if (isMissingTable(e)) return [];
+      throw e;
+    }
   }
 
   async logBotError(e: BotErrorEntry) {

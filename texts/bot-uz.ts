@@ -30,6 +30,8 @@ export const uz = {
     description:
       "💌 Ўзбекча онлайн таклифномалар: никоҳ тўйи, наҳорги ош, суннат тўйи, юбилей.\n✨ Чиройли дизайн, мусиқа, харита ва таймер — меҳмонларга битта ҳавола.\n⏱ 5 дақиқада тайёр, тўлов Kaspi орқали.\nБошлаш учун «Start» тугмасини босинг.",
     commands: { start: "Бошлаш", my: "Менинг таклифномаларим", favorites: "Севимли дизайнлар", help: "Ёрдам" },
+    /** Только у админов: scripts/telegram-setup.mjs --admin-commands */
+    adminCommands: { dashboard: "Бошқарув панели" },
   },
 
   langName: "Ўзбекча",
@@ -265,15 +267,47 @@ export const uz = {
   },
 
   dashboard: {
-    title: "InviteIZI бошқаруви", orders: "📦 Буюртмалар", general: "📊 Умумий статистика", designs: "🎨 Дизайнлар таҳлили", music: "🎵 Мусиқа таҳлили", customers: "👥 Мижозлар", revenue: "💰 Тушум", conversion: "📈 Конверсия",
-    periods: { today: "Бугун", week: "7 кун", month: "30 кун", all: "Барча вақт" },
-    empty: "Ҳозирча маълумот етарли эмас", denied: "Бу ҳисоботга рухсат йўқ. Бот билан шахсий чатда очинг.",
-    tracking: "Каталог кўришлари кузатилмайди. Намуна, танлов ва севимлилар воқеалари йиғиладиган сана:",
-    cohort: "Дизайн конверсияси: даврда танлаб, ҳисобот пайтигача сотиб олган ноёб мижозлар улуши. Намуна бот ҳаволасидан ҳаракат қилингач, ҳар дизайн учун кунига бир марта ҳисобланади. Босқичлар алоҳида ҳисоблагичлар, ягона сессиялар эмас.",
-    labels: { clients: "Жами мижозлар", newUsers: "Даврда янги", orders: "Буюртмалар", paid: "Тўланган", revenue: "Тушум", average: "Ўртача чек", unpaid: "Тўланмаган", waiting: "Чек текширилмоқда", rejected: "Рад этилган", buyers: "Харидорлар", repeat: "Такрорий", newBuyers: "Янги харидорлар" },
-    demos: "Намуна очилиши", selections: "Дизайн танлови", favorites: "Севимлилар", viewed: "Кўп очилган намуналар", purchased: "Кўп сотилган", profitable: "Дизайн тушуми", unpopular: "Кам танланган", formats: "Анимацияли / Варақланадиган / Оддий", categories: "Тоифалар", daily: "Кунлик тушум (₸)", dailyNote: "Барча вақт учун график охирги 30 кунни кўрсатади.",
-    none: "Мусиқасиз", own: "Ўз мусиқаси", ownClients: "Ўз мусиқасини танлаган мижозлар", musicShare: "Рўйхатдан / ўз мусиқаси (мусиқали буюртмалар улуши)", musicCategories: "Тоифалар: рўйхатдан / ўз мусиқаси / мусиқасиз", lastPurchase: "Охирги харид", favoriteCategories: "Кўп танланган тоифалар", lifetime: "Давр харидорлари; ҳар бирининг барча вақтдаги харидлари.",
+    denied: "Бу ҳисоботга рухсат йўқ. Бот билан шахсий чатда очинг.",
     favoriteAdd: "🤍 Севимлиларга", favoriteRemove: "❤️ Севимлидан олиш", favoriteList: "❤️ Севимлилар", favoriteEmpty: "Ҳозирча севимли дизайн йўқ. Каталогдан қўшинг.", favoriteSaved: "Сақланди. Рўйхат: /favorites", favoriteRemoved: "Севимлилардан олинди", unavailable: "Дизайн сақланган, аммо янги буюртма учун вақтинча мавжуд эмас.",
+  },
+  panel: {
+    title: "📊 Dashboard",
+    views: { general: "📈 Умумий", revenue: "💰 Даромад", orders: "🧾 Буюртмалар", designs: "🎨 Дизайнлар", partners: "🤝 Ҳамкорлар", music: "🎵 Мусиқа" },
+    periods: { today: "Бугун", week: "Ҳафта", month: "Ой", all: "Ҳаммаси" },
+    labels: { clients: "Мижозлар келди", created: "Буюртма яратилди", paid: "Тўланди", revenue: "Даромад", average: "Ўртача чек", waiting: "Чек текширувини кутмоқда" },
+    byFormat: "Тариф бўйича:",
+    byOccasion: "Тадбир бўйича:",
+    empty: "Ҳозирча маълумот йўқ",
+    showPaid: "✅ Фақат тўланганлар",
+    showAll: "📋 Ҳаммаси",
+    styles: { milk: "🥛 Сутли", gold: "✨ Олтин", floral: "🌸 Гулли", national: "🏺 Миллий", dark: "🌙 Тўқ", photo: "📷 Суратли" },
+    musicList: "Рўйхатдан", musicOwn: "Ўз қўшиғи", musicNone: "Мусиқасиз",
+    partner: {
+      empty: "Ҳозирча ҳамкор йўқ",
+      notReady: "Ҳамкорлар бўлими база янгилангач ишлайди.",
+      add: "➕ Янги ҳамкор",
+      scanned: "Сканерлади", started: "Буюртма бошлади", paid: "Тўлади", due: "Тўланиши керак", paidOut: "Тўланган",
+      undelivered: (n: number) => `⚠️ ${n} та хабар етмади: ҳамкор ботда /start босмаган`,
+      rateValue: "Ставка",
+      qr: "🔗 Ҳавола ва QR", rate: "✏️ Ставка",
+      pay: (amount: string) => `✅ Тўланди — ${amount}`,
+      payConfirm: (name: string, amount: string) => `${name} учун ${amount} тўланганини тасдиқлайсизми?`,
+      payYes: "✅ Ҳа, тўланди",
+      paidDone: (name: string, amount: string) => `✅ ${name}: ${amount} тўланди деб белгиланди.`,
+      payStale: "Сумма ўзгарган ёки аллақачон белгиланган. Ҳамкорни қайта очинг.",
+      askName: "Ҳамкорнинг исми?",
+      askContact: "Telegram username ёки рақамли ID?\nМасалан: @username ёки 123456789",
+      badContact: "Тушунмадим 🙂 @username ёки рақамли ID ёзинг.",
+      askRate: "Битта тўланган буюртма учун ставка? Тугмани босинг ёки суммани ёзинг.",
+      badRate: "Суммани рақам билан ёзинг. Масалан: 1000",
+      rateSaved: (amount: string) => `✅ Янги ставка: ${amount}. Кейинги тўловлардан бошлаб ишлайди.`,
+      pack: (name: string, link: string, rate: string) => `🤝 ${name}\nСтавка: ${rate}\n${link}`,
+    },
+  },
+  partner: {
+    paidNotice: (amount: string) => `Сизнинг кодингиз орқали янги буюртма тўланди ✅ +${amount}`,
+    stats: (s: { link: string; scanned: number; started: number; paid: number; earned: string; paidOut: string; due: string }) =>
+      `🤝 Сизнинг натижаларингиз\n\nСканерлади: ${s.scanned}\nБуюртма бошлади: ${s.started}\nТўлади: ${s.paid}\n\nЖами ишланган: ${s.earned}\nТўланган: ${s.paidOut}\nТўланиши керак: ${s.due}\n\nҲаволангиз:\n${s.link}`,
   },
   admin: {
     card: (o: { n: number; amount: string; format: string; design: string; names: string; date: string; client: string; url: string }) =>

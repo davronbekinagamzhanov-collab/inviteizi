@@ -12,6 +12,7 @@ function inlineKb(rows: InlineButton[][]): InlineKeyboardMarkup {
     inline_keyboard: rows.map((row) =>
       row.map((b): InlineKeyboardButton => {
         if ("url" in b) return { text: b.text, url: b.url };
+        if ("webApp" in b) return { text: b.text, web_app: { url: b.webApp } };
         if ("copy" in b) return { text: b.text, copy_text: { text: b.copy } };
         return { text: b.text, callback_data: b.data };
       }),
@@ -52,7 +53,12 @@ async function ignoreNotModified(p: Promise<unknown>) {
 }
 
 export function createTg(api: Api, token: string): Tg {
+  let username: string | undefined;
   return {
+    async botUsername() {
+      username ??= (await api.getMe()).username;
+      return username;
+    },
     async sendMessage(chatId, text, opts) {
       const m = await api.sendMessage(chatId, text, sendExtra(opts));
       return { messageId: m.message_id };

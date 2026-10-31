@@ -26,6 +26,22 @@ async function api(method, body = {}) {
 const me = await api("getMe");
 console.log(`Бот: @${me.username}`);
 
+// --admin-commands — только меню команд для ADMIN_IDS (webhook и профиль не меняются)
+if (process.argv.includes("--admin-commands")) {
+  const ids = (process.env.ADMIN_IDS ?? "").split(",").map((s) => Number(s.trim())).filter((n) => Number.isSafeInteger(n) && n > 0);
+  for (const chat_id of ids) {
+    for (const [lang, tx] of [["uz", uz], ["ru", ru], ["", uz]]) {
+      await api("setMyCommands", {
+        commands: Object.entries({ ...tx.profile.commands, ...tx.profile.adminCommands }).map(([command, description]) => ({ command, description })),
+        scope: { type: "chat", chat_id },
+        ...(lang ? { language_code: lang } : {}),
+      });
+    }
+  }
+  console.log(`Меню команд обновлено у админов: ${ids.length}`);
+  process.exit(0);
+}
+
 if (!process.argv.includes("--check")) {
   // max_connections: 1 — обновления одного чата приходят по очереди (порядок ответов клиента сохраняется)
   await api("setWebhook", {

@@ -111,6 +111,10 @@ export class FakeTg implements Tg {
     return `https://api.telegram.org/file/botTEST/${fileId}`;
   }
 
+  async botUsername() {
+    return "inviteizi_test_bot";
+  }
+
   // ── Для проверок ──
   to(chatId: number) {
     return this.messages.filter((m) => m.chatId === chatId);
