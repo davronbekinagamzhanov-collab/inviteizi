@@ -91,6 +91,7 @@ type OrderRow = {
   receipt_at: Date | null;
   paid_at: Date | null;
   payment_reminded_at: Date | null;
+  rsvp: boolean | null;
   admin_reminded_at: Date | null;
   expires_at: Date | null;
   events: EventJson[];
@@ -151,6 +152,7 @@ function toData(r: OrderRow): InvitationData {
   }
   put(d, "textId", r.text_id);
   put(d, "customText", r.custom_text);
+  put(d, "rsvp", r.rsvp);
   return d;
 }
 
@@ -219,6 +221,7 @@ function dataColumns(d: InvitationData): Columns {
     side_bride: d.sides?.bride ?? null,
     text_id: d.textId ?? null,
     custom_text: d.customText ?? null,
+    rsvp: d.rsvp ?? null,
   };
 }
 
@@ -374,6 +377,21 @@ export class PgRepo implements Repo {
         values(${input.orderId},${input.visitorKey},${input.name},${input.guests},${input.attending},${input.ipHash})`;
       return "ok" as const;
     });
+  }
+
+  async rsvpDigestDue(dayStart: Date) {
+    const rows = await this.sql<{ id: string; number: number; userId: number; since: Date | null }[]>`
+      select o.id, o.number, o.user_id as "userId", o.rsvp_digest_at as since from public.orders o
+      where o.status = 'active' and o.rsvp is true
+        and (o.rsvp_digest_at is null or o.rsvp_digest_at < ${dayStart})
+        and exists (select 1 from public.rsvp_responses r where r.order_id = o.id and (o.rsvp_digest_at is null or r.updated_at > o.rsvp_digest_at))`;
+    return [...rows];
+  }
+
+  async claimRsvpDigest(orderId: string, dayStart: Date, now: Date) {
+    const rows = await this.sql`update public.orders set rsvp_digest_at = ${now}
+      where id = ${orderId} and (rsvp_digest_at is null or rsvp_digest_at < ${dayStart}) returning id`;
+    return rows.length > 0;
   }
 
   async listRsvp(orderId: string) {

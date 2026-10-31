@@ -87,11 +87,16 @@ const afterMusic = (c: Ctx): StepId => (c.s.ret || c.s.orderId || data(c).rsvp !
 
 export const rsvp: Step = {
   async ask(c) {
-    await send(c, c.tx.rsvp.ask, inline([[ib(c, c.tx.rsvp.yes, "yes"), ib(c, c.tx.rsvp.no, "no")], backRow(c)]));
+    await send(c, c.tx.rsvp.ask, inline([[ib(c, c.tx.rsvp.yes, "yes"), ib(c, c.tx.rsvp.no, "no")], [ib(c, c.tx.rsvp.howButton, "how")], backRow(c)]));
   },
   async onButton(c, v) {
+    if (v === "how") {
+      await send(c, c.tx.rsvp.how);
+      return { stay: true };
+    }
     if (v !== "yes" && v !== "no") return null;
     data(c).rsvp = v === "yes";
+    if (v === "yes") await send(c, c.tx.rsvp.how);
     return { to: "review" };
   },
 };

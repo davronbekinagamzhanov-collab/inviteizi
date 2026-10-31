@@ -60,6 +60,21 @@ export class MemoryRepo implements Repo {
     this.rsvp.push({ ...input, createdAt: now, updatedAt: now });
     return "ok" as const;
   }
+  rsvpDigestAt = new Map<string, Date>();
+  async rsvpDigestDue(dayStart: Date) {
+    return [...this.orders.values()]
+      .filter((o) => {
+        const since = this.rsvpDigestAt.get(o.id);
+        return o.status === "active" && o.data.rsvp === true && (!since || since < dayStart) && this.rsvp.some((r) => r.orderId === o.id && (!since || r.updatedAt > since));
+      })
+      .map((o) => ({ id: o.id, number: o.number, userId: o.userId, since: this.rsvpDigestAt.get(o.id) ?? null }));
+  }
+  async claimRsvpDigest(orderId: string, dayStart: Date, now: Date) {
+    const since = this.rsvpDigestAt.get(orderId);
+    if (since && since >= dayStart) return false;
+    this.rsvpDigestAt.set(orderId, now);
+    return true;
+  }
   async listRsvp(orderId: string): Promise<RsvpRecord[]> {
     return this.rsvp.filter((r) => r.orderId === orderId).sort((a, b) => +b.updatedAt - +a.updatedAt).map(({ name, guests, attending, updatedAt }) => ({ name, guests, attending, updatedAt }));
   }
