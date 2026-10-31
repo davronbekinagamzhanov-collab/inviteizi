@@ -25,6 +25,7 @@ describe.skipIf(process.env.INVITEIZI_LOCAL_PG !== "1")("PgRepo through isolated
     pg=new PGlite();
     await pg.exec("create role anon; create role authenticated; create role inviteizi_server;");
     for(const name of ["20261023180530_schema.sql","20261024031409_slug_reserved_dev.sql","20261024120000_slug_history.sql","20261024150000_music_occasion.sql","20261025120000_analytics_favorites.sql","20261026120000_scroll_format.sql"]) await pg.exec(await readFile(`supabase/migrations/${name}`,"utf8"));
+    await pg.exec(await readFile("supabase/migrations/20261103120000_rsvp_flag.sql","utf8"));
     for(const d of designs) await pg.query("insert into public.templates(id,number,occasion,format,price) values($1,$2,$3,$4,$5)",[d.id,d.number,d.occasion,d.format,PRICES[d.format]]);
     await pg.exec("insert into public.music(id,title_uz,title_ru,file_url) values('yor-yor','Ёр-ёр','Ёр-ёр','https://fixture.invalid/music.mp3');");
     server=new PGLiteSocketServer({db:pg,host:"127.0.0.1",port:0,maxConnections:1});
@@ -207,4 +208,21 @@ describe.skipIf(process.env.INVITEIZI_LOCAL_PG !== "1")("PgRepo through isolated
     const result={clients:n,ms:Math.round(performance.now()-start),revenueDelta:after.revenue-before.revenue};
     loadResults.push(result);console.log(JSON.stringify(result));
   },60000);
+  it("stage 3.1: выбор «ответы гостей» сохраняется в базе, сводка одна на день",async()=>{
+    await repo.touchUser({id:771100});
+    const data={occasion:"nikoh" as const,groom:"Азиз",bride:"Мадина",hosts:"Оила",events:[],rsvp:true};
+    const o=await repo.createOrder({userId:771100,occasion:"nikoh",format:"simple",templateId:"sapfir",data,music:{kind:"none"},amount:5000,slugBase:"stage31-rsvp",status:"preview"});
+    expect((await repo.getOrder(o.id))?.data.rsvp).toBe(true);
+    await repo.updateOrder(o.id,{data:{...data,rsvp:false}});
+    expect((await repo.getOrder(o.id))?.data.rsvp).toBe(false);
+    await repo.updateOrder(o.id,{data});
+    await sql`update public.orders set status='active' where id=${o.id}`;
+    const day=new Date(Date.now()-3600000),now=new Date();
+    expect((await repo.rsvpDigestDue(day)).some(x=>x.id===o.id)).toBe(false);
+    await repo.saveRsvp({orderId:o.id,visitorKey:"guest-key-31-0000000",name:"Анвар",guests:2,attending:true,ipHash:"x"});
+    expect((await repo.rsvpDigestDue(day)).find(x=>x.id===o.id)).toMatchObject({userId:771100,since:null});
+    expect(await repo.claimRsvpDigest(o.id,day,now)).toBe(true);
+    expect(await repo.claimRsvpDigest(o.id,day,now)).toBe(false);
+    expect((await repo.rsvpDigestDue(day)).some(x=>x.id===o.id)).toBe(false);
+  });
 });

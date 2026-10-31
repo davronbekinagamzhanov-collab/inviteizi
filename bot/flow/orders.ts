@@ -341,7 +341,11 @@ async function sendLinkPack(deps: Deps, o: OrderRecord, afterPayment: boolean) {
     tg.sendMessage(client, share, { markup: inline([[{ text: tx.pay.shareButton, url: shareUrl }]]) }),
   );
   if (afterPayment) {
-    await attempt("спасибо", () => tg.sendMessage(client, tx.pay.thanks, { markup: inline([[{ text: tx.pay.newOrder, data: "new" }]]) }));
+    await attempt("спасибо", () =>
+      tg.sendMessage(client, tx.pay.thanks, {
+        markup: inline([...(o.data.rsvp ? [[{ text: tx.rsvp.answers, data: `rsvp:${o.number}` }]] : []), [{ text: tx.pay.newOrder, data: "new" }]]),
+      }),
+    );
   }
   return { linkSent, shareSent };
 }

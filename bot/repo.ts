@@ -95,6 +95,10 @@ export interface Repo {
   saveRsvp(input: RsvpInput): Promise<"ok" | "limited">;
   /** Новые ответы сверху. Таблицы ещё нет — пусто */
   listRsvp(orderId: string): Promise<RsvpRecord[]>;
+  /** Оплаченные заказы с новыми ответами, которым сегодня сводку ещё не слали */
+  rsvpDigestDue(dayStart: Date): Promise<{ id: string; number: number; userId: number; since: Date | null }[]>;
+  /** Ставит метку сводки; false — сегодня её уже забрал другой запуск */
+  claimRsvpDigest(orderId: string, dayStart: Date, now: Date): Promise<boolean>;
   createPartner(p: { code: string; name: string; telegramId: number | null; username: string | null; rate: number }): Promise<Partner>;
   getPartner(id: number): Promise<Partner | null>;
   setPartnerRate(id: number, rate: number): Promise<void>;
