@@ -2,8 +2,10 @@
 import type { Ctx, Result, Step } from "./types";
 import type { InlineButton } from "../tg";
 import { t } from "@/texts/uz-cyrl";
-import { designsFor, backRow, data, designLine, eventLabel, finalData, fmtDate, ib, inline, MAX_CUSTOM_TEXT, MAX_MUSIC_BYTES, send } from "./util";
+import { designsFor, backRow, data, designLine, editOrSend, eventLabel, finalData, fmtDate, ib, inline, MAX_CUSTOM_TEXT, MAX_MUSIC_BYTES, send } from "./util";
 import { confirmDraft } from "./orders";
+import { recordBotError, toEntry } from "../errors";
+import { MusicTooBigError } from "../own-music";
 
 /** Варианты текста показываем по 3, «🔄 Бошқа вариантлар» листает дальше по кругу */
 const PAGE = 3;
@@ -31,7 +33,7 @@ export const text: Step = {
       c.s.textPage = (c.s.textPage ?? 0) + 1;
       const s = textScreen(c);
       // то же сообщение, новые варианты — чат не засоряется
-      await c.deps.tg.editMessageText(c.chatId, c.u.messageId, s.text, { markup: s.markup });
+      await editOrSend(c, s.text, s.markup);
       return { stay: true };
     }
     const o = v.startsWith("p:") ? options(c)[Number(v.slice(2))] : undefined;
@@ -134,15 +136,17 @@ export const musicOwn: Step = {
       try {
         url = await c.deps.saveMusic(file.fileId, c.user.id);
       } catch (e) {
+        if (e instanceof MusicTooBigError) return { hint: c.tx.music.tooBigUnknown };
         console.error("saveMusic", e instanceof Error ? e.name : "Error");
+        await recordBotError(c.deps, toEntry(e, u, c.step, "ack"));
       }
     }
     // This is also required when the storage dependency is missing.
-    if (!url) {
+    if (!url || !/^https:\/\//.test(url)) {
       await send(c, c.tx.music.saveFailed);
       return { stay: true };
     }
-    c.s.music = { kind: "own", fileId: file.fileId, ...(url ? { url } : {}), ...(title ? { title } : {}) };
+    c.s.music = { kind: "own", fileId: file.fileId, url, ...(title ? { title } : {}) };
     await send(c, c.tx.music.saved);
     return { to: "review" };
   },

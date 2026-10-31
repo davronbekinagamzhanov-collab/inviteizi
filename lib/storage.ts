@@ -15,12 +15,13 @@ export function publicUrl(bucket: Bucket, path: string): string {
   return `${env.supabaseUrl()}/storage/v1/object/public/${bucket}/${encodePath(path)}`;
 }
 
-async function gate<T>(body: Record<string, unknown>): Promise<T> {
+async function gate<T>(body: Record<string, unknown>, signal?: AbortSignal): Promise<T> {
   const res = await fetch(`${env.supabaseUrl()}/functions/v1/storage-gate`, {
     method: "POST",
     headers: { "content-type": "application/json", "x-gate-secret": env.storageGateSecret() },
     body: JSON.stringify(body),
     cache: "no-store",
+    signal,
   });
   const data = (await res.json().catch(() => ({}))) as T & { error?: string; message?: string };
   if (!res.ok) throw new Error(`storage-gate ${res.status}: ${data.error ?? ""} ${data.message ?? ""}`.trim());
@@ -36,12 +37,14 @@ export async function uploadFile(
   path: string,
   bytes: Uint8Array | ArrayBuffer | Blob,
   contentType: string,
+  signal?: AbortSignal,
 ): Promise<string> {
-  const { signedUrl } = await gate<{ signedUrl: string }>({ action: "signUpload", bucket, path });
+  const { signedUrl } = await gate<{ signedUrl: string }>({ action: "signUpload", bucket, path }, signal);
   const res = await fetch(signedUrl, {
     method: "PUT",
     headers: { "content-type": contentType, "x-upsert": "true", "cache-control": "max-age=3600" },
     body: bytes as BodyInit,
+    signal,
   });
   if (!res.ok) throw new Error(`Загрузка ${bucket}/${path}: ${res.status} ${await res.text().catch(() => "")}`);
   return PUBLIC_BUCKETS.has(bucket) ? publicUrl(bucket, path) : path;

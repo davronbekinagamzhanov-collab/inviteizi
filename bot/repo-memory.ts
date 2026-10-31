@@ -1,3 +1,4 @@
+import type { BotErrorEntry } from "./errors";
 /**
  * Repo в памяти — для тестов бота. Поведение то же, что у bot/repo-pg.ts (см. bot/repo.contract.ts).
  * Записи отдаются копиями (как из базы): изменить их снаружи нельзя.
@@ -35,6 +36,10 @@ const TZ_OFFSET_MS = 5 * 60 * 60_000;
 const DAY = 24 * 60 * 60_000;
 
 export class MemoryRepo implements Repo {
+  botErrors: BotErrorEntry[] = [];
+  async logBotError(entry: BotErrorEntry) {
+    this.botErrors.push(entry);
+  }
   private favorites = new Map<number, Map<string,number>>();
   private analyticsEvents = new Map<string, MetricEvent>();
   private ownerId?: number;

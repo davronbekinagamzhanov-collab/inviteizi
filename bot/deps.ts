@@ -6,7 +6,7 @@ import { Api } from "grammy";
 import type { Deps } from "./flow/types";
 import { createTg } from "./telegram";
 import { createPgRepo } from "./repo-pg";
-import { audioFileInfo, readAudioBytes } from "./audio-type";
+import { copyOwnMusic } from "./own-music";
 import { env } from "@/lib/env";
 import { uploadFile } from "@/lib/storage";
 import { createHmac } from "node:crypto";
@@ -31,14 +31,13 @@ export function createBotDeps(): Deps {
     now: () => new Date(),
     /** Песня клиента: файл из Telegram → бакет music (адрес файла Telegram содержит токен — не логируем) */
     async saveMusic(fileId) {
-      const url = await tg.getFileUrl(fileId);
-      const res = await fetch(url,{signal:AbortSignal.timeout(20_000)});
-      if (!res.ok) throw new Error(`Не удалось скачать песню из Telegram: HTTP ${res.status}`);
-      const { ext, contentType } = audioFileInfo(url);
-      const bytes = await readAudioBytes(res);
       // Opaque and stable on retries: no user ID/file ID in the public path, no orphan per retry.
       const objectId = createHmac("sha256",token).update("inviteizi:own-music:v1\0").update(fileId).digest("hex");
-      return uploadFile("music", `own/${objectId}.${ext}`, bytes, contentType);
+      return copyOwnMusic(fileId, {
+        getFileUrl: (id) => tg.getFileUrl(id),
+        fetch,
+        upload: (ext, bytes, contentType, signal) => uploadFile("music", `own/${objectId}.${ext}`, bytes, contentType, signal),
+      });
     },
   };
   return cached;

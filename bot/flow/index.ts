@@ -17,6 +17,8 @@ import { favorites, favoriteAction } from "./favorites";
 import { activeDesigns } from "@/templates/registry";
 import { designsFor } from "./util";
 import { rememberUpdate } from "../update";
+import { classifyError, isUnreachable, recordBotError, toEntry } from "../errors";
+import { beginAttempt } from "./delivery";
 
 const idle: Step = {
   async ask(c) {
@@ -59,40 +61,53 @@ export const steps: Record<StepId, Step> = {
 const BACK_LIMIT = 60;
 const isStep = (s: string): s is StepId => s in steps;
 
-export async function handle(deps: Deps, u: BotUpdate): Promise<boolean> {
-  const isStart = u.kind === "command" && u.command === "start";
-  const user = await deps.repo.touchUser({
-    id: u.from.id,
-    username: u.from.username,
-    firstName: u.from.firstName,
-    source: isStart && u.args ? u.args.slice(0, 64) : null,
-  });
-  if (u.updateId !== undefined && rememberUpdate(user.state.handledUpdates).includes(u.updateId)) {
-    if (u.kind === "callback") await deps.tg.answerCallbackQuery(u.callbackId).catch(() => {});
-    return true;
-  }
-  const c: Ctx = {
-    deps,
-    u,
-    user,
-    lang: user.lang ?? "uz",
-    tx: txFor(user.lang),
-    chatId: u.chatId,
-    step: isStep(user.step) ? user.step : "idle",
-    s: (user.state ?? {}) as Draft,
-    answered: false,
-    q0: Number((user.state as Draft | null)?.q ?? 0),
-  };
+/**
+ * true → webhook отвечает 200, повтора не будет; false → 503, Telegram повторит этот update.
+ * Повторяем только временные сбои (сеть, 429/5xx Telegram, соединение с базой) и не больше MAX_ATTEMPTS раз.
+ * Пока повтор возможен, клиенту ничего не пишем: иначе он получит ошибку, а затем обычный ответ.
+ */
+export async function handle(baseDeps: Deps, u: BotUpdate): Promise<boolean> {
+  const attempt = beginAttempt(baseDeps, u.updateId);
+  const deps: Deps = { ...baseDeps, tg: attempt.tg };
+  let c: Ctx | undefined;
   try {
+    const isStart = u.kind === "command" && u.command === "start";
+    const user = await deps.repo.touchUser({
+      id: u.from.id,
+      username: u.from.username,
+      firstName: u.from.firstName,
+      source: isStart && u.args ? u.args.slice(0, 64) : null,
+    });
+    if (u.updateId !== undefined && rememberUpdate(user.state.handledUpdates).includes(u.updateId)) {
+      attempt.finish();
+      return true;
+    }
+    c = {
+      deps,
+      u,
+      user,
+      lang: user.lang ?? "uz",
+      tx: txFor(user.lang),
+      chatId: u.chatId,
+      step: isStep(user.step) ? user.step : "idle",
+      s: (user.state ?? {}) as Draft,
+      answered: false,
+      q0: Number((user.state as Draft | null)?.q ?? 0),
+    };
     await route(c);
+    attempt.finish();
     return true;
   } catch (e) {
-    // Никогда не молчим: клиенту — короткое «хатолик, қайта уриниб кўринг», в лог — только текст ошибки
-    console.error("bot route", u.kind, e instanceof Error ? e.name : "Error");
-    await deps.tg.sendMessage(u.chatId, c.tx.error).catch(() => {});
-    return false;
+    const retry = attempt.canRetry && classifyError(e) === "transient";
+    const entry = toEntry(e, u, c?.step ?? null, retry ? "retry" : "ack");
+    console.error("bot route", u.kind, entry.errorName, entry.errorCode ?? "", entry.outcome);
+    await recordBotError(deps, entry);
+    if (retry) return false;
+    attempt.finish();
+    if (!isUnreachable(e)) await deps.tg.sendMessage(u.chatId, (c?.tx ?? txFor(null)).error).catch(() => {});
+    return true;
   } finally {
-    if (u.kind === "callback" && !c.answered) await deps.tg.answerCallbackQuery(u.callbackId).catch(() => {});
+    if (u.kind === "callback" && !c?.answered) await deps.tg.answerCallbackQuery(u.callbackId).catch(() => {});
   }
 }
 
@@ -181,13 +196,15 @@ async function askLang(c: Ctx) {
 async function chooseLang(c: Ctx, lang: string) {
   if (lang !== "uz" && lang !== "ru") return;
   const first = !c.user.lang;
-  await c.deps.repo.setLang(c.user.id, lang);
   c.lang = lang as Lang;
   c.tx = texts[c.lang];
+  // Сначала сообщение, потом запись: при повторе после сбоя клиент всё равно получит приветствие
   if (first) {
     await send(c, c.tx.welcome(c.user.firstName), mainMenu(c.tx));
+    await c.deps.repo.setLang(c.user.id, lang);
     return;
   }
+  await c.deps.repo.setLang(c.user.id, lang);
   await send(c, c.tx.langSaved, mainMenu(c.tx));
   await reask(c);
 }
@@ -195,8 +212,9 @@ async function chooseLang(c: Ctx, lang: string) {
 async function welcome(c: Ctx) {
   c.step = "idle";
   c.s = { q: c.s.q };
-  await save(c);
+  // Запись последней: записанный update повторно не обрабатывается, и приветствие бы потерялось
   await send(c, c.tx.welcome(c.user.firstName), mainMenu(c.tx));
+  await save(c);
 }
 
 async function help(c: Ctx) {
@@ -218,8 +236,8 @@ async function menu(c: Ctx, key: MenuKey) {
     case "create":
       return enter(c, "cat");
     case "my":
-      await finish(c);
-      return myOrders(c);
+      await myOrders(c);
+      return finish(c);
     case "help":
       return help(c);
     case "lang":
@@ -282,8 +300,8 @@ async function onCommand(c: Ctx, command: string, args: string) {
     case "help":
       return help(c);
     case "my":
-      await finish(c);
-      return myOrders(c);
+      await myOrders(c);
+      return finish(c);
     case "lang":
       return askLang(c);
     case "new":

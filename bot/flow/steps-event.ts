@@ -17,6 +17,7 @@ import {
   isCompleteEvent,
   mainMenu,
   MAX_EVENTS,
+  editOrSend,
   send,
 } from "./util";
 
@@ -78,7 +79,7 @@ export const evDate: Step = {
       if (!/^\d{4}-\d{2}$/.test(month) || month < cur || month > addMonths(cur, 12)) return { stay: true };
       c.s.calMonth = month;
       const v = calendarView(c);
-      await c.deps.tg.editMessageText(c.chatId, c.u.messageId, v.text, { markup: v.markup });
+      await editOrSend(c, v.text, v.markup);
       return { stay: true };
     }
     if (value.startsWith("d:")) {
@@ -252,7 +253,7 @@ export const evPlaces:Step={
   async onButton(c,v){
     if(v==="next"||v==="previous"){
       c.s.venuePage=((c.s.venuePage??0)+1)%2;const page=placesView(c);
-      await c.deps.tg.editMessageText(c.chatId,c.u.messageId,page.text,{markup:page.markup});return {stay:true};
+      await editOrSend(c,page.text,page.markup);return {stay:true};
     }
     const place=VENUES.find(p=>v==="venue:"+p.id);if(!place)return null;
     Object.assign(curEvent(c),{venueName:place.name,address:place.address,mapUrl:place.mapUrl});delete curEvent(c).location;

@@ -8,6 +8,7 @@ import { t } from "@/texts/uz-cyrl";
 import { uz, type BotTexts } from "@/texts/bot-uz";
 import { ru } from "@/texts/bot-ru";
 import { demoToken } from "@/lib/demo-tracking";
+import { isEditImpossible } from "../errors";
 
 export const texts: Record<Lang, BotTexts> = { uz, ru };
 export const txFor = (lang: Lang | null | undefined): BotTexts => texts[lang ?? "uz"];
@@ -34,6 +35,16 @@ export function mainMenu(tx: BotTexts): Markup {
 
 export async function send(c: Ctx, text: string, markup?: Markup) {
   return c.deps.tg.sendMessage(c.chatId, text, markup ? { markup } : {});
+}
+
+/** Обновить экран кнопки; если старое сообщение уже нельзя править — показать новым */
+export async function editOrSend(c: Ctx, text: string, markup: { inline: InlineButton[][] }) {
+  try {
+    await c.deps.tg.editMessageText(c.chatId, c.u.messageId, text, { markup });
+  } catch (e) {
+    if (!isEditImpossible(e)) throw e;
+    await send(c, text, markup);
+  }
 }
 
 // ── Форматирование ──
