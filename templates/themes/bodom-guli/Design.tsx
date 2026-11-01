@@ -1,10 +1,11 @@
 "use client";
+import localFont from "next/font/local";
 
 import type { TemplateProps } from "../types";
 import { designVars } from "../types";
 import { useEffect,useRef } from "react";
 import { motion,useReducedMotion } from "motion/react";
-import { EB_Garamond,PT_Serif } from "next/font/google";
+
 import { useInvitation } from "../../blocks/useInvitation";
 import { InvitationShell } from "../../blocks/InvitationShell";
 import { Words,useFitWords } from "../../blocks/FitWords";
@@ -14,8 +15,8 @@ import { Countdown } from "../../blocks/Countdown";
 import { MapButton } from "../../blocks/MapButton";
 import { designTexts } from "@/texts/uz-cyrl";
 
-const display=EB_Garamond({variable:"--bg-display",subsets:["cyrillic","cyrillic-ext"],weight:["400","500"],style:["normal","italic"]});
-const body=PT_Serif({variable:"--bg-body",subsets:["cyrillic","cyrillic-ext"],weight:["400"]});
+const display=localFont({src:[{path:"../../../assets/fonts/google/ebgaramond/EBGaramond[wght].woff2",weight:"400.0 800.0",style:"normal"},{path:"../../../assets/fonts/google/ebgaramond/EBGaramond-Italic[wght].woff2",weight:"400.0 800.0",style:"italic"}],display:"swap",variable:"--bg-display"});
+const body=localFont({src:[{path:"../../../assets/fonts/google/ptserif/PT_Serif-Web-Regular.woff2",weight:"400",style:"normal"}],display:"swap",variable:"--bg-body"});
 const vars=designVars({primary:"#698b9e",primaryDark:"#48677b",gold:"#bca16f",goldLight:"#e6d7b4",paper:"#fbf8f1",ink:"#485b62",muted:"#87918e",accent:"#c6b7ba"},{display:"var(--bg-display)",accent:"var(--bg-display)",body:"var(--bg-body)"});
 const t=designTexts("bodom-guli");
 

@@ -10,6 +10,20 @@ import type { Occasion } from "@/lib/types";
 export type TrackTitle = { uz: string; ru: string; artist?: boolean; generated?: boolean; demo?: Occasion };
 
 export const musicTitles: Record<string, TrackTitle> = {
+  // Original, permanently supported recordings; not temporary placeholder melodies.
+  "inviteizi-sunnat-qutlug-qadam": { uz: "Қутлуғ қадам", ru: "Добрый шаг" },
+  "inviteizi-sunnat-oilaviy-shodlik": { uz: "Оилавий шодлик", ru: "Семейная радость" },
+  "inviteizi-sunnat-duolar-sadosi": { uz: "Дуолар садоси", ru: "Отзвук добрых молитв" },
+  "inviteizi-sunnat-navnihollar": { uz: "Навниҳоллар", ru: "Юные побеги" },
+  "inviteizi-sunnat-bayram-nafasi": { uz: "Байрам нафаси", ru: "Дыхание праздника" },
+  "inviteizi-sunnat-mehr-rishtasi": { uz: "Меҳр риштаси", ru: "Нить доброты" },
+  "inviteizi-yubiley-umr-nuri": { uz: "Умр нури", ru: "Свет прожитых лет" },
+  "inviteizi-yubiley-ehtirom": { uz: "Эҳтиром", ru: "Почтение" },
+  "inviteizi-yubiley-xotira-bogi": { uz: "Хотира боғи", ru: "Сад воспоминаний" },
+  "inviteizi-yubiley-diydor": { uz: "Дийдор", ru: "Радость встречи" },
+  "inviteizi-yubiley-sokin-oqshom": { uz: "Сокин оқшом", ru: "Тихий вечер" },
+  "inviteizi-yubiley-minnatdorlik": { uz: "Миннатдорлик", ru: "Благодарность" },
+
   // ── Никоҳ ──
   "atlas-ozbekiston": { uz: "Атлас — миллий куй", ru: "Атлас — узбекская мелодия", demo: "nikoh" },
   "debussy-clair-de-lune": { uz: "Дебюсси — «Ой нури»", ru: "Дебюсси — «Лунный свет»" },

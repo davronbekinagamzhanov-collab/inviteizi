@@ -323,6 +323,12 @@ export const t = {
 
   /** Названия дизайнов каталога */
   designs: {
+    "sunnat-muqova": "Суннат муқоваси",
+    "sunnat-nasab": "Оила шажараси",
+    "sahar-ipagi": "Саҳар ипаги",
+    "sahar-maktubi": "Саҳар мактуби",
+    "umr-sahifalari": "Умр саҳифалари",
+    "ehtirom-kartasi": "Эҳтиром варағи",
     "oltin-monogramma": "Олтин монограмма",
     sapfir: "Сапфир",
     "oq-ot": "Оқ от",

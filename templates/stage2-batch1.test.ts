@@ -9,7 +9,7 @@ vi.mock("next/font/local",()=>({default:()=>({variable:"test-font"})}));
 const cases=[['zarhal-lavha','yubiley','animated'],['adras-nishon','sunnat','simple'],['mis-kafgir','nahorgi','simple'],['rayhon-sahari','nahorgi','scroll'],['visol-rishta','nikoh','animated'],['uzum-hovli','nikoh','scroll'],['sopol-navo','nikoh','scroll'],['girih-nur','nikoh','animated'],['siyoh-duo','nikoh','animated'],['kabutar-salom','nikoh','animated'],['shirin-tilak','nikoh','scroll'],['minor-satr','nikoh','scroll'],['kumush-taroq','nikoh','scroll'],['shabnam-visol','nikoh','animated'],['visol-soati','nikoh','animated'],['dutor-navosi','nikoh','scroll'],['tut-qogozi','nikoh','scroll'],['qosh-uzuk','nikoh','animated'],['yelpigich-ziynat','nikoh','animated'],['saodat-kaliti','nikoh','animated']] as const;
 describe("stage 2 real invitation components",()=>{
   for(const [id,occasion,format] of cases)for(const long of [false,true])for(const mode of ["demo","full"] as const)it(`${id} ${long?'long':'normal'} ${mode}: all supplied fields and venue URLs`,async()=>{
-    const d=getDesign(id)!;expect(d).toMatchObject({occasion,format,withPhoto:false});
+    const d=getDesign(id)!;expect(d).toMatchObject({occasion,format,withPhoto:["kabutar-salom","dutor-navosi","yelpigich-ziynat"].includes(id)});
     const {default:Design}=await d.load(),source=structuredClone(long?longSample(d):d.sample);
     // The owner's actual catalog shape, with no inferred coordinates; maps must preserve it exactly.
     for(const [i,e] of source.events.entries()){const p=VENUES[i];Object.assign(e,{venueName:p.name,address:p.address,mapUrl:p.mapUrl});delete e.location;}

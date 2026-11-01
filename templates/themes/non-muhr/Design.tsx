@@ -1,10 +1,11 @@
 "use client";
+import localFont from "next/font/local";
 
 import type { TemplateProps } from "../types";
 import { designVars } from "../types";
 import { useEffect,useRef } from "react";
 import { motion,useReducedMotion } from "motion/react";
-import { Vollkorn,PT_Serif } from "next/font/google";
+
 import { useInvitation } from "../../blocks/useInvitation";
 import { InvitationShell } from "../../blocks/InvitationShell";
 import { Words,useFitWords } from "../../blocks/FitWords";
@@ -14,8 +15,8 @@ import { Countdown } from "../../blocks/Countdown";
 import { MapButton } from "../../blocks/MapButton";
 import { designTexts } from "@/texts/uz-cyrl";
 
-const display=Vollkorn({variable:"--nm-display",subsets:["cyrillic","cyrillic-ext"],weight:["400","500"],style:["normal","italic"]});
-const body=PT_Serif({variable:"--nm-body",subsets:["cyrillic","cyrillic-ext"],weight:["400"]});
+const display=localFont({src:[{path:"../../../assets/fonts/google/vollkorn/Vollkorn[wght].woff2",weight:"400.0 900.0",style:"normal"},{path:"../../../assets/fonts/google/vollkorn/Vollkorn-Italic[wght].woff2",weight:"400.0 900.0",style:"italic"}],display:"swap",variable:"--nm-display"});
+const body=localFont({src:[{path:"../../../assets/fonts/google/ptserif/PT_Serif-Web-Regular.woff2",weight:"400",style:"normal"}],display:"swap",variable:"--nm-body"});
 const vars=designVars({primary:"#94683e",primaryDark:"#65492f",gold:"#b68b51",goldLight:"#e9d4a8",paper:"#fcf5e6",ink:"#564632",muted:"#8d795f",accent:"#b37f54"},{display:"var(--nm-display)",accent:"var(--nm-display)",body:"var(--nm-body)"});
 const t=designTexts("non-muhr");
 

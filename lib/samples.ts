@@ -156,6 +156,12 @@ type DemoOverride = Pick<InvitationData, "groom" | "bride" | "person" | "hosts" 
 };
 
 const demo: Record<string, DemoOverride> = {
+  "sunnat-muqova": {person:"Муҳаммадюсуф",hosts:"Абдуллаевлар оиласи",relation:"ogil",date:"2027-05-01"},
+  "sunnat-nasab": {person:"Абдураҳмон",hosts:"Ҳамидовлар оиласи",relation:"nabira",date:"2027-05-08"},
+  "sahar-ipagi": {person:"Давронбек",hosts:"Инағамжоновлар оиласи",relation:"ogil",date:"2027-05-15"},
+  "sahar-maktubi": {person:"Отабек",hosts:"Қодировлар оиласи",relation:"farzand",date:"2027-05-22"},
+  "umr-sahifalari": {person:"Муҳтарам Гулчеҳра ая",hosts:"Фарзандлари ва набиралари",age:65,relation:"ona",date:"2027-05-29"},
+  "ehtirom-kartasi": {person:"Абдураҳмон ота",hosts:"Фарзандлари ва набиралари",age:70,relation:"ota",date:"2027-06-05"},
   "dutor-navosi": {groom:"Суҳроб",bride:"Шаҳло",hosts:"Аҳмедовлар оиласи",sides:{groom:"Аҳмедовлар оиласи",bride:"Раҳматовлар оиласи"},date:"2027-10-02"},
   "tut-qogozi": {groom:"Шуҳрат",bride:"Мафтуна",hosts:"Ҳамдамовлар оиласи",sides:{groom:"Ҳамдамовлар оиласи",bride:"Муродовлар оиласи"},date:"2027-10-09"},
   "qosh-uzuk": {groom:"Алишер",bride:"Латофат",hosts:"Абдураҳмоновлар оиласи",sides:{groom:"Абдураҳмоновлар оиласи",bride:"Саидовлар оиласи"},date:"2027-10-16"},

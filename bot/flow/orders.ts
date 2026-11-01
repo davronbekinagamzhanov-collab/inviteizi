@@ -1,3 +1,4 @@
+import { CURRENT_DESIGN_VERSION } from "@/templates/design-version";
 import { rsvpTotals } from "@/lib/rsvp";
 /** Заказ: создание/сохранение, оплата Kaspi, чек, решение админа, «мои приглашения», смена ссылки */
 import QRCode from "qrcode";
@@ -78,8 +79,11 @@ export async function confirmDraft(c: Ctx): Promise<Result> {
       s.format=old.format;s.templateId=old.templateId;
       return {hint:c.tx.order.formatLocked};
     }
+    const preservedData = { ...data };
+    delete preservedData.designVersion;
+    if (old.data.designVersion) preservedData.designVersion = old.data.designVersion;
     const o = await repo.transition(old.id, PAYABLE_STATUSES, old.status, {
-      data,
+      data: preservedData,
       music,
       templateId: s.templateId,
       // A saved order keeps its agreed amount; catalog changes must not reprice it.
@@ -106,7 +110,7 @@ export async function confirmDraft(c: Ctx): Promise<Result> {
     occasion: data.occasion,
     format: s.format,
     templateId: s.templateId,
-    data,
+    data: { ...data, designVersion: CURRENT_DESIGN_VERSION },
     music,
     amount: PRICES[s.format],
     status: "preview",

@@ -1,18 +1,20 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { checkPagesAllowed } from "@/lib/check-pages";
-import { existingArt, getDesign } from "@/templates/registry";
+import { existingArt, getDesign, longSample } from "@/templates/registry";
 
-type Props = { params: Promise<{ template: string }>; searchParams: Promise<{ mode?: string }> };
+import { loadOrderDesign } from "@/templates/order-design";
+
+type Props = { params: Promise<{ template: string }>; searchParams: Promise<{ mode?: string; revision?: string; long?: string }> };
 
 async function Invitation({ params, searchParams }: Props) {
   if (!checkPagesAllowed()) notFound();
   const { template } = await params;
-  const { mode } = await searchParams;
+  const { mode, revision, long } = await searchParams;
   const design = getDesign(template);
   if (!design) notFound();
-  const { default: Design } = await design.load();
-  return <Design data={{ ...design.sample, noMusic: false, rsvp: true, rsvpSlug: "dev-preview" }} mode={mode === "demo" ? "demo" : "full"} art={existingArt(design)} />;
+  const { default: Design } = revision === "legacy" ? await loadOrderDesign(design) : await design.load();
+  return <Design data={{ ...(long ? longSample(design) : design.sample), noMusic: revision === "legacy", rsvp: revision === "legacy" ? false : true, rsvpSlug: revision === "legacy" ? undefined : "dev-preview" }} mode={mode === "demo" ? "demo" : "full"} art={existingArt(design)} />;
 }
 
 /**

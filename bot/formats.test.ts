@@ -17,7 +17,7 @@ describe("three invitation formats",()=>{
     await(lang==="uz"?startUz:startRu)(s,1);await s.click(1,tx.category.nikoh);
     expect(buttonLabels(s.last(1))).toEqual(expect.arrayContaining(FORMATS.map(f=>tx.format[f](`${PRICES[f].toLocaleString("ru-RU").replace(/\u00a0/g," ")} ₸`))));
     await s.click(1,new RegExp(tx.format.names.scroll));
-    expect(s.last(1).media).toContain("shohona-baxmal.jpg");
+    expect(s.last(1).media).toContain("dutor-navosi.jpg");
     expect(s.lastText(1)).toContain("6 000 ₸");
   });
   it.each(FORMATS)("saved orders reject a forged %s format change without repricing",async format=>{
@@ -56,7 +56,7 @@ describe("three invitation formats",()=>{
     await s.repo.saveStep(5,"catalog",{q:50,occasion:"nikoh",format:"simple",catIdx:4});
     await s.callback(5,"a:50:buy",1);
     expect((await s.user(5))?.step).toBe("catalog");
-    expect(s.last(5).media).toContain("sapfir.jpg");
+    expect(s.last(5).media).toContain("ipak-romol.jpg");
     expect(await s.repo.listOrdersByUser(5)).toEqual([]);
     await s.click(5,uz.catalog.buy);expect((await s.user(5))?.step).toBe("groom");
   });

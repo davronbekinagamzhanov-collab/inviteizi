@@ -1,0 +1,51 @@
+{
+  "sourceMain": "fed56f843273589acaa9d41c47e2c3d7cc5720a6",
+  "branch": "feature/wedding-premium-redesign",
+  "tests": {
+    "passed": 804,
+    "failed": 0,
+    "skipped": 30,
+    "skipScope": "Real Supabase tests only"
+  },
+  "build": "passed",
+  "typescript": "passed",
+  "eslint": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "mobileMatrix": {
+    "cases": 256,
+    "passed": 256
+  },
+  "devCompatibility": {
+    "cases": 92,
+    "passed": 92
+  },
+  "productionSmoke": {
+    "cases": 82,
+    "passed": 82
+  },
+  "originalMusic": {
+    "tracks": 12,
+    "passed": 12
+  },
+  "layoutFonts": {
+    "cases": 16,
+    "passed": 16,
+    "maxCls": 0.015389140949185857
+  },
+  "activeDesigns": 56,
+  "newDesigns": 6,
+  "redesignedWeddings": 10,
+  "productionDatabaseModified": false,
+  "merged": false,
+  "productionDeployed": false,
+  "githubApi": "403 Forbidden",
+  "prChecksPreview": "unconfirmed",
+  "releasePrerequisites": [
+    "owner visual review",
+    "owner-reviewed additive design_version migration before app deployment",
+    "owner-reviewed six-template insert before app deployment",
+    "twelve music rows only after published MP3 URLs are verified"
+  ]
+}

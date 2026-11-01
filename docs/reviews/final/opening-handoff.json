@@ -1,0 +1,68 @@
+{
+  "description": "First / intermediate / open. Paper belongs to the fading surface; the transparent button cannot leave an opaque blank frame during handoff.",
+  "results": [
+    {
+      "id": "kabutar-salom",
+      "buttonBackground": "rgba(0, 0, 0, 0)",
+      "buttonImage": "none",
+      "surfaceOpacity": 0.424739,
+      "surfaceBackground": "rgb(244, 238, 226)",
+      "surfaceImage": "none",
+      "passed": true
+    },
+    {
+      "id": "yelpigich-ziynat",
+      "buttonBackground": "rgba(0, 0, 0, 0)",
+      "buttonImage": "none",
+      "surfaceOpacity": 0.423826,
+      "surfaceBackground": "rgb(244, 238, 226)",
+      "surfaceImage": "none",
+      "passed": true
+    },
+    {
+      "id": "samarqand-kitob",
+      "buttonBackground": "rgba(0, 0, 0, 0)",
+      "buttonImage": "none",
+      "surfaceOpacity": 0.424083,
+      "surfaceBackground": "rgb(244, 238, 226)",
+      "surfaceImage": "none",
+      "passed": true
+    },
+    {
+      "id": "qosh-uzuk",
+      "buttonBackground": "rgba(0, 0, 0, 0)",
+      "buttonImage": "none",
+      "surfaceOpacity": 0.705103,
+      "surfaceBackground": "rgb(244, 238, 226)",
+      "surfaceImage": "none",
+      "passed": true
+    },
+    {
+      "id": "saodat-kaliti",
+      "buttonBackground": "rgba(0, 0, 0, 0)",
+      "buttonImage": "none",
+      "surfaceOpacity": 0.424318,
+      "surfaceBackground": "rgba(0, 0, 0, 0)",
+      "surfaceImage": "radial-gradient(at 50% 30%, rgb(251, 246, 234), rgb(232, 222, 204))",
+      "passed": true
+    },
+    {
+      "id": "sunnat-muqova",
+      "buttonBackground": "rgba(0, 0, 0, 0)",
+      "buttonImage": "none",
+      "surfaceOpacity": 0.294331,
+      "surfaceBackground": "rgb(244, 237, 223)",
+      "surfaceImage": "none",
+      "passed": true
+    },
+    {
+      "id": "sahar-ipagi",
+      "buttonBackground": "rgba(0, 0, 0, 0)",
+      "buttonImage": "none",
+      "surfaceOpacity": 0.425071,
+      "surfaceBackground": "rgb(244, 237, 223)",
+      "surfaceImage": "none",
+      "passed": true
+    }
+  ]
+}

@@ -1,15 +1,10 @@
-import { Cormorant_Garamond } from "next/font/google";
+
 import localFont from "next/font/local";
 import { designVars } from "../types";
 
 // Здесь Cormorant используется курсивом: цифра и имя — герои, в отличие от прямой монограммы №1.
 // Прямое начертание тоже подключаем — с одним курсивом turbopack не собирает шрифт
-const display = Cormorant_Garamond({
-  variable: "--pg-display",
-  weight: ["500", "600", "700"],
-  style: ["normal", "italic"],
-  subsets: ["cyrillic", "cyrillic-ext"],
-});
+const display = localFont({src:[{path:"../../../assets/fonts/google/cormorantgaramond/CormorantGaramond[wght].woff2",weight:"300.0 700.0",style:"normal"},{path:"../../../assets/fonts/google/cormorantgaramond/CormorantGaramond-Italic[wght].woff2",weight:"300.0 700.0",style:"italic"}],display:"swap",variable:"--pg-display"});
 
 const body = localFont({
   variable: "--pg-body",

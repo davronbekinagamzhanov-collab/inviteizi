@@ -347,7 +347,12 @@ export class MemoryRepo implements Repo {
       if (await this.isSlugTaken(patch.slug, id)) throw new Error(`Адрес занят: ${patch.slug}`);
       this.slugHistory.set(patch.slug, id);
     }
-    Object.assign(o, clone(patch), { updatedAt: this.now() });
+    const safe = clone(patch);
+    if (safe.data) {
+      delete safe.data.designVersion;
+      if (o.data.designVersion) safe.data.designVersion = o.data.designVersion;
+    }
+    Object.assign(o, safe, { updatedAt: this.now() });
     return clone(o);
   }
 

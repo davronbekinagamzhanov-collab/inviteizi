@@ -1,0 +1,60 @@
+
+> inviteizi@0.1.0 build
+> next build
+
+▲ Next.js 16.4.2 (Turbopack)
+✓ Running next.config.ts took 51ms
+- Cache Components enabled
+- Partial Prefetching enabled
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 11.6s
+  Running TypeScript ...
+  Finished TypeScript in 31.3s ...
+  Collecting page data using 4 workers ...
+  Generating static pages using 4 workers (0/197) ...
+  Generating static pages using 4 workers (49/197)
+  Generating static pages using 4 workers (98/197)
+  Generating static pages using 4 workers (147/197)
+✓ Generating static pages using 4 workers (197/197) in 10.7s
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├   /[slug]
+│ └ ◐ /[slug]
+├ ƒ /[slug]/opengraph-image
+├ ƒ /api/bot
+├ ƒ /api/cron
+├ ƒ /api/demo-event
+├ ƒ /api/rsvp
+├ ○ /catalog
+├   /demo/[template]
+│ ├ ◐ /demo/[template]
+│ ├ ○ /demo/oltin-monogramma
+│ ├ ○ /demo/sapfir
+│ └ ◐ [+55 more paths]
+├   /demo/[template]/legacy
+│ ├ ◐ /demo/[template]/legacy
+│ ├ ○ /demo/kabutar-salom/legacy
+│ ├ ○ /demo/yelpigich-ziynat/legacy
+│ └ ◐ [+8 more paths]
+├   /demo/[template]/long
+│ ├ ◐ /demo/[template]/long
+│ ├ ○ /demo/oltin-monogramma/long
+│ ├ ○ /demo/sapfir/long
+│ └ ◐ [+55 more paths]
+├   /demo/[template]/namuna
+│ ├ ◐ /demo/[template]/namuna
+│ ├ ○ /demo/oltin-monogramma/namuna
+│ ├ ○ /demo/sapfir/namuna
+│ └ ◐ [+55 more paths]
+├   /dev/invitation/[template]
+│ └ ◐ /dev/invitation/[template]
+└ ○ /dev/music
+
+
+○  (Static)             prerendered as static content
+◐  (Partial Prerender)  prerendered as static HTML with dynamic server-streamed content
+ƒ  (Dynamic)            server-rendered on demand

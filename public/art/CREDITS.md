@@ -19,3 +19,15 @@
 - `gulbog-sahifa.webp` — Vladislav Litvinov; [Rose Garden (50131461538).jpg](https://commons.wikimedia.org/wiki/File:Rose_Garden_(50131461538).jpg); CC0 1.0, http://creativecommons.org/publicdomain/zero/1.0/deed.en. Проверено 27.10.2026. Изменения: уменьшение до 1080 px, мягкое размытие, WebP.
 
 - `lola-ehtirom.webp` — Mustang Joe; [Tulip (32689468476).jpg](https://commons.wikimedia.org/wiki/File:Tulip_(32689468476).jpg); CC0 1.0, http://creativecommons.org/publicdomain/zero/1.0/deed.en. Проверено 27.10.2026. Изменения: уменьшение до 1080 px, мягкое размытие, WebP.
+
+
+## Premium final release — reused CC0 photographs
+
+No new external photographs were downloaded. The originals, creators and CC0 1.0 sources above also cover these new layouts and their derived catalog/OG crops:
+
+- `marvarid-satr` — `bodom-guli.webp` (Dulcineia Dias).
+- `dutor-navosi` — `gulbog-sahifa.webp` (Vladislav Litvinov).
+- `umr-sahifalari` — `lola-ehtirom.webp` (Mustang Joe).
+- `kabutar-salom`, `yelpigich-ziynat`, `samarqand-kitob` — the stage-1 mappings documented in `docs/reviews/wedding-premium-stage1.md`.
+
+`public/materials/paper-fibers.svg` is original project-authored decorative linework, not a photograph or third-party texture.

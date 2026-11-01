@@ -3,6 +3,7 @@
  * строки — таблица music (scripts/music-sync.mjs). Названия — texts/music-titles.ts.
  */
 import type { Occasion } from "./types";
+import originals from "@/music/originals/manifest.json";
 import { musicTitles } from "@/texts/music-titles";
 import { slugify } from "./slug";
 
@@ -30,6 +31,8 @@ const SUPABASE_URL = "https://hjakyirmyauqhurkqhsn.supabase.co";
  * Публичный адрес в хранилище — файл загружает scripts/music-sync.mjs.
  */
 export function demoMusicUrl(occasion: Occasion): string | undefined {
+  const original = originals.find(track => track.occasion === occasion);
+  if (original) return `/audio/originals/${original.id}.mp3`;
   const name = Object.keys(musicTitles).find((n) => musicTitles[n].demo === occasion);
   return name ? `${SUPABASE_URL}/storage/v1/object/public/music/${trackPath(occasion, name)}` : undefined;
 }

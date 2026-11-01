@@ -6,7 +6,7 @@ import {activeDesigns,designs,getDesign,longSample} from "./registry";
 import {t} from "@/texts/uz-cyrl";
 
 const batch=[
-  ["marvarid-satr","nikoh","simple",82,false],
+  ["marvarid-satr","nikoh","simple",82,true],
   ["gulbog-sahifa","nikoh","scroll",83,true],
   ["suzani-yol","nikoh","scroll",84,false],
   ["bugdoy-boshoq","nahorgi","simple",85,false],

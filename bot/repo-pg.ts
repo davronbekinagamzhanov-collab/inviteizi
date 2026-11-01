@@ -65,6 +65,7 @@ type OrderRow = {
   occasion: OrderRecord["occasion"];
   format: OrderRecord["format"];
   template_id: string;
+  design_version: InvitationData["designVersion"] | null;
   relation: Relation | null;
   groom: string | null;
   bride: string | null;
@@ -138,6 +139,7 @@ function put<T extends object, K extends keyof T>(obj: T, key: K, v: T[K] | null
 
 function toData(r: OrderRow): InvitationData {
   const d: InvitationData = { occasion: r.occasion, hosts: r.hosts, events: (r.events ?? []).map(toEvent) };
+  put(d, "designVersion", r.design_version);
   put(d, "groom", r.groom);
   put(d, "bride", r.bride);
   put(d, "person", r.person);
@@ -210,6 +212,7 @@ type Columns = Record<string, string | number | boolean | Date | null>;
 function dataColumns(d: InvitationData): Columns {
   return {
     occasion: d.occasion,
+    design_version: d.designVersion ?? null,
     groom: d.groom ?? null,
     bride: d.bride ?? null,
     person: d.person ?? null,
@@ -241,7 +244,12 @@ function patchColumns(p: OrderPatch): Columns {
   if (p.status !== undefined) c.status = p.status;
   if (p.templateId !== undefined) c.template_id = p.templateId;
   if (p.format !== undefined) c.format = p.format;
-  if (p.data !== undefined) Object.assign(c, dataColumns(p.data));
+  if (p.data !== undefined) {
+    const fields = dataColumns(p.data);
+    // A normal edit cannot upgrade, erase or forge the pinned creation revision.
+    delete fields.design_version;
+    Object.assign(c, fields);
+  }
   if (p.music !== undefined) Object.assign(c, musicColumns(p.music));
   if (p.slug !== undefined) c.slug = p.slug;
   if (p.amount !== undefined) c.amount = p.amount;

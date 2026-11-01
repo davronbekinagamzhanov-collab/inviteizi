@@ -1,5 +1,7 @@
 # InviteIZI: свадебные Animated, этап 1/4
 
+Исторический отчёт коммита da25f0f. Завершение версионирования, исправление сборки и итоговый выпуск описаны в [финальном отчёте](premium-final.md).
+
 Исходный main: `fed56f843273589acaa9d41c47e2c3d7cc5720a6`, проверен через `git fetch origin main`. Ветка для четырёх этапов: `feature/wedding-premium-redesign`. Merge и Production Deploy не выполнялись.
 
 ## Выбор до реализации
