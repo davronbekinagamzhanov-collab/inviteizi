@@ -1,0 +1,37 @@
+[
+  {
+    "id": "kabutar-salom",
+    "cpuThrottle": 4,
+    "frames": 64,
+    "maxGapMs": 100,
+    "gapsOver50": 1
+  },
+  {
+    "id": "yelpigich-ziynat",
+    "cpuThrottle": 4,
+    "frames": 65,
+    "maxGapMs": 83.30000000000018,
+    "gapsOver50": 1
+  },
+  {
+    "id": "samarqand-kitob",
+    "cpuThrottle": 4,
+    "frames": 67,
+    "maxGapMs": 66.59999999999991,
+    "gapsOver50": 2
+  },
+  {
+    "id": "qosh-uzuk",
+    "cpuThrottle": 4,
+    "frames": 67,
+    "maxGapMs": 66.69999999999982,
+    "gapsOver50": 1
+  },
+  {
+    "id": "saodat-kaliti",
+    "cpuThrottle": 4,
+    "frames": 65,
+    "maxGapMs": 83.40000000000009,
+    "gapsOver50": 1
+  }
+]

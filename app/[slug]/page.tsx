@@ -7,6 +7,7 @@ import { parseWeddingDate } from "@/lib/wedding-date";
 import { existingArt, getDesign } from "@/templates/registry";
 import { t } from "@/texts/uz-cyrl";
 import Expired from "./Expired";
+import { loadOrderDesign } from "@/templates/order-design";
 
 // Гости открывают ссылку напрямую (из WhatsApp/Telegram): переход внутри сайта может подождать
 export const instant = false;
@@ -63,7 +64,7 @@ async function Invitation({ params }: { params: PageProps<"/[slug]">["params"] }
   const design = getDesign(page.order.templateId);
   if (!design) notFound();
 
-  const { default: Design } = await design.load();
+  const { default: Design } = await loadOrderDesign(design, page.data.designVersion);
   return <Design data={page.data} mode={page.mode} art={existingArt(design)} />;
 }
 

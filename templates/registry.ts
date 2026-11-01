@@ -57,7 +57,7 @@ function design(
   load: Loader,
   extra: Partial<RawDesign> = {},
 ): RawDesign {
-  return { id, number, occasion, format, withPhoto, sample: sampleFor(id, occasion), cover: cover(id), load, ...extra };
+  return { id, number, occasion, format, withPhoto, sample: ["kabutar-salom", "yelpigich-ziynat", "samarqand-kitob", "qosh-uzuk", "saodat-kaliti"].includes(id) ? { ...sampleFor(id, occasion), groom: "Давронбек", bride: "Нозима" } : sampleFor(id, occasion), cover: cover(id), load, ...extra };
 }
 
 const rawDesigns: RawDesign[] = [
@@ -159,7 +159,7 @@ const rawDesigns: RawDesign[] = [
   design("sopol-navo", 93, "nikoh", "scroll", false, () => import("./themes/sopol-navo/Design")),
   design("girih-nur", 94, "nikoh", "animated", false, () => import("./themes/girih-nur/Design")),
   design("siyoh-duo", 95, "nikoh", "animated", false, () => import("./themes/siyoh-duo/Design")),
-  design("kabutar-salom", 96, "nikoh", "animated", false, () => import("./themes/kabutar-salom/Design")),
+  design("kabutar-salom", 96, "nikoh", "animated", true, () => import("./themes/kabutar-salom/Design"), {art:"/art/atirgul.webp"}),
   design("shirin-tilak", 97, "nikoh", "scroll", false, () => import("./themes/shirin-tilak/Design")),
   design("minor-satr", 98, "nikoh", "scroll", false, () => import("./themes/minor-satr/Design")),
   design("kumush-taroq", 99, "nikoh", "scroll", false, () => import("./themes/kumush-taroq/Design")),
@@ -168,7 +168,7 @@ const rawDesigns: RawDesign[] = [
   design("dutor-navosi", 102, "nikoh", "scroll", false, () => import("./themes/dutor-navosi/Design")),
   design("tut-qogozi", 103, "nikoh", "scroll", false, () => import("./themes/tut-qogozi/Design")),
   design("qosh-uzuk", 104, "nikoh", "animated", false, () => import("./themes/qosh-uzuk/Design")),
-  design("yelpigich-ziynat", 105, "nikoh", "animated", false, () => import("./themes/yelpigich-ziynat/Design")),
+  design("yelpigich-ziynat", 105, "nikoh", "animated", true, () => import("./themes/yelpigich-ziynat/Design"), {art:"/art/bodom-guli.webp"}),
   design("saodat-kaliti", 106, "nikoh", "animated", false, () => import("./themes/saodat-kaliti/Design")),
 ];
 
