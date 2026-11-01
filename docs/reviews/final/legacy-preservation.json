@@ -1,0 +1,92 @@
+[
+  {
+    "id": "kabutar-salom",
+    "sourceMain": "fed56f843273589acaa9d41c47e2c3d7cc5720a6",
+    "originalJpegUnchanged": true,
+    "jpegSha256": "982b2c360d6beab3766e5399d2e9e5de09070f555f31e9dc3c9a72baf8480f8e",
+    "originalComponentBodyUnchanged": true,
+    "bodySha256": "207d2c38b6e467f3c6eab67c806b663035eafcabdc53208c3569dd4574f48186",
+    "note": "Imports/font declarations can differ only to self-host the original font family."
+  },
+  {
+    "id": "yelpigich-ziynat",
+    "sourceMain": "fed56f843273589acaa9d41c47e2c3d7cc5720a6",
+    "originalJpegUnchanged": true,
+    "jpegSha256": "f24aba431e963e99345f08743de14faae4dfdc4570a7ff26011f26d9418f1f67",
+    "originalComponentBodyUnchanged": true,
+    "bodySha256": "8b1594d974a868045cc4b2ec48de609b1c8220d9560a29d2c5c6c33c442f919a",
+    "note": "Imports/font declarations can differ only to self-host the original font family."
+  },
+  {
+    "id": "samarqand-kitob",
+    "sourceMain": "fed56f843273589acaa9d41c47e2c3d7cc5720a6",
+    "originalJpegUnchanged": true,
+    "jpegSha256": "7ad47ac886e2820637d0720df4fd47d2c5164ae7c869d9b4a4baac34f674d993",
+    "originalComponentBodyUnchanged": true,
+    "bodySha256": "74af910cd73e6703f3d869be905f02106c4d036999625f8acc7ecb3de9dacf6c",
+    "note": "Imports/font declarations can differ only to self-host the original font family."
+  },
+  {
+    "id": "qosh-uzuk",
+    "sourceMain": "fed56f843273589acaa9d41c47e2c3d7cc5720a6",
+    "originalJpegUnchanged": true,
+    "jpegSha256": "f250c44e1f419e6c342cd0bb8a461bac62af24427614e8c7c70ba5c32a808692",
+    "originalComponentBodyUnchanged": true,
+    "bodySha256": "8ddd19ee90fea678b17065cb37864b257da19cd8ff8f5d623c58fd899e37c43e",
+    "note": "Imports/font declarations can differ only to self-host the original font family."
+  },
+  {
+    "id": "saodat-kaliti",
+    "sourceMain": "fed56f843273589acaa9d41c47e2c3d7cc5720a6",
+    "originalJpegUnchanged": true,
+    "jpegSha256": "89a03ddca90135486f75336b436605ff14142d899253039d22652f29d778820f",
+    "originalComponentBodyUnchanged": true,
+    "bodySha256": "d837f4850a5ae9898b3afa2f26523111067b83653183b5ad2ae1b1b92b7277b0",
+    "note": "Imports/font declarations can differ only to self-host the original font family."
+  },
+  {
+    "id": "ipak-romol",
+    "sourceMain": "fed56f843273589acaa9d41c47e2c3d7cc5720a6",
+    "originalJpegUnchanged": true,
+    "jpegSha256": "54c52df131fa8db1fda53a1912890caffdb37cca62c74c7a80346089293bcea6",
+    "originalComponentBodyUnchanged": true,
+    "bodySha256": "e6d88ca61ec031f0e604bb03e7789a7e907736a8509a8ce3a394b7464bc9f042",
+    "note": "Imports/font declarations can differ only to self-host the original font family."
+  },
+  {
+    "id": "rishton-koshin",
+    "sourceMain": "fed56f843273589acaa9d41c47e2c3d7cc5720a6",
+    "originalJpegUnchanged": true,
+    "jpegSha256": "c6f93d11780aff248a6c7c3894f953fcd1cd64a3894bf132b63b3e270544a71a",
+    "originalComponentBodyUnchanged": true,
+    "bodySha256": "8d124712dc4c2cadbb8fbe41cbd47e0bb19c805fc740d5b3ee0cfbf153417e7b",
+    "note": "Imports/font declarations can differ only to self-host the original font family."
+  },
+  {
+    "id": "marvarid-satr",
+    "sourceMain": "fed56f843273589acaa9d41c47e2c3d7cc5720a6",
+    "originalJpegUnchanged": true,
+    "jpegSha256": "93e6ca8d23c5a2ba117006b1c7e774de2b0f8a4221f31dc21ae26f892b9ac492",
+    "originalComponentBodyUnchanged": true,
+    "bodySha256": "cabcd1a31f1fac7e924dc5730253e44bacf198f60c84bb8908c1b43910ec763b",
+    "note": "Imports/font declarations can differ only to self-host the original font family."
+  },
+  {
+    "id": "dutor-navosi",
+    "sourceMain": "fed56f843273589acaa9d41c47e2c3d7cc5720a6",
+    "originalJpegUnchanged": true,
+    "jpegSha256": "482758ccd5c9fd7bea5b263d7cb2a4580bddf3f23d1c16927df924b1c0082f1e",
+    "originalComponentBodyUnchanged": true,
+    "bodySha256": "2d0221e3473ae486b7a64e94541249431f51e4e36ccfadc79305d36a8b7928d1",
+    "note": "Imports/font declarations can differ only to self-host the original font family."
+  },
+  {
+    "id": "kumush-taroq",
+    "sourceMain": "fed56f843273589acaa9d41c47e2c3d7cc5720a6",
+    "originalJpegUnchanged": true,
+    "jpegSha256": "5d13458488edda772f2a397847d3a6ff74c01c251909ed585188fcbadbba34b7",
+    "originalComponentBodyUnchanged": true,
+    "bodySha256": "6bb436377e2cc5f8aa2ef925e14055e588901a22ab49c3149be1e35910fcd44e",
+    "note": "Imports/font declarations can differ only to self-host the original font family."
+  }
+]

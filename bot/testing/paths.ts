@@ -79,3 +79,13 @@ export async function nikohWithReceipt(sim: Sim, id: number, names?: [string, st
   const [order] = await sim.repo.listOrdersByUser(id);
   return order;
 }
+
+/** Select an existing identity independently of its editorial display position. */
+export async function selectCatalogDesign(sim: Sim, user: number, template: string) {
+  for (let i=0;i<100;i++) {
+    const media=sim.last(user).media;
+    if (typeof media === "string" && media.endsWith(`/covers/${template}.jpg`)) return;
+    await sim.click(user,"▶");
+  }
+  throw new Error(`Catalog did not expose ${template}`);
+}

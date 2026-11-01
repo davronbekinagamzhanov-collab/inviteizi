@@ -1,0 +1,278 @@
+{
+  "scope": "Cold Chromium contexts, 375x812, synthetic 100ms RTT and 10Mbps download; no physical-device claim. CLS <=0.1 target; real platform-font resolution of all eight Uzbek Cyrillic glyphs.",
+  "results": [
+    {
+      "id": "kabutar-salom",
+      "cls": 0.002473245882776416,
+      "shifts": [
+        0.0007369951547801047,
+        0.0017362507279963114
+      ],
+      "fonts": [
+        {
+          "familyName": "PT Serif",
+          "postScriptName": "PTSerif-Regular",
+          "isCustomFont": true,
+          "glyphCount": 8
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "yelpigich-ziynat",
+      "cls": 0.004704003777491972,
+      "shifts": [
+        0.0012495854465448487,
+        0.003261337531445396,
+        0.00019308079950172696
+      ],
+      "fonts": [
+        {
+          "familyName": "PT Serif",
+          "postScriptName": "PTSerif-Regular",
+          "isCustomFont": true,
+          "glyphCount": 8
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "samarqand-kitob",
+      "cls": 0.003924208063873588,
+      "shifts": [
+        0.0008141425416777889,
+        0.003110065522195799
+      ],
+      "fonts": [
+        {
+          "familyName": "PT Serif",
+          "postScriptName": "PTSerif-Regular",
+          "isCustomFont": true,
+          "glyphCount": 8
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "qosh-uzuk",
+      "cls": 0.015389140949185857,
+      "shifts": [
+        0.0012055581001722926,
+        0.009448130262806668,
+        0.004735452586206897
+      ],
+      "fonts": [
+        {
+          "familyName": "PT Serif",
+          "postScriptName": "PTSerif-Regular",
+          "isCustomFont": true,
+          "glyphCount": 8
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "saodat-kaliti",
+      "cls": 0.007200173265649899,
+      "shifts": [
+        0.00015469921619063796,
+        0.0027284486550268145,
+        0.004317025394432446
+      ],
+      "fonts": [
+        {
+          "familyName": "PT Serif",
+          "postScriptName": "PTSerif-Regular",
+          "isCustomFont": true,
+          "glyphCount": 8
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "ipak-romol",
+      "cls": 0.0014095470902391874,
+      "shifts": [
+        0.0002582769136191932,
+        0.001151270176619994
+      ],
+      "fonts": [
+        {
+          "familyName": "Lora",
+          "postScriptName": "Lora-Regular",
+          "isCustomFont": true,
+          "glyphCount": 8
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "rishton-koshin",
+      "cls": 0.006308941222892249,
+      "shifts": [
+        0.0005377071756169769,
+        0.005771234047275272
+      ],
+      "fonts": [
+        {
+          "familyName": "Lora",
+          "postScriptName": "Lora-Regular",
+          "isCustomFont": true,
+          "glyphCount": 8
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "marvarid-satr",
+      "cls": 0.001935096790648483,
+      "shifts": [
+        0.00006559246766483049,
+        0.0018695043229836525
+      ],
+      "fonts": [
+        {
+          "familyName": "Lora",
+          "postScriptName": "Lora-Regular",
+          "isCustomFont": true,
+          "glyphCount": 8
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "dutor-navosi",
+      "cls": 0.0011391903669910296,
+      "shifts": [
+        0.0001850081292921449,
+        0.0009541822376988846
+      ],
+      "fonts": [
+        {
+          "familyName": "Lora",
+          "postScriptName": "Lora-Regular",
+          "isCustomFont": true,
+          "glyphCount": 8
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "kumush-taroq",
+      "cls": 0.0023098478689930193,
+      "shifts": [
+        0.0023098478689930193
+      ],
+      "fonts": [
+        {
+          "familyName": "Lora",
+          "postScriptName": "Lora-Regular",
+          "isCustomFont": true,
+          "glyphCount": 8
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "sunnat-muqova",
+      "cls": 0.0054358098731466424,
+      "shifts": [
+        0.0035054084059307432,
+        0.0019304014672158992
+      ],
+      "fonts": [
+        {
+          "familyName": "Lora",
+          "postScriptName": "Lora-Regular",
+          "isCustomFont": true,
+          "glyphCount": 8
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "sunnat-nasab",
+      "cls": 0.0020820152302894997,
+      "shifts": [
+        0.0020820152302894997
+      ],
+      "fonts": [
+        {
+          "familyName": "Lora",
+          "postScriptName": "Lora-Regular",
+          "isCustomFont": true,
+          "glyphCount": 8
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "sahar-ipagi",
+      "cls": 0.005180556671985084,
+      "shifts": [
+        0.0016366175446099964,
+        0.0035439391273750878
+      ],
+      "fonts": [
+        {
+          "familyName": "Lora",
+          "postScriptName": "Lora-Regular",
+          "isCustomFont": true,
+          "glyphCount": 8
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "sahar-maktubi",
+      "cls": 0.01074408073276873,
+      "shifts": [
+        0.0003637069572180834,
+        0.010380373775550648
+      ],
+      "fonts": [
+        {
+          "familyName": "Lora",
+          "postScriptName": "Lora-Regular",
+          "isCustomFont": true,
+          "glyphCount": 8
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "umr-sahifalari",
+      "cls": 0.004280824071602482,
+      "shifts": [
+        0.0041089117870691675,
+        0.0001719122845333139
+      ],
+      "fonts": [
+        {
+          "familyName": "Lora",
+          "postScriptName": "Lora-Regular",
+          "isCustomFont": true,
+          "glyphCount": 8
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "ehtirom-kartasi",
+      "cls": 0.0026760196498337744,
+      "shifts": [
+        0.0012615161812346818,
+        0.0014145034685990926
+      ],
+      "fonts": [
+        {
+          "familyName": "Lora",
+          "postScriptName": "Lora-Regular",
+          "isCustomFont": true,
+          "glyphCount": 8
+        }
+      ],
+      "passed": true
+    }
+  ]
+}

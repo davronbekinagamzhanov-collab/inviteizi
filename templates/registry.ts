@@ -57,7 +57,7 @@ function design(
   load: Loader,
   extra: Partial<RawDesign> = {},
 ): RawDesign {
-  return { id, number, occasion, format, withPhoto, sample: sampleFor(id, occasion), cover: cover(id), load, ...extra };
+  return { id, number, occasion, format, withPhoto, sample: ["kabutar-salom", "yelpigich-ziynat", "samarqand-kitob", "qosh-uzuk", "saodat-kaliti"].includes(id) ? { ...sampleFor(id, occasion), groom: "Давронбек", bride: "Нозима" } : sampleFor(id, occasion), cover: cover(id), load, ...extra };
 }
 
 const rawDesigns: RawDesign[] = [
@@ -145,7 +145,7 @@ const rawDesigns: RawDesign[] = [
   design("sayram-hovli", 79, "sunnat", "scroll", false, () => import("./themes/sayram-hovli/Design")),
   design("zarvaraq", 80, "yubiley", "simple", false, () => import("./themes/zarvaraq/Design")),
   design("umr-daraxti", 81, "yubiley", "scroll", false, () => import("./themes/umr-daraxti/Design")),
-  design("marvarid-satr", 82, "nikoh", "simple", false, () => import("./themes/marvarid-satr/Design")),
+  design("marvarid-satr", 82, "nikoh", "simple", true, () => import("./themes/marvarid-satr/Design"), {art:"/art/bodom-guli.webp"}),
   design("gulbog-sahifa", 83, "nikoh", "scroll", true, () => import("./themes/gulbog-sahifa/Design"), {art:"/art/gulbog-sahifa.webp"}),
   design("suzani-yol", 84, "nikoh", "scroll", false, () => import("./themes/suzani-yol/Design")),
   design("bugdoy-boshoq", 85, "nahorgi", "simple", false, () => import("./themes/bugdoy-boshoq/Design")),
@@ -159,24 +159,32 @@ const rawDesigns: RawDesign[] = [
   design("sopol-navo", 93, "nikoh", "scroll", false, () => import("./themes/sopol-navo/Design")),
   design("girih-nur", 94, "nikoh", "animated", false, () => import("./themes/girih-nur/Design")),
   design("siyoh-duo", 95, "nikoh", "animated", false, () => import("./themes/siyoh-duo/Design")),
-  design("kabutar-salom", 96, "nikoh", "animated", false, () => import("./themes/kabutar-salom/Design")),
+  design("kabutar-salom", 96, "nikoh", "animated", true, () => import("./themes/kabutar-salom/Design"), {art:"/art/atirgul.webp"}),
   design("shirin-tilak", 97, "nikoh", "scroll", false, () => import("./themes/shirin-tilak/Design")),
   design("minor-satr", 98, "nikoh", "scroll", false, () => import("./themes/minor-satr/Design")),
   design("kumush-taroq", 99, "nikoh", "scroll", false, () => import("./themes/kumush-taroq/Design")),
   design("shabnam-visol", 100, "nikoh", "animated", false, () => import("./themes/shabnam-visol/Design")),
   design("visol-soati", 101, "nikoh", "animated", false, () => import("./themes/visol-soati/Design")),
-  design("dutor-navosi", 102, "nikoh", "scroll", false, () => import("./themes/dutor-navosi/Design")),
+  design("dutor-navosi", 102, "nikoh", "scroll", true, () => import("./themes/dutor-navosi/Design"), {art:"/art/gulbog-sahifa.webp"}),
   design("tut-qogozi", 103, "nikoh", "scroll", false, () => import("./themes/tut-qogozi/Design")),
   design("qosh-uzuk", 104, "nikoh", "animated", false, () => import("./themes/qosh-uzuk/Design")),
-  design("yelpigich-ziynat", 105, "nikoh", "animated", false, () => import("./themes/yelpigich-ziynat/Design")),
+  design("yelpigich-ziynat", 105, "nikoh", "animated", true, () => import("./themes/yelpigich-ziynat/Design"), {art:"/art/bodom-guli.webp"}),
   design("saodat-kaliti", 106, "nikoh", "animated", false, () => import("./themes/saodat-kaliti/Design")),
+  // Final expansion: six new identities, all existing numbers and IDs retained.
+  design("sunnat-muqova", 107, "sunnat", "animated", false, () => import("./themes/sunnat-muqova/Design")),
+  design("sunnat-nasab", 108, "sunnat", "scroll", false, () => import("./themes/sunnat-nasab/Design")),
+  design("sahar-ipagi", 109, "nahorgi", "animated", false, () => import("./themes/sahar-ipagi/Design")),
+  design("sahar-maktubi", 110, "nahorgi", "simple", false, () => import("./themes/sahar-maktubi/Design")),
+  design("umr-sahifalari", 111, "yubiley", "scroll", true, () => import("./themes/umr-sahifalari/Design"), {art:"/art/lola-ehtirom.webp"}),
+  design("ehtirom-kartasi", 112, "yubiley", "simple", false, () => import("./themes/ehtirom-kartasi/Design")),
+
 ];
 
 const STYLE_OF: Record<DesignStyle, string[]> = {
-  milk: ["zarhal-eshik", "atlas-tolqin", "non-muhr", "marvarid-satr", "bugdoy-boshoq", "shirin-tilak", "visol-soati", "tut-qogozi"],
+  milk: ["sahar-ipagi", "sahar-maktubi", "ehtirom-kartasi","zarhal-eshik", "atlas-tolqin", "non-muhr", "marvarid-satr", "bugdoy-boshoq", "shirin-tilak", "visol-soati", "tut-qogozi"],
   gold: ["oltin-monogramma", "oltin-ot", "zarhal-lavha", "qosh-uzuk", "zarvaraq", "saodat-kaliti"],
-  floral: ["pion-guldasta", "ipak-romol", "paxta-gul", "visol-rishta", "kabutar-salom", "umr-daraxti", "rayhon-sahari", "siyoh-duo", "shabnam-visol", "uzum-hovli"],
-  national: ["ganch-peshtoq", "rishton-koshin", "oq-ot", "sayram-hovli", "doppicha", "adras-nishon", "suzani-yol", "sopol-navo", "girih-nur", "dutor-navosi", "minor-satr", "kumush-taroq", "mis-kafgir", "oq-chinni", "tonggi-qozon", "yelpigich-ziynat"],
+  floral: ["umr-sahifalari","pion-guldasta", "ipak-romol", "paxta-gul", "visol-rishta", "kabutar-salom", "umr-daraxti", "rayhon-sahari", "siyoh-duo", "shabnam-visol", "uzum-hovli"],
+  national: ["sunnat-muqova", "sunnat-nasab","ganch-peshtoq", "rishton-koshin", "oq-ot", "sayram-hovli", "doppicha", "adras-nishon", "suzani-yol", "sopol-navo", "girih-nur", "dutor-navosi", "minor-satr", "kumush-taroq", "mis-kafgir", "oq-chinni", "tonggi-qozon", "yelpigich-ziynat"],
   dark: ["sapfir", "shohona-baxmal"],
   photo: ["tandir-nuri", "atirgul", "dasturxon", "bodom-guli", "samarqand-kitob", "tonggi-choy", "gulbog-sahifa", "lola-ehtirom", "anor-bogi"],
 };
@@ -204,11 +212,22 @@ export const ACCEPTED = new Set([
   "uzum-hovli", "sopol-navo", "girih-nur", "siyoh-duo", "kabutar-salom",
   "shirin-tilak", "minor-satr", "kumush-taroq", "shabnam-visol", "visol-soati",
   "dutor-navosi", "tut-qogozi", "qosh-uzuk", "yelpigich-ziynat", "saodat-kaliti",
+  "sunnat-muqova", "sunnat-nasab", "sahar-ipagi", "sahar-maktubi", "umr-sahifalari", "ehtirom-kartasi",
   // "anor-bogi" — скрыт по замечанию владельца 24.10 (код остаётся)
 ]);
 
 /** Дизайны для клиентов: только принятые */
-export const activeDesigns = () => designs.filter((d) => ACCEPTED.has(d.id));
+export const DISPLAY_PRIORITY: readonly string[] = [
+  "saodat-kaliti", "kabutar-salom", "samarqand-kitob", "qosh-uzuk", "yelpigich-ziynat",
+  "ipak-romol", "marvarid-satr", "rishton-koshin", "dutor-navosi", "kumush-taroq",
+  "bodom-guli", "atirgul", "oltin-monogramma", "gulbog-sahifa", "shohona-baxmal",
+  "sunnat-muqova", "sunnat-nasab", "sahar-ipagi", "sahar-maktubi", "umr-sahifalari", "ehtirom-kartasi",
+];
+export function catalogPosition(d: Pick<Design,"id"|"number">) {
+  const i = DISPLAY_PRIORITY.indexOf(d.id);
+  return i < 0 ? 1000 + d.number : i;
+}
+export const activeDesigns = () => designs.filter((d) => ACCEPTED.has(d.id)).sort((a,b)=>catalogPosition(a)-catalogPosition(b));
 
 export function getDesign(id: string) {
   return designs.find((d) => d.id === id);

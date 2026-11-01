@@ -19,6 +19,7 @@ import { designs,PRICES } from "@/templates/registry";
 import type { Sql } from "@/lib/db";
 
 describe.skipIf(process.env.INVITEIZI_LOCAL_PG !== "1")("PgRepo through isolated PGlite PostgreSQL protocol",()=>{
+  // SQL timestamps use the live host clock; keep the simulated cutoff just ahead of them.
   let pg:PGlite,server:PGLiteSocketServer,sql:Sql,repo:PgRepo;
   const loadResults: {clients:number;ms:number;revenueDelta:number}[]=[];
   beforeAll(async()=>{
@@ -26,6 +27,7 @@ describe.skipIf(process.env.INVITEIZI_LOCAL_PG !== "1")("PgRepo through isolated
     await pg.exec("create role anon; create role authenticated; create role inviteizi_server;");
     for(const name of ["20261023180530_schema.sql","20261024031409_slug_reserved_dev.sql","20261024120000_slug_history.sql","20261024150000_music_occasion.sql","20261025120000_analytics_favorites.sql","20261026120000_scroll_format.sql"]) await pg.exec(await readFile(`supabase/migrations/${name}`,"utf8"));
     await pg.exec(await readFile("supabase/migrations/20261103120000_rsvp_flag.sql","utf8"));
+    await pg.exec(await readFile("supabase/migrations/20261104090000_design_version.sql","utf8"));
     for(const d of designs) await pg.query("insert into public.templates(id,number,occasion,format,price) values($1,$2,$3,$4,$5)",[d.id,d.number,d.occasion,d.format,PRICES[d.format]]);
     await pg.exec("insert into public.music(id,title_uz,title_ru,file_url) values('yor-yor','Ёр-ёр','Ёр-ёр','https://fixture.invalid/music.mp3');");
     server=new PGLiteSocketServer({db:pg,host:"127.0.0.1",port:0,maxConnections:1});
@@ -36,8 +38,21 @@ describe.skipIf(process.env.INVITEIZI_LOCAL_PG !== "1")("PgRepo through isolated
     repo=new PgRepo(sql);
   },30000);
   afterAll(async()=>{if(sql)await sql.end({timeout:2});if(server)await server.stop();if(pg)await pg.close();vi.unstubAllEnvs();if(process.env.INVITEIZI_WRITE_REPORTS==="1")await writeFile("docs/reviews/2026-10-25-pg-local-load.json",JSON.stringify({scope:"PgRepo + postgres.js + loopback + PGlite; one connection; not native multi-backend PostgreSQL or production throughput",loadResults},null,2)+"\n");});
+  it("premium revision survives SQL creation, readback, ordinary edits and old-order updates",async()=>{
+    const userId=760099;await repo.touchUser({id:userId});
+    const base={occasion:"nikoh" as const,groom:"Давронбек",bride:"Нозима",hosts:"Оила",events:[]};
+    const premium=await repo.createOrder({userId,occasion:"nikoh",format:"animated",templateId:"kabutar-salom",data:{...base,designVersion:"premium-v1"},music:{kind:"none"},amount:8000,slugBase:"premium-sql",status:"preview"});
+    expect((await repo.getOrderBySlug(premium.slug))?.data.designVersion).toBe("premium-v1");
+    await repo.updateOrder(premium.id,{data:{...base,groom:"Янги исм"}});
+    expect((await repo.getOrder(premium.id))?.data).toMatchObject({groom:"Янги исм",designVersion:"premium-v1"});
+    const old=await repo.createOrder({userId,occasion:"nikoh",format:"animated",templateId:"kabutar-salom",data:base,music:{kind:"none"},amount:4321,slugBase:"legacy-sql",status:"preview"});
+    await repo.updateOrder(old.id,{data:{...base,designVersion:"premium-v1"}});
+    expect((await repo.getOrder(old.id))?.data.designVersion).toBeUndefined();
+    const sim=new Sim({now:new Date(Date.now()+60_000).toISOString()});sim.deps.repo=repo;await nikohToReview(sim,760098);await sim.click(760098,uz.review.confirm);
+    const [created]=await repo.listOrdersByUser(760098);expect(created.data.designVersion).toBe("premium-v1");
+  });
   it("venue stage: SQL roundtrip preserves both families and owner place fields",async()=>{
-    const sim=new Sim();sim.deps.repo=repo;
+    const sim=new Sim({now:new Date(Date.now()+60_000).toISOString()});sim.deps.repo=repo;
     await nikohToReview(sim,760001);await sim.click(760001,uz.review.editSides);await sim.click(760001,uz.form.sideYes);await sim.text(760001,"Юсуповлар оиласи");
     await sim.click(760001,uz.review.editEvent(1,"Никоҳ базми"));await sim.click(760001,uz.review.evLocation);await sim.click(760001,uz.event.readyVenues);await sim.click(760001,"✅ Nayryz");await sim.click(760001,uz.review.confirm);
     const [o]=await repo.listOrdersByUser(760001);
@@ -73,7 +88,7 @@ describe.skipIf(process.env.INVITEIZI_LOCAL_PG !== "1")("PgRepo through isolated
   });
   it("venue stage: SQL saved quote rejects format changes and counts payment once",async()=>{
     vi.stubEnv("ADMIN_IDS","500");vi.stubEnv("OWNER_TELEGRAM_ID","500");
-    const sim=new Sim();sim.deps.repo=repo;await nikohToReview(sim,760002);await sim.click(760002,uz.review.confirm);const [o]=await repo.listOrdersByUser(760002);
+    const sim=new Sim({now:new Date(Date.now()+60_000).toISOString()});sim.deps.repo=repo;await nikohToReview(sim,760002);await sim.click(760002,uz.review.confirm);const [o]=await repo.listOrdersByUser(760002);
     await repo.updateOrder(o.id,{amount:10000});await sim.callback(760002,`edit:${o.number}`,1);await sim.click(760002,uz.review.editDesign);await sim.click(760002,"▶");await sim.click(760002,uz.catalog.buy);await sim.click(760002,uz.review.confirm);
     expect(await repo.getOrder(o.id)).toMatchObject({amount:10000,format:"animated"});
     await repo.saveStep(760002,"review",{q:200,orderId:o.id,occasion:o.occasion,format:"simple",templateId:"sapfir",data:o.data,music:o.music});await sim.callback(760002,"a:200:ok",1);
@@ -84,7 +99,7 @@ describe.skipIf(process.env.INVITEIZI_LOCAL_PG !== "1")("PgRepo through isolated
     expect((await repo.analytics(500,"all",sim.clock)).revenue-before).toBe(10000);
   });
   it("venue stage: SQL JSON null holes are normalized without losing completed events",async()=>{
-    const sim=new Sim();sim.deps.repo=repo;const id=760003;
+    const sim=new Sim({now:new Date(Date.now()+60_000).toISOString()});sim.deps.repo=repo;const id=760003;
     await repo.touchUser({id});await repo.setLang(id,"uz");const e={kind:"nikohBazm",date:"2026-11-14",time:"18:00",venueName:"Fixture",address:"Address"};
     await repo.saveStep(id,"evLoc",{q:10,occasion:"nikoh",ev:2,data:{occasion:"nikoh",groom:"Азиз",bride:"Мадина",hosts:"Оила",events:[e,null,{...e,kind:"nahorgi",time:"06:00"}]}});
     await sim.text(id,uz.event.skip);expect((await repo.getUser(id))?.step).toBe("more");
@@ -101,7 +116,7 @@ describe.skipIf(process.env.INVITEIZI_LOCAL_PG !== "1")("PgRepo through isolated
     expect(p).toMatchObject({code:"pgtest01",telegramId:null,rate:1500});
     expect(typeof p.id).toBe("number");
     expect(await repo.getPartner(p.id)).toMatchObject({name:"Ойбек"});
-    const sim=new Sim();sim.deps.repo=repo;
+    const sim=new Sim({now:new Date(Date.now()+60_000).toISOString()});sim.deps.repo=repo;
     await sim.start(770002,"p_pgtest01");await sim.start(770002,"p_other");
     expect((await repo.getUser(770002))?.source).toBe("p_pgtest01");
     await nikohWithReceipt(sim,770002);const [o]=await repo.listOrdersByUser(770002);
@@ -157,7 +172,7 @@ describe.skipIf(process.env.INVITEIZI_LOCAL_PG !== "1")("PgRepo through isolated
     vi.unstubAllEnvs();
   },60000);
   repoContract(async()=>repo);
-  formatFlowContract(()=>{const sim=new Sim();sim.deps.repo=repo;return{sim,repo};},750001);
+  formatFlowContract(()=>{const sim=new Sim({now:new Date(Date.now()+60_000).toISOString()});sim.deps.repo=repo;return{sim,repo};},750001);
   it("failed draft insert rolls back question; repeated confirmation inserts exactly one order",async()=>{
     const userId=80000001;
     await repo.touchUser({id:userId});await repo.saveStep(userId,"review",{q:10});

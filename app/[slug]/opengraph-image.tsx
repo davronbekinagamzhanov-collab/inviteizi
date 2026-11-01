@@ -5,6 +5,7 @@ import { t } from "@/texts/uz-cyrl";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { getDesign } from "@/templates/registry";
+import { usesLegacyDesign } from "@/templates/design-version";
 import { reportFont, reportText } from "@/lib/chart";
 
 // Картинка ссылки в WhatsApp / Telegram: имена и дата на молочном фоне
@@ -29,7 +30,8 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   const fonts = [{ name: "Body", data: font, weight: 400 as const, style: "normal" as const }];
   const design = d && page ? getDesign(page.order.templateId) : undefined;
   // Only project-owned covers; never a customer-supplied URL or private event address.
-  const cover = design ? await readFile(path.join(process.cwd(), "public/og", `${design.id}.jpg`)).then(bytes => `data:image/jpeg;base64,${bytes.toString("base64")}`).catch(() => null) : null;
+  const artworkVersion = design && d?.designVersion === "premium-v1" && usesLegacyDesign(design.id) ? "premium-v1/" : "";
+  const cover = design ? await readFile(path.join(process.cwd(), "public/og", `${artworkVersion}${design.id}.jpg`)).then(bytes => `data:image/jpeg;base64,${bytes.toString("base64")}`).catch(() => null) : null;
   const namesSize = names.length > 45 ? 42 : names.length > 28 ? 54 : 68;
 
   return new ImageResponse(
@@ -47,7 +49,6 @@ export default async function Image({ params }: { params: Promise<{ slug: string
         }}
       >
         {/* ImageResponse requires a native img element, not next/image. */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         {cover ? <img src={cover} alt="" width={380} height={550} style={{ position: "absolute", left: 40, top: 40, objectFit: "cover", borderRadius: 20 }} /> : null}
         <div
           style={{

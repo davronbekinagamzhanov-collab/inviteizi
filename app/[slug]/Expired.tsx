@@ -1,16 +1,9 @@
-import { Cormorant_Garamond, PT_Serif } from "next/font/google";
+import localFont from "next/font/local";
+
 import { t } from "@/texts/uz-cyrl";
 
-const display = Cormorant_Garamond({
-  variable: "--font-expired-display",
-  weight: ["600"],
-  subsets: ["cyrillic", "cyrillic-ext"],
-});
-const body = PT_Serif({
-  variable: "--font-expired-body",
-  weight: ["400"],
-  subsets: ["cyrillic", "cyrillic-ext"],
-});
+const display = localFont({src:[{path:"../../assets/fonts/google/cormorantgaramond/CormorantGaramond[wght].woff2",weight:"300.0 700.0",style:"normal"}],display:"swap",variable:"--font-expired-display"});
+const body = localFont({src:[{path:"../../assets/fonts/google/ptserif/PT_Serif-Web-Regular.woff2",weight:"400",style:"normal"}],display:"swap",variable:"--font-expired-body"});
 
 /** Заглушка после срока ссылки (последний тадбир + 30 дней) или для архивного заказа */
 export default function Expired() {

@@ -1,22 +1,15 @@
+import localFont from "next/font/local";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import Image from "next/image";
 import Link from "next/link";
-import { Cormorant_Garamond, PT_Serif } from "next/font/google";
+
 import { t } from "@/texts/uz-cyrl";
 import type { Occasion } from "@/lib/types";
 import { activeDesigns, PRICES } from "@/templates/registry";
 
-const display = Cormorant_Garamond({
-  variable: "--font-catalog-display",
-  weight: ["500", "600"],
-  subsets: ["cyrillic", "cyrillic-ext"],
-});
-const body = PT_Serif({
-  variable: "--font-catalog-body",
-  weight: ["400", "700"],
-  subsets: ["cyrillic", "cyrillic-ext"],
-});
+const display = localFont({src:[{path:"../../assets/fonts/google/cormorantgaramond/CormorantGaramond[wght].woff2",weight:"300.0 700.0",style:"normal"}],display:"swap",variable:"--font-catalog-display"});
+const body = localFont({src:[{path:"../../assets/fonts/google/ptserif/PT_Serif-Web-Regular.woff2",weight:"400",style:"normal"},{path:"../../assets/fonts/google/ptserif/PT_Serif-Web-Bold.woff2",weight:"700",style:"normal"}],display:"swap",variable:"--font-catalog-body"});
 
 export const metadata = { title: t.catalog.title };
 

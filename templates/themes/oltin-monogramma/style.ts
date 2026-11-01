@@ -1,20 +1,11 @@
-import { Cormorant_Garamond, PT_Serif } from "next/font/google";
+import localFont from "next/font/local";
+
 import { designVars } from "../types";
 
 // cyrillic-ext — в нём ў қ ғ ҳ
-const display = Cormorant_Garamond({
-  variable: "--om-display",
-  weight: ["500", "600", "700"],
-  style: ["normal", "italic"],
-  subsets: ["cyrillic", "cyrillic-ext"],
-});
+const display = localFont({src:[{path:"../../../assets/fonts/google/cormorantgaramond/CormorantGaramond[wght].woff2",weight:"300.0 700.0",style:"normal"},{path:"../../../assets/fonts/google/cormorantgaramond/CormorantGaramond-Italic[wght].woff2",weight:"300.0 700.0",style:"italic"}],display:"swap",variable:"--om-display"});
 
-const body = PT_Serif({
-  variable: "--om-body",
-  weight: ["400", "700"],
-  style: ["normal", "italic"],
-  subsets: ["cyrillic", "cyrillic-ext"],
-});
+const body = localFont({src:[{path:"../../../assets/fonts/google/ptserif/PT_Serif-Web-Regular.woff2",weight:"400",style:"normal"},{path:"../../../assets/fonts/google/ptserif/PT_Serif-Web-Italic.woff2",weight:"400",style:"italic"},{path:"../../../assets/fonts/google/ptserif/PT_Serif-Web-Bold.woff2",weight:"700",style:"normal"},{path:"../../../assets/fonts/google/ptserif/PT_Serif-Web-BoldItalic.woff2",weight:"700",style:"italic"}],display:"swap",variable:"--om-body"});
 
 export const fontClasses = `${display.variable} ${body.variable}`;
 

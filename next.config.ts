@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/api/bot": ["./assets/fonts/*.ttf"],
-    "/*/opengraph-image": ["./assets/fonts/*.ttf", "./public/og/*"],
+    "/*/opengraph-image": ["./assets/fonts/*.ttf", "./public/og/**/*"],
   },
   cacheComponents: true,
   // без значка Next.js в углу: владелец смотрит пригласительные с телефона в режиме разработки

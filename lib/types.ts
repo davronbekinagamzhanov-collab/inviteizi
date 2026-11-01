@@ -31,6 +31,8 @@ export type InvitationEvent = {
 export type Relation = "farzand" | "ogil" | "qiz" | "nabira" | "uka" | "ona" | "ota" | "ozimiz";
 
 export type InvitationData = {
+  /** Explicit opt-in; absent keeps the original appearance of every existing order. */
+  designVersion?: "premium-v1";
   occasion: Occasion;
   /** Никоҳ: жених и невеста */
   groom?: string;

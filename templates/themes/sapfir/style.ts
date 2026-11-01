@@ -1,14 +1,9 @@
-import { Playfair } from "next/font/google";
+
 import localFont from "next/font/local";
 import { designVars } from "../types";
 
 // Playfair Display без cyrillic-ext (нет қ ғ ҳ), поэтому новая версия семейства — Playfair
-const display = Playfair({
-  variable: "--sf-display",
-  weight: ["400", "500", "600"],
-  style: ["normal", "italic"],
-  subsets: ["cyrillic", "cyrillic-ext"],
-});
+const display = localFont({src:[{path:"../../../assets/fonts/google/playfair/Playfair[opsz,wdth,wght].woff2",weight:"300.0 900.0",style:"normal"},{path:"../../../assets/fonts/google/playfair/Playfair-Italic[opsz,wdth,wght].woff2",weight:"300.0 900.0",style:"italic"}],display:"swap",variable:"--sf-display"});
 
 const body = localFont({
   variable: "--sf-body",

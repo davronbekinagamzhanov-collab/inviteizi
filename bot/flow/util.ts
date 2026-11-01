@@ -54,11 +54,11 @@ export const price = (amount: number) => t.price(amount);
 export const fmtDate = (date: string) => date.split("-").reverse().join(".");
 export const designName = (id: string) => t.designs[id] ?? id;
 export const pageUrl = (c: Pick<Ctx, "deps">, slug: string) => `${c.deps.env.publicBaseUrl}/${slug}`;
-export const coverUrl = (c: Pick<Ctx, "deps">, id: string) => `${c.deps.env.publicBaseUrl}/covers/${id}.jpg`;
+export const coverUrl = (c: Pick<Ctx, "deps">, id: string, legacy = false) => `${c.deps.env.publicBaseUrl}/covers/${legacy ? "legacy/" : ""}${id}.jpg`;
 // «👁 Намуна» в каталоге — чистое демо без надписи НАМУНА (личная НАМУНА — по ссылке заказа)
-export const demoUrl = (c: Pick<Ctx, "deps"> & Partial<Pick<Ctx, "user">>, id: string) => {
+export const demoUrl = (c: Pick<Ctx, "deps"> & Partial<Pick<Ctx, "user">>, id: string, legacy = false) => {
   const token = c.user ? demoToken(c.user.id, id, c.deps.now()) : undefined;
-  return `${c.deps.env.publicBaseUrl}/demo/${id}${token ? `#dt=${token}` : ""}`;
+  return `${c.deps.env.publicBaseUrl}/demo/${id}${legacy ? "/legacy" : ""}${token ? `#dt=${token}` : ""}`;
 };
 export const ownerUrl = (c: Pick<Ctx, "deps">) => `https://t.me/${c.deps.env.ownerUsername.replace(/^@/, "")}`;
 
@@ -72,7 +72,7 @@ export const eventLabel = (tx: BotTexts, kind: EventKind) => tx.event.kinds[kind
 // ── Дизайны ──
 
 export function designsFor(occasion: Occasion, format: Format) {
-  return activeDesigns().filter((d) => d.occasion === occasion && d.format === format).sort((a, b) => a.number - b.number);
+  return activeDesigns().filter((d) => d.occasion === occasion && d.format === format);
 }
 
 export function formatsFor(occasion: Occasion): Format[] {

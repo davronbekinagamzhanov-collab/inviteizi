@@ -234,9 +234,9 @@ describe("мои приглашения, правка, ссылка", () => {
     await sim.click(1, uz.review.editDesign);
     await sim.click(1, "▶");
     await sim.click(1, uz.catalog.buy);
-    expect(sim.lastText(1)).toContain("Дизайн: №61 Ганч пештоқ");
+    expect(sim.lastText(1)).toContain("Дизайн: №96 Кабутар саломи");
     await sim.click(1, uz.review.confirm);
-    expect(await sim.repo.getOrder(o.id)).toMatchObject({ slug: "aziz-madina", format: "animated", amount: 8_000, templateId: "ganch-peshtoq" });
+    expect(await sim.repo.getOrder(o.id)).toMatchObject({ slug: "aziz-madina", format: "animated", amount: 8_000, templateId: "kabutar-salom" });
     expect(buttonLabels(sim.last(1)).some((l) => /^💳 Тўлаш — 8.000 ₸$/.test(l))).toBe(true);
   });
 

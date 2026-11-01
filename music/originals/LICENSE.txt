@@ -1,0 +1,10 @@
+InviteIZI original instrumental recordings and scores
+
+The scores and the master recordings in this directory's manifest were created specifically for InviteIZI by independent additive synthesis. No third-party melodies, sound recordings, samples, performances or soundfonts were imported. The source renderer and the complete motifs, harmony rules, tempo and instrument parameters are included in scripts/render-original-music.mjs and manifest.json.
+
+To the extent copyright and related rights exist in this project-authored material, the project dedicates those rights to the public domain under CC0 1.0 Universal:
+https://creativecommons.org/publicdomain/zero/1.0/
+
+Commercial use, reproduction, adaptation and inclusion in invitations are permitted without attribution. The tracks are synthesized instrumental music; they are not recordings of real performers or licensed commercial songs. No exclusivity or registration with a collecting society is claimed.
+
+The MP3 encoder is the separately licensed installed @breezystack/lamejs package. Its license is not a license on the original musical scores or the audio masters. Font and photo licenses are separate.

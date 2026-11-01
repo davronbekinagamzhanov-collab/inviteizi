@@ -15,7 +15,7 @@ describe("весь путь наҳорги ош на русском", () => {
     expect((await sim.user(id))?.source).toBe("qr_sayram");
     await sim.click(id, ru.category.nahorgi);
     await sim.click(id, /Анимированное/);
-    expect(sim.last(id).text).toMatch(/^№41 · Тонгги қозон\nАнимированное · 8.000 ₸$/);
+    expect(sim.last(id).text).toMatch(/^№109 · Саҳар ипаги\nАнимированное · 8.000 ₸$/);
     await sim.click(id, ru.catalog.buy);
 
     expect(sim.lastText(id)).toBe(ru.form.personNahorgi);
@@ -81,7 +81,7 @@ describe("весь путь наҳорги ош на русском", () => {
     await sim.click(id, ru.review.confirm);
 
     const [o] = await sim.repo.listOrdersByUser(id);
-    expect(o).toMatchObject({ slug: "jasurbek", status: "preview", occasion: "nahorgi", templateId: "tonggi-qozon", amount: 8_000 });
+    expect(o).toMatchObject({ slug: "jasurbek", status: "preview", occasion: "nahorgi", templateId: "sahar-ipagi", amount: 8_000 });
     expect(o.data).toMatchObject({ person: "Жасурбек", relation: "ogil", cause: "nikoh", hosts: "Раҳимовлар оиласи", customText: own });
     expect(o.data.textId).toBeUndefined();
     expect(o.data.events.map((e) => [e.kind, e.date, e.time])).toEqual([
@@ -141,7 +141,7 @@ describe("«Назад» на каждом шаге анкеты", () => {
     const plan: [() => Promise<void>, string][] = [
       [() => sim.click(id, uz.category.nikoh), uz.category.ask],
       [() => sim.click(id, /Анимацияли/), uz.format.ask],
-      [() => sim.click(id, uz.catalog.buy), "№1 · Олтин монограмма\nАнимацияли · 8 000 ₸"],
+      [() => sim.click(id, uz.catalog.buy), "№106 · Саодат калити\nАнимацияли · 8 000 ₸"],
       [() => sim.text(id, "Азиз"), uz.form.groom],
       [() => sim.text(id, "Мадина"), uz.form.bride],
       [() => sim.click(id, "Ўзимизники"), uz.form.relationNikoh],
@@ -188,7 +188,7 @@ describe("«Назад» на каждом шаге анкеты", () => {
     expect(o.data.events[0]).toMatchObject({ kind: "nikohBazm", time: "18:30", location: { lat: 42.3, lng: 69.76 } });
     expect(o.data.events[1]).toMatchObject({ kind: "nahorgi", time: "06:00", date: "2026-11-14" });
     expect(o.data.relation).toBe("ozimiz");
-    expect(o.templateId).toBe("oltin-monogramma");
+    expect(o.templateId).toBe("saodat-kaliti");
   });
 
   it("«Назад» с первого вопроса — в меню; «Назад» с локации возвращает меню-клавиатуру", async () => {

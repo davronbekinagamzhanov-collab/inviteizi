@@ -1,21 +1,12 @@
-import { Merriweather, Playfair } from "next/font/google";
+import localFont from "next/font/local";
+
 import { designVars } from "../types";
 
 // Playfair (новая версия семейства) — в ней есть cyrillic-ext с ў қ ғ ҳ.
 // Ось opsz: на крупных кеглях контраст штрихов растёт сам — имя выглядит «гравированным».
-const display = Playfair({
-  variable: "--ot-display",
-  axes: ["opsz"],
-  style: ["normal", "italic"],
-  subsets: ["cyrillic", "cyrillic-ext"],
-});
+const display = localFont({src:[{path:"../../../assets/fonts/google/playfair/Playfair[opsz,wdth,wght].woff2",weight:"300.0 900.0",style:"normal"},{path:"../../../assets/fonts/google/playfair/Playfair-Italic[opsz,wdth,wght].woff2",weight:"300.0 900.0",style:"italic"}],display:"swap",variable:"--ot-display"});
 
-const body = Merriweather({
-  variable: "--ot-body",
-  axes: ["opsz"],
-  style: ["normal", "italic"],
-  subsets: ["cyrillic", "cyrillic-ext"],
-});
+const body = localFont({src:[{path:"../../../assets/fonts/google/merriweather/Merriweather[opsz,wdth,wght].woff2",weight:"300.0 900.0",style:"normal"},{path:"../../../assets/fonts/google/merriweather/Merriweather-Italic[opsz,wdth,wght].woff2",weight:"300.0 900.0",style:"italic"}],display:"swap",variable:"--ot-body"});
 
 export const fontClasses = `${display.variable} ${body.variable}`;
 

@@ -1,4 +1,4 @@
-import { Alegreya_Sans } from "next/font/google";
+
 import localFont from "next/font/local";
 import { designVars } from "../types";
 
@@ -11,12 +11,7 @@ const display = localFont({
   display: "swap",
 });
 
-const body = Alegreya_Sans({
-  variable: "--oo-body",
-  weight: ["400", "500", "700"],
-  style: ["normal", "italic"],
-  subsets: ["cyrillic", "cyrillic-ext"],
-});
+const body = localFont({src:[{path:"../../../assets/fonts/google/alegreyasans/AlegreyaSans-Regular.woff2",weight:"400",style:"normal"},{path:"../../../assets/fonts/google/alegreyasans/AlegreyaSans-Italic.woff2",weight:"400",style:"italic"},{path:"../../../assets/fonts/google/alegreyasans/AlegreyaSans-Medium.woff2",weight:"500",style:"normal"},{path:"../../../assets/fonts/google/alegreyasans/AlegreyaSans-MediumItalic.woff2",weight:"500",style:"italic"},{path:"../../../assets/fonts/google/alegreyasans/AlegreyaSans-Bold.woff2",weight:"700",style:"normal"},{path:"../../../assets/fonts/google/alegreyasans/AlegreyaSans-BoldItalic.woff2",weight:"700",style:"italic"}],display:"swap",variable:"--oo-body"});
 
 export const fontClasses = `${display.variable} ${body.variable}`;
 

@@ -1,23 +1,15 @@
+import localFont from "next/font/local";
 import type { CSSProperties } from "react";
-import { Cormorant_Unicase, Source_Serif_4 } from "next/font/google";
+
 import { designVars } from "../types";
 
 // Cormorant Upright из каталога не умеет кириллицу (в Google Fonts у него только латиница),
 // поэтому display — Cormorant Unicase: строчные нарисованы как капитель, буквы похожи
 // на резную надпись в ганче. cyrillic-ext — в нём ў қ ғ ҳ.
-const display = Cormorant_Unicase({
-  variable: "--gp-display",
-  weight: ["400", "500", "600"],
-  subsets: ["cyrillic", "cyrillic-ext"],
-});
+const display = localFont({src:[{path:"../../../assets/fonts/google/cormorantunicase/CormorantUnicase-Regular.woff2",weight:"400",style:"normal"},{path:"../../../assets/fonts/google/cormorantunicase/CormorantUnicase-Medium.woff2",weight:"500",style:"normal"},{path:"../../../assets/fonts/google/cormorantunicase/CormorantUnicase-SemiBold.woff2",weight:"600",style:"normal"}],display:"swap",variable:"--gp-display"});
 
 // Source Serif 4 — вариативный, с оптическим размером: мелкий текст плотнее, крупный тоньше
-const body = Source_Serif_4({
-  variable: "--gp-body",
-  style: ["normal", "italic"],
-  axes: ["opsz"],
-  subsets: ["cyrillic", "cyrillic-ext"],
-});
+const body = localFont({src:[{path:"../../../assets/fonts/google/sourceserif4/SourceSerif4[opsz,wght].woff2",weight:"200.0 900.0",style:"normal"},{path:"../../../assets/fonts/google/sourceserif4/SourceSerif4-Italic[opsz,wght].woff2",weight:"200.0 900.0",style:"italic"}],display:"swap",variable:"--gp-body"});
 
 export const fontClasses = `${display.variable} ${body.variable}`;
 

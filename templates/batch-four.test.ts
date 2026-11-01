@@ -3,7 +3,7 @@ import sharp from "sharp";
 import {activeDesigns,ACCEPTED,designs,getDesign,longSample,PRICES} from "./registry";
 import {t} from "@/texts/uz-cyrl";
 import {Sim} from "@/bot/testing/sim";
-import {startUz} from "@/bot/testing/paths";
+import {startUz,selectCatalogDesign} from "@/bot/testing/paths";
 import {uz} from "@/texts/bot-uz";
 
 const batch=[
@@ -36,6 +36,7 @@ describe("batch four: exactly five new complete designs",()=>{
     });
     it(`${id}: existing bot catalog selects the right component and price`,async()=>{
       const s=new Sim();await startUz(s,17);await s.click(17,uz.category[occasion]);await s.click(17,new RegExp(uz.format.names[format]));
+      await selectCatalogDesign(s,17,id);
       expect(s.last(17).media).toContain(`/covers/${id}.jpg`);
       expect(s.lastText(17)).toContain(uz.format.names[format]);expect(s.lastText(17)).toContain(t.price(PRICES[format]));
       await s.click(17,uz.catalog.buy);
