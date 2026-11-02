@@ -141,7 +141,7 @@ describe("«Назад» на каждом шаге анкеты", () => {
     const plan: [() => Promise<void>, string][] = [
       [() => sim.click(id, uz.category.nikoh), uz.category.ask],
       [() => sim.click(id, /Анимацияли/), uz.format.ask],
-      [() => sim.click(id, uz.catalog.buy), "№106 · Саодат калити\nАнимацияли · 8 000 ₸"],
+      [() => sim.click(id, uz.catalog.buy), "№113 · Муҳр\nАнимацияли · 8 000 ₸"],
       [() => sim.text(id, "Азиз"), uz.form.groom],
       [() => sim.text(id, "Мадина"), uz.form.bride],
       [() => sim.click(id, "Ўзимизники"), uz.form.relationNikoh],
@@ -188,7 +188,7 @@ describe("«Назад» на каждом шаге анкеты", () => {
     expect(o.data.events[0]).toMatchObject({ kind: "nikohBazm", time: "18:30", location: { lat: 42.3, lng: 69.76 } });
     expect(o.data.events[1]).toMatchObject({ kind: "nahorgi", time: "06:00", date: "2026-11-14" });
     expect(o.data.relation).toBe("ozimiz");
-    expect(o.templateId).toBe("saodat-kaliti");
+    expect(o.templateId).toBe("muhr");
   });
 
   it("«Назад» с первого вопроса — в меню; «Назад» с локации возвращает меню-клавиатуру", async () => {

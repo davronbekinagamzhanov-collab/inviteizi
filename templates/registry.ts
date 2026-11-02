@@ -179,6 +179,11 @@ const rawDesigns: RawDesign[] = [
   design("sahar-maktubi", 110, "nahorgi", "simple", false, () => import("./themes/sahar-maktubi/Design")),
   design("umr-sahifalari", 111, "yubiley", "scroll", true, () => import("./themes/umr-sahifalari/Design"), {art:"/art/lola-ehtirom.webp"}),
   design("ehtirom-kartasi", 112, "yubiley", "simple", false, () => import("./themes/ehtirom-kartasi/Design")),
+  // «Натуральные» пилоты: настоящие фото, рукописные акценты, фото клиента (02.11.2026)
+  design("muhr", 113, "nikoh", "animated", false, () => import("./themes/muhr/Design"), { clientPhotos: true }),
+  design("ipak", 114, "nikoh", "animated", false, () => import("./themes/ipak/Design"), { clientPhotos: true }),
+  design("bog", 115, "sunnat", "scroll", false, () => import("./themes/bog/Design"), { clientPhotos: true }),
+  design("tong-dasturxon", 116, "nahorgi", "scroll", false, () => import("./themes/tong-dasturxon/Design"), { clientPhotos: true }),
 
 ];
 
@@ -188,7 +193,7 @@ const STYLE_OF: Record<DesignStyle, string[]> = {
   floral: ["umr-sahifalari","pion-guldasta", "ipak-romol", "paxta-gul", "visol-rishta", "kabutar-salom", "umr-daraxti", "rayhon-sahari", "siyoh-duo", "shabnam-visol", "uzum-hovli"],
   national: ["sunnat-muqova", "sunnat-nasab","ganch-peshtoq", "rishton-koshin", "oq-ot", "sayram-hovli", "doppicha", "adras-nishon", "suzani-yol", "sopol-navo", "girih-nur", "dutor-navosi", "minor-satr", "kumush-taroq", "mis-kafgir", "oq-chinni", "tonggi-qozon", "yelpigich-ziynat"],
   dark: ["sapfir", "shohona-baxmal"],
-  photo: ["tandir-nuri", "atirgul", "dasturxon", "bodom-guli", "samarqand-kitob", "tonggi-choy", "gulbog-sahifa", "lola-ehtirom", "anor-bogi"],
+  photo: ["muhr", "ipak", "bog", "tong-dasturxon", "tandir-nuri", "atirgul", "dasturxon", "bodom-guli", "samarqand-kitob", "tonggi-choy", "gulbog-sahifa", "lola-ehtirom", "anor-bogi"],
 };
 
 function styleOf(id: string): DesignStyle {
@@ -215,11 +220,14 @@ export const ACCEPTED = new Set([
   "shirin-tilak", "minor-satr", "kumush-taroq", "shabnam-visol", "visol-soati",
   "dutor-navosi", "tut-qogozi", "qosh-uzuk", "yelpigich-ziynat", "saodat-kaliti",
   "sunnat-muqova", "sunnat-nasab", "sahar-ipagi", "sahar-maktubi", "umr-sahifalari", "ehtirom-kartasi",
+  "muhr", "ipak", "bog", "tong-dasturxon",
   // "anor-bogi" — скрыт по замечанию владельца 24.10 (код остаётся)
 ]);
 
 /** Дизайны для клиентов: только принятые */
 export const DISPLAY_PRIORITY: readonly string[] = [
+  // Натуральные пилоты — первыми в своих тадбирах
+  "muhr", "ipak", "bog", "tong-dasturxon",
   "saodat-kaliti", "kabutar-salom", "samarqand-kitob", "qosh-uzuk", "yelpigich-ziynat",
   "ipak-romol", "marvarid-satr", "rishton-koshin", "dutor-navosi", "kumush-taroq",
   "bodom-guli", "atirgul", "oltin-monogramma", "gulbog-sahifa", "shohona-baxmal",

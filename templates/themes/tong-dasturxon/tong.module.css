@@ -1,0 +1,71 @@
+/* «Тонгги дастурхон»: тёплая бумага, тёмный гранат, настоящий плов. Тихо, крупно, с уважением */
+.page { background: var(--n-paper); color: var(--n-ink); font-family: var(--n-text); }
+
+/* ── Плов и время ── */
+.hero { position: relative; }
+.plov { width: 100%; }
+.timeBlock { position: relative; margin-top: -58px; padding: 0 24px; display: flex; flex-direction: column; align-items: flex-end; }
+.morning { margin-top: 2px; font-size: 50px; line-height: 1.2; color: var(--n-accent); margin-right: 8px; }
+.bigTime { font-family: var(--n-serif); font-size: 128px; font-weight: 300; line-height: .82; letter-spacing: -.03em; font-variant-numeric: lining-nums; }
+
+/* ── Повод и имя ── */
+.who { padding: 52px 28px 0; }
+.cause { font-family: var(--n-serif); font-style: italic; font-size: 21px; line-height: 1.35; color: var(--n-accent); max-width: 30ch; }
+.name { margin-top: 10px; font-family: var(--n-serif); font-weight: 500; font-size: var(--fit, 50px); line-height: 1.04; }
+.title { margin-top: 12px; font-size: 14px; letter-spacing: .22em; text-transform: uppercase; }
+
+/* ── Приветствие ── */
+.letter { padding: 52px 28px 0 64px; }
+.letter h2 { font-family: var(--n-serif); font-size: 25px; font-weight: 500; line-height: 1.2; }
+.letter p { margin-top: 14px; font-size: 17px; line-height: 1.8; }
+
+/* ── Дата: слева день, справа календарь ── */
+.date { display: grid; grid-template-columns: 92px 1fr; gap: 12px; align-items: end; padding: 6px 20px 0 24px; }
+.dateTitle { padding: 64px 24px 0; }
+.dateSide { display: flex; flex-direction: column; }
+.script { display: block; font-size: 64px; line-height: 1.2; color: var(--n-accent); }
+.right { text-align: right; }
+.weekday { margin-top: 4px; font-size: 15px; }
+.dayNum { font-family: var(--n-serif); font-size: 84px; font-weight: 300; line-height: .9; }
+.cal { min-width: 0; }
+
+/* ── Программа (если тадбиров несколько) ── */
+.program { padding: 72px 24px 0; }
+.rows { list-style: none; margin: 10px 0 0; padding: 0; }
+.row { display: grid; grid-template-columns: 112px 1fr; gap: 12px; padding: 18px 0; border-top: 1px solid #dccab5; }
+.row:last-child { border-bottom: 1px solid #dccab5; }
+.rowTime { font-family: var(--n-serif); font-size: 42px; font-weight: 300; line-height: 1; font-variant-numeric: lining-nums; }
+.rowText { display: flex; flex-direction: column; gap: 2px; min-width: 0; font-size: 16px; line-height: 1.45; overflow-wrap: anywhere; }
+.rowText strong { font-family: var(--n-serif); font-size: 20px; font-weight: 500; }
+
+/* ── Манзил ── */
+.place { padding: 72px 24px 0; }
+.venue { margin-top: 14px; padding-left: 18px; border-left: 2px solid var(--n-accent); }
+.venue + .venue, div + div > .venue { margin-top: 30px; }
+.venue h3 { font-family: var(--n-serif); font-size: 27px; font-weight: 500; line-height: 1.15; overflow-wrap: anywhere; }
+.venue p { margin-top: 6px; font-size: 16px; line-height: 1.6; overflow-wrap: anywhere; }
+.map { margin-top: 14px; border: 1px solid var(--n-accent); color: var(--n-accent); border-radius: 999px; padding: 11px 20px; background: transparent; }
+
+/* ── Нон и чай ── */
+.pair { position: relative; height: 470px; margin-top: 72px; }
+.non { position: absolute; left: 0; top: 0; width: 64%; }
+.tea { position: absolute; right: 22px; top: 190px; width: 42%; border: 6px solid var(--n-paper); }
+
+/* ── Хозяева ── */
+.hosts { padding: 40px 24px 0; }
+.hostsLabel { font-size: 14px; letter-spacing: .22em; text-transform: uppercase; color: var(--n-accent); }
+.hostsName { margin-top: 8px; font-family: var(--n-serif); font-size: 34px; font-weight: 500; line-height: 1.12; overflow-wrap: anywhere; }
+
+/* ── Таймер: маленький, спокойный ── */
+.count { margin: 64px 24px 0; padding: 22px 0; border-top: 1px solid #dccab5; border-bottom: 1px solid #dccab5; }
+.countLead { font-family: var(--n-serif); font-style: italic; font-size: 19px; }
+.countGrid { margin-top: 10px; display: grid; grid-template-columns: repeat(4, 1fr); }
+.countBox { display: flex; flex-direction: column; }
+.countNum { font-family: var(--n-serif); font-size: 38px; font-weight: 400; line-height: 1; color: var(--n-accent); }
+.countLabel { margin-top: 4px; font-size: 13px; }
+.countToday { margin-top: 8px; font-family: var(--n-serif); font-size: 26px; }
+
+/* ── Подпись ── */
+.sign { padding: 52px 24px 0; }
+.signLead { font-family: var(--n-serif); font-style: italic; font-size: 19px; }
+.signScript { display: block; margin-top: 4px; font-size: 58px; line-height: 1.25; color: var(--n-accent); }

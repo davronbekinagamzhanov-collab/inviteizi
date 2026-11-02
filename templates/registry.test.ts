@@ -6,9 +6,9 @@ import {photoAttributions} from "@/texts/uz-cyrl";
 vi.mock("next/font/local",()=>({default:()=>({variable:"test-font"})}));
 
 describe("catalog acceptance integrity",()=>{
-  it("retains fifty original designs and adds the six approved final-stage combinations",()=>{
-    const expected={nikoh:{simple:5,scroll:10,animated:15},nahorgi:{simple:4,scroll:3,animated:5},sunnat:{simple:2,scroll:2,animated:3},yubiley:{simple:2,scroll:3,animated:2}} as const;
-    expect(activeDesigns()).toHaveLength(56);expect(ACCEPTED.size).toBe(56);expect(ACCEPTED.has('anor-bogi')).toBe(false);
+  it("retains fifty original designs, the six final-stage combinations and four natural pilots",()=>{
+    const expected={nikoh:{simple:5,scroll:10,animated:17},nahorgi:{simple:4,scroll:4,animated:5},sunnat:{simple:2,scroll:3,animated:3},yubiley:{simple:2,scroll:3,animated:2}} as const;
+    expect(activeDesigns()).toHaveLength(60);expect(ACCEPTED.size).toBe(60);expect(ACCEPTED.has('anor-bogi')).toBe(false);
     for(const occasion of Object.keys(expected) as (keyof typeof expected)[]){const list=activeDesigns().filter(d=>d.occasion===occasion);expect({simple:list.filter(d=>d.format==='simple').length,scroll:list.filter(d=>d.format==='scroll').length,animated:list.filter(d=>d.format==='animated').length}).toEqual(expected[occasion]);}
   });
   it("classifies by functionality and preserves ambiguous tariffs pending owner review",async()=>{

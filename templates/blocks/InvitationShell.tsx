@@ -5,8 +5,8 @@ import { useEffect, type CSSProperties, type ReactNode } from "react";
 import type { Invitation } from "./useInvitation";
 import { MusicButton } from "./MusicButton";
 import { Watermark } from "./Watermark";
-import { BrandBadge, BrandFooter } from "./Brand";
-import { Rsvp } from "./Rsvp";
+import { BrandBadge, BrandFooter, type PhotoCredit } from "./Brand";
+import { Rsvp, type RsvpLook } from "./Rsvp";
 
 /**
  * Оболочка любого дизайна: колонка шириной телефона, аудио, кнопка ▶/⏸, водяной знак «НАМУНА».
@@ -21,6 +21,10 @@ export function InvitationShell({
   fontsClassName = "",
   musicButtonClassName,
   pageColor,
+  rsvpLook,
+  credits,
+  creditClassName,
+  epilogue,
   children,
 }: {
   inv: Invitation;
@@ -32,6 +36,13 @@ export function InvitationShell({
   musicButtonClassName?: string;
   /** Цвет за краями страницы (виден, когда телефон «пружинит» при листании) */
   pageColor?: string;
+  /** Форма «Келасизми?» в цветах дизайна (нет — прежняя карточка) */
+  rsvpLook?: RsvpLook;
+  /** Авторы фото дизайна: строка «Сурат: …» внизу */
+  credits?: PhotoCredit[];
+  creditClassName?: string;
+  /** Блок после формы ответов (подпись семьи), перед бейджем */
+  epilogue?: ReactNode;
   children: ReactNode;
 }) {
   useEffect(() => {
@@ -55,8 +66,9 @@ export function InvitationShell({
 
           {children}
 
-          {inv.data.rsvpSlug && <Rsvp slug={inv.data.rsvpSlug} preview={inv.mode === "demo"} />}
-          <BrandFooter />
+          {inv.data.rsvpSlug && <Rsvp slug={inv.data.rsvpSlug} preview={inv.mode === "demo"} look={rsvpLook} />}
+          {epilogue}
+          <BrandFooter credits={credits} creditClassName={creditClassName} />
 
           {inv.hasMusic && inv.opened && (
             <MusicButton
