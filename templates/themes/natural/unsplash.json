@@ -43,6 +43,17 @@
     "authorUrl": "https://unsplash.com/@adrianaa076",
     "photoUrl": "https://unsplash.com/photos/white-tulips-in-white-background-JfjLTyV8fxY"
   },
+  "bog-tulips-pink": {
+    "id": "dd_QrgUCa5g",
+    "raw": "https://images.unsplash.com/photo-1774870041837-66a4cb4fdab9?ixid=M3wxMTIxNDYwfDB8MXxzZWFyY2h8MTF8fHdoaXRlJTIwdHVsaXBzJTIwYm91cXVldCUyMHNvZnR8ZW58MXwxfHx8MTc5MzY0MDE3NXww",
+    "width": 5152,
+    "height": 7728,
+    "color": "#a68c8c",
+    "alt": "Pink and white tulips in a white vase",
+    "author": "Pascal Debrunner",
+    "authorUrl": "https://unsplash.com/@debrupas",
+    "photoUrl": "https://unsplash.com/photos/pink-and-white-tulips-in-a-white-vase-dd_QrgUCa5g"
+  },
   "dastur-plov": {
     "id": "Zz37fc9SZ5U",
     "raw": "https://images.unsplash.com/photo-1671048117293-6b2d4000d146?ixid=M3wxMTIxNDYwfDB8MXxzZWFyY2h8N3x8cGxvdiUyMHBpbGFmfGVufDF8MXx8fDE3OTM2NDAxMDV8MA",
@@ -65,6 +76,17 @@
     "authorUrl": "https://unsplash.com/@arrogant_7007",
     "photoUrl": "https://unsplash.com/photos/a-plate-of-food-with-meat-and-rice-on-a-table-IuQl4SNJO3Q"
   },
+  "dastur-plov-top": {
+    "id": "pwFCqIdUe8w",
+    "raw": "https://images.unsplash.com/photo-1671048116858-e8ef69175b2d?ixid=M3wxMTIxNDYwfDB8MXxzZWFyY2h8MXx8cGxvdiUyMHBpbGFmfGVufDF8MXx8fDE3OTM2NDAxMDV8MA",
+    "width": 3947,
+    "height": 5921,
+    "color": "#a6400c",
+    "alt": "a plate of food on a wooden table",
+    "author": "otabek xatipov",
+    "authorUrl": "https://unsplash.com/@arrogant_7007",
+    "photoUrl": "https://unsplash.com/photos/a-plate-of-food-on-a-wooden-table-pwFCqIdUe8w"
+  },
   "dastur-tea": {
     "id": "YvtdTGNOwVY",
     "raw": "https://images.unsplash.com/photo-1759615835982-901a88fc4883?ixid=M3wxMTIxNDYwfDB8MXxzZWFyY2h8NHx8dGVhcG90JTIwdGVhJTIwY3VwcyUyMHRhYmxlJTIwbW9ybmluZ3xlbnwxfDF8fHwxNzkzNjQwMTY1fDA",
@@ -86,6 +108,17 @@
     "author": "Mayur Roxan",
     "authorUrl": "https://unsplash.com/@mayurroxanphotography",
     "photoUrl": "https://unsplash.com/photos/breakfast-with-tea-and-sandwiches-CJGQW85ZKeQ"
+  },
+  "dastur-tea-warm": {
+    "id": "eCo4KaFd_jQ",
+    "raw": "https://images.unsplash.com/photo-1615227875116-ae28a77814fb?ixid=M3wxMTIxNDYwfDB8MXxzZWFyY2h8MXx8dGVhcG90JTIwdGVhJTIwY3VwcyUyMHRhYmxlJTIwbW9ybmluZ3xlbnwxfDF8fHwxNzkzNjQwMTY1fDA",
+    "width": 3821,
+    "height": 5731,
+    "color": "#c0c0c0",
+    "alt": "clear glass mug on brown wooden table",
+    "author": "Luke Oslizlo",
+    "authorUrl": "https://unsplash.com/@lukaszmtw",
+    "photoUrl": "https://unsplash.com/photos/clear-glass-mug-on-brown-wooden-table-eCo4KaFd_jQ"
   },
   "ipak-bouquet": {
     "id": "QmwV53wTxHc",

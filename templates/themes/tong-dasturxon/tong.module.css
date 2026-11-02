@@ -4,7 +4,7 @@
 /* ── Плов и время ── */
 .hero { position: relative; }
 .plov { width: 100%; }
-.timeBlock { position: relative; margin-top: -58px; padding: 0 24px; display: flex; flex-direction: column; align-items: flex-end; }
+.timeBlock { position: relative; margin-top: 18px; padding: 0 24px; display: flex; flex-direction: column; align-items: flex-end; }
 .morning { margin-top: 2px; font-size: 50px; line-height: 1.2; color: var(--n-accent); margin-right: 8px; }
 .bigTime { font-family: var(--n-serif); font-size: 128px; font-weight: 300; line-height: .82; letter-spacing: -.03em; font-variant-numeric: lining-nums; }
 

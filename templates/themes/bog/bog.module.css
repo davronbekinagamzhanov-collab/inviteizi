@@ -55,7 +55,7 @@
 .countToday { margin-top: 12px; font-family: var(--n-serif); font-size: 28px; }
 
 /* ── Фото ── */
-.table { padding: 64px 0 0; }
+.table { padding: 64px 48px 0 24px; }
 .extra { padding: 40px 64px 0; }
 
 /* ── Подпись ── */
@@ -63,3 +63,6 @@
 .signScript { display: block; font-size: 60px; line-height: 1.25; color: var(--n-accent); }
 .signLead { margin-top: 6px; font-size: 16px; }
 .signHosts { margin-top: 4px; font-family: var(--n-serif); font-size: 28px; font-weight: 500; line-height: 1.15; overflow-wrap: anywhere; }
+
+/* Второе место — не копия первого: прижато вправо, без заливки, только тонкая линия */
+.place > div:nth-of-type(even) .venue { margin-left: 18%; background: transparent; border: 1px solid #c4d3c8; border-radius: 4px 22px 22px 22px; text-align: right; }

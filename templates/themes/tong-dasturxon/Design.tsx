@@ -39,13 +39,13 @@ export default function TongDasturxon({ data, mode }: TemplateProps) {
   // Плов — всегда настоящий плов (это суть наҳорги ош); фото клиента встают вместо нона и чая
   const plov = stock({
     kind: "unsplash",
-    slot: "dastur-plov",
+    slot: "dastur-plov-top",
     w: 860,
-    h: 1100,
+    h: 860,
   });
   const photos = shots(data, [
     { kind: "local", slot: "dastur-non" },
-    { kind: "unsplash", slot: "dastur-tea", w: 560, h: 700 },
+    { kind: "unsplash", slot: "dastur-tea-warm", w: 560, h: 700 },
   ]);
   const w = inv.main.when;
   const morning = inv.program[0] ?? inv.main;
@@ -85,9 +85,9 @@ export default function TongDasturxon({ data, mode }: TemplateProps) {
         <Photo
           src={plov.src}
           shape="torn"
-          ratio="4 / 5"
+          ratio="1 / 1"
           eager
-          position="50% 55%"
+          position="50% 50%"
           className={s.plov}
         />
         <div className={s.timeBlock}>
@@ -195,7 +195,6 @@ export default function TongDasturxon({ data, mode }: TemplateProps) {
           }}
         />
       </section>
-
     </InvitationShell>
   );
 }

@@ -283,6 +283,14 @@ export default function Muhr({ data, mode }: TemplateProps) {
             <span className={s.flap} />
             <span className={s.seal} aria-hidden>
               <svg viewBox="0 0 100 100" className={s.wax}>
+                {/* Сургуч: толща воска темнее к краю (объём, без блика) */}
+                <defs>
+                  <radialGradient id="muhr-wax" cx="42%" cy="38%" r="65%">
+                    <stop offset="0" stopColor="#4d6a87" />
+                    <stop offset=".7" stopColor="#3b5672" />
+                    <stop offset="1" stopColor="#2c4259" />
+                  </radialGradient>
+                </defs>
                 <path d="M50 3c7 0 10 4 16 5s11 0 15 5 2 10 5 15 8 9 8 16-5 10-6 16 1 11-3 16-10 5-15 8-9 8-16 8-10-5-16-6-11 1-16-3-5-10-8-15-8-9-8-16 5-10 6-16-1-11 3-16 10-5 15-8 9-8 16-8z" />
                 <circle cx="50" cy="50" r="33" className={s.waxRing} />
               </svg>

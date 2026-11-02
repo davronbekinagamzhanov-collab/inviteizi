@@ -53,9 +53,9 @@ export default function Ipak({ data, mode }: TemplateProps) {
     { kind: "unsplash", slot: "ipak-bouquet", w: 520, h: 650 },
     { kind: "unsplash", slot: "ipak-hands", w: 400, h: 400 },
   ]);
-  const candles = stock({
+  const silk = stock({
     kind: "unsplash",
-    slot: "ipak-candles",
+    slot: "ipak-silk",
     w: 860,
     h: 640,
   });
@@ -84,7 +84,7 @@ export default function Ipak({ data, mode }: TemplateProps) {
         radius: "22px",
       }}
       credits={[
-        ...creditsOf([...photos, candles]),
+        ...creditsOf([...photos, silk]),
         localCredit("ipak-silk-video"),
       ]}
       creditClassName="text-[#3b322b]/60"
@@ -115,9 +115,11 @@ export default function Ipak({ data, mode }: TemplateProps) {
           <span ref={groom} className={s.nameLine}>
             <Words text={data.groom ?? ""} />
           </span>
-          <Script text={t.natural.and} className={s.and} />
-          <span ref={bride} className={`${s.nameLine} ${s.nameRight}`}>
-            <Words text={data.bride ?? ""} />
+          <span className={s.brideRow}>
+            <Script text={t.natural.and} className={s.and} />
+            <span ref={bride} className={s.nameLine}>
+              <Words text={data.bride ?? ""} />
+            </span>
           </span>
         </h1>
         <p className={s.occasion}>{t.occasionTitles[inv.occasion]}</p>
@@ -171,20 +173,13 @@ export default function Ipak({ data, mode }: TemplateProps) {
             <p className={s.eventTime}>{t.date.clock(e.time)}</p>
             <div className={s.eventText}>
               <h3>{e.title}</h3>
-              <p>
-                {t.weekdays[e.when.weekdayIndex]},{" "}
-                {t.date.long(e.when.day, e.when.monthIndex, e.when.year)}
-              </p>
+              <p>{t.weekdays[e.when.weekdayIndex]}</p>
+              <p>{t.date.long(e.when.day, e.when.monthIndex, e.when.year)}</p>
               <p className={s.eventVenue}>{e.venueName}</p>
             </div>
           </article>
         ))}
-        <Photo
-          src={candles.src}
-          shape="round"
-          ratio="4 / 3"
-          className={s.candles}
-        />
+        <Photo src={silk.src} shape="round" ratio="4 / 3" className={s.silk} />
       </section>
 
       <section className={s.date}>

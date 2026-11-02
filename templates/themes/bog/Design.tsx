@@ -39,7 +39,7 @@ export default function Bog({ data, mode }: TemplateProps) {
   const inv = useInvitation(data, mode, { melody, opening: false });
   // 1 — круг (фото мальчика или тюльпаны), 2 — белые тюльпаны в рваной рамке
   const photos = shots(data, [
-    { kind: "unsplash", slot: "bog-tulips", w: 640, h: 640 },
+    { kind: "unsplash", slot: "bog-tulips-pink", w: 640, h: 640 },
     { kind: "unsplash", slot: "bog-tulips-2", w: 860, h: 640 },
   ]);
   const extra = (data.photos ?? []).slice(2);
@@ -190,7 +190,7 @@ export default function Bog({ data, mode }: TemplateProps) {
         <Photo
           src={photos[1].src}
           client={photos[1].client}
-          shape="torn"
+          shape="round"
           ratio="4 / 3"
         />
       </section>
@@ -200,7 +200,6 @@ export default function Bog({ data, mode }: TemplateProps) {
           <Photo src={extra[0]} client shape="round" ratio="4 / 5" />
         </section>
       )}
-
     </InvitationShell>
   );
 }
