@@ -5,8 +5,8 @@
  */
 import { env } from "./env";
 
-export type Bucket = "art" | "previews" | "music" | "receipts" | "deploy";
-const PUBLIC_BUCKETS = new Set<Bucket>(["art", "previews", "music"]);
+export type Bucket = "art" | "previews" | "music" | "photos" | "receipts" | "deploy";
+const PUBLIC_BUCKETS = new Set<Bucket>(["art", "previews", "music", "photos"]);
 
 const encodePath = (path: string) => path.split("/").map(encodeURIComponent).join("/");
 
@@ -54,4 +54,9 @@ export async function uploadFile(
 export async function signedReadUrl(bucket: Bucket, path: string, seconds = 3600): Promise<string> {
   const { signedUrl } = await gate<{ signedUrl: string }>({ action: "signRead", bucket, path, expiresIn: seconds });
   return signedUrl;
+}
+
+/** Удалить файлы бакета (фото клиента после конца приглашения). Нет файла — не ошибка */
+export async function removeFiles(bucket: Bucket, paths: string[]): Promise<void> {
+  for (const path of paths) await gate<{ ok: boolean }>({ action: "remove", bucket, path });
 }

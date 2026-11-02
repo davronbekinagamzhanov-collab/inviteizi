@@ -6,6 +6,7 @@ import type { BotUpdate } from "../update";
 import type { Ctx, Deps, Draft, Result, Step, StepId } from "./types";
 import { cat, catalog, fmt } from "./steps-order";
 import { age, bride, cause, groom, hosts, person, relation, sideAsk, sideBride } from "./steps-form";
+import { photoAsk, photoUpload } from "./steps-photo";
 import { evPlaces, evVenueName, evMap, evLink, evAddress, evDate, evLoc, evSameDay, evTime, evTimeCustom, evVenue, more } from "./steps-event";
 import { evMenu, music, musicList, musicOwn, review, rsvp, text, textOwn } from "./steps-final";
 import { approve, askReceipt, askRejectReason, editOrder, myOrders, payOrder, receipt, reject, resendLink, rsvpAnswers } from "./orders";
@@ -41,6 +42,8 @@ export const steps: Record<StepId, Step> = {
   hosts,
   sideAsk,
   sideBride,
+  photoAsk,
+  photoUpload,
   evDate,
   evSameDay,
   evTime,

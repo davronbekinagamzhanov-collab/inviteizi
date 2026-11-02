@@ -93,6 +93,8 @@ type OrderRow = {
   paid_at: Date | null;
   payment_reminded_at: Date | null;
   rsvp: boolean | null;
+  /** Нет колонки до миграции client_photos — тогда undefined */
+  photos?: string[] | null;
   admin_reminded_at: Date | null;
   expires_at: Date | null;
   events: EventJson[];
@@ -155,6 +157,7 @@ function toData(r: OrderRow): InvitationData {
   put(d, "textId", r.text_id);
   put(d, "customText", r.custom_text);
   put(d, "rsvp", r.rsvp);
+  if (r.photos?.length) d.photos = r.photos;
   return d;
 }
 
@@ -207,7 +210,7 @@ function toMusicRecord(r: MusicRow): MusicRecord {
   };
 }
 
-type Columns = Record<string, string | number | boolean | Date | null>;
+type Columns = Record<string, string | number | boolean | Date | string[] | null>;
 
 function dataColumns(d: InvitationData): Columns {
   return {
@@ -225,6 +228,8 @@ function dataColumns(d: InvitationData): Columns {
     text_id: d.textId ?? null,
     custom_text: d.customText ?? null,
     rsvp: d.rsvp ?? null,
+    // Колонка photos появляется миграцией client_photos: заказы без фото её не трогают
+    ...(d.photos !== undefined && { photos: d.photos.length ? d.photos : null }),
   };
 }
 

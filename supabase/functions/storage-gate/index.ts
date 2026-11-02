@@ -1,12 +1,13 @@
 // storage-gate: подписанные ссылки на загрузку и чтение файлов хранилища для сервера InviteIZI.
 // Ключа service_role у сервера нет: он есть только здесь, внутри Supabase.
-// Вызов: POST JSON {action: "signUpload" | "signRead", bucket, path, expiresIn?} + заголовок x-gate-secret.
+// Вызов: POST JSON {action: "signUpload" | "signRead" | "remove", bucket, path, expiresIn?} + заголовок x-gate-secret.
+// remove — только бакет photos (фото клиентов удаляются через 30 дней после конца приглашения).
 // Сам секрет в коде не хранится — только его SHA-256 (печатает scripts/make-secrets.mjs).
 // Деплой: verify_jwt = false (проверка по x-gate-secret).
 import { createClient } from "npm:@supabase/supabase-js@2.49.4";
 
 const GATE_SECRET_SHA256 = "b867d2fbfca497853eccacaed4c4f6461bf1a0b1b8fe8d581774d5ed7e41f40c";
-const BUCKETS = new Set(["art", "previews", "music", "receipts", "deploy"]);
+const BUCKETS = new Set(["art", "previews", "music", "photos", "receipts", "deploy"]);
 const PATH_RE = /^[A-Za-z0-9][A-Za-z0-9._\-/]{0,511}$/;
 
 const json = (status: number, body: unknown) =>
@@ -67,6 +68,13 @@ Deno.serve(async (req) => {
     const { data, error } = await sb.storage.from(bucket).createSignedUrl(path, seconds);
     if (error || !data) return json(502, { error: "storage", message: error?.message });
     return json(200, { signedUrl: data.signedUrl });
+  }
+
+  if (action === "remove") {
+    if (bucket !== "photos") return json(400, { error: "bad_bucket" });
+    const { error } = await sb.storage.from(bucket).remove([path]);
+    if (error) return json(502, { error: "storage", message: error.message });
+    return json(200, { ok: true });
   }
 
   return json(400, { error: "bad_action" });

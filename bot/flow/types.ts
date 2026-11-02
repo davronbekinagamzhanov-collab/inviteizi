@@ -21,6 +21,10 @@ export type Deps = {
   now: () => Date;
   /** Скопировать песню клиента из Telegram в Storage (бакет music); вернуть публичный адрес */
   saveMusic?: (fileId: string, userId: number) => Promise<string | undefined>;
+  /** Фото клиента из Telegram → WebP в Storage (бакет photos); вернуть публичный адрес */
+  savePhoto?: (fileId: string, userId: number) => Promise<string>;
+  /** Удалить фото клиента из Storage (cron, через 30 дней после конца приглашения) */
+  removePhotos?: (urls: string[]) => Promise<void>;
 };
 
 /** Шаги анкеты (users.step) */
@@ -38,6 +42,8 @@ export type StepId =
   | "hosts"
   | "sideAsk"
   | "sideBride"
+  | "photoAsk"
+  | "photoUpload"
   | "evDate"
   | "evSameDay"
   | "evTime"

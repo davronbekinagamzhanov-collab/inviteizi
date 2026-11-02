@@ -4,6 +4,7 @@ import type { InlineButton } from "../tg";
 import { t } from "@/texts/uz-cyrl";
 import { designsFor, backRow, data, designLine, editOrSend, eventLabel, finalData, fmtDate, ib, inline, MAX_CUSTOM_TEXT, MAX_MUSIC_BYTES, priceNote, send } from "./util";
 import { confirmDraft } from "./orders";
+import { photoStepFor } from "./steps-photo";
 import { recordBotError, toEntry } from "../errors";
 import { MusicTooBigError } from "../own-music";
 
@@ -213,6 +214,7 @@ async function summary(c: Ctx) {
   }
   lines.push(await musicLine(c));
   lines.push(d.rsvp ? c.tx.rsvp.reviewOn : c.tx.rsvp.reviewOff);
+  if (photoStepFor(c)) lines.push(c.tx.photo.review(d.photos?.length ?? 0));
   lines.push("", priceNote(c.tx));
   return { text: lines.join("\n"), d };
 }
@@ -234,7 +236,7 @@ export const review: Step = {
     rows.push(row2);
     d.events.forEach((e, i) => rows.push([ib(c, r.editEvent(i + 1, eventLabel(c.tx, e.kind)), `ev:${i}`)]));
     rows.push([ib(c, r.editText, "text"), ib(c, r.editMusic, "music"), ib(c, r.editDesign, "design")]);
-    rows.push([ib(c, c.tx.rsvp.edit, "rsvp")]);
+    rows.push(photoStepFor(c) ? [ib(c, c.tx.rsvp.edit, "rsvp"), ib(c, c.tx.photo.edit, "photo")] : [ib(c, c.tx.rsvp.edit, "rsvp")]);
     rows.push([ib(c, r.confirm, "ok")]);
     if (c.s.back.length) rows.push(backRow(c));
     await send(c, text, inline(rows));
@@ -260,6 +262,8 @@ export const review: Step = {
         return edit("music");
       case "rsvp":
         return edit("rsvp");
+      case "photo":
+        return photoStepFor(c) ? edit("photoAsk") : null;
       case "design":
         if (c.s.paid || c.s.orderId) {
           // A saved quote fixes format and amount; otherwise a cheap order could be upgraded for free.
@@ -281,7 +285,7 @@ export const review: Step = {
   },
 };
 
-function goEdit(c: Ctx, to: "groom" | "person" | "relation" | "hosts" | "sideAsk" | "cause" | "age" | "text" | "music" | "rsvp" | "fmt" | "catalog"): Result {
+function goEdit(c: Ctx, to: "groom" | "person" | "relation" | "hosts" | "sideAsk" | "cause" | "age" | "text" | "music" | "rsvp" | "photoAsk" | "fmt" | "catalog"): Result {
   c.s.ret = "review";
   return { to };
 }

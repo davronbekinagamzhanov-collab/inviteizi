@@ -2,6 +2,7 @@
 import type { Ctx, Result, Step } from "./types";
 import type { Relation } from "@/lib/types";
 import { after, backRow, curEvent, data, ib, inline, MAIN_EVENT, send } from "./util";
+import { afterNames } from "./steps-photo";
 
 /** Текст ответа: обрезаем пробелы, проверяем длину. Не текст — null (общая подсказка) */
 function textAnswer(c: Ctx, max: number): string | { hint: string } | null {
@@ -46,7 +47,7 @@ export const groom = textStep((c) => c.tx.form.groom, NAME_MAX, (c, v) => {
 
 export const bride = textStep((c) => c.tx.form.bride, NAME_MAX, (c, v) => {
   data(c).bride = v;
-  return { to: after(c, "relation") };
+  return afterNames(c);
 });
 
 export const person = textStep(
@@ -59,7 +60,7 @@ export const person = textStep(
   NAME_MAX * 2,
   (c, v) => {
     data(c).person = v;
-    return { to: after(c, "relation") };
+    return afterNames(c);
   },
 );
 
