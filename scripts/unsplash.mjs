@@ -67,7 +67,7 @@ if (cmd === "search") {
   const W = 240;
   const H = 320;
   const tiles = [];
-  for (const [i, h] of hits.entries()) {
+  for (const h of hits) {
     const k = cache[key].indexOf(h);
     const r = await fetch(`${h.raw}&w=${W * 2}&h=${H * 2}&fit=crop&q=60&fm=jpg`);
     if (!r.ok) { console.log(`  ${k}: превью не скачалось (${r.status})`); continue; }

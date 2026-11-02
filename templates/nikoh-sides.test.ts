@@ -20,7 +20,7 @@ describe("accepted non-Nikoh designs retain all supplied events and person data"
     if(data.age)expect(plain).toContain(String(data.age));
     for(const e of data.events){expect(plain).toContain(e.venueName);expect(plain).toContain(e.address);expect(html).toContain(mapLink(e));}
     expect(plain.includes("НАМУНА")).toBe(mode==="demo");
-  });
+  },20000); // первый случай платит за холодную сборку шаблонов
 });
 describe("every accepted Nikoh design renders both families",()=>{
   for(const d of activeDesigns().filter(d=>d.occasion==="nikoh"))for(const mode of ["demo","full"] as const)it(`${d.id} / ${mode}`,async()=>{
