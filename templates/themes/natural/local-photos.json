@@ -1,0 +1,38 @@
+{
+  "ipak-silk-video": {
+    "src": "/art/natural/ipak-silk-video.mp4",
+    "poster": "/art/natural/ipak-silk-video-poster.webp",
+    "author": "GreenCardShow",
+    "license": "Pixabay Content License",
+    "licenseUrl": "https://pixabay.com/service/license-summary/",
+    "source": "https://pixabay.com/videos/id-14534/"
+  },
+  "dastur-non": {
+    "src": "/art/natural/dastur-non.webp",
+    "author": "LoggaWiggler",
+    "license": "Pixabay Content License",
+    "licenseUrl": "https://pixabay.com/service/license-summary/",
+    "source": "https://pixabay.com/photos/loaf-flatbread-food-bread-stamp-196510/"
+  },
+  "sprig": {
+    "src": "/art/natural/sprig.webp",
+    "author": "SYG_Anime",
+    "license": "Pixabay Content License",
+    "licenseUrl": "https://pixabay.com/service/license-summary/",
+    "source": "https://pixabay.com/illustrations/leaves-plant-watercolor-eucalyptus-5672036/"
+  },
+  "eucalyptus": {
+    "src": "/art/natural/eucalyptus.webp",
+    "author": "PhuongLucky",
+    "license": "Pixabay Content License",
+    "licenseUrl": "https://pixabay.com/service/license-summary/",
+    "source": "https://pixabay.com/vectors/wedding-floral-flower-summer-7129271/"
+  },
+  "garland": {
+    "src": "/art/natural/garland.webp",
+    "author": "PhuongLucky",
+    "license": "Pixabay Content License",
+    "licenseUrl": "https://pixabay.com/service/license-summary/",
+    "source": "https://pixabay.com/vectors/frame-copy-space-design-decorate-6626904/"
+  }
+}

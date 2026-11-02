@@ -31,3 +31,14 @@ No new external photographs were downloaded. The originals, creators and CC0 1.0
 - `kabutar-salom`, `yelpigich-ziynat`, `samarqand-kitob` — the stage-1 mappings documented in `docs/reviews/wedding-premium-stage1.md`.
 
 `public/materials/paper-fibers.svg` is original project-authored decorative linework, not a photograph or third-party texture.
+
+
+- `natural/ipak-silk-video.mp4` (и постер) — GreenCardShow, https://pixabay.com/videos/id-14534/; Pixabay Content License. Изменения: фрагмент 8 с, вертикальная обрезка 540×960, без звука.
+
+- `natural/dastur-non.webp` — LoggaWiggler, https://pixabay.com/photos/loaf-flatbread-food-bread-stamp-196510/ Pixabay Content License. Изменения: уменьшение, WebP.
+
+- `natural/sprig.webp` — SYG_Anime, https://pixabay.com/illustrations/leaves-plant-watercolor-eucalyptus-5672036/; Pixabay Content License (иллюстрация-акварель, не ИИ). Изменения: обрезка, уменьшение, WebP с прозрачностью.
+
+- `natural/eucalyptus.webp` — PhuongLucky, https://pixabay.com/vectors/wedding-floral-flower-summer-7129271/; Pixabay Content License (иллюстрация-акварель, не ИИ). Изменения: обрезка, уменьшение, WebP с прозрачностью.
+
+- `natural/garland.webp` — PhuongLucky, https://pixabay.com/vectors/frame-copy-space-design-decorate-6626904/; Pixabay Content License (иллюстрация-акварель, не ИИ). Изменения: обрезка, уменьшение, WebP с прозрачностью.
