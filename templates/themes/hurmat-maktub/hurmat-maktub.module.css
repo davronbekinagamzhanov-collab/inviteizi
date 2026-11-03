@@ -1,0 +1,13 @@
+/* «Ҳурмат мактуби»: тёмная шапка-плашка во всю ширину листа, золотая сузана, крупный возраст */
+.letter { padding-top: 0; overflow: hidden; }
+.letter::before { border-color: color-mix(in srgb, var(--gold) 65%, transparent); }
+.head { margin: 0 -26px; padding: 34px 26px 28px; background: var(--c-accent); color: #fdf9f1; }
+.head p { color: #fdf9f1; }
+.motif { width: 96px; color: var(--gold); }
+.names { color: #fdf9f1; font-size: 46px; }
+.occasion { color: var(--gold) !important; }
+.head [class*="age"] { color: var(--gold); }
+.head [class*="age"] strong { font-size: 72px; }
+.head [class*="relation"] { color: #e9dcc2; }
+.place { background: #f3ede2; border-left: 3px solid var(--gold); border-radius: 4px; }
+.wait { color: var(--c-accent); }

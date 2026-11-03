@@ -193,11 +193,13 @@ const rawDesigns: RawDesign[] = [
   design("bordo-guldasta", 122, "yubiley", "simple", false, () => import("./themes/bordo-guldasta/Design")),
   // Батч 3 (123–138): структуры S1–S7, docs/design/batch3.md
   design("choy-maktub", 123, "nahorgi", "simple", false, () => import("./themes/choy-maktub/Design")),
+  design("oq-maktub", 127, "nikoh", "simple", false, () => import("./themes/oq-maktub/Design")),
+  design("hurmat-maktub", 138, "yubiley", "simple", false, () => import("./themes/hurmat-maktub/Design")),
 
 ];
 
 const STYLE_OF: Record<DesignStyle, string[]> = {
-  milk: ["choy-maktub", "sahar-ipagi", "sahar-maktubi", "ehtirom-kartasi","zarhal-eshik", "atlas-tolqin", "non-muhr", "marvarid-satr", "bugdoy-boshoq", "shirin-tilak", "visol-soati", "tut-qogozi"],
+  milk: ["hurmat-maktub", "oq-maktub", "choy-maktub", "sahar-ipagi", "sahar-maktubi", "ehtirom-kartasi","zarhal-eshik", "atlas-tolqin", "non-muhr", "marvarid-satr", "bugdoy-boshoq", "shirin-tilak", "visol-soati", "tut-qogozi"],
   gold: ["oltin-monogramma", "oltin-ot", "zarhal-lavha", "qosh-uzuk", "zarvaraq", "saodat-kaliti"],
   floral: ["bordo-guldasta", "lola-bodom", "tonggi-piyola", "muhrli-maktub", "gul-doira", "girih-barg", "umr-sahifalari","pion-guldasta", "ipak-romol", "paxta-gul", "visol-rishta", "kabutar-salom", "umr-daraxti", "rayhon-sahari", "siyoh-duo", "shabnam-visol", "uzum-hovli"],
   national: ["sunnat-muqova", "sunnat-nasab","ganch-peshtoq", "rishton-koshin", "oq-ot", "sayram-hovli", "doppicha", "adras-nishon", "suzani-yol", "sopol-navo", "girih-nur", "dutor-navosi", "minor-satr", "kumush-taroq", "mis-kafgir", "oq-chinni", "tonggi-qozon", "yelpigich-ziynat"],
@@ -229,7 +231,7 @@ export const ACCEPTED = new Set([
   // 117–122 — «Гулли рамка» (03.11.2026): никоҳ ×3, наҳорги ош, суннат, юбилей
   "gul-doira", "girih-barg", "muhrli-maktub", "tonggi-piyola", "lola-bodom", "bordo-guldasta",
   // 123–138 — батч 3
-   "choy-maktub",
+   "choy-maktub", "oq-maktub", "hurmat-maktub",
   // Скрыты по решению владельца 03.11.2026 (код и строки в БД остаются — оплаченные ссылки работают),
   // список — HIDDEN_03_11 ниже. «anor-bogi» скрыт ещё 24.10.
 ]);
