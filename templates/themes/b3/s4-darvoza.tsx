@@ -4,7 +4,8 @@
  * имя, тадбир и сана (видны с первого кадра). По нажатию створки распахиваются внутрь двора;
  * за ними каждая часть стоит в своём арочном окне, между окнами — полоса гириҳа.
  */
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
+import { useReducedMotion } from "motion/react";
 import type { TemplateProps } from "../types";
 import type { Score } from "../../blocks/synth";
 import { useInvitation } from "../../blocks/useInvitation";
@@ -26,8 +27,7 @@ function Window({ children, className }: { children: ReactNode; className?: stri
 export function Darvoza({ data, mode, melody, skin, look, motif, id }: TemplateProps & { melody: Score; skin: Skin; look: Look; motif: ReactNode; id: string }) {
   const inv = useInvitation(data, mode, { melody });
 
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => setReduced(window.matchMedia("(prefers-reduced-motion: reduce)").matches), []);
+  const reduced = useReducedMotion();
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   useEffect(() => () => clearTimeout(timer.current), []);
   const open = () => {

@@ -5,7 +5,8 @@
  * «Таклифномани очинг». По нажатию фото уходит вверх, как поднятый занавес, — под ним начинается рассказ:
  * глава 1 — текст рядом с узкой полосой фото, глава 2 — сана поверх фото-ленты, потом программа и манзил.
  */
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
+import { useReducedMotion } from "motion/react";
 import type { TemplateProps } from "../types";
 import type { Score } from "../../blocks/synth";
 import { useInvitation } from "../../blocks/useInvitation";
@@ -29,8 +30,7 @@ export function Hikoya({
   const [hero, second = hero, third = second] = photos.list;
   const w = inv.main.when;
 
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => setReduced(window.matchMedia("(prefers-reduced-motion: reduce)").matches), []);
+  const reduced = useReducedMotion();
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   useEffect(() => () => clearTimeout(timer.current), []);
   const open = () => {
