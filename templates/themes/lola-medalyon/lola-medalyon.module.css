@@ -1,0 +1,5 @@
+/* «Лола медальон»: кольцо розоватое, как бодом гули; тюльпан узкий */
+.ring { color: var(--blush); }
+.finMotif { width: 46px; }
+.mini:nth-child(2) { margin-top: 0; }
+.mini:nth-child(1) { margin-top: 26px; }
