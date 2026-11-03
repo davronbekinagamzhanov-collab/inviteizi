@@ -14,8 +14,8 @@ describe("весь путь наҳорги ош на русском", () => {
     await startRu(sim, id, "qr_sayram");
     expect((await sim.user(id))?.source).toBe("qr_sayram");
     await sim.click(id, ru.category.nahorgi);
-    await sim.click(id, /Анимированное/);
-    expect(sim.last(id).text).toMatch(/^№109 · Саҳар ипаги\nАнимированное · 8.000 ₸$/);
+    await sim.click(id, /С прокруткой/);
+    expect(sim.last(id).text).toMatch(/^№116 · Тонгги дастурхон\nС прокруткой · 6.000 ₸$/); // после чистки 03.11
     await sim.click(id, ru.catalog.buy);
 
     expect(sim.lastText(id)).toBe(ru.form.personNahorgi);
@@ -81,7 +81,7 @@ describe("весь путь наҳорги ош на русском", () => {
     await sim.click(id, ru.review.confirm);
 
     const [o] = await sim.repo.listOrdersByUser(id);
-    expect(o).toMatchObject({ slug: "jasurbek", status: "preview", occasion: "nahorgi", templateId: "sahar-ipagi", amount: 8_000 });
+    expect(o).toMatchObject({ slug: "jasurbek", status: "preview", occasion: "nahorgi", templateId: "tong-dasturxon", amount: 6_000 });
     expect(o.data).toMatchObject({ person: "Жасурбек", relation: "ogil", cause: "nikoh", hosts: "Раҳимовлар оиласи", customText: own });
     expect(o.data.textId).toBeUndefined();
     expect(o.data.events.map((e) => [e.kind, e.date, e.time])).toEqual([
@@ -99,7 +99,7 @@ describe("суннат с двумя мальчиками", () => {
     const id = 3;
     await startUz(sim, id);
     await sim.click(id, uz.category.sunnat);
-    await sim.click(id, /Анимацияли/);
+    await sim.click(id, /Оддий/);
     await sim.click(id, uz.catalog.buy);
     expect(sim.lastText(id)).toBe(uz.form.personSunnat);
     await sim.text(id, "Абдураҳмонжон ва Абдуллоҳжон");

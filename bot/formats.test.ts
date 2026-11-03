@@ -6,7 +6,7 @@ import {Sim,ADMIN} from "./testing/sim";
 import {nikohOrder,startUz,startRu} from "./testing/paths";
 import {uz} from "@/texts/bot-uz";
 import {ru} from "@/texts/bot-ru";
-import {formatsFor} from "./flow/util";
+import {designsFor,formatsFor} from "./flow/util";
 import {buttonLabels} from "./testing/fake-tg";
 
 afterEach(()=>{vi.unstubAllEnvs();vi.restoreAllMocks();});
@@ -17,7 +17,7 @@ describe("three invitation formats",()=>{
     await(lang==="uz"?startUz:startRu)(s,1);await s.click(1,tx.category.nikoh);
     expect(buttonLabels(s.last(1))).toEqual(expect.arrayContaining(FORMATS.map(f=>tx.format[f](`${PRICES[f].toLocaleString("ru-RU").replace(/\u00a0/g," ")} ₸`))));
     await s.click(1,new RegExp(tx.format.names.scroll));
-    expect(s.last(1).media).toContain("dutor-navosi.jpg");
+    expect(s.last(1).media).toContain(`${designsFor("nikoh","scroll")[0].id}.jpg`);
     expect(s.lastText(1)).toContain("6 000 ₸");
   });
   it.each(FORMATS)("saved orders reject a forged %s format change without repricing",async format=>{
@@ -49,14 +49,16 @@ describe("three invitation formats",()=>{
     await s.repo.saveStep(4,"catalog",{q:50,occasion:"nahorgi",format:"simple",catIdx:0});
     await s.callback(4,`a:50:${value}`,1);
     expect((await s.user(4))?.step).toBe("fmt");expect(s.lastText(4)).toContain(uz.format.ask);
-    expect(formatsFor("nahorgi")).toEqual(["animated","scroll"]);
+    expect(formatsFor("nahorgi")).not.toContain("simple");expect(formatsFor("nahorgi")).toContain("scroll");
   });
   it("an old catalog index never silently selects a different design after tariff changes",async()=>{
+    // Каталог до чистки 03.11: там у никоҳ/Оддий было 5+ дизайнов, индекс 4 существовал
+    vi.spyOn(registry,"activeDesigns").mockImplementation(()=>registry.everAccepted().sort((a,b)=>registry.catalogPosition(a)-registry.catalogPosition(b)));
     const s=new Sim();await startUz(s,5);
     await s.repo.saveStep(5,"catalog",{q:50,occasion:"nikoh",format:"simple",catIdx:4});
     await s.callback(5,"a:50:buy",1);
     expect((await s.user(5))?.step).toBe("catalog");
-    expect(s.last(5).media).toContain("ipak-romol.jpg");
+    expect(s.last(5).media).toContain(`${designsFor("nikoh","simple")[0].id}.jpg`);
     expect(await s.repo.listOrdersByUser(5)).toEqual([]);
     await s.click(5,uz.catalog.buy);expect((await s.user(5))?.step).toBe("groom");
   });

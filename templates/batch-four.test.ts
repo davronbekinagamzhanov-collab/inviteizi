@@ -1,6 +1,6 @@
 import {describe,it,expect} from "vitest";
 import sharp from "sharp";
-import {activeDesigns,ACCEPTED,designs,getDesign,longSample,PRICES} from "./registry";
+import {everAccepted,ACCEPTED,HIDDEN_03_11,designs,getDesign,longSample,PRICES} from "./registry";
 import {t} from "@/texts/uz-cyrl";
 import {Sim} from "@/bot/testing/sim";
 import {startUz,selectCatalogDesign} from "@/bot/testing/paths";
@@ -16,7 +16,7 @@ const batch=[
 
 describe("batch four: exactly five new complete designs",()=>{
   it("preserves previous accepted designs and fills five empty category/format cells",()=>{
-    const previous=activeDesigns().filter(d=>d.number<=81);
+    const previous=everAccepted().filter(d=>d.number<=81);
     expect(previous).toHaveLength(25);expect(designs.filter(d=>d.number<=81)).toHaveLength(26);expect(ACCEPTED.has("anor-bogi")).toBe(false);
     expect(previous.filter(d=>d.number>76).map(d=>d.id).sort()).toEqual(batch.map(([id])=>id).sort());
     for(const [o,counts] of [["nikoh",[4,1,6]],["nahorgi",[1,2,4]],["sunnat",[1,1,2]],["yubiley",[1,1,1]]] as const)
@@ -25,7 +25,7 @@ describe("batch four: exactly five new complete designs",()=>{
   for(const [id,occasion,format,number] of batch){
     it(`${id}: accepted identity, covers/OG and genuinely difficult sample data`,async()=>{
       const d=getDesign(id)!;
-      expect(d).toMatchObject({occasion,format,number,withPhoto:false});expect(ACCEPTED.has(id)).toBe(true);
+      expect(d).toMatchObject({occasion,format,number,withPhoto:false});expect(ACCEPTED.has(id)||HIDDEN_03_11.includes(id)).toBe(true);
       expect(t.designs[id]).toMatch(/[ўқғҳа-я]/i);
       expect(longSample(d).events).toHaveLength(3);
       expect(longSample(d).person!.length).toBeGreaterThan(10);
@@ -34,7 +34,8 @@ describe("batch four: exactly five new complete designs",()=>{
       expect((await sharp(`public/covers/${id}.jpg`).metadata())).toMatchObject({width:1080,height:1920,format:"jpeg"});
       expect((await sharp(`public/og/${id}.jpg`).metadata())).toMatchObject({width:420,height:620,format:"jpeg"});
     });
-    it(`${id}: existing bot catalog selects the right component and price`,async()=>{
+    it(`${id}: existing bot catalog selects the right component and price (or hides it after 03.11)`,async()=>{
+      if(!ACCEPTED.has(id)){expect(HIDDEN_03_11).toContain(id);expect(getDesign(id)).toBeDefined();return;}
       const s=new Sim();await startUz(s,17);await s.click(17,uz.category[occasion]);await s.click(17,new RegExp(uz.format.names[format]));
       await selectCatalogDesign(s,17,id);
       expect(s.last(17).media).toContain(`/covers/${id}.jpg`);

@@ -120,8 +120,10 @@ const cases = (["uz", "ru"] as const).flatMap((lang) =>
 );
 
 describe("все кнопки на всём пути клиента", () => {
-  it("проверяем все 4 тадбира и 3 тарифа", () => {
-    expect(cases).toHaveLength(2 * 4 * 3);
+  it("проверяем все 4 тадбира и все тарифы, где есть дизайны", () => {
+    // После чистки каталога 03.11 пустые тарифы бот не показывает
+    expect(new Set(cases.map((c) => c[1])).size).toBe(4);
+    expect(cases).toHaveLength(2 * OCCASIONS.reduce((n, o) => n + formatsFor(o).length, 0));
   });
   it.each(cases)("%s / %s / %s", async (lang, occasion, format) => {
     const log = vi.spyOn(console, "error").mockImplementation(() => {});

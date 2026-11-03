@@ -209,34 +209,42 @@ export const designs: Design[] = rawDesigns.map((d) => ({ ...d, style: styleOf(d
  * Остальные в работе: код остаётся, демо открывается по прямой ссылке, но в каталоге их нет.
  */
 export const ACCEPTED = new Set([
-  "oltin-monogramma", "sapfir", "oq-ot", "tonggi-qozon", "pion-guldasta",
-  "tandir-nuri", "ganch-peshtoq", "ipak-romol", "oltin-ot",
-  "zarhal-eshik", "rishton-koshin", "atirgul", "dasturxon",
-  "atlas-tolqin", "non-muhr", "shohona-baxmal", "paxta-gul", "bodom-guli", "samarqand-kitob", "tonggi-choy",
-  "oq-chinni", "doppicha", "sayram-hovli", "zarvaraq", "umr-daraxti",
-  "marvarid-satr", "gulbog-sahifa", "suzani-yol", "bugdoy-boshoq", "lola-ehtirom",
-  "zarhal-lavha", "adras-nishon", "mis-kafgir", "rayhon-sahari", "visol-rishta",
-  "uzum-hovli", "sopol-navo", "girih-nur", "siyoh-duo", "kabutar-salom",
-  "shirin-tilak", "minor-satr", "kumush-taroq", "shabnam-visol", "visol-soati",
-  "dutor-navosi", "tut-qogozi", "qosh-uzuk", "yelpigich-ziynat", "saodat-kaliti",
-  "sunnat-muqova", "sunnat-nasab", "sahar-ipagi", "sahar-maktubi", "umr-sahifalari", "ehtirom-kartasi",
-  "muhr", "ipak", "bog", "tong-dasturxon",
-  // "anor-bogi" — скрыт по замечанию владельца 24.10 (код остаётся)
+  // 1, 23, 61, 70, 113, 114 — никоҳ
+  "oltin-monogramma", "sapfir", "ganch-peshtoq", "shohona-baxmal", "muhr", "ipak",
+  // 78, 115 — суннат
+  "doppicha", "bog",
+  // 116 — наҳорги ош
+  "tong-dasturxon",
+  // 51, 81, 87 — юбилей
+  "pion-guldasta", "umr-daraxti", "zarhal-lavha",
+  // Скрыты по решению владельца 03.11.2026 (код и строки в БД остаются — оплаченные ссылки работают),
+  // список — HIDDEN_03_11 ниже. «anor-bogi» скрыт ещё 24.10.
 ]);
+
+/** Скрыты из каталога сайта и бота 03.11.2026 (номера 31, 41, 62–69, 71–77, 79, 80, 82–86, 88–112). Не удалять: заказы на них открываются */
+export const HIDDEN_03_11: readonly string[] = [
+  "oq-ot", "tonggi-qozon", "zarhal-eshik", "atlas-tolqin", "bodom-guli", "samarqand-kitob",
+  "ipak-romol", "rishton-koshin", "atirgul", "tandir-nuri", "dasturxon", "non-muhr",
+  "tonggi-choy", "paxta-gul", "oltin-ot", "oq-chinni", "sayram-hovli", "zarvaraq",
+  "marvarid-satr", "gulbog-sahifa", "suzani-yol", "bugdoy-boshoq", "lola-ehtirom", "adras-nishon",
+  "mis-kafgir", "rayhon-sahari", "visol-rishta", "uzum-hovli", "sopol-navo", "girih-nur",
+  "siyoh-duo", "kabutar-salom", "shirin-tilak", "minor-satr", "kumush-taroq", "shabnam-visol",
+  "visol-soati", "dutor-navosi", "tut-qogozi", "qosh-uzuk", "yelpigich-ziynat", "saodat-kaliti",
+  "sunnat-muqova", "sunnat-nasab", "sahar-ipagi", "sahar-maktubi", "umr-sahifalari", "ehtirom-kartasi"
+];
 
 /** Дизайны для клиентов: только принятые */
 export const DISPLAY_PRIORITY: readonly string[] = [
   // Натуральные пилоты — первыми в своих тадбирах
   "muhr", "ipak", "bog", "tong-dasturxon",
-  "saodat-kaliti", "kabutar-salom", "samarqand-kitob", "qosh-uzuk", "yelpigich-ziynat",
-  "ipak-romol", "marvarid-satr", "rishton-koshin", "dutor-navosi", "kumush-taroq",
-  "bodom-guli", "atirgul", "oltin-monogramma", "gulbog-sahifa", "shohona-baxmal",
-  "sunnat-muqova", "sunnat-nasab", "sahar-ipagi", "sahar-maktubi", "umr-sahifalari", "ehtirom-kartasi",
+  "oltin-monogramma", "ganch-peshtoq",
 ];
 export function catalogPosition(d: Pick<Design,"id"|"number">) {
   const i = DISPLAY_PRIORITY.indexOf(d.id);
   return i < 0 ? 1000 + d.number : i;
 }
+/** Все когда-либо принятые (каталог + скрытые 03.11): код живой, заказы на них открываются */
+export const everAccepted = () => designs.filter((d) => ACCEPTED.has(d.id) || HIDDEN_03_11.includes(d.id));
 export const activeDesigns = () => designs.filter((d) => ACCEPTED.has(d.id)).sort((a,b)=>catalogPosition(a)-catalogPosition(b));
 
 export function getDesign(id: string) {

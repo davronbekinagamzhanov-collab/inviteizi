@@ -7,7 +7,8 @@ import { activeDesigns } from "@/templates/registry";
 
 const BASE = "https://inviteizi.vercel.app";
 const animatedNikohCount=activeDesigns().filter(d=>d.occasion==="nikoh"&&d.format==="animated").length;
-const simpleNikoh=activeDesigns().filter(d=>d.occasion==="nikoh"&&d.format==="simple");
+// Листание проверяем на самом большом каталоге никоҳ (Анимацияли)
+const simpleNikoh=activeDesigns().filter(d=>d.occasion==="nikoh"&&d.format==="animated");
 
 describe("весь путь никоҳ на ўзбекском", () => {
   it("от /start insta до ссылки на НАМУНА", async () => {
@@ -186,7 +187,7 @@ describe("весь путь никоҳ на ўзбекском", () => {
     const sim = new Sim();
     await startUz(sim, 1);
     await sim.click(1, uz.category.nikoh);
-    await sim.click(1, /Оддий/);
+    await sim.click(1, new RegExp(uz.format.names.animated));
     const cat = sim.last(1);
     expect(buttonLabels(cat)).toContain(`1/${simpleNikoh.length}`);
     expect(cat.media).toBe(`${BASE}/covers/${simpleNikoh[0].id}.jpg`);
