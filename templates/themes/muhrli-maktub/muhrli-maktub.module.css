@@ -1,0 +1,45 @@
+/* «Муҳрли мактуб»: пудровый конверт, бордовый сургуч, цветущий бодом. Страница — арка, всё по центру и воздушно */
+
+/* ── Конверт ── */
+.envelope { position: fixed; inset: 0; z-index: 50; margin: 0 auto; width: 100%; max-width: 430px; overflow: hidden; perspective: 1400px; cursor: pointer; background: var(--e-paper) url("/materials/paper-fibers.svg"); background-size: 320px; transition: opacity .5s ease 1.8s; }
+.envelope[data-started="true"] { opacity: 0; }
+.letterCard { position: absolute; left: 9%; right: 9%; top: 16%; height: 50%; z-index: 1; display: flex; justify-content: center; padding-top: 18%; background: #fffdfb; border-radius: 4px; box-shadow: 0 10px 30px -18px rgba(60, 30, 20, .55); transition: transform .9s cubic-bezier(.22, 1, .36, 1) 1s; }
+.letterMono { font-size: 34px; color: var(--f-line); }
+.pocket { position: absolute; inset: 0; z-index: 3; background: linear-gradient(175deg, var(--e-light) 35%, var(--e-paper)); clip-path: polygon(0 36%, 50% 64%, 100% 36%, 100% 100%, 0 100%); }
+.pocket::after { content: ""; position: absolute; inset: 0; background: url("/materials/paper-fibers.svg"); background-size: 320px; opacity: .6; }
+.flapWrap { position: absolute; inset: 0; z-index: 4; transform-origin: 50% 0; filter: drop-shadow(0 6px 8px rgba(70, 40, 30, .28)); transition: transform .85s cubic-bezier(.55, 0, .25, 1) .4s, opacity .45s ease .75s; }
+.flap { position: absolute; inset: 0; display: flex; justify-content: center; background: linear-gradient(180deg, var(--e-dark), var(--e-paper)); clip-path: polygon(0 0, 100% 0, 100% 36%, 50% 68%, 0 36%); }
+.flapNames { margin-top: 13svh; display: flex; flex-direction: column; align-items: center; color: #fffaf6; line-height: 1.1; transition: opacity .3s ease; }
+.flapScript { font-size: 44px; color: #fffaf6; }
+.flapAnd { font-family: var(--n-serif); font-style: italic; font-size: 16px; opacity: .85; }
+.seal { position: absolute; left: 50%; top: 68%; width: 86px; height: 86px; margin: -43px 0 0 -43px; z-index: 5; transition: transform .5s cubic-bezier(.3, 0, .2, 1), opacity .45s ease .1s; }
+.wax { position: absolute; inset: 0; width: 100%; height: 100%; filter: drop-shadow(0 3px 3px rgba(60, 20, 15, .35)); }
+.wax path { fill: var(--e-wax); }
+.wax circle { fill: none; stroke: color-mix(in srgb, var(--e-wax) 70%, #000); stroke-width: 2; }
+.sealMono { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--n-serif); font-size: 23px; font-weight: 600; color: color-mix(in srgb, var(--e-wax) 45%, #fff); }
+.sealMono i { display: block; width: 1px; height: 20px; background: currentColor; opacity: .7; }
+.envFlowers { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
+.envTl { left: -18%; top: -6%; width: 36%; rotate: 150deg; }
+.envBr { right: -14%; bottom: -3%; width: 46%; rotate: -30deg; }
+.envTap { position: absolute; left: 0; right: 0; bottom: calc(9svh + env(safe-area-inset-bottom)); z-index: 7; text-align: center; font-family: var(--n-serif); font-size: 13px; letter-spacing: .28em; padding-left: .28em; text-transform: uppercase; color: #fffaf6; transition: opacity .3s ease; }
+.envelope[data-started="true"] .seal { transform: scale(1.18); opacity: 0; }
+.envelope[data-started="true"] .flapNames, .envelope[data-started="true"] .envTap { opacity: 0; }
+.envelope[data-started="true"] .flapWrap { transform: rotateX(-168deg); opacity: 0; }
+.envelope[data-started="true"] .letterCard { transform: translate3d(0, -24%, 0) scale(1.04); }
+@media (prefers-reduced-motion: reduce) { .envelope, .flapWrap, .letterCard, .seal { transition: none; } }
+
+/* ── Страница ── */
+.heroWrap { min-height: 100svh; display: grid; place-items: center; overflow: hidden; }
+.heroLeft { left: -18%; top: 12%; width: 50%; rotate: 18deg; }
+.heroRight { right: -18%; bottom: 8%; width: 50%; rotate: -164deg; }
+.card { position: relative; z-index: 2; width: min(72vw, 290px); aspect-ratio: .74; display: grid; place-items: center; padding-top: 18%; --f-name: 44px; }
+.card::before { content: ""; position: absolute; inset: 1.5%; border-radius: 48% 48% 0 0 / 38% 38% 0 0; background: var(--f-card); box-shadow: 0 18px 46px -30px rgba(75, 59, 58, .5); }
+.card > div { padding: 0 26px; }
+
+.letter h2 { font-family: var(--n-serif); font-style: italic; font-weight: 400; font-size: 26px; }
+.title { font-size: 56px; color: var(--e-wax); }
+.count { margin: 56px 24px 0; padding: 26px 0 28px; border-radius: 120px 120px 18px 18px; background: var(--f-card); }
+.venue { border-radius: 140px 140px 16px 16px; padding-top: 34px; }
+.finale { min-height: 260px; }
+.finLeft { left: -10%; top: 0; width: 40%; rotate: 24deg; }
+.finRight { right: -10%; top: 0; width: 40%; rotate: -24deg; }

@@ -314,9 +314,12 @@ export function tidy(text: string) {
 export function HandCircle({
   seen,
   className = "",
+  heart = false,
 }: {
   seen: boolean;
   className?: string;
+  /** Сердце вместо круга (цветочные дизайны) */
+  heart?: boolean;
 }) {
   return (
     <svg
@@ -327,11 +330,16 @@ export function HandCircle({
     >
       <path
         pathLength={1}
-        d="M44.5 7.8C36.2 3.1 22.4 3.6 13.6 10.2 5.2 16.6 3.3 28.4 8.6 37.6c5.6 9.6 18.9 13.9 30.6 11.5 11.4-2.3 19.6-10.9 19.2-21.1C58 18.3 50.6 10.6 41.2 7.4 35.6 5.5 29.9 5.7 25.2 6.9"
+        d={heart ? HEART : CIRCLE}
       />
     </svg>
   );
 }
+
+const HEART =
+  "M32 50C24 43 9 34 7.5 21.5 6.4 12.6 12.4 6 20 6c5.6 0 9.6 3.4 12 8.2C34.4 9.4 38.4 6 44 6c7.6 0 13.6 6.6 12.5 15.5C55 34 40 43 31.5 50.6";
+const CIRCLE =
+  "M44.5 7.8C36.2 3.1 22.4 3.6 13.6 10.2 5.2 16.6 3.3 28.4 8.6 37.6c5.6 9.6 18.9 13.9 30.6 11.5 11.4-2.3 19.6-10.9 19.2-21.1C58 18.3 50.6 10.6 41.2 7.4 35.6 5.5 29.9 5.7 25.2 6.9";
 
 /** Стрелки-завитки «от руки» между пунктами программы. dir — куда ведёт */
 const ARROWS = {
@@ -367,10 +375,12 @@ export function HandCalendar({
   date,
   className = "",
   title = true,
+  heart = false,
 }: {
   date: WeddingDate;
   className?: string;
   title?: boolean;
+  heart?: boolean;
 }) {
   const [ref, seen] = useSeen<HTMLDivElement>();
   const weeks = monthGrid(date.year, date.monthIndex);
@@ -401,7 +411,7 @@ export function HandCalendar({
           >
             {day ?? ""}
             {day === date.day && (
-              <HandCircle seen={seen} className={s.calCircle} />
+              <HandCircle seen={seen} heart={heart} className={s.calCircle} />
             )}
           </span>
         ))}

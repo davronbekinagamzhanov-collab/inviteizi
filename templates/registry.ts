@@ -184,13 +184,20 @@ const rawDesigns: RawDesign[] = [
   design("ipak", 114, "nikoh", "animated", false, () => import("./themes/ipak/Design"), { clientPhotos: true }),
   design("bog", 115, "sunnat", "scroll", false, () => import("./themes/bog/Design"), { clientPhotos: true }),
   design("tong-dasturxon", 116, "nahorgi", "scroll", false, () => import("./themes/tong-dasturxon/Design"), { clientPhotos: true }),
+  // ── «Гулли рамка»: акварельные цветы с краёв + карточка в центре, без фото (03.11.2026) ──
+  design("gul-doira", 117, "nikoh", "animated", false, () => import("./themes/gul-doira/Design")),
+  design("girih-barg", 118, "nikoh", "animated", false, () => import("./themes/girih-barg/Design")),
+  design("muhrli-maktub", 119, "nikoh", "animated", false, () => import("./themes/muhrli-maktub/Design")),
+  design("tonggi-piyola", 120, "nahorgi", "animated", false, () => import("./themes/tonggi-piyola/Design")),
+  design("lola-bodom", 121, "sunnat", "animated", false, () => import("./themes/lola-bodom/Design")),
+  design("bordo-guldasta", 122, "yubiley", "simple", false, () => import("./themes/bordo-guldasta/Design")),
 
 ];
 
 const STYLE_OF: Record<DesignStyle, string[]> = {
   milk: ["sahar-ipagi", "sahar-maktubi", "ehtirom-kartasi","zarhal-eshik", "atlas-tolqin", "non-muhr", "marvarid-satr", "bugdoy-boshoq", "shirin-tilak", "visol-soati", "tut-qogozi"],
   gold: ["oltin-monogramma", "oltin-ot", "zarhal-lavha", "qosh-uzuk", "zarvaraq", "saodat-kaliti"],
-  floral: ["umr-sahifalari","pion-guldasta", "ipak-romol", "paxta-gul", "visol-rishta", "kabutar-salom", "umr-daraxti", "rayhon-sahari", "siyoh-duo", "shabnam-visol", "uzum-hovli"],
+  floral: ["bordo-guldasta", "lola-bodom", "tonggi-piyola", "muhrli-maktub", "gul-doira", "girih-barg", "umr-sahifalari","pion-guldasta", "ipak-romol", "paxta-gul", "visol-rishta", "kabutar-salom", "umr-daraxti", "rayhon-sahari", "siyoh-duo", "shabnam-visol", "uzum-hovli"],
   national: ["sunnat-muqova", "sunnat-nasab","ganch-peshtoq", "rishton-koshin", "oq-ot", "sayram-hovli", "doppicha", "adras-nishon", "suzani-yol", "sopol-navo", "girih-nur", "dutor-navosi", "minor-satr", "kumush-taroq", "mis-kafgir", "oq-chinni", "tonggi-qozon", "yelpigich-ziynat"],
   dark: ["sapfir", "shohona-baxmal"],
   photo: ["muhr", "ipak", "bog", "tong-dasturxon", "tandir-nuri", "atirgul", "dasturxon", "bodom-guli", "samarqand-kitob", "tonggi-choy", "gulbog-sahifa", "lola-ehtirom", "anor-bogi"],
@@ -217,6 +224,8 @@ export const ACCEPTED = new Set([
   "tong-dasturxon",
   // 51, 81, 87 — юбилей
   "pion-guldasta", "umr-daraxti", "zarhal-lavha",
+  // 117–122 — «Гулли рамка» (03.11.2026): никоҳ ×3, наҳорги ош, суннат, юбилей
+  "gul-doira", "girih-barg", "muhrli-maktub", "tonggi-piyola", "lola-bodom", "bordo-guldasta",
   // Скрыты по решению владельца 03.11.2026 (код и строки в БД остаются — оплаченные ссылки работают),
   // список — HIDDEN_03_11 ниже. «anor-bogi» скрыт ещё 24.10.
 ]);

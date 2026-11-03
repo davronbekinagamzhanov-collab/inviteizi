@@ -1,0 +1,48 @@
+/* «Бордо гулдаста»: беж + бордо + золото. Плашка с двойной золотой рамкой, крупный прямой шрифт */
+.heroWrap { min-height: 100svh; display: grid; place-items: center; overflow: hidden; padding: 0 0 8svh; }
+.bouquet { left: -26%; top: -7%; width: 92%; rotate: 8deg; }
+.small { right: -12%; bottom: 2%; width: 46%; rotate: -12deg; }
+.card {
+  position: relative; z-index: 2; margin-top: 30svh; width: min(84vw, 340px); padding: 30px 22px 28px;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  background: var(--f-card); border: 1px solid var(--gold); outline: 1px solid var(--gold); outline-offset: -7px;
+  box-shadow: 0 22px 50px -34px rgba(59, 28, 34, .55);
+}
+.relation { font-family: var(--n-serif); font-style: italic; font-size: 19px; color: var(--f-line); }
+.name { margin-top: 6px; font-family: var(--n-serif); font-size: 38px; font-weight: 500; line-height: 1.15; color: var(--f-ink); overflow-wrap: anywhere; text-wrap: balance; }
+.occasion { margin-top: 10px; font-family: var(--n-serif); font-size: 15px; letter-spacing: .3em; padding-left: .3em; text-transform: uppercase; color: var(--gold); }
+.age { margin-top: 10px; display: flex; align-items: baseline; gap: 8px; color: var(--f-line); }
+.age strong { font-family: var(--n-serif); font-size: 64px; font-weight: 400; line-height: .95; font-variant-numeric: lining-nums; }
+.age span { font-family: var(--n-serif); font-style: italic; font-size: 20px; }
+.date { margin-top: 12px; padding-top: 12px; border-top: 1px solid color-mix(in srgb, var(--gold) 50%, transparent); font-family: var(--n-serif); font-size: 19px; }
+.time { margin-top: 2px; font-family: var(--n-serif); font-size: 22px; font-weight: 500; color: var(--f-line); font-variant-numeric: lining-nums; }
+
+.step { opacity: 0; }
+[data-on="true"] .step { animation: bStep .8s cubic-bezier(.22, 1, .36, 1) both; }
+[data-on="true"] .step:nth-child(1) { animation-delay: .5s; }
+[data-on="true"] .step:nth-child(2) { animation-delay: .68s; }
+[data-on="true"] .step:nth-child(3) { animation-delay: .86s; }
+[data-on="true"] .step:nth-child(4) { animation-delay: 1.04s; }
+[data-on="true"] .step:nth-child(5) { animation-delay: 1.22s; }
+[data-on="true"] .step:nth-child(6) { animation-delay: 1.4s; }
+@keyframes bStep { from { opacity: 0; transform: translate3d(0, 12px, 0); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .step { opacity: 1; } [data-on="true"] .step { animation: none; } }
+
+/* Блоки: крупный текст для старших гостей (основной ≥18 px) */
+.letter h2 { font-size: 27px; color: var(--f-line); }
+.letter p { font-size: 19px; line-height: 1.7; }
+.title { font-family: var(--n-serif); font-size: 40px; font-weight: 500; color: var(--f-line); }
+.dateLine { font-size: 20px; }
+.countLead { font-size: 15px; }
+.countNum { color: var(--f-line); font-size: 46px; }
+.countLabel { font-size: 15px; opacity: .85; }
+.waveTime { color: var(--f-line); }
+.venue { border-radius: 6px; border: 1px solid var(--gold); box-shadow: none; }
+.venue h3 { font-size: 25px; }
+.venue p { font-size: 18px; }
+.map { font-size: 18px; border-color: var(--f-line); color: var(--f-line); }
+.finaleScript { font-family: var(--n-serif); font-size: 42px; font-weight: 500; }
+.finaleHosts { font-size: 27px; }
+.finale { min-height: 280px; }
+.finLeft { left: -16%; top: -10px; width: 52%; rotate: 10deg; }
+.finRight { right: -8%; top: 30px; width: 34%; rotate: -14deg; }

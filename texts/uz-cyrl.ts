@@ -325,6 +325,12 @@ export const t = {
 
   /** Названия дизайнов каталога */
   designs: {
+    "gul-doira": "Гул доира",
+    "girih-barg": "Гиреҳ барг",
+    "muhrli-maktub": "Муҳрли мактуб",
+    "tonggi-piyola": "Тонгги пиёла",
+    "lola-bodom": "Лола ва бодом",
+    "bordo-guldasta": "Бордо гулдаста",
     muhr: "Муҳр",
     ipak: "Ипак",
     bog: "Боғ",
@@ -579,6 +585,14 @@ export const t = {
     sides: "Тўй эгалари",
     playHint: "Таклифномани очиш",
     calendarAria: (date: string) => `Тадбир куни: ${date}`,
+  },
+
+  /** Цветочные дизайны «Гулли рамка» (117–122) */
+  floral: {
+    wait: "Сизни кутамиз",
+    tap: "Таклифномани очинг",
+    morning: "эрталаб",
+    letter: "Мактуб",
   },
 
   watermark: "НАМУНА",

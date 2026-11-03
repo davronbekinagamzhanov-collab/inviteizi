@@ -6,11 +6,11 @@ import {photoAttributions} from "@/texts/uz-cyrl";
 vi.mock("next/font/local",()=>({default:()=>({variable:"test-font"})}));
 
 describe("catalog acceptance integrity",()=>{
-  it("after the 03.11 clean-up the catalog keeps 12 designs; 48 hidden ones stay in code",()=>{
-    const expected={nikoh:{simple:1,scroll:1,animated:4},nahorgi:{simple:0,scroll:1,animated:0},sunnat:{simple:1,scroll:1,animated:0},yubiley:{simple:0,scroll:1,animated:2}} as const;
-    expect(activeDesigns()).toHaveLength(12);expect(ACCEPTED.size).toBe(12);expect(ACCEPTED.has('anor-bogi')).toBe(false);
-    expect(activeDesigns().map(d=>d.number).sort((a,b)=>a-b)).toEqual([1,23,51,61,70,78,81,87,113,114,115,116]);
-    expect(HIDDEN_03_11).toHaveLength(48);expect(everAccepted()).toHaveLength(60);
+  it("after the 03.11 clean-up the catalog keeps 12 designs + 6 «Гулли рамка» (117–122); 48 hidden ones stay in code",()=>{
+    const expected={nikoh:{simple:1,scroll:1,animated:7},nahorgi:{simple:0,scroll:1,animated:1},sunnat:{simple:1,scroll:1,animated:1},yubiley:{simple:1,scroll:1,animated:2}} as const;
+    expect(activeDesigns()).toHaveLength(18);expect(ACCEPTED.size).toBe(18);expect(ACCEPTED.has('anor-bogi')).toBe(false);
+    expect(activeDesigns().map(d=>d.number).sort((a,b)=>a-b)).toEqual([1,23,51,61,70,78,81,87,113,114,115,116,117,118,119,120,121,122]);
+    expect(HIDDEN_03_11).toHaveLength(48);expect(everAccepted()).toHaveLength(66);
     for(const id of HIDDEN_03_11){const d=getDesign(id);expect(d,id).toBeDefined();expect(ACCEPTED.has(id)).toBe(false);}
     expect(getDesign("saodat-kaliti")?.number).toBe(106);expect(getDesign("kabutar-salom")?.number).toBe(96);
     for(const occasion of Object.keys(expected) as (keyof typeof expected)[]){const list=activeDesigns().filter(d=>d.occasion===occasion);expect({simple:list.filter(d=>d.format==='simple').length,scroll:list.filter(d=>d.format==='scroll').length,animated:list.filter(d=>d.format==='animated').length}).toEqual(expected[occasion]);}
@@ -26,7 +26,7 @@ describe("catalog acceptance integrity",()=>{
       expect(html).not.toContain('data-open="');
       for(const event of d.sample.events)expect(html).toContain(event.venueName);
     }
-  });
+  },30000); // рендерит все «варақланадиган» дизайны — на холодную сборку не хватает 5 с
   it("retains required public attribution in each downloadable preview",()=>{
     for(const d of everAccepted()){
       const credit=photoAttributions[d.id];if(!credit)continue;

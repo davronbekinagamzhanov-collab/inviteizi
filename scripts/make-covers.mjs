@@ -1,6 +1,7 @@
 // Обложки для каталога: первый экран после открытия, 1080×1920 → public/covers/<id>.webp (сайт) и .jpg (бот)
 // Запуск (при работающем dev-сервере): node scripts/make-covers.mjs [id …]
 // Без аргументов — все дизайны из templates/registry.ts.
+// NO_NAMES=1 — обложка без имён: имена и «кем приходится» в карточке скрыты (место остаётся пустым).
 import { chromium } from "playwright-core";
 import sharp from "sharp";
 import {withAssetCredit} from "./asset-credit.mjs";
@@ -25,6 +26,7 @@ for (const id of ids) {
   await page.waitForTimeout(4000);
   // кнопка музыки на превью не нужна
   await page.addStyleTag({ content: "[aria-label^='Мусиқани'] { display: none !important; }" });
+  if (process.env.NO_NAMES) await page.addStyleTag({ content: "[data-card-text] h1, [data-card-text] h1 + *:not(p), [data-card-text] > p:first-child { visibility: hidden !important; }" });
   const png = await withAssetCredit(await page.screenshot(),id);
   await sharp(png).resize(1080, 1920).withMetadata().webp({ quality: 82 }).toFile(`public/covers/${id}.webp`);
   // Telegram показывает фото только в JPG/PNG — для каталога в боте

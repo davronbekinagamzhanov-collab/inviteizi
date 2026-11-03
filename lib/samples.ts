@@ -211,6 +211,13 @@ const demo: Record<string, DemoOverride> = {
   "paxta-gul": { person: "Илҳомжон", relation: "ogil", hosts: "Зокировлар оиласи", date: "2027-02-07" },
   // суннат
   "oltin-ot": { person: "Абдулазиз", relation: "ogil", hosts: "Ғофуровлар оиласи", date: "2027-04-24" },
+  // «Гулли рамка» (117–122)
+  "gul-doira": { groom: "Бекзод", bride: "Дилноза", hosts: "Раҳмонқуловлар оиласи", sides: { groom: "Раҳмонқуловлар оиласи", bride: "Ғаниевлар оиласи" }, date: "2027-05-22" },
+  "girih-barg": { groom: "Азамат", bride: "Шириной", hosts: "Нормуҳаммедовлар оиласи", date: "2027-06-12" },
+  "muhrli-maktub": { groom: "Сардорбек", bride: "Гулшода", hosts: "Йўлдошевлар оиласи", sides: { groom: "Йўлдошевлар оиласи", bride: "Қаюмовлар оиласи" }, date: "2027-09-18" },
+  "tonggi-piyola": { person: "Жавоҳир", relation: "ogil", hosts: "Мирзакаримовлар оиласи", date: "2027-04-17" },
+  "lola-bodom": { person: "Иброҳимжон", relation: "nabira", hosts: "Тошпўлатовлар оиласи", date: "2027-05-08" },
+  "bordo-guldasta": { person: "Ҳалима опа", relation: "ona", age: 70, hosts: "Фарзандлари ва набиралари", date: "2027-03-20" },
 };
 
 const DAY_MS = 24 * 60 * 60 * 1000;
