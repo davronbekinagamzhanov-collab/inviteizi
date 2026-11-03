@@ -9,5 +9,7 @@ export default defineConfig({
     environment: "node",
     include: ["**/*.test.ts"],
     exclude: ["node_modules/**", ".next/**"],
+    // рендер дизайнов на холодную сборку при полном прогоне иногда дольше 5 с
+    testTimeout: 15000,
   },
 });

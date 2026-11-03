@@ -1,0 +1,7 @@
+/* «Чой мактуби»: кобальтовая нить по краю листа, как кайма пиёлы */
+.letter { border-top: 6px solid var(--c-accent); }
+.letter::before { border-style: dashed; border-color: color-mix(in srgb, var(--c-accent) 45%, transparent); }
+.motif { width: 170px; }
+.corner { width: 40px; height: 40px; }
+.names { font-size: 46px; }
+.place { background: #f1f4f8; }

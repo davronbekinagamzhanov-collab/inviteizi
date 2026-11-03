@@ -1,0 +1,63 @@
+/* Батч 3: общая база. Цвета — из дизайна: --c-paper, --c-ink, --c-accent, --c-soft, --c-line, --c-card.
+   Шрифты — из структуры: --f-display (заголовки, имена), --f-text (чтение). */
+.page {
+  --f-text: var(--n-text);
+  background: var(--c-paper);
+  color: var(--c-ink);
+  font-family: var(--f-text);
+}
+.page h1, .page h2, .page h3 { font-weight: inherit; }
+
+.names { font-family: var(--f-display); display: flex; flex-direction: column; align-items: center; line-height: 1.08; overflow-wrap: anywhere; text-wrap: balance; }
+.name { display: block; }
+.and { display: block; margin: 4px 0; font-family: var(--n-serif); font-style: italic; font-size: .38em; color: var(--c-accent); }
+.relation { font-family: var(--n-serif); font-style: italic; font-size: 18px; color: var(--c-accent); }
+.age { display: flex; align-items: baseline; justify-content: center; gap: 6px; color: var(--c-accent); }
+.age strong { font-family: var(--f-display); font-size: 58px; font-weight: 400; line-height: 1; font-variant-numeric: lining-nums; }
+.age span { font-family: var(--n-serif); font-style: italic; font-size: 20px; }
+
+.letter { position: relative; z-index: 2; margin: 0 auto; padding: 64px 30px 8px; max-width: 400px; text-align: center; }
+.letter h2 { font-family: var(--f-display); font-size: 25px; line-height: 1.25; text-wrap: balance; }
+.letter p { margin-top: 14px; font-size: 17px; line-height: 1.75; text-wrap: pretty; }
+
+.section { position: relative; z-index: 2; margin: 0 auto; padding: 60px 24px 0; max-width: 420px; text-align: center; }
+.title { font-family: var(--f-display); font-size: 34px; line-height: 1.15; color: var(--c-accent); margin-bottom: 18px; }
+.cal { margin: 0 auto; max-width: 320px; color: var(--c-ink); }
+.dateLine { margin-top: 12px; font-family: var(--n-serif); font-size: 18px; letter-spacing: .03em; }
+
+.count { padding-top: 52px; }
+.countLead { font-family: var(--n-serif); font-size: 16px; letter-spacing: .14em; text-transform: uppercase; padding-left: .14em; }
+.countGrid { margin-top: 14px; display: grid; grid-template-columns: repeat(4, 1fr); }
+.countBox { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 4px 0; border-left: 1px solid color-mix(in srgb, var(--c-line) 60%, transparent); }
+.countBox:first-child { border-left: 0; }
+.countNum { font-family: var(--f-display); font-size: 40px; font-weight: 400; line-height: 1; color: var(--c-accent); font-variant-numeric: lining-nums tabular-nums; }
+.countLabel { font-size: 14px; opacity: .8; }
+.countToday { margin-top: 14px; font-family: var(--f-display); font-size: 26px; }
+
+.program { display: grid; gap: 14px; text-align: left; }
+.event { display: grid; grid-template-columns: 82px 1fr; gap: 14px; align-items: start; padding: 14px 0; border-top: 1px solid color-mix(in srgb, var(--c-line) 55%, transparent); }
+.eventTime { font-family: var(--f-display); font-size: 30px; line-height: 1; color: var(--c-accent); font-variant-numeric: lining-nums; }
+.event h3 { font-family: var(--n-serif); font-size: 15px; letter-spacing: .14em; text-transform: uppercase; color: var(--c-accent); }
+.event p { font-size: 16px; line-height: 1.5; overflow-wrap: anywhere; }
+
+.venue { margin-top: 14px; padding: 24px 22px; border-radius: 18px; background: var(--c-card); border: 1px solid color-mix(in srgb, var(--c-line) 50%, transparent); }
+.venue h3 { font-family: var(--f-display); font-size: 24px; line-height: 1.2; overflow-wrap: anywhere; }
+.venue p { margin-top: 6px; font-size: 16px; line-height: 1.55; opacity: .85; overflow-wrap: anywhere; }
+.map { margin: 14px auto 0; display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--c-accent); color: var(--c-accent); border-radius: 999px; padding: 10px 20px; background: transparent; font-size: 16px; }
+
+.finale { position: relative; z-index: 2; margin-top: 56px; padding: 0 28px; text-align: center; overflow: hidden; }
+.finaleText { position: relative; z-index: 2; padding: 36px 0 8px; }
+.finaleWait { font-family: var(--f-display); font-size: 40px; line-height: 1.15; color: var(--c-accent); }
+.finaleLead { margin-top: 10px; font-family: var(--n-serif); font-style: italic; font-size: 18px; }
+.finaleHosts { margin-top: 4px; font-family: var(--f-display); font-size: 24px; line-height: 1.25; overflow-wrap: anywhere; text-wrap: balance; }
+.sides { margin: 22px auto 0; display: grid; gap: 12px; max-width: 320px; justify-items: center; }
+.sides > span { width: 48px; height: 1px; background: color-mix(in srgb, var(--c-line) 60%, transparent); }
+.sides p { font-family: var(--n-serif); font-size: 13px; letter-spacing: .2em; text-transform: uppercase; color: var(--c-accent); }
+.sides h3 { margin-top: 6px; font-family: var(--f-display); font-size: 19px; line-height: 1.3; overflow-wrap: anywhere; }
+
+.pic { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+/* Мягкое «досветление» первого экрана: текст виден сразу (opacity ≥ .72), только transform+opacity */
+.soft { animation: b3Soft .6s cubic-bezier(.22, 1, .36, 1) both; }
+@keyframes b3Soft { from { opacity: .72; transform: translate3d(0, 8px, 0); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .soft { animation: none; } }

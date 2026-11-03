@@ -333,6 +333,22 @@ export const t = {
     "tonggi-piyola": "Тонгги пиёла",
     "lola-bodom": "Лола ва бодом",
     "bordo-guldasta": "Бордо гулдаста",
+    "choy-maktub": "Чой мактуби",
+    "non-albom": "Нон ва чой",
+    "qozon-tongi": "Қозон тонги",
+    "tong-varaq": "Тонг варағи",
+    "oq-maktub": "Оқ мактуб",
+    "ipak-albom": "Ипак альбом",
+    "suzani-medalyon": "Сузана медальон",
+    "nur-varaq": "Нур варақ",
+    "islimi-varaq": "Ислими варақ",
+    "xotira-albom": "Хотира альбоми",
+    "visol-hikoya": "Висол ҳикояси",
+    "ganch-darvoza": "Ганч дарвоза",
+    "doppi-kitob": "Дўппи китоби",
+    "lola-medalyon": "Лола медальон",
+    "umr-kitobi": "Умр китоби",
+    "hurmat-maktub": "Ҳурмат мактуби",
     muhr: "Муҳр",
     ipak: "Ипак",
     bog: "Боғ",
@@ -590,6 +606,13 @@ export const t = {
   },
 
   /** Цветочные дизайны «Гулли рамка» (117–122) */
+  /** Батч 3: подсказки листания */
+  b3: {
+    swipeDown: "Пастга суринг",
+    swipeSide: "Варақни суринг",
+    tap: "Таклифномани очинг",
+    album: "Хотира учун",
+  },
   floral: {
     wait: "Сизни кутамиз",
     tap: "Таклифномани очинг",

@@ -218,6 +218,23 @@ const demo: Record<string, DemoOverride> = {
   "tonggi-piyola": { person: "Жавоҳир", relation: "ogil", hosts: "Мирзакаримовлар оиласи", date: "2027-04-17" },
   "lola-bodom": { person: "Иброҳимжон", relation: "nabira", hosts: "Тошпўлатовлар оиласи", date: "2027-05-08" },
   "bordo-guldasta": { person: "Ҳалима опа", relation: "ona", age: 70, hosts: "Фарзандлари ва набиралари", date: "2027-03-20" },
+  // батч 3 (123–138)
+  "choy-maktub": { person: "Шерзод", relation: "ogil", hosts: "Абдуллаевлар оиласи", date: "2027-03-13" },
+  "non-albom": { person: "Отабек", relation: "ogil", hosts: "Саидовлар оиласи", date: "2027-04-03" },
+  "qozon-tongi": { person: "Даврон", relation: "ogil", hosts: "Хўжаевлар оиласи", date: "2027-05-29" },
+  "tong-varaq": { person: "Улуғбек", relation: "nabira", hosts: "Қодировлар оиласи", date: "2027-06-26" },
+  "oq-maktub": { groom: "Фаррух", bride: "Мунира", hosts: "Каримовлар оиласи", date: "2027-07-10" },
+  "ipak-albom": { groom: "Жасур", bride: "Нилуфар", hosts: "Усмоновлар оиласи", sides: { groom: "Усмоновлар оиласи", bride: "Ҳакимовлар оиласи" }, date: "2027-08-14" },
+  "suzani-medalyon": { groom: "Рустам", bride: "Зарина", hosts: "Мўминовлар оиласи", date: "2027-09-04" },
+  "nur-varaq": { groom: "Элёр", bride: "Камола", hosts: "Тўхтаевлар оиласи", sides: { groom: "Тўхтаевлар оиласи", bride: "Назаровлар оиласи" }, date: "2027-09-25" },
+  "islimi-varaq": { groom: "Санжар", bride: "Мадинабону", hosts: "Аҳмедовлар оиласи", date: "2027-10-09" },
+  "xotira-albom": { groom: "Акмал", bride: "Севара", hosts: "Бобоевлар оиласи", date: "2027-10-23" },
+  "visol-hikoya": { groom: "Ислом", bride: "Феруза", hosts: "Юнусовлар оиласи", sides: { groom: "Юнусовлар оиласи", bride: "Олимовлар оиласи" }, date: "2027-11-06" },
+  "ganch-darvoza": { person: "Муҳаммадюсуф", relation: "ogil", hosts: "Эргашевлар оиласи", date: "2027-04-10" },
+  "doppi-kitob": { person: "Абдуллоҳ", relation: "nabira", hosts: "Ҳайдаровлар оиласи", date: "2027-05-15" },
+  "lola-medalyon": { person: "Умаржон", relation: "ogil", hosts: "Ғуломовлар оиласи", date: "2027-06-05" },
+  "umr-kitobi": { person: "Тўлқин ота", relation: "ota", age: 75, hosts: "Фарзандлари ва набиралари", date: "2027-07-17" },
+  "hurmat-maktub": { person: "Зулфия опа", relation: "ona", age: 65, hosts: "Фарзандлари ва набиралари", date: "2027-08-21" },
 };
 
 const DAY_MS = 24 * 60 * 60 * 1000;

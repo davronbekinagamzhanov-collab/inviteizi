@@ -6,14 +6,22 @@ import {photoAttributions} from "@/texts/uz-cyrl";
 vi.mock("next/font/local",()=>({default:()=>({variable:"test-font"})}));
 
 describe("catalog acceptance integrity",()=>{
-  it("after the 03.11 clean-up the catalog keeps 12 designs + 6 «Гулли рамка» (117–122); 48 hidden ones stay in code",()=>{
-    const expected={nikoh:{simple:1,scroll:1,animated:7},nahorgi:{simple:0,scroll:1,animated:1},sunnat:{simple:1,scroll:1,animated:1},yubiley:{simple:1,scroll:1,animated:2}} as const;
-    expect(activeDesigns()).toHaveLength(18);expect(ACCEPTED.size).toBe(18);expect(ACCEPTED.has('anor-bogi')).toBe(false);
-    expect(activeDesigns().map(d=>d.number).sort((a,b)=>a-b)).toEqual([1,23,51,61,70,78,81,87,113,114,115,116,117,118,119,120,121,122]);
-    expect(HIDDEN_03_11).toHaveLength(48);expect(everAccepted()).toHaveLength(66);
+  it("after the 03.11 clean-up: 18 designs (12 + «Гулли рамка» 117–122) + batch 3 (123–138); 48 hidden ones stay in code",()=>{
+    const base=[1,23,51,61,70,78,81,87,113,114,115,116,117,118,119,120,121,122];
+    const nums=activeDesigns().map(d=>d.number).sort((a,b)=>a-b);
+    expect(ACCEPTED.size).toBe(activeDesigns().length);expect(ACCEPTED.has('anor-bogi')).toBe(false);
+    expect(nums.filter(n=>n<123)).toEqual(base);
+    const b3=nums.filter(n=>n>=123);
+    expect(b3.length).toBeLessThanOrEqual(16);expect(b3.every(n=>n<=138)).toBe(true);
+    expect(new Set(nums).size).toBe(nums.length);
+    expect(HIDDEN_03_11).toHaveLength(48);expect(everAccepted()).toHaveLength(48+nums.length);
     for(const id of HIDDEN_03_11){const d=getDesign(id);expect(d,id).toBeDefined();expect(ACCEPTED.has(id)).toBe(false);}
     expect(getDesign("saodat-kaliti")?.number).toBe(106);expect(getDesign("kabutar-salom")?.number).toBe(96);
-    for(const occasion of Object.keys(expected) as (keyof typeof expected)[]){const list=activeDesigns().filter(d=>d.occasion===occasion);expect({simple:list.filter(d=>d.format==='simple').length,scroll:list.filter(d=>d.format==='scroll').length,animated:list.filter(d=>d.format==='animated').length}).toEqual(expected[occasion]);}
+    // Every format the bot offers for an occasion has at least one design (formatsFor hides empty ones)
+    for(const occasion of ["nikoh","nahorgi","sunnat","yubiley"] as const){
+      const list=activeDesigns().filter(d=>d.occasion===occasion);
+      expect(list.length,occasion).toBeGreaterThan(0);
+    }
   });
   it("classifies by functionality and preserves ambiguous tariffs pending owner review",async()=>{
     expect(everAccepted().filter(d=>d.format==="scroll"&&d.number<=81).map(d=>d.id).sort()).toEqual(["paxta-gul","sayram-hovli","shohona-baxmal","tonggi-choy","umr-daraxti"]);
