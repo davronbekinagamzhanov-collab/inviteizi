@@ -26,14 +26,14 @@
 .frame { position: absolute; inset: 0; width: 100%; height: 100%; color: var(--f-line); }
 .star { width: 22px; height: 22px; color: var(--f-line); }
 .cardText { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; text-align: center; }
-.step { opacity: 0; }
-[data-on="true"] .step { animation: stepIn .9s cubic-bezier(.22, 1, .36, 1) both; }
-[data-on="true"] .step:nth-child(1) { animation-delay: .35s; }
-[data-on="true"] .step:nth-child(2) { animation-delay: .53s; }
-[data-on="true"] .step:nth-child(3) { animation-delay: .71s; }
-[data-on="true"] .step:nth-child(4) { animation-delay: .89s; }
-[data-on="true"] .step:nth-child(5) { animation-delay: 1.07s; }
-@keyframes stepIn { from { opacity: 0; transform: translate3d(0, 12px, 0); } to { opacity: 1; transform: none; } }
+/* Текст карточки виден с первого кадра (правило владельца 03.11): анимация только «досветляет» за 0,6 с */
+[data-on="true"] .step { animation: stepIn .6s cubic-bezier(.22, 1, .36, 1) both; }
+[data-on="true"] .step:nth-child(1) { animation-delay: 0.00s; }
+[data-on="true"] .step:nth-child(2) { animation-delay: 0.05s; }
+[data-on="true"] .step:nth-child(3) { animation-delay: 0.10s; }
+[data-on="true"] .step:nth-child(4) { animation-delay: 0.15s; }
+[data-on="true"] .step:nth-child(5) { animation-delay: 0.20s; }
+@keyframes stepIn { from { opacity: .72; transform: translate3d(0, 8px, 0); } to { opacity: 1; transform: none; } }
 
 .mono { display: flex; align-items: center; gap: 10px; font-family: var(--n-serif); font-size: 26px; font-weight: 400; letter-spacing: .06em; color: var(--f-line); line-height: 1; }
 .mono i { display: block; width: 1px; height: 24px; background: currentColor; opacity: .7; }
@@ -107,7 +107,7 @@
 .finaleHosts { margin-top: 4px; font-family: var(--n-serif); font-size: 25px; font-weight: 500; line-height: 1.25; overflow-wrap: anywhere; text-wrap: balance; }
 
 @media (prefers-reduced-motion: reduce) {
-  .bloomIn, .step { opacity: 1; }
+  .bloomIn { opacity: 1; }
   [data-on="true"] .bloomIn, [data-on="true"] .bloomImg, [data-on="true"] .step, .tap, .tap::after { animation: none; }
   .tap { opacity: .8; }
   .curtain, .curtain[data-started="true"] .bloom { transition: none; }

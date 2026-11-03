@@ -9,6 +9,7 @@
 .bigTime { font-family: var(--n-serif); font-size: 128px; font-weight: 300; line-height: .82; letter-spacing: -.03em; font-variant-numeric: lining-nums; }
 
 /* ── Повод и имя ── */
+.heroDate { margin-top: 6px; font-family: var(--n-serif); font-size: 18px; letter-spacing: .03em; }
 .who { padding: 52px 28px 0; }
 .cause { font-family: var(--n-serif); font-style: italic; font-size: 21px; line-height: 1.35; color: var(--n-accent); max-width: 30ch; }
 .name { margin-top: 10px; font-family: var(--n-serif); font-weight: 500; font-size: var(--fit, 50px); line-height: 1.04; }

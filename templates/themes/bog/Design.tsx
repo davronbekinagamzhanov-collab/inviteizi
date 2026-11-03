@@ -111,6 +111,7 @@ export default function Bog({ data, mode }: TemplateProps) {
           <Words text={data.person ?? ""} />
         </h1>
         <p className={s.cause}>{t.occasionTitles[inv.occasion]}</p>
+        <p className={s.heroDate}>{t.date.long(inv.main.when.day, inv.main.when.monthIndex, inv.main.when.year)}</p>
         <div className={s.circleWrap}>
           <Rosette className={s.lace} petals={12} />
           <Photo

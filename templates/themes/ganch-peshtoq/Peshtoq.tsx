@@ -7,6 +7,7 @@ import { designTexts } from "@/texts/uz-cyrl";
 // свои заголовки дизайна (texts/uz-cyrl.ts → headings)
 const t = designTexts("ganch-peshtoq");
 import type { Invitation } from "../../blocks/useInvitation";
+import { OpeningCaption } from "../../blocks/OpeningCaption";
 import { Kitoba, PeshtoqArt, archPath, peshtoqGeo, starPoints, useSize, type Peshtoq } from "./decor";
 import { PLASTER, SURFACE } from "./style";
 
@@ -158,7 +159,11 @@ export function Cover({ inv }: { inv: Invitation }) {
             >
               <Kitoba className="w-full">
                 <span className="flex flex-col items-center px-8 pt-3.5 pb-3">
-                  <span className="font-display text-[27px] leading-none font-medium text-ink">{t.opening.invitation}</span>
+                  <OpeningCaption
+                    inv={inv}
+                    nameClassName="font-display text-[23px] leading-[1.15] font-medium text-ink"
+                    metaClassName="text-[13px] tracking-[0.06em] text-ink/80"
+                  />
                   <span className="soft-pulse mt-1.5 text-[16px] text-muted italic">{t.opening.tapToOpen}</span>
                 </span>
               </Kitoba>

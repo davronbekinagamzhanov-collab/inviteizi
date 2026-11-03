@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { t } from "@/texts/uz-cyrl";
+import { OpeningCaption } from "../../blocks/OpeningCaption";
 import type { Invitation } from "../../blocks/useInvitation";
 import { EmbossedPaper } from "./decor";
 import { PAPER } from "./style";
@@ -51,13 +52,17 @@ export function Envelope({ inv, initials }: { inv: Invitation; initials: [string
         >
           <EmbossedPaper />
 
-          <motion.p
-            className="gold-text relative mb-10 font-display text-[22px] font-semibold tracking-[0.42em] uppercase"
+          <motion.div
+            className="relative mb-9 px-6"
             animate={{ opacity: reached("rise") ? 0 : 1, y: reached("rise") ? -12 : 0 }}
             transition={{ duration: 0.6 }}
           >
-            {t.opening.invitation}
-          </motion.p>
+            <OpeningCaption
+              inv={inv}
+              nameClassName="gold-text font-display text-[34px] leading-[1.15] font-semibold"
+              metaClassName="font-body text-[16px] tracking-[0.16em] text-muted"
+            />
+          </motion.div>
 
           <motion.button
             type="button"

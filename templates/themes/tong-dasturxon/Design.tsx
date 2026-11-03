@@ -104,6 +104,7 @@ export default function TongDasturxon({ data, mode }: TemplateProps) {
         <div className={s.timeBlock}>
           <p className={s.bigTime}>{t.date.clock(morning.time)}</p>
           <Script text={t.natural.morning} className={s.morning} />
+          <p className={s.heroDate}>{t.date.long(inv.main.when.day, inv.main.when.monthIndex, inv.main.when.year)}</p>
         </div>
       </header>
 

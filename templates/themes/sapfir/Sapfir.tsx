@@ -31,9 +31,10 @@ export default function Sapfir({ data, mode }: TemplateProps) {
   const { when } = main;
 
   const appear = (i: number) => ({
-    initial: { opacity: 0, y: 10 },
+    // текст виден с первого кадра (правило 03.11), рамка рисуется вокруг уже читаемых имён
+    initial: { opacity: 0.72, y: 6 },
     animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.8, delay: FRAME_S * 0.85 + i * 0.12, ease: EASE },
+    transition: { duration: 0.6, delay: i * 0.05, ease: EASE },
   });
 
   return (
