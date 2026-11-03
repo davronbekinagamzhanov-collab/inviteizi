@@ -1,0 +1,7 @@
+/* «Висол ҳикояси»: полоса фото справа (зеркально), обложка в арке, имена курсивом */
+.chapter { grid-template-columns: 1fr 34%; padding: 56px 0 0 22px; }
+.stripPic { order: 2; border-radius: 160px 0 0 160px; }
+.coverPic { margin: 0 18px; height: 60svh; border-radius: 999px 999px 0 0; }
+.coverText { margin-top: 0; padding-top: 22px; }
+.names { font-style: italic; font-weight: 400; }
+.openNames { font-style: italic; font-weight: 400; }
