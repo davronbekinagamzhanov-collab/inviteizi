@@ -91,4 +91,26 @@ describe("пометка «с фото» и шаг фото по дизайну"
     expect(st.data?.photos ?? []).toEqual([]);
   });
 
+  it("наҳорги ош: ни у одного дизайна нет фото клиента — ни строки 📷 в подписи, ни шага фото", async () => {
+    const formats = ["animated", "scroll", "simple"] as const;
+    const all = formats.flatMap((f) => designsFor("nahorgi", f));
+    expect(all.length).toBeGreaterThan(0);
+    for (const d of all) expect(d.clientPhotos, d.id).toBeFalsy();
+    for (const f of formats) {
+      const list = designsFor("nahorgi", f);
+      if (!list.length) continue;
+      const s = photoSim();
+      await startUz(s, 1);
+      await s.click(1, uz.category.nahorgi);
+      await s.click(1, new RegExp(uz.format.names[f]));
+      // ▶ правит то же сообщение — подпись проверяем на каждом шаге листания
+      for (const [k, d] of list.entries()) {
+        if (k > 0) await s.click(1, "▶");
+        const card = s.tg.to(1).filter((m) => m.type === "photo").at(-1)!;
+        expect(card.text, d.id).toContain(`№${d.number} `);
+        expect(card.text.includes(uz.catalog.withPhoto), d.id).toBe(false);
+      }
+    }
+  });
+
 });

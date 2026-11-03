@@ -13,11 +13,12 @@ describe("натуральные пилоты", () => {
     for (const w of words) expect(w, w).not.toMatch(/[ҚқҒғҲҳ]/);
   });
 
-  it("в реестре, приняты, поддерживают фото клиента и имеют обложки", () => {
+  it("в реестре, приняты, фото клиента (кроме наҳорги ош) и имеют обложки", () => {
     for (const id of PILOTS) {
       const d = designs.find((x) => x.id === id);
       expect(d, id).toBeTruthy();
-      expect(d!.clientPhotos, id).toBe(true);
+      // наҳорги ош — без фото клиента (решение владельца 03.11.2026)
+      expect(Boolean(d!.clientPhotos), id).toBe(d!.occasion !== "nahorgi");
       expect(ACCEPTED.has(id), id).toBe(true);
       expect(existsSync(`public/covers/${id}.webp`) && existsSync(`public/covers/${id}.jpg`), id).toBe(true);
     }

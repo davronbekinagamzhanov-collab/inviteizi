@@ -34,5 +34,33 @@
     "license": "Pixabay Content License",
     "licenseUrl": "https://pixabay.com/service/license-summary/",
     "source": "https://pixabay.com/vectors/frame-copy-space-design-decorate-6626904/"
+  },
+  "nahorgi-non-close": {
+    "src": "/art/natural/nahorgi-non-close.webp",
+    "author": "LoggaWiggler",
+    "license": "Pixabay Content License",
+    "licenseUrl": "https://pixabay.com/service/license-summary/",
+    "source": "https://pixabay.com/photos/loaf-flatbread-food-bread-stamp-196511/"
+  },
+  "nahorgi-samarkand-a": {
+    "src": "/art/natural/nahorgi-samarkand-a.webp",
+    "author": "xusenru",
+    "license": "Pixabay Content License",
+    "licenseUrl": "https://pixabay.com/service/license-summary/",
+    "source": "https://pixabay.com/photos/samarkand-architecture-registan-9780493/"
+  },
+  "nahorgi-samarkand-b": {
+    "src": "/art/natural/nahorgi-samarkand-b.webp",
+    "author": "xusenru",
+    "license": "Pixabay Content License",
+    "licenseUrl": "https://pixabay.com/service/license-summary/",
+    "source": "https://pixabay.com/photos/samarkand-architecture-registan-9780503/"
+  },
+  "nahorgi-choy-bukhara": {
+    "src": "/art/natural/nahorgi-choy-bukhara.webp",
+    "author": "Ekaterina Kvelidze",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Uzbek_tea_couple_with_traditional_coloration.jpg"
   }
 }

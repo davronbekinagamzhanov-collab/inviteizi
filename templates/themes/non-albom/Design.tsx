@@ -1,7 +1,7 @@
 "use client";
 /**
- * «Нон альбом» (124) — наҳорги ош, Оддий, С ФОТО, структура S5 «Альбом».
- * Пшеничная бумага, ореховый текст, лента цвета изразца; запасные фото — нон, чой, дастурхон.
+ * «Нон альбом» (124) — наҳорги ош, Оддий, структура S5 «Альбом». Фото клиента на наҳорги ош не ставим (решение владельца 03.11).
+ * Пшеничная бумага, ореховый текст, лента цвета изразца; фото — тандирный нон со штампом, ош на адрас-ляганде, Самарқанд на рассвете.
  */
 import type { TemplateProps } from "../types";
 import { Albom } from "../b3/s5-albom";
@@ -27,9 +27,9 @@ export default function NonAlbom(props: TemplateProps) {
       look={s}
       motif={<Non />}
       photos={[
-        { kind: "unsplash", slot: "b3-non-2", w: 800 },
-        { kind: "unsplash", slot: "b3-tea", w: 500 },
-        { kind: "unsplash", slot: "b3-tea-3", w: 500 },
+        { kind: "local", slot: "nahorgi-non-close" },
+        { kind: "unsplash", slot: "dastur-plov-2", w: 500 },
+        { kind: "local", slot: "nahorgi-samarkand-a" },
       ]}
     />
   );

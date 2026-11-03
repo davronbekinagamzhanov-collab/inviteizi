@@ -27,5 +27,7 @@ export function localPhoto(slot: LocalSlot) {
 
 export function localCredit(slot: LocalSlot): PhotoCredit {
   const p = localPhoto(slot);
+  // CC BY / BY-SA (Wikimedia): «Автор / CC BY-SA 4.0» — ссылка на файл у автора, на лицензию у её названия
+  if (p.license.startsWith("CC BY")) return { author: p.author, authorUrl: p.source, source: p.license, sourceUrl: p.licenseUrl };
   return { author: p.author, authorUrl: p.source, source: p.source.includes("pixabay") ? "Pixabay" : "Openverse", sourceUrl: p.source };
 }

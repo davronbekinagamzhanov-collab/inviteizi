@@ -44,7 +44,7 @@ const vars = {
 
 export default function TongDasturxon({ data, mode }: TemplateProps) {
   const inv = useInvitation(data, mode, { melody, opening: false });
-  // Плов — всегда настоящий плов (это суть наҳорги ош); фото клиента встают вместо нона и чая
+  // Плов — всегда настоящий плов (это суть наҳорги ош); фото клиента на наҳорги ош не ставим (решение владельца 03.11)
   const plov = stock({
     kind: "unsplash",
     slot: "dastur-plov-top",
@@ -53,7 +53,7 @@ export default function TongDasturxon({ data, mode }: TemplateProps) {
   });
   const photos = shots(data, [
     { kind: "local", slot: "dastur-non" },
-    { kind: "unsplash", slot: "dastur-tea-warm", w: 560, h: 700 },
+    { kind: "local", slot: "nahorgi-choy-bukhara" },
   ]);
   const w = inv.main.when;
   const morning = inv.program[0] ?? inv.main;
