@@ -8,7 +8,7 @@ import type { InlineButton } from "../tg";
 import { usesLegacyDesign } from "@/templates/design-version";
 import { photoAttributions } from "@/texts/uz-cyrl";
 
-const OCCASIONS: Occasion[] = ["nikoh", "nahorgi", "sunnat", "yubiley"];
+export const OCCASIONS: Occasion[] = ["nikoh", "nahorgi", "sunnat", "yubiley"];
 
 export const cat: Step = {
   async ask(c) {
