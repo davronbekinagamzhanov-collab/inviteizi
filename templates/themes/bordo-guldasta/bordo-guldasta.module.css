@@ -1,7 +1,7 @@
 /* «Бордо гулдаста»: беж + бордо + золото. Плашка с двойной золотой рамкой, крупный прямой шрифт */
 .heroWrap { min-height: 100svh; display: grid; place-items: center; overflow: hidden; padding: 0 0 8svh; }
-.bouquet { left: -26%; top: -7%; width: 92%; rotate: 8deg; }
-.small { right: -12%; bottom: 2%; width: 46%; rotate: -12deg; }
+.bouquet { left: -26%; top: -4%; width: 84%; --r: 8deg; }
+.small { right: -12%; bottom: 2%; width: 46%; --r: -12deg; }
 .card {
   position: relative; z-index: 2; margin-top: 30svh; width: min(84vw, 340px); padding: 30px 22px 28px;
   display: flex; flex-direction: column; align-items: center; text-align: center;
@@ -10,7 +10,7 @@
 }
 .relation { font-family: var(--n-serif); font-style: italic; font-size: 19px; color: var(--f-line); }
 .name { margin-top: 6px; font-family: var(--n-serif); font-size: 38px; font-weight: 500; line-height: 1.15; color: var(--f-ink); overflow-wrap: anywhere; text-wrap: balance; }
-.occasion { margin-top: 10px; font-family: var(--n-serif); font-size: 15px; letter-spacing: .3em; padding-left: .3em; text-transform: uppercase; color: var(--gold); }
+.occasion { margin-top: 10px; font-family: var(--n-serif); font-size: 17px; letter-spacing: .22em; padding-left: .22em; text-transform: uppercase; color: var(--gold); }
 .age { margin-top: 10px; display: flex; align-items: baseline; gap: 8px; color: var(--f-line); }
 .age strong { font-family: var(--n-serif); font-size: 64px; font-weight: 400; line-height: .95; font-variant-numeric: lining-nums; }
 .age span { font-family: var(--n-serif); font-style: italic; font-size: 20px; }
@@ -33,10 +33,12 @@
 .letter p { font-size: 19px; line-height: 1.7; }
 .title { font-family: var(--n-serif); font-size: 40px; font-weight: 500; color: var(--f-line); }
 .dateLine { font-size: 20px; }
-.countLead { font-size: 15px; }
+.countLead { font-size: 17px; letter-spacing: .14em; padding-left: .14em; }
 .countNum { color: var(--f-line); font-size: 46px; }
-.countLabel { font-size: 15px; opacity: .85; }
+.countLabel { font-size: 17px; opacity: .85; }
 .waveTime { color: var(--f-line); }
+.wave h3 { font-size: 17px; letter-spacing: .12em; }
+.wave p { font-size: 18px; }
 .venue { border-radius: 6px; border: 1px solid var(--gold); box-shadow: none; }
 .venue h3 { font-size: 25px; }
 .venue p { font-size: 18px; }
@@ -44,5 +46,9 @@
 .finaleScript { font-family: var(--n-serif); font-size: 42px; font-weight: 500; }
 .finaleHosts { font-size: 27px; }
 .finale { min-height: 280px; }
-.finLeft { left: -16%; top: -10px; width: 52%; rotate: 10deg; }
-.finRight { right: -8%; top: 30px; width: 34%; rotate: -14deg; }
+.finLeft { left: -16%; top: -10px; width: 52%; --r: 10deg; }
+.finRight { right: -8%; top: 30px; width: 34%; --r: -14deg; }
+
+/* стороны (если есть) и подписи — тоже крупно */
+.finale div > div > p { font-size: 17px; letter-spacing: .12em; }
+.finale div > div > h3 { font-size: 21px; }

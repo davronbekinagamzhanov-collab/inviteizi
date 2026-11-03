@@ -123,9 +123,10 @@ export function GirihStar({ className }: { className?: string }) {
 }
 
 /** Монограмма «Б | Д» */
-export function Monogram({ a, b, className }: { a: string; b?: string; className?: string }) {
+export function Monogram({ a, b, className, inline = false }: { a: string; b?: string; className?: string; /** внутри кнопки — span вместо p */ inline?: boolean }) {
+  const Tag = inline ? "span" : "p";
   return (
-    <p className={cx(f.mono, className)} aria-hidden>
+    <Tag className={cx(f.mono, className)} aria-hidden>
       <span>{a}</span>
       {b && (
         <>
@@ -133,7 +134,7 @@ export function Monogram({ a, b, className }: { a: string; b?: string; className
           <span>{b}</span>
         </>
       )}
-    </p>
+    </Tag>
   );
 }
 
@@ -174,7 +175,7 @@ export function CardText({ data, inv, className, monogram = true }: { data: Invi
 function WavyProgram({ inv, look }: { inv: Invitation; look: Look }) {
   const list = inv.program;
   return (
-    <ol className={cx(f.wave, look.wave)} data-count={list.length}>
+    <div className={cx(f.wave, look.wave)} data-count={list.length}>
       {list.length > 1 && (
         <svg viewBox="0 0 40 400" preserveAspectRatio="none" className={f.waveLine} aria-hidden data-decor>
           <path d="M20 0C38 50 2 100 20 150s-18 100 0 150 18 70 0 100" fill="none" stroke="currentColor" vectorEffect="non-scaling-stroke" />
@@ -189,7 +190,7 @@ function WavyProgram({ inv, look }: { inv: Invitation; look: Look }) {
           <p className={f.waveMeta}>{e.venueName}</p>
         </Rise>
       ))}
-    </ol>
+    </div>
   );
 }
 
@@ -207,6 +208,8 @@ export type FloralConfig = {
   assets: FloralAsset[];
   look: Look;
   heart?: boolean;
+  /** Шрифт заголовков блоков вместо прописи (юбилей — прямой, читаемый) */
+  titleFont?: string;
   /** Первая композиция: цветы + карточка. on — пора выплывать */
   hero: (on: boolean, inv: Invitation) => ReactNode;
   /** Цветы финала «Сизни кутамиз» */
@@ -239,6 +242,7 @@ export function FloralInvitation({ data, mode, cfg }: { data: InvitationData; mo
   const start = () => {
     if (!inv.started) inv.start();
   };
+  const titleStyle = cfg.titleFont ? { fontFamily: cfg.titleFont } : undefined;
   const on = cfg.opening === "none" ? mounted : inv.started;
   const w = inv.main.when;
   const places = venues(inv);
@@ -260,9 +264,12 @@ export function FloralInvitation({ data, mode, cfg }: { data: InvitationData; mo
         <footer className={cx(f.finale, look.finale)} data-on={on}>
           {cfg.finale}
           <Rise stagger className={f.finaleText}>
-            <Script text={t.floral.wait} className={cx(f.finaleScript, look.finaleScript)} />
+            <Script text={t.floral.wait} className={cx(f.finaleScript, look.finaleScript)} style={titleStyle} />
             <p className={f.finaleLead}>{t.hosts.respect}</p>
-            <p className={cx(f.finaleHosts, look.finaleHosts)}>{data.hosts}</p>
+            {/* хозяева = одна из сторон → не повторяем фамилию дважды */}
+            {!(inv.sides && [inv.sides.groom, inv.sides.bride].includes(data.hosts ?? "")) && (
+              <p className={cx(f.finaleHosts, look.finaleHosts)}>{data.hosts}</p>
+            )}
             {inv.sides && (
               <div className={f.sides}>
                 <div>
@@ -290,7 +297,7 @@ export function FloralInvitation({ data, mode, cfg }: { data: InvitationData; mo
       </Rise>
 
       <section className={cx(f.section, look.dateSec)}>
-        <Script text={t.natural.date} className={cx(f.title, look.title)} />
+        <Script text={t.natural.date} className={cx(f.title, look.title)} style={titleStyle} />
         <HandCalendar date={w} heart={cfg.heart} className={cx(f.cal, look.cal)} />
         <p className={cx(f.dateLine, look.dateLine)}>
           {t.weekdays[w.weekdayIndex]}, {t.date.clock(inv.main.time)}
@@ -301,19 +308,19 @@ export function FloralInvitation({ data, mode, cfg }: { data: InvitationData; mo
         <p className={cx(f.countLead, look.countLead)}>{t.countdown.title[inv.occasion]}</p>
         <Countdown
           startsAt={w.startsAt}
-          look={{ grid: f.countGrid, box: f.countBox, number: cx(f.countNum, look.countNum), label: f.countLabel, today: f.countToday }}
+          look={{ grid: f.countGrid, box: f.countBox, number: cx(f.countNum, look.countNum), label: cx(f.countLabel, look.countLabel), today: f.countToday }}
         />
       </section>
 
       {inv.program.length > 1 && (
         <section className={cx(f.section, look.programSec)}>
-          <Script text={t.natural.program} className={cx(f.title, look.title)} />
+          <Script text={t.natural.program} className={cx(f.title, look.title)} style={titleStyle} />
           <WavyProgram inv={inv} look={look} />
         </section>
       )}
 
       <section className={cx(f.section, look.placeSec)}>
-        <Script text={t.natural.place} className={cx(f.title, look.title)} />
+        <Script text={t.natural.place} className={cx(f.title, look.title)} style={titleStyle} />
         {places.map((e, i) => (
           <Rise key={i} className={cx(f.venue, look.venue)}>
             <h3>{e.venueName}</h3>
@@ -324,20 +331,15 @@ export function FloralInvitation({ data, mode, cfg }: { data: InvitationData; mo
       </section>
 
       {!inv.opened && cfg.opening === "curtain" && (
-        <button
-          type="button"
-          data-open
-          data-started={inv.started}
-          onClick={start}
-          disabled={inv.started}
-          aria-label={t.natural.playHint}
-          className={cx(f.curtain, look.curtain)}
-        >
-          <span className={cx(f.heroWrap, look.heroWrap)} data-on={mounted}>
+        // Вся шторка нажимается; для клавиатуры и чтеца — настоящая кнопка «очинг» (клик всплывает к шторке)
+        <div data-open data-started={inv.started} onClick={start} className={cx(f.curtain, look.curtain)}>
+          <div className={cx(f.heroWrap, look.heroWrap)} data-on={mounted} aria-hidden>
             {cfg.hero(mounted, inv)}
-          </span>
-          <span className={cx(f.tap, look.tap)}>{t.floral.tap}</span>
-        </button>
+          </div>
+          <button type="button" disabled={inv.started} aria-label={t.natural.playHint} className={cx(f.tap, look.tap)}>
+            {t.floral.tap}
+          </button>
+        </div>
       )}
       {!inv.opened && cfg.opening === "custom" && cfg.overlay?.(start, inv.started)}
     </InvitationShell>

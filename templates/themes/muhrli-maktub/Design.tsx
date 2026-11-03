@@ -72,7 +72,7 @@ export default function MuhrliMaktub({ data, mode }: TemplateProps) {
             className={s.envelope}
           >
             <span className={s.letterCard}>
-              <Monogram a={a} b={b} className={s.letterMono} />
+              <Monogram a={a} b={b} className={s.letterMono} inline />
             </span>
             <span className={s.pocket} />
             <span className={s.flapWrap}>

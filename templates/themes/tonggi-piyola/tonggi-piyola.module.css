@@ -1,8 +1,8 @@
 /* «Тонгги пиёла»: утро, тёплый крем, кобальт пахта-нусхи. Овал по центру, крупное «6:00» */
 .heroWrap { min-height: 100svh; display: grid; place-items: center; overflow: hidden; }
-.tl { left: -22%; top: -8%; width: 70%; rotate: 140deg; }
-.tr { right: -20%; top: -4%; width: 52%; rotate: -150deg; }
-.br { right: -30%; bottom: -16%; width: 60%; rotate: -30deg; }
+.tl { left: -22%; top: -8%; width: 70%; --r: 140deg; }
+.tr { right: -20%; top: -4%; width: 52%; --r: -150deg; }
+.br { right: -30%; bottom: -16%; width: 60%; --r: -30deg; }
 .card { position: relative; z-index: 2; width: min(80vw, 330px); aspect-ratio: .72; display: grid; place-items: center; }
 .card::before { content: ""; position: absolute; inset: 1.5%; border-radius: 50%; background: radial-gradient(ellipse at 50% 40%, #fffdf8 55%, #fbf3e6); box-shadow: 0 18px 46px -32px rgba(61, 49, 40, .5); }
 .cardText { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0 28px; }
@@ -42,5 +42,5 @@
 .countNum { color: var(--cobalt); }
 .venue { border-radius: 22px; border: 1px solid #ecdfcc; box-shadow: none; }
 .finale { padding-top: 24px; }
-.finLeft { left: -14%; top: 0; width: 46%; rotate: 30deg; }
+.finLeft { left: -14%; top: 0; width: 46%; --r: 30deg; }
 .finTea { position: relative; z-index: 2; display: block; width: 170px; margin: 0 auto; }

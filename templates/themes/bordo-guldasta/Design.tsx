@@ -30,6 +30,7 @@ export default function BordoGuldasta({ data, mode }: TemplateProps) {
       cfg={{
         melody,
         opening: "none",
+        titleFont: "var(--n-serif)",
         vars,
         pageColor: "#f7efe4",
         backdrop: "bg-[#ebdfd0]",

@@ -19,8 +19,8 @@
 .sealMono { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--n-serif); font-size: 23px; font-weight: 600; color: color-mix(in srgb, var(--e-wax) 45%, #fff); }
 .sealMono i { display: block; width: 1px; height: 20px; background: currentColor; opacity: .7; }
 .envFlowers { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
-.envTl { left: -18%; top: -6%; width: 36%; rotate: 150deg; }
-.envBr { right: -14%; bottom: -3%; width: 46%; rotate: -30deg; }
+.envTl { left: -18%; top: -6%; width: 36%; --r: 150deg; }
+.envBr { right: -14%; bottom: -3%; width: 46%; --r: -30deg; }
 .envTap { position: absolute; left: 0; right: 0; bottom: calc(9svh + env(safe-area-inset-bottom)); z-index: 7; text-align: center; font-family: var(--n-serif); font-size: 13px; letter-spacing: .28em; padding-left: .28em; text-transform: uppercase; color: #fffaf6; transition: opacity .3s ease; }
 .envelope[data-started="true"] .seal { transform: scale(1.18); opacity: 0; }
 .envelope[data-started="true"] .flapNames, .envelope[data-started="true"] .envTap { opacity: 0; }
@@ -30,8 +30,8 @@
 
 /* ── Страница ── */
 .heroWrap { min-height: 100svh; display: grid; place-items: center; overflow: hidden; }
-.heroLeft { left: -18%; top: 12%; width: 50%; rotate: 18deg; }
-.heroRight { right: -18%; bottom: 8%; width: 50%; rotate: -164deg; }
+.heroLeft { left: -18%; top: 12%; width: 50%; --r: 18deg; }
+.heroRight { right: -18%; bottom: 8%; width: 50%; --r: -164deg; }
 .card { position: relative; z-index: 2; width: min(72vw, 290px); aspect-ratio: .74; display: grid; place-items: center; padding-top: 18%; --f-name: 44px; }
 .card::before { content: ""; position: absolute; inset: 1.5%; border-radius: 48% 48% 0 0 / 38% 38% 0 0; background: var(--f-card); box-shadow: 0 18px 46px -30px rgba(75, 59, 58, .5); }
 .card > div { padding: 0 26px; }
@@ -41,5 +41,5 @@
 .count { margin: 56px 24px 0; padding: 26px 0 28px; border-radius: 120px 120px 18px 18px; background: var(--f-card); }
 .venue { border-radius: 140px 140px 16px 16px; padding-top: 34px; }
 .finale { min-height: 260px; }
-.finLeft { left: -10%; top: 0; width: 40%; rotate: 24deg; }
-.finRight { right: -10%; top: 0; width: 40%; rotate: -24deg; }
+.finLeft { left: -10%; top: 0; width: 40%; --r: 24deg; }
+.finRight { right: -10%; top: 0; width: 40%; --r: -24deg; }

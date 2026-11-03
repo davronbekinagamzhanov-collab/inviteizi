@@ -1,9 +1,9 @@
 /* «Гул доира»: тёплое молоко, приглушённое золото, розово-пудровые цветы по четырём углам */
 .heroWrap { min-height: 100svh; display: grid; place-items: center; overflow: hidden; }
-.tl { left: -26%; top: -6%; width: 92%; rotate: 128deg; }
-.tr { right: -38%; top: 9%; width: 86%; rotate: -112deg; }
-.bl { left: -36%; bottom: 10%; width: 84%; rotate: 70deg; }
-.br { right: -24%; bottom: -5%; width: 92%; rotate: -50deg; }
+.tl { left: -26%; top: -6%; width: 92%; --r: 128deg; }
+.tr { right: -38%; top: 9%; width: 86%; --r: -112deg; }
+.bl { left: -36%; bottom: 10%; width: 84%; --r: 70deg; }
+.br { right: -24%; bottom: -5%; width: 92%; --r: -50deg; }
 .card { position: relative; z-index: 2; width: min(78vw, 318px); aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%; background: radial-gradient(circle, #fffdf9 62%, rgba(255, 253, 249, .9)); box-shadow: 0 18px 50px -30px rgba(74, 58, 54, .45); --f-name: 44px; }
 .card > div { padding: 0 30px; }
 

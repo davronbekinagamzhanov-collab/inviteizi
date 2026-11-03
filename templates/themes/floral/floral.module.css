@@ -5,7 +5,8 @@
 /* ── Цветы с краёв ── */
 .bloom { position: absolute; z-index: 1; pointer-events: none; display: block; }
 .bloomIn { display: block; opacity: 0; }
-.bloomImg { display: block; width: 100%; height: auto; transform-origin: 50% 50%; }
+/* Поворот (--r) — на картинке, а не на обёртке: выплывание и «шторка» идут строго с края, куда указывает data-from */
+.bloomImg { display: block; width: 100%; height: auto; transform-origin: 50% 50%; rotate: var(--r, 0deg); }
 .flip { scale: -1 1; }
 .bloom[data-from="left"] { --dx: -32px; --dy: 0px; }
 .bloom[data-from="right"] { --dx: 32px; --dy: 0px; }
@@ -18,7 +19,7 @@
 [data-on="true"] .bloomIn { animation: bloomIn 1.4s cubic-bezier(.22, 1, .36, 1) var(--d, 0ms) both; }
 [data-on="true"] .bloomImg { animation: breathe var(--b, 8s) ease-in-out calc(var(--d, 0ms) + 1.4s) infinite alternate; }
 @keyframes bloomIn { from { opacity: 0; transform: translate3d(var(--dx), var(--dy), 0); } to { opacity: 1; transform: none; } }
-@keyframes breathe { from { transform: none; } to { transform: scale(1.015) rotate(.6deg); } }
+@keyframes breathe { 0% { transform: none; } 50% { transform: scale(1.015) rotate(.6deg); } 100% { transform: scale(1.008) rotate(-.6deg); } }
 
 /* ── Карточка ── */
 .heroWrap { position: relative; display: block; }
@@ -51,7 +52,7 @@
 .curtain[data-started="true"] .bloom[data-from="right"], .curtain[data-started="true"] .bloom[data-from="tr"], .curtain[data-started="true"] .bloom[data-from="br"] { transform: translate3d(24%, 0, 0); }
 .curtain[data-started="true"] .bloom[data-from="top"] { transform: translate3d(0, -24%, 0); }
 .curtain[data-started="true"] .bloom[data-from="bottom"] { transform: translate3d(0, 24%, 0); }
-.tap { position: absolute; left: 0; right: 0; bottom: calc(5svh + env(safe-area-inset-bottom)); z-index: 3; text-align: center; font-family: var(--n-serif); font-size: 13px; letter-spacing: .28em; text-transform: uppercase; color: var(--f-ink); opacity: 0; animation: tapIn 1s ease 1.6s forwards; padding-left: .28em; }
+.tap { position: absolute; left: 0; right: 0; width: 100%; background: none; border: 0; cursor: pointer; bottom: calc(5svh + env(safe-area-inset-bottom)); z-index: 3; text-align: center; font-family: var(--n-serif); font-size: 13px; letter-spacing: .28em; text-transform: uppercase; color: var(--f-ink); opacity: 0; animation: tapIn 1s ease 1.6s forwards; padding-left: .28em; }
 .tap::after { content: ""; display: block; width: 1px; height: 26px; margin: 10px auto 0; background: currentColor; opacity: .5; animation: tapLine 2.4s ease-in-out 2.6s infinite; transform-origin: top; }
 @keyframes tapIn { to { opacity: .8; } }
 @keyframes tapLine { 0%, 100% { transform: scaleY(.4); } 50% { transform: scaleY(1); } }
