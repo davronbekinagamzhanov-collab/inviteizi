@@ -15,7 +15,7 @@ describe("весь путь наҳорги ош на русском", () => {
     expect((await sim.user(id))?.source).toBe("qr_sayram");
     await sim.click(id, ru.category.nahorgi);
     await sim.click(id, /С прокруткой/);
-    expect(sim.last(id).text).toMatch(/^№116 · Тонгги дастурхон\nС прокруткой · 6.000 ₸$/); // после чистки 03.11
+    expect(sim.last(id).text).toMatch(/^№116 · Тонгги дастурхон\nС прокруткой · 6.000 ₸\n📷 Можно добавить своё фото$/); // после чистки 03.11; дизайн с фото клиента
     await sim.click(id, ru.catalog.buy);
 
     expect(sim.lastText(id)).toBe(ru.form.personNahorgi);

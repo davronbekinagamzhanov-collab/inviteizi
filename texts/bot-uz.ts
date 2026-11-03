@@ -86,6 +86,8 @@ export const uz = {
   catalog: {
     photoCredit: (author: string, license: string, source: string) => `Сурат: ${author} · ${license}\n${source}`,
     caption: (n: number, name: string, format: string, price: string) => `№${n} · ${name}\n${format} · ${price}`,
+    /** Строка под подписью у дизайнов, куда клиент может поставить своё фото */
+    withPhoto: "📷 Расмингизни қўйса бўлади",
     demo: "👁 Намуна",
     buy: "🛒 Сотиб олиш",
     hint: "◀ ▶ — бошқа дизайнлар. «👁 Намуна» — телефонда очиб кўринг.",

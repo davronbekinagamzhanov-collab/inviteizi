@@ -73,6 +73,7 @@ export default function CatalogPage() {
                     {t.designs[d.id]}
                   </p>
                   <p className="text-[16px] font-bold">{t.price(PRICES[d.format])}</p>
+                  {d.clientPhotos && <p className="text-[14px] text-[#6b5a48]">{t.catalog.withPhoto}</p>}
                   <Link
                     href={`/demo/${d.id}`}
                     className="gold-fill mt-2 block rounded-full py-2.5 text-center text-[16px] font-bold text-[#3b2a1e]"

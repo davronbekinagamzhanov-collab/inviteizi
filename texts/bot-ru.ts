@@ -103,6 +103,8 @@ export const ru = {
   catalog: {
     photoCredit: (author: string, license: string, source: string) => `Фото: ${author} · ${license}\n${source}`,
     caption: (n: number, name: string, format: string, price: string) => `№${n} · ${name}\n${format} · ${price}`,
+    /** Строка под подписью у дизайнов, куда клиент может поставить своё фото */
+    withPhoto: "📷 Можно добавить своё фото",
     demo: "👁 Образец",
     buy: "🛒 Купить",
     hint: "◀ ▶ — другие дизайны. «👁 Образец» — откройте на телефоне.",

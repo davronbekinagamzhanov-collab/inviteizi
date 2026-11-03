@@ -29,7 +29,7 @@ describe("весь путь никоҳ на ўзбекском", () => {
     const cat = sim.last(id);
     expect(cat.type).toBe("photo");
     expect(cat.media).toBe(`${BASE}/covers/muhr.jpg`);
-    expect(cat.text).toMatch(/^№113 · Муҳр\nАнимацияли · 8.000 ₸$/);
+    expect(cat.text).toMatch(/^№113 · Муҳр\nАнимацияли · 8.000 ₸\n📷 Расмингизни қўйса бўлади$/);
     expect(buttonLabels(cat)).toEqual(expect.arrayContaining(["◀", `1/${animatedNikohCount}`, "▶", uz.catalog.demo, uz.catalog.buy]));
     expect(inlineButtons(cat).find((b) => b.text === uz.catalog.demo)).toEqual({
       text: uz.catalog.demo,
