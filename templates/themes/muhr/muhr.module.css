@@ -128,3 +128,5 @@
 .flapRosette { opacity: .75; }
 /* v3: сверху по центру бейдж InviteIZI — надпись тадбира ниже него */
 .hero { padding-top: 60px; }
+/* v3: на низких экранах арка чуть меньше — имена выше кнопки музыки */
+@media (max-height: 700px) { .heroArt { width: 62%; } }

@@ -109,3 +109,5 @@
 /* v2 после критика: вертикальная дата в одну колонку, кнопки карты — контур */
 .vertical { white-space: nowrap; }
 .map { background: transparent; color: #3b322b; border: 1px solid #3b322b; }
+/* v3: заголовок письма не заходит под кнопку музыки (справа 16px + 46px) */
+.letter h2 { padding-right: 56px; text-wrap: balance; }

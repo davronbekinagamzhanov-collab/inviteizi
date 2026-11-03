@@ -85,3 +85,5 @@
 .venue { border-radius: 0 12px 12px 0; }
 .count { border-radius: 14px; border: 1px solid #dccab5; padding: 22px 20px; }
 @media (max-width: 380px) { .date { grid-template-columns: 88px 1fr; gap: 8px; padding-left: 16px; padding-right: 14px; } .medal { width: 86px; } .medal .dayNum { font-size: 40px; } .medal .weekday { font-size: 12px; } }
+/* v3: заголовок письма не заходит под кнопку музыки (справа 16px + 46px) */
+.letter h2 { padding-right: 56px; text-wrap: balance; }
