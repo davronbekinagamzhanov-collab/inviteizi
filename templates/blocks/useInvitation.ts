@@ -6,6 +6,7 @@ import { parseWeddingDate } from "@/lib/wedding-date";
 import { mapLink } from "@/lib/map-link";
 import type { InvitationData, InvitationMode } from "@/lib/types";
 import { SynthPlayer, type Score } from "./synth";
+import { glueData, glueWords } from "@/lib/typography";
 
 type Options = {
   /** Мелодия дизайна (играет, если клиент не прислал свою песню) */
@@ -18,7 +19,9 @@ type Options = {
  * Общая механика любого дизайна: данные, тексты, музыка, открытие.
  * Дизайн решает только, КАК это выглядит.
  */
-export function useInvitation(data: InvitationData, mode: InvitationMode, opts: Options = {}) {
+export function useInvitation(raw: InvitationData, mode: InvitationMode, opts: Options = {}) {
+  // «ва / ҳам / билан» не висят в конце строки ни в одном дизайне
+  const data = glueData(raw);
   const hasOpening = opts.opening !== false;
   const [started, setStarted] = useState(!hasOpening); // гость нажал «открыть»
   const [opened, setOpened] = useState(!hasOpening); // анимация открытия закончилась
@@ -84,7 +87,7 @@ export function useInvitation(data: InvitationData, mode: InvitationMode, opts: 
     mode,
     occasion: data.occasion,
     /** Текст приглашения: { greeting, body } */
-    text: t.invite(data),
+    text: (({ greeting, body }) => ({ greeting: glueWords(greeting), body: glueWords(body) }))(t.invite(data)),
     events,
     /** Главное событие: для «Тўй санаси», календаря и таймера */
     main: events[0],

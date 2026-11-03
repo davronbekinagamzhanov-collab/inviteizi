@@ -2,7 +2,7 @@
 /**
  * «Лола медальон» (136) — суннат, Оддий, С ФОТО, структура S7 «Медальон».
  * Весенний медальон: цветущий бодом в круге, нежно-зелёная гамма, тюльпан в финале.
- * Запасные фото — цветущая ветка, нон, чой.
+ * Запасные фото — цветущая ветка, бирюзовый купол Бухары, минарет Кальта-Минор (Хива).
  */
 import type { TemplateProps } from "../types";
 import { Medalyon } from "../b3/s7-medalyon";
@@ -29,8 +29,8 @@ export default function LolaMedalyon(props: TemplateProps) {
       motif={<Lola />}
       photos={[
         { kind: "unsplash", slot: "b3-blossom", w: 700 },
-        { kind: "unsplash", slot: "b3-non-2", w: 300 },
-        { kind: "unsplash", slot: "b3-tea", w: 300 },
+        { kind: "unsplash", slot: "s-bukhara-dome", w: 300 },
+        { kind: "unsplash", slot: "s-khiva-minor", w: 300 },
       ]}
     />
   );

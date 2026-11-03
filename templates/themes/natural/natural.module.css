@@ -50,7 +50,7 @@
 .calendar { width: 100%; max-width: 300px; }
 .calTitle { font-family: var(--n-serif); font-size: 15px; letter-spacing: .18em; text-transform: uppercase; margin-bottom: 14px; }
 .calGrid { display: grid; grid-template-columns: repeat(7, 1fr); row-gap: 4px; text-align: center; }
-.calHead { font-family: var(--n-text); font-size: 11px; opacity: .55; padding-bottom: 8px; }
+.calHead { font-family: var(--n-text); font-size: 14px; opacity: .6; padding-bottom: 8px; }
 .calDay { position: relative; height: 36px; display: flex; align-items: center; justify-content: center; font-family: var(--n-serif); font-size: 18px; font-variant-numeric: lining-nums; }
 .calMarked { font-weight: 700; }
 .calCircle { position: absolute; left: 50%; top: 50%; width: 46px; height: 40px; transform: translate(-50%, -52%) rotate(-6deg); color: var(--n-accent); stroke-width: 1.8; }

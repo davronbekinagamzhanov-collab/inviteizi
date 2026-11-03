@@ -438,5 +438,27 @@
     "author": "Bernd 📷 Dittrich",
     "authorUrl": "https://unsplash.com/@hdbernd",
     "photoUrl": "https://unsplash.com/photos/lemon-tea-pitcher-and-islam-khoja-minaret-O4eFhl7p6dg"
+  },
+  "s-bukhara-dome": {
+    "id": "ih-afcs5oC4",
+    "raw": "https://images.unsplash.com/photo-1662492727591-b8441648d861?ixid=M3wxMTIxNDYwfDB8MXxzZWFyY2h8MTB8fHV6YmVraXN0YW4lMjB0ZWF8ZW58MXwxfHx8MTc5MzcyOTAwN3ww",
+    "width": 3417,
+    "height": 5125,
+    "color": "#0c2640",
+    "alt": "a domed building with a green dome",
+    "author": "Safar Safarov",
+    "authorUrl": "https://unsplash.com/@safarslife",
+    "photoUrl": "https://unsplash.com/photos/a-domed-building-with-a-green-dome-ih-afcs5oC4"
+  },
+  "s-khiva-minor": {
+    "id": "GbxRAQq22r8",
+    "raw": "https://images.unsplash.com/photo-1793648127489-fe02c5b6e6b7?ixid=M3wxMTIxNDYwfDB8MXxzZWFyY2h8MTF8fHV6YmVraXN0YW4lMjB0ZWF8ZW58MXwxfHx8MTc5MzcyOTAwN3ww",
+    "width": 4160,
+    "height": 6240,
+    "color": "#0c2640",
+    "alt": "The Kalta Minor Minaret with intricate blue and green tilework in Khiva, Uzbekistan",
+    "author": "Bernd 📷 Dittrich",
+    "authorUrl": "https://unsplash.com/@hdbernd",
+    "photoUrl": "https://unsplash.com/photos/kalta-minor-minaret-in-khiva-GbxRAQq22r8"
   }
 }

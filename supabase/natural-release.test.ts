@@ -54,3 +54,27 @@ describe('батч 3 (123–138): SQL только по «да» владель�
   expect((await pg.query("select id from public.templates where number between 123 and 138")).rows).toEqual([{id:'external-130'}]);
  }finally{await pg.close()}},20000);
 });
+
+describe('весь выпуск по порядку (03.11.2026): natural-four → natural-six → batch3 → hide-old-designs',()=>{
+ it('в базе активны ровно дизайны каталога кода (33), каждая строка совпадает с реестром; 131 и 48 старых скрыты',async()=>{const pg=await fixture();try{
+  for(const name of ['natural-four-templates','natural-six-templates','natural-batch3-templates','hide-old-designs'])await pg.exec(await file(`supabase/release/${name}.sql`));
+  const rows=(await pg.query<{id:string;number:number;occasion:string;format:string;price:number;is_active:boolean}>('select id,number,occasion,format,price,is_active from public.templates')).rows;
+  const byId=new Map(rows.map(r=>[r.id,r]));
+  // активные в базе = каталог бота и сайта
+  expect(rows.filter(r=>r.is_active).map(r=>r.id).sort()).toEqual([...ACCEPTED].sort());
+  expect(ACCEPTED.size).toBe(33);
+  // каждый дизайн, на который может ссылаться заказ, есть в базе с тем же номером, тадбиром и форматом
+  for(const d of everAccepted().filter(d=>d.number>=113||ACCEPTED.has(d.id))){
+   const r=byId.get(d.id);expect(r,d.id).toBeDefined();
+   expect({number:r!.number,occasion:r!.occasion,format:r!.format},d.id).toEqual({number:d.number,occasion:d.occasion,format:d.format});
+  }
+  // цены новых строк = цены формата в коде
+  const PRICE={animated:8000,scroll:6000,simple:5000} as const;
+  for(const r of rows.filter(r=>r.number>=113))expect(r.price,r.id).toBe(PRICE[r.format as keyof typeof PRICE]);
+  expect(byId.get('islimi-varaq')?.is_active).toBe(false);
+  // повторный прогон всех файлов ничего не меняет
+  const before=(await pg.query('select * from public.templates order by id')).rows;
+  for(const name of ['natural-four-templates','natural-six-templates','natural-batch3-templates','hide-old-designs'])await pg.exec(await file(`supabase/release/${name}.sql`));
+  expect((await pg.query('select * from public.templates order by id')).rows).toEqual(before);
+ }finally{await pg.close()}},30000);
+});

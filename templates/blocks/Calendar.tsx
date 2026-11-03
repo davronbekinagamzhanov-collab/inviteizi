@@ -41,7 +41,7 @@ export function Calendar({
         {t.weekdaysShort.map((d, i) => (
           <span
             key={d}
-            className={`pb-2 text-[11px] font-semibold uppercase tracking-wider ${
+            className={`pb-2 text-[14px] font-semibold uppercase tracking-wide ${
               i >= 5 ? weekendClassName : "text-muted"
             }`}
           >

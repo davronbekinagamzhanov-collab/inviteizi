@@ -11,6 +11,7 @@ import {
   type ReactNode,
 } from "react";
 import { t } from "@/texts/uz-cyrl";
+import { glueWords } from "@/lib/typography";
 import { monthGrid, type WeddingDate } from "@/lib/wedding-date";
 import s from "./natural.module.css";
 
@@ -304,11 +305,7 @@ export function Divider({ className = "" }: { className?: string }) {
 /**
  * Без «висячих» слов: «ва», «ҳам» прилипают к следующему слову, «билан», «учун» — к предыдущему.
  */
-export function tidy(text: string) {
-  return text
-    .replace(/(^|\s)(ва|ҳам|ё)\s+/giu, "$1$2 ")
-    .replace(/\s+(билан|учун|каби)(?=[\s.,!?:;]|$)/giu, " $1");
-}
+export const tidy = glueWords;
 
 /** Кружок «от руки» (чуть неровный, концы заходят друг за друга) */
 export function HandCircle({
