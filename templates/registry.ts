@@ -204,14 +204,16 @@ const rawDesigns: RawDesign[] = [
   design("qozon-tongi", 125, "nahorgi", "animated", true, () => import("./themes/qozon-tongi/Design"), { clientPhotos: true }),
   design("visol-hikoya", 133, "nikoh", "animated", true, () => import("./themes/visol-hikoya/Design"), { clientPhotos: true }),
   design("ganch-darvoza", 134, "sunnat", "animated", false, () => import("./themes/ganch-darvoza/Design")),
+  design("doppi-kitob", 135, "sunnat", "scroll", false, () => import("./themes/doppi-kitob/Design")),
+  design("umr-kitobi", 137, "yubiley", "scroll", false, () => import("./themes/umr-kitobi/Design")),
 
 ];
 
 const STYLE_OF: Record<DesignStyle, string[]> = {
-  milk: ["tong-varaq", "hurmat-maktub", "oq-maktub", "choy-maktub", "sahar-ipagi", "sahar-maktubi", "ehtirom-kartasi","zarhal-eshik", "atlas-tolqin", "non-muhr", "marvarid-satr", "bugdoy-boshoq", "shirin-tilak", "visol-soati", "tut-qogozi"],
+  milk: ["umr-kitobi", "tong-varaq", "hurmat-maktub", "oq-maktub", "choy-maktub", "sahar-ipagi", "sahar-maktubi", "ehtirom-kartasi","zarhal-eshik", "atlas-tolqin", "non-muhr", "marvarid-satr", "bugdoy-boshoq", "shirin-tilak", "visol-soati", "tut-qogozi"],
   gold: ["oltin-monogramma", "oltin-ot", "zarhal-lavha", "qosh-uzuk", "zarvaraq", "saodat-kaliti"],
   floral: ["bordo-guldasta", "lola-bodom", "tonggi-piyola", "muhrli-maktub", "gul-doira", "girih-barg", "umr-sahifalari","pion-guldasta", "ipak-romol", "paxta-gul", "visol-rishta", "kabutar-salom", "umr-daraxti", "rayhon-sahari", "siyoh-duo", "shabnam-visol", "uzum-hovli"],
-  national: ["ganch-darvoza", "islimi-varaq", "sunnat-muqova", "sunnat-nasab","ganch-peshtoq", "rishton-koshin", "oq-ot", "sayram-hovli", "doppicha", "adras-nishon", "suzani-yol", "sopol-navo", "girih-nur", "dutor-navosi", "minor-satr", "kumush-taroq", "mis-kafgir", "oq-chinni", "tonggi-qozon", "yelpigich-ziynat"],
+  national: ["doppi-kitob", "ganch-darvoza", "islimi-varaq", "sunnat-muqova", "sunnat-nasab","ganch-peshtoq", "rishton-koshin", "oq-ot", "sayram-hovli", "doppicha", "adras-nishon", "suzani-yol", "sopol-navo", "girih-nur", "dutor-navosi", "minor-satr", "kumush-taroq", "mis-kafgir", "oq-chinni", "tonggi-qozon", "yelpigich-ziynat"],
   dark: ["sapfir", "shohona-baxmal"],
   photo: ["visol-hikoya", "qozon-tongi", "xotira-albom", "ipak-albom", "non-albom", "nur-varaq", "muhr", "ipak", "bog", "tong-dasturxon", "tandir-nuri", "atirgul", "dasturxon", "bodom-guli", "samarqand-kitob", "tonggi-choy", "gulbog-sahifa", "lola-ehtirom", "anor-bogi"],
 };
@@ -240,7 +242,7 @@ export const ACCEPTED = new Set([
   // 117–122 — «Гулли рамка» (03.11.2026): никоҳ ×3, наҳорги ош, суннат, юбилей
   "gul-doira", "girih-barg", "muhrli-maktub", "tonggi-piyola", "lola-bodom", "bordo-guldasta",
   // 123–138 — батч 3
-   "choy-maktub", "oq-maktub", "hurmat-maktub", "tong-varaq", "nur-varaq", "islimi-varaq", "non-albom", "ipak-albom", "xotira-albom", "qozon-tongi", "visol-hikoya", "ganch-darvoza",
+   "choy-maktub", "oq-maktub", "hurmat-maktub", "tong-varaq", "nur-varaq", "islimi-varaq", "non-albom", "ipak-albom", "xotira-albom", "qozon-tongi", "visol-hikoya", "ganch-darvoza", "doppi-kitob", "umr-kitobi",
   // Скрыты по решению владельца 03.11.2026 (код и строки в БД остаются — оплаченные ссылки работают),
   // список — HIDDEN_03_11 ниже. «anor-bogi» скрыт ещё 24.10.
 ]);
