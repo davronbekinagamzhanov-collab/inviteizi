@@ -11,16 +11,20 @@ import { useInvitation } from "../../blocks/useInvitation";
 import { InvitationShell } from "../../blocks/InvitationShell";
 import { Countdown } from "../../blocks/Countdown";
 import { MapButton } from "../../blocks/MapButton";
-import { Reveal } from "../../blocks/Reveal";
 import { Words, useFitWords } from "../../blocks/FitWords";
 import { t } from "@/texts/uz-cyrl";
 import { naturalFonts } from "../natural/fonts";
 import {
+  Divider,
   HandCalendar,
+  Medallion,
   Photo,
+  Rise,
+  Rosette,
   Script,
   SideTitle,
   Squiggle,
+  tidy,
   useSeen,
 } from "../natural/kit";
 import { creditsOf, initial, shots, venues } from "../natural/common";
@@ -51,7 +55,7 @@ export default function Muhr({ data, mode }: TemplateProps) {
   const open = () => {
     if (inv.started) return;
     inv.start();
-    timer.current = setTimeout(inv.finishOpening, reduced ? 0 : 1700);
+    timer.current = setTimeout(inv.finishOpening, reduced ? 0 : 2400);
   };
 
   // Фото: 1 — арка (фото пары клиента или кольца), 2–3 — маленькие кружки в программе / фото клиента
@@ -75,7 +79,8 @@ export default function Muhr({ data, mode }: TemplateProps) {
       pageColor="#f3f4f2"
       backdropClassName="bg-[#e6eaed]"
       className={s.page}
-      musicButtonClassName="bg-[#2c3b49] text-white"
+      musicVariant="soft"
+      musicButtonClassName="bg-[#f3f4f2]/75 text-[#2c3b49] ring-[#2c3b49]/20"
       rsvpLook={{
         paper: "#ffffff",
         ink: "#2c3b49",
@@ -83,18 +88,19 @@ export default function Muhr({ data, mode }: TemplateProps) {
         soft: "#e8eef3",
         accent: "#4f6b85",
         font: "var(--n-text)",
-        radius: "4px",
+        radius: "18px",
+        buttonRadius: "999px",
       }}
       credits={creditsOf(photos)}
       creditClassName="text-[#2c3b49]/60"
       epilogue={
-        <Reveal effect="fade">
+        <Rise>
           <footer className={s.sign}>
             <p className={s.signLead}>{t.hosts.respect}</p>
             <p className={s.signHosts}>{data.hosts}</p>
             <Script text={t.natural.wait} className={s.signScript} />
           </footer>
-        </Reveal>
+        </Rise>
       }
     >
       <header className={s.hero}>
@@ -129,8 +135,7 @@ export default function Muhr({ data, mode }: TemplateProps) {
         </p>
       </header>
 
-      <Reveal effect="fade">
-        <section className={s.letter}>
+      <Rise stagger className={s.letter}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={localPhoto("eucalyptus").src}
@@ -140,20 +145,22 @@ export default function Muhr({ data, mode }: TemplateProps) {
             data-decor
           />
           {inv.text.greeting && (
-            <h2 className={s.greeting}>{inv.text.greeting}</h2>
+            <h2 className={s.greeting}>{tidy(inv.text.greeting)}</h2>
           )}
-          <p className={s.body}>{inv.text.body}</p>
-        </section>
-      </Reveal>
+          <p className={s.body}>{tidy(inv.text.body)}</p>
+      </Rise>
+
+      <Divider className={s.divider} />
 
       <section className={s.dateBlock}>
+        <Rosette className={s.rosette} petals={12} />
         <Script text={t.natural.date} className={s.bigScript} />
         <div className={s.dateRow}>
           <HandCalendar date={w} className={s.cal} />
-          <p className={s.dateNote}>
-            <span>{t.weekdays[w.weekdayIndex]}</span>
-            <strong>{t.date.clock(inv.main.time)}</strong>
-          </p>
+          <Medallion className={s.medal}>
+            <span className={s.medalDay}>{t.weekdays[w.weekdayIndex]}</span>
+            <strong className={s.medalTime}>{t.date.clock(inv.main.time)}</strong>
+          </Medallion>
         </div>
       </section>
 
@@ -200,7 +207,7 @@ export default function Muhr({ data, mode }: TemplateProps) {
         <SideTitle className={s.placeTitle}>{t.natural.place}</SideTitle>
         <div className={s.placeList}>
           {places.map((e, i) => (
-            <Reveal key={i} effect="fade">
+            <Rise key={i}>
               <div className={s.venue}>
                 <h3>{e.venueName}</h3>
                 <p>{e.address}</p>
@@ -210,7 +217,7 @@ export default function Muhr({ data, mode }: TemplateProps) {
                   iconClassName="text-[#4f6b85]"
                 />
               </div>
-            </Reveal>
+            </Rise>
           ))}
         </div>
       </section>
@@ -269,36 +276,52 @@ export default function Muhr({ data, mode }: TemplateProps) {
           aria-label={t.natural.playHint}
           className={s.opening}
         >
-          <span className={s.envelope}>
-            <span className={s.card}>
-              <span className={s.cardNames}>
-                {data.groom}
-                <br />
-                <Script text={t.natural.and} className={s.cardAnd} />
-                <br />
-                {data.bride}
-              </span>
+          {/* Сургуч: толща воска темнее к краю (объём, без блика) */}
+          <svg width="0" height="0" aria-hidden className="absolute">
+            <defs>
+              <radialGradient id="muhr-wax" cx="42%" cy="38%" r="65%">
+                <stop offset="0" stopColor="#4d6a87" />
+                <stop offset=".7" stopColor="#3b5672" />
+                <stop offset="1" stopColor="#2c4259" />
+              </radialGradient>
+            </defs>
+          </svg>
+          <span className={s.letterCard}>
+            <span className={s.cardNames}>
+              {data.groom}
+              <Script text={t.natural.and} className={s.cardAnd} />
+              {data.bride}
             </span>
-            <span className={s.pocket} />
-            <span className={s.flap} />
-            <span className={s.seal} aria-hidden>
-              <svg viewBox="0 0 100 100" className={s.wax}>
-                {/* Сургуч: толща воска темнее к краю (объём, без блика) */}
-                <defs>
-                  <radialGradient id="muhr-wax" cx="42%" cy="38%" r="65%">
-                    <stop offset="0" stopColor="#4d6a87" />
-                    <stop offset=".7" stopColor="#3b5672" />
-                    <stop offset="1" stopColor="#2c4259" />
-                  </radialGradient>
-                </defs>
-                <path d="M50 3c7 0 10 4 16 5s11 0 15 5 2 10 5 15 8 9 8 16-5 10-6 16 1 11-3 16-10 5-15 8-9 8-16 8-10-5-16-6-11 1-16-3-5-10-8-15-8-9-8-16 5-10 6-16-1-11 3-16 10-5 15-8 9-8 16-8z" />
-                <circle cx="50" cy="50" r="33" className={s.waxRing} />
-              </svg>
-              <span className={s.sealMono}>
+          </span>
+          <span className={s.pocket} />
+          <span className={s.flapWrap}>
+            <span className={s.flap}>
+              <Rosette className={s.flapRosette} />
+              <span className={s.flapMono}>
                 {mono[0]}
                 <i />
                 {mono[1]}
               </span>
+            </span>
+          </span>
+          {/* Печать трескается на две половинки */}
+          <span className={s.seal} aria-hidden>
+            <span className={`${s.sealHalf} ${s.sealLeft}`}>
+              <svg viewBox="0 0 100 100" className={s.wax}>
+                  <path d="M50 3c7 0 10 4 16 5s11 0 15 5 2 10 5 15 8 9 8 16-5 10-6 16 1 11-3 16-10 5-15 8-9 8-16 8-10-5-16-6-11 1-16-3-5-10-8-15-8-9-8-16 5-10 6-16-1-11 3-16 10-5 15-8 9-8 16-8z" />
+                  <circle cx="50" cy="50" r="33" className={s.waxRing} />
+                </svg>
+            </span>
+            <span className={`${s.sealHalf} ${s.sealRight}`}>
+              <svg viewBox="0 0 100 100" className={s.wax}>
+                  <path d="M50 3c7 0 10 4 16 5s11 0 15 5 2 10 5 15 8 9 8 16-5 10-6 16 1 11-3 16-10 5-15 8-9 8-16 8-10-5-16-6-11 1-16-3-5-10-8-15-8-9-8-16 5-10 6-16-1-11 3-16 10-5 15-8 9-8 16-8z" />
+                  <circle cx="50" cy="50" r="33" className={s.waxRing} />
+                </svg>
+            </span>
+            <span className={s.sealMono}>
+              {mono[0]}
+              <i />
+              {mono[1]}
             </span>
           </span>
           <Script text={t.natural.open} className={s.openWord} />

@@ -20,6 +20,7 @@ export function InvitationShell({
   backdropClassName = "bg-paper",
   fontsClassName = "",
   musicButtonClassName,
+  musicVariant,
   pageColor,
   rsvpLook,
   credits,
@@ -34,6 +35,8 @@ export function InvitationShell({
   /** Классы next/font дизайна: должны стоять там же, где style, иначе --d-* не увидят шрифты */
   fontsClassName?: string;
   musicButtonClassName?: string;
+  /** Вид кнопки музыки: soft — круглая с линейной иконкой (натуральные дизайны) */
+  musicVariant?: "default" | "soft";
   /** Цвет за краями страницы (виден, когда телефон «пружинит» при листании) */
   pageColor?: string;
   /** Форма «Келасизми?» в цветах дизайна (нет — прежняя карточка) */
@@ -75,6 +78,7 @@ export function InvitationShell({
               playing={inv.playing}
               onToggle={inv.toggleMusic}
               className={musicButtonClassName}
+              variant={musicVariant}
               raised={inv.mode === "demo"}
             />
           )}

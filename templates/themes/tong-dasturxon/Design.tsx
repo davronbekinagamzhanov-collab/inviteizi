@@ -10,11 +10,19 @@ import { useInvitation } from "../../blocks/useInvitation";
 import { InvitationShell } from "../../blocks/InvitationShell";
 import { Countdown } from "../../blocks/Countdown";
 import { MapButton } from "../../blocks/MapButton";
-import { Reveal } from "../../blocks/Reveal";
 import { Words, useFitWords } from "../../blocks/FitWords";
 import { t } from "@/texts/uz-cyrl";
 import { naturalFonts } from "../natural/fonts";
-import { HandCalendar, Photo, Script } from "../natural/kit";
+import {
+  Divider,
+  HandCalendar,
+  Medallion,
+  Photo,
+  Rise,
+  Rosette,
+  Script,
+  tidy,
+} from "../natural/kit";
 import { creditsOf, shots, stock, venues } from "../natural/common";
 import { melody } from "./melody";
 import s from "./tong.module.css";
@@ -60,7 +68,8 @@ export default function TongDasturxon({ data, mode }: TemplateProps) {
       pageColor="#f5ede1"
       backdropClassName="bg-[#e9dfd0]"
       className={s.page}
-      musicButtonClassName="bg-[#7a3b2e] text-[#f5ede1]"
+      musicVariant="soft"
+      musicButtonClassName="bg-[#f5ede1]/70 text-[#7a3b2e] ring-[#7a3b2e]/25"
       rsvpLook={{
         paper: "#fbf6ee",
         ink: "#3a2a22",
@@ -68,17 +77,18 @@ export default function TongDasturxon({ data, mode }: TemplateProps) {
         soft: "#efe1d0",
         accent: "#7a3b2e",
         font: "var(--n-text)",
-        radius: "6px",
+        radius: "16px",
+        buttonRadius: "999px",
       }}
       credits={creditsOf([plov, ...photos])}
       creditClassName="text-[#3a2a22]/60"
       epilogue={
-        <Reveal effect="fade">
+        <Rise>
           <footer className={s.sign}>
             <p className={s.signLead}>{t.hosts.respectDeep}</p>
             <Script text={t.natural.wait} className={s.signScript} />
           </footer>
-        </Reveal>
+        </Rise>
       }
     >
       <header className={s.hero}>
@@ -104,19 +114,17 @@ export default function TongDasturxon({ data, mode }: TemplateProps) {
         <p className={s.title}>{t.occasionTitles[inv.occasion]}</p>
       </section>
 
-      <Reveal effect="fade">
-        <section className={s.letter}>
-          {inv.text.greeting && <h2>{inv.text.greeting}</h2>}
-          <p>{inv.text.body}</p>
-        </section>
-      </Reveal>
+      <Rise stagger className={s.letter}>
+        {inv.text.greeting && <h2>{tidy(inv.text.greeting)}</h2>}
+        <p>{tidy(inv.text.body)}</p>
+      </Rise>
 
       <Script text={t.natural.date} className={`${s.script} ${s.dateTitle}`} />
       <section className={s.date}>
-        <div className={s.dateSide}>
-          <p className={s.weekday}>{t.weekdays[w.weekdayIndex]}</p>
-          <p className={s.dayNum}>{w.day}</p>
-        </div>
+        <Medallion className={s.medal}>
+          <span className={s.weekday}>{t.weekdays[w.weekdayIndex]}</span>
+          <strong className={s.dayNum}>{w.day}</strong>
+        </Medallion>
         <HandCalendar date={w} className={s.cal} />
       </section>
 
@@ -146,7 +154,7 @@ export default function TongDasturxon({ data, mode }: TemplateProps) {
       <section className={s.place}>
         <Script text={t.natural.place} className={s.script} />
         {places.map((e, i) => (
-          <Reveal key={i} effect="fade">
+          <Rise key={i}>
             <div className={s.venue}>
               <h3>{e.venueName}</h3>
               <p>{e.address}</p>
@@ -156,7 +164,7 @@ export default function TongDasturxon({ data, mode }: TemplateProps) {
                 iconClassName="text-[#7a3b2e]"
               />
             </div>
-          </Reveal>
+          </Rise>
         ))}
       </section>
 
@@ -171,13 +179,16 @@ export default function TongDasturxon({ data, mode }: TemplateProps) {
         <Photo
           src={photos[1].src}
           client={photos[1].client}
-          shape="round"
-          ratio="4 / 5"
+          shape="circle"
+          ratio="1 / 1"
           className={s.tea}
         />
       </section>
 
+      <Divider className={s.divider} />
+
       <section className={s.hosts}>
+        <Rosette className={s.hostsRosette} />
         <p className={s.hostsLabel}>{t.natural.sides}</p>
         <p className={s.hostsName}>{data.hosts}</p>
       </section>

@@ -25,7 +25,15 @@ for (const width of (arg("widths", "430,360")).split(",").map(Number)) {
   const name = `${OUT}/${id}${TAG}-${width}`;
   if (width === 430) await page.screenshot({ path: `${name}-0-opening.png` });
   const opener = page.locator("[data-open]").first();
-  if (await opener.count()) await opener.click();
+  if (await opener.count()) {
+    await opener.click();
+    // --anim: кадры открытия, чтобы проверить последовательность без рывков
+    if (process.argv.includes("--anim") && width === 430)
+      for (const ms of [250, 700, 1200, 1800]) {
+        await page.waitForTimeout(ms === 250 ? 250 : 500);
+        await page.screenshot({ path: `${name}-0-open-${ms}ms.png` });
+      }
+  }
   await page.waitForSelector('[data-opened="true"]', { timeout: 10_000 }).catch(() => errors.push("не открылось"));
   await page.waitForTimeout(900);
   // Пролистать до конца, чтобы все блоки появились

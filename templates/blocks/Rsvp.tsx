@@ -26,12 +26,12 @@ type State = "form" | "sending" | "done" | "error" | "limited";
  * Цвета формы в цветах дизайна: CSS-переменные --rsvp-* (без них — прежняя карточка).
  * paper — фон, ink — текст, line — рамки, soft — кнопки «−/+» и «Келолмайман», accent — «Келаман», font — шрифт.
  */
-export type RsvpLook = { paper: string; ink: string; line: string; soft: string; accent: string; accentInk?: string; font?: string; radius?: string };
+export type RsvpLook = { paper: string; ink: string; line: string; soft: string; accent: string; accentInk?: string; font?: string; radius?: string; buttonRadius?: string };
 
 export function rsvpVars(l: RsvpLook): CSSProperties {
   return {
     "--rsvp-paper": l.paper, "--rsvp-ink": l.ink, "--rsvp-line": l.line, "--rsvp-soft": l.soft,
-    "--rsvp-accent": l.accent, "--rsvp-accent-ink": l.accentInk ?? "#fff", "--rsvp-font": l.font ?? "inherit", "--rsvp-radius": l.radius ?? "16px",
+    "--rsvp-accent": l.accent, "--rsvp-accent-ink": l.accentInk ?? "#fff", "--rsvp-font": l.font ?? "inherit", "--rsvp-radius": l.radius ?? "16px", "--rsvp-btn-radius": l.buttonRadius ?? "0.75rem",
   } as CSSProperties;
 }
 
@@ -87,7 +87,7 @@ export function Rsvp({ slug, preview, look }: { slug: string; preview: boolean; 
                 onChange={(e) => setName(e.target.value)}
                 maxLength={60}
                 autoComplete="name"
-                className="min-h-12 rounded-xl border border-[var(--rsvp-line,#c9a86a)] bg-white px-3 text-[17px] text-[var(--rsvp-ink,#2b1f16)]"
+                className="min-h-12 rounded-[var(--rsvp-btn-radius,0.75rem)] border border-[var(--rsvp-line,#c9a86a)] bg-white px-3 text-[17px] text-[var(--rsvp-ink,#2b1f16)]"
               />
             </label>
             {/* Ловушка для роботов: человек это поле не видит */}
@@ -101,8 +101,8 @@ export function Rsvp({ slug, preview, look }: { slug: string; preview: boolean; 
               </span>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              <button type="submit" disabled={!name.trim() || state === "sending"} onClick={(e) => submit(e, true)} className="min-h-12 rounded-xl bg-[var(--rsvp-accent,#3f6b47)] px-2 text-[16px] font-semibold text-[var(--rsvp-accent-ink,#fff)] disabled:opacity-50">{tx.yes}</button>
-              <button type="button" disabled={!name.trim() || state === "sending"} onClick={(e) => submit(e, false)} className="min-h-12 rounded-xl bg-[var(--rsvp-soft,#efe3cd)] px-2 text-[16px] font-semibold text-[var(--rsvp-ink,#2b1f16)] disabled:opacity-50">{tx.no}</button>
+              <button type="submit" disabled={!name.trim() || state === "sending"} onClick={(e) => submit(e, true)} className="min-h-12 rounded-[var(--rsvp-btn-radius,0.75rem)] bg-[var(--rsvp-accent,#3f6b47)] px-2 text-[16px] font-semibold text-[var(--rsvp-accent-ink,#fff)] disabled:opacity-50">{tx.yes}</button>
+              <button type="button" disabled={!name.trim() || state === "sending"} onClick={(e) => submit(e, false)} className="min-h-12 rounded-[var(--rsvp-btn-radius,0.75rem)] bg-[var(--rsvp-soft,#efe3cd)] px-2 text-[16px] font-semibold text-[var(--rsvp-ink,#2b1f16)] disabled:opacity-50">{tx.no}</button>
             </div>
             {state === "error" && <p role="alert" className="text-center text-[14px] text-[#9b2c1f]">{tx.error}</p>}
             {state === "limited" && <p role="alert" className="text-center text-[14px] text-[#9b2c1f]">{tx.limited}</p>}

@@ -66,3 +66,24 @@
 
 /* Второе место — не копия первого: прижато вправо, без заливки, только тонкая линия */
 .place > div:nth-of-type(even) .venue { margin-left: 18%; background: transparent; border: 1px solid #c4d3c8; border-radius: 4px 22px 22px 22px; text-align: right; }
+
+/* ── v2: кружевная розетка вокруг круга, медальон даты ── */
+.page { --n-photo-filter: saturate(.9) brightness(1.03); }
+.lace { position: absolute; left: -11%; top: -11%; width: 122%; height: 122%; color: var(--n-accent); opacity: .28; animation: laceTurn 120s linear infinite; }
+@keyframes laceTurn { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .lace { animation: none; } }
+.circle { position: relative; box-shadow: 0 16px 36px -22px rgba(47,61,54,.55); }
+.circleWrap { margin-top: 48px; }
+.medal { flex: none; width: 112px; color: var(--n-accent); background: #fff; box-shadow: 0 10px 26px -18px rgba(47,61,54,.6); }
+.medalDay { display: block; font-family: var(--n-serif); font-size: 48px; font-weight: 300; line-height: .9; color: var(--n-ink); font-variant-numeric: lining-nums; }
+.medalWeek { display: block; margin-top: 6px; font-size: 13px; color: var(--n-ink); }
+.divider { margin: 56px auto 0; }
+.venue { border-radius: 22px; }
+.place > div:nth-of-type(even) .venue { border-radius: 22px; }
+/* v2 после критика: таймер — ровная сетка из 4 колонок, кружево заметнее */
+.countGrid { display: grid; grid-template-columns: repeat(4, 1fr); column-gap: 0; text-align: center; }
+.countBox { flex-direction: column; align-items: center; gap: 4px; }
+.countBox + .countBox { border-left: 1px solid #c4d3c8; }
+.countNum { font-weight: 300; font-variant-numeric: lining-nums tabular-nums; }
+.countLabel { font-size: 13px; letter-spacing: .04em; opacity: .8; }
+.lace { opacity: .42; }

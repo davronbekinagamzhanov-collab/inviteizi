@@ -1,26 +1,36 @@
 /* «Муҳр»: один цвет — пыльно-голубой — на холодной бумаге. Всё остальное — воздух и типографика */
 .page { background: var(--n-paper); color: var(--n-ink); font-family: var(--n-text); }
 
-/* ── Конверт ── */
-.opening { position: fixed; inset: 0; z-index: 50; margin: 0 auto; max-width: 430px; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 34px; background: #e9edf0; cursor: pointer; transition: opacity .5s ease 1.2s; }
+/* ── Конверт на весь экран ──
+   Последовательность (≈2,4 с): печать трескается на две половинки → клапан складывается назад →
+   письмо выезжает вверх → конверт растворяется. Анимируются только transform и opacity. */
+.opening { position: fixed; inset: 0; z-index: 50; margin: 0 auto; max-width: 430px; width: 100%; overflow: hidden; perspective: 1400px; cursor: pointer; background: linear-gradient(180deg, #6f879d, #7b93a9); transition: opacity .45s ease 1.95s; }
 .opening[data-started="true"] { opacity: 0; }
-.envelope { position: relative; width: 82%; aspect-ratio: 1.42; perspective: 900px; }
-.pocket, .flap, .card { position: absolute; inset: 0; }
-.pocket { background: #8aa1b5; clip-path: polygon(0 0, 50% 52%, 100% 0, 100% 100%, 0 100%); z-index: 3; box-shadow: 0 18px 40px -22px rgba(44,59,73,.55); }
-.flap { background: #7f97ad; clip-path: polygon(0 0, 100% 0, 50% 58%); transform-origin: top; z-index: 4; transition: transform .7s cubic-bezier(.5,0,.3,1) .15s, z-index 0s .5s; }
-.card { inset: 6% 6% 8%; background: #fbfbfa; z-index: 2; display: flex; align-items: flex-start; justify-content: center; padding-top: 12%; transition: transform .8s cubic-bezier(.3,.7,.3,1) .75s; }
-.cardNames { font-family: var(--n-serif); text-transform: uppercase; letter-spacing: .2em; font-size: 13px; text-align: center; color: var(--n-ink); line-height: 1.5; }
-.cardAnd { font-size: 26px; color: var(--n-accent); text-transform: none; letter-spacing: 0; }
-.seal { position: absolute; left: 50%; top: 58%; width: 86px; height: 86px; transform: translate(-50%, -50%); z-index: 5; transition: transform .45s ease, opacity .35s ease; }
-.wax { position: absolute; inset: 0; width: 100%; height: 100%; fill: #3f5b77; filter: drop-shadow(0 3px 3px rgba(20,30,40,.35)); }
+.letterCard { position: absolute; left: 8%; right: 8%; top: 14%; height: 52%; z-index: 1; display: flex; align-items: flex-start; justify-content: center; padding-top: 16%; background: #fbfbfa; border-radius: 6px; box-shadow: 0 10px 30px -18px rgba(20,30,40,.6); transition: transform .9s cubic-bezier(.22,1,.36,1) 1.05s; }
+.cardNames { display: flex; flex-direction: column; align-items: center; gap: 4px; font-family: var(--n-serif); text-transform: uppercase; letter-spacing: .2em; font-size: 15px; text-align: center; color: var(--n-ink); line-height: 1.4; }
+.cardAnd { font-size: 30px; color: var(--n-accent); text-transform: none; letter-spacing: 0; }
+.pocket { position: absolute; inset: 0; z-index: 3; background: linear-gradient(175deg, #a2b5c6 35%, #95aabc 75%, #8ea3b6); clip-path: polygon(0 34%, 50% 62%, 100% 34%, 100% 100%, 0 100%); }
+.flapWrap { position: absolute; inset: 0; z-index: 4; transform-origin: 50% 0; filter: drop-shadow(0 7px 9px rgba(25,38,52,.32)); transition: transform .85s cubic-bezier(.55,0,.25,1) .4s, opacity .5s ease .7s; }
+.flap { position: absolute; inset: 0; background: linear-gradient(180deg, #8098ae 0%, #758ea5 100%); clip-path: polygon(0 0, 100% 0, 100% 34%, 50% 66%, 0 34%); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+.flapRosette { margin-top: 15svh; width: 58px; height: 58px; color: #e6edf2; opacity: .55; transition: opacity .3s ease; }
+.flapMono { margin-top: 16px; display: flex; align-items: center; gap: 12px; font-family: var(--n-serif); font-size: 40px; font-weight: 300; letter-spacing: .04em; color: #eef2f5; transition: opacity .3s ease; }
+.flapMono i, .sealMono i, .heroMono i { display: block; width: 1px; height: 30px; background: currentColor; opacity: .7; }
+.seal { position: absolute; left: 50%; top: 66%; width: 92px; height: 92px; margin: -46px 0 0 -46px; z-index: 5; }
+.sealHalf { position: absolute; inset: 0; transition: transform .55s cubic-bezier(.3,0,.2,1), opacity .45s ease .1s; }
+.sealLeft { clip-path: polygon(0 0, 54% 0, 46% 30%, 54% 55%, 44% 100%, 0 100%); }
+.sealRight { clip-path: polygon(54% 0, 100% 0, 100% 100%, 44% 100%, 54% 55%, 46% 30%); }
+.wax { position: absolute; inset: 0; width: 100%; height: 100%; fill: url(#muhr-wax); filter: drop-shadow(0 3px 3px rgba(20,30,40,.35)); }
 .waxRing { fill: none; stroke: #5d7894; stroke-width: 2; }
-.sealMono { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 7px; font-family: var(--n-serif); font-size: 25px; font-weight: 600; color: #c9d6e2; text-shadow: 0 -1px 0 rgba(0,0,0,.35); }
-.sealMono i, .heroMono i { display: block; width: 1px; height: 24px; background: currentColor; opacity: .7; }
-.openWord { font-size: 46px; color: var(--n-ink); }
-.opening[data-started="true"] .seal { transform: translate(-50%, -50%) scale(.6); opacity: 0; }
-.opening[data-started="true"] .flap { transform: rotateX(180deg); z-index: 1; }
-.opening[data-started="true"] .card { transform: translateY(-46%); }
-@media (prefers-reduced-motion: reduce) { .opening, .flap, .card, .seal { transition: none; } }
+.sealMono { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 7px; font-family: var(--n-serif); font-size: 25px; font-weight: 600; color: #c9d6e2; text-shadow: 0 -1px 0 rgba(0,0,0,.35); transition: opacity .2s ease; }
+.sealMono i { height: 22px; }
+.openWord { position: absolute; left: 0; right: 0; bottom: 12svh; z-index: 6; text-align: center; font-size: 48px; color: #f3f4f2; transition: opacity .3s ease; }
+.opening[data-started="true"] .sealMono, .opening[data-started="true"] .openWord, .opening[data-started="true"] .flapMono { opacity: 0; }
+.opening[data-started="true"] .sealLeft { transform: translate3d(-18px, 10px, 0) rotate(-16deg); opacity: 0; }
+.opening[data-started="true"] .sealRight { transform: translate3d(18px, 12px, 0) rotate(14deg); opacity: 0; }
+.opening[data-started="true"] .flapWrap { transform: rotateX(-165deg); opacity: 0; }
+.opening[data-started="true"] .flapRosette { opacity: 0; }
+.opening[data-started="true"] .letterCard { transform: translate3d(0, -22%, 0) scale(1.04); }
+@media (prefers-reduced-motion: reduce) { .opening, .flapWrap, .letterCard, .sealHalf { transition: none; } }
 
 /* ── Первый экран ── */
 .hero { padding: 40px 24px 8px; }
@@ -104,8 +114,15 @@
 .heroMono { left: -27%; bottom: 6%; flex-direction: column; gap: 8px; font-size: 52px; }
 .heroMono i { width: 30px; height: 1px; }
 
-/* Бумага конверта: мягкая тень сгиба и неровный тон, без блеска */
-.pocket { background: linear-gradient(160deg, #94aabd 0%, #869db1 55%, #7c94a9 100%); }
-.flap { background: linear-gradient(180deg, #8aa1b5 0%, #7790a6 100%); filter: drop-shadow(0 4px 3px rgba(30,45,60,.28)); }
-.card { box-shadow: inset 0 0 0 1px rgba(44,59,73,.06); }
-.wax { fill: url(#muhr-wax); }
+/* ── v2: круглые детали, разделитель, обработка фото ── */
+.page { --n-photo-filter: saturate(.86) contrast(.97) brightness(1.02); }
+.divider { margin: 46px auto 0; }
+.dateBlock { position: relative; }
+.rosette { position: absolute; right: -70px; top: 10px; width: 250px; height: 250px; color: var(--n-accent); opacity: .16; }
+.medal { flex: none; width: 104px; color: var(--n-accent); margin-bottom: 18px; }
+.medalDay { display: block; font-size: 13px; letter-spacing: .06em; color: var(--n-ink); }
+.medalTime { display: block; margin-top: 6px; font-family: var(--n-serif); font-size: 30px; font-weight: 400; color: var(--n-ink); font-variant-numeric: lining-nums; }
+.venue { border-radius: 14px; }
+/* v2 после критика: подпись хозяев без грубого капса, розетка на клапане заметнее */
+.signHosts { text-transform: none; font-weight: 400; letter-spacing: .02em; }
+.flapRosette { opacity: .75; }

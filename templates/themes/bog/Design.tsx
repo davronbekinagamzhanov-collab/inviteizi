@@ -10,11 +10,21 @@ import { useInvitation } from "../../blocks/useInvitation";
 import { InvitationShell } from "../../blocks/InvitationShell";
 import { Countdown } from "../../blocks/Countdown";
 import { MapButton } from "../../blocks/MapButton";
-import { Reveal } from "../../blocks/Reveal";
 import { Words, useFitWords } from "../../blocks/FitWords";
 import { t } from "@/texts/uz-cyrl";
 import { naturalFonts } from "../natural/fonts";
-import { HandCalendar, Photo, Script, Squiggle, useSeen } from "../natural/kit";
+import {
+  Divider,
+  HandCalendar,
+  Medallion,
+  Photo,
+  Rise,
+  Rosette,
+  Script,
+  Squiggle,
+  tidy,
+  useSeen,
+} from "../natural/kit";
 import { creditsOf, shots, venues } from "../natural/common";
 import { localCredit, localPhoto } from "../natural/photos";
 import { melody } from "./melody";
@@ -56,7 +66,8 @@ export default function Bog({ data, mode }: TemplateProps) {
       pageColor="#f6f7f3"
       backdropClassName="bg-[#e3e9e3]"
       className={s.page}
-      musicButtonClassName="bg-[#2f3d36] text-white"
+      musicVariant="soft"
+      musicButtonClassName="bg-[#f6f7f3]/70 text-[#2f3d36] ring-[#5f8270]/30"
       rsvpLook={{
         paper: "#ffffff",
         ink: "#2f3d36",
@@ -64,7 +75,8 @@ export default function Bog({ data, mode }: TemplateProps) {
         soft: "#e6eee8",
         accent: "#5f8270",
         font: "var(--n-text)",
-        radius: "14px",
+        radius: "22px",
+        buttonRadius: "999px",
       }}
       credits={[
         ...creditsOf(photos),
@@ -73,13 +85,13 @@ export default function Bog({ data, mode }: TemplateProps) {
       ]}
       creditClassName="text-[#2f3d36]/60"
       epilogue={
-        <Reveal effect="fade">
+        <Rise>
           <footer className={s.sign}>
             <Script text={t.natural.wait} className={s.signScript} />
             <p className={s.signLead}>{t.hosts.respect}</p>
             <p className={s.signHosts}>{data.hosts}</p>
           </footer>
-        </Reveal>
+        </Rise>
       }
     >
       <header className={s.hero}>
@@ -99,6 +111,7 @@ export default function Bog({ data, mode }: TemplateProps) {
         </h1>
         <p className={s.cause}>{t.occasionTitles[inv.occasion]}</p>
         <div className={s.circleWrap}>
+          <Rosette className={s.lace} petals={12} />
           <Photo
             src={photos[0].src}
             client={photos[0].client}
@@ -118,20 +131,20 @@ export default function Bog({ data, mode }: TemplateProps) {
         </div>
       </header>
 
-      <Reveal effect="fade">
-        <section className={s.letter}>
-          {inv.text.greeting && <h2>{inv.text.greeting}</h2>}
-          <p>{inv.text.body}</p>
-        </section>
-      </Reveal>
+      <Rise stagger className={s.letter}>
+        {inv.text.greeting && <h2>{tidy(inv.text.greeting)}</h2>}
+        <p>{tidy(inv.text.body)}</p>
+      </Rise>
+
+      <Divider className={s.divider} />
 
       <section className={s.date}>
         <div className={s.dateHead}>
           <Script text={t.natural.date} className={s.script} />
-          <p className={s.dateBig}>
-            <strong>{w.day}</strong>
-            <span>{t.weekdays[w.weekdayIndex]}</span>
-          </p>
+          <Medallion className={s.medal}>
+            <strong className={s.medalDay}>{w.day}</strong>
+            <span className={s.medalWeek}>{t.weekdays[w.weekdayIndex]}</span>
+          </Medallion>
         </div>
         <HandCalendar date={w} className={s.cal} />
       </section>
@@ -158,7 +171,7 @@ export default function Bog({ data, mode }: TemplateProps) {
       <section className={s.place}>
         <Script text={t.natural.place} className={s.script} />
         {places.map((e, i) => (
-          <Reveal key={i} effect="fade">
+          <Rise key={i}>
             <div className={s.venue}>
               <h3>{e.venueName}</h3>
               <p>{e.address}</p>
@@ -168,7 +181,7 @@ export default function Bog({ data, mode }: TemplateProps) {
                 iconClassName="text-white"
               />
             </div>
-          </Reveal>
+          </Rise>
         ))}
       </section>
 

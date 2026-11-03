@@ -5,18 +5,26 @@
  * тонкие цифры таймера, каждое событие — своя «страница» с крупным временем.
  * Порядок: шёлк → имена → фото → приветствие → таймер → тадбирлар → «Сана» → «Манзил» → семьи → ответы → подпись.
  */
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "motion/react";
 import { designVars, type TemplateProps } from "../types";
 import { useInvitation } from "../../blocks/useInvitation";
 import { InvitationShell } from "../../blocks/InvitationShell";
 import { Countdown } from "../../blocks/Countdown";
 import { MapButton } from "../../blocks/MapButton";
-import { Reveal } from "../../blocks/Reveal";
 import { Words, useFitWords } from "../../blocks/FitWords";
 import { t } from "@/texts/uz-cyrl";
 import { naturalFonts } from "../natural/fonts";
-import { HandCalendar, Photo, Script } from "../natural/kit";
+import {
+  Divider,
+  HandCalendar,
+  Medallion,
+  Photo,
+  Rise,
+  Rosette,
+  Script,
+  tidy,
+} from "../natural/kit";
 import { creditsOf, shots, stock, venues } from "../natural/common";
 import { localCredit, localPhoto } from "../natural/photos";
 import { melody } from "./melody";
@@ -60,6 +68,7 @@ export default function Ipak({ data, mode }: TemplateProps) {
     h: 640,
   });
   const video = localPhoto("ipak-silk-video");
+  const [videoOn, setVideoOn] = useState(false);
   const w = inv.main.when;
   const groom = useFitWords<HTMLSpanElement>(54);
   const bride = useFitWords<HTMLSpanElement>(54);
@@ -73,7 +82,8 @@ export default function Ipak({ data, mode }: TemplateProps) {
       pageColor="#efe8de"
       backdropClassName="bg-[#e4dbcf]"
       className={s.page}
-      musicButtonClassName="bg-[#3b322b] text-[#efe8de]"
+      musicVariant="soft"
+      musicButtonClassName="bg-[#efe8de]/70 text-[#3b322b] ring-[#3b322b]/20"
       rsvpLook={{
         paper: "#f8f4ee",
         ink: "#3b322b",
@@ -81,7 +91,8 @@ export default function Ipak({ data, mode }: TemplateProps) {
         soft: "#e9e0d4",
         accent: "#3b322b",
         font: "var(--n-text)",
-        radius: "22px",
+        radius: "26px",
+        buttonRadius: "999px",
       }}
       credits={[
         ...creditsOf([...photos, silk]),
@@ -89,7 +100,7 @@ export default function Ipak({ data, mode }: TemplateProps) {
       ]}
       creditClassName="text-[#3b322b]/60"
       epilogue={
-        <Reveal effect="fade">
+        <Rise>
           <footer className={s.sign}>
             {photos[2].client && (
               <Photo
@@ -104,7 +115,7 @@ export default function Ipak({ data, mode }: TemplateProps) {
             <p className={s.signLead}>{t.hosts.respectDeep}</p>
             <p className={s.signHosts}>{data.hosts}</p>
           </footer>
-        </Reveal>
+        </Rise>
       }
     >
       <header className={s.spread}>
@@ -129,7 +140,7 @@ export default function Ipak({ data, mode }: TemplateProps) {
         <Photo
           src={photos[0].src}
           client={photos[0].client}
-          shape="round"
+          shape="corner"
           ratio="3 / 4"
           eager
           className={s.photoBig}
@@ -137,18 +148,23 @@ export default function Ipak({ data, mode }: TemplateProps) {
         <Photo
           src={photos[1].src}
           client={photos[1].client}
-          shape="round"
-          ratio="4 / 5"
+          shape="oval"
+          ratio="3 / 4"
           className={s.photoSmall}
         />
+        <Medallion className={s.medal}>
+          <span className={s.medalDay}>{w.day}</span>
+          <span className={s.medalMonth}>{t.date.monthYear(w.monthIndex, w.year).split(" ")[0]}</span>
+        </Medallion>
       </section>
 
-      <section className={s.letter}>
-        {inv.text.greeting && <h2>{inv.text.greeting}</h2>}
-        <p>{inv.text.body}</p>
-      </section>
+      <Rise stagger className={s.letter}>
+        {inv.text.greeting && <h2>{tidy(inv.text.greeting)}</h2>}
+        <p>{tidy(inv.text.body)}</p>
+      </Rise>
 
       <section className={s.count}>
+        <Rosette className={s.countRosette} petals={12} />
         <Script text={t.natural.wait} className={s.countScript} />
         <p className={s.countLead}>{t.countdown.title[inv.occasion]}</p>
         <Countdown
@@ -165,22 +181,20 @@ export default function Ipak({ data, mode }: TemplateProps) {
 
       <section className={s.events}>
         {inv.program.map((e, i) => (
-          <article
-            key={i}
-            data-event
-            className={`${s.event} ${i % 2 ? s.eventAlt : ""}`}
-          >
+          <Rise key={i} stagger className={`${s.event} ${i % 2 ? s.eventAlt : ""}`}>
             <p className={s.eventTime}>{t.date.clock(e.time)}</p>
             <div className={s.eventText}>
-              <h3>{e.title}</h3>
+              <h3 data-event>{e.title}</h3>
               <p>{t.weekdays[e.when.weekdayIndex]}</p>
               <p>{t.date.long(e.when.day, e.when.monthIndex, e.when.year)}</p>
               <p className={s.eventVenue}>{e.venueName}</p>
             </div>
-          </article>
+          </Rise>
         ))}
-        <Photo src={silk.src} shape="round" ratio="4 / 3" className={s.silk} />
+        <Photo src={silk.src} shape="arch" ratio="4 / 5" className={s.silk} />
       </section>
+
+      <Divider className={s.divider} />
 
       <section className={s.date}>
         <Script text={t.natural.date} className={s.sideScript} />
@@ -220,8 +234,11 @@ export default function Ipak({ data, mode }: TemplateProps) {
 
       {!inv.opened && (
         <div className={s.opening} data-started={inv.started}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={video.poster} alt="" aria-hidden className={s.video} />
           <video
-            className={s.video}
+            className={`${s.video} ${s.videoFade} ${videoOn ? s.videoOn : ""}`}
+            onPlaying={() => setVideoOn(true)}
             src={video.src}
             poster={video.poster}
             autoPlay

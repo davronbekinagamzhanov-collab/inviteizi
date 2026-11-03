@@ -69,3 +69,19 @@
 .sign { padding: 52px 24px 0; }
 .signLead { font-family: var(--n-serif); font-style: italic; font-size: 19px; }
 .signScript { display: block; margin-top: 4px; font-size: 58px; line-height: 1.25; color: var(--n-accent); }
+
+/* ── v2: медальон даты, круглый чай, розетка за хозяевами ── */
+.page { --n-photo-filter: sepia(.06) saturate(.82) brightness(1.02); }
+.date { grid-template-columns: 112px 1fr; align-items: center; }
+.medal { width: 108px; color: var(--n-accent); background: #fbf6ee; box-shadow: 0 10px 26px -18px rgba(58,42,34,.55); }
+.medal .weekday { margin: 0; font-size: 13px; }
+.medal .dayNum { display: block; margin-top: 4px; font-size: 50px; line-height: .9; }
+.tea { top: auto; bottom: 0; width: 44%; border: 0; outline: 6px solid var(--n-paper); }
+.divider { margin: 28px auto 0; }
+.pair { height: auto; aspect-ratio: 430 / 440; }
+.hosts { position: relative; overflow: hidden; padding-bottom: 8px; }
+.hostsRosette { position: absolute; right: -60px; top: -30px; width: 190px; height: 190px; color: var(--n-accent); opacity: .12; }
+.hostsLabel, .hostsName { position: relative; }
+.venue { border-radius: 0 12px 12px 0; }
+.count { border-radius: 14px; border: 1px solid #dccab5; padding: 22px 20px; }
+@media (max-width: 380px) { .date { grid-template-columns: 88px 1fr; gap: 8px; padding-left: 16px; padding-right: 14px; } .medal { width: 86px; } .medal .dayNum { font-size: 40px; } .medal .weekday { font-size: 12px; } }

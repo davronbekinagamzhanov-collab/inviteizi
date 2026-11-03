@@ -70,7 +70,15 @@ export function useSeen<T extends Element>() {
 }
 
 export type FrameShape =
-  "arch" | "round" | "circle" | "torn" | "tornTop" | "plain";
+  | "arch"
+  | "round"
+  | "circle"
+  | "torn"
+  | "tornTop"
+  | "plain"
+  | "petal" // два противоположных угла — большие дуги (лист)
+  | "corner" // один большой скруглённый угол сверху слева
+  | "oval";
 
 /**
  * Фото в рамке. Фото клиента (client) бывает любых пропорций: если оно сильно не совпадает с рамкой,
@@ -85,6 +93,7 @@ export function Photo({
   className = "",
   eager = false,
   alt = "",
+  parallax = 18,
 }: {
   src: string;
   shape?: FrameShape;
@@ -94,7 +103,10 @@ export function Photo({
   className?: string;
   eager?: boolean;
   alt?: string;
+  /** Сдвиг фото внутри рамки при листании, px (0 — без параллакса) */
+  parallax?: number;
 }) {
+  const imgRef = useParallax<HTMLImageElement>(parallax);
   const [fit, setFit] = useState<"cover" | "contain">("cover");
   const [w, h] = ratio.split("/").map((x) => Number(x.trim()));
   const frame = w / h;
@@ -117,6 +129,7 @@ export function Photo({
       )}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
+        ref={imgRef}
         src={src}
         alt={alt}
         aria-hidden={alt ? undefined : true}
@@ -126,8 +139,175 @@ export function Photo({
         className={s.img}
         style={{ objectFit: fit, objectPosition: position }}
       />
+      <span className={s.vignette} aria-hidden />
     </div>
   );
+}
+
+/* ── Плавность ─────────────────────────────────────────────────────────────
+ * Один общий обработчик прокрутки (через requestAnimationFrame) на всю страницу:
+ * - Rise: блок проявляется (opacity + translateY), когда его верх выше 90% высоты экрана — в том числе
+ *   если его уже пролистали прыжком: ни один блок не остаётся полупрозрачным.
+ * - параллакс фото: только transform и только у фото рядом с экраном.
+ */
+const pending = new Map<Element, () => void>();
+const drifting = new Map<HTMLElement, number>();
+let ticking = false;
+let listening = false;
+function onFrame() {
+  ticking = false;
+  const vh = window.innerHeight;
+  for (const [el, show] of pending) {
+    if (el.getBoundingClientRect().top < vh * 0.9) {
+      show();
+      pending.delete(el);
+    }
+  }
+  for (const [img, amp] of drifting) {
+    const r = (img.parentElement ?? img).getBoundingClientRect();
+    if (r.bottom < -vh * 0.2 || r.top > vh * 1.2) continue;
+    const p = Math.max(-1, Math.min(1, (r.top + r.height / 2 - vh / 2) / vh));
+    img.style.transform = `translate3d(0, ${(p * amp).toFixed(1)}px, 0) scale(1.08)`;
+  }
+}
+function schedule() {
+  if (ticking) return;
+  ticking = true;
+  requestAnimationFrame(onFrame);
+}
+function listen() {
+  if (listening) return;
+  listening = true;
+  window.addEventListener("scroll", schedule, { passive: true });
+  window.addEventListener("resize", schedule, { passive: true });
+}
+const reducedMotion = () =>
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function useParallax<T extends HTMLElement>(amp: number) {
+  const ref = useRef<T>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !amp || reducedMotion()) return;
+    drifting.set(el, amp);
+    listen();
+    schedule();
+    return () => {
+      drifting.delete(el);
+    };
+  }, [amp]);
+  return ref;
+}
+
+/**
+ * Мягкое появление: opacity + translateY 16px, 0,8 с, cubic-bezier(0.22, 1, 0.36, 1).
+ * stagger — дочерние элементы появляются лесенкой через 100 мс.
+ */
+export function Rise({
+  children,
+  className = "",
+  stagger = false,
+}: {
+  children: ReactNode;
+  className?: string;
+  stagger?: boolean;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (reducedMotion()) {
+      const f = requestAnimationFrame(() => setShown(true));
+      return () => cancelAnimationFrame(f);
+    }
+    pending.set(el, () => setShown(true));
+    listen();
+    schedule();
+    return () => {
+      pending.delete(el);
+    };
+  }, []);
+  return (
+    <div
+      ref={ref}
+      data-reveal={shown ? "shown" : "hidden"}
+      className={`${s.rise} ${stagger ? s.riseStagger : ""} ${shown ? s.risen : ""} ${className}`}
+    >
+      {children}
+    </div>
+  );
+}
+
+/**
+ * Тонкая розетка (ислими): лепестки и завитки одной линией, без заливки и блеска.
+ * Цвет — currentColor, прозрачность задаёт дизайн.
+ */
+export function Rosette({
+  className = "",
+  petals = 8,
+}: {
+  className?: string;
+  petals?: 8 | 12;
+}) {
+  const step = 360 / petals;
+  return (
+    <svg viewBox="-100 -100 200 200" className={`${s.rosette} ${className}`} aria-hidden data-decor>
+      <circle r="96" />
+      <circle r="90" strokeDasharray="1 5" />
+      <circle r="30" />
+      <circle r="6" />
+      {Array.from({ length: petals }, (_, i) => (
+        <g key={i} transform={`rotate(${i * step})`}>
+          <path d="M0 -32 C 14 -46 14 -66 0 -82 C -14 -66 -14 -46 0 -32 Z" />
+          <path
+            transform={`rotate(${step / 2})`}
+            d="M0 -36 C 6 -50 18 -54 20 -64 C 21 -71 14 -74 10 -69 C 7 -65 11 -60 15 -62"
+          />
+          <circle cy="-88" r="1.6" />
+        </g>
+      ))}
+    </svg>
+  );
+}
+
+/** Круглый медальон: тонкая двойная окружность, внутри — монограмма или дата */
+export function Medallion({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={`${s.medallion} ${className}`}>
+      <svg viewBox="-50 -50 100 100" className={s.medallionRing} aria-hidden data-decor>
+        <circle r="48" />
+        <circle r="44.5" strokeDasharray="0.6 2.4" />
+      </svg>
+      <div className={s.medallionInner}>{children}</div>
+    </div>
+  );
+}
+
+/** Маленький разделитель между блоками: линия — ромбик — линия */
+export function Divider({ className = "" }: { className?: string }) {
+  return (
+    <div className={`${s.divider} ${className}`} aria-hidden data-decor>
+      <span />
+      <i />
+      <span />
+    </div>
+  );
+}
+
+/**
+ * Без «висячих» слов: «ва», «ҳам» прилипают к следующему слову, «билан», «учун» — к предыдущему.
+ */
+export function tidy(text: string) {
+  return text
+    .replace(/(^|\s)(ва|ҳам|ё)\s+/giu, "$1$2 ")
+    .replace(/\s+(билан|учун|каби)(?=[\s.,!?:;]|$)/giu, " $1");
 }
 
 /** Кружок «от руки» (чуть неровный, концы заходят друг за друга) */

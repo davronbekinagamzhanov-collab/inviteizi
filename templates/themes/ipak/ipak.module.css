@@ -79,3 +79,33 @@
 .signScript { display: block; font-size: 64px; color: var(--n-accent); }
 .signLead { margin-top: 8px; font-size: 16px; }
 .signHosts { margin-top: 6px; font-family: var(--n-serif); font-size: 30px; font-weight: 500; line-height: 1.15; overflow-wrap: anywhere; }
+
+/* ── v2: плавный шёлк, круглые формы, медальон ── */
+.page { --n-photo-filter: sepia(.08) saturate(.9) brightness(1.02); }
+.videoFade { opacity: 0; transition: opacity 1.4s cubic-bezier(.22,1,.36,1); }
+.videoOn { opacity: 1; }
+.openText > *, .play, .openWord { animation: silkIn 1.1s cubic-bezier(.22,1,.36,1) both; }
+.openText > :nth-child(2) { animation-delay: .25s; }
+.play { animation-delay: .5s; }
+.openWord { animation-delay: .65s; }
+@keyframes silkIn { from { opacity: 0; transform: translate3d(0, 14px, 0); } to { opacity: 1; transform: none; } }
+.play { transition: transform .3s cubic-bezier(.22,1,.36,1), background-color .3s ease; box-shadow: 0 8px 24px -10px rgba(0,0,0,.45); backdrop-filter: blur(6px); }
+.play:active { transform: scale(.94); }
+@media (prefers-reduced-motion: reduce) { .openText > *, .play, .openWord { animation: none; } .videoFade { transition: none; } }
+
+.photoSmall { border: 0; outline: 6px solid var(--n-paper); }
+.medal { position: absolute; left: 30px; top: 410px; width: 108px; background: var(--n-paper); color: var(--n-accent); box-shadow: 0 10px 26px -16px rgba(59,50,43,.5); }
+.medalDay { display: block; font-family: var(--n-serif); font-size: 44px; font-weight: 300; line-height: .9; color: var(--n-ink); font-variant-numeric: lining-nums; }
+.medalMonth { display: block; margin-top: 4px; font-size: 12px; letter-spacing: .22em; text-transform: uppercase; }
+
+.count { position: relative; overflow: hidden; border-radius: 0 0 46px 46px; }
+.countRosette { position: absolute; right: -90px; top: -60px; width: 300px; height: 300px; color: var(--n-accent); opacity: .14; }
+.countScript, .countLead, .count > div { position: relative; }
+.countBox { position: relative; }
+.countBox + .countBox::before { content: ""; position: absolute; left: 0; top: 14px; height: 34px; width: 1px; background: currentColor; opacity: .18; }
+.countLabel { letter-spacing: .06em; }
+.divider { margin: 56px auto 0; }
+.map { border-radius: 999px; }
+/* v2 после критика: вертикальная дата в одну колонку, кнопки карты — контур */
+.vertical { white-space: nowrap; }
+.map { background: transparent; color: #3b322b; border: 1px solid #3b322b; }
