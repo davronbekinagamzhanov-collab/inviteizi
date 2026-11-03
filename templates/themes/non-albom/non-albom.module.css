@@ -1,0 +1,5 @@
+/* «Нон альбом»: лента — изразцовая бирюза, уголки — орех */
+.root { --tape: color-mix(in srgb, var(--tile) 62%, transparent); background-image: radial-gradient(color-mix(in srgb, var(--c-line) 30%, transparent) .7px, transparent .8px); background-size: 7px 7px; }
+.occasion { color: var(--tile); }
+.hero { rotate: -3deg; }
+.countNum { color: var(--tile); }

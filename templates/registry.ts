@@ -198,6 +198,9 @@ const rawDesigns: RawDesign[] = [
   design("tong-varaq", 126, "nahorgi", "scroll", false, () => import("./themes/tong-varaq/Design")),
   design("nur-varaq", 130, "nikoh", "scroll", true, () => import("./themes/nur-varaq/Design"), { clientPhotos: true }),
   design("islimi-varaq", 131, "nikoh", "scroll", false, () => import("./themes/islimi-varaq/Design")),
+  design("non-albom", 124, "nahorgi", "simple", true, () => import("./themes/non-albom/Design"), { clientPhotos: true }),
+  design("ipak-albom", 128, "nikoh", "simple", true, () => import("./themes/ipak-albom/Design"), { clientPhotos: true }),
+  design("xotira-albom", 132, "nikoh", "scroll", true, () => import("./themes/xotira-albom/Design"), { clientPhotos: true }),
 
 ];
 
@@ -207,7 +210,7 @@ const STYLE_OF: Record<DesignStyle, string[]> = {
   floral: ["bordo-guldasta", "lola-bodom", "tonggi-piyola", "muhrli-maktub", "gul-doira", "girih-barg", "umr-sahifalari","pion-guldasta", "ipak-romol", "paxta-gul", "visol-rishta", "kabutar-salom", "umr-daraxti", "rayhon-sahari", "siyoh-duo", "shabnam-visol", "uzum-hovli"],
   national: ["islimi-varaq", "sunnat-muqova", "sunnat-nasab","ganch-peshtoq", "rishton-koshin", "oq-ot", "sayram-hovli", "doppicha", "adras-nishon", "suzani-yol", "sopol-navo", "girih-nur", "dutor-navosi", "minor-satr", "kumush-taroq", "mis-kafgir", "oq-chinni", "tonggi-qozon", "yelpigich-ziynat"],
   dark: ["sapfir", "shohona-baxmal"],
-  photo: ["nur-varaq", "muhr", "ipak", "bog", "tong-dasturxon", "tandir-nuri", "atirgul", "dasturxon", "bodom-guli", "samarqand-kitob", "tonggi-choy", "gulbog-sahifa", "lola-ehtirom", "anor-bogi"],
+  photo: ["xotira-albom", "ipak-albom", "non-albom", "nur-varaq", "muhr", "ipak", "bog", "tong-dasturxon", "tandir-nuri", "atirgul", "dasturxon", "bodom-guli", "samarqand-kitob", "tonggi-choy", "gulbog-sahifa", "lola-ehtirom", "anor-bogi"],
 };
 
 function styleOf(id: string): DesignStyle {
@@ -234,7 +237,7 @@ export const ACCEPTED = new Set([
   // 117–122 — «Гулли рамка» (03.11.2026): никоҳ ×3, наҳорги ош, суннат, юбилей
   "gul-doira", "girih-barg", "muhrli-maktub", "tonggi-piyola", "lola-bodom", "bordo-guldasta",
   // 123–138 — батч 3
-   "choy-maktub", "oq-maktub", "hurmat-maktub", "tong-varaq", "nur-varaq", "islimi-varaq",
+   "choy-maktub", "oq-maktub", "hurmat-maktub", "tong-varaq", "nur-varaq", "islimi-varaq", "non-albom", "ipak-albom", "xotira-albom",
   // Скрыты по решению владельца 03.11.2026 (код и строки в БД остаются — оплаченные ссылки работают),
   // список — HIDDEN_03_11 ниже. «anor-bogi» скрыт ещё 24.10.
 ]);

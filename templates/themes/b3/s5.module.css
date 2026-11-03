@@ -1,0 +1,57 @@
+/* S5 «Альбом»: Piazzolla, полароиды с лентой, подписи от руки (Bad Script — есть ў қ ғ ҳ). */
+.root { --f-display: var(--b-piazzolla); --tape: color-mix(in srgb, var(--c-accent) 55%, transparent); padding-bottom: 8px; overflow: hidden; }
+
+/* шапка — видна с первого кадра */
+.head { position: relative; z-index: 2; padding: 64px 24px 0; text-align: center; display: flex; flex-direction: column; align-items: center; }
+.relation { font-size: 19px; }
+.names { margin-top: 4px; font-size: 48px; font-weight: 600; letter-spacing: -.015em; }
+.occasion { margin-top: 12px; font-family: var(--f-display); font-style: italic; font-size: 21px; color: var(--c-accent); }
+.date { margin-top: 2px; font-family: var(--f-display); font-size: 18px; opacity: .85; }
+
+/* полароид */
+.polaroid { position: relative; margin: 0; padding: 12px 12px 0; background: #fffdf8; box-shadow: 0 1px 2px rgba(40, 30, 20, .12), 0 10px 24px -10px rgba(40, 30, 20, .28); }
+.frame { aspect-ratio: 4 / 5; overflow: hidden; background: var(--c-soft); }
+.caption { padding: 10px 4px 14px; text-align: center; font-family: var(--n-script-alt); font-size: 22px; line-height: 1.2; color: var(--c-ink); }
+.tape { position: absolute; z-index: 2; top: -12px; left: 50%; width: 112px; height: 28px; translate: -50% 0; rotate: -4deg; background: var(--tape); box-shadow: 0 1px 2px rgba(0, 0, 0, .08); }
+.tape::before, .tape::after { content: ""; position: absolute; top: 0; bottom: 0; width: 6px; background: inherit; }
+.tape::before { left: -5px; clip-path: polygon(100% 0, 0 15%, 100% 30%, 0 45%, 100% 60%, 0 75%, 100% 90%, 0 100%, 100% 100%); }
+.tape::after { right: -5px; clip-path: polygon(0 0, 100% 15%, 0 30%, 100% 45%, 0 60%, 100% 75%, 0 90%, 100% 100%, 0 100%); }
+
+.hero { width: min(78%, 320px); margin: 30px auto 0; }
+
+/* текст */
+.text { margin: 0 auto; padding: 54px 28px 0; max-width: 400px; text-align: center; }
+.textMotif { width: 64px; margin: 0 auto 14px; color: var(--c-accent); }
+.textMotif svg { display: block; width: 100%; height: auto; }
+.text h2 { font-family: var(--f-display); font-size: 26px; line-height: 1.25; text-wrap: balance; }
+.text p { margin-top: 14px; font-size: 18px; line-height: 1.75; text-wrap: pretty; }
+
+/* два маленьких полароида */
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 56px 20px 0; max-width: 430px; margin: 0 auto; }
+.small { padding: 8px 8px 0; }
+.small .caption { font-size: 18px; padding: 8px 2px 10px; }
+.small .tape { width: 70px; height: 22px; top: -10px; }
+
+/* лента фото (Варақланадиган) */
+.stripWrap { padding-top: 22px; }
+.strip { display: flex; gap: 22px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 18px 13% 12px; scrollbar-width: none; overscroll-behavior-x: contain; }
+.strip::-webkit-scrollbar { display: none; }
+.stripItem { flex: 0 0 74%; scroll-snap-align: center; }
+.stripHint { margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; font-family: var(--n-serif); font-size: 16px; letter-spacing: .1em; opacity: .75; }
+.sideArrow { width: 10px; height: 10px; border-right: 1.5px solid currentColor; border-top: 1.5px solid currentColor; rotate: 45deg; animation: albomSide 2.4s ease-in-out infinite; }
+@keyframes albomSide { 0%, 100% { transform: translate3d(0, 0, 0); opacity: .5; } 50% { transform: translate3d(3px, -3px, 0); opacity: 1; } }
+
+/* сана в «уголках альбома» */
+.corners { position: relative; margin: 60px 18px 0; padding: 8px 0 30px; background: var(--c-card); }
+.corner { position: absolute; width: 26px; height: 26px; background: var(--c-accent); opacity: .85; }
+.corner:nth-child(1) { top: -6px; left: -6px; clip-path: polygon(0 0, 100% 0, 0 100%); }
+.corner:nth-child(2) { top: -6px; right: -6px; clip-path: polygon(0 0, 100% 0, 100% 100%); }
+.corner:nth-child(3) { bottom: -6px; left: -6px; clip-path: polygon(0 0, 0 100%, 100% 100%); }
+.corner:nth-child(4) { bottom: -6px; right: -6px; clip-path: polygon(100% 0, 100% 100%, 0 100%); }
+.flat { padding-top: 40px; }
+
+.finale { padding-top: 10px; }
+.finMotif { width: 110px; margin: 0 auto; color: var(--c-accent); }
+.finMotif svg { display: block; width: 100%; height: auto; }
+
+@media (prefers-reduced-motion: reduce) { .sideArrow { animation: none; } }
