@@ -1,0 +1,3 @@
+/* «Ганч дарвоза»: окна на тёплой известковой бумаге, цифры таймера — орех */
+.countNum { color: var(--wood); }
+.event { border-top-color: color-mix(in srgb, var(--c-accent) 50%, transparent); }

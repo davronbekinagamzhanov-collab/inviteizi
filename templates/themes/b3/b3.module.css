@@ -9,7 +9,8 @@
 .page h1, .page h2, .page h3 { font-weight: inherit; }
 
 .names { font-family: var(--f-display); display: flex; flex-direction: column; align-items: center; line-height: 1.08; overflow-wrap: anywhere; text-wrap: balance; }
-.name { display: block; }
+/* не шире строки: 0.6em — средняя ширина буквы, --fit-w — ширина строки на телефоне 360px */
+.name { display: block; font-size: min(1em, calc(var(--fit-w, 290px) / (var(--len, 8) * .6))); }
 .and { display: block; margin: 4px 0; font-family: var(--n-serif); font-style: italic; font-size: .38em; color: var(--c-accent); }
 .relation { font-family: var(--n-serif); font-style: italic; font-size: 18px; color: var(--c-accent); }
 .age { display: flex; align-items: baseline; justify-content: center; gap: 6px; color: var(--c-accent); }

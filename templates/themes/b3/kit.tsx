@@ -93,8 +93,10 @@ export function B3Shell({
 export function Names({ inv, className, andClassName, as: Tag = "h1" }: { inv: Invitation; className?: string; andClassName?: string; as?: "h1" | "h2" | "p" }) {
   const d = inv.data;
   const nikoh = inv.occasion === "nikoh" && d.groom && d.bride;
+  // Самое длинное слово → --len: длинное имя («Муҳаммадюсуф») уменьшается, а не рвётся посередине
+  const len = Math.max(6, ...[d.groom, d.bride, d.person].flatMap((n) => (n ?? "").split(/\s+/)).map((w) => w.length));
   return (
-    <Tag className={cx(b.names, className)}>
+    <Tag className={cx(b.names, className)} style={{ "--len": len } as CSSProperties}>
       {nikoh ? (
         <>
           <span className={b.name}>{d.groom}</span>
