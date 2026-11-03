@@ -55,8 +55,9 @@
 .dateBlock { padding: 56px 24px 24px; }
 .bigScript { display: block; font-size: 72px; color: var(--n-accent); }
 .right { text-align: right; }
-.dateRow { margin-top: 10px; display: flex; align-items: flex-end; gap: 14px; }
-.cal { flex: 1; }
+/* Календарь на всю ширину: рядом с медальоном на 360px дни слипались и кружок задевал соседние числа */
+.dateRow { margin-top: 10px; display: flex; flex-direction: column; align-items: center; gap: 18px; }
+.cal { width: 100%; }
 .dateNote { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; padding-bottom: 8px; font-family: var(--n-serif); font-size: 15px; }
 .dateNote strong { font-size: 34px; font-weight: 400; line-height: 1; }
 

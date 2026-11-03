@@ -1,0 +1,3494 @@
+{
+ "muhr": {
+  "number": 113,
+  "occasion": "nikoh",
+  "format": "animated",
+  "errors": [],
+  "runs": {
+   "w360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 27.7,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": -59,
+      "edge": 0,
+      "width": 194,
+      "marked": {
+       "day": "14",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Келинг"
+    ],
+    "music": "ok"
+   },
+   "w430": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 37.7,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": -59,
+      "edge": 0,
+      "width": 264,
+      "marked": {
+       "day": "14",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "long360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 27.7,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": -59,
+      "edge": 0,
+      "width": 194,
+      "marked": {
+       "day": "14",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [
+     "ва| Абдураҳмоновлар ва Нуриддиновлар оилалари"
+    ],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Келинг",
+     "Тўйгача қолди"
+    ],
+    "music": "ok"
+   },
+   "namuna375": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 29.9,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": -59,
+      "edge": 0,
+      "width": 209,
+      "marked": {
+       "day": "14",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "нет кнопки"
+   }
+  }
+ },
+ "ipak": {
+  "number": 114,
+  "occasion": "nikoh",
+  "format": "animated",
+  "errors": [],
+  "runs": {
+   "w360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 42.9,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 300,
+      "marked": {
+       "day": "14",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Харитада очиш"
+    ],
+    "music": "ok"
+   },
+   "w430": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 42.9,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 300,
+      "marked": {
+       "day": "14",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "«Наврўз» тўйхонаси"
+    ],
+    "music": "ok"
+   },
+   "long360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 42.9,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 300,
+      "marked": {
+       "day": "14",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [
+     "ва| Абдураҳмоновлар ва Нуриддиновлар оилалари"
+    ],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "namuna375": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 42.9,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 300,
+      "marked": {
+       "day": "14",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   }
+  }
+ },
+ "bog": {
+  "number": 115,
+  "occasion": "sunnat",
+  "format": "scroll",
+  "errors": [],
+  "runs": {
+   "w360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 42.9,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 300,
+      "marked": {
+       "day": "12",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Сизни ўғлимиз Муҳаммадалининг "
+    ],
+    "music": "ok"
+   },
+   "w430": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 42.9,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 300,
+      "marked": {
+       "day": "12",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [
+     {
+      "src": "garland.webp",
+      "shown": 516,
+      "natural": 900
+     }
+    ],
+    "covered": [],
+    "music": "ok"
+   },
+   "long360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 42.9,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 300,
+      "marked": {
+       "day": "12",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [
+     "ва| Абдураҳмоновлар ва Нуриддиновлар оилалари"
+    ],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Сизни набирамиз Абдураҳмонжон "
+    ],
+    "music": "ok"
+   },
+   "namuna375": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 42.9,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 300,
+      "marked": {
+       "day": "12",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   }
+  }
+ },
+ "tong-dasturxon": {
+  "number": 116,
+  "occasion": "nahorgi",
+  "format": "scroll",
+  "errors": [],
+  "runs": {
+   "w360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 33.4,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 49,
+      "edge": 14,
+      "width": 234,
+      "marked": {
+       "day": "21",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Раҳимовлар оиласи"
+    ],
+    "music": "ok"
+   },
+   "w430": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 37.4,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 64,
+      "edge": 20,
+      "width": 262,
+      "marked": {
+       "day": "21",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [
+     {
+      "src": "photo-1671048116858-e8ef69175b2d?ixid=M3wxMTIxNDYwfDB8MXxzZW",
+      "shown": 464,
+      "natural": 860
+     }
+    ],
+    "covered": [],
+    "music": "ok"
+   },
+   "long360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 33.4,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 49,
+      "edge": 14,
+      "width": 234,
+      "marked": {
+       "day": "21",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [
+     "ва| Абдураҳмоновлар ва Нуриддиновлар оилалари"
+    ],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Абдурашидхон",
+     "Абдураҳмоновлар ва Нуриддиновл"
+    ],
+    "music": "ok"
+   },
+   "namuna375": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 35.6,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 49,
+      "edge": 14,
+      "width": 249,
+      "marked": {
+       "day": "21",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   }
+  }
+ },
+ "oltin-monogramma": {
+  "number": 1,
+  "occasion": "nikoh",
+  "format": "animated",
+  "errors": [],
+  "runs": {
+   "w360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 40,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 16,
+      "width": 280,
+      "marked": {
+       "day": "14",
+       "dx": 0,
+       "dy": -1,
+       "marker": "svg",
+       "markerW": 40
+      }
+     }
+    ],
+    "hanging": [
+     "ва| Сизнинг иштирокингиз ва эзгу тилакларингиз — оилам"
+    ],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "w430": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 45.7,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 320,
+      "marked": {
+       "day": "14",
+       "dx": 0,
+       "dy": -1,
+       "marker": "svg",
+       "markerW": 40
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "long360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 40,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 16,
+      "width": 280,
+      "marked": {
+       "day": "14",
+       "dx": 0,
+       "dy": -1,
+       "marker": "svg",
+       "markerW": 40
+      }
+     }
+    ],
+    "hanging": [
+     "ва| Сизнинг иштирокингиз ва эзгу тилакларингиз — оилам"
+    ],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "namuna375": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 42.1,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 16,
+      "width": 295,
+      "marked": {
+       "day": "14",
+       "dx": 0,
+       "dy": -1,
+       "marker": "svg",
+       "markerW": 40
+      }
+     }
+    ],
+    "hanging": [
+     "ва| Сизнинг иштирокингиз ва эзгу тилакларингиз — оилам"
+    ],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "нет кнопки"
+   }
+  }
+ },
+ "ganch-peshtoq": {
+  "number": 61,
+  "occasion": "nikoh",
+  "format": "animated",
+  "errors": [],
+  "runs": {
+   "w360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 36.6,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 28,
+      "width": 256,
+      "marked": {
+       "day": "21",
+       "dx": 0,
+       "dy": 0,
+       "marker": "svg",
+       "markerW": 40
+      }
+     }
+    ],
+    "hanging": [
+     "|билан Ҳурмат ва эҳтиром билан"
+    ],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "w430": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 40.6,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 28,
+      "width": 284,
+      "marked": {
+       "day": "21",
+       "dx": 0,
+       "dy": 0,
+       "marker": "svg",
+       "markerW": 40
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "long360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 36.6,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 28,
+      "width": 256,
+      "marked": {
+       "day": "14",
+       "dx": 0,
+       "dy": 0,
+       "marker": "svg",
+       "markerW": 40
+      }
+     }
+    ],
+    "hanging": [
+     "|билан Ҳурмат ва эҳтиром билан"
+    ],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "namuna375": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 38.7,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 28,
+      "width": 271,
+      "marked": {
+       "day": "21",
+       "dx": 0,
+       "dy": 0,
+       "marker": "svg",
+       "markerW": 40
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "нет кнопки"
+   }
+  }
+ },
+ "sapfir": {
+  "number": 23,
+  "occasion": "nikoh",
+  "format": "simple",
+  "errors": [],
+  "runs": {
+   "w360": {
+    "overflowX": 0,
+    "calendars": [],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "w430": {
+    "overflowX": 0,
+    "calendars": [],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "long360": {
+    "overflowX": 0,
+    "calendars": [],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Сайрам, Ибрагимов кўчаси 12"
+    ],
+    "music": "ok"
+   },
+   "namuna375": {
+    "overflowX": 0,
+    "calendars": [],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   }
+  }
+ },
+ "pion-guldasta": {
+  "number": 51,
+  "occasion": "yubiley",
+  "format": "animated",
+  "errors": [],
+  "runs": {
+   "w360": {
+    "overflowX": 0,
+    "calendars": [],
+    "hanging": [
+     "|билан Ушбу муборак кунда ёнимизда бўлишингиз — биз учун ",
+     "ва| Фарзандлари ва набиралари"
+    ],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "w430": {
+    "overflowX": 0,
+    "calendars": [],
+    "hanging": [
+     "ва| Ушбу муборак кунда ёнимизда бўлишингиз — биз учун ",
+     "ва| Фарзандлари ва набиралари"
+    ],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "long360": {
+    "overflowX": 0,
+    "calendars": [],
+    "hanging": [
+     "|билан Ушбу муборак кунда ёнимизда бўлишингиз — биз учун ",
+     "ва| Фарзандлари, набиралари ва Абдураҳмоновлар оиласи"
+    ],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "namuna375": {
+    "overflowX": 0,
+    "calendars": [],
+    "hanging": [
+     "ва| Фарзандлари ва набиралари"
+    ],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "нет кнопки"
+   }
+  }
+ },
+ "shohona-baxmal": {
+  "number": 70,
+  "occasion": "nikoh",
+  "format": "scroll",
+  "errors": [],
+  "runs": {
+   "w360": {
+    "overflowX": 0,
+    "calendars": [],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Сизни фарзандларимиз Шоҳрух ва"
+    ],
+    "music": "ok"
+   },
+   "w430": {
+    "overflowX": 0,
+    "calendars": [],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "long360": {
+    "overflowX": 0,
+    "calendars": [],
+    "hanging": [
+     "ва| Абдураҳмоновлар ва Нуриддиновлар оилалари"
+    ],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Сизни фарзандларимиз Муҳаммада"
+    ],
+    "music": "ok"
+   },
+   "namuna375": {
+    "overflowX": 0,
+    "calendars": [],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Сизни фарзандларимиз Шоҳрух ва"
+    ],
+    "music": "ok"
+   }
+  }
+ },
+ "doppicha": {
+  "number": 78,
+  "occasion": "sunnat",
+  "format": "simple",
+  "errors": [],
+  "runs": {
+   "w360": {
+    "overflowX": 0,
+    "calendars": [],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Тошматовлар хонадони",
+     "Сайрам, Навоий кўчаси 8"
+    ],
+    "music": "ok"
+   },
+   "w430": {
+    "overflowX": 0,
+    "calendars": [],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Суннат тўйи базми"
+    ],
+    "music": "ok"
+   },
+   "long360": {
+    "overflowX": 0,
+    "calendars": [],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "12 декабр, 2026 йил",
+     "соат 06:00"
+    ],
+    "music": "ok"
+   },
+   "namuna375": {
+    "overflowX": 0,
+    "calendars": [],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Сайрам, Навоий кўчаси 8"
+    ],
+    "music": "ok"
+   }
+  }
+ },
+ "umr-daraxti": {
+  "number": 81,
+  "occasion": "yubiley",
+  "format": "scroll",
+  "errors": [],
+  "runs": {
+   "w360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 38.9,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 24,
+      "width": 272,
+      "marked": {
+       "day": "10",
+       "dx": 0,
+       "dy": 0,
+       "marker": "svg",
+       "markerW": 40
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Отамиз Ҳамид отанинг 70 ёшлик "
+    ],
+    "music": "ok"
+   },
+   "w430": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 45.7,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 320,
+      "marked": {
+       "day": "10",
+       "dx": 0,
+       "dy": 0,
+       "marker": "svg",
+       "markerW": 40
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Отамиз Ҳамид отанинг 70 ёшлик "
+    ],
+    "music": "ok"
+   },
+   "long360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 38.9,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 24,
+      "width": 272,
+      "marked": {
+       "day": "5",
+       "dx": 0,
+       "dy": 0,
+       "marker": "svg",
+       "markerW": 40
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Қадрли меҳмонлар!"
+    ],
+    "music": "ok"
+   },
+   "namuna375": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 41,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 24,
+      "width": 287,
+      "marked": {
+       "day": "10",
+       "dx": 0,
+       "dy": 0,
+       "marker": "svg",
+       "markerW": 40
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Отамиз Ҳамид отанинг 70 ёшлик "
+    ],
+    "music": "ok"
+   }
+  }
+ },
+ "zarhal-lavha": {
+  "number": 87,
+  "occasion": "yubiley",
+  "format": "animated",
+  "errors": [],
+  "runs": {
+   "w360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 38.6,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 21,
+      "width": 270,
+      "marked": {
+       "day": "12",
+       "dx": 0,
+       "dy": 0,
+       "marker": "svg",
+       "markerW": 40
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Отамиз Абдуқаҳҳор отанинг 70 ё"
+    ],
+    "music": "ok"
+   },
+   "w430": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 45.7,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 320,
+      "marked": {
+       "day": "12",
+       "dx": 0,
+       "dy": 0,
+       "marker": "svg",
+       "markerW": 40
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "long360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 38.6,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 21,
+      "width": 270,
+      "marked": {
+       "day": "5",
+       "dx": 0,
+       "dy": 0,
+       "marker": "svg",
+       "markerW": 40
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Онамиз Муҳтарам Гулчеҳра Абдур"
+    ],
+    "music": "ok"
+   },
+   "namuna375": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 40.7,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 21,
+      "width": 285,
+      "marked": {
+       "day": "12",
+       "dx": 0,
+       "dy": 0,
+       "marker": "svg",
+       "markerW": 40
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Отамиз Абдуқаҳҳор отанинг 70 ё"
+    ],
+    "music": "ok"
+   }
+  }
+ },
+ "gul-doira": {
+  "number": 117,
+  "occasion": "nikoh",
+  "format": "animated",
+  "errors": [],
+  "runs": {
+   "w360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 43.4,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 304,
+      "marked": {
+       "day": "22",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "w430": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 45.7,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 320,
+      "marked": {
+       "day": "22",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Харитада очиш"
+    ],
+    "music": "ok"
+   },
+   "long360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 43.4,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 304,
+      "marked": {
+       "day": "14",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "namuna375": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 45.6,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 319,
+      "marked": {
+       "day": "22",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   }
+  }
+ },
+ "girih-barg": {
+  "number": 118,
+  "occasion": "nikoh",
+  "format": "animated",
+  "errors": [],
+  "runs": {
+   "w360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 43.4,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 304,
+      "marked": {
+       "day": "12",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "w430": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 47.1,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 330,
+      "marked": {
+       "day": "12",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [
+     {
+      "src": "eucalyptus-top.webp",
+      "shown": 576,
+      "natural": 1140
+     }
+    ],
+    "covered": [],
+    "music": "ok"
+   },
+   "long360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 43.4,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 304,
+      "marked": {
+       "day": "14",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "namuna375": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 45.6,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 319,
+      "marked": {
+       "day": "12",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   }
+  }
+ },
+ "muhrli-maktub": {
+  "number": 119,
+  "occasion": "nikoh",
+  "format": "animated",
+  "errors": [],
+  "runs": {
+   "w360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 43.4,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 304,
+      "marked": {
+       "day": "18",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Харитада очиш"
+    ],
+    "music": "ok"
+   },
+   "w430": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 47.1,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 330,
+      "marked": {
+       "day": "18",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "long360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 43.4,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 304,
+      "marked": {
+       "day": "14",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "namuna375": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 45.6,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 319,
+      "marked": {
+       "day": "18",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "нет кнопки"
+   }
+  }
+ },
+ "tonggi-piyola": {
+  "number": 120,
+  "occasion": "nahorgi",
+  "format": "animated",
+  "errors": [],
+  "runs": {
+   "w360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 43.4,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 304,
+      "marked": {
+       "day": "17",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "w430": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 47.1,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 330,
+      "marked": {
+       "day": "17",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "long360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 43.4,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 304,
+      "marked": {
+       "day": "21",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "namuna375": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 45.6,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 319,
+      "marked": {
+       "day": "17",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   }
+  }
+ },
+ "lola-bodom": {
+  "number": 121,
+  "occasion": "sunnat",
+  "format": "animated",
+  "errors": [],
+  "runs": {
+   "w360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 43.4,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 304,
+      "marked": {
+       "day": "8",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Харитада очиш"
+    ],
+    "music": "ok"
+   },
+   "w430": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 47.1,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 330,
+      "marked": {
+       "day": "8",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "long360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 43.4,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 304,
+      "marked": {
+       "day": "12",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Харитада очиш"
+    ],
+    "music": "ok"
+   },
+   "namuna375": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 45.6,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 319,
+      "marked": {
+       "day": "8",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   }
+  }
+ },
+ "bordo-guldasta": {
+  "number": 122,
+  "occasion": "yubiley",
+  "format": "simple",
+  "errors": [],
+  "runs": {
+   "w360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 43.4,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 304,
+      "marked": {
+       "day": "20",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Харитада очиш"
+    ],
+    "music": "ok"
+   },
+   "w430": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 47.1,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 330,
+      "marked": {
+       "day": "20",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [
+     {
+      "src": "burgundy-small.webp",
+      "shown": 237,
+      "natural": 451
+     }
+    ],
+    "covered": [
+     "Манзил"
+    ],
+    "music": "ok"
+   },
+   "long360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 43.4,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 304,
+      "marked": {
+       "day": "5",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [
+     "ва| Фарзандлари, набиралари ва Абдураҳмоновлар оиласи"
+    ],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "namuna375": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 45.6,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 319,
+      "marked": {
+       "day": "20",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   }
+  }
+ },
+ "choy-maktub": {
+  "number": 123,
+  "occasion": "nahorgi",
+  "format": "simple",
+  "errors": [],
+  "runs": {
+   "w360": {
+    "overflowX": 0,
+    "calendars": [],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Сизни ўғлимиз Шерзоднинг никоҳ"
+    ],
+    "music": "ok"
+   },
+   "w430": {
+    "overflowX": 0,
+    "calendars": [],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Шанба, 6:00"
+    ],
+    "music": "ok"
+   },
+   "long360": {
+    "overflowX": 0,
+    "calendars": [],
+    "hanging": [
+     "ва| Абдураҳмоновлар ва Нуриддиновлар оилалари"
+    ],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Нуриддиновлар хонадони"
+    ],
+    "music": "ok"
+   },
+   "namuna375": {
+    "overflowX": 0,
+    "calendars": [],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   }
+  }
+ },
+ "non-albom": {
+  "number": 124,
+  "occasion": "nahorgi",
+  "format": "simple",
+  "errors": [],
+  "runs": {
+   "w360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 39.4,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 24,
+      "width": 276,
+      "marked": {
+       "day": "3",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Харитада очиш"
+    ],
+    "music": "ok"
+   },
+   "w430": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 45.7,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 320,
+      "marked": {
+       "day": "3",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Манзил"
+    ],
+    "music": "ok"
+   },
+   "long360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 39.4,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 24,
+      "width": 276,
+      "marked": {
+       "day": "21",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "namuna375": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 41.6,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 24,
+      "width": 291,
+      "marked": {
+       "day": "3",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   }
+  }
+ },
+ "qozon-tongi": {
+  "number": 125,
+  "occasion": "nahorgi",
+  "format": "animated",
+  "errors": [],
+  "runs": {
+   "w360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 44.6,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 312,
+      "marked": {
+       "day": "29",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Харитада очиш"
+    ],
+    "music": "ok"
+   },
+   "w430": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 45.7,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 320,
+      "marked": {
+       "day": "29",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [
+     {
+      "src": "nahorgi-samarkand-b.webp",
+      "shown": 430,
+      "natural": 853
+     }
+    ],
+    "covered": [
+     "Манзил"
+    ],
+    "music": "ok"
+   },
+   "long360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 44.6,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 312,
+      "marked": {
+       "day": "21",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "namuna375": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 45.7,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 320,
+      "marked": {
+       "day": "29",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   }
+  }
+ },
+ "tong-varaq": {
+  "number": 126,
+  "occasion": "nahorgi",
+  "format": "scroll",
+  "errors": [],
+  "runs": {
+   "w360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 37.1,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 24,
+      "width": 260,
+      "marked": {
+       "day": "26",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "w430": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 45.7,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 320,
+      "marked": {
+       "day": "26",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "long360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 37.1,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 24,
+      "width": 260,
+      "marked": {
+       "day": "21",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "namuna375": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 39.3,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 24,
+      "width": 275,
+      "marked": {
+       "day": "26",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   }
+  }
+ },
+ "oq-maktub": {
+  "number": 127,
+  "occasion": "nikoh",
+  "format": "simple",
+  "errors": [],
+  "runs": {
+   "w360": {
+    "overflowX": 0,
+    "calendars": [],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "w430": {
+    "overflowX": 0,
+    "calendars": [],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "long360": {
+    "overflowX": 0,
+    "calendars": [],
+    "hanging": [
+     "ва| Абдураҳмоновлар ва Нуриддиновлар оилалари"
+    ],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Харитада очиш"
+    ],
+    "music": "ok"
+   },
+   "namuna375": {
+    "overflowX": 0,
+    "calendars": [],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   }
+  }
+ },
+ "ipak-albom": {
+  "number": 128,
+  "occasion": "nikoh",
+  "format": "simple",
+  "errors": [],
+  "runs": {
+   "w360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 39.1,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 24,
+      "width": 274,
+      "marked": {
+       "day": "14",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "w430": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 45.7,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 320,
+      "marked": {
+       "day": "14",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Харитада очиш"
+    ],
+    "music": "ok"
+   },
+   "long360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 39.1,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 24,
+      "width": 274,
+      "marked": {
+       "day": "14",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "namuna375": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 41.3,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 24,
+      "width": 289,
+      "marked": {
+       "day": "14",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   }
+  }
+ },
+ "suzani-medalyon": {
+  "number": 129,
+  "occasion": "nikoh",
+  "format": "simple",
+  "errors": [],
+  "runs": {
+   "w360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 21.2,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 106,
+      "width": 149,
+      "marked": {
+       "day": "4",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "w430": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 21.2,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 141,
+      "width": 149,
+      "marked": {
+       "day": "4",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "long360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 21.2,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 106,
+      "width": 149,
+      "marked": {
+       "day": "14",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "namuna375": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 0,
+      "gapAvg": 21.2,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 113,
+      "width": 149,
+      "marked": null
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   }
+  }
+ },
+ "nur-varaq": {
+  "number": 130,
+  "occasion": "nikoh",
+  "format": "scroll",
+  "errors": [],
+  "runs": {
+   "w360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 37.1,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 24,
+      "width": 260,
+      "marked": {
+       "day": "25",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "w430": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 45.7,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 320,
+      "marked": {
+       "day": "25",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "long360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 37.1,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 24,
+      "width": 260,
+      "marked": {
+       "day": "14",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "namuna375": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 39.3,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 24,
+      "width": 275,
+      "marked": {
+       "day": "25",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   }
+  }
+ },
+ "xotira-albom": {
+  "number": 132,
+  "occasion": "nikoh",
+  "format": "scroll",
+  "errors": [],
+  "runs": {
+   "w360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 39.4,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 24,
+      "width": 276,
+      "marked": {
+       "day": "23",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "w430": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 45.7,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 320,
+      "marked": {
+       "day": "23",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Харитада очиш"
+    ],
+    "music": "ok"
+   },
+   "long360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 39.4,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 24,
+      "width": 276,
+      "marked": {
+       "day": "14",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "namuna375": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 41.6,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 24,
+      "width": 291,
+      "marked": {
+       "day": "23",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   }
+  }
+ },
+ "visol-hikoya": {
+  "number": 133,
+  "occasion": "nikoh",
+  "format": "animated",
+  "errors": [],
+  "runs": {
+   "w360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 44.6,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 312,
+      "marked": {
+       "day": "6",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "w430": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 45.7,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 320,
+      "marked": {
+       "day": "6",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Харитада очиш"
+    ],
+    "music": "ok"
+   },
+   "long360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 44.6,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 312,
+      "marked": {
+       "day": "14",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "namuna375": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 45.7,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 320,
+      "marked": {
+       "day": "6",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   }
+  }
+ },
+ "ganch-darvoza": {
+  "number": 134,
+  "occasion": "sunnat",
+  "format": "animated",
+  "errors": [],
+  "runs": {
+   "w360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 40.3,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 21,
+      "width": 282,
+      "marked": {
+       "day": "10",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "«Ақ Ниет» тўйхонаси"
+    ],
+    "music": "ok"
+   },
+   "w430": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 45.7,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 320,
+      "marked": {
+       "day": "10",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Харитада очиш"
+    ],
+    "music": "ok"
+   },
+   "long360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 40.3,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 21,
+      "width": 282,
+      "marked": {
+       "day": "12",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Сайрам, Мустақиллик кўчаси 128"
+    ],
+    "music": "ok"
+   },
+   "namuna375": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 0,
+      "gapAvg": 42.4,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 21,
+      "width": 297,
+      "marked": null
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   }
+  }
+ },
+ "doppi-kitob": {
+  "number": 135,
+  "occasion": "sunnat",
+  "format": "scroll",
+  "errors": [],
+  "runs": {
+   "w360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 39.1,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 4,
+      "edge": 23,
+      "width": 274,
+      "marked": {
+       "day": "15",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "w430": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 45.7,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 320,
+      "marked": {
+       "day": "15",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Варақни суринг"
+    ],
+    "music": "ok"
+   },
+   "long360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 39.1,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 4,
+      "edge": 23,
+      "width": 274,
+      "marked": {
+       "day": "12",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "1",
+     "/",
+     "5"
+    ],
+    "music": "ok"
+   },
+   "namuna375": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 41.3,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 4,
+      "edge": 23,
+      "width": 289,
+      "marked": {
+       "day": "15",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   }
+  }
+ },
+ "lola-medalyon": {
+  "number": 136,
+  "occasion": "sunnat",
+  "format": "simple",
+  "errors": [],
+  "runs": {
+   "w360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 21.2,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 106,
+      "width": 149,
+      "marked": {
+       "day": "5",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Азиз меҳмонимиз!",
+     "Харитада очиш"
+    ],
+    "music": "ok"
+   },
+   "w430": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 21.2,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 141,
+      "width": 149,
+      "marked": {
+       "day": "5",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Сизни ўғлимиз Умаржоннинг сунн"
+    ],
+    "music": "ok"
+   },
+   "long360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 21.2,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 106,
+      "width": 149,
+      "marked": {
+       "day": "12",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "namuna375": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 0,
+      "gapAvg": 21.2,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 113,
+      "width": 149,
+      "marked": null
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   }
+  }
+ },
+ "umr-kitobi": {
+  "number": 137,
+  "occasion": "yubiley",
+  "format": "scroll",
+  "errors": [],
+  "runs": {
+   "w360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 38.4,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 6.5,
+      "edge": 23,
+      "width": 269,
+      "marked": {
+       "day": "17",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "1",
+     "/",
+     "4"
+    ],
+    "music": "ok"
+   },
+   "w430": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 45.7,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 0,
+      "edge": 0,
+      "width": 320,
+      "marked": {
+       "day": "17",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Варақни суринг"
+    ],
+    "music": "ok"
+   },
+   "long360": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 38.4,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 6.5,
+      "edge": 23,
+      "width": 269,
+      "marked": {
+       "day": "5",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "namuna375": {
+    "overflowX": 0,
+    "calendars": [
+     {
+      "headPx": 14,
+      "dayPx": 18,
+      "gapAvg": 40.6,
+      "gapSpread": 0,
+      "offColumn": 0,
+      "centerDx": 6.5,
+      "edge": 23,
+      "width": 284,
+      "marked": {
+       "day": "17",
+       "dx": 0,
+       "dy": 0.8,
+       "marker": "svg",
+       "markerW": 50
+      }
+     }
+    ],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   }
+  }
+ },
+ "hurmat-maktub": {
+  "number": 138,
+  "occasion": "yubiley",
+  "format": "simple",
+  "errors": [],
+  "runs": {
+   "w360": {
+    "overflowX": 0,
+    "calendars": [],
+    "hanging": [
+     "ва| Фарзандлари ва набиралари"
+    ],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Онамиз Зулфия опанинг 65 ёшлик"
+    ],
+    "music": "ok"
+   },
+   "w430": {
+    "overflowX": 0,
+    "calendars": [],
+    "hanging": [],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   },
+   "long360": {
+    "overflowX": 0,
+    "calendars": [],
+    "hanging": [
+     "ва| Фарзандлари, набиралари ва Абдураҳмоновлар оиласи"
+    ],
+    "clipped": [],
+    "blurry": [],
+    "covered": [
+     "Онамиз Муҳтарам Гулчеҳра Абдур",
+     "«Сайрам Сарой» тўйхонасининг к",
+     "Сайрам, Ибрагимов кўчаси 12"
+    ],
+    "music": "ok"
+   },
+   "namuna375": {
+    "overflowX": 0,
+    "calendars": [],
+    "hanging": [
+     "ва| Фарзандлари ва набиралари"
+    ],
+    "clipped": [],
+    "blurry": [],
+    "covered": [],
+    "music": "ok"
+   }
+  }
+ }
+}

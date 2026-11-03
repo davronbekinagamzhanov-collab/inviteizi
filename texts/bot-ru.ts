@@ -294,6 +294,7 @@ export const ru = {
   },
 
   pay: {
+    eventPassed: "Дата тадбира уже прошла — оплату за такое приглашение не принимаем. Укажите новую дату через «✏️ Изменить».",
     card: (number: string) => "Номер карты: " + number,
     copyCard: "📋 Скопировать карту",
     info: (amount: string, phone: string, name: string, n: number) =>

@@ -4,6 +4,7 @@
  * Перед запуском тексты проверяют носители языка (старшие в семье).
  */
 import type { EventKind, InvitationData, Occasion, Relation } from "@/lib/types";
+import { glueDeep } from "@/lib/typography";
 
 const months = [
   "январ",
@@ -301,7 +302,7 @@ const pageInviteTo = {
   yubiley: "Юбилейга таклиф этамиз",
 } satisfies Record<Occasion, string>;
 
-export const t = {
+const raw = {
   photoCredits: {
     by: (author: string) => `Сурат: ${author}`,
     label: "Сурат:",
@@ -668,12 +669,20 @@ export const t = {
       body: "Тадбир ўтиб кетди. Ташрифингиз ва яхши тилакларингиз учун катта раҳмат!",
       brand: "InviteIZI — онлайн таклифномалар",
     },
+    /** Нотўғри ёки эскирган ҳавола */
+    notFound: {
+      title: "Таклифнома топилмади",
+      body: "Ҳаволани текширинг ёки таклиф қилган одамдан уни қайта юборишни сўранг.",
+    },
   },
 
   footer: {
     madeWith: "InviteIZI орқали яратилди",
   },
 } as const;
+
+/** Без висячих «ва / билан / учун» в конце и начале строк — склейка один раз для всех дизайнов */
+export const t: typeof raw = glueDeep(raw);
 
 export type Texts = typeof t;
 
@@ -760,7 +769,7 @@ const allOccasions = (s: string) => ({ nikoh: s, sunnat: s, nahorgi: s, yubiley:
 /** Тексты для дизайна: общие `t` + свои заголовки этого дизайна */
 export function designTexts(id: string): Texts {
   const h = headings[id] ?? {};
-  return {
+  return glueDeep({
     ...t,
     countdown: { ...t.countdown, title: h.countdown ? allOccasions(h.countdown) : t.countdown.title },
     date: { ...t.date, title: h.date ? allOccasions(h.date) : t.date.title },
@@ -769,5 +778,5 @@ export function designTexts(id: string): Texts {
     blessing: { ...t.blessing, title: h.blessing ?? t.blessing.title },
     opening: { ...t.opening, tapToOpen: h.tap ?? t.opening.tapToOpen },
     hosts: { ...t.hosts, thanks: h.thanks ?? t.hosts.thanks, waiting: h.waiting ?? t.hosts.waiting },
-  } as unknown as Texts;
+  }) as unknown as Texts;
 }

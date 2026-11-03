@@ -163,8 +163,10 @@ export const evTimeCustom: Step = {
 
 function textOf(c: Ctx, max: number): string | Result {
   if (c.u.kind !== "text") return null;
-  const v = c.u.text.trim().replace(/\s+/g, " ");
+  // Невидимые символы (смена направления текста и т. п.) в приглашение не попадают; место — хоть одна буква или цифра
+  const v = c.u.text.replace(/[\p{Cc}\p{Cf}]/gu, " ").trim().replace(/\s+/g, " ");
   if (!v) return null;
+  if (!/[\p{L}\p{N}]/u.test(v)) return { hint: c.tx.needLetters };
   if (v.length > max) return { hint: c.tx.tooLong(max) };
   return v;
 }

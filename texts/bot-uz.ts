@@ -277,6 +277,7 @@ export const uz = {
   },
 
   pay: {
+    eventPassed: "Тадбир санаси ўтиб кетган — бундай таклифномага тўлов қабул қилмаймиз. «✏️ Ўзгартириш» орқали янги санани киритинг.",
     card: (number: string) => "Карта рақами: " + number,
     copyCard: "📋 Картани нусхалаш",
     info: (amount: string, phone: string, name: string, n: number) =>

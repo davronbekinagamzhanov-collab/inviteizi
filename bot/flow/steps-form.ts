@@ -95,7 +95,11 @@ export const cause: Step = {
   },
   async onButton(c, v) {
     if (v !== "nikoh" && v !== "sunnat") return null;
-    data(c).cause = v;
+    const d = data(c);
+    d.cause = v;
+    // Сменили повод — базм уже добавленного тадбира тоже меняется (дата и место остаются), иначе в таклифнома «Никоҳ базми» у суннат
+    const bazm = v === "sunnat" ? "sunnatBazm" : "nikohBazm";
+    for (const e of d.events ?? []) if (e.kind === "nikohBazm" || e.kind === "sunnatBazm") e.kind = bazm;
     return { to: after(c, "hosts") };
   },
 };

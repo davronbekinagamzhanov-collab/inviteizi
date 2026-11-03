@@ -363,7 +363,7 @@ async function onCallback(c: Ctx, d: string) {
     case "pay":
       return apply(c, await payOrder(c, n));
     case "rcpt":
-      return apply(c, await askReceipt(c, n));
+      return apply(c, await askReceipt(c, n, b === undefined ? undefined : Number(b)));
     case "edit":
       return apply(c, await editOrder(c, n));
     case "link":

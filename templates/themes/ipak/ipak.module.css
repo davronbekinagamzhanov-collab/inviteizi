@@ -47,10 +47,11 @@
 
 /* ── События ── */
 .events { padding: 64px 0 0; }
-.event { display: grid; grid-template-columns: auto 1fr; align-items: end; gap: 24px; padding: 0 24px 40px; }
+.event { display: grid; grid-template-columns: auto 1fr; align-items: end; gap: 18px; padding: 0 24px 40px; }
 .eventAlt { grid-template-columns: 1fr auto; text-align: right; }
 .eventAlt .eventTime { order: 2; }
-.eventTime { font-family: var(--n-serif); font-size: 84px; font-weight: 300; line-height: .8; font-variant-numeric: lining-nums; letter-spacing: -.02em; }
+/* На 360px время чуть меньше: колонке текста хватает места на длинную фамилию («Абдураҳмоновлар») без разрыва слова */
+.eventTime { font-family: var(--n-serif); font-size: clamp(68px, 20vw, 84px); font-weight: 300; line-height: .8; font-variant-numeric: lining-nums; letter-spacing: -.02em; }
 .eventText { min-width: 0; padding-bottom: 4px; }
 .eventText h3 { font-family: var(--n-serif); font-size: 15px; letter-spacing: .2em; text-transform: uppercase; color: var(--n-accent); }
 .eventText p { margin-top: 4px; font-size: 16px; line-height: 1.45; overflow-wrap: anywhere; }

@@ -1,5 +1,6 @@
 /** Текст приглашения, музыка, сводка и правка тадбира из сводки */
 import type { Ctx, Result, Step, StepId } from "./types";
+import { getDesign } from "@/templates/registry";
 import type { InlineButton } from "../tg";
 import { t } from "@/texts/uz-cyrl";
 import { designsFor, backRow, data, designLine, editOrSend, eventLabel, finalData, fmtDate, ib, inline, MAX_CUSTOM_TEXT, MAX_MUSIC_BYTES, priceNote, send } from "./util";
@@ -53,9 +54,11 @@ export const textOwn: Step = {
   },
   async onMessage(c) {
     if (c.u.kind !== "text") return null;
-    const v = c.u.text.trim();
+    // Невидимые символы убираем, но перевод строки и склейку эмодзи (U+200D) оставляем
+    const v = c.u.text.replace(/(?!\n|‍)[\p{Cc}\p{Cf}]/gu, "").trim();
     if (!v) return null;
-    const n = [...v].length;
+    // Считаем видимые знаки: эмодзи-семья 👨‍👩‍👧‍👦 — один знак, а не семь
+    const n = [...new Intl.Segmenter().segment(v)].length;
     if (n > MAX_CUSTOM_TEXT) return { hint: c.tx.text.tooLong(n) };
     const d = data(c);
     d.customText = v;
@@ -188,6 +191,9 @@ async function summary(c: Ctx) {
   const r = c.tx.review;
   const d = finalData(c.s);
   const old = c.s.orderId ? await c.deps.repo.getOrder(c.s.orderId) : null;
+  // Выбрали другой формат в «✏️ Дизайн», но вернулись без покупки: формат остаётся тот, что у выбранного дизайна
+  const chosen = c.s.templateId ? getDesign(c.s.templateId) : undefined;
+  if (chosen && c.s.format !== chosen.format) c.s.format = chosen.format;
   // согласованная сумма — пока формат тот же; сменили формат до оплаты — цена нового формата
   const quoted = old?.userId === c.user.id && old.format === c.s.format ? old.amount : undefined;
   const lines = [r.title, "", designLine(c.tx, c.s.templateId ?? "", c.s.format ?? "animated", quoted)];
