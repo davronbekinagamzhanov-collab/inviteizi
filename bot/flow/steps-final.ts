@@ -188,7 +188,8 @@ async function summary(c: Ctx) {
   const r = c.tx.review;
   const d = finalData(c.s);
   const old = c.s.orderId ? await c.deps.repo.getOrder(c.s.orderId) : null;
-  const quoted = old?.userId === c.user.id ? old.amount : undefined;
+  // согласованная сумма — пока формат тот же; сменили формат до оплаты — цена нового формата
+  const quoted = old?.userId === c.user.id && old.format === c.s.format ? old.amount : undefined;
   const lines = [r.title, "", designLine(c.tx, c.s.templateId ?? "", c.s.format ?? "animated", quoted)];
   if (d.occasion === "nikoh") lines.push(r.groom(d.groom ?? ""), r.bride(d.bride ?? ""));
   else lines.push(r.person(d.person ?? ""));
@@ -265,13 +266,12 @@ export const review: Step = {
       case "photo":
         return photoStepFor(c) ? edit("photoAsk") : null;
       case "design":
-        if (c.s.paid || c.s.orderId) {
-          // A saved quote fixes format and amount; otherwise a cheap order could be upgraded for free.
+        {
+          // До оплаты — выбор формата (новый формат = новая цена при сохранении); каталог открывается на текущем дизайне
           const list = designsFor(c.s.occasion ?? "nikoh", c.s.format ?? "animated");
           c.s.catIdx = Math.max(0, list.findIndex((x) => x.id === c.s.templateId));
-          return edit("catalog");
+          return edit(c.s.paid ? "catalog" : "fmt");
         }
-        return edit("fmt");
       case "ok":
         return confirmDraft(c);
     }

@@ -37,7 +37,7 @@ describe.each([["uz", uz], ["ru", ru]] as const)("лимиты Telegram: %s", (_
   it("подписи к фото и документам не длиннее 1024", () => {
     const captions = [
       tx.pay.qrCaption,
-      tx.catalog.caption(100, LONG, "Варақланадиган", "10 000 ₸") + `\n\n${tx.catalog.photoCredit(LONG, LONG, LONG_URL)}`,
+      tx.catalog.caption(100, LONG, "Варақланадиган", "10 000 ₸") + `\n${tx.catalog.withPhoto}\n\n${tx.catalog.photoCredit(LONG, LONG, LONG_URL)}`,
       tx.admin.card(worstCard),
     ];
     for (const text of captions) expect(text.length, text).toBeLessThanOrEqual(TG_LIMITS.caption);
@@ -56,6 +56,9 @@ describe.each([["uz", uz], ["ru", ru]] as const)("лимиты Telegram: %s", (_
       tx.review.evDate, tx.review.evTime, tx.review.evVenue, tx.review.evAddress, tx.review.evLocation, tx.review.evDelete,
       tx.order.pay("10 000 ₸"), tx.order.edit, tx.pay.copy, tx.pay.copyCard, tx.pay.sendReceipt, tx.pay.shareButton, tx.pay.newOrder, tx.pay.resend,
       tx.admin.approve, tx.admin.reject, ...Object.values(tx.admin.reasons), tx.my.link,
+      // фото клиента, ответы гостей, избранное (03.11.2026)
+      tx.photo.yes, tx.photo.no, tx.photo.example, tx.photo.done, tx.photo.again, tx.photo.edit,
+      tx.rsvp.yes, tx.rsvp.no, tx.dashboard.favoriteAdd, tx.dashboard.favoriteList,
     ];
     for (const label of labels) expect(label.length, label).toBeLessThanOrEqual(TG_LIMITS.button);
   });

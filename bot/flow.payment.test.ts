@@ -227,11 +227,12 @@ describe("мои приглашения, правка, ссылка", () => {
     expect(inlineButtons(old).find((b) => b.text === uz.contact)).toEqual({ text: uz.contact, url: "https://t.me/inviteizi_owner" });
   });
 
-  it("правка неоплаченного: смена дизайна сохраняет формат и согласованную сумму, slug тот же", async () => {
+  it("правка неоплаченного: смена дизайна в том же формате сохраняет согласованную сумму, slug тот же", async () => {
     const sim = new Sim();
     const o = await nikohOrder(sim, 1);
     await sim.click(1, uz.order.edit);
     await sim.click(1, uz.review.editDesign);
+    await sim.click(1, new RegExp(uz.format.names.animated)); // до оплаты сначала выбор формата
     await sim.click(1, "▶");
     await sim.click(1, uz.catalog.buy);
     expect(sim.lastText(1)).toContain("Дизайн: №114 Ипак");

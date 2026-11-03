@@ -7,6 +7,7 @@ import { after, backRow, coverUrl, data, demoUrl, designName, designsFor, format
 import type { InlineButton } from "../tg";
 import { usesLegacyDesign } from "@/templates/design-version";
 import { photoAttributions } from "@/texts/uz-cyrl";
+import { photoStepFor } from "./steps-photo";
 
 export const OCCASIONS: Occasion[] = ["nikoh", "nahorgi", "sunnat", "yubiley"];
 
@@ -112,6 +113,8 @@ export const catalog: Step = {
       data(c).occasion = c.s.occasion;
       // Сменили дизайн до оплаты на дизайн без фото — прежние фото клиента не тянем в новый заказ
       if (!v.d.clientPhotos && data(c).photos?.length) data(c).photos = [];
+      // Правка: перешли на дизайн с фото, а фото ещё нет — предлагаем добавить, потом обратно к сводке
+      if (c.s.ret && photoStepFor(c) && !data(c).photos?.length) return { to: "photoAsk" };
       return { to: after(c, formStart(c)) };
     }
     return null;

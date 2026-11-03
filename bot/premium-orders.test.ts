@@ -43,10 +43,10 @@ describe('catalog promises the pinned appearance when an older unpaid order is e
  it('uses original cover/demo for a historical order and current ones for a new order',async()=>{
   const sim=new Sim();await startUz(sim,960100);const d=getDesign('kabutar-salom')!;
   const old=await sim.repo.createOrder({userId:960100,occasion:'nikoh',format:'animated',templateId:d.id,data:{...d.sample},music:{kind:'none'},amount:4321,slugBase:'old-presentation',status:'preview'});
-  await sim.callback(960100,`edit:${old.number}`,1);await sim.click(960100,uz.review.editDesign);
+  await sim.callback(960100,`edit:${old.number}`,1);await sim.click(960100,uz.review.editDesign);await sim.click(960100,new RegExp(uz.format.names.animated));
   expect(sim.last(960100).media).toContain('/covers/legacy/kabutar-salom.jpg');
   expect(JSON.stringify(sim.last(960100).markup)).toContain('/demo/kabutar-salom/legacy');
-  const fresh=await nikohOrder(sim,960101);await sim.callback(960101,`edit:${fresh.number}`,1);await sim.click(960101,uz.review.editDesign);
+  const fresh=await nikohOrder(sim,960101);await sim.callback(960101,`edit:${fresh.number}`,1);await sim.click(960101,uz.review.editDesign);await sim.click(960101,new RegExp(uz.format.names.animated));
   expect(sim.last(960101).media).not.toContain('/covers/legacy/');
   expect(JSON.stringify(sim.last(960101).markup)).not.toContain('/legacy');
  });

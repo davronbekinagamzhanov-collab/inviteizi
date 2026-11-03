@@ -27,7 +27,7 @@ import {
   send,
   txFor,
 } from "./util";
-import { getDesign } from "@/templates/registry";
+import { ACCEPTED, getDesign } from "@/templates/registry";
 import { rememberUpdate } from "../update";
 import { recordBotError, toEntry } from "../errors";
 import { creditPartnerSafely } from "./partners";
@@ -74,8 +74,11 @@ export async function confirmDraft(c: Ctx): Promise<Result> {
       await send(c, old.status === "receipt_sent" ? c.tx.pay.waiting : c.tx.order.closed);
       return { done: true };
     }
+    // До оплаты можно сменить и дизайн, и формат (решение владельца 03.11.2026): новый формат — новая цена.
+    // Тот же дизайн и формат — прежняя согласованная сумма (даже если каталог потом переклассифицировал дизайн).
     const selected=getDesign(s.templateId);
-    if(s.format!==old.format||(s.templateId!==old.templateId&&(!selected||selected.format!==old.format||selected.occasion!==old.occasion))){
+    const unchanged=s.templateId===old.templateId&&s.format===old.format;
+    if(!unchanged&&(!selected||!ACCEPTED.has(selected.id)||selected.format!==s.format||selected.occasion!==old.occasion)){
       s.format=old.format;s.templateId=old.templateId;
       return {hint:c.tx.order.formatLocked};
     }
@@ -86,8 +89,8 @@ export async function confirmDraft(c: Ctx): Promise<Result> {
       data: preservedData,
       music,
       templateId: s.templateId,
-      // A saved order keeps its agreed amount; catalog changes must not reprice it.
-      format: s.format, amount: old.amount,
+      // Тот же формат — согласованная сумма (каталог её не меняет); другой формат — цена этого формата
+      format: s.format, amount: s.format === old.format ? old.amount : PRICES[s.format],
     });
     if (!o) {
       const current = await repo.getOrder(old.id);
