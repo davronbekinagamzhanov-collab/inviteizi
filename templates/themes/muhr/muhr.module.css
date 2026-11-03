@@ -126,3 +126,5 @@
 /* v2 после критика: подпись хозяев без грубого капса, розетка на клапане заметнее */
 .signHosts { text-transform: none; font-weight: 400; letter-spacing: .02em; }
 .flapRosette { opacity: .75; }
+/* v3: сверху по центру бейдж InviteIZI — надпись тадбира ниже него */
+.hero { padding-top: 60px; }

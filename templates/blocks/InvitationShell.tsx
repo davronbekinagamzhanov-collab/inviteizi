@@ -6,6 +6,7 @@ import type { Invitation } from "./useInvitation";
 import { MusicButton } from "./MusicButton";
 import { Watermark } from "./Watermark";
 import { BrandBadge, BrandFooter, type PhotoCredit } from "./Brand";
+import { SoftBrandBadge, SoftBrandFooter } from "./BrandSoft";
 import { Rsvp, type RsvpLook } from "./Rsvp";
 
 /**
@@ -26,6 +27,7 @@ export function InvitationShell({
   credits,
   creditClassName,
   epilogue,
+  brandVariant = "default",
   children,
 }: {
   inv: Invitation;
@@ -46,6 +48,8 @@ export function InvitationShell({
   creditClassName?: string;
   /** Блок после формы ответов (подпись семьи), перед бейджем */
   epilogue?: ReactNode;
+  /** "soft" — плашки InviteIZI в цветах дизайна (только натуральные дизайны) */
+  brandVariant?: "default" | "soft";
   children: ReactNode;
 }) {
   useEffect(() => {
@@ -71,7 +75,11 @@ export function InvitationShell({
 
           {inv.data.rsvpSlug && <Rsvp slug={inv.data.rsvpSlug} preview={inv.mode === "demo"} look={rsvpLook} />}
           {epilogue}
-          <BrandFooter credits={credits} creditClassName={creditClassName} />
+          {brandVariant === "soft" ? (
+            <SoftBrandFooter credits={credits} />
+          ) : (
+            <BrandFooter credits={credits} creditClassName={creditClassName} />
+          )}
 
           {inv.hasMusic && inv.opened && (
             <MusicButton
@@ -82,7 +90,12 @@ export function InvitationShell({
               raised={inv.mode === "demo"}
             />
           )}
-          {inv.opened && <BrandBadge raised={inv.mode === "demo"} />}
+          {inv.opened &&
+            (brandVariant === "soft" ? (
+              <SoftBrandBadge />
+            ) : (
+              <BrandBadge raised={inv.mode === "demo"} />
+            ))}
           {inv.mode === "demo" && <Watermark />}
         </div>
       </div>

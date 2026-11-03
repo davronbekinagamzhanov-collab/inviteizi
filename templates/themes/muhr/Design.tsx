@@ -80,6 +80,7 @@ export default function Muhr({ data, mode }: TemplateProps) {
       backdropClassName="bg-[#e6eaed]"
       className={s.page}
       musicVariant="soft"
+      brandVariant="soft"
       musicButtonClassName="bg-[#f3f4f2]/75 text-[#2c3b49] ring-[#2c3b49]/20"
       rsvpLook={{
         paper: "#ffffff",

@@ -69,6 +69,7 @@ export default function TongDasturxon({ data, mode }: TemplateProps) {
       backdropClassName="bg-[#e9dfd0]"
       className={s.page}
       musicVariant="soft"
+      brandVariant="soft"
       musicButtonClassName="bg-[#f5ede1]/70 text-[#7a3b2e] ring-[#7a3b2e]/25"
       rsvpLook={{
         paper: "#fbf6ee",

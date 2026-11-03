@@ -67,6 +67,7 @@ export default function Bog({ data, mode }: TemplateProps) {
       backdropClassName="bg-[#e3e9e3]"
       className={s.page}
       musicVariant="soft"
+      brandVariant="soft"
       musicButtonClassName="bg-[#f6f7f3]/70 text-[#2f3d36] ring-[#5f8270]/30"
       rsvpLook={{
         paper: "#ffffff",

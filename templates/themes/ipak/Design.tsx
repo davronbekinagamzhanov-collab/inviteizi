@@ -83,6 +83,7 @@ export default function Ipak({ data, mode }: TemplateProps) {
       backdropClassName="bg-[#e4dbcf]"
       className={s.page}
       musicVariant="soft"
+      brandVariant="soft"
       musicButtonClassName="bg-[#efe8de]/70 text-[#3b322b] ring-[#3b322b]/20"
       rsvpLook={{
         paper: "#f8f4ee",

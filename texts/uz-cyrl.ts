@@ -305,6 +305,7 @@ export const t = {
   photoCredits: {
     by: (author: string) => `Сурат: ${author}`,
     label: "Сурат:",
+    many: "Суратлар:",
     adapted: "Сурат ўлчами ва кўриниши мослаштирилган.",
   },
   site: {
