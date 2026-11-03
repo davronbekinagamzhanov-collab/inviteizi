@@ -36,7 +36,7 @@
 
 .program { display: grid; gap: 14px; text-align: left; }
 .event { display: grid; grid-template-columns: 82px 1fr; gap: 14px; align-items: start; padding: 14px 0; border-top: 1px solid color-mix(in srgb, var(--c-line) 55%, transparent); }
-.eventTime { font-family: var(--f-display); font-size: 30px; line-height: 1; color: var(--c-accent); font-variant-numeric: lining-nums; }
+.event .eventTime { font-family: var(--f-display); font-size: 30px; line-height: 1; color: var(--c-accent); font-variant-numeric: lining-nums; }
 .event h3 { font-family: var(--n-serif); font-size: 15px; letter-spacing: .14em; text-transform: uppercase; color: var(--c-accent); }
 .event p { font-size: 16px; line-height: 1.5; overflow-wrap: anywhere; }
 

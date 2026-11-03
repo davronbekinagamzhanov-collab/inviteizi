@@ -1,0 +1,8 @@
+/* «Тонг варағи»: первый экран — рассвет (небо → шафран), нон как восходящее солнце */
+.first { background: linear-gradient(180deg, #e9eef2 0%, #f3ead9 62%, #f6dfb8 100%); justify-content: flex-start; padding-top: 92px; }
+.heroMotif { width: min(58vw, 230px); color: #b9741a; filter: drop-shadow(0 18px 30px rgba(185, 116, 26, .25)); }
+.names { font-size: 60px; }
+.second { background: #ffffff; }
+.third { background: #f6ead6; }
+.fifth { background: #eef1f3; }
+.venue { border-radius: 0; border: 0; border-top: 2px solid #b9741a; background: #ffffff; }

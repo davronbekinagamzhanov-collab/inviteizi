@@ -8,23 +8,31 @@ import type { CSSProperties } from "react";
 type P = { className?: string; style?: CSSProperties };
 const line = { fill: "none", stroke: "currentColor", strokeLinecap: "round", strokeLinejoin: "round", vectorEffect: "non-scaling-stroke" } as const;
 
-/** Ислими: вьющаяся лоза с листьями, горизонтальная лента */
+/** Половина ислими: S-лоза от центра к краю, спираль-завиток, листья-бодомча */
+function IslimiHalf() {
+  return (
+    <g>
+      <path d="M120 30C134 30 140 18 152 14c14-5 26 3 26 14 0 9-8 14-15 11-6-2-6-10 0-11" {...line} strokeWidth="1.2" />
+      <path d="M178 28c8-14 24-20 38-14 10 4 14 14 22 14" {...line} strokeWidth="1.2" />
+      <path d="M150 14c-4-10 2-18 10-20-1 9-4 15-10 20zM196 16c2-10 10-14 18-13-4 8-10 12-18 13zM172 40c8 4 10 12 8 18-6-4-9-10-8-18z" {...line} strokeWidth="1" />
+      <path d="M140 33c4 8 2 15-3 19-3-7-2-13 3-19z" {...line} strokeWidth="1" />
+      <circle cx="226" cy="27" r="1.6" fill="currentColor" />
+      <circle cx="163" cy="36" r="1.3" fill="currentColor" />
+    </g>
+  );
+}
+
+/** Ислими: симметричная лента — бутон в центре, лозы с завитками и листьями в стороны */
 export function Islimi({ className, style }: P) {
   return (
-    <svg viewBox="0 0 240 40" className={className} style={style} aria-hidden data-decor>
-      <path d="M0 20c20 0 20-14 40-14s20 28 40 28 20-28 40-28 20 28 40 28 20-14 40-14 20 14 40 14" {...line} strokeWidth="1.1" />
-      {[40, 120, 200].map((x) => (
-        <g key={x} transform={`translate(${x} 6)`}>
-          <path d="M0 0c-6-6-4-12 2-14 2 6 2 10-2 14z" {...line} strokeWidth=".9" />
-          <circle r="1.6" cx="0" cy="0" fill="currentColor" />
-        </g>
-      ))}
-      {[80, 160].map((x) => (
-        <g key={x} transform={`translate(${x} 34)`}>
-          <path d="M0 0c6 6 4 12-2 14-2-6-2-10 2-14z" {...line} strokeWidth=".9" />
-          <circle r="1.6" fill="currentColor" />
-        </g>
-      ))}
+    <svg viewBox="0 0 240 60" className={className} style={style} aria-hidden data-decor>
+      <IslimiHalf />
+      <g transform="translate(240 0) scale(-1 1)">
+        <IslimiHalf />
+      </g>
+      <path d="M120 44c-9-6-11-17-0-28 11 11 9 22 0 28z" {...line} strokeWidth="1.2" />
+      <path d="M120 40v-18" {...line} strokeWidth=".8" />
+      <circle cx="120" cy="10" r="2" fill="currentColor" />
     </svg>
   );
 }
