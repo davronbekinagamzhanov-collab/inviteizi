@@ -26,7 +26,8 @@ export function OpeningCaption({
       <span className={`block [overflow-wrap:anywhere] ${nameClassName}`}>
         {nikoh ? (
           <>
-            {d.groom} <span className="text-[0.62em] italic opacity-80">{t.natural.and}</span> {d.bride}
+            {/* «ва» не висит в конце строки: неразрывный пробел перед невестой */}
+            {d.groom} <span className="text-[0.62em] italic opacity-80">{t.natural.and}</span>{" "}{d.bride}
           </>
         ) : (
           d.person

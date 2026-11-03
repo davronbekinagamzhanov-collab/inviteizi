@@ -5,14 +5,14 @@
  * «Таклифномани очинг». По нажатию фото уходит вверх, как поднятый занавес, — под ним начинается рассказ:
  * глава 1 — текст рядом с узкой полосой фото, глава 2 — сана поверх фото-ленты, потом программа и манзил.
  */
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
 import { useReducedMotion } from "motion/react";
 import type { TemplateProps } from "../types";
 import type { Score } from "../../blocks/synth";
 import { useInvitation } from "../../blocks/useInvitation";
 import { OpeningCaption } from "../../blocks/OpeningCaption";
 import { t } from "@/texts/uz-cyrl";
-import { Age, B3Shell, Count, DateBlock, Finale, Names, Pic, Places, Program, Relation, Rise, cx, longDate, occasionTitle, tidy, usePhotos, type Look, type Skin, type Stock } from "./kit";
+import { nameLen, Age, B3Shell, Count, DateBlock, Finale, Names, Pic, Places, Program, Relation, Rise, cx, longDate, occasionTitle, tidy, usePhotos, type Look, type Skin, type Stock } from "./kit";
 import b from "./b3.module.css";
 import s from "./s1.module.css";
 
@@ -110,7 +110,7 @@ export function Hikoya({
               <Pic shot={hero} eager />
             </span>
           )}
-          <span className={cx(s.openText, b.soft, look.openText)}>
+          <span className={cx(s.openText, b.soft, look.openText)} style={{ "--len": nameLen(inv) } as CSSProperties}>
             <span className={s.openMotif}>{motif}</span>
             <OpeningCaption inv={inv} nameClassName={cx(s.openNames, look.openNames)} metaClassName={s.openMeta} />
             <span className={cx(s.tap, look.tap)}>{t.b3.tap}</span>

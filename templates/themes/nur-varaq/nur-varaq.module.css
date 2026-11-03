@@ -1,6 +1,6 @@
 /* «Нур варақ»: фото на весь первый экран, дальше пудровые листы */
 .names { font-size: 58px; font-style: italic; }
-.occasion { color: #f6dcd9 !important; }
+.occasion { color: var(--c-accent) !important; }
 .third { background: #f3e4e4; }
 .fifth { background: #fffaf8; }
 .cal { color: #2e2326; }

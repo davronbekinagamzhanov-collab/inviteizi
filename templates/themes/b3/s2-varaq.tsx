@@ -24,7 +24,8 @@ export function Varaq({
   motif,
   cover,
   textArt,
-}: TemplateProps & { melody: Score; skin: Skin; look: Look; motif: ReactNode; cover?: Stock[]; textArt?: ReactNode }) {
+  milky,
+}: TemplateProps & { melody: Score; skin: Skin; look: Look; motif: ReactNode; cover?: Stock[]; textArt?: ReactNode; milky?: boolean }) {
   const inv = useInvitation(data, mode, { melody, opening: false });
   const photos = usePhotos(data, cover ?? []);
   const hero = cover ? photos.list[0] : undefined;
@@ -98,7 +99,7 @@ export function Varaq({
               <span aria-hidden className={s.arrow} />
             </p>
           </>,
-          cx(s.first, look.first),
+          cx(s.first, milky && s.milky, look.first),
         )}
 
         {page(

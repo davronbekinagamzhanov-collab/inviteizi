@@ -1,6 +1,6 @@
 import {existsSync,readFileSync} from "node:fs";
 import {describe,it,expect,vi} from "vitest";
-import {ACCEPTED,activeDesigns,designs,everAccepted,getDesign,HIDDEN_03_11,PRICES} from "./registry";
+import {ACCEPTED,activeDesigns,designs,everAccepted,getDesign,HIDDEN_03_11,HIDDEN_BATCH3,PRICES} from "./registry";
 import {photoAttributions} from "@/texts/uz-cyrl";
 
 vi.mock("next/font/local",()=>({default:()=>({variable:"test-font"})}));
@@ -14,7 +14,8 @@ describe("catalog acceptance integrity",()=>{
     const b3=nums.filter(n=>n>=123);
     expect(b3.length).toBeLessThanOrEqual(16);expect(b3.every(n=>n<=138)).toBe(true);
     expect(new Set(nums).size).toBe(nums.length);
-    expect(HIDDEN_03_11).toHaveLength(48);expect(everAccepted()).toHaveLength(48+nums.length);
+    expect(HIDDEN_03_11).toHaveLength(48);expect(HIDDEN_BATCH3).toEqual(["islimi-varaq"]);expect(nums).not.toContain(131);
+    expect(everAccepted()).toHaveLength(48+HIDDEN_BATCH3.length+nums.length);expect(activeDesigns()).toHaveLength(33);
     for(const id of HIDDEN_03_11){const d=getDesign(id);expect(d,id).toBeDefined();expect(ACCEPTED.has(id)).toBe(false);}
     expect(getDesign("saodat-kaliti")?.number).toBe(106);expect(getDesign("kabutar-salom")?.number).toBe(96);
     // Every format the bot offers for an occasion has at least one design (formatsFor hides empty ones)

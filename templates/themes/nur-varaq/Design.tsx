@@ -1,7 +1,7 @@
 "use client";
 /**
  * «Нур варақ» (130) — никоҳ, Варақланадиган, С ФОТО, структура S2 «Варақ».
- * Первый экран — фото клиента на весь экран (запасное — руки пары), второй — арочное фото рядом с текстом.
+ * Первый экран — фото клиента на весь экран (запасное — светлый букет белых роз, растворяется в молочный), второй — арочное фото рядом с текстом.
  * Пудрово-розовый, бодом гули в финале.
  */
 import type { TemplateProps } from "../types";
@@ -27,9 +27,10 @@ export default function NurVaraq(props: TemplateProps) {
       skin={skin}
       look={s}
       motif={<Bodom />}
+      milky
       cover={[
-        { kind: "unsplash", slot: "b3-hands-hold", w: 900 },
-        { kind: "unsplash", slot: "b3-roses", w: 700 },
+        { kind: "unsplash", slot: "b3-roses", w: 900 },
+        { kind: "unsplash", slot: "b3-hands-hold", w: 700 },
       ]}
     />
   );

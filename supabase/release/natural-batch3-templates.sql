@@ -1,4 +1,4 @@
--- PRE-DEPLOY (только по «да» владельца): батч 3 — 16 дизайнов (123–138) в каталоге. Без UPDATE/DELETE, заказы не трогаем.
+-- PRE-DEPLOY (только по «да» владельца): батч 3 — 16 строк (123–138), из них 15 в каталоге; 131 «Ислими варақ» снят (is_active = false, номер занят). Без UPDATE/DELETE, заказы не трогаем.
 -- Номера 123..138 зарезервированы в templates/registry.ts. Если номер или id уже занят другим — транзакция откатывается целиком.
 -- Применять ДО Merge: код таблицу templates не читает (каталог бота — из templates/registry.ts), а заказ ссылается на неё
 -- внешним ключом — без строки заказ на новый дизайн упадёт. Старому коду новые строки не видны. Порядок — docs/release/checklist.md.
@@ -17,7 +17,7 @@ do $$ begin
     ('ipak-albom', 128, 'nikoh', 'simple', false, 5000, '/covers/ipak-albom.webp', true, 36),
     ('suzani-medalyon', 129, 'nikoh', 'simple', false, 5000, '/covers/suzani-medalyon.webp', true, 37),
     ('nur-varaq', 130, 'nikoh', 'scroll', false, 6000, '/covers/nur-varaq.webp', true, 38),
-    ('islimi-varaq', 131, 'nikoh', 'scroll', false, 6000, '/covers/islimi-varaq.webp', true, 39),
+    ('islimi-varaq', 131, 'nikoh', 'scroll', false, 6000, '/covers/islimi-varaq.webp', false, 39),
     ('xotira-albom', 132, 'nikoh', 'scroll', false, 6000, '/covers/xotira-albom.webp', true, 40),
     ('visol-hikoya', 133, 'nikoh', 'animated', false, 8000, '/covers/visol-hikoya.webp', true, 41),
     ('ganch-darvoza', 134, 'sunnat', 'animated', false, 8000, '/covers/ganch-darvoza.webp', true, 42),
@@ -38,7 +38,7 @@ insert into public.templates(id, number, occasion, format, with_photo, price, co
     ('ipak-albom', 128, 'nikoh', 'simple', false, 5000, '/covers/ipak-albom.webp', true, 36),
     ('suzani-medalyon', 129, 'nikoh', 'simple', false, 5000, '/covers/suzani-medalyon.webp', true, 37),
     ('nur-varaq', 130, 'nikoh', 'scroll', false, 6000, '/covers/nur-varaq.webp', true, 38),
-    ('islimi-varaq', 131, 'nikoh', 'scroll', false, 6000, '/covers/islimi-varaq.webp', true, 39),
+    ('islimi-varaq', 131, 'nikoh', 'scroll', false, 6000, '/covers/islimi-varaq.webp', false, 39),
     ('xotira-albom', 132, 'nikoh', 'scroll', false, 6000, '/covers/xotira-albom.webp', true, 40),
     ('visol-hikoya', 133, 'nikoh', 'animated', false, 8000, '/covers/visol-hikoya.webp', true, 41),
     ('ganch-darvoza', 134, 'sunnat', 'animated', false, 8000, '/covers/ganch-darvoza.webp', true, 42),

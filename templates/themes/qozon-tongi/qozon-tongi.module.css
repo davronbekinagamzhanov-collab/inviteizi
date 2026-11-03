@@ -1,5 +1,5 @@
 /* «Қозон тонги»: обложка без «карточки» — текст прямо на дымчатой бумаге, мотив казана крупнее */
-.coverText { margin-top: -40px; border-top: 3px solid var(--c-accent); }
+.coverText { margin-top: -40px; }
 .motif { width: 64px; }
 .finMotif { width: 120px; }
 .bandPic::after { background: color-mix(in srgb, #3a1d0e 52%, transparent); }

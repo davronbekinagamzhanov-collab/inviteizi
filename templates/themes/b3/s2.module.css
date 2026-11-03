@@ -28,6 +28,9 @@
 .onPhoto { color: #fffaf3; }
 .heroText.onPhoto { margin-top: auto; margin-bottom: 44px; text-shadow: 0 1px 14px rgba(0, 0, 0, .35); }
 .heroText.onPhoto p, .heroText.onPhoto span { color: #fffaf3; }
+/* milky: фото растворяется в молочный лист, текст тёмный (правило «тёплый молочный», без тёмных экранов) */
+.milky .coverPic::after { background: linear-gradient(180deg, transparent 28%, color-mix(in srgb, var(--c-paper) 82%, transparent) 60%, var(--c-paper) 80%); }
+.milky .onPhoto, .milky .heroText.onPhoto p, .milky .heroText.onPhoto span { color: var(--c-ink); text-shadow: none; }
 
 /* 2 — текст */
 .textPage { max-width: 380px; }

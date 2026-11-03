@@ -244,7 +244,7 @@ export const ACCEPTED = new Set([
   // 117–122 — «Гулли рамка» (03.11.2026): никоҳ ×3, наҳорги ош, суннат, юбилей
   "gul-doira", "girih-barg", "muhrli-maktub", "tonggi-piyola", "lola-bodom", "bordo-guldasta",
   // 123–138 — батч 3
-   "choy-maktub", "oq-maktub", "hurmat-maktub", "tong-varaq", "nur-varaq", "islimi-varaq", "non-albom", "ipak-albom", "xotira-albom", "qozon-tongi", "visol-hikoya", "ganch-darvoza", "doppi-kitob", "umr-kitobi", "suzani-medalyon", "lola-medalyon",
+   "choy-maktub", "oq-maktub", "hurmat-maktub", "tong-varaq", "nur-varaq", "non-albom", "ipak-albom", "xotira-albom", "qozon-tongi", "visol-hikoya", "ganch-darvoza", "doppi-kitob", "umr-kitobi", "suzani-medalyon", "lola-medalyon",
   // Скрыты по решению владельца 03.11.2026 (код и строки в БД остаются — оплаченные ссылки работают),
   // список — HIDDEN_03_11 ниже. «anor-bogi» скрыт ещё 24.10.
 ]);
@@ -272,7 +272,9 @@ export function catalogPosition(d: Pick<Design,"id"|"number">) {
   return i < 0 ? 1000 + d.number : i;
 }
 /** Все когда-либо принятые (каталог + скрытые 03.11): код живой, заказы на них открываются */
-export const everAccepted = () => designs.filter((d) => ACCEPTED.has(d.id) || HIDDEN_03_11.includes(d.id));
+/** Сняты из каталога после критика батча 3 (03.11.2026): 131 «Ислими варақ». Код и строка в БД остаются */
+export const HIDDEN_BATCH3: readonly string[] = ["islimi-varaq"];
+export const everAccepted = () => designs.filter((d) => ACCEPTED.has(d.id) || HIDDEN_03_11.includes(d.id) || HIDDEN_BATCH3.includes(d.id));
 export const activeDesigns = () => designs.filter((d) => ACCEPTED.has(d.id)).sort((a,b)=>catalogPosition(a)-catalogPosition(b));
 
 export function getDesign(id: string) {

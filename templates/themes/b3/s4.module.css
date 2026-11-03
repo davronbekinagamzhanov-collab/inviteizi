@@ -16,7 +16,7 @@
 .gate[data-started="true"] .leafR { transform: rotateY(100deg); }
 .plaque { position: absolute; z-index: 3; left: 50%; top: 40%; translate: -50% -50%; width: min(82%, 330px); padding: 26px 18px 24px; background: var(--c-paper); color: var(--c-ink); border: 1px solid var(--carve); box-shadow: 0 0 0 5px var(--c-paper), 0 0 0 6px var(--carve), 0 18px 40px -18px rgba(0, 0, 0, .6); transition: opacity .35s ease, transform .5s ease; }
 .gate[data-started="true"] .plaque { opacity: 0; transform: translate3d(0, -10px, 0); }
-.plaqueName { font-family: var(--b-alegreya); font-size: 40px; line-height: 1.1; font-weight: 500; color: var(--c-accent); }
+.plaqueName { font-family: var(--b-alegreya); font-size: min(40px, calc(250px / (var(--len, 8) * .6))); overflow-wrap: normal !important; line-height: 1.1; font-weight: 500; color: var(--c-accent); }
 .plaqueMeta { font-family: var(--b-alegreya); font-style: italic; font-size: 19px; line-height: 1.4; }
 .tap { position: absolute; z-index: 3; left: 50%; bottom: calc(46px + env(safe-area-inset-bottom)); translate: -50% 0; white-space: nowrap; padding: 12px 26px; border-radius: 999px; background: var(--c-paper); color: var(--c-ink); font-family: var(--n-serif); font-size: 17px; letter-spacing: .06em; box-shadow: 0 0 0 1px var(--carve); transition: opacity .3s ease; animation: darvozaTap 2.6s ease-in-out infinite; }
 .gate[data-started="true"] .tap { opacity: 0; }

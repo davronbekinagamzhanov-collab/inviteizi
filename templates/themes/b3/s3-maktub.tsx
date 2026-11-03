@@ -11,7 +11,7 @@ import { useInvitation } from "../../blocks/useInvitation";
 import { MapButton } from "../../blocks/MapButton";
 import { t } from "@/texts/uz-cyrl";
 import { Script } from "../natural/kit";
-import { Age, B3Shell, Names, Relation, cx, longDate, occasionTitle, tidy, venues, type Look, type Skin } from "./kit";
+import { Age, B3Shell, Names, Relation, cx, weekdayTime, longDate, occasionTitle, tidy, venues, type Look, type Skin } from "./kit";
 import b from "./b3.module.css";
 import s from "./s3.module.css";
 
@@ -25,7 +25,6 @@ export function Maktub({
   corner,
 }: TemplateProps & { melody: Score; skin: Skin; look: Look; motif: ReactNode; corner?: ReactNode }) {
   const inv = useInvitation(data, mode, { melody, opening: false });
-  const w = inv.main.when;
   return (
     <B3Shell inv={inv} skin={skin} look={look}>
       <article className={cx(s.letter, look.letter)}>
@@ -43,10 +42,7 @@ export function Maktub({
           <p className={cx(s.occasion, look.occasion)}>{occasionTitle(inv)}</p>
           <p className={s.when}>
             <span>{longDate(inv)}</span>
-            <span className={s.dot} aria-hidden />
-            <span>
-              {t.weekdays[w.weekdayIndex]}, {t.date.clock(inv.main.time)}
-            </span>
+            <span>{weekdayTime(inv)}</span>
           </p>
         </header>
 

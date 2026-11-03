@@ -89,12 +89,15 @@ export function B3Shell({
   );
 }
 
+/** Самое длинное слово в именах → --len: длинное имя («Муҳаммадюсуф») уменьшается, а не рвётся посередине */
+export const nameLen = (inv: Invitation) =>
+  Math.max(6, ...[inv.data.groom, inv.data.bride, inv.data.person].flatMap((n) => (n ?? "").split(/\s+/)).map((w) => w.length));
+
 /** Имена: «Жених / ва / Невеста» или одно имя */
 export function Names({ inv, className, andClassName, as: Tag = "h1" }: { inv: Invitation; className?: string; andClassName?: string; as?: "h1" | "h2" | "p" }) {
   const d = inv.data;
   const nikoh = inv.occasion === "nikoh" && d.groom && d.bride;
-  // Самое длинное слово → --len: длинное имя («Муҳаммадюсуф») уменьшается, а не рвётся посередине
-  const len = Math.max(6, ...[d.groom, d.bride, d.person].flatMap((n) => (n ?? "").split(/\s+/)).map((w) => w.length));
+  const len = nameLen(inv);
   return (
     <Tag className={cx(b.names, className)} style={{ "--len": len } as CSSProperties}>
       {nikoh ? (
@@ -120,6 +123,13 @@ export const occasionTitle = (inv: Invitation) => t.occasionTitles[inv.occasion]
 export const longDate = (inv: Invitation) => {
   const w = inv.main.when;
   return t.date.long(w.day, w.monthIndex, w.year);
+};
+
+/** «Шанба, 18:00»; если тадбиров несколько — только день недели (время каждого — в «Дастур»),
+ *  иначе гость примет время наҳорги оша за время всего тўя */
+export const weekdayTime = (inv: Invitation) => {
+  const w = inv.main.when;
+  return inv.events.length > 1 ? t.weekdays[w.weekdayIndex] : `${t.weekdays[w.weekdayIndex]}, ${t.date.clock(inv.main.time)}`;
 };
 
 /** Возраст юбиляра: «75 ёш» */
@@ -151,9 +161,7 @@ export function DateBlock({ inv, className, calClassName, heart, title = true }:
     <section className={cx(b.section, className)}>
       {title && <SectionTitle>{t.natural.date}</SectionTitle>}
       <HandCalendar date={w} heart={heart} className={cx(b.cal, calClassName)} />
-      <p className={b.dateLine}>
-        {t.weekdays[w.weekdayIndex]}, {t.date.clock(inv.main.time)}
-      </p>
+      <p className={b.dateLine}>{weekdayTime(inv)}</p>
     </section>
   );
 }

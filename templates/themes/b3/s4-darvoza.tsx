@@ -4,14 +4,14 @@
  * имя, тадбир и сана (видны с первого кадра). По нажатию створки распахиваются внутрь двора;
  * за ними каждая часть стоит в своём арочном окне, между окнами — полоса гириҳа.
  */
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
 import { useReducedMotion } from "motion/react";
 import type { TemplateProps } from "../types";
 import type { Score } from "../../blocks/synth";
 import { useInvitation } from "../../blocks/useInvitation";
 import { OpeningCaption } from "../../blocks/OpeningCaption";
 import { t } from "@/texts/uz-cyrl";
-import { Age, B3Shell, Count, DateBlock, Finale, Names, Places, Program, Relation, Rise, cx, longDate, occasionTitle, tidy, type Look, type Skin } from "./kit";
+import { nameLen, Age, B3Shell, Count, DateBlock, Finale, Names, Places, Program, Relation, Rise, cx, longDate, occasionTitle, tidy, type Look, type Skin } from "./kit";
 import { GanchLattice } from "./decor";
 import b from "./b3.module.css";
 import s from "./s4.module.css";
@@ -98,7 +98,7 @@ export function Darvoza({ data, mode, melody, skin, look, motif, id }: TemplateP
             <GanchLattice id={`${id}-r`} className={s.leafLattice} />
             <span className={s.knob} />
           </span>
-          <span className={cx(s.plaque, b.soft, look.plaque)}>
+          <span className={cx(s.plaque, b.soft, look.plaque)} style={{ "--len": nameLen(inv) } as CSSProperties}>
             <OpeningCaption inv={inv} nameClassName={s.plaqueName} metaClassName={s.plaqueMeta} />
           </span>
           <span className={cx(s.tap, look.tap)}>{t.b3.tap}</span>
