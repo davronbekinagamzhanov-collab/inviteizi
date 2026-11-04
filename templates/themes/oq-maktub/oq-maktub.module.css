@@ -1,0 +1,10 @@
+/* «Оқ мактуб»: лист с полукруглой аркой сверху, ислими во всю ширину */
+.letter { margin-top: 64px; padding-top: 70px; border-radius: 200px 200px 6px 6px; }
+.letter::before { inset: 10px; border-radius: 190px 190px 2px 2px; }
+.letter::after { inset: 15px; border-radius: 185px 185px 2px 2px; }
+.motif { width: 100%; max-width: 260px; margin-bottom: 16px; }
+.names { font-size: 46px; font-weight: 500; font-style: italic; }
+.corner { width: 34px; height: 34px; }
+.corner:first-child { display: none; }
+.place { background: transparent; border: 1px solid color-mix(in srgb, var(--c-accent) 30%, transparent); }
+.hosts { color: var(--c-ink); }

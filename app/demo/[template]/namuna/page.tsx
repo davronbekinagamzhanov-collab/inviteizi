@@ -1,3 +1,4 @@
+import { glueData } from "@/lib/typography";
 import { notFound } from "next/navigation";
 import { demoMusicUrl } from "@/lib/music";
 import { designs, existingArt, getDesign } from "@/templates/registry";
@@ -15,5 +16,5 @@ export default async function DemoWatermarkPage({ params }: PageProps<"/demo/[te
   if (!design) notFound();
 
   const { default: Design } = await design.load();
-  return <Design data={{ ...design.sample, musicUrl: demoMusicUrl(design.occasion) }} mode="demo" art={existingArt(design)} />;
+  return <Design data={glueData({ ...design.sample, musicUrl: demoMusicUrl(design.occasion) })} mode="demo" art={existingArt(design)} />;
 }

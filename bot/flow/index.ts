@@ -6,6 +6,7 @@ import type { BotUpdate } from "../update";
 import type { Ctx, Deps, Draft, Result, Step, StepId } from "./types";
 import { cat, catalog, fmt } from "./steps-order";
 import { age, bride, cause, groom, hosts, person, relation, sideAsk, sideBride } from "./steps-form";
+import { photoAsk, photoUpload } from "./steps-photo";
 import { evPlaces, evVenueName, evMap, evLink, evAddress, evDate, evLoc, evSameDay, evTime, evTimeCustom, evVenue, more } from "./steps-event";
 import { evMenu, music, musicList, musicOwn, review, rsvp, text, textOwn } from "./steps-final";
 import { approve, askReceipt, askRejectReason, editOrder, myOrders, payOrder, receipt, reject, resendLink, rsvpAnswers } from "./orders";
@@ -41,6 +42,8 @@ export const steps: Record<StepId, Step> = {
   hosts,
   sideAsk,
   sideBride,
+  photoAsk,
+  photoUpload,
   evDate,
   evSameDay,
   evTime,
@@ -350,7 +353,15 @@ async function onCallback(c: Ctx, d: string) {
     if (c.chatId !== c.user.id || !(await c.deps.repo.listFavorites(c.user.id)).includes(id)) return;
     const design = activeDesigns().find(d => d.id === id);
     if (!design) return;
-    return enter(c, "catalog", { occasion: design.occasion, format: design.format, catIdx: designsFor(design.occasion, design.format).findIndex(d => d.id === id) });
+    const catIdx = designsFor(design.occasion, design.format).findIndex(d => d.id === id);
+    // Идёт правка заказа или заполнение анкеты того же тадбира: меняем дизайн в ней, а не начинаем новый заказ
+    if (c.s.data && c.s.occasion === design.occasion && !c.s.paid) {
+      c.s = { ...c.s, format: design.format, catIdx, ret: c.s.ret ?? (c.s.orderId ? "review" : undefined), back: [] };
+      c.step = "catalog";
+      return ask(c);
+    }
+    if (c.s.orderId) return void (await send(c, c.tx.order.formatLocked));
+    return enter(c, "catalog", { occasion: design.occasion, format: design.format, catIdx });
   }
   const [kind, a, b] = d.split(":");
   const n = Number(a);
@@ -360,7 +371,7 @@ async function onCallback(c: Ctx, d: string) {
     case "pay":
       return apply(c, await payOrder(c, n));
     case "rcpt":
-      return apply(c, await askReceipt(c, n));
+      return apply(c, await askReceipt(c, n, b === undefined ? undefined : Number(b)));
     case "edit":
       return apply(c, await editOrder(c, n));
     case "link":

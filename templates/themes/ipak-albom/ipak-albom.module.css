@@ -1,0 +1,7 @@
+/* «Ипак альбом»: шёлковая лента вместо скотча, лола в тексте и финале */
+.root { --tape: color-mix(in srgb, var(--silk) 80%, transparent); }
+.names { font-weight: 500; font-style: italic; }
+.textMotif { width: 34px; }
+.finMotif { width: 52px; }
+.corners { background: transparent; border: 1px solid var(--c-line); }
+.corner { background: var(--silk); opacity: 1; }

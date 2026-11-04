@@ -659,6 +659,34 @@
         }
       ],
       "license": "SIL OFL 1.1"
+    },
+    "Great Vibes": {
+      "folder": "greatvibes",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/greatvibes/",
+      "files": [
+        {
+          "filename": "GreatVibes-Regular.ttf",
+          "style": "normal",
+          "weight": "400",
+          "sha256": "8d509802186f1b51572531ecf313e8098f9a5bfdfaca93f0c9b34467f9982d15",
+          "bundled_filename": "GreatVibes-Regular.woff2",
+          "bundled_sha256": "095c667798911656dc579e8b11e7d0e40644b98bc7d48f79e17ed6adaa2958bc"
+        }
+      ]
+    },
+    "Bad Script": {
+      "folder": "badscript",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/badscript/",
+      "files": [
+        {
+          "filename": "BadScript-Regular.ttf",
+          "style": "normal",
+          "weight": "400",
+          "sha256": "40ec737eee65ec4efbc24ae636fa31d7d84d1ccca83ab54cd555edb72cb3eaf0",
+          "bundled_filename": "BadScript-Regular.woff2",
+          "bundled_sha256": "8c50bbde25593421b5152e0cd543b1e616f32196ad52db2b6ff5e65d4b1d71ac"
+        }
+      ]
     }
   },
   "conversion": "Lossless WOFF2 conversion with fontTools; original glyphs, naming, variation axes and OFL notices retained. No glyph subsetting or font redesign."

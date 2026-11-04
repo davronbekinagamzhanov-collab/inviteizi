@@ -398,11 +398,11 @@ describe("партнёры", () => {
 describe("избранное", () => {
   it("сохраняется после /start, повторное добавление без дублей", async () => {
     const s = new Sim(); await prepare(s, 1);
-    await s.callback(1, "fav:add:oq-ot", 1); await s.callback(1, "fav:add:oq-ot", 1);
+    await s.callback(1, "fav:add:doppicha", 1); await s.callback(1, "fav:add:doppicha", 1);
     await s.start(1); await s.command(1, "favorites");
-    expect(await s.repo.listFavorites(1)).toEqual(["oq-ot"]);
+    expect(await s.repo.listFavorites(1)).toEqual(["doppicha"]);
     expect(await s.repo.listFavorites(2)).toEqual([]);
-    await s.callback(1, "fav:remove:oq-ot", 1); await s.callback(1, "fav:remove:oq-ot", 1);
+    await s.callback(1, "fav:remove:doppicha", 1); await s.callback(1, "fav:remove:doppicha", 1);
     expect(await s.repo.listFavorites(1)).toEqual([]);
   });
 });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { t } from "./uz-cyrl";
+import { t as glued, tPlain as t } from "./uz-cyrl";
 import { longSamples, samples } from "@/lib/samples";
 import type { InvitationData, Occasion } from "@/lib/types";
 
@@ -24,6 +24,11 @@ describe("тексты приглашений", () => {
       }
     });
   }
+
+  it("на странице «ва» и «билан» не отрываются: тексты приглашения склеены неразрывным пробелом", () => {
+    expect(glued.inviteOptions(samples.nikoh)[0].body).toContain("Азиз ва Мадинанинг");
+    expect(JSON.stringify(glued)).not.toMatch(/(^|[\s"])ва /);
+  });
 
   it("имена подставлены в нужном падеже", () => {
     const nikoh = t.inviteOptions(samples.nikoh);

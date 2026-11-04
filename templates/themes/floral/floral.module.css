@@ -1,0 +1,114 @@
+/* «Гулли рамка» — общая механика. Цвета дизайна: --f-paper, --f-ink, --f-line (тонкие линии), --f-card (фон карточки).
+   Анимируются только transform и opacity; при prefers-reduced-motion всё стоит на месте. */
+.page { background: var(--f-paper); color: var(--f-ink); font-family: var(--n-text); overflow-x: clip; }
+
+/* ── Цветы с краёв ── */
+.bloom { position: absolute; z-index: 1; pointer-events: none; display: block; }
+.bloomIn { display: block; opacity: 0; }
+/* Поворот (--r) — на картинке, а не на обёртке: выплывание и «шторка» идут строго с края, куда указывает data-from */
+.bloomImg { display: block; width: 100%; height: auto; transform-origin: 50% 50%; rotate: var(--r, 0deg); }
+.flip { scale: -1 1; }
+.bloom[data-from="left"] { --dx: -32px; --dy: 0px; }
+.bloom[data-from="right"] { --dx: 32px; --dy: 0px; }
+.bloom[data-from="top"] { --dx: 0px; --dy: -32px; }
+.bloom[data-from="bottom"] { --dx: 0px; --dy: 32px; }
+.bloom[data-from="tl"] { --dx: -26px; --dy: -26px; }
+.bloom[data-from="tr"] { --dx: 26px; --dy: -26px; }
+.bloom[data-from="bl"] { --dx: -26px; --dy: 26px; }
+.bloom[data-from="br"] { --dx: 26px; --dy: 26px; }
+[data-on="true"] .bloomIn { animation: bloomIn 1.4s cubic-bezier(.22, 1, .36, 1) var(--d, 0ms) both; }
+[data-on="true"] .bloomImg { animation: breathe var(--b, 8s) ease-in-out calc(var(--d, 0ms) + 1.4s) infinite alternate; }
+@keyframes bloomIn { from { opacity: 0; transform: translate3d(var(--dx), var(--dy), 0); } to { opacity: 1; transform: none; } }
+@keyframes breathe { 0% { transform: none; } 50% { transform: scale(1.015) rotate(.6deg); } 100% { transform: scale(1.008) rotate(-.6deg); } }
+
+/* ── Карточка ── */
+.heroWrap { position: relative; display: block; }
+.frame { position: absolute; inset: 0; width: 100%; height: 100%; color: var(--f-line); }
+.star { width: 22px; height: 22px; color: var(--f-line); }
+.cardText { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; text-align: center; }
+/* Текст карточки виден с первого кадра (правило владельца 03.11): анимация только «досветляет» за 0,6 с */
+[data-on="true"] .step { animation: stepIn .6s cubic-bezier(.22, 1, .36, 1) both; }
+[data-on="true"] .step:nth-child(1) { animation-delay: 0.00s; }
+[data-on="true"] .step:nth-child(2) { animation-delay: 0.05s; }
+[data-on="true"] .step:nth-child(3) { animation-delay: 0.10s; }
+[data-on="true"] .step:nth-child(4) { animation-delay: 0.15s; }
+[data-on="true"] .step:nth-child(5) { animation-delay: 0.20s; }
+@keyframes stepIn { from { opacity: .72; transform: translate3d(0, 8px, 0); } to { opacity: 1; transform: none; } }
+
+.mono { display: flex; align-items: center; gap: 10px; font-family: var(--n-serif); font-size: 26px; font-weight: 400; letter-spacing: .06em; color: var(--f-line); line-height: 1; }
+.mono i { display: block; width: 1px; height: 24px; background: currentColor; opacity: .7; }
+.names { display: flex; flex-direction: column; align-items: center; margin-top: 10px; line-height: 1.05; font-weight: 400; }
+.nameScript { display: block; font-size: var(--f-name, 46px); color: var(--f-ink); line-height: 1.15; max-width: 100%; overflow-wrap: anywhere; }
+.and { margin: -2px 0; font-family: var(--n-serif); font-style: italic; font-size: 16px; color: var(--f-line); }
+.relation { font-family: var(--n-serif); font-style: italic; font-size: 17px; color: var(--f-line); }
+.occasion { margin-top: 12px; font-family: var(--n-serif); font-size: 13px; letter-spacing: .32em; text-transform: uppercase; color: var(--f-ink); padding-left: .32em; }
+.date { margin-top: 8px; font-family: var(--n-serif); font-size: 16px; letter-spacing: .14em; color: var(--f-ink); opacity: .85; font-variant-numeric: lining-nums; }
+
+/* ── Открытие «занавес»: карточка на весь экран, по нажатию цветы расходятся, экран тает ── */
+.curtain { position: fixed; inset: 0; z-index: 50; margin: 0 auto; width: 100%; max-width: 430px; overflow: hidden; background: var(--f-paper); cursor: pointer; transition: opacity .8s ease .3s; text-align: inherit; }
+.curtain[data-started="true"] { opacity: 0; }
+.curtain[data-started="true"] .bloom { transition: transform .9s cubic-bezier(.55, 0, .25, 1); }
+.curtain[data-started="true"] .bloom[data-from="left"], .curtain[data-started="true"] .bloom[data-from="tl"], .curtain[data-started="true"] .bloom[data-from="bl"] { transform: translate3d(-24%, 0, 0); }
+.curtain[data-started="true"] .bloom[data-from="right"], .curtain[data-started="true"] .bloom[data-from="tr"], .curtain[data-started="true"] .bloom[data-from="br"] { transform: translate3d(24%, 0, 0); }
+.curtain[data-started="true"] .bloom[data-from="top"] { transform: translate3d(0, -24%, 0); }
+.curtain[data-started="true"] .bloom[data-from="bottom"] { transform: translate3d(0, 24%, 0); }
+.tap { position: absolute; left: 0; right: 0; width: 100%; background: none; border: 0; cursor: pointer; bottom: calc(5svh + env(safe-area-inset-bottom)); z-index: 3; text-align: center; font-family: var(--n-serif); font-size: 13px; letter-spacing: .28em; text-transform: uppercase; color: var(--f-ink); opacity: 0; animation: tapIn 1s ease 1.6s forwards; padding-left: .28em; }
+.tap::after { content: ""; display: block; width: 1px; height: 26px; margin: 10px auto 0; background: currentColor; opacity: .5; animation: tapLine 2.4s ease-in-out 2.6s infinite; transform-origin: top; }
+@keyframes tapIn { to { opacity: .8; } }
+@keyframes tapLine { 0%, 100% { transform: scaleY(.4); } 50% { transform: scaleY(1); } }
+
+/* ── Блоки страницы ── */
+.letter { position: relative; z-index: 2; margin: 0 auto; padding: 64px 32px 8px; max-width: 400px; text-align: center; }
+.letter h2 { font-family: var(--n-serif); font-size: 25px; font-weight: 500; line-height: 1.25; text-wrap: balance; }
+.letter p { margin-top: 14px; font-size: 17px; line-height: 1.75; text-wrap: pretty; }
+.section { position: relative; z-index: 2; padding: 64px 28px 0; text-align: center; }
+.title { display: block; font-size: 58px; line-height: 1.15; color: var(--f-line); }
+.cal { margin: 14px auto 0; max-width: 330px; }
+.dateLine { margin-top: 12px; font-family: var(--n-serif); font-size: 17px; letter-spacing: .04em; }
+
+.count { padding-top: 56px; }
+.countLead { font-family: var(--n-serif); font-size: 14px; letter-spacing: .3em; text-transform: uppercase; padding-left: .3em; }
+.countGrid { margin: 18px auto 0; max-width: 340px; display: grid; grid-template-columns: repeat(4, 1fr); }
+.countBox { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.countBox + .countBox { border-left: 1px solid color-mix(in srgb, var(--f-line) 40%, transparent); }
+.countNum { font-family: var(--n-serif); font-size: 42px; font-weight: 300; line-height: 1; font-variant-numeric: lining-nums tabular-nums; }
+.countLabel { font-size: 13px; letter-spacing: .04em; opacity: .75; }
+.countToday { margin-top: 14px; font-family: var(--n-serif); font-size: 26px; }
+
+/* Программа: тонкая волна по центру, события по очереди слева и справа */
+.wave { position: relative; list-style: none; margin: 18px 0 0; padding: 0; }
+.waveLine { position: absolute; left: 50%; top: 6px; bottom: 6px; width: 40px; height: calc(100% - 12px); transform: translateX(-50%); color: var(--f-line); opacity: .55; }
+.waveItem { position: relative; width: 50%; padding: 6px 0 34px; }
+.waveItem:last-child { padding-bottom: 6px; }
+.waveLeft { padding-right: 30px; text-align: right; }
+.waveRight { margin-left: 50%; padding-left: 30px; text-align: left; }
+.waveDot { position: absolute; top: 20px; width: 9px; height: 9px; border-radius: 50%; background: var(--f-paper); border: 1px solid var(--f-line); }
+.waveLeft .waveDot { right: -4.5px; }
+.waveRight .waveDot { left: -4.5px; }
+.waveTime { font-family: var(--n-serif); font-size: 34px; font-weight: 300; line-height: 1.1; font-variant-numeric: lining-nums; }
+.waveTitle { margin-top: 4px; font-family: var(--n-serif); font-size: 13px; letter-spacing: .2em; text-transform: uppercase; line-height: 1.5; color: var(--f-line); }
+.waveMeta { font-size: 16px; line-height: 1.5; opacity: .85; overflow-wrap: anywhere; }
+.wave[data-count="1"] .waveItem { width: 100%; margin: 0; padding: 0; text-align: center; }
+.wave[data-count="1"] .waveDot { display: none; }
+
+.venue { margin: 18px auto 0; max-width: 360px; padding: 22px 20px; border-radius: 16px; background: var(--f-card); box-shadow: 0 12px 30px -24px rgba(40, 30, 20, .45); }
+.venue h3 { font-family: var(--n-serif); font-size: 23px; font-weight: 500; line-height: 1.2; overflow-wrap: anywhere; }
+.venue p { margin-top: 6px; font-size: 16px; line-height: 1.55; opacity: .85; overflow-wrap: anywhere; }
+.map { margin: 14px auto 0; display: inline-flex; border: 1px solid var(--f-line); color: var(--f-ink); border-radius: 999px; padding: 10px 20px; background: transparent; font-size: 16px; }
+
+.finale { position: relative; z-index: 2; margin-top: 56px; padding: 0 28px; text-align: center; overflow: hidden; }
+.finaleText { position: relative; z-index: 2; padding: 40px 0 8px; }
+.finaleScript { display: block; font-size: 56px; line-height: 1.2; color: var(--f-line); }
+.finaleLead { margin-top: 10px; font-family: var(--n-serif); font-style: italic; font-size: 18px; }
+.sides { margin: 22px auto 0; display: grid; gap: 12px; max-width: 320px; justify-items: center; }
+.sides > span { width: 48px; height: 1px; background: color-mix(in srgb, var(--f-line) 40%, transparent); }
+.sides p { font-family: var(--n-serif); font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: var(--f-line); }
+.sides h3 { margin-top: 6px; font-family: var(--n-serif); font-size: 18px; font-weight: 500; line-height: 1.3; overflow-wrap: anywhere; }
+.finaleHosts { margin-top: 4px; font-family: var(--n-serif); font-size: 25px; font-weight: 500; line-height: 1.25; overflow-wrap: anywhere; text-wrap: balance; }
+
+@media (prefers-reduced-motion: reduce) {
+  .bloomIn { opacity: 1; }
+  [data-on="true"] .bloomIn, [data-on="true"] .bloomImg, [data-on="true"] .step, .tap, .tap::after { animation: none; }
+  .tap { opacity: .8; }
+  .curtain, .curtain[data-started="true"] .bloom { transition: none; }
+}

@@ -1,0 +1,26 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`форматы бота × тадбирлар (реальный каталог) > таблица тадбир × формат (сколько дизайнов, сколько с фото) — снимок каталога 1`] = `
+{
+  "nahorgi": {
+    "animated": "2/0📷",
+    "scroll": "2/0📷",
+    "simple": "2/0📷",
+  },
+  "nikoh": {
+    "animated": "8/3📷",
+    "scroll": "3/2📷",
+    "simple": "4/2📷",
+  },
+  "sunnat": {
+    "animated": "2/0📷",
+    "scroll": "2/1📷",
+    "simple": "2/1📷",
+  },
+  "yubiley": {
+    "animated": "2/0📷",
+    "scroll": "2/0📷",
+    "simple": "2/0📷",
+  },
+}
+`;

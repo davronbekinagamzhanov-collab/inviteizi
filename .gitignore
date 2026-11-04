@@ -53,3 +53,7 @@ next-env.d.ts
 /screens/stage3/
 /backups/
 /screens-rsvp.log
+
+# временные снимки проверки
+docs/reviews/final/cover*/
+docs/reviews/final/sheet-*.jpg

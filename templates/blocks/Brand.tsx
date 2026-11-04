@@ -24,10 +24,26 @@ export function BrandBadge({ raised }: { raised: boolean }) {
   );
 }
 
+/** Автор фото (Unsplash и др.): «Сурат: Имя / Unsplash» со ссылками */
+export type PhotoCredit = { author: string; authorUrl: string; source: string; sourceUrl: string };
+
 /** Самый конец приглашения. Снизу запас: плашка и кнопка музыки не закрывают ссылку */
-export function BrandFooter() {
+export function BrandFooter({ credits = [], creditClassName = "text-current opacity-60" }: { credits?: PhotoCredit[]; creditClassName?: string }) {
   return (
-    <footer data-brand-footer className="relative z-10 flex justify-center px-4 pt-6 pb-28">
+    <footer data-brand-footer className="relative z-10 flex flex-col items-center gap-3 px-4 pt-6 pb-28">
+      {credits.length > 0 && (
+        <p data-photo-credits className={`max-w-[360px] text-center font-sans text-[11px] leading-relaxed ${creditClassName}`}>
+          {credits.map((c, i) => (
+            <span key={c.authorUrl} className="inline-block">
+              {i > 0 && <span aria-hidden className="px-1.5">·</span>}
+              {t.photoCredits.label}{" "}
+              <a href={c.authorUrl} target="_blank" rel="noopener" className="underline underline-offset-2">{c.author}</a>
+              {" / "}
+              <a href={c.sourceUrl} target="_blank" rel="noopener" className="underline underline-offset-2">{c.source}</a>
+            </span>
+          ))}
+        </p>
+      )}
       <div className="flex flex-col items-center gap-2 rounded-2xl bg-[#2b1f16]/70 px-5 py-3 text-center font-sans text-white ring-1 ring-white/20">
         <p className="text-[13px] leading-snug">{t.brand.footer}</p>
         <a href={botLink("footer")} target="_blank" rel="noopener" className="rounded-full bg-[#f0d596] px-4 py-2 text-[14px] font-semibold text-[#2b1f16] active:scale-95">

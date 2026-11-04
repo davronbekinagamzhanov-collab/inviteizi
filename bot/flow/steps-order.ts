@@ -7,8 +7,9 @@ import { after, backRow, coverUrl, data, demoUrl, designName, designsFor, format
 import type { InlineButton } from "../tg";
 import { usesLegacyDesign } from "@/templates/design-version";
 import { photoAttributions } from "@/texts/uz-cyrl";
+import { photoStepFor } from "./steps-photo";
 
-const OCCASIONS: Occasion[] = ["nikoh", "nahorgi", "sunnat", "yubiley"];
+export const OCCASIONS: Occasion[] = ["nikoh", "nahorgi", "sunnat", "yubiley"];
 
 export const cat: Step = {
   async ask(c) {
@@ -51,7 +52,7 @@ function catalogView(c: Ctx) {
   const legacy = Boolean(c.s.orderId) && usesLegacyDesign(d.id,c.s.data?.designVersion);
   const fmtName = c.tx.format.names[d.format];
   const credit = photoAttributions[d.id];
-  const caption = c.tx.catalog.caption(d.number, designName(d.id), fmtName, price(PRICES[d.format])) + (credit ? `\n\n${c.tx.catalog.photoCredit(credit.author,credit.license,credit.source)}` : "");
+  const caption = c.tx.catalog.caption(d.number, designName(d.id), fmtName, price(PRICES[d.format])) + (d.clientPhotos ? `\n${c.tx.catalog.withPhoto}` : "") + (credit ? `\n\n${c.tx.catalog.photoCredit(credit.author,credit.license,credit.source)}` : "");
   const rows: InlineButton[][] = [];
   if (list.length > 1) rows.push([ib(c, "◀", "prev"), ib(c, `${i + 1}/${list.length}`, "x"), ib(c, "▶", "next")]);
   rows.push([{ text: c.tx.catalog.demo, url: demoUrl(c, d.id, legacy) }, ib(c, c.tx.catalog.buy, "buy")]);
@@ -110,6 +111,10 @@ export const catalog: Step = {
         console.warn("design selection analytics",error instanceof Error?error.name:"Error");
       });
       data(c).occasion = c.s.occasion;
+      // Сменили дизайн до оплаты на дизайн без фото — прежние фото клиента не тянем в новый заказ
+      if (!v.d.clientPhotos && data(c).photos?.length) data(c).photos = [];
+      // Правка: перешли на дизайн с фото, а фото ещё нет — предлагаем добавить, потом обратно к сводке
+      if (c.s.ret && photoStepFor(c) && !data(c).photos?.length) return { to: "photoAsk" };
       return { to: after(c, formStart(c)) };
     }
     return null;

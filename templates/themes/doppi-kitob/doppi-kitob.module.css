@@ -1,0 +1,3 @@
+/* «Дўппи китоби»: титул в двойной индиговой рамке, как форзац */
+.title { padding: 26px 8px; outline: 1px solid color-mix(in srgb, var(--c-accent) 60%, transparent); outline-offset: 8px; box-shadow: inset 0 0 0 4px var(--c-card), inset 0 0 0 5px color-mix(in srgb, var(--c-accent) 35%, transparent); }
+.motif { width: 96px; }

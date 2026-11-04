@@ -1,0 +1,90 @@
+/* «Боғ»: шалфей на белой бумаге. Зелень — только настоящая акварель (гирлянда сверху и одна веточка) */
+.page { background: var(--n-paper); color: var(--n-ink); font-family: var(--n-text); }
+
+/* ── Имя ── */
+.hero { position: relative; padding: 118px 24px 0; overflow: hidden; }
+.garland { position: absolute; top: -8px; left: -10%; width: 120%; max-width: none; opacity: .9; transform: scaleY(-1); pointer-events: none; }
+.relation { font-family: var(--n-serif); font-style: italic; font-size: 22px; color: var(--n-accent); }
+.name { margin-top: 6px; font-family: var(--n-serif); font-weight: 500; font-size: var(--fit, 56px); line-height: 1.02; }
+.heroDate { margin-top: 4px; font-family: var(--n-serif); font-size: 17px; letter-spacing: .04em; color: var(--n-ink); }
+.cause { margin-top: 10px; font-size: 15px; letter-spacing: .16em; text-transform: uppercase; color: var(--n-accent); }
+.circleWrap { position: relative; width: 66%; margin: 36px 0 30px auto; }
+.circle { width: 100%; }
+.sprig { position: absolute; left: -38%; bottom: -16%; width: 52%; transform: rotate(-24deg); pointer-events: none; }
+
+/* ── Приветствие ── */
+.letter { padding: 48px 28px 0; max-width: 36ch; }
+.letter h2 { font-family: var(--n-serif); font-size: 27px; font-weight: 500; line-height: 1.2; }
+.letter p { margin-top: 14px; font-size: 17px; line-height: 1.75; }
+
+/* ── Дата ── */
+.date { padding: 72px 24px 0; }
+.dateHead { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.script { display: block; font-size: 68px; line-height: 1.2; color: var(--n-accent); }
+.right { text-align: right; }
+.dateBig { display: flex; flex-direction: column; align-items: flex-end; font-family: var(--n-serif); }
+.dateBig strong { font-size: 76px; font-weight: 300; line-height: .85; }
+.dateBig span { margin-top: 6px; font-size: 15px; }
+.cal { margin-top: 18px; }
+
+/* ── Тадбирлар ── */
+.events { padding: 72px 24px 0; }
+.steps { list-style: none; margin: 12px 0 0; padding: 0; }
+.step { position: relative; padding: 0 0 72px; max-width: 74%; }
+.step:nth-child(even) { margin-left: auto; text-align: right; }
+.step:last-child { padding-bottom: 0; }
+.time { font-family: var(--n-serif); font-size: 52px; font-weight: 300; line-height: 1; font-variant-numeric: lining-nums; }
+.step h3 { margin-top: 4px; font-family: var(--n-serif); font-size: 22px; font-weight: 500; }
+.meta { margin-top: 2px; font-size: 16px; line-height: 1.5; color: #4a5a51; overflow-wrap: anywhere; }
+.arrow { position: absolute; bottom: 4px; right: -34%; width: 72px; height: 72px; color: var(--n-accent); }
+.step:nth-child(even) .arrow { right: auto; left: -34%; transform: scaleX(-1); }
+
+/* ── Манзил ── */
+.place { padding: 72px 24px 0; }
+.venue { margin-top: 18px; padding: 22px 22px 24px; background: #e9efea; border-radius: 22px 22px 22px 4px; }
+.venue h3 { font-family: var(--n-serif); font-size: 26px; font-weight: 500; line-height: 1.15; overflow-wrap: anywhere; }
+.venue p { margin-top: 6px; font-size: 16px; line-height: 1.6; overflow-wrap: anywhere; }
+.map { margin-top: 14px; border-radius: 999px; padding: 11px 20px; background: #5f8270; color: #fff; }
+
+/* ── Таймер в одну строку ── */
+.count { padding: 72px 24px 0; }
+.countLead { font-family: var(--n-serif); font-style: italic; font-size: 22px; }
+.countGrid { margin-top: 14px; display: flex; align-items: baseline; column-gap: 18px; row-gap: 6px; flex-wrap: wrap; }
+.countBox { display: flex; align-items: baseline; gap: 5px; }
+.countNum { font-family: var(--n-serif); font-size: 46px; font-weight: 400; line-height: 1; color: var(--n-accent); }
+.countLabel { font-size: 14px; }
+.countToday { margin-top: 12px; font-family: var(--n-serif); font-size: 28px; }
+
+/* ── Фото ── */
+.table { padding: 64px 48px 0 24px; }
+.extra { padding: 40px 64px 0; }
+
+/* ── Подпись ── */
+.sign { padding: 56px 24px 0; text-align: right; }
+.signScript { display: block; font-size: 60px; line-height: 1.25; color: var(--n-accent); }
+.signLead { margin-top: 6px; font-size: 16px; }
+.signHosts { margin-top: 4px; font-family: var(--n-serif); font-size: 28px; font-weight: 500; line-height: 1.15; overflow-wrap: anywhere; }
+
+/* Второе место — не копия первого: прижато вправо, без заливки, только тонкая линия */
+.place > div:nth-of-type(even) .venue { margin-left: 18%; background: transparent; border: 1px solid #c4d3c8; border-radius: 4px 22px 22px 22px; text-align: right; }
+
+/* ── v2: кружевная розетка вокруг круга, медальон даты ── */
+.page { --n-photo-filter: saturate(.9) brightness(1.03); }
+.lace { position: absolute; left: -11%; top: -11%; width: 122%; height: 122%; color: var(--n-accent); opacity: .28; animation: laceTurn 120s linear infinite; }
+@keyframes laceTurn { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .lace { animation: none; } }
+.circle { position: relative; box-shadow: 0 16px 36px -22px rgba(47,61,54,.55); }
+.circleWrap { margin-top: 48px; }
+.medal { flex: none; width: 112px; color: var(--n-accent); background: #fff; box-shadow: 0 10px 26px -18px rgba(47,61,54,.6); }
+.medalDay { display: block; font-family: var(--n-serif); font-size: 48px; font-weight: 300; line-height: .9; color: var(--n-ink); font-variant-numeric: lining-nums; }
+.medalWeek { display: block; margin-top: 6px; font-size: 13px; color: var(--n-ink); }
+.divider { margin: 56px auto 0; }
+.venue { border-radius: 22px; }
+.place > div:nth-of-type(even) .venue { border-radius: 22px; }
+/* v2 после критика: таймер — ровная сетка из 4 колонок, кружево заметнее */
+.countGrid { display: grid; grid-template-columns: repeat(4, 1fr); column-gap: 0; text-align: center; }
+.countBox { flex-direction: column; align-items: center; gap: 4px; }
+.countBox + .countBox { border-left: 1px solid #c4d3c8; }
+.countNum { font-weight: 300; font-variant-numeric: lining-nums tabular-nums; }
+.countLabel { font-size: 13px; letter-spacing: .04em; opacity: .8; }
+.lace { opacity: .42; }

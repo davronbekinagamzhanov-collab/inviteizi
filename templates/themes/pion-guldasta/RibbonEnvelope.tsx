@@ -7,6 +7,7 @@ import { designTexts } from "@/texts/uz-cyrl";
 // свои заголовки дизайна (texts/uz-cyrl.ts → headings)
 const t = designTexts("pion-guldasta");
 import type { Invitation } from "../../blocks/useInvitation";
+import { OpeningCaption } from "../../blocks/OpeningCaption";
 import { Bow } from "./decor";
 import { CREAM } from "./style";
 
@@ -55,13 +56,17 @@ export function RibbonEnvelope({ inv, age }: { inv: Invitation; age?: number }) 
             transition={{ duration: 0.9, delay: going ? 1.45 : 0 }}
           />
 
-          <motion.p
-            className="relative mb-9 font-display text-[24px] text-[#6E1E2E] italic"
+          <motion.div
+            className="relative mb-8 px-6"
             animate={{ opacity: going ? 0 : 1 }}
             transition={{ duration: 0.4 }}
           >
-            {t.opening.invitation}
-          </motion.p>
+            <OpeningCaption
+              inv={inv}
+              nameClassName="font-display text-[36px] leading-[1.15] text-[#6E1E2E]"
+              metaClassName="text-[17px] tracking-[0.08em] text-[#8C6A6E]"
+            />
+          </motion.div>
 
           <button
             type="button"

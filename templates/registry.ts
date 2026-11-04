@@ -31,6 +31,8 @@ export type Design = {
   style: DesignStyle;
   /** В дизайне есть фото (Pixabay), а не только орнаменты кодом */
   withPhoto: boolean;
+  /** Дизайн умеет показывать фото клиента: бот спрашивает «расмларингизни қўшасизми?» */
+  clientPhotos?: boolean;
   /** Тёмный фон (бархат) — в каталоге таких немного */
   dark?: boolean;
   /** Пример данных для демо */
@@ -177,16 +179,45 @@ const rawDesigns: RawDesign[] = [
   design("sahar-maktubi", 110, "nahorgi", "simple", false, () => import("./themes/sahar-maktubi/Design")),
   design("umr-sahifalari", 111, "yubiley", "scroll", true, () => import("./themes/umr-sahifalari/Design"), {art:"/art/lola-ehtirom.webp"}),
   design("ehtirom-kartasi", 112, "yubiley", "simple", false, () => import("./themes/ehtirom-kartasi/Design")),
+  // «Натуральные» пилоты: настоящие фото, рукописные акценты, фото клиента (02.11.2026)
+  design("muhr", 113, "nikoh", "animated", false, () => import("./themes/muhr/Design"), { clientPhotos: true }),
+  design("ipak", 114, "nikoh", "animated", false, () => import("./themes/ipak/Design"), { clientPhotos: true }),
+  design("bog", 115, "sunnat", "scroll", false, () => import("./themes/bog/Design"), { clientPhotos: true }),
+  design("tong-dasturxon", 116, "nahorgi", "scroll", false, () => import("./themes/tong-dasturxon/Design")),
+  // ── «Гулли рамка»: акварельные цветы с краёв + карточка в центре, без фото (03.11.2026) ──
+  design("gul-doira", 117, "nikoh", "animated", false, () => import("./themes/gul-doira/Design")),
+  design("girih-barg", 118, "nikoh", "animated", false, () => import("./themes/girih-barg/Design")),
+  design("muhrli-maktub", 119, "nikoh", "animated", false, () => import("./themes/muhrli-maktub/Design")),
+  design("tonggi-piyola", 120, "nahorgi", "animated", false, () => import("./themes/tonggi-piyola/Design")),
+  design("lola-bodom", 121, "sunnat", "animated", false, () => import("./themes/lola-bodom/Design")),
+  design("bordo-guldasta", 122, "yubiley", "simple", false, () => import("./themes/bordo-guldasta/Design")),
+  // Батч 3 (123–138): структуры S1–S7, docs/design/batch3.md
+  design("choy-maktub", 123, "nahorgi", "simple", false, () => import("./themes/choy-maktub/Design")),
+  design("oq-maktub", 127, "nikoh", "simple", false, () => import("./themes/oq-maktub/Design")),
+  design("hurmat-maktub", 138, "yubiley", "simple", false, () => import("./themes/hurmat-maktub/Design")),
+  design("tong-varaq", 126, "nahorgi", "scroll", false, () => import("./themes/tong-varaq/Design")),
+  design("nur-varaq", 130, "nikoh", "scroll", false, () => import("./themes/nur-varaq/Design"), { clientPhotos: true }),
+  design("islimi-varaq", 131, "nikoh", "scroll", false, () => import("./themes/islimi-varaq/Design")),
+  design("non-albom", 124, "nahorgi", "simple", false, () => import("./themes/non-albom/Design")),
+  design("ipak-albom", 128, "nikoh", "simple", false, () => import("./themes/ipak-albom/Design"), { clientPhotos: true }),
+  design("xotira-albom", 132, "nikoh", "scroll", false, () => import("./themes/xotira-albom/Design"), { clientPhotos: true }),
+  design("qozon-tongi", 125, "nahorgi", "animated", false, () => import("./themes/qozon-tongi/Design")),
+  design("visol-hikoya", 133, "nikoh", "animated", false, () => import("./themes/visol-hikoya/Design"), { clientPhotos: true }),
+  design("ganch-darvoza", 134, "sunnat", "animated", false, () => import("./themes/ganch-darvoza/Design")),
+  design("doppi-kitob", 135, "sunnat", "scroll", false, () => import("./themes/doppi-kitob/Design")),
+  design("umr-kitobi", 137, "yubiley", "scroll", false, () => import("./themes/umr-kitobi/Design")),
+  design("suzani-medalyon", 129, "nikoh", "simple", false, () => import("./themes/suzani-medalyon/Design"), { clientPhotos: true }),
+  design("lola-medalyon", 136, "sunnat", "simple", false, () => import("./themes/lola-medalyon/Design"), { clientPhotos: true }),
 
 ];
 
 const STYLE_OF: Record<DesignStyle, string[]> = {
-  milk: ["sahar-ipagi", "sahar-maktubi", "ehtirom-kartasi","zarhal-eshik", "atlas-tolqin", "non-muhr", "marvarid-satr", "bugdoy-boshoq", "shirin-tilak", "visol-soati", "tut-qogozi"],
+  milk: ["umr-kitobi", "tong-varaq", "hurmat-maktub", "oq-maktub", "choy-maktub", "sahar-ipagi", "sahar-maktubi", "ehtirom-kartasi","zarhal-eshik", "atlas-tolqin", "non-muhr", "marvarid-satr", "bugdoy-boshoq", "shirin-tilak", "visol-soati", "tut-qogozi"],
   gold: ["oltin-monogramma", "oltin-ot", "zarhal-lavha", "qosh-uzuk", "zarvaraq", "saodat-kaliti"],
-  floral: ["umr-sahifalari","pion-guldasta", "ipak-romol", "paxta-gul", "visol-rishta", "kabutar-salom", "umr-daraxti", "rayhon-sahari", "siyoh-duo", "shabnam-visol", "uzum-hovli"],
-  national: ["sunnat-muqova", "sunnat-nasab","ganch-peshtoq", "rishton-koshin", "oq-ot", "sayram-hovli", "doppicha", "adras-nishon", "suzani-yol", "sopol-navo", "girih-nur", "dutor-navosi", "minor-satr", "kumush-taroq", "mis-kafgir", "oq-chinni", "tonggi-qozon", "yelpigich-ziynat"],
+  floral: ["bordo-guldasta", "lola-bodom", "tonggi-piyola", "muhrli-maktub", "gul-doira", "girih-barg", "umr-sahifalari","pion-guldasta", "ipak-romol", "paxta-gul", "visol-rishta", "kabutar-salom", "umr-daraxti", "rayhon-sahari", "siyoh-duo", "shabnam-visol", "uzum-hovli"],
+  national: ["doppi-kitob", "ganch-darvoza", "islimi-varaq", "sunnat-muqova", "sunnat-nasab","ganch-peshtoq", "rishton-koshin", "oq-ot", "sayram-hovli", "doppicha", "adras-nishon", "suzani-yol", "sopol-navo", "girih-nur", "dutor-navosi", "minor-satr", "kumush-taroq", "mis-kafgir", "oq-chinni", "tonggi-qozon", "yelpigich-ziynat"],
   dark: ["sapfir", "shohona-baxmal"],
-  photo: ["tandir-nuri", "atirgul", "dasturxon", "bodom-guli", "samarqand-kitob", "tonggi-choy", "gulbog-sahifa", "lola-ehtirom", "anor-bogi"],
+  photo: ["lola-medalyon", "suzani-medalyon", "visol-hikoya", "qozon-tongi", "xotira-albom", "ipak-albom", "non-albom", "nur-varaq", "muhr", "ipak", "bog", "tong-dasturxon", "tandir-nuri", "atirgul", "dasturxon", "bodom-guli", "samarqand-kitob", "tonggi-choy", "gulbog-sahifa", "lola-ehtirom", "anor-bogi"],
 };
 
 function styleOf(id: string): DesignStyle {
@@ -202,31 +233,53 @@ export const designs: Design[] = rawDesigns.map((d) => ({ ...d, style: styleOf(d
  * Остальные в работе: код остаётся, демо открывается по прямой ссылке, но в каталоге их нет.
  */
 export const ACCEPTED = new Set([
-  "oltin-monogramma", "sapfir", "oq-ot", "tonggi-qozon", "pion-guldasta",
-  "tandir-nuri", "ganch-peshtoq", "ipak-romol", "oltin-ot",
-  "zarhal-eshik", "rishton-koshin", "atirgul", "dasturxon",
-  "atlas-tolqin", "non-muhr", "shohona-baxmal", "paxta-gul", "bodom-guli", "samarqand-kitob", "tonggi-choy",
-  "oq-chinni", "doppicha", "sayram-hovli", "zarvaraq", "umr-daraxti",
-  "marvarid-satr", "gulbog-sahifa", "suzani-yol", "bugdoy-boshoq", "lola-ehtirom",
-  "zarhal-lavha", "adras-nishon", "mis-kafgir", "rayhon-sahari", "visol-rishta",
-  "uzum-hovli", "sopol-navo", "girih-nur", "siyoh-duo", "kabutar-salom",
-  "shirin-tilak", "minor-satr", "kumush-taroq", "shabnam-visol", "visol-soati",
-  "dutor-navosi", "tut-qogozi", "qosh-uzuk", "yelpigich-ziynat", "saodat-kaliti",
-  "sunnat-muqova", "sunnat-nasab", "sahar-ipagi", "sahar-maktubi", "umr-sahifalari", "ehtirom-kartasi",
-  // "anor-bogi" — скрыт по замечанию владельца 24.10 (код остаётся)
+  // 1, 23, 61, 70, 113, 114 — никоҳ
+  "oltin-monogramma", "sapfir", "ganch-peshtoq", "shohona-baxmal", "muhr", "ipak",
+  // 78, 115 — суннат
+  "doppicha", "bog",
+  // 116 — наҳорги ош
+  "tong-dasturxon",
+  // 51, 81, 87 — юбилей
+  "pion-guldasta", "umr-daraxti", "zarhal-lavha",
+  // 117–122 — «Гулли рамка» (03.11.2026): никоҳ ×3, наҳорги ош, суннат, юбилей
+  "gul-doira", "girih-barg", "muhrli-maktub", "tonggi-piyola", "lola-bodom", "bordo-guldasta",
+  // 123–138 — батч 3
+   "choy-maktub", "oq-maktub", "hurmat-maktub", "tong-varaq", "nur-varaq", "non-albom", "ipak-albom", "xotira-albom", "qozon-tongi", "visol-hikoya", "ganch-darvoza", "doppi-kitob", "umr-kitobi", "suzani-medalyon", "lola-medalyon",
+  // Скрыты по решению владельца 03.11.2026 (код и строки в БД остаются — оплаченные ссылки работают),
+  // список — HIDDEN_03_11 ниже. «anor-bogi» скрыт ещё 24.10.
 ]);
+
+/** Дизайн можно купить сейчас (новый заказ или смена дизайна до оплаты) */
+export function isOnSale(id: string) {
+  return ACCEPTED.has(id);
+}
+
+/** Скрыты из каталога сайта и бота 03.11.2026 (номера 31, 41, 62–69, 71–77, 79, 80, 82–86, 88–112). Не удалять: заказы на них открываются */
+export const HIDDEN_03_11: readonly string[] = [
+  "oq-ot", "tonggi-qozon", "zarhal-eshik", "atlas-tolqin", "bodom-guli", "samarqand-kitob",
+  "ipak-romol", "rishton-koshin", "atirgul", "tandir-nuri", "dasturxon", "non-muhr",
+  "tonggi-choy", "paxta-gul", "oltin-ot", "oq-chinni", "sayram-hovli", "zarvaraq",
+  "marvarid-satr", "gulbog-sahifa", "suzani-yol", "bugdoy-boshoq", "lola-ehtirom", "adras-nishon",
+  "mis-kafgir", "rayhon-sahari", "visol-rishta", "uzum-hovli", "sopol-navo", "girih-nur",
+  "siyoh-duo", "kabutar-salom", "shirin-tilak", "minor-satr", "kumush-taroq", "shabnam-visol",
+  "visol-soati", "dutor-navosi", "tut-qogozi", "qosh-uzuk", "yelpigich-ziynat", "saodat-kaliti",
+  "sunnat-muqova", "sunnat-nasab", "sahar-ipagi", "sahar-maktubi", "umr-sahifalari", "ehtirom-kartasi"
+];
 
 /** Дизайны для клиентов: только принятые */
 export const DISPLAY_PRIORITY: readonly string[] = [
-  "saodat-kaliti", "kabutar-salom", "samarqand-kitob", "qosh-uzuk", "yelpigich-ziynat",
-  "ipak-romol", "marvarid-satr", "rishton-koshin", "dutor-navosi", "kumush-taroq",
-  "bodom-guli", "atirgul", "oltin-monogramma", "gulbog-sahifa", "shohona-baxmal",
-  "sunnat-muqova", "sunnat-nasab", "sahar-ipagi", "sahar-maktubi", "umr-sahifalari", "ehtirom-kartasi",
+  // Натуральные пилоты — первыми в своих тадбирах
+  "muhr", "ipak", "bog", "tong-dasturxon",
+  "oltin-monogramma", "ganch-peshtoq",
 ];
 export function catalogPosition(d: Pick<Design,"id"|"number">) {
   const i = DISPLAY_PRIORITY.indexOf(d.id);
   return i < 0 ? 1000 + d.number : i;
 }
+/** Все когда-либо принятые (каталог + скрытые 03.11): код живой, заказы на них открываются */
+/** Сняты из каталога после критика батча 3 (03.11.2026): 131 «Ислими варақ». Код и строка в БД остаются */
+export const HIDDEN_BATCH3: readonly string[] = ["islimi-varaq"];
+export const everAccepted = () => designs.filter((d) => ACCEPTED.has(d.id) || HIDDEN_03_11.includes(d.id) || HIDDEN_BATCH3.includes(d.id));
 export const activeDesigns = () => designs.filter((d) => ACCEPTED.has(d.id)).sort((a,b)=>catalogPosition(a)-catalogPosition(b));
 
 export function getDesign(id: string) {

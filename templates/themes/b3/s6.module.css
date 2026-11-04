@@ -1,0 +1,48 @@
+/* S6 «Китоб»: EB Garamond, страницы листаются вбок, корешок слева, колонтитул-номер снизу. */
+.root { --f-display: var(--b-garamond); padding-top: 58px; }
+
+.book { display: flex; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; }
+.book::-webkit-scrollbar { display: none; }
+.page { flex: 0 0 100%; scroll-snap-align: center; scroll-snap-stop: always; padding: 0 16px; display: flex; }
+.sheet { position: relative; flex: 1; min-height: calc(100svh - 150px); display: flex; flex-direction: column; justify-content: center; padding: 40px 22px 56px 30px; text-align: center; background: var(--c-card);
+  border: 1px solid color-mix(in srgb, var(--c-line) 70%, transparent);
+  box-shadow: inset 14px 0 18px -14px rgba(40, 30, 20, .28), 3px 3px 0 -1px var(--c-card), 3px 3px 0 0 color-mix(in srgb, var(--c-line) 70%, transparent), 6px 6px 0 -1px var(--c-card), 6px 6px 0 0 color-mix(in srgb, var(--c-line) 50%, transparent); }
+.folio { position: absolute; left: 0; right: 0; bottom: 18px; font-family: var(--f-display); font-style: italic; font-size: 16px; color: var(--c-accent); }
+
+/* титул */
+.title { display: flex; flex-direction: column; align-items: center; }
+.motif { width: 80px; color: var(--c-accent); margin-bottom: 18px; }
+.motif svg { display: block; width: 100%; height: auto; }
+.relation { font-size: 19px; }
+.names { margin-top: 6px; font-size: 52px; font-weight: 500; }
+.occasion { margin-top: 16px; padding: 6px 0; border-block: 1px solid color-mix(in srgb, var(--c-accent) 50%, transparent); font-family: var(--n-serif); font-size: 16px; letter-spacing: .26em; text-transform: uppercase; padding-left: .26em; color: var(--c-accent); }
+.date { margin-top: 12px; font-family: var(--f-display); font-style: italic; font-size: 21px; }
+.hint { margin-top: 34px; display: flex; align-items: center; gap: 10px; font-family: var(--n-serif); font-size: 16px; letter-spacing: .1em; opacity: .75; }
+.arrow { width: 10px; height: 10px; border-right: 1.5px solid currentColor; border-top: 1.5px solid currentColor; rotate: 45deg; animation: kitobHint 2.4s ease-in-out infinite; }
+@keyframes kitobHint { 0%, 100% { transform: translate3d(0, 0, 0); opacity: .5; } 50% { transform: translate3d(3px, -3px, 0); opacity: 1; } }
+
+/* текст: книжный абзац с красной строкой */
+.text { text-align: left; }
+.text h2 { font-family: var(--f-display); font-size: 27px; line-height: 1.2; color: var(--c-accent); text-align: center; text-wrap: balance; }
+.text p { margin-top: 16px; font-size: 18px; line-height: 1.75; text-wrap: pretty; hyphens: manual; }
+.text p { text-indent: 1.6em; }
+.text h2 + p::before { content: ""; display: block; width: 40px; height: 1px; margin: 0 auto 16px; background: var(--c-accent); text-indent: 0; }
+.textMotif { width: 56px; margin: 22px auto 0; color: var(--c-accent); }
+.textMotif svg { display: block; width: 100%; height: auto; }
+
+.flat { padding: 0; }
+.flatCount { padding: 36px 0 0; }
+
+/* навигация под книгой */
+.nav { margin-top: 18px; display: flex; align-items: center; justify-content: center; gap: 18px; }
+.nav button { width: 44px; height: 44px; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--c-accent) 50%, transparent); color: var(--c-accent); font-size: 24px; line-height: 1; background: transparent; }
+.nav button:disabled { opacity: .3; }
+.dots { display: flex; gap: 8px; }
+.dots i { width: 6px; height: 6px; border-radius: 50%; background: color-mix(in srgb, var(--c-ink) 25%, transparent); transition: transform .3s ease, background-color .3s ease; }
+.dots i[data-on="true"] { background: var(--c-accent); transform: scale(1.5); }
+
+.finale { padding-top: 10px; }
+.finMotif { width: 90px; margin: 0 auto; color: var(--c-accent); }
+.finMotif svg { display: block; width: 100%; height: auto; }
+
+@media (prefers-reduced-motion: reduce) { .arrow { animation: none; } }

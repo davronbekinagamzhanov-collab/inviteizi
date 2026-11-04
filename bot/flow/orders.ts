@@ -6,7 +6,7 @@ import type { Ctx, Deps, Result, Step } from "./types";
 import type { Lang, OrderRecord } from "@/lib/domain";
 import type { InlineButton } from "../tg";
 import { PRICES } from "@/templates/registry";
-import { t } from "@/texts/uz-cyrl";
+import { tPlain as t } from "@/texts/uz-cyrl";
 import { uz } from "@/texts/bot-uz";
 import { slugify } from "@/lib/slug";
 import {
@@ -27,10 +27,17 @@ import {
   send,
   txFor,
 } from "./util";
-import { getDesign } from "@/templates/registry";
+import { getDesign, isOnSale } from "@/templates/registry";
 import { rememberUpdate } from "../update";
 import { recordBotError, toEntry } from "../errors";
 import { creditPartnerSafely } from "./partners";
+import { kzToday } from "../calendar";
+
+/** Последний тадбир уже прошёл (по времени Казахстана): платить за такую ссылку бессмысленно — она сразу заглушка */
+function eventsPassed(c: Ctx, o: OrderRecord) {
+  const last = o.data.events.map((e) => e.date).filter(Boolean).sort().at(-1);
+  return !!last && last < kzToday(c.deps.now());
+}
 
 /**
  * Сообщение после уже записанного действия (заказ, чек, оплата): ошибка здесь не должна вызывать
@@ -74,8 +81,11 @@ export async function confirmDraft(c: Ctx): Promise<Result> {
       await send(c, old.status === "receipt_sent" ? c.tx.pay.waiting : c.tx.order.closed);
       return { done: true };
     }
+    // До оплаты можно сменить и дизайн, и формат (решение владельца 03.11.2026): новый формат — новая цена.
+    // Тот же дизайн и формат — прежняя согласованная сумма (даже если каталог потом переклассифицировал дизайн).
     const selected=getDesign(s.templateId);
-    if(s.format!==old.format||(s.templateId!==old.templateId&&(!selected||selected.format!==old.format||selected.occasion!==old.occasion))){
+    const unchanged=s.templateId===old.templateId&&s.format===old.format;
+    if(!unchanged&&(!selected||!isOnSale(selected.id)||selected.format!==s.format||selected.occasion!==old.occasion)){
       s.format=old.format;s.templateId=old.templateId;
       return {hint:c.tx.order.formatLocked};
     }
@@ -86,8 +96,8 @@ export async function confirmDraft(c: Ctx): Promise<Result> {
       data: preservedData,
       music,
       templateId: s.templateId,
-      // A saved order keeps its agreed amount; catalog changes must not reprice it.
-      format: s.format, amount: old.amount,
+      // Тот же формат — согласованная сумма (каталог её не меняет); другой формат — цена этого формата
+      format: s.format, amount: s.format === old.format ? old.amount : PRICES[s.format],
     });
     if (!o) {
       const current = await repo.getOrder(old.id);
@@ -99,7 +109,8 @@ export async function confirmDraft(c: Ctx): Promise<Result> {
   }
 
   const selected=getDesign(s.templateId);
-  if(!selected||selected.format!==s.format||selected.occasion!==data.occasion){
+  // Старый черновик мог запомнить дизайн, который потом сняли с каталога: купить его уже нельзя
+  if(!selected||!isOnSale(selected.id)||selected.format!==s.format||selected.occasion!==data.occasion){
     s.ret="review";
     await send(c,c.tx.order.catalogChanged);
     return {to:"fmt"};
@@ -172,12 +183,17 @@ export async function payOrder(c: Ctx, n: number): Promise<Result> {
     await send(c, c.tx.pay.waiting);
     return { done: true };
   }
+  if (eventsPassed(c, o)) {
+    await send(c, c.tx.pay.eventPassed, inline(orderButtons(c, o).filter((r) => !r.some((b) => "data" in b && b.data.startsWith("pay:")))));
+    return { done: true };
+  }
   await c.deps.repo.transition(o.id, PAYABLE_STATUSES, "awaiting_payment");
   const env = c.deps.env;
   const card=env.paymentCardNumber?.trim();
   const paymentRows:InlineButton[][]=[[{text:c.tx.pay.copy,copy:env.kaspiPhone.replace(/[^\d+]/g,"")}]];
   if(card)paymentRows.push([{text:c.tx.pay.copyCard,copy:card}]);
-  paymentRows.push([{text:c.tx.pay.sendReceipt,data:`rcpt:${o.number}`}]);
+  // Сумма в кнопке: если до чека сменили формат (новая цена), старая кнопка снова покажет реквизиты
+  paymentRows.push([{text:c.tx.pay.sendReceipt,data:`rcpt:${o.number}:${o.amount}`}]);
   await send(
     c,
     c.tx.pay.info(price(o.amount), env.kaspiPhone, env.kaspiName, o.number)+(card?"\n\n"+c.tx.pay.card(card):""),
@@ -189,7 +205,7 @@ export async function payOrder(c: Ctx, n: number): Promise<Result> {
 }
 
 /** «Чекни юбориш» / «Чекни қайта юбориш» */
-export async function askReceipt(c: Ctx, n: number): Promise<Result> {
+export async function askReceipt(c: Ctx, n: number, shownAmount?: number): Promise<Result> {
   const o = await ownOrder(c, n);
   if (!o) {
     await send(c, c.tx.order.notFound);
@@ -203,6 +219,12 @@ export async function askReceipt(c: Ctx, n: number): Promise<Result> {
     await send(c, c.tx.pay.waiting);
     return { done: true };
   }
+  if (eventsPassed(c, o)) {
+    await send(c, c.tx.pay.eventPassed, inline(orderButtons(c, o).filter((r) => !r.some((b) => "data" in b && b.data.startsWith("pay:")))));
+    return { done: true };
+  }
+  // Клиент видел реквизиты с другой суммой (цена сменилась) — показываем актуальные
+  if (shownAmount !== undefined && shownAmount !== o.amount) return payOrder(c, n);
   c.s = { q: c.s.q, orderId: o.id };
   return { enter: "receipt" };
 }
@@ -421,7 +443,7 @@ export async function reject(c: Ctx, n: number, code: string) {
   await c.deps.tg.editMessageReplyMarkup(c.chatId, c.u.messageId, null).catch(() => {});
   const tx = txFor(await langOf(c.deps, o.userId).catch(() => "uz" as const));
   await sendAfterCommit(c, o.userId, tx.pay.rejected(n, tx.admin.reasons[code]), {
-    markup: inline([[{ text: tx.pay.resend, data: `rcpt:${n}` }], [{ text: tx.contact, url: ownerUrl(c) }]]),
+    markup: inline([[{ text: tx.pay.resend, data: `rcpt:${n}:${o.amount}` }], [{ text: tx.contact, url: ownerUrl(c) }]]),
   });
   await sendAfterCommit(c, c.chatId, c.tx.admin.rejectedDone(n, c.tx.admin.reasons[code]));
 }

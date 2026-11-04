@@ -1,0 +1,4 @@
+/* «Умр китоби»: корешок кожаного цвета, номер страницы — кирпич */
+.sheet { border-left: 6px solid var(--c-accent); }
+.names { font-style: italic; font-weight: 400; }
+.motif { width: 64px; }

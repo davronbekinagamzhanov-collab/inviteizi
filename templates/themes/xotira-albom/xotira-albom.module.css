@@ -1,0 +1,6 @@
+/* «Хотира альбом»: горчичная лента, без главного полароида — фото идут лентой */
+.root { --tape: color-mix(in srgb, var(--mustard) 70%, transparent); background-image: repeating-linear-gradient(0deg, color-mix(in srgb, var(--c-line) 22%, transparent) 0 1px, transparent 1px 4px), repeating-linear-gradient(90deg, color-mix(in srgb, var(--c-line) 16%, transparent) 0 1px, transparent 1px 5px); }
+.names { font-weight: 400; letter-spacing: 0; }
+.occasion { font-style: normal; font-size: 16px; letter-spacing: .24em; text-transform: uppercase; padding-left: .24em; }
+.corner { background: var(--mustard); }
+.finMotif { width: 70px; }

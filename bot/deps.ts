@@ -7,8 +7,9 @@ import type { Deps } from "./flow/types";
 import { createTg } from "./telegram";
 import { createPgRepo } from "./repo-pg";
 import { copyOwnMusic } from "./own-music";
+import { copyClientPhoto, photoPath } from "./own-photo";
 import { env } from "@/lib/env";
-import { uploadFile } from "@/lib/storage";
+import { removeFiles, uploadFile } from "@/lib/storage";
 import { createHmac } from "node:crypto";
 
 let cached: Deps | undefined;
@@ -38,6 +39,18 @@ export function createBotDeps(): Deps {
         fetch,
         upload: (ext, bytes, contentType, signal) => uploadFile("music", `own/${objectId}.${ext}`, bytes, contentType, signal),
       });
+    },
+    /** Фото клиента: Telegram → WebP → бакет photos. Имя файла непредсказуемое, без id клиента */
+    async savePhoto(fileId) {
+      const objectId = createHmac("sha256", token).update("inviteizi:client-photo:v1\0").update(fileId).digest("hex");
+      return copyClientPhoto(fileId, {
+        getFileUrl: (id) => tg.getFileUrl(id),
+        fetch,
+        upload: (bytes, signal) => uploadFile("photos", `client/${objectId}.webp`, bytes, "image/webp", signal),
+      });
+    },
+    async removePhotos(urls) {
+      await removeFiles("photos", urls.map(photoPath).filter((p): p is string => Boolean(p)));
     },
   };
   return cached;

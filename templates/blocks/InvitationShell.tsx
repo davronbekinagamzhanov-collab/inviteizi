@@ -5,8 +5,9 @@ import { useEffect, type CSSProperties, type ReactNode } from "react";
 import type { Invitation } from "./useInvitation";
 import { MusicButton } from "./MusicButton";
 import { Watermark } from "./Watermark";
-import { BrandBadge, BrandFooter } from "./Brand";
-import { Rsvp } from "./Rsvp";
+import { BrandBadge, BrandFooter, type PhotoCredit } from "./Brand";
+import { SoftBrandBadge, SoftBrandFooter } from "./BrandSoft";
+import { Rsvp, type RsvpLook } from "./Rsvp";
 
 /**
  * Оболочка любого дизайна: колонка шириной телефона, аудио, кнопка ▶/⏸, водяной знак «НАМУНА».
@@ -20,7 +21,13 @@ export function InvitationShell({
   backdropClassName = "bg-paper",
   fontsClassName = "",
   musicButtonClassName,
+  musicVariant,
   pageColor,
+  rsvpLook,
+  credits,
+  creditClassName,
+  epilogue,
+  brandVariant = "default",
   children,
 }: {
   inv: Invitation;
@@ -30,8 +37,19 @@ export function InvitationShell({
   /** Классы next/font дизайна: должны стоять там же, где style, иначе --d-* не увидят шрифты */
   fontsClassName?: string;
   musicButtonClassName?: string;
+  /** Вид кнопки музыки: soft — круглая с линейной иконкой (натуральные дизайны) */
+  musicVariant?: "default" | "soft";
   /** Цвет за краями страницы (виден, когда телефон «пружинит» при листании) */
   pageColor?: string;
+  /** Форма «Келасизми?» в цветах дизайна (нет — прежняя карточка) */
+  rsvpLook?: RsvpLook;
+  /** Авторы фото дизайна: строка «Сурат: …» внизу */
+  credits?: PhotoCredit[];
+  creditClassName?: string;
+  /** Блок после формы ответов (подпись семьи), перед бейджем */
+  epilogue?: ReactNode;
+  /** "soft" — плашки InviteIZI в цветах дизайна (только натуральные дизайны) */
+  brandVariant?: "default" | "soft";
   children: ReactNode;
 }) {
   useEffect(() => {
@@ -55,18 +73,29 @@ export function InvitationShell({
 
           {children}
 
-          {inv.data.rsvpSlug && <Rsvp slug={inv.data.rsvpSlug} preview={inv.mode === "demo"} />}
-          <BrandFooter />
+          {inv.data.rsvpSlug && <Rsvp slug={inv.data.rsvpSlug} preview={inv.mode === "demo"} look={rsvpLook} />}
+          {epilogue}
+          {brandVariant === "soft" ? (
+            <SoftBrandFooter credits={credits} />
+          ) : (
+            <BrandFooter credits={credits} creditClassName={creditClassName} />
+          )}
 
           {inv.hasMusic && inv.opened && (
             <MusicButton
               playing={inv.playing}
               onToggle={inv.toggleMusic}
               className={musicButtonClassName}
+              variant={musicVariant}
               raised={inv.mode === "demo"}
             />
           )}
-          {inv.opened && <BrandBadge raised={inv.mode === "demo"} />}
+          {inv.opened &&
+            (brandVariant === "soft" ? (
+              <SoftBrandBadge />
+            ) : (
+              <BrandBadge raised={inv.mode === "demo"} />
+            ))}
           {inv.mode === "demo" && <Watermark />}
         </div>
       </div>

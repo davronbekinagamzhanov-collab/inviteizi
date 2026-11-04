@@ -1,3 +1,4 @@
+import { glueData } from "@/lib/typography";
 import { notFound } from "next/navigation";
 import { demoMusicUrl } from "@/lib/music";
 import { designs, existingArt, getDesign } from "@/templates/registry";
@@ -18,5 +19,5 @@ export default async function DemoPage({ params }: PageProps<"/demo/[template]">
   if (!design) notFound();
 
   const { default: Design } = await design.load();
-  return <><DemoTracker /><Design data={{ ...design.sample, musicUrl: demoMusicUrl(design.occasion) }} mode="full" art={existingArt(design)} /></>;
+  return <><DemoTracker /><Design data={glueData({ ...design.sample, musicUrl: demoMusicUrl(design.occasion) })} mode="full" art={existingArt(design)} /></>;
 }

@@ -4,6 +4,7 @@
  *  - клиенту: пропал на оплате больше 3 часов — одно вежливое напоминание;
  *  - архив: прошёл expiresAt (последний тадбир + 30 дней) → archived (ссылка показывает заглушку).
  *  - хозяину: вечером сводка новых ответов гостей (один раз в день и только если они есть).
+ *  - фото клиента: удаляются через 30 дней после конца приглашения (expiresAt + 30 дней).
  * Каждое напоминание — одна попытка: если пользователь заблокировал бота, повторять не будем.
  */
 import type { Deps } from "./flow/types";
@@ -11,8 +12,10 @@ import { adminCard, decisionButtons } from "./flow/orders";
 import { inline, pageUrl, price, txFor } from "./flow/util";
 import { creditPartner } from "./flow/partners";
 import { rsvpTotals } from "@/lib/rsvp";
+import { expiresAtOf } from "@/lib/orders";
+import { PHOTO_KEEP_AFTER_EXPIRY_MS } from "./own-photo";
 
-export type CronResult = { adminReminded: number; clientReminded: number; archived: number; rsvpDigests: number; errors: number };
+export type CronResult = { adminReminded: number; clientReminded: number; archived: number; rsvpDigests: number; photosRemoved: number; errors: number };
 
 const MIN = 60_000;
 export const ADMIN_REMIND_AFTER_MIN = 30;
@@ -45,10 +48,24 @@ async function sendRsvpDigests(deps: Deps, now: Date, r: CronResult) {
   }
 }
 
+const ALL_STATUSES = ["draft", "preview", "awaiting_payment", "receipt_sent", "active", "archived", "rejected"] as const;
+
+async function removeOldPhotos(deps: Deps, now: Date, r: CronResult) {
+  if (!deps.removePhotos) return;
+  for (const o of await deps.repo.listOrdersByStatus([...ALL_STATUSES])) {
+    const photos = o.data.photos;
+    const end = expiresAtOf(o);
+    if (!photos?.length || !end || end.getTime() + PHOTO_KEEP_AFTER_EXPIRY_MS > now.getTime()) continue;
+    await deps.removePhotos(photos);
+    await deps.repo.updateOrder(o.id, { data: { ...o.data, photos: [] } });
+    r.photosRemoved++;
+  }
+}
+
 export async function runCron(deps: Deps): Promise<CronResult> {
   const { repo, tg } = deps;
   const now = deps.now();
-  const r: CronResult = { adminReminded: 0, clientReminded: 0, archived: 0, rsvpDigests: 0, errors: 0 };
+  const r: CronResult = { adminReminded: 0, clientReminded: 0, archived: 0, rsvpDigests: 0, photosRemoved: 0, errors: 0 };
   const ctx = { deps };
 
   // ── Админам: чек ждёт ──
@@ -93,6 +110,14 @@ export async function runCron(deps: Deps): Promise<CronResult> {
   // ── Архив ──
   for (const o of await repo.listOrdersByStatus(["active"])) {
     if (o.expiresAt && o.expiresAt <= now && (await repo.transition(o.id, ["active"], "archived"))) r.archived++;
+  }
+
+  // ── Фото клиента: через 30 дней после того, как ссылка закрылась ──
+  try {
+    await removeOldPhotos(deps, now, r);
+  } catch (e) {
+    r.errors++;
+    console.error("cron photos", e instanceof Error ? e.name : "Error");
   }
 
   // ── Партнёры: оплаты, которые не начислились сразу (сбой в момент подтверждения) ──

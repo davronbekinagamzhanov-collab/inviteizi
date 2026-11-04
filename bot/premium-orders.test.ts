@@ -1,3 +1,4 @@
+import {useHistoricalCatalog} from './testing/historical';
 import {describe,it,expect} from 'vitest';
 import {Sim,ADMIN} from './testing/sim';
 import {nikohOrder,nikohToReview,startUz} from './testing/paths';
@@ -8,6 +9,7 @@ import {usesLegacyDesign} from '@/templates/order-design';
 import {invitationData,pageMode} from '@/lib/orders';
 const revised=['kabutar-salom','yelpigich-ziynat','samarqand-kitob','qosh-uzuk','saodat-kaliti','ipak-romol','rishton-koshin','marvarid-satr','dutor-navosi','kumush-taroq'];
 describe('pinned premium order revision',()=>{
+ useHistoricalCatalog();
  for(const [i,id] of revised.entries())it(`${id}: new order survives edit, payment and page data`,async()=>{
   const s=new Sim(),user=950000+i,d=getDesign(id)!;
   await nikohToReview(s,user,undefined,d.format);
@@ -37,13 +39,14 @@ describe('one display order across web and bot',()=>{
 });
 
 describe('catalog promises the pinned appearance when an older unpaid order is edited',()=>{
+ useHistoricalCatalog();
  it('uses original cover/demo for a historical order and current ones for a new order',async()=>{
   const sim=new Sim();await startUz(sim,960100);const d=getDesign('kabutar-salom')!;
   const old=await sim.repo.createOrder({userId:960100,occasion:'nikoh',format:'animated',templateId:d.id,data:{...d.sample},music:{kind:'none'},amount:4321,slugBase:'old-presentation',status:'preview'});
-  await sim.callback(960100,`edit:${old.number}`,1);await sim.click(960100,uz.review.editDesign);
+  await sim.callback(960100,`edit:${old.number}`,1);await sim.click(960100,uz.review.editDesign);await sim.click(960100,new RegExp(uz.format.names.animated));
   expect(sim.last(960100).media).toContain('/covers/legacy/kabutar-salom.jpg');
   expect(JSON.stringify(sim.last(960100).markup)).toContain('/demo/kabutar-salom/legacy');
-  const fresh=await nikohOrder(sim,960101);await sim.callback(960101,`edit:${fresh.number}`,1);await sim.click(960101,uz.review.editDesign);
+  const fresh=await nikohOrder(sim,960101);await sim.callback(960101,`edit:${fresh.number}`,1);await sim.click(960101,uz.review.editDesign);await sim.click(960101,new RegExp(uz.format.names.animated));
   expect(sim.last(960101).media).not.toContain('/covers/legacy/');
   expect(JSON.stringify(sim.last(960101).markup)).not.toContain('/legacy');
  });

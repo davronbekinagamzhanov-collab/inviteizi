@@ -107,7 +107,8 @@ for (const vp of VIEWPORTS) {
     for (const el of document.querySelectorAll("body *")) {
       const s = getComputedStyle(el);
       if (s.position === "fixed" || s.visibility === "hidden" || s.display === "none") continue;
-      if (el.closest("[aria-hidden='true'], [data-decor]")) continue;
+      // [data-hscroll] — лента, которую листают вбок: карточки за краем экрана задуманы
+      if (el.closest("[aria-hidden='true'], [data-decor], [data-hscroll]")) continue;
       const b = el.getBoundingClientRect();
       if (b.width === 0 || b.height === 0) continue;
       if ((b.right > w + 1 || b.left < -1) && (el.textContent ?? "").trim().length > 0) {
@@ -121,7 +122,8 @@ for (const vp of VIEWPORTS) {
   r.smallText = await page.evaluate(() => {
     const out = [];
     for (const el of document.querySelectorAll("p, span, li, div, a, h1, h2, h3")) {
-      if (el.closest("[data-watermark]")) continue;
+      // подпись авторов фото — служебная сноска, её мелкий кегль задуман
+      if (el.closest("[data-watermark], [data-photo-credits]")) continue;
       const own = [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join("").trim();
       if (own.length < 20) continue;
       const fs = parseFloat(getComputedStyle(el).fontSize);

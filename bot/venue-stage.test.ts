@@ -135,9 +135,9 @@ describe("optional payment card and immutable existing amounts",()=>{
     await s.photo(1,"receipt");await s.callback(ADMIN,`ok:${o.number}`,1);await s.callback(ADMIN,`ok:${o.number}`,1);
     expect((await s.repo.analytics(ADMIN,"all",s.clock)).revenue).toBe(o.amount);
   });
-  it("changing tariff or design cannot reprice a saved order, then paid edits remain closed",async()=>{
+  it("same-format design change keeps the agreed amount, then paid edits remain closed",async()=>{
     const s=new Sim(),o=await nikohOrder(s,1);await s.repo.updateOrder(o.id,{amount:10000});
-    await s.callback(1,`edit:${o.number}`,1);await s.click(1,uz.review.editDesign);await s.click(1,"▶");await s.click(1,uz.catalog.buy);
+    await s.callback(1,`edit:${o.number}`,1);await s.click(1,uz.review.editDesign);await s.click(1,new RegExp(uz.format.names.animated));await s.click(1,"▶");await s.click(1,uz.catalog.buy);
     expect(s.lastText(1)).toContain("10 000 ₸");await s.click(1,uz.review.confirm);
     expect(await s.repo.getOrder(o.id)).toMatchObject({format:"animated",amount:10000,slug:o.slug});
     await s.callback(1,`pay:${o.number}`,1);expect(s.lastText(1)).toContain("10 000 ₸");await s.photo(1,"receipt");await s.callback(ADMIN,`ok:${o.number}`,1);await s.callback(1,`edit:${o.number}`,1);

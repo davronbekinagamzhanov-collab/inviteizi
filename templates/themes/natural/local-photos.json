@@ -1,0 +1,59 @@
+{
+  "ipak-silk-video": {
+    "src": "/art/natural/ipak-silk-video.mp4",
+    "poster": "/art/natural/ipak-silk-video-poster.webp",
+    "author": "GreenCardShow",
+    "license": "Pixabay Content License",
+    "licenseUrl": "https://pixabay.com/service/license-summary/",
+    "source": "https://pixabay.com/videos/id-14534/"
+  },
+  "sprig": {
+    "src": "/art/natural/sprig.webp",
+    "author": "SYG_Anime",
+    "license": "Pixabay Content License",
+    "licenseUrl": "https://pixabay.com/service/license-summary/",
+    "source": "https://pixabay.com/illustrations/leaves-plant-watercolor-eucalyptus-5672036/"
+  },
+  "eucalyptus": {
+    "src": "/art/natural/eucalyptus.webp",
+    "author": "PhuongLucky",
+    "license": "Pixabay Content License",
+    "licenseUrl": "https://pixabay.com/service/license-summary/",
+    "source": "https://pixabay.com/vectors/wedding-floral-flower-summer-7129271/"
+  },
+  "garland": {
+    "src": "/art/natural/garland.webp",
+    "author": "PhuongLucky",
+    "license": "Pixabay Content License",
+    "licenseUrl": "https://pixabay.com/service/license-summary/",
+    "source": "https://pixabay.com/vectors/frame-copy-space-design-decorate-6626904/"
+  },
+  "nahorgi-samarkand-a": {
+    "src": "/art/natural/nahorgi-samarkand-a.webp",
+    "author": "xusenru",
+    "license": "Pixabay Content License",
+    "licenseUrl": "https://pixabay.com/service/license-summary/",
+    "source": "https://pixabay.com/photos/samarkand-architecture-registan-9780493/"
+  },
+  "nahorgi-samarkand-b": {
+    "src": "/art/natural/nahorgi-samarkand-b.webp",
+    "author": "xusenru",
+    "license": "Pixabay Content License",
+    "licenseUrl": "https://pixabay.com/service/license-summary/",
+    "source": "https://pixabay.com/photos/samarkand-architecture-registan-9780503/"
+  },
+  "nahorgi-plov-white": {
+    "src": "/art/natural/nahorgi-plov-white.webp",
+    "author": "sergey_kim1992",
+    "license": "Pixabay Content License",
+    "licenseUrl": "https://pixabay.com/service/license-summary/",
+    "source": "https://pixabay.com/photos/food-pilaf-rice-beef-nutrition-3589513/"
+  },
+  "nahorgi-chekich": {
+    "src": "/art/natural/nahorgi-chekich.webp",
+    "author": "LoggaWiggler",
+    "license": "Pixabay Content License",
+    "licenseUrl": "https://pixabay.com/service/license-summary/",
+    "source": "https://pixabay.com/photos/bread-stamp-loaf-uzbekistan-198742/"
+  }
+}

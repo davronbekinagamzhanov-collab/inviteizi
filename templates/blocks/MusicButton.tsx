@@ -18,12 +18,16 @@ export function MusicButton({
   onToggle,
   className,
   raised = false,
+  variant = "default",
 }: {
   playing: boolean;
   onToggle: () => void;
   className?: string;
   raised?: boolean;
+  /** soft — круглая полупрозрачная кнопка с линейной иконкой (натуральные дизайны) */
+  variant?: "default" | "soft";
 }) {
+  if (variant === "soft") return <SoftMusicButton playing={playing} onToggle={onToggle} className={className} raised={raised} />;
   return (
     <motion.button
       type="button"
@@ -43,6 +47,44 @@ export function MusicButton({
         ) : (
           <path fill="currentColor" d="M8 5.5v13l11-6.5z" />
         )}
+      </svg>
+    </motion.button>
+  );
+}
+
+/**
+ * Круглая «мягкая» кнопка: полупрозрачный фон в цвет дизайна с размытием, тонкая обводка, линейная иконка динамика.
+ * Пока играет музыка, по тонкому кольцу медленно (7 с на оборот) идёт точка — как пластинка; на паузе стоит.
+ * className задаёт цвета: фон (bg-…/70), текст (text-…), обводку (ring-…).
+ */
+function SoftMusicButton({ playing, onToggle, className, raised }: { playing: boolean; onToggle: () => void; className?: string; raised: boolean }) {
+  return (
+    <motion.button
+      type="button"
+      onClick={onToggle}
+      aria-label={playing ? t.music.pause : t.music.play}
+      aria-pressed={playing}
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay: 0.3, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      data-music-button
+      className={`${BASE} ${raised ? BOTTOM_RAISED : BOTTOM} !h-[46px] !w-[46px] rounded-full ring-1 shadow-[0_6px_18px_-8px_rgba(40,30,20,.45)] backdrop-blur-md transition-transform duration-300 ${className ?? "bg-white/70 text-[#3a2a22] ring-black/10"}`}
+    >
+      <span
+        aria-hidden
+        className={`pointer-events-none absolute -inset-[5px] rounded-full border border-current opacity-30 transition-opacity duration-300 animate-[spin_7s_linear_infinite] motion-reduce:animate-none ${playing ? "" : "[animation-play-state:paused] !opacity-0"}`}
+      >
+        <span className="absolute left-1/2 top-[-2.5px] h-[4px] w-[4px] -translate-x-1/2 rounded-full bg-current" />
+      </span>
+      <svg viewBox="0 0 24 24" className="h-[21px] w-[21px]" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M4 9.5h3l4.5-3.8v12.6L7 14.5H4z" />
+        <g className={`transition-opacity duration-300 ${playing ? "opacity-100" : "opacity-0"}`}>
+          <path d="M15 9.2a4 4 0 0 1 0 5.6" />
+          <path d="M17.6 6.8a7.4 7.4 0 0 1 0 10.4" />
+        </g>
+        <g className={`transition-opacity duration-300 ${playing ? "opacity-0" : "opacity-100"}`}>
+          <path d="M15.5 9.5l5 5M20.5 9.5l-5 5" />
+        </g>
       </svg>
     </motion.button>
   );

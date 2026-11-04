@@ -2,7 +2,7 @@ import {describe,it,expect} from "vitest";
 import {readFileSync} from "node:fs";
 import {createHash} from "node:crypto";
 import sharp from "sharp";
-import {activeDesigns,designs,getDesign,longSample} from "./registry";
+import {everAccepted,designs,getDesign,longSample} from "./registry";
 import {t} from "@/texts/uz-cyrl";
 
 const batch=[
@@ -15,7 +15,7 @@ const batch=[
 
 describe("batch five catalog acceptance",()=>{
   it("adds exactly five identities while retaining all 25 earlier accepted designs",()=>{
-    const now=activeDesigns().filter(d=>d.number<=86);
+    const now=everAccepted().filter(d=>d.number<=86);
     expect(now).toHaveLength(30);expect(now.filter(d=>d.number<=81)).toHaveLength(25);
     expect(designs.filter(d=>d.number<=86)).toHaveLength(31);
     expect(now.filter(d=>d.number>81).map(d=>d.id).sort()).toEqual(batch.map(([id])=>id).sort());

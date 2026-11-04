@@ -1,0 +1,133 @@
+/* «Муҳр»: один цвет — пыльно-голубой — на холодной бумаге. Всё остальное — воздух и типографика */
+.page { background: var(--n-paper); color: var(--n-ink); font-family: var(--n-text); }
+
+/* ── Конверт на весь экран ──
+   Последовательность (≈2,4 с): печать трескается на две половинки → клапан складывается назад →
+   письмо выезжает вверх → конверт растворяется. Анимируются только transform и opacity. */
+.opening { position: fixed; inset: 0; z-index: 50; margin: 0 auto; max-width: 430px; width: 100%; overflow: hidden; perspective: 1400px; cursor: pointer; background: linear-gradient(180deg, #6f879d, #7b93a9); transition: opacity .45s ease 1.95s; }
+.opening[data-started="true"] { opacity: 0; }
+.letterCard { position: absolute; left: 8%; right: 8%; top: 14%; height: 52%; z-index: 1; display: flex; align-items: flex-start; justify-content: center; padding-top: 16%; background: #fbfbfa; border-radius: 6px; box-shadow: 0 10px 30px -18px rgba(20,30,40,.6); transition: transform .9s cubic-bezier(.22,1,.36,1) 1.05s; }
+.cardNames { display: flex; flex-direction: column; align-items: center; gap: 4px; font-family: var(--n-serif); text-transform: uppercase; letter-spacing: .2em; font-size: 15px; text-align: center; color: var(--n-ink); line-height: 1.4; }
+.cardAnd { font-size: 30px; color: var(--n-accent); text-transform: none; letter-spacing: 0; }
+.pocket { position: absolute; inset: 0; z-index: 3; background: linear-gradient(175deg, #a2b5c6 35%, #95aabc 75%, #8ea3b6); clip-path: polygon(0 34%, 50% 62%, 100% 34%, 100% 100%, 0 100%); }
+.flapWrap { position: absolute; inset: 0; z-index: 4; transform-origin: 50% 0; filter: drop-shadow(0 7px 9px rgba(25,38,52,.32)); transition: transform .85s cubic-bezier(.55,0,.25,1) .4s, opacity .5s ease .7s; }
+.flap { position: absolute; inset: 0; background: linear-gradient(180deg, #8098ae 0%, #758ea5 100%); clip-path: polygon(0 0, 100% 0, 100% 34%, 50% 66%, 0 34%); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+.flapRosette { margin-top: 15svh; width: 58px; height: 58px; color: #e6edf2; opacity: .55; transition: opacity .3s ease; }
+.flapMono { margin-top: 16px; display: flex; align-items: center; gap: 12px; font-family: var(--n-serif); font-size: 40px; font-weight: 300; letter-spacing: .04em; color: #eef2f5; transition: opacity .3s ease; }
+.flapMono i, .sealMono i, .heroMono i { display: block; width: 1px; height: 30px; background: currentColor; opacity: .7; }
+.seal { position: absolute; left: 50%; top: 66%; width: 92px; height: 92px; margin: -46px 0 0 -46px; z-index: 5; }
+.sealHalf { position: absolute; inset: 0; transition: transform .55s cubic-bezier(.3,0,.2,1), opacity .45s ease .1s; }
+.sealLeft { clip-path: polygon(0 0, 54% 0, 46% 30%, 54% 55%, 44% 100%, 0 100%); }
+.sealRight { clip-path: polygon(54% 0, 100% 0, 100% 100%, 44% 100%, 54% 55%, 46% 30%); }
+.wax { position: absolute; inset: 0; width: 100%; height: 100%; fill: url(#muhr-wax); filter: drop-shadow(0 3px 3px rgba(20,30,40,.35)); }
+.waxRing { fill: none; stroke: #5d7894; stroke-width: 2; }
+.sealMono { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 7px; font-family: var(--n-serif); font-size: 25px; font-weight: 600; color: #c9d6e2; text-shadow: 0 -1px 0 rgba(0,0,0,.35); transition: opacity .2s ease; }
+.sealMono i { height: 22px; }
+.openWord { position: absolute; left: 0; right: 0; bottom: 12svh; z-index: 6; text-align: center; font-size: 48px; color: #f3f4f2; transition: opacity .3s ease; }
+.opening[data-started="true"] .sealMono, .opening[data-started="true"] .openWord, .opening[data-started="true"] .flapMono { opacity: 0; }
+.opening[data-started="true"] .sealLeft { transform: translate3d(-18px, 10px, 0) rotate(-16deg); opacity: 0; }
+.opening[data-started="true"] .sealRight { transform: translate3d(18px, 12px, 0) rotate(14deg); opacity: 0; }
+.opening[data-started="true"] .flapWrap { transform: rotateX(-165deg); opacity: 0; }
+.opening[data-started="true"] .flapRosette { opacity: 0; }
+.opening[data-started="true"] .letterCard { transform: translate3d(0, -22%, 0) scale(1.04); }
+@media (prefers-reduced-motion: reduce) { .opening, .flapWrap, .letterCard, .sealHalf { transition: none; } }
+
+/* ── Первый экран ── */
+.hero { padding: 40px 24px 8px; }
+.kicker { font-family: var(--n-serif); font-size: 13px; letter-spacing: .3em; text-transform: uppercase; color: var(--n-accent); margin-left: 4px; }
+.heroArt { position: relative; margin: 22px 0 0 auto; width: 74%; }
+.arch { width: 100%; }
+.heroMono { position: absolute; left: -22%; bottom: 12%; display: flex; align-items: center; gap: 10px; font-family: var(--n-serif); font-size: 64px; font-weight: 300; color: var(--n-ink); line-height: 1; }
+.heroMono i { height: 54px; }
+.names { margin-top: 28px; display: flex; flex-direction: column; font-family: var(--n-serif); font-weight: 500; font-size: var(--fit, 46px); text-transform: uppercase; letter-spacing: .06em; line-height: 1.02; }
+.groom { align-self: flex-start; }
+.and { align-self: center; font-size: 54px; color: var(--n-accent); text-transform: none; margin: -2px 0 -6px; }
+.bride { align-self: flex-end; text-align: right; }
+.heroDate { margin-top: 18px; font-family: var(--n-serif); font-size: 18px; letter-spacing: .4em; color: var(--n-accent); }
+
+/* ── Письмо ── */
+.letter { position: relative; padding: 64px 28px 24px 28px; }
+.sprig { position: absolute; right: -18px; top: 18px; width: 120px; opacity: .85; transform: rotate(14deg); pointer-events: none; }
+.greeting { font-family: var(--n-serif); font-style: italic; font-size: 26px; line-height: 1.2; max-width: 74%; }
+.body { margin-top: 16px; font-size: 17px; line-height: 1.75; max-width: 34ch; }
+
+/* ── Дата ── */
+.dateBlock { padding: 56px 24px 24px; }
+.bigScript { display: block; font-size: 72px; color: var(--n-accent); }
+.right { text-align: right; }
+/* Календарь на всю ширину: рядом с медальоном на 360px дни слипались и кружок задевал соседние числа */
+.dateRow { margin-top: 10px; display: flex; flex-direction: column; align-items: center; gap: 18px; }
+.cal { width: 100%; }
+.dateNote { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; padding-bottom: 8px; font-family: var(--n-serif); font-size: 15px; }
+.dateNote strong { font-size: 34px; font-weight: 400; line-height: 1; }
+
+/* ── Программа ── */
+.program { padding: 56px 20px 8px; }
+.steps { list-style: none; margin: 18px 0 0; padding: 0; }
+.step { position: relative; display: flex; align-items: center; gap: 16px; padding-bottom: 64px; }
+.step:last-child { padding-bottom: 8px; }
+.step.right { flex-direction: row-reverse; text-align: right; }
+.stepPic { width: 88px; flex: none; }
+.stepText { min-width: 0; }
+.time { font-family: var(--n-serif); font-size: 44px; font-weight: 300; line-height: 1; font-variant-numeric: lining-nums; }
+.stepTitle { margin-top: 4px; font-family: var(--n-serif); font-size: 14px; letter-spacing: .22em; text-transform: uppercase; color: var(--n-accent); }
+.stepMeta { font-size: 15px; line-height: 1.5; opacity: .8; overflow-wrap: anywhere; }
+.arrow { position: absolute; bottom: 4px; width: 62px; height: 58px; color: var(--n-accent); }
+.step.left .arrow { left: 46%; }
+.step.right .arrow { right: 46%; }
+
+/* ── Манзил ── */
+.place { position: relative; display: grid; grid-template-columns: 44px 1fr; gap: 14px; padding: 72px 24px 24px 14px; }
+.placeTitle { align-self: start; font-size: 30px; color: var(--n-accent); }
+.placeList { display: flex; flex-direction: column; gap: 34px; border-left: 1px solid #c6d1db; padding-left: 20px; }
+.venue h3 { font-family: var(--n-serif); font-size: 26px; font-weight: 500; line-height: 1.15; overflow-wrap: anywhere; }
+.venue p { margin-top: 6px; font-size: 16px; line-height: 1.6; opacity: .85; overflow-wrap: anywhere; }
+.map { margin-top: 14px; border: 1px solid #4f6b85; color: #2c3b49; border-radius: 999px; padding: 11px 20px; background: transparent; }
+
+/* ── Семьи ── */
+.sides { display: grid; grid-template-columns: 1fr 1px 1fr; gap: 16px; margin: 64px 24px 0; text-align: center; }
+.sides > span { background: #c6d1db; }
+.sides p { font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--n-accent); }
+.sides h3 { margin-top: 8px; font-family: var(--n-serif); font-size: 21px; font-weight: 500; line-height: 1.2; overflow-wrap: anywhere; }
+
+/* ── Фото клиента ── */
+.gallery { display: grid; grid-template-columns: 1.1fr .9fr; gap: 14px; align-items: end; padding: 64px 24px 0; }
+.gallery.one { grid-template-columns: 1fr; padding: 64px 48px 0; }
+.galleryPic:nth-child(2) { margin-bottom: 48px; }
+
+/* ── Таймер ── */
+.count { padding: 72px 24px 8px; text-align: center; }
+.countLead { margin-top: 6px; font-family: var(--n-serif); font-size: 14px; letter-spacing: .26em; text-transform: uppercase; }
+.countGrid { margin-top: 22px; display: grid; grid-template-columns: repeat(4, 1fr); }
+.countBox { display: flex; flex-direction: column; align-items: center; border-left: 1px solid #c6d1db; }
+.countBox:first-child { border-left: 0; }
+.countNum { font-family: var(--n-serif); font-size: 46px; font-weight: 300; line-height: 1; }
+.countLabel { margin-top: 6px; font-size: 13px; opacity: .7; }
+.countToday { margin-top: 18px; font-family: var(--n-serif); font-size: 28px; }
+
+/* ── Подпись ── */
+.sign { padding: 56px 24px 0 28px; }
+.signLead { font-family: var(--n-serif); font-style: italic; font-size: 20px; }
+.signHosts { margin-top: 6px; font-family: var(--n-serif); font-size: 28px; font-weight: 500; text-transform: uppercase; letter-spacing: .08em; line-height: 1.15; overflow-wrap: anywhere; }
+.signScript { display: block; margin-top: 26px; line-height: 1.25; font-size: 54px; color: var(--n-accent); text-align: right; }
+
+/* Правки после ревью: монограмма — столбиком на поле у арки, не на фото */
+.heroMono { left: -27%; bottom: 6%; flex-direction: column; gap: 8px; font-size: 52px; }
+.heroMono i { width: 30px; height: 1px; }
+
+/* ── v2: круглые детали, разделитель, обработка фото ── */
+.page { --n-photo-filter: saturate(.86) contrast(.97) brightness(1.02); }
+.divider { margin: 46px auto 0; }
+.dateBlock { position: relative; }
+.rosette { position: absolute; right: -70px; top: 10px; width: 250px; height: 250px; color: var(--n-accent); opacity: .16; }
+.medal { flex: none; width: 104px; color: var(--n-accent); margin-bottom: 18px; }
+.medalDay { display: block; font-size: 13px; letter-spacing: .06em; color: var(--n-ink); }
+.medalTime { display: block; margin-top: 6px; font-family: var(--n-serif); font-size: 30px; font-weight: 400; color: var(--n-ink); font-variant-numeric: lining-nums; }
+.venue { border-radius: 14px; }
+/* v2 после критика: подпись хозяев без грубого капса, розетка на клапане заметнее */
+.signHosts { text-transform: none; font-weight: 400; letter-spacing: .02em; }
+.flapRosette { opacity: .75; }
+/* v3: сверху по центру бейдж InviteIZI — надпись тадбира ниже него */
+.hero { padding-top: 60px; }
+/* v3: на низких экранах арка чуть меньше — имена выше кнопки музыки */
+@media (max-height: 700px) { .heroArt { width: 62%; } }

@@ -1,0 +1,22 @@
+/* «Лола ва бодом»: белое с шалфеем, тюльпаны снизу, ветка бодома сверху, арка-пештоқ */
+.heroWrap img { filter: saturate(.62) brightness(1.05); }
+.heroWrap { min-height: 100svh; display: grid; place-items: center; overflow: hidden; }
+.branch { right: -10%; top: -10%; width: 52%; --r: 172deg; }
+.tulipLeft { left: -12%; bottom: -12%; width: 50%; --r: 14deg; }
+.tulipRight { right: -16%; bottom: -14%; width: 44%; --r: -10deg; }
+.card { position: relative; z-index: 2; width: min(74vw, 296px); aspect-ratio: .76; display: grid; place-items: center; padding-top: 16%; --f-name: 40px; }
+.card::after { content: ""; position: absolute; inset: 0; z-index: 0; background: #fff; clip-path: polygon(4.0% 96.0%, 4.0% 43.0%, 4.8% 37.3%, 7.2% 32.0%, 11.2% 26.9%, 16.5% 22.1%, 23.1% 17.6%, 31.0% 13.2%, 40.0% 9.0%, 50.0% 5.0%, 60.0% 9.0%, 69.0% 13.2%, 76.9% 17.6%, 83.5% 22.1%, 88.8% 26.9%, 92.8% 32.0%, 95.2% 37.3%, 96.0% 43.0%, 96.0% 96.0%); opacity: .94; }
+.card > div { z-index: 2; padding: 0 26px; }
+.star { position: absolute; left: 50%; top: -10px; z-index: 3; translate: -50% 0; background: var(--f-paper); color: var(--f-line); }
+.tap { bottom: auto; top: calc(50% + min(48vw, 195px) + 18px); }
+
+/* Блоки: зелёная тонкая линия слева у заголовков, программа и место — на белых листах */
+.letter h2 { font-family: var(--n-serif); font-weight: 500; }
+.title { font-size: 56px; }
+.count { margin: 56px 28px 0; padding: 0; }
+.countNum { color: var(--f-line); font-weight: 400; }
+.venue { border-radius: 18px; border-top: 3px solid color-mix(in srgb, var(--f-line) 55%, transparent); }
+.finale { min-height: 300px; }
+.finale img { filter: saturate(.55) brightness(1.06); opacity: .85; }
+.finale .finTulip { left: -22%; top: auto; bottom: -40px; width: 38%; --r: 8deg; }
+.finale .finBranch { right: -20%; top: -40px; width: 36%; --r: -20deg; }

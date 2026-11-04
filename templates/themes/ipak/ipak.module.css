@@ -1,0 +1,114 @@
+/* «Ипак»: бежевый журнал. Один тёплый цвет (мокко) на бумаге, крупный шрифт, много воздуха */
+.page { background: var(--n-paper); color: var(--n-ink); font-family: var(--n-text); }
+
+/* ── Шёлк ── */
+.opening { position: fixed; inset: 0; z-index: 50; margin: 0 auto; max-width: 430px; width: 100%; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 12svh; color: #fbf8f3; transition: transform 1s cubic-bezier(.7,0,.3,1), opacity .6s ease .5s; }
+.opening[data-started="true"] { transform: translateY(-100%); opacity: 0; }
+.video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.veil { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(40,32,26,.1) 30%, rgba(40,32,26,.55)); }
+.openText { position: absolute; top: 14svh; left: 0; right: 0; text-align: center; padding: 0 24px; }
+.openNames { display: flex; flex-direction: column; align-items: center; font-family: var(--n-serif); font-size: 34px; font-weight: 500; text-transform: uppercase; letter-spacing: .14em; line-height: 1.1; overflow-wrap: anywhere; }
+.openAnd { font-size: 46px; text-transform: none; letter-spacing: 0; margin: 2px 0 6px; }
+.openDate { margin-top: 18px; font-family: var(--n-serif); font-size: 16px; letter-spacing: .24em; text-transform: uppercase; }
+.play { position: relative; width: 74px; height: 74px; border-radius: 50%; border: 1px solid rgba(251,248,243,.85); color: #fbf8f3; display: flex; align-items: center; justify-content: center; background: rgba(251,248,243,.08); cursor: pointer; }
+.play svg { width: 26px; height: 26px; margin-left: 4px; }
+.openWord { position: relative; margin-top: 12px; font-size: 40px; }
+@media (prefers-reduced-motion: reduce) { .opening { transition: none; } }
+
+/* ── Имена разворотом ── */
+.spread { position: relative; padding: 56px 56px 20px 24px; }
+.vertical { position: absolute; right: 14px; top: 58px; writing-mode: vertical-rl; font-family: var(--n-serif); font-size: 13px; letter-spacing: .3em; text-transform: uppercase; color: var(--n-accent); }
+.names { display: flex; flex-direction: column; font-family: var(--n-serif); font-weight: 400; text-transform: uppercase; letter-spacing: .04em; line-height: 1; }
+.nameLine { display: block; width: 100%; font-size: var(--fit, 54px); }
+.brideRow { display: flex; align-items: baseline; gap: 12px; margin-top: 6px; padding-left: 14%; }
+.brideRow .nameLine { flex: 1; min-width: 0; }
+.and { flex: none; font-size: 50px; line-height: 1; color: var(--n-accent); text-transform: none; }
+.occasion { margin-top: 22px; font-family: var(--n-serif); font-style: italic; font-size: 20px; color: var(--n-accent); }
+
+/* ── Фото со смещением ── */
+.photos { position: relative; padding: 24px 0 0; height: 520px; }
+.photoBig { position: absolute; left: 20px; width: 64%; }
+.photoSmall { position: absolute; right: 18px; top: 250px; width: 44%; border: 6px solid var(--n-paper); }
+
+/* ── Приветствие ── */
+.letter { padding: 36px 26px 0 96px; }
+.letter h2 { font-family: var(--n-serif); font-size: 25px; font-weight: 500; line-height: 1.2; }
+.letter p { margin-top: 14px; font-size: 17px; line-height: 1.75; }
+
+/* ── Таймер: тонкие цифры ── */
+.count { margin: 72px 0 0; padding: 40px 24px 44px; background: #e6ddd0; text-align: center; }
+.countScript { display: block; font-size: 64px; color: var(--n-accent); }
+.countLead { margin-top: 4px; font-size: 15px; }
+.countGrid { margin-top: 26px; display: grid; grid-template-columns: repeat(4, 1fr); }
+.countBox { display: flex; flex-direction: column; align-items: center; }
+.countNum { font-family: var(--n-serif); font-size: 62px; font-weight: 300; line-height: .9; }
+.countLabel { margin-top: 8px; font-size: 13px; color: var(--n-accent); }
+.countToday { margin-top: 18px; font-family: var(--n-serif); font-size: 28px; }
+
+/* ── События ── */
+.events { padding: 64px 0 0; }
+.event { display: grid; grid-template-columns: auto 1fr; align-items: end; gap: 18px; padding: 0 24px 40px; }
+.eventAlt { grid-template-columns: 1fr auto; text-align: right; }
+.eventAlt .eventTime { order: 2; }
+/* На 360px время чуть меньше: колонке текста хватает места на длинную фамилию («Абдураҳмоновлар») без разрыва слова */
+.eventTime { font-family: var(--n-serif); font-size: clamp(68px, 20vw, 84px); font-weight: 300; line-height: .8; font-variant-numeric: lining-nums; letter-spacing: -.02em; }
+.eventText { min-width: 0; padding-bottom: 4px; }
+.eventText h3 { font-family: var(--n-serif); font-size: 15px; letter-spacing: .2em; text-transform: uppercase; color: var(--n-accent); }
+.eventText p { margin-top: 4px; font-size: 16px; line-height: 1.45; overflow-wrap: anywhere; }
+.eventVenue { font-style: italic; }
+.silk { margin: 8px 24px 0 64px; }
+
+/* ── Дата и место ── */
+.date, .place { padding: 64px 24px 0; }
+.sideScript { display: block; font-size: 66px; color: var(--n-accent); margin-bottom: 12px; }
+.cal { margin-left: auto; max-width: 300px; }
+.right { text-align: right; }
+.venue { margin-top: 26px; padding-top: 22px; border-top: 1px solid #cdbfae; }
+.venue:first-of-type { border-top: 0; padding-top: 0; }
+.venue h3 { font-family: var(--n-serif); font-size: 28px; font-weight: 500; line-height: 1.15; overflow-wrap: anywhere; }
+.venue p { margin-top: 6px; font-size: 16px; line-height: 1.6; overflow-wrap: anywhere; }
+.map { margin-top: 16px; border-radius: 999px; padding: 12px 22px; background: #3b322b; color: #efe8de; }
+
+/* ── Семьи ── */
+.sides { margin: 64px 24px 0; display: flex; flex-direction: column; gap: 14px; }
+.sides p { display: flex; justify-content: space-between; gap: 16px; align-items: baseline; font-family: var(--n-serif); font-size: 21px; font-weight: 500; border-bottom: 1px solid #cdbfae; padding-bottom: 10px; text-align: right; overflow-wrap: anywhere; }
+.sides span { flex: none; font-family: var(--n-text); font-size: 13px; font-weight: 400; color: var(--n-accent); text-align: left; }
+
+/* ── Подпись ── */
+.sign { padding: 64px 24px 0; text-align: center; }
+.signPhoto { width: 150px; margin: 0 auto 18px; }
+.signScript { display: block; font-size: 64px; color: var(--n-accent); }
+.signLead { margin-top: 8px; font-size: 16px; }
+.signHosts { margin-top: 6px; font-family: var(--n-serif); font-size: 30px; font-weight: 500; line-height: 1.15; overflow-wrap: anywhere; }
+
+/* ── v2: плавный шёлк, круглые формы, медальон ── */
+.page { --n-photo-filter: sepia(.08) saturate(.9) brightness(1.02); }
+.videoFade { opacity: 0; transition: opacity 1.4s cubic-bezier(.22,1,.36,1); }
+.videoOn { opacity: 1; }
+.openText > *, .play, .openWord { animation: silkIn 1.1s cubic-bezier(.22,1,.36,1) both; }
+.openText > :nth-child(2) { animation-delay: .25s; }
+.play { animation-delay: .5s; }
+.openWord { animation-delay: .65s; }
+@keyframes silkIn { from { opacity: 0; transform: translate3d(0, 14px, 0); } to { opacity: 1; transform: none; } }
+.play { transition: transform .3s cubic-bezier(.22,1,.36,1), background-color .3s ease; box-shadow: 0 8px 24px -10px rgba(0,0,0,.45); backdrop-filter: blur(6px); }
+.play:active { transform: scale(.94); }
+@media (prefers-reduced-motion: reduce) { .openText > *, .play, .openWord { animation: none; } .videoFade { transition: none; } }
+
+.photoSmall { border: 0; outline: 6px solid var(--n-paper); }
+.medal { position: absolute; left: 30px; top: 410px; width: 108px; background: var(--n-paper); color: var(--n-accent); box-shadow: 0 10px 26px -16px rgba(59,50,43,.5); }
+.medalDay { display: block; font-family: var(--n-serif); font-size: 44px; font-weight: 300; line-height: .9; color: var(--n-ink); font-variant-numeric: lining-nums; }
+.medalMonth { display: block; margin-top: 4px; font-size: 12px; letter-spacing: .22em; text-transform: uppercase; }
+
+.count { position: relative; overflow: hidden; border-radius: 0 0 46px 46px; }
+.countRosette { position: absolute; right: -90px; top: -60px; width: 300px; height: 300px; color: var(--n-accent); opacity: .14; }
+.countScript, .countLead, .count > div { position: relative; }
+.countBox { position: relative; }
+.countBox + .countBox::before { content: ""; position: absolute; left: 0; top: 14px; height: 34px; width: 1px; background: currentColor; opacity: .18; }
+.countLabel { letter-spacing: .06em; }
+.divider { margin: 56px auto 0; }
+.map { border-radius: 999px; }
+/* v2 после критика: вертикальная дата в одну колонку, кнопки карты — контур */
+.vertical { white-space: nowrap; }
+.map { background: transparent; color: #3b322b; border: 1px solid #3b322b; }
+/* v3: заголовок письма не заходит под кнопку музыки (справа 16px + 46px) */
+.letter h2 { padding-right: 56px; text-wrap: balance; }

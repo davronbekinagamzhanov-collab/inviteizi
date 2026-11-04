@@ -1,3 +1,4 @@
+import { glueData } from "@/lib/typography";
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
@@ -65,7 +66,9 @@ async function Invitation({ params }: { params: PageProps<"/[slug]">["params"] }
   if (!design) notFound();
 
   const { default: Design } = await loadOrderDesign(design, page.data.designVersion);
-  return <Design data={page.data} mode={page.mode} art={existingArt(design)} />;
+  // Фото клиента — только у дизайнов с clientPhotos (наҳорги ош — никогда): старые фото после смены дизайна не всплывают
+  const data = design.clientPhotos ? page.data : { ...page.data, photos: undefined };
+  return <Design data={glueData(data)} mode={page.mode} art={existingArt(design)} />;
 }
 
 /** Пока загружается заказ: тот же молочный фон, без мигания белым */

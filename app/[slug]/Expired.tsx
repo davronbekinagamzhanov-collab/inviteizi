@@ -5,8 +5,8 @@ import { t } from "@/texts/uz-cyrl";
 const display = localFont({src:[{path:"../../assets/fonts/google/cormorantgaramond/CormorantGaramond[wght].woff2",weight:"300.0 700.0",style:"normal"}],display:"swap",variable:"--font-expired-display"});
 const body = localFont({src:[{path:"../../assets/fonts/google/ptserif/PT_Serif-Web-Regular.woff2",weight:"400",style:"normal"}],display:"swap",variable:"--font-expired-body"});
 
-/** Заглушка после срока ссылки (последний тадбир + 30 дней) или для архивного заказа */
-export default function Expired() {
+/** Заглушка после срока ссылки (последний тадбир + 30 дней) или для архивного заказа; та же страница — для неверной ссылки */
+export default function Expired({ texts = t.invitationPage.expired }: { texts?: { title: string; body: string } }) {
   return (
     <main
       className={`${display.variable} ${body.variable} flex min-h-svh items-center justify-center bg-[#f7efe3] px-4 text-[#3b2a1e]`}
@@ -21,10 +21,10 @@ export default function Expired() {
           className="mt-8 text-[34px] leading-tight font-semibold text-balance"
           style={{ fontFamily: "var(--font-expired-display)" }}
         >
-          {t.invitationPage.expired.title}
+          {texts.title}
         </h1>
         <p className="mx-auto mt-5 max-w-[320px] text-[18px] leading-relaxed text-[#6f5a46] text-pretty">
-          {t.invitationPage.expired.body}
+          {texts.body}
         </p>
         <Ornament flip />
         <p className="mt-10 text-[13px] tracking-[0.12em] text-[#a87a28]">{t.invitationPage.expired.brand}</p>

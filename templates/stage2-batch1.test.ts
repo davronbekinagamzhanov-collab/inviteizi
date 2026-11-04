@@ -1,4 +1,4 @@
-import {describe,it,expect,vi} from "vitest";
+import {beforeAll,describe,it,expect,vi} from "vitest";
 import {createElement} from "react";
 import {renderToStaticMarkup} from "react-dom/server";
 import {getDesign,longSample} from "./registry";
@@ -8,6 +8,8 @@ import {VENUES} from "@/bot/venues";
 vi.mock("next/font/local",()=>({default:()=>({variable:"test-font"})}));
 const cases=[['zarhal-lavha','yubiley','animated'],['adras-nishon','sunnat','simple'],['mis-kafgir','nahorgi','simple'],['rayhon-sahari','nahorgi','scroll'],['visol-rishta','nikoh','animated'],['uzum-hovli','nikoh','scroll'],['sopol-navo','nikoh','scroll'],['girih-nur','nikoh','animated'],['siyoh-duo','nikoh','animated'],['kabutar-salom','nikoh','animated'],['shirin-tilak','nikoh','scroll'],['minor-satr','nikoh','scroll'],['kumush-taroq','nikoh','scroll'],['shabnam-visol','nikoh','animated'],['visol-soati','nikoh','animated'],['dutor-navosi','nikoh','scroll'],['tut-qogozi','nikoh','scroll'],['qosh-uzuk','nikoh','animated'],['yelpigich-ziynat','nikoh','animated'],['saodat-kaliti','nikoh','animated']] as const;
 describe("stage 2 real invitation components",()=>{
+  // Холодная загрузка шаблонов — в подготовку, а не в первый тест (см. nikoh-sides.test.ts)
+  beforeAll(()=>Promise.all(cases.map(([id])=>getDesign(id)!.load())),120_000);
   for(const [id,occasion,format] of cases)for(const long of [false,true])for(const mode of ["demo","full"] as const)it(`${id} ${long?'long':'normal'} ${mode}: all supplied fields and venue URLs`,async()=>{
     const d=getDesign(id)!;expect(d).toMatchObject({occasion,format,withPhoto:["kabutar-salom","dutor-navosi","yelpigich-ziynat"].includes(id)});
     const {default:Design}=await d.load(),source=structuredClone(long?longSample(d):d.sample);

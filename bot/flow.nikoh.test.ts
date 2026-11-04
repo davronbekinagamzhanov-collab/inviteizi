@@ -7,7 +7,8 @@ import { activeDesigns } from "@/templates/registry";
 
 const BASE = "https://inviteizi.vercel.app";
 const animatedNikohCount=activeDesigns().filter(d=>d.occasion==="nikoh"&&d.format==="animated").length;
-const simpleNikoh=activeDesigns().filter(d=>d.occasion==="nikoh"&&d.format==="simple");
+// Листание проверяем на самом большом каталоге никоҳ (Анимацияли)
+const simpleNikoh=activeDesigns().filter(d=>d.occasion==="nikoh"&&d.format==="animated");
 
 describe("весь путь никоҳ на ўзбекском", () => {
   it("от /start insta до ссылки на НАМУНА", async () => {
@@ -27,17 +28,17 @@ describe("весь путь никоҳ на ўзбекском", () => {
     // Каталог: одно сообщение с фото, листаем ▶ в том же сообщении
     const cat = sim.last(id);
     expect(cat.type).toBe("photo");
-    expect(cat.media).toBe(`${BASE}/covers/saodat-kaliti.jpg`);
-    expect(cat.text).toMatch(/^№106 · Саодат калити\nАнимацияли · 8.000 ₸$/);
+    expect(cat.media).toBe(`${BASE}/covers/muhr.jpg`);
+    expect(cat.text).toMatch(/^№113 · Муҳр\nАнимацияли · 8.000 ₸\n📷 Расмингизни қўйса бўлади$/);
     expect(buttonLabels(cat)).toEqual(expect.arrayContaining(["◀", `1/${animatedNikohCount}`, "▶", uz.catalog.demo, uz.catalog.buy]));
     expect(inlineButtons(cat).find((b) => b.text === uz.catalog.demo)).toEqual({
       text: uz.catalog.demo,
-      url: `${BASE}/demo/saodat-kaliti`, // каталог — чистое демо без надписи
+      url: `${BASE}/demo/muhr`, // каталог — чистое демо без надписи
     });
     await sim.click(id, "▶");
     expect(sim.last(id).id).toBe(cat.id);
-    expect(cat.media).toBe(`${BASE}/covers/kabutar-salom.jpg`);
-    expect(cat.text).toMatch(/^№96 · Кабутар саломи/);
+    expect(cat.media).toBe(`${BASE}/covers/ipak.jpg`);
+    expect(cat.text).toMatch(/^№114 · Ипак/);
     expect(buttonLabels(cat)).toContain(`2/${animatedNikohCount}`);
     await sim.click(id, uz.catalog.buy);
 
@@ -106,7 +107,7 @@ describe("весь путь никоҳ на ўзбекском", () => {
     // Сводка
     const review = sim.lastText(id);
     expect(review).toContain(uz.review.title);
-    expect(review).toContain("Дизайн: №96 Кабутар саломи");
+    expect(review).toContain("Дизайн: №114 Ипак");
     expect(review).toContain(uz.review.groom("Азиз"));
     expect(review).toContain(uz.review.bride("Мадина"));
     expect(review).toContain(uz.review.sideBride("Юсуповлар оиласи"));
@@ -134,7 +135,7 @@ describe("весь путь никоҳ на ўзбекском", () => {
       status: "preview",
       occasion: "nikoh",
       format: "animated",
-      templateId: "kabutar-salom",
+      templateId: "ipak",
       slug: "aziz-madina",
       amount: 8_000,
       music: { kind: "list", musicId: "yor-yor" },
@@ -186,7 +187,7 @@ describe("весь путь никоҳ на ўзбекском", () => {
     const sim = new Sim();
     await startUz(sim, 1);
     await sim.click(1, uz.category.nikoh);
-    await sim.click(1, /Оддий/);
+    await sim.click(1, new RegExp(uz.format.names.animated));
     const cat = sim.last(1);
     expect(buttonLabels(cat)).toContain(`1/${simpleNikoh.length}`);
     expect(cat.media).toBe(`${BASE}/covers/${simpleNikoh[0].id}.jpg`);

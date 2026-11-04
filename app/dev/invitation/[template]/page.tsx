@@ -1,3 +1,4 @@
+import { glueData } from "@/lib/typography";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { checkPagesAllowed } from "@/lib/check-pages";
@@ -14,7 +15,7 @@ async function Invitation({ params, searchParams }: Props) {
   const design = getDesign(template);
   if (!design) notFound();
   const { default: Design } = revision === "legacy" ? await loadOrderDesign(design) : await design.load();
-  return <Design data={{ ...(long ? longSample(design) : design.sample), noMusic: revision === "legacy", rsvp: revision === "legacy" ? false : true, rsvpSlug: revision === "legacy" ? undefined : "dev-preview" }} mode={mode === "demo" ? "demo" : "full"} art={existingArt(design)} />;
+  return <Design data={glueData({ ...(long ? longSample(design) : design.sample), noMusic: revision === "legacy", rsvp: revision === "legacy" ? false : true, rsvpSlug: revision === "legacy" ? undefined : "dev-preview" })} mode={mode === "demo" ? "demo" : "full"} art={existingArt(design)} />;
 }
 
 /**

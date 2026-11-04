@@ -1,3 +1,4 @@
+import { glueData } from "@/lib/typography";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { demoMusicUrl } from "@/lib/music";
@@ -26,5 +27,5 @@ async function LongPreview({params,searchParams}:PageProps<"/demo/[template]/lon
   if (!design) notFound();
 
   const { default: Design } = await design.load();
-  return <Design data={{ ...longSample(design), musicUrl: demoMusicUrl(design.occasion) }} mode={query.mode==="demo"?"demo":"full"} art={existingArt(design)} />;
+  return <Design data={glueData({ ...longSample(design), musicUrl: demoMusicUrl(design.occasion) })} mode={query.mode==="demo"?"demo":"full"} art={existingArt(design)} />;
 }
