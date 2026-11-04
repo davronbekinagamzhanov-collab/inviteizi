@@ -249,6 +249,11 @@ export const ACCEPTED = new Set([
   // список — HIDDEN_03_11 ниже. «anor-bogi» скрыт ещё 24.10.
 ]);
 
+/** Дизайн можно купить сейчас (новый заказ или смена дизайна до оплаты) */
+export function isOnSale(id: string) {
+  return ACCEPTED.has(id);
+}
+
 /** Скрыты из каталога сайта и бота 03.11.2026 (номера 31, 41, 62–69, 71–77, 79, 80, 82–86, 88–112). Не удалять: заказы на них открываются */
 export const HIDDEN_03_11: readonly string[] = [
   "oq-ot", "tonggi-qozon", "zarhal-eshik", "atlas-tolqin", "bodom-guli", "samarqand-kitob",

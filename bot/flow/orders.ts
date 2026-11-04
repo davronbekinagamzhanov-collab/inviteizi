@@ -6,7 +6,7 @@ import type { Ctx, Deps, Result, Step } from "./types";
 import type { Lang, OrderRecord } from "@/lib/domain";
 import type { InlineButton } from "../tg";
 import { PRICES } from "@/templates/registry";
-import { t } from "@/texts/uz-cyrl";
+import { tPlain as t } from "@/texts/uz-cyrl";
 import { uz } from "@/texts/bot-uz";
 import { slugify } from "@/lib/slug";
 import {
@@ -27,7 +27,7 @@ import {
   send,
   txFor,
 } from "./util";
-import { ACCEPTED, getDesign } from "@/templates/registry";
+import { getDesign, isOnSale } from "@/templates/registry";
 import { rememberUpdate } from "../update";
 import { recordBotError, toEntry } from "../errors";
 import { creditPartnerSafely } from "./partners";
@@ -85,7 +85,7 @@ export async function confirmDraft(c: Ctx): Promise<Result> {
     // Тот же дизайн и формат — прежняя согласованная сумма (даже если каталог потом переклассифицировал дизайн).
     const selected=getDesign(s.templateId);
     const unchanged=s.templateId===old.templateId&&s.format===old.format;
-    if(!unchanged&&(!selected||!ACCEPTED.has(selected.id)||selected.format!==s.format||selected.occasion!==old.occasion)){
+    if(!unchanged&&(!selected||!isOnSale(selected.id)||selected.format!==s.format||selected.occasion!==old.occasion)){
       s.format=old.format;s.templateId=old.templateId;
       return {hint:c.tx.order.formatLocked};
     }
@@ -110,7 +110,7 @@ export async function confirmDraft(c: Ctx): Promise<Result> {
 
   const selected=getDesign(s.templateId);
   // Старый черновик мог запомнить дизайн, который потом сняли с каталога: купить его уже нельзя
-  if(!selected||!ACCEPTED.has(selected.id)||selected.format!==s.format||selected.occasion!==data.occasion){
+  if(!selected||!isOnSale(selected.id)||selected.format!==s.format||selected.occasion!==data.occasion){
     s.ret="review";
     await send(c,c.tx.order.catalogChanged);
     return {to:"fmt"};

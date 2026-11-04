@@ -2,7 +2,7 @@
 import type { Ctx, Result, Step, StepId } from "./types";
 import { getDesign } from "@/templates/registry";
 import type { InlineButton } from "../tg";
-import { t } from "@/texts/uz-cyrl";
+import { tPlain as t } from "@/texts/uz-cyrl";
 import { designsFor, backRow, data, designLine, editOrSend, eventLabel, finalData, fmtDate, ib, inline, MAX_CUSTOM_TEXT, MAX_MUSIC_BYTES, priceNote, send } from "./util";
 import { confirmDraft } from "./orders";
 import { photoStepFor } from "./steps-photo";
@@ -191,9 +191,11 @@ async function summary(c: Ctx) {
   const r = c.tx.review;
   const d = finalData(c.s);
   const old = c.s.orderId ? await c.deps.repo.getOrder(c.s.orderId) : null;
-  // Выбрали другой формат в «✏️ Дизайн», но вернулись без покупки: формат остаётся тот, что у выбранного дизайна
+  // Выбрали другой формат в «✏️ Дизайн», но вернулись без покупки: дизайн прежний — и формат прежний
+  // (у старого заказа — формат из заказа: каталог мог потом переклассифицировать дизайн)
   const chosen = c.s.templateId ? getDesign(c.s.templateId) : undefined;
-  if (chosen && c.s.format !== chosen.format) c.s.format = chosen.format;
+  if (old && c.s.templateId === old.templateId) c.s.format = old.format;
+  else if (chosen && c.s.format !== chosen.format) c.s.format = chosen.format;
   // согласованная сумма — пока формат тот же; сменили формат до оплаты — цена нового формата
   const quoted = old?.userId === c.user.id && old.format === c.s.format ? old.amount : undefined;
   const lines = [r.title, "", designLine(c.tx, c.s.templateId ?? "", c.s.format ?? "animated", quoted)];

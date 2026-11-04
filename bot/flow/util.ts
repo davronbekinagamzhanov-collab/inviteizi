@@ -4,7 +4,7 @@ import type { Ctx, Draft, DraftData } from "./types";
 import type { InvitationData, InvitationEvent, Lang, Occasion, OrderRecord, OrderStatus } from "@/lib/domain";
 import type { EventKind } from "@/lib/types";
 import { getDesign, PRICES, FORMATS, type Format, activeDesigns } from "@/templates/registry";
-import { t } from "@/texts/uz-cyrl";
+import { tPlain as t } from "@/texts/uz-cyrl";
 import { uz, type BotTexts } from "@/texts/bot-uz";
 import { ru } from "@/texts/bot-ru";
 import { demoToken } from "@/lib/demo-tracking";

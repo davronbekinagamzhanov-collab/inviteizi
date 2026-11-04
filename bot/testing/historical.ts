@@ -10,6 +10,7 @@ export function useHistoricalCatalog() {
     vi.spyOn(registry, "activeDesigns").mockImplementation(() =>
       registry.everAccepted().sort((a, b) => registry.catalogPosition(a) - registry.catalogPosition(b)),
     );
+    vi.spyOn(registry, "isOnSale").mockImplementation((id) => registry.everAccepted().some((d) => d.id === id));
   });
   afterEach(() => vi.restoreAllMocks());
 }

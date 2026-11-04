@@ -353,7 +353,15 @@ async function onCallback(c: Ctx, d: string) {
     if (c.chatId !== c.user.id || !(await c.deps.repo.listFavorites(c.user.id)).includes(id)) return;
     const design = activeDesigns().find(d => d.id === id);
     if (!design) return;
-    return enter(c, "catalog", { occasion: design.occasion, format: design.format, catIdx: designsFor(design.occasion, design.format).findIndex(d => d.id === id) });
+    const catIdx = designsFor(design.occasion, design.format).findIndex(d => d.id === id);
+    // Идёт правка заказа или заполнение анкеты того же тадбира: меняем дизайн в ней, а не начинаем новый заказ
+    if (c.s.data && c.s.occasion === design.occasion && !c.s.paid) {
+      c.s = { ...c.s, format: design.format, catIdx, ret: c.s.ret ?? (c.s.orderId ? "review" : undefined), back: [] };
+      c.step = "catalog";
+      return ask(c);
+    }
+    if (c.s.orderId) return void (await send(c, c.tx.order.formatLocked));
+    return enter(c, "catalog", { occasion: design.occasion, format: design.format, catIdx });
   }
   const [kind, a, b] = d.split(":");
   const n = Number(a);

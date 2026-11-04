@@ -683,6 +683,8 @@ const raw = {
 
 /** Без висячих «ва / билан / учун» в конце и начале строк — склейка один раз для всех дизайнов */
 export const t: typeof raw = glueDeep(raw);
+/** Те же тексты без склейки — для бота (в Telegram перенос строк свой, неразрывные пробелы не нужны) */
+export const tPlain = raw;
 
 export type Texts = typeof t;
 

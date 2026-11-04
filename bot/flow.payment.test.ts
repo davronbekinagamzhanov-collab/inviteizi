@@ -27,7 +27,7 @@ describe("оплата Kaspi и чек", () => {
     expect(inlineButtons(m)).toEqual(
       expect.arrayContaining([
         { text: uz.pay.copy, copy: "+77000000000" },
-        { text: uz.pay.sendReceipt, data: `rcpt:${o.number}` },
+        { text: uz.pay.sendReceipt, data: `rcpt:${o.number}:${o.amount}` },
       ]),
     );
     expect((await sim.repo.getOrder(o.id))?.status).toBe("awaiting_payment");
