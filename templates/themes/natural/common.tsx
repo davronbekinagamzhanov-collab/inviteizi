@@ -13,14 +13,14 @@ import {
 } from "./photos";
 
 export type Stock =
-  | { kind: "unsplash"; slot: UnsplashSlot; w?: number; h?: number }
+  | { kind: "unsplash"; slot: UnsplashSlot; w?: number; h?: number; zoom?: number }
   | { kind: "local"; slot: LocalSlot };
 export type Shot = { src: string; client: boolean; credit?: PhotoCredit };
 
 export function stock(s: Stock): Shot {
   if (s.kind === "unsplash")
     return {
-      src: unsplashSrc(s.slot, s.w ?? 860, s.h),
+      src: unsplashSrc(s.slot, s.w ?? 860, s.h, s.zoom),
       client: false,
       credit: unsplashCredit(s.slot),
     };

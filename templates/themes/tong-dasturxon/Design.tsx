@@ -23,7 +23,8 @@ import {
   Script,
   tidy,
 } from "../natural/kit";
-import { creditsOf, shots, stock, venues } from "../natural/common";
+import { creditsOf, stock, venues } from "../natural/common";
+import { Choynak, Non } from "../b3/decor";
 import { melody } from "./melody";
 import s from "./tong.module.css";
 
@@ -45,16 +46,7 @@ const vars = {
 export default function TongDasturxon({ data, mode }: TemplateProps) {
   const inv = useInvitation(data, mode, { melody, opening: false });
   // Плов — всегда настоящий плов (это суть наҳорги ош); фото клиента на наҳорги ош не ставим (решение владельца 03.11)
-  const plov = stock({
-    kind: "unsplash",
-    slot: "dastur-plov-top",
-    w: 860,
-    h: 860,
-  });
-  const photos = shots(data, [
-    { kind: "local", slot: "dastur-non" },
-    { kind: "local", slot: "nahorgi-choy-bukhara" },
-  ]);
+  const plov = stock({ kind: "local", slot: "nahorgi-plov-white" });
   const w = inv.main.when;
   const morning = inv.program[0] ?? inv.main;
   const name = useFitWords<HTMLHeadingElement>(50);
@@ -81,7 +73,7 @@ export default function TongDasturxon({ data, mode }: TemplateProps) {
         radius: "16px",
         buttonRadius: "999px",
       }}
-      credits={creditsOf([plov, ...photos])}
+      credits={creditsOf([plov])}
       creditClassName="text-[#3a2a22]/60"
       epilogue={
         <Rise>
@@ -170,21 +162,10 @@ export default function TongDasturxon({ data, mode }: TemplateProps) {
         ))}
       </section>
 
-      <section className={s.pair}>
-        <Photo
-          src={photos[0].src}
-          client={photos[0].client}
-          shape="tornTop"
-          ratio="4 / 5"
-          className={s.non}
-        />
-        <Photo
-          src={photos[1].src}
-          client={photos[1].client}
-          shape="circle"
-          ratio="1 / 1"
-          className={s.tea}
-        />
+      {/* Нон и чой — тонкой линией: хороших фото без «колхоза» нет (04.11.2026), ждут съёмку Higgsfield */}
+      <section className={s.drawn} aria-hidden>
+        <Non className={s.drawnNon} />
+        <Choynak className={s.drawnTea} />
       </section>
 
       <Divider className={s.divider} />

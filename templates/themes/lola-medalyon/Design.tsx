@@ -12,7 +12,7 @@ import { melody } from "../bog/melody";
 import s from "./lola-medalyon.module.css";
 
 const skin = {
-  vars: palette({ paper: "#f2f3ec", ink: "#22281f", accent: "#4f6b3a", soft: "#e6eadb", line: "#c4cdb2", card: "#fbfcf7", muted: "#5a6252" }, { "--blush": "#c98b8b" }),
+  vars: palette({ paper: "#f2f3ec", ink: "#22281f", accent: "#4f6b3a", soft: "#e6eadb", line: "#c4cdb2", card: "#fbfcf7", muted: "#5a6252" }, { "--blush": "#c98b8b", "--n-photo-filter": "saturate(.72) sepia(.1) contrast(1.02) brightness(1.02)" }),
   pageColor: "#f2f3ec",
   backdrop: "bg-[#e6e9dd]",
   music: "bg-[#fbfcf7]/85 text-[#22281f] ring-[#4f6b3a]/30",
@@ -28,7 +28,7 @@ export default function LolaMedalyon(props: TemplateProps) {
       look={s}
       motif={<Lola />}
       photos={[
-        { kind: "unsplash", slot: "b3-blossom", w: 700 },
+        { kind: "unsplash", slot: "b3-blossom", w: 700, h: 700, zoom: 1.5 },
         { kind: "unsplash", slot: "s-bukhara-dome", w: 300 },
         { kind: "unsplash", slot: "s-khiva-minor", w: 300 },
       ]}

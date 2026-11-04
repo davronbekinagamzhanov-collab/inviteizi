@@ -57,7 +57,7 @@ export default function Ipak({ data, mode }: TemplateProps) {
   };
 
   const photos = shots(data, [
-    { kind: "unsplash", slot: "ipak-rings", w: 760, h: 1000 },
+    { kind: "unsplash", slot: "x-earrings", w: 760, h: 1000 },
     { kind: "unsplash", slot: "ipak-bouquet", w: 520, h: 650 },
     { kind: "unsplash", slot: "ipak-hands", w: 400, h: 400 },
   ]);

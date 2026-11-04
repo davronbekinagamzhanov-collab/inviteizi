@@ -212,7 +212,7 @@ for (const d of list) {
     await page.close();
   }
   const w = r.runs.w360;
-  console.log(`${d.id}: err ${r.errors.length}, cal ${w.calendars.map((c) => `${c.headPx}/${c.dayPx}px Δ${c.marked?.dx},${c.marked?.dy}`).join(" ")}, hang ${w.hanging.length + r.runs.long360.hanging.length}, cover ${w.covered.length}, blur ${w.blurry.length}, music ${w.music}`);
+  console.log(`${d.id}: err ${r.errors.length}, cal ${w.calendars.map((c) => `${c.headPx}/${c.dayPx}px Δ${c.marked?.dx},${c.marked?.dy} w${c.width}${c.width < 240 || c.gapAvg < 28 ? " ТЕСНО" : ""}`).join(" ")}, hang ${w.hanging.length + r.runs.long360.hanging.length}, cover ${w.covered.length}, blur ${w.blurry.length}, music ${w.music}`);
 }
 await browser.close();
 writeFileSync(`${OUT}/audit.json`, JSON.stringify(report, null, 1));

@@ -24,7 +24,8 @@
 .dayDisc { width: 176px; aspect-ratio: 1; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid var(--c-accent); box-shadow: 0 0 0 6px var(--c-paper), 0 0 0 7px color-mix(in srgb, var(--c-accent) 45%, transparent), 0 0 0 14px var(--c-paper), 0 0 0 15px color-mix(in srgb, var(--c-accent) 25%, transparent); background: var(--c-card); }
 .dayNum { font-family: var(--f-display); font-size: 72px; line-height: .9; font-weight: 600; color: var(--c-accent); font-variant-numeric: lining-nums; }
 .dayMonth { margin-top: 6px; font-family: var(--n-serif); font-style: italic; font-size: 18px; }
-.flat { padding-top: 30px; }
+/* width: 100% — иначе в колонке с align-items: center блок сжимался и календарь становился 149 px (числа слипались) */
+.flat { padding-top: 30px; width: 100%; }
 
 /* таймер в кружках */
 .countGrid { gap: 8px; }

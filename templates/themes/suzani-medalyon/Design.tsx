@@ -2,7 +2,7 @@
 /**
  * «Сузана медальон» (129) — никоҳ, Оддий, С ФОТО, структура S7 «Медальон».
  * Медальон с фото в кольце лепестков сузаны; гранатово-бордовую гамму не берём — шафран и маренго.
- * Запасные фото — вышитая сузана в медальоне, руки с кольцами над розами, каллы.
+ * Запасные фото — вышитая сузана в медальоне, пионы в саду, белые розы в вазе.
  */
 import type { TemplateProps } from "../types";
 import { Medalyon } from "../b3/s7-medalyon";
@@ -29,8 +29,8 @@ export default function SuzaniMedalyon(props: TemplateProps) {
       motif={<Suzani />}
       photos={[
         { kind: "unsplash", slot: "b3-suzani", w: 700 },
-        { kind: "unsplash", slot: "b3-hands-roses", w: 300 },
-        { kind: "unsplash", slot: "b3-callas", w: 300 },
+        { kind: "unsplash", slot: "w-peony-garden", w: 300 },
+        { kind: "unsplash", slot: "x-roses-vase", w: 300 },
       ]}
     />
   );

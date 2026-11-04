@@ -1,7 +1,7 @@
 "use client";
 /**
  * «Қозон тонги» (125) — наҳорги ош, Анимацияли, структура S1 «Фото-ҳикоя». Фото клиента на наҳорги ош не ставим (решение владельца 03.11).
- * Открытие — Самарқанд на рассвете на весь экран; рассказ в цветах дыма и углей. Дальше — чой в Хиве, ош на адрас-ляганде.
+ * Открытие — тёплая утренняя галерея Хивы; рассказ в цветах дыма и углей. Дальше — Самарқанд, ош на адрас-ляганде крупно.
  */
 import type { TemplateProps } from "../types";
 import { Hikoya } from "../b3/s1-hikoya";
@@ -27,9 +27,10 @@ export default function QozonTongi(props: TemplateProps) {
       look={s}
       motif={<Qozon />}
       photos={[
+        { kind: "unsplash", slot: "n-khiva-arcade", w: 860 },
         { kind: "local", slot: "nahorgi-samarkand-b" },
-        { kind: "unsplash", slot: "n-khiva-tea", w: 500 },
-        { kind: "unsplash", slot: "b3-plov", w: 900 },
+        // тот же плов, но крупно к центру: без лакированного стола и перца по краям
+        { kind: "unsplash", slot: "b3-plov", w: 860, h: 860, zoom: 1.9 },
       ]}
     />
   );

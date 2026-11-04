@@ -1,7 +1,7 @@
 "use client";
 /**
  * «Висол ҳикояси» (133) — никоҳ, Анимацияли, С ФОТО, структура S1 «Фото-ҳикоя».
- * Открытие — руки жениха и невесты (хна) на весь экран; рассказ в цвете тутового вина. Запасные фото — руки с хной, каллы, розы.
+ * Открытие — белый букет невесты на весь экран; рассказ в цвете тутового вина. Запасные фото — букет невесты, белая роза, фатин.
  */
 import type { TemplateProps } from "../types";
 import { Hikoya } from "../b3/s1-hikoya";
@@ -27,9 +27,9 @@ export default function VisolHikoya(props: TemplateProps) {
       look={s}
       motif={<Bodom />}
       photos={[
-        { kind: "unsplash", slot: "b3-hands-henna", w: 900 },
-        { kind: "unsplash", slot: "b3-callas", w: 500 },
-        { kind: "unsplash", slot: "b3-roses", w: 900 },
+        { kind: "unsplash", slot: "x-bouquet", w: 900 },
+        { kind: "unsplash", slot: "x-rose-one", w: 500 },
+        { kind: "unsplash", slot: "w-tulle", w: 900 },
       ]}
     />
   );

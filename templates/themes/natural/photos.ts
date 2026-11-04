@@ -7,10 +7,18 @@ export type LocalSlot = keyof typeof local;
 
 const UTM = "utm_source=inviteizi&utm_medium=referral";
 
-export function unsplashSrc(slot: UnsplashSlot, width = 860, height?: number) {
+// Запрашиваем в 1,5 раза больше заданной ширины: на телефоне @3x (430 px → 1290) фото не «мылится»
+const SHARP = 1.5;
+
+/** zoom > 1 — кадр «приближен» к центру (fp-z), чтобы убрать лишнее по краям (стол, посторонние предметы) */
+export function unsplashSrc(slot: UnsplashSlot, width = 860, height?: number, zoom?: number) {
   const p = unsplash[slot];
-  const size = height ? `&w=${width}&h=${height}&fit=crop&crop=entropy` : `&w=${width}`;
-  return `${p.raw}${size}&q=72&fm=webp&auto=format`;
+  const w = Math.min(2000, Math.round(width * SHARP));
+  const h = height && Math.round((height * w) / width);
+  const size = zoom
+    ? `&w=${w}&h=${h ?? w}&fit=crop&crop=focalpoint&fp-x=.5&fp-y=.5&fp-z=${zoom}`
+    : h ? `&w=${w}&h=${h}&fit=crop&crop=entropy` : `&w=${w}`;
+  return `${p.raw}${size}&q=75&fm=webp&auto=format`;
 }
 
 /** Подпись «Сурат: Имя / Unsplash» для низа страницы (ссылки с utm — правило Unsplash) */

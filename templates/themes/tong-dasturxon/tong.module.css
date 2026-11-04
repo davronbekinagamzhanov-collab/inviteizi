@@ -88,3 +88,7 @@
 @media (max-width: 380px) { .date { grid-template-columns: 88px 1fr; gap: 8px; padding-left: 16px; padding-right: 14px; } .medal { width: 86px; } .medal .dayNum { font-size: 40px; } .medal .weekday { font-size: 12px; } }
 /* v3: заголовок письма не заходит под кнопку музыки (справа 16px + 46px) */
 .letter h2 { padding-right: 56px; text-wrap: balance; }
+/* 04.11: вместо фото нона и чая — линейный рисунок на светлой карточке */
+.drawn { margin: 72px 24px 0; padding: 30px 18px; display: flex; align-items: center; justify-content: center; gap: 14px; color: var(--n-accent); background: #fbf6ee; border-radius: 18px; box-shadow: 0 14px 30px -24px rgba(58,42,34,.6); }
+.drawnNon { width: 92px; flex: none; }
+.drawnTea { width: 190px; max-width: 58%; }

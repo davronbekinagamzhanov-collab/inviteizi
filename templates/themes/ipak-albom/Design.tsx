@@ -1,7 +1,7 @@
 "use client";
 /**
  * «Ипак альбом» (128) — никоҳ, Оддий, С ФОТО, структура S5 «Альбом».
- * Слоновая кость, оливковый текст, шёлковая лента цвета чайной розы; запасные фото — руки с розами, каллы, кружево.
+ * Слоновая кость, оливковый текст, шёлковая лента цвета чайной розы; запасные фото — руки с розами, белый пион, кремовые розы.
  */
 import type { TemplateProps } from "../types";
 import { Albom } from "../b3/s5-albom";
@@ -28,8 +28,8 @@ export default function IpakAlbom(props: TemplateProps) {
       motif={<Lola />}
       photos={[
         { kind: "unsplash", slot: "b3-hands-roses", w: 800 },
-        { kind: "unsplash", slot: "b3-callas", w: 500 },
-        { kind: "unsplash", slot: "b3-hands-lace", w: 500 },
+        { kind: "unsplash", slot: "w-peony-white", w: 500 },
+        { kind: "unsplash", slot: "x-roses-cream", w: 500 },
       ]}
     />
   );
