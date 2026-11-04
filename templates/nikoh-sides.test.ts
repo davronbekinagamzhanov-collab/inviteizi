@@ -1,4 +1,4 @@
-import {describe,it,expect,vi} from "vitest";
+import {beforeAll,describe,it,expect,vi} from "vitest";
 import {createElement} from "react";
 import {renderToStaticMarkup} from "react-dom/server";
 import {activeDesigns,longSample} from "./registry";
@@ -11,6 +11,9 @@ vi.mock("next/font/google",()=>{
 });
 
 describe("accepted non-Nikoh designs retain all supplied events and person data",()=>{
+ // Холодная загрузка шаблонов (motion, шрифты, общий набор) — подготовка, а не время одного теста:
+ // иначе её целиком оплачивает первый случай и при параллельном прогоне он не укладывается в лимит
+ beforeAll(()=>Promise.all(activeDesigns().map(d=>d.load())),120_000);
   for(const d of activeDesigns().filter(d=>d.occasion!=="nikoh"))for(const mode of ["demo","full"] as const)it(`${d.id} / ${mode}`,async()=>{
     const {default:Design}=await d.load();
     const data={...longSample(d),noMusic:true};
@@ -20,7 +23,7 @@ describe("accepted non-Nikoh designs retain all supplied events and person data"
     if(data.age)expect(plain).toContain(String(data.age));
     for(const e of data.events){expect(plain).toContain(e.venueName);expect(plain).toContain(e.address);expect(html).toContain(mapLink(e));}
     expect(plain.includes("НАМУНА")).toBe(mode==="demo");
-  },20000); // первый случай платит за холодную сборку шаблонов
+  });
 });
 describe("every accepted Nikoh design renders both families",()=>{
   for(const d of activeDesigns().filter(d=>d.occasion==="nikoh"))for(const mode of ["demo","full"] as const)it(`${d.id} / ${mode}`,async()=>{

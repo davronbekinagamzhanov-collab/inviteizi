@@ -11,12 +11,12 @@
      {
       "headPx": 14,
       "dayPx": 18,
-      "gapAvg": 27.7,
+      "gapAvg": 42.9,
       "gapSpread": 0,
       "offColumn": 0,
-      "centerDx": -59,
+      "centerDx": 0,
       "edge": 0,
-      "width": 194,
+      "width": 300,
       "marked": {
        "day": "14",
        "dx": 0,
@@ -40,12 +40,12 @@
      {
       "headPx": 14,
       "dayPx": 18,
-      "gapAvg": 37.7,
+      "gapAvg": 42.9,
       "gapSpread": 0,
       "offColumn": 0,
-      "centerDx": -59,
+      "centerDx": 0,
       "edge": 0,
-      "width": 264,
+      "width": 300,
       "marked": {
        "day": "14",
        "dx": 0,
@@ -67,12 +67,12 @@
      {
       "headPx": 14,
       "dayPx": 18,
-      "gapAvg": 27.7,
+      "gapAvg": 42.9,
       "gapSpread": 0,
       "offColumn": 0,
-      "centerDx": -59,
+      "centerDx": 0,
       "edge": 0,
-      "width": 194,
+      "width": 300,
       "marked": {
        "day": "14",
        "dx": 0,
@@ -82,9 +82,7 @@
       }
      }
     ],
-    "hanging": [
-     "ва| Абдураҳмоновлар ва Нуриддиновлар оилалари"
-    ],
+    "hanging": [],
     "clipped": [],
     "blurry": [],
     "covered": [
@@ -99,12 +97,12 @@
      {
       "headPx": 14,
       "dayPx": 18,
-      "gapAvg": 29.9,
+      "gapAvg": 42.9,
       "gapSpread": 0,
       "offColumn": 0,
-      "centerDx": -59,
+      "centerDx": 0,
       "edge": 0,
-      "width": 209,
+      "width": 300,
       "marked": {
        "day": "14",
        "dx": 0,
@@ -207,9 +205,7 @@
       }
      }
     ],
-    "hanging": [
-     "ва| Абдураҳмоновлар ва Нуриддиновлар оилалари"
-    ],
+    "hanging": [],
     "clipped": [],
     "blurry": [],
     "covered": [],
@@ -333,9 +329,7 @@
       }
      }
     ],
-    "hanging": [
-     "ва| Абдураҳмоновлар ва Нуриддиновлар оилалари"
-    ],
+    "hanging": [],
     "clipped": [],
     "blurry": [],
     "covered": [
@@ -430,13 +424,7 @@
     ],
     "hanging": [],
     "clipped": [],
-    "blurry": [
-     {
-      "src": "photo-1671048116858-e8ef69175b2d?ixid=M3wxMTIxNDYwfDB8MXxzZW",
-      "shown": 464,
-      "natural": 860
-     }
-    ],
+    "blurry": [],
     "covered": [],
     "music": "ok"
    },
@@ -461,14 +449,12 @@
       }
      }
     ],
-    "hanging": [
-     "ва| Абдураҳмоновлар ва Нуриддиновлар оилалари"
-    ],
+    "hanging": [],
     "clipped": [],
     "blurry": [],
     "covered": [
      "Абдурашидхон",
-     "Абдураҳмоновлар ва Нуриддиновл"
+     "Абдураҳмоновлар ва Нуриддиновл"
     ],
     "music": "ok"
    },
@@ -528,9 +514,7 @@
       }
      }
     ],
-    "hanging": [
-     "ва| Сизнинг иштирокингиз ва эзгу тилакларингиз — оилам"
-    ],
+    "hanging": [],
     "clipped": [],
     "blurry": [],
     "covered": [],
@@ -584,9 +568,7 @@
       }
      }
     ],
-    "hanging": [
-     "ва| Сизнинг иштирокингиз ва эзгу тилакларингиз — оилам"
-    ],
+    "hanging": [],
     "clipped": [],
     "blurry": [],
     "covered": [],
@@ -613,9 +595,7 @@
       }
      }
     ],
-    "hanging": [
-     "ва| Сизнинг иштирокингиз ва эзгу тилакларингиз — оилам"
-    ],
+    "hanging": [],
     "clipped": [],
     "blurry": [],
     "covered": [],
@@ -650,9 +630,7 @@
       }
      }
     ],
-    "hanging": [
-     "|билан Ҳурмат ва эҳтиром билан"
-    ],
+    "hanging": [],
     "clipped": [],
     "blurry": [],
     "covered": [],
@@ -706,9 +684,7 @@
       }
      }
     ],
-    "hanging": [
-     "|билан Ҳурмат ва эҳтиром билан"
-    ],
+    "hanging": [],
     "clipped": [],
     "blurry": [],
     "covered": [],
@@ -798,10 +774,7 @@
    "w360": {
     "overflowX": 0,
     "calendars": [],
-    "hanging": [
-     "|билан Ушбу муборак кунда ёнимизда бўлишингиз — биз учун ",
-     "ва| Фарзандлари ва набиралари"
-    ],
+    "hanging": [],
     "clipped": [],
     "blurry": [],
     "covered": [],
@@ -810,10 +783,7 @@
    "w430": {
     "overflowX": 0,
     "calendars": [],
-    "hanging": [
-     "ва| Ушбу муборак кунда ёнимизда бўлишингиз — биз учун ",
-     "ва| Фарзандлари ва набиралари"
-    ],
+    "hanging": [],
     "clipped": [],
     "blurry": [],
     "covered": [],
@@ -822,10 +792,7 @@
    "long360": {
     "overflowX": 0,
     "calendars": [],
-    "hanging": [
-     "|билан Ушбу муборак кунда ёнимизда бўлишингиз — биз учун ",
-     "ва| Фарзандлари, набиралари ва Абдураҳмоновлар оиласи"
-    ],
+    "hanging": [],
     "clipped": [],
     "blurry": [],
     "covered": [],
@@ -834,9 +801,7 @@
    "namuna375": {
     "overflowX": 0,
     "calendars": [],
-    "hanging": [
-     "ва| Фарзандлари ва набиралари"
-    ],
+    "hanging": [],
     "clipped": [],
     "blurry": [],
     "covered": [],
@@ -873,9 +838,7 @@
    "long360": {
     "overflowX": 0,
     "calendars": [],
-    "hanging": [
-     "ва| Абдураҳмоновлар ва Нуриддиновлар оилалари"
-    ],
+    "hanging": [],
     "clipped": [],
     "blurry": [],
     "covered": [
@@ -1881,9 +1844,7 @@
       }
      }
     ],
-    "hanging": [
-     "ва| Фарзандлари, набиралари ва Абдураҳмоновлар оиласи"
-    ],
+    "hanging": [],
     "clipped": [],
     "blurry": [],
     "covered": [],
@@ -1949,9 +1910,7 @@
    "long360": {
     "overflowX": 0,
     "calendars": [],
-    "hanging": [
-     "ва| Абдураҳмоновлар ва Нуриддиновлар оилалари"
-    ],
+    "hanging": [],
     "clipped": [],
     "blurry": [],
     "covered": [
@@ -2030,7 +1989,7 @@
     "clipped": [],
     "blurry": [],
     "covered": [
-     "Манзил"
+     "Раҳимовлар хонадони"
     ],
     "music": "ok"
    },
@@ -2148,13 +2107,7 @@
     ],
     "hanging": [],
     "clipped": [],
-    "blurry": [
-     {
-      "src": "nahorgi-samarkand-b.webp",
-      "shown": 430,
-      "natural": 853
-     }
-    ],
+    "blurry": [],
     "covered": [
      "Манзил"
     ],
@@ -2359,9 +2312,7 @@
    "long360": {
     "overflowX": 0,
     "calendars": [],
-    "hanging": [
-     "ва| Абдураҳмоновлар ва Нуриддиновлар оилалари"
-    ],
+    "hanging": [],
     "clipped": [],
     "blurry": [],
     "covered": [
@@ -2510,12 +2461,12 @@
      {
       "headPx": 14,
       "dayPx": 18,
-      "gapAvg": 21.2,
+      "gapAvg": 44.6,
       "gapSpread": 0,
       "offColumn": 0,
       "centerDx": 0,
-      "edge": 106,
-      "width": 149,
+      "edge": 0,
+      "width": 312,
       "marked": {
        "day": "4",
        "dx": 0,
@@ -2537,12 +2488,12 @@
      {
       "headPx": 14,
       "dayPx": 18,
-      "gapAvg": 21.2,
+      "gapAvg": 45.7,
       "gapSpread": 0,
       "offColumn": 0,
       "centerDx": 0,
-      "edge": 141,
-      "width": 149,
+      "edge": 0,
+      "width": 320,
       "marked": {
        "day": "4",
        "dx": 0,
@@ -2555,7 +2506,9 @@
     "hanging": [],
     "clipped": [],
     "blurry": [],
-    "covered": [],
+    "covered": [
+     "Харитада очиш"
+    ],
     "music": "ok"
    },
    "long360": {
@@ -2564,12 +2517,12 @@
      {
       "headPx": 14,
       "dayPx": 18,
-      "gapAvg": 21.2,
+      "gapAvg": 44.6,
       "gapSpread": 0,
       "offColumn": 0,
       "centerDx": 0,
-      "edge": 106,
-      "width": 149,
+      "edge": 0,
+      "width": 312,
       "marked": {
        "day": "14",
        "dx": 0,
@@ -2591,12 +2544,12 @@
      {
       "headPx": 14,
       "dayPx": 0,
-      "gapAvg": 21.2,
+      "gapAvg": 45.7,
       "gapSpread": 0,
       "offColumn": 0,
       "centerDx": 0,
-      "edge": 113,
-      "width": 149,
+      "edge": 0,
+      "width": 320,
       "marked": null
      }
     ],
@@ -2900,7 +2853,7 @@
     "clipped": [],
     "blurry": [],
     "covered": [
-     "Харитада очиш"
+     "Сайрам, Ибрагимов кўчаси 12"
     ],
     "music": "ok"
    },
@@ -3210,12 +3163,12 @@
      {
       "headPx": 14,
       "dayPx": 18,
-      "gapAvg": 21.2,
+      "gapAvg": 44.6,
       "gapSpread": 0,
       "offColumn": 0,
       "centerDx": 0,
-      "edge": 106,
-      "width": 149,
+      "edge": 0,
+      "width": 312,
       "marked": {
        "day": "5",
        "dx": 0,
@@ -3240,12 +3193,12 @@
      {
       "headPx": 14,
       "dayPx": 18,
-      "gapAvg": 21.2,
+      "gapAvg": 45.7,
       "gapSpread": 0,
       "offColumn": 0,
       "centerDx": 0,
-      "edge": 141,
-      "width": 149,
+      "edge": 0,
+      "width": 320,
       "marked": {
        "day": "5",
        "dx": 0,
@@ -3269,12 +3222,12 @@
      {
       "headPx": 14,
       "dayPx": 18,
-      "gapAvg": 21.2,
+      "gapAvg": 44.6,
       "gapSpread": 0,
       "offColumn": 0,
       "centerDx": 0,
-      "edge": 106,
-      "width": 149,
+      "edge": 0,
+      "width": 312,
       "marked": {
        "day": "12",
        "dx": 0,
@@ -3296,12 +3249,12 @@
      {
       "headPx": 14,
       "dayPx": 0,
-      "gapAvg": 21.2,
+      "gapAvg": 45.7,
       "gapSpread": 0,
       "offColumn": 0,
       "centerDx": 0,
-      "edge": 113,
-      "width": 149,
+      "edge": 0,
+      "width": 320,
       "marked": null
      }
     ],
@@ -3444,9 +3397,7 @@
    "w360": {
     "overflowX": 0,
     "calendars": [],
-    "hanging": [
-     "ва| Фарзандлари ва набиралари"
-    ],
+    "hanging": [],
     "clipped": [],
     "blurry": [],
     "covered": [
@@ -3466,9 +3417,7 @@
    "long360": {
     "overflowX": 0,
     "calendars": [],
-    "hanging": [
-     "ва| Фарзандлари, набиралари ва Абдураҳмоновлар оиласи"
-    ],
+    "hanging": [],
     "clipped": [],
     "blurry": [],
     "covered": [
@@ -3481,9 +3430,7 @@
    "namuna375": {
     "overflowX": 0,
     "calendars": [],
-    "hanging": [
-     "ва| Фарзандлари ва набиралари"
-    ],
+    "hanging": [],
     "clipped": [],
     "blurry": [],
     "covered": [],
