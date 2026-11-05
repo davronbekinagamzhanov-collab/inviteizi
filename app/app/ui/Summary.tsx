@@ -94,7 +94,7 @@ export function Summary(p: Props) {
               <>
                 <textarea className={`${s.input} ${ownCount > MAX_CUSTOM_TEXT ? s.inputErr : ""}`} value={p.customText ?? ""} placeholder={T.summary.ownTextPh} onChange={(e) => p.onChange({ customText: e.target.value })} name="customText" />
                 <span className={ownCount > MAX_CUSTOM_TEXT ? s.err : s.help}>
-                  {ownCount > MAX_CUSTOM_TEXT ? T.summary.ownTextLong(MAX_CUSTOM_TEXT) : T.summary.ownTextCount(ownCount, MAX_CUSTOM_TEXT)}
+                  {ownCount > MAX_CUSTOM_TEXT ? `${T.summary.ownTextCount(ownCount, MAX_CUSTOM_TEXT)} · ${T.summary.ownTextLong(MAX_CUSTOM_TEXT)}` : T.summary.ownTextCount(ownCount, MAX_CUSTOM_TEXT)}
                 </span>
               </>
             )}
@@ -209,7 +209,7 @@ export function Summary(p: Props) {
                       name={`customText-${l}`}
                       onChange={(e) => p.onChange({ customTexts: { ...p.customTexts, [l]: e.target.value } })}
                     />
-                    <span className={n > MAX_CUSTOM_TEXT ? s.err : s.help}>{n > MAX_CUSTOM_TEXT ? T.summary.ownTextLong(MAX_CUSTOM_TEXT) : value ? T.summary.ownTextCount(n, MAX_CUSTOM_TEXT) : T.summary.ownTextInHint}</span>
+                    <span className={n > MAX_CUSTOM_TEXT ? s.err : s.help}>{n > MAX_CUSTOM_TEXT ? `${T.summary.ownTextCount(n, MAX_CUSTOM_TEXT)} · ${T.summary.ownTextLong(MAX_CUSTOM_TEXT)}` : value ? T.summary.ownTextCount(n, MAX_CUSTOM_TEXT) : T.summary.ownTextInHint}</span>
                   </label>
                 );
               })}

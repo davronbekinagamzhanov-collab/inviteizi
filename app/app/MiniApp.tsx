@@ -140,6 +140,12 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
           setToast(T.form.errors.fix);
           return null;
         }
+        if (r.error === "textLong") {
+          // Свой текст длинный: остаёмся на итоге, под полем видно «N / 600»
+          haptic.error();
+          setToast(T.summary.ownTextLong(r.max));
+          return null;
+        }
         if (r.error === "closed" || r.error === "waiting") {
           setToast(r.error === "waiting" ? T.pay.errors.waiting : T.orders.closedEdit);
           reset([{ name: "catalog" }, { name: "orders" }]);

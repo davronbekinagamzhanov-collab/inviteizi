@@ -396,34 +396,30 @@ async function sendLinkPack(deps: Deps, o: OrderRecord, afterPayment: boolean) {
   const tx = txFor(await langOf(deps, client));
   const url = `${deps.env.publicBaseUrl}/${o.slug}`;
   const tg = deps.tg;
-  const attempt = async (what: string, fn: () => Promise<unknown>) => {
-    try {
-      await fn();
-      return true;
-    } catch (e) {
-      console.error("клиенту не отправлено:", what, e instanceof Error ? e.name : "Error");
-      return false;
-    }
-  };
-  const linkSent = await attempt("ссылка", () => tg.sendMessage(client, tx.pay.paid(url), { markup: mainMenu() }));
-  await attempt("QR", async () => {
-    const png = await QRCode.toBuffer(url, { width: 600, margin: 2 });
-    await tg.sendPhoto(client, new Uint8Array(png), { caption: tx.pay.qrCaption });
-  });
-  await attempt("пояснение", () => tg.sendMessage(client, tx.pay.shareIntro));
+  // ОДНО сообщение: QR-картинка, под ней ссылка, как разослать гостям и спасибо; кнопки — гостям, ответы, новый заказ
   const share = guestShareText(o, url);
   const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(share.replace(url, "").trim())}`;
-  const shareSent = await attempt("текст для гостей", () =>
-    tg.sendMessage(client, share, { markup: inline([[{ text: tx.pay.shareButton, url: shareUrl }]]) }),
-  );
-  if (afterPayment) {
-    await attempt("спасибо", () =>
-      tg.sendMessage(client, tx.pay.thanks, {
-        markup: inline([...(o.data.rsvp ? [[{ text: tx.rsvp.answers, data: `rsvp:${o.number}` }]] : []), [{ text: tx.pay.newOrder, data: "new" }]]),
-      }),
-    );
+  const caption = afterPayment ? tx.pay.paidPack(url) : tx.pay.linkPack(url);
+  const markup = inline([
+    [{ text: tx.pay.shareButton, url: shareUrl }],
+    ...(o.data.rsvp ? [[{ text: tx.rsvp.answers, data: `rsvp:${o.number}` }]] : []),
+    ...(afterPayment ? [[{ text: tx.pay.newOrder, data: "new" }]] : []),
+  ]);
+  try {
+    const png = await QRCode.toBuffer(url, { width: 600, margin: 2 });
+    await tg.sendPhoto(client, new Uint8Array(png), { caption, markup });
+    return { linkSent: true, shareSent: true };
+  } catch (e) {
+    console.error("клиенту не отправлено: QR", e instanceof Error ? e.name : "Error");
   }
-  return { linkSent, shareSent };
+  // QR не ушёл — то же самое текстом (ссылка и кнопки важнее картинки)
+  try {
+    await tg.sendMessage(client, caption, { markup });
+    return { linkSent: true, shareSent: true };
+  } catch (e) {
+    console.error("клиенту не отправлено: ссылка", e instanceof Error ? e.name : "Error");
+    return { linkSent: false, shareSent: false };
+  }
 }
 
 /** «🔗 Ҳавола» в «Менинг таклифномаларим»: оплаченному — ссылка, QR и текст заново; неоплаченному — ссылка НАМУНА */

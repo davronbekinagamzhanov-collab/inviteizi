@@ -5,14 +5,14 @@
  */
 import type { Deps, Draft } from "../flow/types";
 import type { Lang, MusicChoice, OrderRecord, OrderStatus } from "@/lib/domain";
-import type { ExtraLang, InvitationData } from "@/lib/types";
+import { EXTRA_LANGS, type ExtraLang, type InvitationData } from "@/lib/types";
 import type { AppUser } from "@/lib/tg-init-data";
 import { getDesign, isOnSale } from "@/templates/registry";
 import { tPlain as t } from "@/texts/uz-cyrl";
 import { kzToday } from "../calendar";
 import { PAID_STATUSES, PAYABLE_STATUSES, txFor } from "../flow/util";
 import { adminCard, decisionButtons, upsertDraftOrder, type UpsertOutcome } from "../flow/orders";
-import { validateForm, type FieldError, type FormInput, cleanOwnText } from "@/lib/order-rules";
+import { validateForm, type FieldError, type FormInput, cleanOwnText, graphemes, MAX_CUSTOM_TEXT } from "@/lib/order-rules";
 import { isQuiet } from "@/lib/quiet-hours";
 import { PHOTO_MAX_COUNT } from "../own-photo";
 
@@ -243,6 +243,8 @@ export async function saveDraft(deps: Deps, u: AppUser, d: AppDraft) {
 export type SubmitResult =
   | { ok: true; order: AppOrder; created: boolean }
   | { error: "fields"; fields: FieldError[] }
+  /** Свой текст длиннее 600 знаков: не обрезаем молча — приложение показывает мягкую ошибку под полем */
+  | { error: "textLong"; length: number; max: number }
   | { error: "design" | "closed" | "waiting" | "notFound" | "formatLocked" | "busy" };
 
 /** «НАМУНА»: проверить анкету целиком и создать заказ (или обновить неоплаченный) */
@@ -252,12 +254,19 @@ export async function submitDraft(deps: Deps, u: AppUser, d: AppDraft): Promise<
   if (!d.orderId && !isOnSale(design.id)) return { error: "design" };
   const v = validateForm(design.occasion, (d.form ?? {}) as FormInput, kzToday(deps.now()));
   if ("errors" in v) return { error: "fields", fields: v.errors };
+  const own = cleanOwnText(d.customText);
+  if (typeof d.customText === "string" && "problem" in own && own.problem === "long") return { error: "textLong", length: graphemes(d.customText.trim()), max: MAX_CUSTOM_TEXT };
+  for (const l of EXTRA_LANGS) {
+    const tr = d.customTexts?.[l];
+    if (typeof tr === "string" && graphemes(tr.trim()) > MAX_CUSTOM_TEXT) return { error: "textLong", length: graphemes(tr.trim()), max: MAX_CUSTOM_TEXT };
+  }
   const user = (await deps.repo.getUser(u.id)) ?? (await deps.repo.touchUser({ id: u.id, username: u.username, firstName: u.firstName }));
   const prev = user.state as Draft;
   const draft = toDraft(deps, prev, d, v.data);
-  if (!draft.music) {
-    const first = (await deps.repo.listMusic(design.occasion))[0];
-    draft.music = first ? { kind: "list", musicId: first.id } : { kind: "none" };
+  // Мелодия только из списка этого тадбира; несуществующая (или чужого тадбира) — первая по умолчанию
+  const tracks = await deps.repo.listMusic(design.occasion);
+  if (!draft.music || (draft.music.kind === "list" && !tracks.some((t) => t.id === (draft.music as { musicId: string }).musicId))) {
+    draft.music = tracks[0] ? { kind: "list", musicId: tracks[0].id } : { kind: "none" };
   }
   // Готовый текст должен существовать для этого тадбира, иначе — лучший (первый)
   const options = t.inviteOptions({ ...(draft.data as InvitationData) });

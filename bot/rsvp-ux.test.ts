@@ -77,8 +77,8 @@ describe("этап 3.1: понятные ответы гостей", () => {
   it("после оплаты в сообщении есть кнопка ответов, и она открывает список", async () => {
     const s = new Sim();
     const o = await paidOrder(s, 1);
-    const thanks = s.tg.to(1).filter((m) => m.text === uz.pay.thanks).at(-1)!;
-    expect(buttonLabels(thanks)).toEqual([uz.rsvp.answers, uz.pay.newOrder]);
+    const thanks = s.tg.to(1).filter((m) => m.text === uz.pay.paidPack(`https://inviteizi.vercel.app/${o.slug}`)).at(-1)!;
+    expect(buttonLabels(thanks)).toEqual([uz.pay.shareButton, uz.rsvp.answers, uz.pay.newOrder]);
     await s.click(1, uz.rsvp.answers);
     expect(s.lastText(1)).toBe(uz.rsvp.empty);
     expect(o.data.rsvp).toBe(true);

@@ -92,15 +92,19 @@ describe("приложение: анкета", () => {
     expect(await app.submitDraft(sim.deps, user(73), { templateId: "nope", form: form("nikoh") })).toEqual({ error: "design" });
   });
 
-  it("свой текст: переносы строк сохраняются, больше 600 знаков — не сохраняется", async () => {
+  it("свой текст: переносы строк сохраняются, больше 600 — мягкая ошибка; несуществующая мелодия — первая", async () => {
     const sim = new Sim();
     const u = user(74);
     const r = await app.submitDraft(sim.deps, u, { templateId: first("nikoh").id, form: form("nikoh"), customText: "Азиз меҳмонлар!\nТўйимизга келинг 🌸" });
     if (!("ok" in r)) throw new Error("ожидали заказ");
     expect((await sim.repo.getOrder(r.order.id))!.data.customText).toBe("Азиз меҳмонлар!\nТўйимизга келинг 🌸");
+    // Больше 600 — не обрезаем и не теряем молча: мягкая ошибка с числом знаков, приложение остаётся на итоге
     const long = await app.submitDraft(sim.deps, u, { templateId: first("nikoh").id, form: form("nikoh"), customText: "а".repeat(601) });
-    if (!("ok" in long)) throw new Error("ожидали заказ");
-    expect((await sim.repo.getOrder(long.order.id))!.data.customText).toBeUndefined();
+    expect(long).toEqual({ error: "textLong", length: 601, max: 600 });
+    // Несуществующая мелодия — первая из списка тадбира
+    const fake = await app.submitDraft(sim.deps, user(71), { templateId: first("nikoh").id, form: form("nikoh"), music: { kind: "list", musicId: "nope-404" } });
+    if (!("ok" in fake)) throw new Error(JSON.stringify(fake));
+    expect((await sim.repo.getOrder(fake.order.id))!.music).toEqual({ kind: "list", musicId: "yor-yor" });
   });
 });
 

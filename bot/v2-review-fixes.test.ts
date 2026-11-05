@@ -82,3 +82,12 @@ describe("находки ревьюера v2", () => {
     expect((await app.openSession(s.deps, u)).draft).toBeNull();
   });
 });
+
+describe("одно сообщение после оплаты (ночная задача, п.1)", () => {
+  it("подпись к QR укладывается в 1024 знака на всех языках", async () => {
+    const { ru } = await import("@/texts/bot-ru");
+    const { kk } = await import("@/texts/bot-kk");
+    const url = `https://inviteizi.vercel.app/${"a".repeat(60)}`;
+    for (const tx of [uz, ru, kk]) for (const t of [tx.pay.paidPack(url), tx.pay.linkPack(url)]) expect(t.length).toBeLessThanOrEqual(1024);
+  });
+});

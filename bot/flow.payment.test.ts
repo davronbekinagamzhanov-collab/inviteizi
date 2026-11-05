@@ -109,17 +109,16 @@ describe("подтверждение админом", () => {
     expect(paid?.expiresAt?.toISOString()).toBe("2026-12-14T18:59:59.000Z"); // 14.11 23:59:59 (+05) + 30 дней
     const url = `${BASE}/aziz-madina`;
     const toClient = sim.tg.to(1).filter((m) => m.id >= mark);
-    expect(toClient.map((m) => m.type)).toEqual(["text", "photo", "text", "text", "text"]);
-    expect(toClient[4].text).toBe(uz.pay.thanks);
-    expect(toClient[0].text).toBe(uz.pay.paid(url));
-    const png = toClient[1].media as Uint8Array;
+    // Одно аккуратное сообщение: QR-картинка с подписью (ссылка, как разослать, спасибо) и кнопками
+    expect(toClient.map((m) => m.type)).toEqual(["photo"]);
+    expect(toClient[0].text).toBe(uz.pay.paidPack(url));
+    const png = toClient[0].media as Uint8Array;
     expect(Array.from(png.slice(1, 4))).toEqual([0x50, 0x4e, 0x47]); // «PNG»
-    expect(toClient[2].text).toBe(uz.pay.shareIntro);
-    expect(toClient[3].text).toContain("Азиз ва Мадинанинг никоҳ тўйига");
-    expect(toClient[3].text).toContain(url);
-    const share = inlineButtons(toClient[3])[0] as { text: string; url: string };
+    const share = inlineButtons(toClient[0])[0] as { text: string; url: string };
     expect(share.text).toBe(uz.pay.shareButton);
     expect(share.url.startsWith(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=`)).toBe(true);
+    expect(decodeURIComponent(share.url)).toContain("Азиз ва Мадинанинг никоҳ тўйига");
+    expect(inlineButtons(toClient[0]).map((b) => b.text)).toContain(uz.pay.newOrder);
     expect(card.markup).toBeUndefined(); // кнопки у карточки убраны
     expect(sim.lastText(ADMIN)).toBe(`${uz.admin.approved(o.number)}\n💳 №${o.number} · ${price(o.amount)} · ${designName(o.templateId)} · напрямую`);
   });
@@ -134,7 +133,7 @@ describe("подтверждение админом", () => {
     await sim.callback(ADMIN, card1.data, card1.msg.id);
     await sim.callback(ADMIN, card1.data, card1.msg.id);
     await sim.callback(ADMIN2, card2.data, card2.msg.id, ADMIN2);
-    expect(sim.tg.to(1).filter((m) => m.id >= mark && m.text === uz.pay.paid(`${BASE}/aziz-madina`))).toHaveLength(1);
+    expect(sim.tg.to(1).filter((m) => m.id >= mark && m.text === uz.pay.paidPack(`${BASE}/aziz-madina`))).toHaveLength(1);
     expect(sim.tg.answers.filter((a) => a.text === uz.admin.already)).toHaveLength(2);
     expect((await sim.repo.getOrder(o.id))?.status).toBe("active");
   });
@@ -320,8 +319,8 @@ describe("команды админа", () => {
     const mark = sim.mark();
     await sim.click(1, uz.my.link);
     const toClient = sim.tg.to(1).filter((m) => m.id >= mark);
-    expect(toClient.map((m) => m.type)).toEqual(["text", "photo", "text", "text"]);
-    expect(toClient[0].text).toBe(uz.pay.paid(`${BASE}/aziz-madina`));
+    expect(toClient.map((m) => m.type)).toEqual(["photo"]);
+    expect(toClient[0].text).toBe(uz.pay.linkPack(`${BASE}/aziz-madina`));
   });
 
   it("после оплаты — спасибо и одна кнопка «🆕 Янги таклифнома»: новый заказ с нуля", async () => {
@@ -330,8 +329,8 @@ describe("команды админа", () => {
     await nikohWithReceipt(sim, 1);
     await sim.click(ADMIN, uz.admin.approve);
     const last = sim.last(1);
-    expect(last.text).toBe(uz.pay.thanks);
-    expect(buttonLabels(last)).toEqual([uz.pay.newOrder]);
+    expect(last.text).toBe(uz.pay.paidPack(`${BASE}/aziz-madina`));
+    expect(buttonLabels(last)).toEqual([uz.pay.shareButton, uz.pay.newOrder]);
     await sim.click(1, uz.pay.newOrder);
     expect(sim.lastText(1)).toBe(uz.category.ask);
     const u = await sim.user(1);
