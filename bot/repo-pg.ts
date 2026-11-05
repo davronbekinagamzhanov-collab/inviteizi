@@ -45,6 +45,8 @@ type UserRow = {
   source: string | null;
   created_at: Date;
   last_seen_at: Date;
+  nudge_count?: number | null;
+  nudge_off?: boolean | null;
 };
 
 type EventJson = {
@@ -128,6 +130,8 @@ function toUser(r: UserRow): UserRecord {
     source: r.source,
     createdAt: r.created_at,
     lastSeenAt: r.last_seen_at,
+    nudgeCount: r.nudge_count ?? 0,
+    nudgeOff: r.nudge_off ?? false,
   };
 }
 
@@ -344,6 +348,7 @@ const PARTNER_PATCH: Record<keyof PartnerPatch, string> = { phone: "phone", kasp
 const MANAGER_COLUMNS = `telegram_id as "telegramId", code, username, first_name as "firstName", invited_by as "invitedBy", active, created_at as "createdAt"`;
 /** Миграция партнёров ещё не применена */
 const isMissingTable = (e: unknown) => (e as { code?: string } | null)?.code === "42P01";
+const isMissingColumn = (e: unknown) => (e as { code?: string } | null)?.code === "42703";
 
 export class PgRepo implements Repo {
   async isOwner(id: number) { return env.ownerId() === id; }
@@ -510,6 +515,74 @@ export class PgRepo implements Repo {
       if (isMissingTable(e)) return [];
       throw e;
     }
+  }
+
+  // ── Часть 10: напоминания, отзывы, очистка ──
+  async setNudge(id: number, patch: { count?: number; off?: boolean }) {
+    const row: Record<string, number | boolean> = {};
+    if (patch.count !== undefined) row.nudge_count = Math.min(4, Math.max(0, patch.count));
+    if (patch.off !== undefined) row.nudge_off = patch.off;
+    if (!Object.keys(row).length) return;
+    try {
+      await this.sql`update public.users set ${this.sql(row, Object.keys(row))} where id = ${id}`;
+    } catch (e) {
+      if (!isMissingColumn(e)) throw e;
+    }
+  }
+
+  async saveReview(r: { orderId: string; userId: number; stars?: number; text?: string }) {
+    try {
+      if (r.stars !== undefined) {
+        await this.sql`insert into public.order_reviews(order_id, user_id, stars) values(${r.orderId}, ${r.userId}, ${r.stars})
+          on conflict (order_id) do update set stars = excluded.stars, updated_at = now()`;
+      }
+      if (r.text !== undefined) {
+        const rows = await this.sql`update public.order_reviews set text = ${r.text}, updated_at = now() where order_id = ${r.orderId} and user_id = ${r.userId} returning order_id`;
+        return rows.length > 0;
+      }
+      return true;
+    } catch (e) {
+      if (isMissingTable(e)) return false;
+      throw e;
+    }
+  }
+
+  async reviewSummary(from: Date, to: Date, orderIds: string[] | null) {
+    try {
+      const ids = orderIds ? this.sql.array(orderIds) : null;
+      const [r] = await this.sql<{ avg: number | null; count: number }[]>`select avg(stars)::float8 as avg, count(*)::int as count from public.order_reviews
+        where created_at >= ${from} and created_at < ${to} and (${ids}::uuid[] is null or order_id = any(${ids}::uuid[]))`;
+      return r.count ? { avg: r.avg ?? 0, count: r.count } : null;
+    } catch (e) {
+      if (isMissingTable(e)) return null;
+      throw e;
+    }
+  }
+
+  async staleDraftStates(before: Date) {
+    const rows = await this.sql<{ id: number; state: Record<string, unknown> }[]>`select id, state from public.users
+      where last_seen_at < ${before} and (state ? 'data' or state ? 'music') limit 500`;
+    return [...rows];
+  }
+
+  async deleteStaleDrafts(before: Date) {
+    return this.sql.begin(async (tx) => {
+      // Только неоплаченные: оплаченные заказы, оплаты и выплаты не удаляются никогда
+      const rows = await tx<{ id: string; photos: string[] | null; music_url: string | null; music_kind: string }[]>`
+        select id, photos, music_url, music_kind from public.orders
+        where status in ('draft', 'preview', 'awaiting_payment', 'rejected') and paid_at is null and created_at < ${before}
+          and not exists (select 1 from public.users u where u.id = orders.user_id and u.last_seen_at >= ${before})
+          and not exists (select 1 from public.partner_earnings e where e.order_id = orders.id)
+        for update`;
+      if (!rows.length) return [];
+      const ids = tx.array(rows.map((r) => r.id));
+      // Заказ «для клиента», который клиент так и не забрал, уходит вместе с заказом; забранный — остаётся
+      await tx`delete from public.client_orders where order_id = any(${ids}::uuid[]) and claimed_by is null`;
+      const gone = await tx<{ id: string }[]>`delete from public.orders o where o.id = any(${ids}::uuid[])
+        and not exists (select 1 from public.client_orders c where c.order_id = o.id) returning o.id`;
+      const deleted = new Set(gone.map((g) => g.id));
+      return rows.filter((r) => deleted.has(r.id)).map((r) => ({ photos: r.photos ?? [], music: r.music_kind === "own" ? r.music_url : null }));
+    });
   }
 
   async recordManagerPayout(p: Omit<ManagerPayout, "createdAt"> & { createdBy: number }) {

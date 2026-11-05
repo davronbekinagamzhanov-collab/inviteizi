@@ -17,6 +17,7 @@ import { rsvpTotals } from "@/lib/rsvp";
 import { expiresAtOf } from "@/lib/orders";
 import { PHOTO_KEEP_AFTER_EXPIRY_MS } from "./own-photo";
 import { eveningReports, flushNotices, payDayNotices } from "./flow/notify";
+import { cleanup, nudges, reviewRequests } from "./flow/care";
 import { kzHour, QUIET_TO } from "@/lib/quiet-hours";
 
 export type CronResult = {
@@ -30,6 +31,9 @@ export type CronResult = {
   notices: number;
   payDay: number;
   evening: number;
+  nudges: number;
+  reviews: number;
+  cleaned: number;
   errors: number;
 };
 
@@ -84,7 +88,7 @@ async function removeOldPhotos(deps: Deps, now: Date, r: CronResult) {
 export async function runCron(deps: Deps): Promise<CronResult> {
   const { repo, tg } = deps;
   const now = deps.now();
-  const r: CronResult = { adminReminded: 0, clientReminded: 0, archived: 0, rsvpDigests: 0, photosRemoved: 0, partnerNotices: 0, sleeping: 0, notices: 0, payDay: 0, evening: 0, errors: 0 };
+  const r: CronResult = { adminReminded: 0, clientReminded: 0, archived: 0, rsvpDigests: 0, photosRemoved: 0, partnerNotices: 0, sleeping: 0, notices: 0, payDay: 0, evening: 0, nudges: 0, reviews: 0, cleaned: 0, errors: 0 };
   const ctx = { deps };
 
   // ── Админам: чек ждёт > 30 мин — днём (08:00–21:00), дальше каждые 2 часа до 21:00 ──
@@ -173,6 +177,16 @@ export async function runCron(deps: Deps): Promise<CronResult> {
   } catch (e) {
     r.errors++;
     console.error("cron notices", e instanceof Error ? e.name : "Error");
+  }
+
+  // ── v2, часть 10: напоминания не купившим, отзывы, автоочистка ──
+  try {
+    r.nudges = await nudges(deps);
+    r.reviews = await reviewRequests(deps);
+    r.cleaned = await cleanup(deps);
+  } catch (e) {
+    r.errors++;
+    console.error("cron care", e instanceof Error ? e.name : "Error");
   }
 
   // ── Хозяину: вечерняя сводка ответов гостей ──

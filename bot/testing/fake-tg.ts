@@ -49,7 +49,11 @@ export class FakeTg implements Tg {
   /** Сколько раз дёргали методы (для проверок «не отправил повторно» и т.п.) */
   calls: { method: string; chatId?: number }[] = [];
 
+  /** Эти пользователи заблокировали бота: любое сообщение им — 403 */
+  blocked = new Set<number>();
+
   async sendMessage(chatId: number, text: string, opts: SendOpts = {}): Promise<Sent> {
+    if (this.blocked.has(chatId)) throw new GrammyError("Call failed", { ok: false, error_code: 403, description: "Forbidden: bot was blocked by the user" }, "sendMessage" as never, {} as never);
     checkText("sendMessage", text);
     checkMarkup("sendMessage", opts.markup);
     return this.push({ chatId, type: "text", text, markup: opts.markup });

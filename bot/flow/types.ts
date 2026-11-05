@@ -33,6 +33,8 @@ export type Deps = {
   savePhotoBytes?: (bytes: Uint8Array) => Promise<string>;
   /** Удалить фото клиента из Storage (cron, через 30 дней после конца приглашения) */
   removePhotos?: (urls: string[]) => Promise<void>;
+  /** Удалить свои песни клиентов из Storage (автоочистка неоплаченных черновиков) */
+  removeMusic?: (urls: string[]) => Promise<void>;
 };
 
 /** Шаги анкеты (users.step) */
@@ -118,6 +120,9 @@ export type Draft = {
   data?: DraftData;
   /** Индекс тадбира, который сейчас заполняется */
   ev?: number;
+  /** v2: отзыв — после оценки ждём текст по желанию (номер заказа и звёзды) */
+  reviewFor?: string;
+  reviewStars?: number;
   /** v2: для какого языка клиент пишет свой текст (шаг langText) */
   langText?: ExtraLang;
   calMonth?: string;

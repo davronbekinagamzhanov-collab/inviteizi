@@ -53,3 +53,9 @@ export async function copyOwnMusic(fileId: string, io: MusicIo, budgetMs = MUSIC
   if (!check.ok) throw new Error(`Saved audio is not available: HTTP ${check.status}`);
   return url;
 }
+
+/** Публичный адрес своей песни → путь в бакете music («own/<id>.mp3»). Чужой адрес — null */
+export function ownMusicPath(url: string): string | null {
+  const m = /\/storage\/v1\/object\/public\/music\/(own\/[a-f0-9]{16,64}\.[a-z0-9]{2,5})$/.exec(url);
+  return m ? m[1] : null;
+}

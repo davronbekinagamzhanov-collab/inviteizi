@@ -176,4 +176,13 @@ export interface Repo {
   recordManagerPayout(p: Omit<ManagerPayout, "createdAt"> & { createdBy: number }): Promise<boolean>;
   /** Средняя оценка отзывов за промежуток (orderIds — только эти заказы; null — все). Нет таблицы — null */
   reviewSummary?(from: Date, to: Date, orderIds: string[] | null): Promise<{ avg: number; count: number } | null>;
+
+  // ── Часть 10: напоминания, отзывы, автоочистка ──
+  setNudge(id: number, patch: { count?: number; off?: boolean }): Promise<void>;
+  /** stars — поставить/сменить оценку; text — добавить текст к уже поставленной оценке (false — оценки нет) */
+  saveReview(r: { orderId: string; userId: number; stars?: number; text?: string }): Promise<boolean>;
+  /** Удалить неоплаченные заказы, созданные до before, если клиент не заходил в бот с before. Возвращает их файлы */
+  deleteStaleDrafts(before: Date): Promise<{ photos: string[]; music: string | null }[]>;
+  /** Черновики анкеты (users.state) клиентов, не заходивших с before: id и состояние */
+  staleDraftStates(before: Date): Promise<{ id: number; state: Record<string, unknown> }[]>;
 }

@@ -152,6 +152,8 @@ describe("фото клиента в боте", () => {
     await finishForm(s, 1);
     await s.click(1, uz.review.confirm);
     const [o] = await s.repo.listOrdersByUser(1);
+    // Оплаченный заказ (неоплаченный через 30 дней удаляет автоочистка — это проверяет bot/care.test.ts)
+    await s.repo.updateOrder(o.id, { status: "active", paidAt: s.clock });
     // Тадбир 14 ноября → ссылка до 14 декабря → фото до 13 января
     s.clock = new Date("2027-01-10T00:00:00Z");
     expect((await runCron(s.deps)).photosRemoved).toBe(0);

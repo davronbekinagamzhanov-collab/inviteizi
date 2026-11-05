@@ -108,6 +108,48 @@ export class MemoryRepo implements Repo {
     for (const n of due) n.sentAt = now;
     return due.map(({ sentAt, ...n }) => (void sentAt, clone(n)));
   }
+  // ── Часть 10 ──
+  reviews: { orderId: string; userId: number; stars: number; text: string | null; createdAt: Date }[] = [];
+  async setNudge(id: number, patch: { count?: number; off?: boolean }) {
+    const u = this.users.get(id);
+    if (!u) return;
+    if (patch.count !== undefined) u.nudgeCount = Math.min(4, Math.max(0, patch.count));
+    if (patch.off !== undefined) u.nudgeOff = patch.off;
+  }
+  async saveReview(r: { orderId: string; userId: number; stars?: number; text?: string }) {
+    let rec = this.reviews.find((x) => x.orderId === r.orderId);
+    if (r.stars !== undefined) {
+      if (rec) rec.stars = r.stars;
+      else this.reviews.push((rec = { orderId: r.orderId, userId: r.userId, stars: r.stars, text: null, createdAt: this.now() }));
+    }
+    if (r.text !== undefined) {
+      if (!rec || rec.userId !== r.userId) return false;
+      rec.text = r.text;
+    }
+    return true;
+  }
+  async reviewSummary(from: Date, to: Date, orderIds: string[] | null) {
+    const list = this.reviews.filter((r) => +r.createdAt >= +from && +r.createdAt < +to && (!orderIds || orderIds.includes(r.orderId)));
+    return list.length ? { avg: list.reduce((n, r) => n + r.stars, 0) / list.length, count: list.length } : null;
+  }
+  async staleDraftStates(before: Date) {
+    return [...this.users.values()].filter((u) => +u.lastSeenAt < +before && u.state && Object.keys(u.state).some((k) => k === "data" || k === "music")).map((u) => ({ id: u.id, state: clone(u.state) }));
+  }
+  async deleteStaleDrafts(before: Date) {
+    const out: { photos: string[]; music: string | null }[] = [];
+    for (const o of [...this.orders.values()]) {
+      if (!["draft", "preview", "awaiting_payment", "rejected"].includes(o.status) || o.paidAt || +o.createdAt >= +before) continue;
+      if (+(this.users.get(o.userId)?.lastSeenAt ?? 0) >= +before) continue;
+      if (this.earnings.some((e) => e.orderId === o.id)) continue;
+      const co = this.clientOrders.find((x) => x.orderId === o.id);
+      if (co?.claimedBy) continue;
+      if (co) this.clientOrders.splice(this.clientOrders.indexOf(co), 1);
+      this.orders.delete(o.id);
+      out.push({ photos: o.data.photos ?? [], music: o.music.kind === "own" ? (o.music.url ?? null) : null });
+    }
+    return out;
+  }
+
   async recordManagerPayout(p: Omit<ManagerPayout, "createdAt"> & { createdBy: number }) {
     if (p.amount <= 0 || this.managerPayouts.some((x) => x.managerId === p.managerId && x.month === p.month)) return false;
     this.managerPayouts.push({ managerId: p.managerId, month: p.month, amount: p.amount, orders: p.orders, createdAt: this.now() });
@@ -348,6 +390,8 @@ export class MemoryRepo implements Repo {
           source: u.source ?? null,
           createdAt: now,
           lastSeenAt: now,
+          nudgeCount: 0,
+          nudgeOff: false,
         };
     this.users.set(u.id, rec);
     return clone(rec);

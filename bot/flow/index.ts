@@ -42,6 +42,7 @@ import { acceptManager, claimOrder, panelAction, roleHome, showClaimed, toClient
 import { parseStartToken } from "@/lib/roles";
 import { gotPayout, payManagerAction, payPartnerAction } from "./notify";
 import { partnerStatsAction, statsAction } from "./stats";
+import { rate, reviewText, skipReviewText, stopNudges } from "./care";
 import { exportAction } from "./export";
 
 const idle: Step = {
@@ -377,6 +378,9 @@ async function route(c: Ctx) {
     if (isBackLabel(u.text.trim()) && c.step !== "idle") return goBack(c);
   }
 
+  // Отзыв: первое сообщение после оценки — его текст (анкету не трогает)
+  if (u.kind === "text" && c.s.reviewFor && (await reviewText(c))) return save(c);
+
   const step = steps[c.step];
   if (c.step === "idle" || !step.onMessage) {
     if (c.step === "idle") return idle.ask(c);
@@ -469,6 +473,16 @@ async function onCallback(c: Ctx, d: string) {
     return payManagerAction(c, id, month, amount);
   }
   if (d === "pg") return gotPayout(c);
+  if (d === "care:stop") return stopNudges(c);
+  if (d.startsWith("rv:")) {
+    const [, n = "", x = ""] = d.split(":");
+    if (x === "skip") {
+      await skipReviewText(c);
+      return save(c);
+    }
+    await rate(c, n, x);
+    return save(c);
+  }
   if (d.startsWith("pq:")) {
     const [, id = "", lang = ""] = d.split(":");
     return sendPoster(c, id, lang);

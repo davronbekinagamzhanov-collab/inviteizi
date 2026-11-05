@@ -38,6 +38,9 @@ export type UserRecord = {
   source: string | null;
   createdAt: Date;
   lastSeenAt: Date;
+  /** v2: напоминаний «не купившим» уже отправлено (0–4); nudgeOff — «🔕 Бошқа юборманг» или бот заблокирован */
+  nudgeCount?: number;
+  nudgeOff?: boolean;
 };
 
 export type MusicRecord = {
