@@ -57,12 +57,18 @@ function mockServer(lang) {
           const f = d.form ?? {};
           let o = orders.find((x) => x.id === d.orderId);
           if (!o) {
-            o = { id: `o${++n}`, number: n, status: "preview", canEdit: true, canPay: true, paid: false, createdAt: new Date().toISOString() };
+            o = { id: `o${++n}`, number: n, status: "preview", canEdit: true, canPay: true, paid: false, confirmed: false, createdAt: new Date().toISOString() };
             orders.unshift(o);
           }
-          Object.assign(o, { templateId: d.templateId, title: f.groom ? `${f.groom} & ${f.bride}` : f.person, date: f.events?.[0]?.date ?? null, amount: { animated: 8000, scroll: 6000, simple: 5000 }[getDesign(d.templateId).format], url: `${base}/demo/${d.templateId}` });
+          Object.assign(o, { templateId: d.templateId, title: f.groom ? `${f.groom} & ${f.bride}` : f.person, date: f.events?.[0]?.date ?? null, check: `${f.groom ? `${f.groom} ва ${f.bride}` : f.person}\n📅 ${(f.events?.[0]?.date ?? "").split("-").reverse().join(".")}, ${f.events?.[0]?.time ?? ""} · ${f.events?.[0]?.venueName ?? ""}`, amount: { animated: 8000, scroll: 6000, simple: 5000 }[getDesign(d.templateId).format], url: `${base}/demo/${d.templateId}` });
           st.draft = { ...d, orderId: o.id };
           return route.fulfill({ json: { ok: true, order: o, created: true } });
+        }
+        case "confirmPay": {
+          const o = orders.find((x) => x.id === body.orderId);
+          if (!o) return route.fulfill({ json: { error: "notFound" } });
+          Object.assign(o, { confirmed: true, status: "awaiting_payment" });
+          return route.fulfill({ json: { ok: true, order: o } });
         }
         case "new":
           st.draft = null;
@@ -89,8 +95,17 @@ const NAMES = {
   },
 };
 
+const TG_STUB = `(() => {
+  const h = new URLSearchParams(location.hash.slice(1));
+  const noop = () => {};
+  const btn = { setParams: noop, onClick: noop, offClick: noop, showProgress: noop, hideProgress: noop, show: noop, hide: noop };
+  window.Telegram = { WebApp: { initData: h.get("tgWebAppData") || "", platform: "unknown", version: h.get("tgWebAppVersion") || "6.0",
+    ready: noop, expand: noop, close: noop, isVersionAtLeast: () => false, MainButton: btn, BackButton: { show: noop, hide: noop, onClick: noop, offClick: noop },
+    openLink: (u) => window.open(u), openTelegramLink: (u) => window.open(u) } };
+})();`;
+
 const report = [];
-const browser = await chromium.launch({ channel: "chrome", headless: true });
+const browser = await chromium.launch(process.env.CHROME ? { executablePath: process.env.CHROME, headless: true } : { channel: "chrome", headless: true });
 try {
   for (const width of [360, 430]) {
     for (const lang of ["uz", "ru"]) {
@@ -106,6 +121,9 @@ try {
         page.on("pageerror", (e) => errors.push(`pageerror: ${e.message}`));
         page.on("console", (m) => m.type() === "error" && !/Failed to load resource.*none\.mp3|Download the React DevTools/.test(m.text()) && errors.push(`console: ${m.text()}`));
         await page.route("**/api/app**", (r) => server.handle(r));
+        // telegram.org может быть закрыт сетью песочницы: та же логика, что у настоящего скрипта вне Telegram
+        // (initData из #tgWebAppData, платформа unknown — приложение рисует свои кнопки)
+        await page.route("https://telegram.org/js/telegram-web-app.js", (r) => r.fulfill({ contentType: "text/javascript", body: TG_STUB }));
         const check = async (name, shot = true) => {
           await page.waitForTimeout(450);
           const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
@@ -167,8 +185,11 @@ try {
           await page.locator('iframe[title="НАМУНА"]').waitFor();
           await check("10-namuna", false);
           await page.getByRole("button", { name: new RegExp(T.form.previewClose) }).click();
-          // Оплата
+          // Оплата: сначала проверка («⚠️ …пул қайтарилмайди»), реквизиты — после «✅ Ҳаммаси тўғри»
           await page.locator("[data-main-action]").click();
+          await page.getByText(T.pay.checkWarn).waitFor();
+          await check("11a-pay-check");
+          await page.getByRole("button", { name: T.pay.checkYes }).click();
           await page.getByText(T.pay.how).waitFor();
           await check("11-pay");
           await page.locator('input[type="file"]').setInputFiles([{ name: "chek.jpg", mimeType: "image/jpeg", buffer: photoBytes }]);
