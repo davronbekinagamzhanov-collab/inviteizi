@@ -15,6 +15,8 @@ export type BotEnv = {
   venueMapPickerUrl?: string;
   /** https://…/app — «✨ Таклифнома яратиш» открывает приложение. Нет (MINI_APP_ENABLED=false) — заказ по чату */
   miniAppUrl?: string | null;
+  /** KAZAKH_ENABLED=true: казахский постер и казахский язык приглашения (тексты ждут проверки носителем) */
+  kazakhEnabled?: boolean;
 };
 
 export type Deps = {

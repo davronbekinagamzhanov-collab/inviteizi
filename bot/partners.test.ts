@@ -12,6 +12,7 @@ import { normalizeKaspi, normalizePhone, SLEEP_AFTER_MS } from "./flow/partners"
 import { TG_LIMITS } from "./testing/fake-tg";
 import { nikohWithReceipt } from "./testing/paths";
 import { ADMIN, ADMIN2, Sim } from "./testing/sim";
+import { posterKkButton } from "@/texts/invite-kk";
 
 const T = staff.pt;
 const MANAGER = 700;
@@ -490,5 +491,23 @@ describe("QR и постер (часть 6)", () => {
     expect(lastToast(s)).toBe(ru.oldButton);
     await s.click(MANAGER, ru.role.posterRu);
     expect(s.tg.to(MANAGER).at(-1)!.fileName).toMatch(/-ru\.png$/);
+  }, 30_000);
+});
+
+describe("Казахский постер (дополнение к части 6)", () => {
+  it("кнопка kk только при KAZAKH_ENABLED; без флага pq:…:kk не срабатывает", async () => {
+    const off = new Sim();
+    await createPartner(off, ADMIN);
+    expect(JSON.stringify(off.last(ADMIN)!.markup)).not.toContain(":kk");
+    const before = off.tg.messages.length;
+    await off.callback(ADMIN, `pq:${off.repo.partners[0].id}:kk`, 1);
+    expect(off.tg.messages.length).toBe(before);
+
+    const on = new Sim();
+    on.deps.env = { ...on.deps.env, kazakhEnabled: true };
+    await createPartner(on, ADMIN);
+    const p = on.repo.partners[0];
+    await on.click(ADMIN, posterKkButton.ru);
+    expect(on.tg.to(ADMIN).at(-1)!.fileName).toBe(`inviteizi-${p.code}-kk.png`);
   }, 30_000);
 });

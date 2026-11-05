@@ -9,6 +9,7 @@ import sharp from "sharp";
 import { describe, expect, it } from "vitest";
 import { uz } from "@/texts/bot-uz";
 import { ru } from "@/texts/bot-ru";
+import { posterKk } from "@/texts/invite-kk";
 import { POSTER, posterPdf, renderPosterPng } from "./poster";
 
 const BOT = "https://t.me/inviteizi_uz_bot?start=p_abcd2345";
@@ -27,9 +28,9 @@ async function read(png: Uint8Array, box: [number, number, number, number], scal
 }
 
 describe("постер A4", () => {
-  for (const [lang, tx] of [["uz", uz], ["ru", ru]] as const) {
+  for (const [lang, poster] of [["uz", uz.role.poster], ["ru", ru.role.poster], ["kk", posterKk]] as const) {
     it(`${lang}: A4 200 dpi, крупный QR — бот с кодом партнёра, маленький — демо`, async () => {
-      const png = await renderPosterPng({ text: tx.role.poster, botUrl: BOT, demoUrl: DEMO, partner: "Салон Малика · Сайрам", minPrice: 5000 });
+      const png = await renderPosterPng({ text: poster, botUrl: BOT, demoUrl: DEMO, partner: "Салон Малика · Сайрам", minPrice: 5000 });
       const meta = await sharp(png).metadata();
       expect([meta.width, meta.height]).toEqual([POSTER.width, POSTER.height]);
       expect(await read(png, [0.2, 0.3, 0.6, 0.42])).toBe(BOT);

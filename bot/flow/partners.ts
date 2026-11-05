@@ -23,6 +23,7 @@ import {
 import { hashToken, INVITE_TTL_MS, managerName, newToken } from "@/lib/roles";
 import { isQuiet } from "@/lib/quiet-hours";
 import { posterPdf, renderPosterPng } from "@/lib/poster";
+import { posterKk, posterKkButton } from "@/texts/invite-kk";
 import { activeDesigns, PRICES } from "@/templates/registry";
 import { staff as S } from "@/texts/bot-ru";
 import type { InlineButton } from "../tg";
@@ -100,14 +101,18 @@ export async function sendPack(c: Ctx, p: Partner) {
   const png = await QRCode.toBuffer(link, { width: 800, margin: 4 });
   await c.deps.tg.sendPhoto(c.chatId, new Uint8Array(png), {
     caption: tx.role.qrCaption(p.name, link),
-    markup: inline([[{ text: tx.role.posterUz, data: `pq:${p.id}:uz` }, { text: tx.role.posterRu, data: `pq:${p.id}:ru` }]]),
+    markup: inline([
+      [{ text: tx.role.posterUz, data: `pq:${p.id}:uz` }, { text: tx.role.posterRu, data: `pq:${p.id}:ru` }],
+      ...(c.deps.env.kazakhEnabled ? [[{ text: posterKkButton[tx === texts.ru ? "ru" : "uz"], data: `pq:${p.id}:kk` }]] : []),
+    ]),
   });
 }
 
 /** pq:<id>:<язык> — постер A4: PDF для печати и PNG для телефона */
 export async function sendPoster(c: Ctx, idArg: string, lang: string) {
   const p = await c.deps.repo.getPartner(Number(idArg));
-  if (!p || (lang !== "uz" && lang !== "ru") || !(await canSeePack(c, p))) {
+  const kk = lang === "kk" && Boolean(c.deps.env.kazakhEnabled);
+  if (!p || (lang !== "uz" && lang !== "ru" && !kk) || !(await canSeePack(c, p))) {
     if (c.u.kind === "callback") {
       await c.deps.tg.answerCallbackQuery(c.u.callbackId, { text: c.tx.oldButton });
       c.answered = true;
@@ -115,7 +120,7 @@ export async function sendPoster(c: Ctx, idArg: string, lang: string) {
     return;
   }
   const png = await renderPosterPng({
-    text: texts[lang].role.poster,
+    text: lang === "kk" ? posterKk : texts[lang as "uz" | "ru"].role.poster,
     botUrl: await linkOf(c.deps, p),
     demoUrl: posterDemoUrl(c.deps, p),
     partner: p.name,
