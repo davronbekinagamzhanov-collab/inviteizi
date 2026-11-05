@@ -2,10 +2,10 @@
 .root { --f-display: var(--b-alegreya); padding-bottom: 8px; }
 
 /* ── Ворота ── */
-.gate { position: fixed; inset: 0; z-index: 50; margin: 0 auto; width: 100%; max-width: 430px; overflow: hidden; cursor: pointer; perspective: 1200px; background: var(--wood); color: var(--c-paper); transition: opacity .45s ease 1.45s; }
+.gate { position: fixed; inset: 0; z-index: 50; margin: 0 auto; width: 100%; max-width: 430px; overflow: hidden; cursor: pointer; perspective: 1200px; background: var(--wood); color: var(--c-paper); transition: opacity var(--m-fast) var(--m-ease) 1.45s; }
 .gate[data-started="true"] { opacity: 0; }
 .court { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 40%, var(--c-paper), color-mix(in srgb, var(--c-paper) 70%, var(--wood))); }
-.leaf { position: absolute; top: 0; bottom: 0; width: 50%; background: var(--wood); color: var(--carve); overflow: hidden; transition: transform 1.35s cubic-bezier(.6, 0, .25, 1) .15s; box-shadow: inset 0 0 0 10px color-mix(in srgb, var(--wood) 80%, #000), inset 0 0 0 11px color-mix(in srgb, var(--carve) 50%, transparent); }
+.leaf { position: absolute; top: 0; bottom: 0; width: 50%; background: var(--wood); color: var(--carve); overflow: hidden; transition: transform var(--m-slow) var(--m-ease) .15s; box-shadow: inset 0 0 0 10px color-mix(in srgb, var(--wood) 80%, #000), inset 0 0 0 11px color-mix(in srgb, var(--carve) 50%, transparent), 0 14px 36px rgba(0, 0, 0, .16); }
 .leafL { left: 0; transform-origin: 0 50%; }
 .leafR { right: 0; transform-origin: 100% 50%; }
 .leafLattice { position: absolute; inset: 22px 18px; width: calc(100% - 36px); height: calc(100% - 44px); opacity: .55; }
@@ -14,11 +14,11 @@
 .leafR .knob { left: 12px; }
 .gate[data-started="true"] .leafL { transform: rotateY(-100deg); }
 .gate[data-started="true"] .leafR { transform: rotateY(100deg); }
-.plaque { position: absolute; z-index: 3; left: 50%; top: 40%; translate: -50% -50%; width: min(82%, 330px); padding: 26px 18px 24px; background: var(--c-paper); color: var(--c-ink); border: 1px solid var(--carve); box-shadow: 0 0 0 5px var(--c-paper), 0 0 0 6px var(--carve), 0 18px 40px -18px rgba(0, 0, 0, .6); transition: opacity .35s ease, transform .5s ease; }
+.plaque { position: absolute; z-index: 3; left: 50%; top: 40%; translate: -50% -50%; width: min(82%, 330px); padding: 26px 18px 24px; background: var(--c-paper); color: var(--c-ink); border: 1px solid var(--carve); box-shadow: 0 0 0 5px var(--c-paper), 0 0 0 6px var(--carve), 0 18px 40px -18px rgba(0, 0, 0, .6); transition: opacity var(--m-fast) var(--m-ease), transform var(--m-fast) var(--m-ease); }
 .gate[data-started="true"] .plaque { opacity: 0; transform: translate3d(0, -10px, 0); }
 .plaqueName { font-family: var(--b-alegreya); font-size: min(40px, calc(250px / (var(--len, 8) * .6))); overflow-wrap: normal !important; line-height: 1.1; font-weight: 500; color: var(--c-accent); }
 .plaqueMeta { font-family: var(--b-alegreya); font-style: italic; font-size: 19px; line-height: 1.4; }
-.tap { position: absolute; z-index: 3; left: 50%; bottom: calc(46px + env(safe-area-inset-bottom)); translate: -50% 0; white-space: nowrap; padding: 12px 26px; border-radius: 999px; background: var(--c-paper); color: var(--c-ink); font-family: var(--n-serif); font-size: 17px; letter-spacing: .06em; box-shadow: 0 0 0 1px var(--carve); transition: opacity .3s ease; animation: darvozaTap 2.6s ease-in-out infinite; }
+.tap { position: absolute; z-index: 3; left: 50%; bottom: calc(46px + env(safe-area-inset-bottom)); translate: -50% 0; white-space: nowrap; padding: 12px 26px; border-radius: 999px; background: var(--c-paper); color: var(--c-ink); font-family: var(--n-serif); font-size: 17px; letter-spacing: .06em; box-shadow: 0 0 0 1px var(--carve); transition: opacity var(--m-fast) var(--m-ease); animation: darvozaTap 2.6s ease-in-out infinite; }
 .gate[data-started="true"] .tap { opacity: 0; }
 @keyframes darvozaTap { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(0, -4px, 0); } }
 

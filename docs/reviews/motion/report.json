@@ -1,0 +1,574 @@
+{
+  "base": "http://localhost:3130",
+  "cpu": 4,
+  "viewport": "375x812",
+  "note": "Chrome headless на ноутбуке, CPU замедлен в 4 раза; не замена реального телефона",
+  "results": [
+    {
+      "id": "oltin-monogramma",
+      "opening": {
+        "frames": 57,
+        "fps": 22,
+        "p95": 172.1,
+        "max": 1139,
+        "janks": 6,
+        "cls": 0
+      },
+      "scroll": {
+        "frames": 91,
+        "fps": 57,
+        "p95": 18.1,
+        "max": 36.1,
+        "janks": 0,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "sapfir",
+      "opening": null,
+      "scroll": {
+        "frames": 92,
+        "fps": 58,
+        "p95": 18.1,
+        "max": 18.1,
+        "janks": 0,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "ganch-peshtoq",
+      "opening": {
+        "frames": 131,
+        "fps": 50,
+        "p95": 18.1,
+        "max": 233.1,
+        "janks": 2,
+        "cls": 0
+      },
+      "scroll": {
+        "frames": 74,
+        "fps": 46,
+        "p95": 18.2,
+        "max": 161.2,
+        "janks": 3,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "shohona-baxmal",
+      "opening": null,
+      "scroll": {
+        "frames": 67,
+        "fps": 42,
+        "p95": 18.1,
+        "max": 447.1,
+        "janks": 1,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "muhr",
+      "opening": {
+        "frames": 140,
+        "fps": 54,
+        "p95": 18.1,
+        "max": 89.9,
+        "janks": 2,
+        "cls": 0
+      },
+      "scroll": {
+        "frames": 90,
+        "fps": 56,
+        "p95": 18.1,
+        "max": 35.3,
+        "janks": 0,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "ipak",
+      "opening": {
+        "frames": 141,
+        "fps": 54,
+        "p95": 18.1,
+        "max": 72,
+        "janks": 2,
+        "cls": 0
+      },
+      "scroll": {
+        "frames": 90,
+        "fps": 56,
+        "p95": 18.1,
+        "max": 18.2,
+        "janks": 0,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "doppicha",
+      "opening": null,
+      "scroll": {
+        "frames": 92,
+        "fps": 58,
+        "p95": 18.1,
+        "max": 18.4,
+        "janks": 0,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "bog",
+      "opening": null,
+      "scroll": {
+        "frames": 90,
+        "fps": 56,
+        "p95": 18.1,
+        "max": 18.1,
+        "janks": 0,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "tong-dasturxon",
+      "opening": null,
+      "scroll": {
+        "frames": 91,
+        "fps": 57,
+        "p95": 18.1,
+        "max": 18.1,
+        "janks": 0,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "pion-guldasta",
+      "opening": {
+        "frames": 143,
+        "fps": 55,
+        "p95": 18.1,
+        "max": 90,
+        "janks": 2,
+        "cls": 0
+      },
+      "scroll": {
+        "frames": 92,
+        "fps": 58,
+        "p95": 18.1,
+        "max": 18.2,
+        "janks": 0,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "umr-daraxti",
+      "opening": null,
+      "scroll": {
+        "frames": 92,
+        "fps": 58,
+        "p95": 18.1,
+        "max": 18.1,
+        "janks": 0,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "zarhal-lavha",
+      "opening": {
+        "frames": 144,
+        "fps": 55,
+        "p95": 18.1,
+        "max": 53.3,
+        "janks": 1,
+        "cls": 0
+      },
+      "scroll": {
+        "frames": 91,
+        "fps": 57,
+        "p95": 18.1,
+        "max": 18.2,
+        "janks": 0,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "gul-doira",
+      "opening": {
+        "frames": 144,
+        "fps": 55,
+        "p95": 18.1,
+        "max": 54.1,
+        "janks": 1,
+        "cls": 0
+      },
+      "scroll": {
+        "frames": 91,
+        "fps": 57,
+        "p95": 18.1,
+        "max": 18.5,
+        "janks": 0,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "girih-barg",
+      "opening": {
+        "frames": 145,
+        "fps": 56,
+        "p95": 18.1,
+        "max": 53.1,
+        "janks": 1,
+        "cls": 0
+      },
+      "scroll": {
+        "frames": 92,
+        "fps": 58,
+        "p95": 18.1,
+        "max": 18.7,
+        "janks": 0,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "muhrli-maktub",
+      "opening": {
+        "frames": 143,
+        "fps": 55,
+        "p95": 18.1,
+        "max": 54.1,
+        "janks": 1,
+        "cls": 0
+      },
+      "scroll": {
+        "frames": 91,
+        "fps": 57,
+        "p95": 18.1,
+        "max": 18.1,
+        "janks": 0,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "tonggi-piyola",
+      "opening": {
+        "frames": 145,
+        "fps": 56,
+        "p95": 18.1,
+        "max": 54.1,
+        "janks": 1,
+        "cls": 0
+      },
+      "scroll": {
+        "frames": 92,
+        "fps": 58,
+        "p95": 18.1,
+        "max": 18.2,
+        "janks": 0,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "lola-bodom",
+      "opening": {
+        "frames": 137,
+        "fps": 53,
+        "p95": 18.1,
+        "max": 107.1,
+        "janks": 2,
+        "cls": 0
+      },
+      "scroll": {
+        "frames": 92,
+        "fps": 58,
+        "p95": 18.1,
+        "max": 18.4,
+        "janks": 0,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "bordo-guldasta",
+      "opening": null,
+      "scroll": {
+        "frames": 91,
+        "fps": 57,
+        "p95": 18.1,
+        "max": 18.1,
+        "janks": 0,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "choy-maktub",
+      "opening": null,
+      "scroll": {
+        "frames": 91,
+        "fps": 57,
+        "p95": 18.1,
+        "max": 18.1,
+        "janks": 0,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "oq-maktub",
+      "opening": null,
+      "scroll": {
+        "frames": 85,
+        "fps": 53,
+        "p95": 18.1,
+        "max": 125.5,
+        "janks": 1,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "hurmat-maktub",
+      "opening": null,
+      "scroll": {
+        "frames": 81,
+        "fps": 51,
+        "p95": 18.1,
+        "max": 197.1,
+        "janks": 1,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "tong-varaq",
+      "opening": null,
+      "scroll": {
+        "frames": 83,
+        "fps": 52,
+        "p95": 18.1,
+        "max": 142.5,
+        "janks": 1,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "nur-varaq",
+      "opening": null,
+      "scroll": {
+        "frames": 83,
+        "fps": 52,
+        "p95": 18.1,
+        "max": 143.6,
+        "janks": 1,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "non-albom",
+      "opening": null,
+      "scroll": {
+        "frames": 91,
+        "fps": 57,
+        "p95": 18.1,
+        "max": 18.6,
+        "janks": 0,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "ipak-albom",
+      "opening": null,
+      "scroll": {
+        "frames": 86,
+        "fps": 54,
+        "p95": 18.1,
+        "max": 107.6,
+        "janks": 1,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "xotira-albom",
+      "opening": null,
+      "scroll": {
+        "frames": 90,
+        "fps": 56,
+        "p95": 18.1,
+        "max": 18.2,
+        "janks": 0,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "qozon-tongi",
+      "opening": {
+        "frames": 145,
+        "fps": 56,
+        "p95": 18.1,
+        "max": 54,
+        "janks": 1,
+        "cls": 0
+      },
+      "scroll": {
+        "frames": 92,
+        "fps": 58,
+        "p95": 18.1,
+        "max": 18.1,
+        "janks": 0,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "visol-hikoya",
+      "opening": {
+        "frames": 143,
+        "fps": 55,
+        "p95": 18.1,
+        "max": 54.1,
+        "janks": 2,
+        "cls": 0
+      },
+      "scroll": {
+        "frames": 90,
+        "fps": 56,
+        "p95": 18.1,
+        "max": 18.3,
+        "janks": 0,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "ganch-darvoza",
+      "opening": {
+        "frames": 145,
+        "fps": 56,
+        "p95": 18.1,
+        "max": 35.2,
+        "janks": 0,
+        "cls": 0
+      },
+      "scroll": {
+        "frames": 91,
+        "fps": 57,
+        "p95": 18.1,
+        "max": 18.1,
+        "janks": 0,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "doppi-kitob",
+      "opening": null,
+      "scroll": {
+        "frames": 90,
+        "fps": 56,
+        "p95": 18.1,
+        "max": 18.1,
+        "janks": 0,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "umr-kitobi",
+      "opening": null,
+      "scroll": {
+        "frames": 90,
+        "fps": 56,
+        "p95": 18.1,
+        "max": 18.2,
+        "janks": 0,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "suzani-medalyon",
+      "opening": null,
+      "scroll": {
+        "frames": 91,
+        "fps": 57,
+        "p95": 18.1,
+        "max": 18.6,
+        "janks": 0,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "lola-medalyon",
+      "opening": null,
+      "scroll": {
+        "frames": 83,
+        "fps": 52,
+        "p95": 18.1,
+        "max": 161.1,
+        "janks": 1,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "suvbuyoq-tuman",
+      "opening": null,
+      "scroll": {
+        "frames": 91,
+        "fps": 57,
+        "p95": 18.1,
+        "max": 18.1,
+        "janks": 0,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "suvbuyoq-zumrad",
+      "opening": null,
+      "scroll": {
+        "frames": 90,
+        "fps": 56,
+        "p95": 18.1,
+        "max": 18.1,
+        "janks": 0,
+        "cls": 0
+      },
+      "errors": []
+    },
+    {
+      "id": "suvbuyoq-upa",
+      "opening": null,
+      "scroll": {
+        "frames": 90,
+        "fps": 56,
+        "p95": 18.1,
+        "max": 18.1,
+        "janks": 0,
+        "cls": 0
+      },
+      "errors": []
+    }
+  ]
+}

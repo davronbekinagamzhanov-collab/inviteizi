@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { MOTION, MOTION_CSS_EASE } from "./motion";
 
 /**
  * Появление блока при листании. Каждый дизайн выбирает свой эффект.
  *
  * Правило: пустого экрана не бывает никогда.
  * - Блок запускается заранее — когда до него остаётся ещё четверть экрана.
- * - Анимация короткая (0,35 с) и начинается не с нуля: блок сразу виден на 35%.
+ * - Анимация по общей системе движения (0,9 с, мягкое замедление) и начинается не с нуля: блок сразу виден на 35%.
  * - Если гость пролистал так быстро, что блок уже на экране, — он показывается мгновенно.
  *
  * Работает на CSS-переходах (а не на JS-анимации): состояние в DOM всегда совпадает с тем,
@@ -32,6 +33,11 @@ const SHOWN: CSSProperties = { opacity: 1, transform: "none" };
 // clip-path только у «свитка»: у остальных он обрезал бы тени
 const SHOWN_UNROLL: CSSProperties = { ...SHOWN, clipPath: "inset(-60px -60px -60px -60px)" };
 
+const revealTransition = (delay: number) => {
+  const d = `${MOTION.base}s ${MOTION_CSS_EASE} ${Math.min(delay, MOTION.step * 3)}s`;
+  return `opacity ${d}, transform ${d}, clip-path ${d}`;
+};
+
 export function Reveal({
   children,
   delay = 0,
@@ -39,7 +45,7 @@ export function Reveal({
   className,
 }: {
   children: ReactNode;
-  /** Задержка, не больше 0,15 с (для лесенки внутри блока) */
+  /** Задержка для лесенки внутри блока: шаг MOTION.step, не больше трёх шагов */
   delay?: number;
   effect?: RevealEffect;
   className?: string;
@@ -52,10 +58,7 @@ export function Reveal({
       ? revealEffects[effect]
       : {
           ...(effect === "unroll" ? SHOWN_UNROLL : SHOWN),
-          transition:
-            state === "instant"
-              ? "none"
-              : `opacity 0.35s ease-out ${Math.min(delay, 0.15)}s, transform 0.35s cubic-bezier(0.22,1,0.36,1) ${Math.min(delay, 0.15)}s, clip-path 0.35s ease-out ${Math.min(delay, 0.15)}s`,
+          transition: state === "instant" ? "none" : revealTransition(delay),
         };
 
   return (
@@ -81,7 +84,8 @@ function useRevealState(ref: React.RefObject<HTMLElement | null>) {
       if (!entry?.isIntersecting) return;
       setState(entry.boundingClientRect.top < window.innerHeight * 0.85 ? "instant" : "animate");
       observer.disconnect();
-    }, { rootMargin: "25% 0px" });
+      // сверху — целый экран запаса: блок, который гость «перепрыгнул» быстрым листанием, тоже показывается
+    }, { rootMargin: "100% 0px 25% 0px" });
     observer.observe(el);
     return () => observer.disconnect();
   }, [ref]);

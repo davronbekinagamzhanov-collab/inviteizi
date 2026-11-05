@@ -249,6 +249,6 @@ describe("скрытые дизайны", () => {
       expect(getDesign(d.id)?.load, d.id).toBeTypeOf("function");
     }
     expect(shown.has("islimi-varaq")).toBe(false);
-    expect(shown.size).toBe(33);
+    expect(shown.size).toBe(36); // 33 + три «Пятна» (v2)
   });
 });

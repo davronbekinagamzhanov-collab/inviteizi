@@ -17,8 +17,8 @@ import { RibbonEnvelope } from "./RibbonEnvelope";
 import { BouquetFallback, GoldDefs, PetalDivider } from "./decor";
 import { melody } from "./melody";
 import { BORDO, CREAM, POWDER, fontClasses, vars } from "./style";
+import { MOTION } from "@/templates/blocks/motion";
 
-const EASE = [0.22, 1, 0.36, 1] as const;
 
 /**
  * №51 «Пион гулдаста» — юбилей, Анимацияли.
@@ -145,7 +145,7 @@ function Hero({ inv, art }: { inv: Inv; art?: string }) {
   const show = (delay: number) => ({
     initial: { opacity: 0, y: 12 },
     animate: on ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 },
-    transition: { duration: 0.9, delay: on ? delay : 0, ease: EASE },
+    transition: { duration: MOTION.base, delay: on ? delay : 0, ease: MOTION.ease },
   });
 
   return (
@@ -157,7 +157,7 @@ function Hero({ inv, art }: { inv: Inv; art?: string }) {
         className="absolute inset-x-0 bottom-0 h-[64%] origin-bottom"
         initial={{ opacity: 0, scale: 0.7, y: 40 }}
         animate={on ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.7, y: 40 }}
-        transition={{ duration: 1.6, delay: on ? 1.2 : 0, ease: EASE }}
+        transition={{ duration: MOTION.slow, delay: on ? 1.2 : 0, ease: MOTION.ease }}
         style={{ maskImage: "linear-gradient(180deg, transparent 0%, #000 22%, #000 82%, transparent 100%)" }}
       >
         {art ? (
@@ -170,9 +170,9 @@ function Hero({ inv, art }: { inv: Inv; art?: string }) {
       <div className="relative flex flex-col items-center px-6 pt-[5svh] text-center">
         <motion.div
           className="flex items-start"
-          initial={{ opacity: 0, scale: 0.85, filter: "blur(6px)" }}
-          animate={on ? { opacity: 1, scale: 1, filter: "blur(0px)" } : { opacity: 0, scale: 0.85, filter: "blur(6px)" }}
-          transition={{ duration: 1.2, delay: on ? 1.7 : 0, ease: EASE }}
+          initial={{ opacity: 0, scale: 0.85 }}
+          animate={on ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.85 }}
+          transition={{ duration: MOTION.slow, delay: on ? 1.7 : 0, ease: MOTION.ease }}
         >
           <span className="gold-text gold-shine font-display text-[clamp(120px,min(40vw,22svh),170px)] leading-[0.9] font-bold italic">
             {inv.data.age}

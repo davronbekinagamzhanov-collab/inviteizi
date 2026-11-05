@@ -11,6 +11,7 @@ import {MapButton} from "../../blocks/MapButton";
 import {Reveal} from "../../blocks/Reveal";
 import {Calendar} from "../../blocks/Calendar";
 import {designTexts} from "@/texts/uz-cyrl";
+import { MOTION } from "@/templates/blocks/motion";
 const font=localFont({src:[{path:"../../../assets/fonts/Lora-Regular.ttf"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--zl-font",display:"swap"});
 const vars=designVars({primary:"#89623c",primaryDark:"#634328",gold:"#b28b53",goldLight:"#ead7b6",paper:"#fcf6eb",ink:"#514332",muted:"#71614e"},{display:"var(--zl-font)",accent:"var(--zl-font)",body:"var(--zl-font)"});
 const t=designTexts("zarhal-lavha");
@@ -23,8 +24,8 @@ export default function Design({data,mode}:TemplateProps){
   return <InvitationShell inv={inv} style={vars} fontsClassName={font.variable} backdropClassName="bg-[#ded3bd]" className="bg-paper text-ink [overflow-wrap:anywhere]">
     <Content data={data} inv={inv}/>
     {!inv.opened&&<button data-open type="button" onClick={open} disabled={inv.started} aria-label={t.opening.tapToOpen} className="absolute inset-x-0 top-0 z-40 h-svh min-h-[560px] overflow-hidden text-ink" style={{perspective:1200}}>
-      {[0,1,2,3,4].map(i=><motion.div key={i} initial={false} animate={{rotateX:inv.started?(i%2?90:-90):0,opacity:inv.started?0:1}} transition={{duration:reduced?0:.76,delay:reduced?0:i*.055,ease:[.22,.65,.3,1]}} className="absolute inset-x-0 h-[20.2%] border-y border-[#c0a271]/45 bg-[#eee0c4]" style={{top:`${i*20}%`,transformOrigin:i%2?"center bottom":"center top",backfaceVisibility:"hidden",willChange:inv.started?"transform,opacity":undefined}}><div aria-hidden className="absolute inset-3 border border-[#b28b53]/40"/>{i===0||i===4?<div className="absolute inset-x-8 top-[25%]"><Filigree/></div>:null}</motion.div>)}
-      <motion.div initial={false} animate={{opacity:inv.started?0:1,y:inv.started?-12:0}} transition={{duration:reduced?0:.18}} className="pointer-events-none absolute inset-x-7 top-[31%] text-center"><p className="text-[13px] uppercase tracking-[.2em]">{t.opening.invitation}</p>{data.age!=null&&<p className="mt-6 text-[88px] leading-none text-primary">{data.age}<span className="ml-2 text-[22px] italic">{t.ageLabel}</span></p>}<p className="mt-7 text-[29px]">{t.occasionTitles[inv.occasion]}</p><p className="mt-12 text-[17px]">{t.opening.tapToOpen}</p></motion.div>
+      {[0,1,2,3,4].map(i=><motion.div key={i} initial={false} animate={{rotateX:inv.started?(i%2?90:-90):0,opacity:inv.started?0:1}} transition={{duration:reduced?0:MOTION.base,delay:reduced?0:i * MOTION.step,ease: MOTION.ease}} className="absolute inset-x-0 h-[20.2%] border-y border-[#c0a271]/45 bg-[#eee0c4]" style={{top:`${i*20}%`,transformOrigin:i%2?"center bottom":"center top",backfaceVisibility:"hidden",willChange:inv.started?"transform,opacity":undefined}}><div aria-hidden className="absolute inset-3 border border-[#b28b53]/40"/>{i===0||i===4?<div className="absolute inset-x-8 top-[25%]"><Filigree/></div>:null}</motion.div>)}
+      <motion.div initial={false} animate={{opacity:inv.started?0:1,y:inv.started?-12:0}} transition={{duration:reduced?0:MOTION.fast, ease: MOTION.ease}} className="pointer-events-none absolute inset-x-7 top-[31%] text-center"><p className="text-[13px] uppercase tracking-[.2em]">{t.opening.invitation}</p>{data.age!=null&&<p className="mt-6 text-[88px] leading-none text-primary">{data.age}<span className="ml-2 text-[22px] italic">{t.ageLabel}</span></p>}<p className="mt-7 text-[29px]">{t.occasionTitles[inv.occasion]}</p><p className="mt-12 text-[17px]">{t.opening.tapToOpen}</p></motion.div>
     </button>}
   </InvitationShell>;
 }

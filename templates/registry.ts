@@ -206,11 +206,15 @@ const rawDesigns: RawDesign[] = [
   design("umr-kitobi", 137, "yubiley", "scroll", false, () => import("./themes/umr-kitobi/Design")),
   design("suzani-medalyon", 129, "nikoh", "simple", false, () => import("./themes/suzani-medalyon/Design"), { clientPhotos: true }),
   design("lola-medalyon", 136, "sunnat", "simple", false, () => import("./themes/lola-medalyon/Design"), { clientPhotos: true }),
+  // «Пятно» (v2, 05.11.2026): акварельное пятно на белой бумаге, структура templates/themes/patno
+  design("suvbuyoq-tuman", 139, "nikoh", "animated", false, () => import("./themes/suvbuyoq-tuman/Design")),
+  design("suvbuyoq-zumrad", 140, "nikoh", "animated", false, () => import("./themes/suvbuyoq-zumrad/Design")),
+  design("suvbuyoq-upa", 141, "nikoh", "animated", false, () => import("./themes/suvbuyoq-upa/Design")),
 
 ];
 
 const STYLE_OF: Record<DesignStyle, string[]> = {
-  milk: ["umr-kitobi", "tong-varaq", "hurmat-maktub", "oq-maktub", "choy-maktub", "sahar-ipagi", "sahar-maktubi", "ehtirom-kartasi","zarhal-eshik", "atlas-tolqin", "non-muhr", "marvarid-satr", "bugdoy-boshoq", "shirin-tilak", "visol-soati", "tut-qogozi"],
+  milk: ["suvbuyoq-tuman", "suvbuyoq-zumrad", "suvbuyoq-upa", "umr-kitobi", "tong-varaq", "hurmat-maktub", "oq-maktub", "choy-maktub", "sahar-ipagi", "sahar-maktubi", "ehtirom-kartasi","zarhal-eshik", "atlas-tolqin", "non-muhr", "marvarid-satr", "bugdoy-boshoq", "shirin-tilak", "visol-soati", "tut-qogozi"],
   gold: ["oltin-monogramma", "oltin-ot", "zarhal-lavha", "qosh-uzuk", "zarvaraq", "saodat-kaliti"],
   floral: ["bordo-guldasta", "lola-bodom", "tonggi-piyola", "muhrli-maktub", "gul-doira", "girih-barg", "umr-sahifalari","pion-guldasta", "ipak-romol", "paxta-gul", "visol-rishta", "kabutar-salom", "umr-daraxti", "rayhon-sahari", "siyoh-duo", "shabnam-visol", "uzum-hovli"],
   national: ["doppi-kitob", "ganch-darvoza", "islimi-varaq", "sunnat-muqova", "sunnat-nasab","ganch-peshtoq", "rishton-koshin", "oq-ot", "sayram-hovli", "doppicha", "adras-nishon", "suzani-yol", "sopol-navo", "girih-nur", "dutor-navosi", "minor-satr", "kumush-taroq", "mis-kafgir", "oq-chinni", "tonggi-qozon", "yelpigich-ziynat"],
@@ -243,6 +247,8 @@ export const ACCEPTED = new Set([
   "gul-doira", "girih-barg", "muhrli-maktub", "tonggi-piyola", "lola-bodom", "bordo-guldasta",
   // 123–138 — батч 3
    "choy-maktub", "oq-maktub", "hurmat-maktub", "tong-varaq", "nur-varaq", "non-albom", "ipak-albom", "xotira-albom", "qozon-tongi", "visol-hikoya", "ganch-darvoza", "doppi-kitob", "umr-kitobi", "suzani-medalyon", "lola-medalyon",
+  // 139–141 — «Пятно» (v2): никоҳ, места 5–7 в каталоге
+  "suvbuyoq-tuman", "suvbuyoq-zumrad", "suvbuyoq-upa",
   // Скрыты по решению владельца 03.11.2026 (код и строки в БД остаются — оплаченные ссылки работают),
   // список — HIDDEN_03_11 ниже. «anor-bogi» скрыт ещё 24.10.
 ]);
@@ -267,7 +273,7 @@ export const HIDDEN_03_11: readonly string[] = [
 /**
  * Порядок каталога — ОДИН список на тадбир (бот, приложение, сайт /catalog).
  * Первым — сильнейший за 8 000 ₸; цены смешаны, чтобы сразу было видно недорогие (5 000 и 6 000 ₸).
- * Никоҳ: 113, 114 и сильнейший 8 000 первыми, места 5–7 — «Пятна» (их id добавляются, когда дизайны готовы).
+ * Никоҳ: 113, 114 и сильнейший 8 000 первыми, места 5–7 — «Пятна» (139–141).
  */
 export const CATALOG_ORDER: Record<Occasion, readonly string[]> = {
   nikoh: [

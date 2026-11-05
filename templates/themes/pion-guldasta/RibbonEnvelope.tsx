@@ -10,9 +10,9 @@ import type { Invitation } from "../../blocks/useInvitation";
 import { OpeningCaption } from "../../blocks/OpeningCaption";
 import { Bow } from "./decor";
 import { CREAM } from "./style";
+import { MOTION } from "@/templates/blocks/motion";
 
 const FINISH_MS = 2700;
-const EASE = [0.65, 0, 0.35, 1] as const;
 
 const SATIN_H = "linear-gradient(180deg, #4E1220 0%, #7E2537 30%, #B5536A 50%, #7E2537 70%, #4E1220 100%)";
 const SATIN_V = "linear-gradient(90deg, #4E1220 0%, #7E2537 30%, #B5536A 50%, #7E2537 70%, #4E1220 100%)";
@@ -36,7 +36,7 @@ export function RibbonEnvelope({ inv, age }: { inv: Invitation; age?: number }) 
   // половинки ленты и конверта: [куда уходят, задержка]
   const slide = (to: Record<string, number | string>, delay: number) => ({
     animate: going ? { ...to, opacity: 0 } : {},
-    transition: { duration: 0.85, delay: going ? delay : 0, ease: EASE },
+    transition: { duration: MOTION.base, delay: going ? delay : 0, ease: MOTION.ease },
   });
 
   return (
@@ -46,20 +46,20 @@ export function RibbonEnvelope({ inv, age }: { inv: Invitation; age?: number }) 
           key="ribbon"
           className="fixed inset-y-0 left-1/2 z-[29] flex w-full max-w-[430px] -translate-x-1/2 flex-col items-center justify-center overflow-hidden"
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: MOTION.fast, ease: MOTION.ease }}
         >
           {/* фон заставки тает к концу, открывая букет */}
           <motion.div
             className="absolute inset-0"
             style={{ background: `radial-gradient(120% 70% at 50% 20%, #FFFFFF 0%, ${CREAM} 45%, #F6E4E1 100%)` }}
             animate={{ opacity: going ? 0 : 1 }}
-            transition={{ duration: 0.9, delay: going ? 1.45 : 0 }}
+            transition={{ duration: MOTION.base, ease: MOTION.ease, delay: going ? 1.45 : 0 }}
           />
 
           <motion.div
             className="relative mb-8 px-6"
             animate={{ opacity: going ? 0 : 1 }}
-            transition={{ duration: 0.4 }}
+            transition={{ duration: MOTION.fast, ease: MOTION.ease }}
           >
             <OpeningCaption
               inv={inv}
@@ -111,7 +111,7 @@ export function RibbonEnvelope({ inv, age }: { inv: Invitation; age?: number }) 
               <motion.span
                 className="gold-text absolute right-5 bottom-3 font-display text-[30px] font-semibold italic"
                 animate={{ opacity: going ? 0 : 1 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: MOTION.fast, ease: MOTION.ease }}
               >
                 {age}
               </motion.span>
@@ -121,7 +121,7 @@ export function RibbonEnvelope({ inv, age }: { inv: Invitation; age?: number }) 
           <motion.p
             className="soft-pulse relative mt-10 text-[17px] tracking-[0.14em] text-[#8C6A6E]"
             animate={{ opacity: going ? 0 : 1 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: MOTION.fast, ease: MOTION.ease }}
           >
             {t.opening.tapToOpen}
           </motion.p>

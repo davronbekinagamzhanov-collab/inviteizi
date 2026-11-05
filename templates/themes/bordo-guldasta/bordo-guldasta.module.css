@@ -18,7 +18,7 @@
 .time { margin-top: 2px; font-family: var(--n-serif); font-size: 22px; font-weight: 500; color: var(--f-line); font-variant-numeric: lining-nums; }
 
 /* Текст карточки виден с первого кадра (правило владельца 03.11): анимация только «досветляет» за 0,6 с */
-[data-on="true"] .step { animation: bStep .6s cubic-bezier(.22, 1, .36, 1) both; }
+[data-on="true"] .step { animation: bStep var(--m-fast) var(--m-ease) both; }
 [data-on="true"] .step:nth-child(1) { animation-delay: 0.00s; }
 [data-on="true"] .step:nth-child(2) { animation-delay: 0.05s; }
 [data-on="true"] .step:nth-child(3) { animation-delay: 0.10s; }

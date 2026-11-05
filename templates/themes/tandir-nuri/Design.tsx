@@ -1,5 +1,6 @@
 "use client";
 
+import { MOTION } from "@/templates/blocks/motion";
 import { motion } from "motion/react";
 import type { ReactNode } from "react";
 import { designTexts } from "@/texts/uz-cyrl";
@@ -110,7 +111,7 @@ export default function Design({ data, mode }: TemplateProps) {
             )}
             {inv.program.map((ev, i) => (
               <li key={i} className="relative pb-12 pl-11 last:pb-0">
-                <Reveal delay={i * 0.06}>
+                <Reveal delay={i * MOTION.step}>
                   <ProgramItem event={ev} />
                 </Reveal>
               </li>

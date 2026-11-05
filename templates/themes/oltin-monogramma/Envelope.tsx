@@ -7,6 +7,7 @@ import { OpeningCaption } from "../../blocks/OpeningCaption";
 import type { Invitation } from "../../blocks/useInvitation";
 import { EmbossedPaper } from "./decor";
 import { PAPER } from "./style";
+import { MOTION } from "@/templates/blocks/motion";
 
 const ORDER = ["idle", "crack", "open", "rise", "expand"] as const;
 type Phase = (typeof ORDER)[number];
@@ -19,7 +20,6 @@ const TIMELINE: [Phase, number][] = [
 ];
 const FINISH_MS = 2900;
 
-const EASE = [0.65, 0, 0.35, 1] as const;
 
 /**
  * Заставка: плотный конверт с золотой сургучной печатью.
@@ -48,14 +48,14 @@ export function Envelope({ inv, initials }: { inv: Invitation; initials: [string
           className="fixed inset-y-0 left-1/2 z-[29] flex w-full max-w-[430px] -translate-x-1/2 flex-col items-center justify-center overflow-hidden"
           style={{ background: PAPER }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
+          transition={{ duration: MOTION.fast, ease: MOTION.ease }}
         >
           <EmbossedPaper />
 
           <motion.div
             className="relative mb-9 px-6"
             animate={{ opacity: reached("rise") ? 0 : 1, y: reached("rise") ? -12 : 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: MOTION.fast, ease: MOTION.ease }}
           >
             <OpeningCaption
               inv={inv}
@@ -71,7 +71,7 @@ export function Envelope({ inv, initials }: { inv: Invitation; initials: [string
             aria-label={t.opening.tapToOpen}
             className="relative aspect-[3/2] w-[min(80vw,310px)] cursor-pointer [perspective:1100px]"
             animate={reached("expand") ? { scale: 1.15, opacity: 0 } : { scale: 1, opacity: 1 }}
-            transition={{ duration: 0.7, ease: EASE }}
+            transition={{ duration: MOTION.fast, ease: MOTION.ease }}
           >
             {/* задняя стенка */}
             <span
@@ -84,7 +84,7 @@ export function Envelope({ inv, initials }: { inv: Invitation; initials: [string
               className="absolute inset-x-[7%] top-[7%] bottom-[7%] z-[2] flex flex-col items-center justify-center rounded-[4px] shadow-md"
               style={{ background: PAPER }}
               animate={{ y: reached("rise") ? "-62%" : "0%" }}
-              transition={{ duration: 0.85, ease: EASE }}
+              transition={{ duration: MOTION.base, ease: MOTION.ease }}
             >
               <span className="absolute inset-[6px] rounded-[2px] border border-[#B8892F]/50" />
               <span className="gold-text font-display text-[34px] leading-none font-semibold">
@@ -115,7 +115,7 @@ export function Envelope({ inv, initials }: { inv: Invitation; initials: [string
               // открытый клапан уходит за карточку, чтобы она поднималась поверх него
               style={{ zIndex: reached("rise") ? 1 : 3 }}
               animate={{ rotateX: reached("open") ? 180 : 0 }}
-              transition={{ duration: 0.8, ease: EASE }}
+              transition={{ duration: MOTION.base, ease: MOTION.ease }}
             >
               <span
                 className="absolute inset-0 [backface-visibility:hidden]"
@@ -147,7 +147,7 @@ export function Envelope({ inv, initials }: { inv: Invitation; initials: [string
           <motion.div
             className="relative mt-12 flex flex-col items-center gap-3"
             animate={{ opacity: phase === "idle" ? 1 : 0 }}
-            transition={{ duration: 0.4 }}
+            transition={{ duration: MOTION.fast, ease: MOTION.ease }}
           >
             <p className="soft-pulse font-body text-[17px] tracking-[0.18em] text-muted">{t.opening.tapToOpen}</p>
             <TapHint />
@@ -184,7 +184,7 @@ function SealHalf({
           ? { x: dir * 26, y: 46, rotate: dir * 24, opacity: 0 }
           : { x: 0, y: 0, rotate: 0, opacity: 1 }
       }
-      transition={{ duration: 0.7, ease: [0.5, 0, 0.75, 0], delay: 0.08 }}
+      transition={{ duration: MOTION.fast, ease: MOTION.ease, delay: 0.08 }}
     >
       <svg viewBox="0 0 76 76" className="h-full w-full">
         {/* тень под печатью и неровный край сургуча */}

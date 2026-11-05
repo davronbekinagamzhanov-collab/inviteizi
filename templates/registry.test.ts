@@ -6,16 +6,17 @@ import {photoAttributions} from "@/texts/uz-cyrl";
 vi.mock("next/font/local",()=>({default:()=>({variable:"test-font"})}));
 
 describe("catalog acceptance integrity",()=>{
-  it("after the 03.11 clean-up: 18 designs (12 + «Гулли рамка» 117–122) + batch 3 (123–138); 48 hidden ones stay in code",()=>{
+  it("after the 03.11 clean-up: 18 designs (12 + «Гулли рамка» 117–122) + batch 3 (123–138) + «Пятно» 139–141; 48 hidden ones stay in code",()=>{
     const base=[1,23,51,61,70,78,81,87,113,114,115,116,117,118,119,120,121,122];
     const nums=activeDesigns().map(d=>d.number).sort((a,b)=>a-b);
     expect(ACCEPTED.size).toBe(activeDesigns().length);expect(ACCEPTED.has('anor-bogi')).toBe(false);
     expect(nums.filter(n=>n<123)).toEqual(base);
-    const b3=nums.filter(n=>n>=123);
-    expect(b3.length).toBeLessThanOrEqual(16);expect(b3.every(n=>n<=138)).toBe(true);
+    const b3=nums.filter(n=>n>=123&&n<=138);
+    expect(b3.length).toBeLessThanOrEqual(16);
+    expect(nums.filter(n=>n>138)).toEqual([139,140,141]); // «Пятно» (v2)
     expect(new Set(nums).size).toBe(nums.length);
     expect(HIDDEN_03_11).toHaveLength(48);expect(HIDDEN_BATCH3).toEqual(["islimi-varaq"]);expect(nums).not.toContain(131);
-    expect(everAccepted()).toHaveLength(48+HIDDEN_BATCH3.length+nums.length);expect(activeDesigns()).toHaveLength(33);
+    expect(everAccepted()).toHaveLength(48+HIDDEN_BATCH3.length+nums.length);expect(activeDesigns()).toHaveLength(36);
     for(const id of HIDDEN_03_11){const d=getDesign(id);expect(d,id).toBeDefined();expect(ACCEPTED.has(id)).toBe(false);}
     expect(getDesign("saodat-kaliti")?.number).toBe(106);expect(getDesign("kabutar-salom")?.number).toBe(96);
     // Every format the bot offers for an occasion has at least one design (formatsFor hides empty ones)

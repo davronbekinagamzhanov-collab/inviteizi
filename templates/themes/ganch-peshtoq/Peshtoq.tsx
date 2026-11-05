@@ -10,9 +10,8 @@ import type { Invitation } from "../../blocks/useInvitation";
 import { OpeningCaption } from "../../blocks/OpeningCaption";
 import { Kitoba, PeshtoqArt, archPath, peshtoqGeo, starPoints, useSize, type Peshtoq } from "./decor";
 import { PLASTER, SURFACE } from "./style";
+import { MOTION } from "@/templates/blocks/motion";
 
-const EASE = [0.65, 0, 0.35, 1] as const;
-const SOFT = [0.22, 1, 0.36, 1] as const;
 // Когда после нажатия всё готово: решётки ушли в стены, свет осел, имена проявились
 const FINISH_MS = 2700;
 // Когда проявляются имена (решётки к этому моменту разошлись наполовину)
@@ -45,9 +44,10 @@ export function Cover({ inv }: { inv: Invitation }) {
   // Без заставки (уже открыто) — текст сразу, без задержки
   const base = inv.opened ? 0 : TEXT_AT;
   const show = (i: number) => ({
-    initial: { opacity: 0, y: 12, filter: "blur(6px)" },
-    animate: on ? { opacity: 1, y: 0, filter: "blur(0px)" } : { opacity: 0, y: 12, filter: "blur(6px)" },
-    transition: { duration: 1, delay: on ? base + i * 0.14 : 0, ease: SOFT },
+    // без blur: размытие пересчитывается на каждом кадре и на слабом телефоне дёргается
+    initial: { opacity: 0, y: 12 },
+    animate: on ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 },
+    transition: { duration: MOTION.base, delay: on ? base + i * 0.14 : 0, ease: MOTION.ease },
   });
 
   function open() {
@@ -80,7 +80,7 @@ export function Cover({ inv }: { inv: Invitation }) {
         }}
         initial={{ opacity: 0 }}
         animate={on ? { opacity: inv.opened ? 0.45 : [0, 1, 0.45] } : { opacity: 0 }}
-        transition={{ duration: 2.4, times: [0, 0.4, 1], delay: inv.opened ? 0 : 0.2, ease: "easeInOut" }}
+        transition={{ duration: 2.4, times: [0, 0.4, 1], delay: inv.opened ? 0 : 0.2, ease: MOTION.ease }}
       />
 
       {/* Текст внутри арки */}
@@ -147,7 +147,7 @@ export function Cover({ inv }: { inv: Invitation }) {
               className="absolute inset-0"
               style={{ background: "radial-gradient(80% 60% at 50% 55%, rgba(120,96,62,0.10), rgba(90,70,45,0.32))" }}
               animate={{ opacity: on ? 0 : 1 }}
-              transition={{ duration: 1.2, delay: 0.3 }}
+              transition={{ duration: MOTION.slow, ease: MOTION.ease, delay: 0.3 }}
             />
             <Screen side="left" w={g.aw / 2} h={nicheH} on={on} initial={data.groom?.charAt(0) ?? ""} />
             <Screen side="right" w={g.aw / 2} h={nicheH} on={on} initial={data.bride?.charAt(0) ?? ""} />
@@ -155,7 +155,7 @@ export function Cover({ inv }: { inv: Invitation }) {
             <motion.span
               className="absolute bottom-[7%] left-1/2 block w-[min(84%,240px)] -translate-x-1/2"
               animate={{ opacity: on ? 0 : 1, y: on ? 8 : 0 }}
-              transition={{ duration: 0.35 }}
+              transition={{ duration: MOTION.fast, ease: MOTION.ease }}
             >
               <Kitoba className="w-full">
                 <span className="flex flex-col items-center px-8 pt-3.5 pb-3">
@@ -187,7 +187,7 @@ function Screen({ side, w, h, on, initial }: { side: "left" | "right"; w: number
       style={{ width: w, left: left ? 0 : w, filter: "drop-shadow(0 6px 10px rgba(70,57,45,0.22))" }}
       initial={false}
       animate={{ x: on ? (left ? "-103%" : "103%") : "0%" }}
-      transition={{ duration: 1.7, delay: on ? 0.2 : 0, ease: EASE }}
+      transition={{ duration: 1.7, delay: on ? 0.2 : 0, ease: MOTION.ease }}
     >
       <svg aria-hidden viewBox={`0 0 ${w} ${h}`} className={`absolute inset-0 h-full w-full ${left ? "" : "-scale-x-100"}`}>
         {/* тёплая подложка: сквозь отверстия видна тень проёма, а не то, что за решёткой */}
@@ -249,7 +249,7 @@ function GoldDust({ g, active }: { g: Peshtoq; active: boolean }) {
               y: -(90 + rnd(i, 5) * 220),
               scale: [0.6, 1, 0.4],
             }}
-            transition={{ duration: 1.8 + rnd(i, 6) * 1.1, delay: 0.35 + rnd(i, 7) * 0.9, ease: "easeOut" }}
+            transition={{ duration: 1.8 + rnd(i, 6) * 1.1, delay: 0.35 + rnd(i, 7) * 0.9, ease: MOTION.ease }}
           />
         );
       })}

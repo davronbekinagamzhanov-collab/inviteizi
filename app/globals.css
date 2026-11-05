@@ -21,6 +21,12 @@
 }
 
 :root {
+  /* Система движения приглашений (templates/blocks/motion.ts): мягкое замедление, 0,7–1,2 с, лесенка 0,1 с */
+  --m-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --m-fast: 700ms;
+  --m-base: 900ms;
+  --m-slow: 1200ms;
+  --m-step: 100ms;
   /* Золото по умолчанию: #B8892F → #F3D58A → #A87A28 */
   --c-primary: #3b2a1e;
   --c-primary-dark: #2a1d14;

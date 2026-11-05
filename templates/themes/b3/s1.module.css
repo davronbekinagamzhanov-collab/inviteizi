@@ -3,9 +3,9 @@
 
 /* ── Открытие: фото-занавес ── */
 .opening { position: fixed; inset: 0; z-index: 50; margin: 0 auto; width: 100%; max-width: 430px; overflow: hidden; cursor: pointer; background: var(--c-ink); color: #fffaf3; text-align: center;
-  transition: transform 1.1s cubic-bezier(.7, 0, .2, 1) .25s, opacity .3s ease 1.15s; }
+  transition: transform var(--m-slow) var(--m-ease) .25s, opacity var(--m-fast) var(--m-ease) 1.15s; }
 .opening[data-started="true"] { transform: translate3d(0, -100%, 0); opacity: 0; }
-.openPic { position: absolute; inset: 0; display: block; transition: transform 1.4s cubic-bezier(.22, 1, .36, 1); }
+.openPic { position: absolute; inset: 0; display: block; transition: transform var(--m-slow) var(--m-ease); }
 .openPic::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0, 0, 0, .12) 0%, rgba(0, 0, 0, 0) 32%, rgba(0, 0, 0, .58) 60%, rgba(0, 0, 0, .8) 100%); }
 .opening[data-started="true"] .openPic { transform: scale(1.08); }
 .openText { position: absolute; left: 0; right: 0; bottom: calc(40px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; align-items: center; padding: 0 24px; text-shadow: 0 1px 16px rgba(0, 0, 0, .35); }
