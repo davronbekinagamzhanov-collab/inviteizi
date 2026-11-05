@@ -299,6 +299,8 @@ export const uz = {
     receiptAsk: "📎 Чекни сурат ёки PDF файл қилиб юборинг.",
     receiptBad: "Чекни сурат ёки PDF файл қилиб юборинг 🙏",
     receiptGot: "✅ Чек қабул қилинди. Текширилмоқда — одатда 5–30 дақиқа.\nТасдиқлангач, ҳаволани шу ерга юбораман.",
+    /** Чек пришёл ночью (22:00–08:00): проверим утром */
+    receiptGotNight: "✅ Чек қабул қилинди.\nЭрталаб 9:00 гача текшириб, ҳаволани шу ерга юбораман 🌙",
     alreadyPaid: "Бу буюртма тўланган ✅",
     waiting: "Чекингиз текширилмоқда ⏳ Одатда 5–30 дақиқа.",
     paid: (url: string) => `🎉 Тўлов тасдиқланди! Таклифномангиз тайёр:\n${url}`,
@@ -419,6 +421,21 @@ export const uz = {
     payDay: (when: string) => `Тўлов куни: ${when}`,
     onHold: (amount: string) => `Тасдиқ кутилмоқда: ${amount}`,
     countOnly: "Бу QR фақат ҳисоб учун — тўлов йўқ.",
+    /** v2, часть 7: вечер 20:00, день выплаты, выплата пришла */
+    evening: (s: { count: number; lines: string; you: string; pending: boolean; payDay: string }) =>
+      [
+        `🌙 Бугун сизнинг QR орқали ${s.count} та тўлов:`,
+        s.lines,
+        ...(s.you ? ["", `Сизга: ${s.you}${s.pending ? " (тасдиқдан кейин)" : ""}`, `Тўлов куни: ${s.payDay}`] : []),
+      ].join("\n"),
+    evLine: (n: number, who: string, amount: string) => `№${n} ${who} ${amount}`,
+    tomorrow: "эртага",
+    weekdays: ["якшанба", "душанба", "сешанба", "чоршанба", "пайшанба", "жума", "шанба"],
+    months: ["январ", "феврал", "март", "апрел", "май", "июн", "июл", "август", "сентябр", "октябр", "ноябр", "декабр"],
+    payToday: (owner: string, amount: string, count: number) => `💰 Бугун ${owner} сизга ${amount} ўтказади (${count} та тўлов).`,
+    paidOut: (amount: string) => `✅ ${amount} ўтказилди. Kaspi'ни текширинг.`,
+    gotIt: "👍 Олдим",
+    thanks: "Раҳмат! 🤝",
     /** QR и постер A4 (v2, часть 6). На постере — без эмодзи: шрифт постера их не рисует */
     qrCaption: (name: string, link: string) => `🔳 ${name}\n${link}\n\nПостер A4 (PDF ва PNG) — пастдаги тугма 👇`,
     posterUz: "📄 Постер · ўзбекча",

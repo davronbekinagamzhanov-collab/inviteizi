@@ -17,7 +17,8 @@ import type {
 import type { Occasion } from "@/lib/types";
 import type { Analytics, Period, EventKind } from "@/lib/analytics";
 import type { BotErrorEntry } from "./errors";
-import type { PanelSnapshot, Partner, PayoutSchedule } from "@/lib/owner-panel";
+import type { ManagerPayout, PanelSnapshot, Partner, PayoutSchedule } from "@/lib/owner-panel";
+import type { InlineButton } from "./tg";
 import type { RsvpInput, RsvpRecord } from "@/lib/rsvp";
 import type { ClaimStatus, InviteKind, InviteUse, Manager } from "@/lib/roles";
 
@@ -34,6 +35,9 @@ export type NewPartner = {
   ownerNotifiedAt?: Date | null;
 };
 export type PartnerPatch = Partial<Pick<Partner, "phone" | "kaspi" | "schedule" | "ownerNotifiedAt" | "sleepNotifiedAt">>;
+
+/** Исходящее сообщение бота с ключом (v2, часть 7): один ключ — одно сообщение */
+export type Notice = { key: string; chatId: number; text: string; markup?: { inline: InlineButton[][] } | null; dueAt: Date };
 
 export interface Repo {
   /** Журнал ошибок бота: entry уже очищен от личных данных */
@@ -160,4 +164,14 @@ export interface Repo {
   claimClientOrder(tokenHash: string, clientId: number, now: Date): Promise<{ status: ClaimStatus; order?: OrderRecord }>;
   /** Забранный клиентом заказ «для клиента»: кому засчитать (m_<код> менеджера; ref null — напрямую). null — обычный заказ */
   clientOrderRef(orderId: string): Promise<{ ref: string | null } | null>;
+
+  // ── Уведомления и выплаты менеджерам (v2, часть 7). Таблиц ещё нет — queueNotice false, списки пустые ──
+  /** Поставить сообщение в очередь; false — сообщение с таким ключом уже было */
+  queueNotice(n: Notice): Promise<boolean>;
+  /** Забрать одно сообщение к отправке (sent_at = now). false — его уже забрали */
+  claimNotice(key: string, now: Date): Promise<boolean>;
+  /** Забрать все созревшие (due_at ≤ now) неотправленные сообщения, не больше limit */
+  claimDueNotices(now: Date, limit: number): Promise<Notice[]>;
+  /** Выплата менеджеру за месяц: один раз; false — уже выплачено */
+  recordManagerPayout(p: Omit<ManagerPayout, "createdAt"> & { createdBy: number }): Promise<boolean>;
 }

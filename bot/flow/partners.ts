@@ -28,8 +28,9 @@ import { activeDesigns, PRICES } from "@/templates/registry";
 import { staff as S } from "@/texts/bot-ru";
 import type { InlineButton } from "../tg";
 import { recordBotError, toEntry } from "../errors";
-import { editOrSend, ib, inline, price, roleOf, send, texts, txFor } from "./util";
+import { editOrSend, ib, inline, price, roleOf, send, texts } from "./util";
 import { roleHome } from "./panel";
+import { afterPartnerPayout } from "./notify";
 import type { Ctx, Deps, Result, Step } from "./types";
 
 const PAGE = 8;
@@ -219,6 +220,7 @@ export async function partnerAction(c: Ctx, action: string, idArg: string, amoun
   if (action === "ok") {
     // Сумма в кнопке: двойное нажатие или устаревшая кнопка не проведут выплату второй раз
     const done = await c.deps.repo.recordPartnerPayout(partner.id, amount, c.user.id);
+    if (done) await afterPartnerPayout(c.deps, partner, amount);
     await send(c, done ? t.paidDone(partner.name, price(amount)) : t.payStale);
   }
 }
@@ -367,6 +369,7 @@ export async function ptAction(c: Ctx, action: string, idArg: string, x: string)
       const amount = Number(x);
       // Сумма в кнопке: двойное нажатие или устаревшая кнопка не проведут выплату второй раз
       const done = Number.isInteger(amount) && amount > 0 && (await c.deps.repo.recordPartnerPayout(p.id, amount, c.user.id));
+      if (done) await afterPartnerPayout(c.deps, p, amount);
       return show(c, { text: done ? T.paidDone(p.name, price(amount)) : T.payStale, rows: [[{ text: S.back, data: `pa:v:${p.id}` }]] });
     }
     case "prop":
@@ -746,7 +749,7 @@ async function recipientOf(deps: Deps, p: Partner) {
 /**
  * Начислить партнёру за оплаченный заказ (один раз) и сообщить ему.
  * Ставка берётся на момент оплаты: смена ставки не меняет прошлые начисления.
- * Неподтверждённому партнёру начисление записывается (к выплате — после ✅), но без сообщения; ставка 0 — тоже без сообщения.
+ * Неподтверждённому партнёру начисление записывается (к выплате — после ✅). Сообщение партнёру — вечером, одним отчётом.
  */
 export async function creditPartner(deps: Deps, order: Pick<OrderRecord, "id" | "userId">) {
   // Заказ владельца или админа: ни начисления, ни сообщения партнёру
@@ -762,15 +765,8 @@ export async function creditPartner(deps: Deps, order: Pick<OrderRecord, "id" | 
     await deps.repo.markEarningDelivered(order.id);
     return;
   }
-  const recipient = await recipientOf(deps, credit.partner);
-  // Партнёр не нажимал /start: пропускаем молча, панель покажет отметку
-  if (!recipient) return;
-  try {
-    await deps.tg.sendMessage(recipient.id, txFor(recipient.lang).partner.paidNotice(price(credit.amount)));
-    await deps.repo.markEarningDelivered(order.id);
-  } catch (e) {
-    console.error("partner notice", e instanceof Error ? e.name : "Error");
-  }
+  // Партнёру об оплатах пишем раз в день, в 20:00 (bot/flow/notify.ts). Не нажимал /start — панель покажет отметку
+  if (await recipientOf(deps, credit.partner)) await deps.repo.markEarningDelivered(order.id);
 }
 
 /** После подтверждения оплаты: сбой партнёрской части не должен мешать выдаче ссылки */

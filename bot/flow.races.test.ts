@@ -1,3 +1,4 @@
+import { designName, price } from "./flow/util";
 import { describe, expect, it, vi } from "vitest";
 import { uz } from "@/texts/bot-uz";
 import { ADMIN, Sim } from "./testing/sim";
@@ -69,7 +70,7 @@ describe("гонки и сбои (ревью бота I1, I3)", () => {
     };
     await sim.click(ADMIN, uz.admin.approve);
     expect((await sim.repo.getOrder(o.id))?.status).toBe("active");
-    expect(sim.lastText(ADMIN)).toBe(uz.admin.approvedFailed(o.number));
+    expect(sim.lastText(ADMIN)).toBe(`${uz.admin.approvedFailed(o.number)}\n💳 №${o.number} · ${price(o.amount)} · ${designName(o.templateId)} · напрямую`);
   });
 
   it("сбой только на QR-картинке → остальное клиенту всё равно отправлено, админу «отправлено»", async () => {
@@ -85,6 +86,6 @@ describe("гонки и сбои (ревью бота I1, I3)", () => {
     const toClient = sim.textsSince(1, mark);
     expect(toClient[0]).toBe(uz.pay.paid("https://inviteizi.vercel.app/aziz-madina"));
     expect(toClient.some((t) => t.includes("Азиз ва Мадинанинг никоҳ тўйига"))).toBe(true);
-    expect(sim.lastText(ADMIN)).toBe(uz.admin.approved(o.number));
+    expect(sim.lastText(ADMIN)).toBe(`${uz.admin.approved(o.number)}\n💳 №${o.number} · ${price(o.amount)} · ${designName(o.templateId)} · напрямую`);
   });
 });

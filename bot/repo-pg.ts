@@ -1,5 +1,5 @@
 import { RSVP_IP_HOUR_LIMIT, RSVP_ORDER_LIMIT, type RsvpInput, type RsvpRecord } from "@/lib/rsvp";
-import type { PanelOrder, PanelSnapshot, Partner, PartnerEarning, PartnerPayout, PanelUser, PayoutSchedule } from "@/lib/owner-panel";
+import type { ManagerPayout, PanelOrder, PanelSnapshot, Partner, PartnerEarning, PartnerPayout, PanelUser, PayoutSchedule } from "@/lib/owner-panel";
 import type { BotErrorEntry } from "./errors";
 import type { ClaimStatus, InviteKind, InviteUse, Manager } from "@/lib/roles";
 /**
@@ -7,7 +7,7 @@ import type { ClaimStatus, InviteKind, InviteUse, Manager } from "@/lib/roles";
  * Поведение — как у bot/repo-memory.ts (общий набор тестов bot/repo.contract.ts).
  * Таблицы: supabase/migrations/*_schema.sql.
  */
-import type { NewPartner, PartnerPatch, Repo } from "./repo";
+import type { NewPartner, Notice, PartnerPatch, Repo } from "./repo";
 import type {
   InvitationData,
   InvitationEvent,
@@ -436,11 +436,67 @@ export class PgRepo implements Repo {
       const partners = await this.sql<Partner[]>`select ${this.sql.unsafe(PARTNER_COLUMNS)} from public.partners order by id`;
       const earnings = await this.sql<PartnerEarning[]>`select order_id as "orderId", partner_id as "partnerId", amount, delivered, created_at as "createdAt" from public.partner_earnings`;
       const payouts = await this.sql<PartnerPayout[]>`select partner_id as "partnerId", amount, created_at as "createdAt" from public.partner_payouts`;
-      return { ...base, partners: [...partners], earnings: [...earnings], payouts: [...payouts], partnersReady: true };
+      return { ...base, partners: [...partners], earnings: [...earnings], payouts: [...payouts], ...(await this.v2Snapshot()), partnersReady: true };
     } catch (e) {
       if (!isMissingTable(e)) throw e;
       return { ...base, partners: [], earnings: [], payouts: [], partnersReady: false };
     }
+  }
+
+  /** Заказы «для клиента» и выплаты менеджерам; до миграций v2 — пусто */
+  private async v2Snapshot() {
+    const clientOrders = await this.sql<{ orderId: string; ref: string | null }[]>`select order_id as "orderId", ref_source as ref from public.client_orders where claimed_by is not null`.catch((e) => {
+      if (isMissingTable(e)) return [];
+      throw e;
+    });
+    const managerPayouts = await this.sql<ManagerPayout[]>`select manager_id as "managerId", month, amount, orders, created_at as "createdAt" from public.manager_payouts`.catch((e) => {
+      if (isMissingTable(e)) return [];
+      throw e;
+    });
+    return { clientOrders: [...clientOrders], managerPayouts: [...managerPayouts] };
+  }
+
+  // ── Уведомления и выплаты менеджерам (v2, часть 7) ──
+  async queueNotice(n: Notice) {
+    try {
+      const rows = await this.sql`insert into public.bot_notices(key, chat_id, body, due_at)
+        values(${n.key}, ${n.chatId}, ${this.sql.json({ text: n.text, markup: n.markup ?? null })}, ${n.dueAt})
+        on conflict (key) do nothing returning key`;
+      return rows.length > 0;
+    } catch (e) {
+      if (isMissingTable(e)) return false;
+      throw e;
+    }
+  }
+
+  async claimNotice(key: string, now: Date) {
+    try {
+      const rows = await this.sql`update public.bot_notices set sent_at = ${now} where key = ${key} and sent_at is null returning key`;
+      return rows.length > 0;
+    } catch (e) {
+      if (isMissingTable(e)) return false;
+      throw e;
+    }
+  }
+
+  async claimDueNotices(now: Date, limit: number) {
+    try {
+      const rows = await this.sql<{ key: string; chatId: number; body: { text: string; markup: Notice["markup"] }; dueAt: Date }[]>`
+        update public.bot_notices set sent_at = ${now}
+        where key in (select key from public.bot_notices where sent_at is null and due_at <= ${now} order by due_at limit ${limit} for update skip locked)
+        returning key, chat_id as "chatId", body, due_at as "dueAt"`;
+      return rows.map((r) => ({ key: r.key, chatId: r.chatId, text: r.body.text, markup: r.body.markup, dueAt: r.dueAt }));
+    } catch (e) {
+      if (isMissingTable(e)) return [];
+      throw e;
+    }
+  }
+
+  async recordManagerPayout(p: Omit<ManagerPayout, "createdAt"> & { createdBy: number }) {
+    if (p.amount <= 0) return false;
+    const rows = await this.sql`insert into public.manager_payouts(manager_id, month, amount, orders, created_by)
+      values(${p.managerId}, ${p.month}, ${p.amount}, ${p.orders}, ${p.createdBy}) on conflict do nothing returning month`;
+    return rows.length > 0;
   }
 
   async createPartner(p: NewPartner) {

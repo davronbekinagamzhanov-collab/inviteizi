@@ -262,19 +262,25 @@ describe("партнёры", () => {
     expect(s.repo.earnings).toEqual([]);
   });
 
-  it("сообщение партнёру только после подтверждения оплаты, один раз", async () => {
+  it("партнёру об оплате — один вечерний отчёт в 20:00, без имени клиента; повтор cron не дублирует", async () => {
     const s = new Sim();
     await addPartner(s, code, { telegramId: 50 });
     await prepare(s, ADMIN);
     await prepare(s, 50);
     await s.start(1, partnerSource(code));
     const o = await nikohWithReceipt(s, 1);
-    const isNotice = (m: { text?: string }) => m.text?.startsWith("Сизнинг кодингиз орқали янги буюртма тўланди ✅ +1");
-    expect(s.tg.to(50).some(isNotice)).toBe(false);
+    const before = s.tg.to(50).length;
     await s.callback(ADMIN, `ok:${o.number}`, 1);
     await s.callback(ADMIN, `ok:${o.number}`, 1);
-    expect(s.tg.to(50).filter(isNotice)).toHaveLength(1);
+    expect(s.tg.to(50)).toHaveLength(before);
     expect(s.repo.earnings).toMatchObject([{ delivered: true, amount: 1000 }]);
+    s.clock = new Date("2026-11-01T15:05:00Z"); // 20:05 в Сайраме
+    await runCron(s.deps);
+    await runCron(s.deps);
+    const evening = s.tg.to(50).slice(before);
+    expect(evening).toHaveLength(1);
+    expect(evening[0].text).toContain(`№${o.number} `);
+    expect(evening[0].text).toContain("Сизга: 1 000 ₸");
   });
 
   it("партнёр не нажимал /start: тихо пропускаем и показываем отметку", async () => {
@@ -295,7 +301,7 @@ describe("партнёры", () => {
     await prepare(s, ADMIN);
     await prepare(s, 50);
     await paidOrder(s, 1, code);
-    expect(s.tg.to(50).some((m) => m.text?.includes("✅ +1"))).toBe(true);
+    expect(s.repo.earnings).toMatchObject([{ delivered: true }]);
     await s.command(50, "hamkor");
     expect(s.lastText(50)).toContain("Тўлади: 1");
     expect(s.repo.partners[0].telegramId).toBe(50);

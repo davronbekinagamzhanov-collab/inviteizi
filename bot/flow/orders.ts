@@ -32,6 +32,8 @@ import {
 import { getDesign, isOnSale } from "@/templates/registry";
 import { rememberUpdate } from "../update";
 import { recordBotError, toEntry } from "../errors";
+import { paidNotices } from "./notify";
+import { isQuiet } from "@/lib/quiet-hours";
 import { creditPartnerSafely } from "./partners";
 import { isSeller } from "./panel";
 import { kzToday } from "../calendar";
@@ -295,7 +297,7 @@ export const receipt: Step = {
       console.error("notifyAdmins", e instanceof Error ? e.name : "Error");
       await recordBotError(c.deps, toEntry(e, c.u, c.step, "ack"));
     }
-    await sendAfterCommit(c, c.chatId, c.tx.pay.receiptGot, { markup: mainMenu() });
+    await sendAfterCommit(c, c.chatId, isQuiet(c.deps.now()) ? c.tx.pay.receiptGotNight : c.tx.pay.receiptGot, { markup: mainMenu() });
     return { done: true };
   },
 };
@@ -460,7 +462,13 @@ export async function approve(c: Ctx, n: number) {
 
   await creditPartnerSafely(c, o);
   const { linkSent, shareSent } = await sendLinkPack(c.deps, o, true);
-  await sendAfterCommit(c, c.chatId, linkSent && shareSent ? c.tx.admin.approved(n) : c.tx.admin.approvedFailed(n));
+  // «💳 №134 · 8 000 ₸ · дизайн · кто привёл» — к ответу подтвердившего; другим админам и менеджеру — отдельно
+  const paidLine = await paidNotices(c.deps, o, c.user.id).catch(async (e) => {
+    await recordBotError(c.deps, toEntry(e, c.u, c.step, "ack"));
+    return "";
+  });
+  const done = linkSent && shareSent ? c.tx.admin.approved(n) : c.tx.admin.approvedFailed(n);
+  await sendAfterCommit(c, c.chatId, paidLine ? `${done}\n${paidLine}` : done);
 }
 
 const REASONS = ["money", "sum", "other"] as const;

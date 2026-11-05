@@ -40,6 +40,7 @@ import { classifyError, isUnreachable, recordBotError, toEntry } from "../errors
 import { beginAttempt } from "./delivery";
 import { acceptManager, claimOrder, panelAction, roleHome, showClaimed, toClient } from "./panel";
 import { parseStartToken } from "@/lib/roles";
+import { gotPayout, payManagerAction, payPartnerAction } from "./notify";
 
 const idle: Step = {
   async ask(c) {
@@ -449,6 +450,15 @@ async function onCallback(c: Ctx, d: string) {
     const r = await ptAction(c, action, id, x);
     return r ? apply(c, r) : undefined;
   }
+  if (d.startsWith("po:")) {
+    const [, id = "", amount = ""] = d.split(":");
+    return payPartnerAction(c, id, amount);
+  }
+  if (d.startsWith("mp:")) {
+    const [, id = "", month = "", amount = ""] = d.split(":");
+    return payManagerAction(c, id, month, amount);
+  }
+  if (d === "pg") return gotPayout(c);
   if (d.startsWith("pq:")) {
     const [, id = "", lang = ""] = d.split(":");
     return sendPoster(c, id, lang);

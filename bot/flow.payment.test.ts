@@ -1,3 +1,4 @@
+import { designName, price } from "./flow/util";
 import { describe, expect, it } from "vitest";
 import { uz } from "@/texts/bot-uz";
 import { ru } from "@/texts/bot-ru";
@@ -120,7 +121,7 @@ describe("подтверждение админом", () => {
     expect(share.text).toBe(uz.pay.shareButton);
     expect(share.url.startsWith(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=`)).toBe(true);
     expect(card.markup).toBeUndefined(); // кнопки у карточки убраны
-    expect(sim.lastText(ADMIN)).toBe(uz.admin.approved(o.number));
+    expect(sim.lastText(ADMIN)).toBe(`${uz.admin.approved(o.number)}\n💳 №${o.number} · ${price(o.amount)} · ${designName(o.templateId)} · напрямую`);
   });
 
   it("двойное «Тасдиқлаш» (тот же или второй админ) → клиенту одно сообщение", async () => {

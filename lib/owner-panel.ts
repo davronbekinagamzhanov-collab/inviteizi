@@ -55,12 +55,18 @@ export type Partner = {
 };
 export type PartnerEarning = { orderId: string; partnerId: number; amount: number; delivered: boolean; createdAt: Date };
 export type PartnerPayout = { partnerId: number; amount: number; createdAt: Date };
+/** month — «2026-11» по Алматы */
+export type ManagerPayout = { managerId: number; month: string; amount: number; orders: number; createdAt: Date };
 export type PanelSnapshot = {
   orders: PanelOrder[];
   users: PanelUser[];
   partners: Partner[];
   earnings: PartnerEarning[];
   payouts: PartnerPayout[];
+  /** Заказы «для клиента», которые клиент забрал: кому засчитать (m_<код менеджера>; null — напрямую) */
+  clientOrders?: { orderId: string; ref: string | null }[];
+  /** Выплаты менеджерам за месяц */
+  managerPayouts?: ManagerPayout[];
   /** false — миграция партнёров ещё не применена */
   partnersReady: boolean;
 };

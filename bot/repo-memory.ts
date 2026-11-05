@@ -1,6 +1,6 @@
 import { RSVP_IP_HOUR_LIMIT, RSVP_ORDER_LIMIT, type RsvpInput, type RsvpRecord } from "@/lib/rsvp";
-import type { PanelOrder, PanelSnapshot, Partner, PartnerEarning, PartnerPayout, PayoutSchedule } from "@/lib/owner-panel";
-import type { NewPartner, PartnerPatch } from "./repo";
+import type { ManagerPayout, PanelOrder, PanelSnapshot, Partner, PartnerEarning, PartnerPayout, PayoutSchedule } from "@/lib/owner-panel";
+import type { NewPartner, Notice, PartnerPatch } from "./repo";
 import type { BotErrorEntry } from "./errors";
 import type { ClaimStatus, InviteKind, InviteUse, Manager } from "@/lib/roles";
 /**
@@ -87,7 +87,31 @@ export class MemoryRepo implements Repo {
       return { id: o.id, number: o.number, userId: o.userId, username: u?.username ?? null, firstName: u?.firstName ?? null, status: o.status, occasion: o.occasion, format: o.format, templateId: o.templateId, musicKind: o.music.kind, amount: o.amount, createdAt: o.createdAt, paidAt: o.paidAt, updatedAt: o.updatedAt };
     });
     const users = [...this.users.values()].map((u) => ({ id: u.id, createdAt: u.createdAt, source: u.source }));
-    return { orders, users, partners: this.partners.map((p) => ({ ...p })), earnings: this.earnings.map((e) => ({ ...e })), payouts: this.payouts.map((p) => ({ ...p })), partnersReady: this.partnersReady };
+    return { orders, users, partners: this.partners.map((p) => ({ ...p })), earnings: this.earnings.map((e) => ({ ...e })), payouts: this.payouts.map((p) => ({ ...p })), clientOrders: this.clientOrders.filter((x) => x.claimedBy !== null).map((x) => ({ orderId: x.orderId, ref: x.refSource })), managerPayouts: clone(this.managerPayouts), partnersReady: this.partnersReady };
+  }
+  // ── Уведомления и выплаты менеджерам (v2, часть 7) ──
+  notices = new Map<string, Notice & { sentAt: Date | null }>();
+  managerPayouts: ManagerPayout[] = [];
+  async queueNotice(n: Notice) {
+    if (this.notices.has(n.key)) return false;
+    this.notices.set(n.key, { ...clone(n), sentAt: null });
+    return true;
+  }
+  async claimNotice(key: string, now: Date) {
+    const n = this.notices.get(key);
+    if (!n || n.sentAt) return false;
+    n.sentAt = now;
+    return true;
+  }
+  async claimDueNotices(now: Date, limit: number) {
+    const due = [...this.notices.values()].filter((n) => !n.sentAt && +n.dueAt <= +now).sort((a, b) => +a.dueAt - +b.dueAt).slice(0, limit);
+    for (const n of due) n.sentAt = now;
+    return due.map(({ sentAt, ...n }) => (void sentAt, clone(n)));
+  }
+  async recordManagerPayout(p: Omit<ManagerPayout, "createdAt"> & { createdBy: number }) {
+    if (p.amount <= 0 || this.managerPayouts.some((x) => x.managerId === p.managerId && x.month === p.month)) return false;
+    this.managerPayouts.push({ managerId: p.managerId, month: p.month, amount: p.amount, orders: p.orders, createdAt: this.now() });
+    return true;
   }
   async createPartner(p: NewPartner) {
     const partner: Partner = {
