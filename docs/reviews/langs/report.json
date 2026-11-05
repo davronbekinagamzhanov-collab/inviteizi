@@ -1,7 +1,7 @@
 {
- "muhr": {
-  "number": 113,
-  "format": "animated",
+ "xotira-albom": {
+  "number": 132,
+  "format": "scroll",
   "uz360": {
    "errors": [],
    "htmlLang": "uz",
@@ -18,10 +18,7 @@
    "afterTap": "playing",
    "music": "ok",
    "overflowX": 0,
-   "outside": [
-    "Программа",
-    "Приходите"
-   ],
+   "outside": [],
    "uz": []
   },
   "kk360": {
@@ -30,9 +27,7 @@
    "afterTap": "playing",
    "music": "ok",
    "overflowX": 0,
-   "outside": [
-    "Бағдарлама"
-   ],
+   "outside": [],
    "uz": []
   },
   "uz430": {
@@ -45,9 +40,9 @@
    "uz": []
   }
  },
- "suvbuyoq-tuman": {
-  "number": 139,
-  "format": "animated",
+ "sapfir": {
+  "number": 23,
+  "format": "simple",
   "uz360": {
    "errors": [],
    "htmlLang": "uz",
