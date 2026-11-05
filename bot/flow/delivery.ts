@@ -47,7 +47,8 @@ export function beginAttempt(deps: Deps, updateId?: number): { tg: Tg; canRetry:
   const guarded: Tg = {
     sendMessage: (chat, text, opts) => once(`m:${chat}:${text}`, () => tg.sendMessage(chat, text, opts)),
     sendPhoto: (chat, photo, opts) => once(`p:${chat}:${media(photo)}:${opts?.caption ?? ""}`, () => tg.sendPhoto(chat, photo, opts)),
-    sendDocument: (chat, file, opts) => once(`d:${chat}:${file}:${opts?.caption ?? ""}`, () => tg.sendDocument(chat, file, opts)),
+    sendDocument: (chat, file, opts) => once(`d:${chat}:${media(file)}:${opts?.caption ?? ""}`, () => tg.sendDocument(chat, file, opts)),
+    setMenuButton: (...args) => tg.setMenuButton(...args),
     sendAudio: (chat, audio, opts) => once(`a:${chat}:${audio}`, () => tg.sendAudio(chat, audio, opts)),
     editMessageText: (...args) => tg.editMessageText(...args),
     editMessageMedia: (...args) => tg.editMessageMedia(...args),

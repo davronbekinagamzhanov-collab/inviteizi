@@ -15,8 +15,8 @@ export const txFor = (lang: Lang | null | undefined): BotTexts => texts[lang ?? 
 
 /** Песня клиента — до 20 МБ */
 export { MAX_MUSIC_BYTES } from "../audio-type";
-export const MAX_CUSTOM_TEXT = 600;
-export const MAX_EVENTS = 3;
+export { MAX_CUSTOM_TEXT, MAX_EVENTS, MAIN_EVENT, isCompleteEvent } from "@/lib/order-rules";
+import { MAIN_EVENT, isCompleteEvent } from "@/lib/order-rules";
 /** Статусы «уже оплачено» */
 export const PAID_STATUSES: OrderStatus[] = ["active", "archived"];
 /** Можно платить / присылать чек */
@@ -92,12 +92,6 @@ export function designLine(tx: BotTexts, templateId: string, format: Format, amo
 
 // ── Черновик ──
 
-export const MAIN_EVENT: Record<Occasion, EventKind> = {
-  nikoh: "nikohBazm",
-  nahorgi: "nahorgi",
-  sunnat: "sunnatBazm",
-  yubiley: "yubileyBazm",
-};
 
 export function data(c: Ctx) {
   c.s.data ??= { occasion: c.s.occasion, events: [] };
@@ -121,8 +115,6 @@ export function curEvent(c: Ctx): Partial<InvitationEvent> {
   return evs[i];
 }
 
-export const isCompleteEvent = (e: Partial<InvitationEvent> | null | undefined): e is InvitationEvent =>
-  !!(e?.kind && e.date && e.time && e.venueName && e.address);
 
 /** Черновик → данные пригласительного (только законченные тадбиры) */
 export function finalData(s: Draft): InvitationData {

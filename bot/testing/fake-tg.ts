@@ -1,6 +1,6 @@
 /** Tg для тестов: записывает исходящие сообщения и правки. Никакой сети. */
 import { GrammyError } from "grammy";
-import type { InlineButton, Markup, SendOpts, Sent, Tg } from "../tg";
+import type { FileOpts, InlineButton, Markup, SendOpts, Sent, SentFile, Tg } from "../tg";
 
 /** Лимиты Bot API: нарушение в любом сценарном тесте падает так же, как в настоящем Telegram */
 export const TG_LIMITS = { message: 4096, caption: 1024, alert: 200, callbackData: 64, button: 64 };
@@ -35,6 +35,7 @@ export type FakeMessage = {
   markup?: Markup;
   /** url / file_id / байты */
   media?: string | Uint8Array;
+  fileName?: string;
   edits: number;
 };
 
@@ -83,16 +84,26 @@ export class FakeTg implements Tg {
     m.edits++;
   }
 
-  async sendPhoto(chatId: number, photo: string | Uint8Array, opts: SendOpts & { caption?: string } = {}) {
+  async sendPhoto(chatId: number, photo: string | Uint8Array, opts: FileOpts = {}): Promise<SentFile> {
     checkCaption("sendPhoto", opts.caption);
     checkMarkup("sendPhoto", opts.markup);
-    return this.push({ chatId, type: "photo", text: opts.caption ?? "", markup: opts.markup, media: photo });
+    const sent = this.push({ chatId, type: "photo", text: opts.caption ?? "", markup: opts.markup, media: photo });
+    return { ...sent, fileId: typeof photo === "string" ? photo : `TGPHOTO_${this.nextFile++}` };
   }
 
-  async sendDocument(chatId: number, fileId: string, opts: SendOpts & { caption?: string } = {}) {
+  async sendDocument(chatId: number, doc: string | Uint8Array, opts: FileOpts = {}): Promise<SentFile> {
     checkCaption("sendDocument", opts.caption);
     checkMarkup("sendDocument", opts.markup);
-    return this.push({ chatId, type: "document", text: opts.caption ?? "", markup: opts.markup, media: fileId });
+    const sent = this.push({ chatId, type: "document", text: opts.caption ?? "", markup: opts.markup, media: doc, fileName: opts.fileName });
+    return { ...sent, fileId: typeof doc === "string" ? doc : `TGDOC_${this.nextFile++}` };
+  }
+
+  /** Кнопка меню по чатам (undefined — для всех) */
+  menuButtons = new Map<number | "all", { text: string; url: string } | null>();
+  async setMenuButton(chatId: number | undefined, button: { text: string; url: string } | null) {
+    if (button && button.text.length > TG_LIMITS.button) reject("setChatMenuButton", "bad button text");
+    this.calls.push({ method: "setMenuButton", chatId });
+    this.menuButtons.set(chatId ?? "all", button);
   }
 
   async sendAudio(chatId: number, audio: string, opts: { caption?: string } = {}) {

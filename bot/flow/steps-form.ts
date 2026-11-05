@@ -3,6 +3,7 @@ import type { Ctx, Result, Step } from "./types";
 import type { Relation } from "@/lib/types";
 import { after, backRow, curEvent, data, ib, inline, MAIN_EVENT, send } from "./util";
 import { afterNames } from "./steps-photo";
+import { followCause, NAME_MAX, RELATIONS } from "@/lib/order-rules";
 
 /** Текст ответа: обрезаем пробелы, проверяем длину. Не текст — null (общая подсказка) */
 function textAnswer(c: Ctx, max: number): string | { hint: string } | null {
@@ -29,7 +30,6 @@ function textStep(question: (c: Ctx) => string, max: number, save: (c: Ctx, v: s
   };
 }
 
-const NAME_MAX = 40;
 
 /** После хозяев/сторон — первый тадбир (при правке — назад к сводке) */
 function toFirstEvent(c: Ctx): Result {
@@ -64,14 +64,7 @@ export const person = textStep(
   },
 );
 
-const RELATIONS: Record<"nikoh" | "nahorgi" | "sunnat" | "yubiley", Relation[]> = {
-  nikoh: ["farzand", "nabira", "ozimiz"],
-  nahorgi: ["ogil", "qiz", "nabira", "uka", "ozimiz"],
-  sunnat: ["ogil", "nabira", "uka", "farzand"],
-  yubiley: ["ona", "ota", "ozimiz"],
-};
-
-const relationsFor = (c: Ctx) => RELATIONS[(c.s.occasion ?? "nikoh") as "nikoh"] ?? RELATIONS.nikoh;
+const relationsFor = (c: Ctx) => RELATIONS[c.s.occasion ?? "nikoh"] ?? RELATIONS.nikoh;
 
 export const relation: Step = {
   async ask(c) {
@@ -98,8 +91,7 @@ export const cause: Step = {
     const d = data(c);
     d.cause = v;
     // Сменили повод — базм уже добавленного тадбира тоже меняется (дата и место остаются), иначе в таклифнома «Никоҳ базми» у суннат
-    const bazm = v === "sunnat" ? "sunnatBazm" : "nikohBazm";
-    for (const e of d.events ?? []) if (e.kind === "nikohBazm" || e.kind === "sunnatBazm") e.kind = bazm;
+    followCause(d.events ?? [], v);
     return { to: after(c, "hosts") };
   },
 };

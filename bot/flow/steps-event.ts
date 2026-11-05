@@ -2,6 +2,7 @@
 import { VENUES, venuePickerUrl } from "../venues";
 import type { Ctx, Result, Step } from "./types";
 import type { EventKind } from "@/lib/types";
+import { addableKinds } from "@/lib/order-rules";
 import type { InlineButton } from "../tg";
 import { addMonths, calendarMonth, kzTime, kzToday } from "../calendar";
 import { isMapLink, parseTime } from "../parse";
@@ -208,11 +209,7 @@ export const evAddress: Step = {
 /** Какие тадбиры можно добавить (без уже добавленных) */
 function addable(c: Ctx): EventKind[] {
   const d = data(c);
-  const have = new Set(d.events.filter(isCompleteEvent).map((e) => e.kind));
-  const bazm: EventKind = d.cause === "sunnat" ? "sunnatBazm" : "nikohBazm";
-  const options: EventKind[] =
-    c.s.occasion === "nikoh" ? ["nahorgi", "kelinSalom"] : c.s.occasion === "nahorgi" ? [bazm] : ["nahorgi"];
-  return options.filter((k) => !have.has(k));
+  return addableKinds(c.s.occasion ?? "nikoh", d.cause, d.events.filter(isCompleteEvent).map((e) => e.kind));
 }
 
 /** После локации: ещё тадбир? (если есть место и что добавить) */

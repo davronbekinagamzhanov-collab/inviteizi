@@ -90,13 +90,20 @@ export function createTg(api: Api, token: string): Tg {
       }
     },
     async sendPhoto(chatId, photo, opts = {}) {
-      const file = typeof photo === "string" ? photo : new InputFile(photo, "qr.png");
+      const file = typeof photo === "string" ? photo : new InputFile(photo, opts.fileName ?? "qr.png");
       const m = await api.sendPhoto(chatId, file, { ...sendExtra(opts), ...(opts.caption ? { caption: opts.caption } : {}) });
-      return { messageId: m.message_id };
+      return { messageId: m.message_id, fileId: m.photo?.at(-1)?.file_id };
     },
-    async sendDocument(chatId, fileId, opts = {}) {
-      const m = await api.sendDocument(chatId, fileId, { ...sendExtra(opts), ...(opts.caption ? { caption: opts.caption } : {}) });
-      return { messageId: m.message_id };
+    async sendDocument(chatId, doc, opts = {}) {
+      const file = typeof doc === "string" ? doc : new InputFile(doc, opts.fileName ?? "file.pdf");
+      const m = await api.sendDocument(chatId, file, { ...sendExtra(opts), ...(opts.caption ? { caption: opts.caption } : {}) });
+      return { messageId: m.message_id, fileId: m.document?.file_id };
+    },
+    async setMenuButton(chatId, button) {
+      await api.setChatMenuButton({
+        ...(chatId ? { chat_id: chatId } : {}),
+        menu_button: button ? { type: "web_app", text: button.text, web_app: { url: button.url } } : { type: "commands" },
+      });
     },
     async sendAudio(chatId, audio, opts = {}) {
       const m = await api.sendAudio(chatId, audio, {

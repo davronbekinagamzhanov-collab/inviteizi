@@ -2,7 +2,8 @@ import { glueData } from "@/lib/typography";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { checkPagesAllowed } from "@/lib/check-pages";
-import { existingArt, getDesign, longSample } from "@/templates/registry";
+import { getDesign, longSample } from "@/templates/registry";
+import { existingArt } from "@/templates/art";
 
 import { loadOrderDesign } from "@/templates/order-design";
 

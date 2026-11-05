@@ -2,7 +2,7 @@ import { CURRENT_DESIGN_VERSION } from "@/templates/design-version";
 import { rsvpTotals } from "@/lib/rsvp";
 /** Заказ: создание/сохранение, оплата Kaspi, чек, решение админа, «мои приглашения», смена ссылки */
 import QRCode from "qrcode";
-import type { Ctx, Deps, Result, Step } from "./types";
+import type { Ctx, Deps, Draft, Result, Step } from "./types";
 import type { Lang, OrderRecord } from "@/lib/domain";
 import type { InlineButton } from "../tg";
 import { PRICES } from "@/templates/registry";
@@ -66,28 +66,35 @@ function orderButtons(c: Ctx, o: OrderRecord): InlineButton[][] {
   return rows;
 }
 
-export async function confirmDraft(c: Ctx): Promise<Result> {
-  const s = c.s;
+/** Итог сохранения черновика в заказ — одинаковый для чата и приложения */
+export type UpsertOutcome =
+  | { kind: "created" | "updated"; order: OrderRecord }
+  | { kind: "incomplete" | "notFound" | "formatLocked" | "catalogChanged" | "race" }
+  | { kind: "closed" | "waiting" };
+
+/**
+ * Черновик → заказ (НАМУНА). Есть orderId — правка неоплаченного заказа (та же ссылка), иначе новый заказ.
+ * Новый заказ создаётся атомарно вместе с «занятием» вопроса expectedQ: двойное нажатие не создаст второй.
+ */
+export async function upsertDraftOrder(deps: Deps, userId: number, s: Draft, expectedQ: number, handledUpdates?: number[]): Promise<UpsertOutcome> {
   const data = finalData(s);
-  if (!s.templateId || !s.format || !data.events.length || !(s.data?.events ?? []).every(isCompleteEvent)) return null;
+  if (!s.templateId || !s.format || !data.events.length || !(s.data?.events ?? []).every(isCompleteEvent)) return { kind: "incomplete" };
   const music = s.music ?? { kind: "none" as const };
-  const repo = c.deps.repo;
+  const repo = deps.repo;
 
   if (s.orderId) {
     const old = await repo.getOrder(s.orderId);
-    if (!old || old.userId !== c.user.id) return { hint: c.tx.order.notFound };
+    if (!old || old.userId !== userId) return { kind: "notFound" };
     // The status guard belongs in the UPDATE, not only in the earlier read.
-    if (!PAYABLE_STATUSES.includes(old.status)) {
-      await send(c, old.status === "receipt_sent" ? c.tx.pay.waiting : c.tx.order.closed);
-      return { done: true };
-    }
+    if (!PAYABLE_STATUSES.includes(old.status)) return { kind: old.status === "receipt_sent" ? "waiting" : "closed" };
     // До оплаты можно сменить и дизайн, и формат (решение владельца 03.11.2026): новый формат — новая цена.
     // Тот же дизайн и формат — прежняя согласованная сумма (даже если каталог потом переклассифицировал дизайн).
-    const selected=getDesign(s.templateId);
-    const unchanged=s.templateId===old.templateId&&s.format===old.format;
-    if(!unchanged&&(!selected||!isOnSale(selected.id)||selected.format!==s.format||selected.occasion!==old.occasion)){
-      s.format=old.format;s.templateId=old.templateId;
-      return {hint:c.tx.order.formatLocked};
+    const selected = getDesign(s.templateId);
+    const unchanged = s.templateId === old.templateId && s.format === old.format;
+    if (!unchanged && (!selected || !isOnSale(selected.id) || selected.format !== s.format || selected.occasion !== old.occasion)) {
+      s.format = old.format;
+      s.templateId = old.templateId;
+      return { kind: "formatLocked" };
     }
     const preservedData = { ...data };
     delete preservedData.designVersion;
@@ -97,40 +104,65 @@ export async function confirmDraft(c: Ctx): Promise<Result> {
       music,
       templateId: s.templateId,
       // Тот же формат — согласованная сумма (каталог её не меняет); другой формат — цена этого формата
-      format: s.format, amount: s.format === old.format ? old.amount : PRICES[s.format],
+      format: s.format,
+      amount: s.format === old.format ? old.amount : PRICES[s.format],
     });
     if (!o) {
       const current = await repo.getOrder(old.id);
-      await send(c, current?.status === "receipt_sent" ? c.tx.pay.waiting : c.tx.order.closed);
-      return { done: true };
+      return { kind: current?.status === "receipt_sent" ? "waiting" : "closed" };
     }
-    await send(c, c.tx.order.updated(pageUrl(c, o.slug)), inline(orderButtons(c, o)));
-    return { done: true };
+    return { kind: "updated", order: o };
   }
 
-  const selected=getDesign(s.templateId);
+  const selected = getDesign(s.templateId);
   // Старый черновик мог запомнить дизайн, который потом сняли с каталога: купить его уже нельзя
-  if(!selected||!isOnSale(selected.id)||selected.format!==s.format||selected.occasion!==data.occasion){
-    s.ret="review";
-    await send(c,c.tx.order.catalogChanged);
-    return {to:"fmt"};
-  }
+  if (!selected || !isOnSale(selected.id) || selected.format !== s.format || selected.occasion !== data.occasion) return { kind: "catalogChanged" };
   const slugBase = data.occasion === "nikoh" ? slugify(data.groom ?? "", data.bride ?? "") : slugify(data.person ?? "");
-  const o = await repo.createOrderFromDraft({
-    userId: c.user.id,
-    occasion: data.occasion,
-    format: s.format,
-    templateId: s.templateId,
-    data: { ...data, designVersion: CURRENT_DESIGN_VERSION },
-    music,
-    amount: PRICES[s.format],
-    status: "preview",
-    slugBase,
-  }, c.q0, c.u.updateId === undefined ? undefined : rememberUpdate(c.user.state.handledUpdates,c.u.updateId));
-  if (!o) return { ignore: true };
-  await sendAfterCommit(c, c.chatId, c.tx.order.created(pageUrl(c, o.slug)), { markup: inline(orderButtons(c, o)) });
-  // Repo already finished this draft in the same transaction. Do not overwrite a newer dialog.
-  return { ignore: true };
+  const o = await repo.createOrderFromDraft(
+    {
+      userId,
+      occasion: data.occasion,
+      format: s.format,
+      templateId: s.templateId,
+      data: { ...data, designVersion: CURRENT_DESIGN_VERSION },
+      music,
+      amount: PRICES[s.format],
+      status: "preview",
+      slugBase,
+    },
+    expectedQ,
+    handledUpdates,
+  );
+  return o ? { kind: "created", order: o } : { kind: "race" };
+}
+
+export async function confirmDraft(c: Ctx): Promise<Result> {
+  const r = await upsertDraftOrder(c.deps, c.user.id, c.s, c.q0, c.u.updateId === undefined ? undefined : rememberUpdate(c.user.state.handledUpdates, c.u.updateId));
+  switch (r.kind) {
+    case "incomplete":
+      return null;
+    case "notFound":
+      return { hint: c.tx.order.notFound };
+    case "formatLocked":
+      return { hint: c.tx.order.formatLocked };
+    case "waiting":
+    case "closed":
+      await send(c, r.kind === "waiting" ? c.tx.pay.waiting : c.tx.order.closed);
+      return { done: true };
+    case "catalogChanged":
+      c.s.ret = "review";
+      await send(c, c.tx.order.catalogChanged);
+      return { to: "fmt" };
+    case "race":
+      return { ignore: true };
+    case "updated":
+      await send(c, c.tx.order.updated(pageUrl(c, r.order.slug)), inline(orderButtons(c, r.order)));
+      return { done: true };
+    case "created":
+      await sendAfterCommit(c, c.chatId, c.tx.order.created(pageUrl(c, r.order.slug)), { markup: inline(orderButtons(c, r.order)) });
+      // Repo already finished this draft in the same transaction. Do not overwrite a newer dialog.
+      return { ignore: true };
+  }
 }
 
 // ── Свои заказы ──

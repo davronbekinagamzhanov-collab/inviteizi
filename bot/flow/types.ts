@@ -23,6 +23,8 @@ export type Deps = {
   saveMusic?: (fileId: string, userId: number) => Promise<string | undefined>;
   /** Фото клиента из Telegram → WebP в Storage (бакет photos); вернуть публичный адрес */
   savePhoto?: (fileId: string, userId: number) => Promise<string>;
+  /** Фото клиента из приложения (байты) → WebP в Storage; вернуть публичный адрес */
+  savePhotoBytes?: (bytes: Uint8Array) => Promise<string>;
   /** Удалить фото клиента из Storage (cron, через 30 дней после конца приглашения) */
   removePhotos?: (urls: string[]) => Promise<void>;
 };

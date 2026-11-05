@@ -2,7 +2,8 @@ import { glueData } from "@/lib/typography";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { demoMusicUrl } from "@/lib/music";
-import { designs, existingArt, getDesign, longSample } from "@/templates/registry";
+import { designs, getDesign, longSample } from "@/templates/registry";
+import { existingArt } from "@/templates/art";
 
 /**
  * Только для проверки вёрстки (режим разработки): длинные имена и три тадбира.
