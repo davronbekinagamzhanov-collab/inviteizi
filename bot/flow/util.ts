@@ -29,8 +29,24 @@ export const ib = (c: Ctx, text: string, value: string): InlineButton => ({ text
 export const backRow = (c: Ctx): InlineButton[] => [ib(c, c.tx.back, "back")];
 export const inline = (rows: InlineButton[][]): { inline: InlineButton[][] } => ({ inline: rows });
 
-export function mainMenu(tx: BotTexts): Markup {
-  return { reply: [[{ text: tx.menu.create }], [{ text: tx.menu.my }], [{ text: tx.menu.help }, { text: tx.menu.lang }]] };
+/** Убрать нижнюю клавиатуру (старое меню, «📍 Локация»). Главное меню теперь — кнопки под сообщением, см. startMenu */
+export function mainMenu(): Markup {
+  return { removeReply: true };
+}
+
+/** Главное меню: одно сообщение с кнопками. «✨ Таклифнома яратиш» — приложение (или чат, если приложение выключено) */
+export async function startMenu(c: Ctx): Promise<{ inline: InlineButton[][] }> {
+  const tx = c.tx;
+  const saved = c.chatId === c.user.id ? (await c.deps.repo.listFavorites(c.user.id)).length : 0;
+  const app = c.deps.env.miniAppUrl;
+  return {
+    inline: [
+      [app ? { text: tx.menu.create, webApp: app } : { text: tx.menu.create, data: "m:create" }],
+      [{ text: tx.menu.my, data: "m:my" }],
+      [{ text: tx.menuSaved(saved), data: "favorites" }],
+      [{ text: tx.menu.lang, data: "m:lang" }, { text: tx.menu.help, data: "m:help" }],
+    ],
+  };
 }
 
 export async function send(c: Ctx, text: string, markup?: Markup) {

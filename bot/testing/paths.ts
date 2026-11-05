@@ -2,7 +2,56 @@
 import { uz } from "@/texts/bot-uz";
 import { ru } from "@/texts/bot-ru";
 import type { Format } from "@/lib/domain";
+import { FORMATS } from "@/templates/registry";
+import type { Draft } from "../flow/types";
+import { catalogList, PAGE } from "../flow/steps-order";
 import type { Sim } from "./sim";
+
+
+/**
+ * Каталог в чате (v2): альбом по 3 обложки. Листает ▶ до страницы с нужным дизайном и жмёт «N️⃣ Шуни танлайман».
+ * which: формат (первый дизайн этого формата в каталоге), id дизайна или ничего (первый в каталоге).
+ */
+export async function pickDesign(sim: Sim, id: number, which?: Format | string) {
+  const st = (await sim.user(id))!.state as Draft;
+  const list = catalogList({ s: { occasion: st.occasion, paid: st.paid, format: st.format } });
+  const target = which === undefined ? list[0] : (FORMATS as readonly string[]).includes(which) ? list.find((d) => d.format === which) : list.find((d) => d.id === which);
+  if (!target) throw new Error(`В каталоге нет ${which}`);
+  const idx = list.indexOf(target);
+  const want = Math.floor(idx / PAGE) * PAGE;
+  for (let i = 0; i <= list.length; i++) {
+    const now = ((await sim.user(id))!.state as Draft).catIdx ?? 0;
+    if (now === want) break;
+    await sim.click(id, "▶");
+  }
+  const mark = ["1️⃣", "2️⃣", "3️⃣"][idx % PAGE];
+  await sim.click(id, new RegExp(`^${mark} (${uz.catalog.pick("").trim()}|${ru.catalog.pick("").trim()})$`));
+  return target;
+}
+
+/** Дизайн уже в черновике → тот же, но через каталог «✏️ Дизайн» не нужен: только выбор на открытой странице */
+export const pickFromOpenCatalog = pickDesign;
+
+/**
+ * Бот сам выбрал текст №1, первую мелодию и «ответы: ҳа». Старые тесты отвечали на эти вопросы —
+ * тот же итог через ✏️ в сводке: текст N, музыка (none — без музыки, keep — как выбрал бот), ответы.
+ */
+export async function setChoices(sim: Sim, id: number, o: { text?: number; music?: "none" | "keep"; rsvp?: boolean } = {}) {
+  const tx = ((await sim.user(id))!.lang ?? "uz") === "ru" ? ru : uz;
+  if (o.text && o.text !== 1) {
+    await sim.click(id, tx.review.editText);
+    await sim.click(id, tx.text.pick(o.text));
+  }
+  if ((o.music ?? "none") === "none") {
+    await sim.click(id, tx.review.editMusic);
+    await sim.click(id, tx.music.none);
+  }
+  if (o.rsvp === false) {
+    await sim.click(id, tx.rsvp.edit);
+    await sim.click(id, tx.rsvp.no);
+  }
+}
+
 
 /** /start → язык → «Создать» (клиент стоит на выборе тадбира) */
 export async function startUz(sim: Sim, id: number, payload = "") {
@@ -22,8 +71,7 @@ export async function startRu(sim: Sim, id: number, payload = "") {
 export async function nikohToMusic(sim: Sim, id: number, names: [string, string] = ["Азиз", "Мадина"], format: Format = "animated") {
   await startUz(sim, id);
   await sim.click(id, uz.category.nikoh);
-  await sim.click(id, new RegExp(uz.format.names[format]));
-  await sim.click(id, uz.catalog.buy);
+  await pickDesign(sim, id, format);
   await sim.text(id, names[0]);
   await sim.text(id, names[1]);
   await sim.click(id, "Фарзандларимиз");
@@ -35,15 +83,15 @@ export async function nikohToMusic(sim: Sim, id: number, names: [string, string]
   await sim.text(id, "Сайрам, Амир Темур кўчаси 45");
   await sim.text(id, uz.event.skip);
   await sim.click(id, uz.event.noMore);
-  await sim.click(id, uz.text.pick(1));
+  // v2: бот сам выбрал текст/музыку/ответы и показал сводку; к вопросу о музыке — через ✏️
+  await sim.click(id, uz.review.editMusic);
 }
 
 /** Никоҳ до шага «Матн» (варианты текста уже показаны) */
 export async function nikohToText(sim: Sim, id: number, format: Format = "animated") {
   await startUz(sim, id);
   await sim.click(id, uz.category.nikoh);
-  await sim.click(id, new RegExp(uz.format.names[format]));
-  await sim.click(id, uz.catalog.buy);
+  await pickDesign(sim, id, format);
   await sim.text(id, "Азиз");
   await sim.text(id, "Мадина");
   await sim.click(id, "Фарзандларимиз");
@@ -55,11 +103,13 @@ export async function nikohToText(sim: Sim, id: number, format: Format = "animat
   await sim.text(id, "Сайрам, Амир Темур кўчаси 45");
   await sim.text(id, uz.event.skip);
   await sim.click(id, uz.event.noMore);
+  await sim.click(id, uz.review.editText);
 }
 
 export async function nikohToReview(sim: Sim, id: number, names: [string, string] = ["Азиз", "Мадина"], format: Format = "animated") {
   await nikohToMusic(sim, id, names, format);
   await sim.click(id, uz.music.none);
+  await sim.click(id, uz.rsvp.edit);
   await sim.click(id, uz.rsvp.no);
 }
 
@@ -80,12 +130,7 @@ export async function nikohWithReceipt(sim: Sim, id: number, names?: [string, st
   return order;
 }
 
-/** Select an existing identity independently of its editorial display position. */
+/** Выбрать дизайн по id, где бы он ни стоял в каталоге */
 export async function selectCatalogDesign(sim: Sim, user: number, template: string) {
-  for (let i=0;i<100;i++) {
-    const media=sim.last(user).media;
-    if (typeof media === "string" && media.endsWith(`/covers/${template}.jpg`)) return;
-    await sim.click(user,"▶");
-  }
-  throw new Error(`Catalog did not expose ${template}`);
+  await pickDesign(sim, user, template);
 }

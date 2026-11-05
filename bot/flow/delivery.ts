@@ -10,7 +10,7 @@ import type { Deps } from "./types";
 export const MAX_ATTEMPTS = 3;
 const MAX_TRACKED = 200;
 
-type Attempts = { attempts: number; sent: Map<string, Sent> };
+type Attempts = { attempts: number; sent: Map<string, unknown> };
 
 const ledgers = new WeakMap<object, Map<number, Attempts>>();
 
@@ -48,6 +48,8 @@ export function beginAttempt(deps: Deps, updateId?: number): { tg: Tg; canRetry:
     sendMessage: (chat, text, opts) => once(`m:${chat}:${text}`, () => tg.sendMessage(chat, text, opts)),
     sendPhoto: (chat, photo, opts) => once(`p:${chat}:${media(photo)}:${opts?.caption ?? ""}`, () => tg.sendPhoto(chat, photo, opts)),
     sendDocument: (chat, file, opts) => once(`d:${chat}:${media(file)}:${opts?.caption ?? ""}`, () => tg.sendDocument(chat, file, opts)),
+    sendMediaGroup: (chat, photos) => once(`g:${chat}:${photos.map((p) => p.url).join(",")}`, () => tg.sendMediaGroup(chat, photos)),
+    deleteMessage: (...args) => tg.deleteMessage(...args),
     setMenuButton: (...args) => tg.setMenuButton(...args),
     sendAudio: (chat, audio, opts) => once(`a:${chat}:${audio}`, () => tg.sendAudio(chat, audio, opts)),
     editMessageText: (...args) => tg.editMessageText(...args),

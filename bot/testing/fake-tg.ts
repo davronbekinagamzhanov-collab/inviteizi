@@ -98,6 +98,22 @@ export class FakeTg implements Tg {
     return { ...sent, fileId: typeof doc === "string" ? doc : `TGDOC_${this.nextFile++}` };
   }
 
+  async sendMediaGroup(chatId: number, photos: { url: string; caption?: string }[]) {
+    if (photos.length < 2 || photos.length > 10) reject("sendMediaGroup", "wrong number of media");
+    for (const p of photos) checkCaption("sendMediaGroup", p.caption);
+    const messageIds = photos.map((p) => this.push({ chatId, type: "photo", text: p.caption ?? "", media: p.url }).messageId);
+    return { messageId: messageIds[0], messageIds };
+  }
+
+  /** Удалённые сообщения убираются из списка (как в чате у клиента) */
+  deleted: number[] = [];
+  async deleteMessage(chatId: number, messageId: number) {
+    this.calls.push({ method: "deleteMessage", chatId });
+    const i = this.messages.findIndex((x) => x.chatId === chatId && x.id === messageId);
+    if (i >= 0) this.messages.splice(i, 1);
+    this.deleted.push(messageId);
+  }
+
   /** Кнопка меню по чатам (undefined — для всех) */
   menuButtons = new Map<number | "all", { text: string; url: string } | null>();
   async setMenuButton(chatId: number | undefined, button: { text: string; url: string } | null) {

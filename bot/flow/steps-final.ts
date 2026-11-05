@@ -3,7 +3,8 @@ import type { Ctx, Result, Step, StepId } from "./types";
 import { getDesign } from "@/templates/registry";
 import type { InlineButton } from "../tg";
 import { tPlain as t } from "@/texts/uz-cyrl";
-import { designsFor, backRow, data, designLine, editOrSend, eventLabel, finalData, fmtDate, ib, inline, MAX_CUSTOM_TEXT, MAX_MUSIC_BYTES, priceNote, send } from "./util";
+import { backRow, data, designLine, editOrSend, eventLabel, finalData, fmtDate, ib, inline, MAX_CUSTOM_TEXT, MAX_MUSIC_BYTES, send } from "./util";
+import { catalogList, pageOf } from "./steps-order";
 import { confirmDraft } from "./orders";
 import { photoStepFor } from "./steps-photo";
 import { recordBotError, toEntry } from "../errors";
@@ -175,6 +176,21 @@ export const musicOwn: Step = {
   },
 };
 
+/**
+ * «Бот сиз учун танлади»: после тадбиров не задаём вопросы про текст, музыку и ответы гостей —
+ * ставим лучшее (текст №1, первая мелодия тадбира, ответы включены) и сразу показываем сводку с ✏️.
+ */
+export async function chosenByBot(c: Ctx): Promise<Result> {
+  const d = data(c);
+  if (!d.customText && !d.textId) d.textId = t.inviteOptions(finalData(c.s))[0]?.id;
+  if (!c.s.music) {
+    const first = (await c.deps.repo.listMusic(c.s.occasion))[0];
+    c.s.music = first ? { kind: "list", musicId: first.id } : { kind: "none" };
+  }
+  d.rsvp ??= true;
+  return { to: "review" };
+}
+
 // ── Сводка ──
 
 async function musicLine(c: Ctx) {
@@ -224,7 +240,6 @@ async function summary(c: Ctx) {
   lines.push(await musicLine(c));
   lines.push(d.rsvp ? c.tx.rsvp.reviewOn : c.tx.rsvp.reviewOff);
   if (photoStepFor(c)) lines.push(c.tx.photo.review(d.photos?.length ?? 0));
-  lines.push("", priceNote(c.tx));
   return { text: lines.join("\n"), d };
 }
 
@@ -274,12 +289,9 @@ export const review: Step = {
       case "photo":
         return photoStepFor(c) ? edit("photoAsk") : null;
       case "design":
-        {
-          // До оплаты — выбор формата (новый формат = новая цена при сохранении); каталог открывается на текущем дизайне
-          const list = designsFor(c.s.occasion ?? "nikoh", c.s.format ?? "animated");
-          c.s.catIdx = Math.max(0, list.findIndex((x) => x.id === c.s.templateId));
-          return edit(c.s.paid ? "catalog" : "fmt");
-        }
+        // До оплаты — любой дизайн тадбира (другая цена — при сохранении); каталог открывается на странице текущего
+        c.s.catIdx = pageOf(catalogList(c), c.s.templateId);
+        return edit("catalog");
       case "ok":
         return confirmDraft(c);
     }

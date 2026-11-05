@@ -11,7 +11,7 @@ import { uz } from "@/texts/bot-uz";
 import { PRICES, getDesign, isOnSale } from "@/templates/registry";
 import { designsFor } from "./flow/util";
 import { inlineButtons } from "./testing/fake-tg";
-import { nikohOrder } from "./testing/paths";
+import { nikohOrder, pickDesign } from "./testing/paths";
 import { Sim } from "./testing/sim";
 import NotFound from "@/app/not-found";
 
@@ -23,14 +23,11 @@ type Button = { text: string; data?: string };
 const receiptButton = (sim: Sim) =>
   sim.tg.to(ID).flatMap((m) => inlineButtons(m) as Button[]).filter((b) => b.data?.startsWith("rcpt:")).at(-1)!;
 
-/** Правка заказа: другой формат, первый дизайн без фото клиента → «Сотиб олиш» → «Ҳаммаси тўғри» */
+/** Правка заказа: дизайн другого формата без фото клиента → «Шуни танлайман» → «Ҳаммаси тўғри» */
 async function switchFormat(sim: Sim, n: number, format: "simple" | "scroll") {
   await sim.callback(ID, `edit:${n}`, sim.last(ID).id);
   await sim.click(ID, uz.review.editDesign);
-  await sim.click(ID, new RegExp(uz.format.names[format]));
-  const idx = designsFor("nikoh", format).findIndex((d) => !d.clientPhotos);
-  for (let k = 0; k < idx; k++) await sim.click(ID, "▶");
-  await sim.click(ID, uz.catalog.buy);
+  await pickDesign(sim, ID, designsFor("nikoh", format).find((d) => !d.clientPhotos)!.id);
   await sim.click(ID, uz.review.confirm);
 }
 
@@ -109,7 +106,9 @@ describe("избранное во время правки", () => {
     await sim.callback(ID, `fav:add:${fav.id}`, 1);
     await sim.callback(ID, `edit:${o.number}`, sim.last(ID).id);
     await sim.callback(ID, `fav:choose:${fav.id}`, 1);
-    await sim.click(ID, uz.catalog.buy);
+    // открылась страница каталога с этим дизайном — остаётся нажать «Шуни танлайман»
+    expect((await sim.user(ID))!.step).toBe("catalog");
+    await pickDesign(sim, ID, fav.id);
     expect((await sim.user(ID))!.step).toBe("review");
     await sim.click(ID, uz.review.confirm);
     const orders = await sim.repo.listOrdersByUser(ID);

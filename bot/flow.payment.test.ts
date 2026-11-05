@@ -3,7 +3,7 @@ import { uz } from "@/texts/bot-uz";
 import { ru } from "@/texts/bot-ru";
 import { ADMIN, ADMIN2, Sim } from "./testing/sim";
 import { buttonLabels, inlineButtons } from "./testing/fake-tg";
-import { nikohOrder, nikohWithReceipt, startRu } from "./testing/paths";
+import { nikohOrder, nikohWithReceipt, startRu, pickDesign, setChoices } from "./testing/paths";
 
 const BASE = "https://inviteizi.vercel.app";
 
@@ -170,8 +170,7 @@ describe("подтверждение админом", () => {
     await admins(sim);
     await startRu(sim, 2);
     await sim.click(2, ru.category.nikoh);
-    await sim.click(2, /Анимированное/);
-    await sim.click(2, ru.catalog.buy);
+    await pickDesign(sim, 2, "animated");
     await sim.text(2, "Азиз");
     await sim.text(2, "Мадина");
     await sim.click(2, "Наших детей");
@@ -183,9 +182,7 @@ describe("подтверждение админом", () => {
     await sim.text(2, "Манзил");
     await sim.text(2, ru.event.skip);
     await sim.click(2, ru.event.noMore);
-    await sim.click(2, ru.text.pick(1));
-    await sim.click(2, ru.music.none);
-    await sim.click(2, ru.rsvp.no);
+    await setChoices(sim, 2, { text: 1, music: "none", rsvp: false });
     await sim.click(2, ru.review.confirm);
     await sim.click(2, /^💳 Оплатить/);
     await sim.photo(2, "P");
@@ -232,9 +229,7 @@ describe("мои приглашения, правка, ссылка", () => {
     const o = await nikohOrder(sim, 1);
     await sim.click(1, uz.order.edit);
     await sim.click(1, uz.review.editDesign);
-    await sim.click(1, new RegExp(uz.format.names.animated)); // до оплаты сначала выбор формата
-    await sim.click(1, "▶");
-    await sim.click(1, uz.catalog.buy);
+    await pickDesign(sim, 1, "ipak");
     expect(sim.lastText(1)).toContain("Дизайн: №114 Ипак");
     await sim.click(1, uz.review.confirm);
     expect(await sim.repo.getOrder(o.id)).toMatchObject({ slug: "aziz-madina", format: "animated", amount: 8_000, templateId: "ipak" });

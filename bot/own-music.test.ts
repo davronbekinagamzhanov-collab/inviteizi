@@ -83,7 +83,7 @@ describe("шаг «своя музыка»", () => {
     const sim = await atOwn();
     await sim.send(raw(fields));
     const user = (await sim.user(1))!;
-    expect(user.step).toBe("rsvp");
+    expect(user.step).toBe("review");
     expect(user.state.music).toMatchObject({ kind: "own", fileId, url: `https://cdn.test/music/own/${fileId}.mp3` });
     expect(sim.tg.to(1).some(m => m.text === uz.music.saved)).toBe(true);
     expect((user.state as { data: { groom?: string } }).data.groom).toBeTruthy();
@@ -101,7 +101,7 @@ describe("шаг «своя музыка»", () => {
     await sim.send(raw(fields));
     const user = (await sim.user(1))!;
     expect(user.step).toBe("musicOwn");
-    expect(user.state.music).toBeUndefined();
+    expect((user.state.music as { kind?: string } | undefined)?.kind).not.toBe("own");
     expect(user.state.data).toEqual(before.state.data);
     expect(sim.tg.to(1).some(m => m.text === uz.music.sendFile)).toBe(true);
     expect(sim.savedMusic).toEqual([]);
@@ -131,7 +131,7 @@ describe("шаг «своя музыка»", () => {
     sim.deps.saveMusic = async () => { throw new MusicTooBigError(); };
     await sim.send(raw({ audio: { file_id: "X", file_unique_id: "u", duration: 1 } }));
     expect(sim.tg.to(1).some(m => m.text === uz.music.tooBigUnknown)).toBe(true);
-    expect((await sim.user(1))!.state.music).toBeUndefined();
+    expect(((await sim.user(1))!.state.music as { kind?: string } | undefined)?.kind).not.toBe("own");
   });
 
   it("медленная загрузка оборвалась по лимиту: без «сохранено», ошибка записана, можно повторить", async () => {
@@ -154,7 +154,7 @@ describe("шаг «своя музыка»", () => {
     sim.deps.saveMusic = async () => "own/path.mp3";
     await sim.audio(1, "F", 1000);
     expect(sim.lastText(1)).toBe(uz.music.saveFailed);
-    expect((await sim.user(1))!.state.music).toBeUndefined();
+    expect(((await sim.user(1))!.state.music as { kind?: string } | undefined)?.kind).not.toBe("own");
   });
 });
 
@@ -184,6 +184,7 @@ describe("оплата и заказ: сбой сообщения после з�
     const sim = new Sim();
     await path(sim, 1);
     await sim.click(1, uz.music.none);
+    await sim.click(1, uz.rsvp.edit);
     await sim.click(1, uz.rsvp.no);
     const log = vi.spyOn(console, "error").mockImplementation(() => {});
     try {

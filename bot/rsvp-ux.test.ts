@@ -20,6 +20,8 @@ const post = (s: Sim, r: Request) => handleRsvpRequest(r, { repo: s.repo, secret
 async function toRsvpStep(s: Sim, id: number) {
   await nikohToMusic(s, id);
   await s.click(id, uz.music.none);
+  // v2: бот сам включил ответы; к вопросу — через ✏️ в сводке
+  await s.click(id, uz.rsvp.edit);
   expect(s.lastText(id)).toBe(uz.rsvp.ask);
 }
 

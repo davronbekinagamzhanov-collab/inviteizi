@@ -39,6 +39,10 @@ export interface Tg {
   sendPhoto(chatId: number, photo: string | Uint8Array, opts?: FileOpts): Promise<SentFile>;
   /** doc — file_id или байты (чек PDF из приложения, выгрузка xlsx) */
   sendDocument(chatId: number, doc: string | Uint8Array, opts?: FileOpts): Promise<SentFile>;
+  /** Альбом из 2–10 фото (каталог в чате: 3 обложки сразу). Возвращает id всех сообщений альбома */
+  sendMediaGroup(chatId: number, photos: { url: string; caption?: string }[]): Promise<Sent & { messageIds: number[] }>;
+  /** Удалить своё сообщение (старый альбом каталога, старое меню). Уже удалённое — не ошибка */
+  deleteMessage(chatId: number, messageId: number): Promise<void>;
   /** Кнопка меню Telegram у поля ввода: открыть приложение (null — обычное меню команд) */
   setMenuButton(chatId: number | undefined, button: { text: string; url: string } | null): Promise<void>;
   /** audio — url или file_id; возвращает file_id отправленного файла */

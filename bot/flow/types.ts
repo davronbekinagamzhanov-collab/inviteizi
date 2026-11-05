@@ -12,6 +12,8 @@ export type BotEnv = {
   publicBaseUrl: string;
   paymentCardNumber?: string;
   venueMapPickerUrl?: string;
+  /** https://…/app — «✨ Таклифнома яратиш» открывает приложение. Нет (MINI_APP_ENABLED=false) — заказ по чату */
+  miniAppUrl?: string | null;
 };
 
 export type Deps = {
@@ -94,6 +96,10 @@ export type Draft = {
   catIdx?: number;
   /** IDs shown with this catalog question; a changed tariff/catalog requires a fresh choice. */
   catRevision?: string;
+  /** Сообщения текущей страницы каталога (альбом + кнопки): при листании и выборе удаляются/правятся */
+  catMsgs?: number[];
+  /** Одно «живое» сообщение о принятых фото: правится, а не шлётся заново */
+  photoMsg?: number;
   /** Страница вариантов текста (по 3) */
   textPage?: number;
   data?: DraftData;

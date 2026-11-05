@@ -21,6 +21,7 @@ function rsvpRequest(body: Record<string, unknown>, ip = "1.1.1.1", origin = "ht
 async function rsvpOrder(s: Sim, id: number) {
   await nikohToMusic(s, id);
   await s.click(id, uz.music.none);
+  await s.click(id, uz.rsvp.edit);
   expect(s.lastText(id)).toBe(uz.rsvp.ask);
   await s.click(id, uz.rsvp.yes);
   await s.click(id, uz.review.confirm);
@@ -42,13 +43,14 @@ describe("RSVP", () => {
     expect(invitationData(off).rsvpSlug).toBeUndefined();
   });
 
-  it("«Назад» с вопроса возвращает к музыке, правка в сводке меняет ответ", async () => {
+  it("«Назад» с вопроса возвращает к сводке, правка в сводке меняет ответ", async () => {
     const s = new Sim();
     await nikohToMusic(s, 1);
     await s.click(1, uz.music.none);
+    await s.click(1, uz.rsvp.edit);
     await s.click(1, uz.back);
-    expect((await s.user(1))!.step).toBe("music");
-    await s.click(1, uz.music.none);
+    expect((await s.user(1))!.step).toBe("review");
+    await s.click(1, uz.rsvp.edit);
     await s.click(1, uz.rsvp.no);
     expect(s.lastText(1)).toContain(uz.rsvp.reviewOff);
     await s.click(1, uz.rsvp.edit);
@@ -60,6 +62,7 @@ describe("RSVP", () => {
     const s = new Sim();
     await nikohToMusic(s, 1);
     await s.click(1, uz.music.none);
+    await s.click(1, uz.rsvp.edit);
     await s.click(1, uz.rsvp.yes);
     await s.click(1, uz.review.editMusic);
     await s.click(1, uz.music.none);
@@ -130,22 +133,21 @@ describe("RSVP", () => {
 });
 
 describe("Нарх ўзгармайди и тексты", () => {
-  it("на выборе тарифа и в сводке, цифры из PRICES", async () => {
+  it("в каталоге и в сводке — цена дизайна, цифры из PRICES", async () => {
     expect(PRICES).toEqual({ animated: 8000, scroll: 6000, simple: 5000 });
     for (const [tx, lang] of [[uz, uz.langUz], [ru, ru.langRu]] as const) {
       const s = new Sim();
       await prepare(s, 1, lang);
       await s.text(1, tx.menu.create);
       await s.click(1, tx.category.nikoh);
-      const note = tx.pricing.note("8.000", "6.000", "5.000").replace(/8.000 \/ 6.000 \/ 5.000/, "");
-      expect(s.lastText(1).length).toBeGreaterThan(note.length);
-      expect(s.lastText(1)).toMatch(/8.000 \/ 6.000 \/ 5.000 ₸/);
+      expect(s.lastText(1)).toMatch(/8.000 ₸/);
     }
     const s = new Sim();
     await nikohToMusic(s, 1);
     await s.click(1, uz.music.none);
+    await s.click(1, uz.rsvp.edit);
     await s.click(1, uz.rsvp.no);
-    expect(s.lastText(1)).toMatch(/8.000 \/ 6.000 \/ 5.000 ₸/);
+    expect(s.lastText(1)).toMatch(/· 8.000 ₸/);
   });
 
   it("текст музыки называет настоящую кнопку", () => {

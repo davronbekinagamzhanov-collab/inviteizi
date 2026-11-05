@@ -6,7 +6,7 @@ import { ru } from "@/texts/bot-ru";
 import { uz } from "@/texts/bot-uz";
 import { redact, toEntry } from "./errors";
 import { handleCronRequest, handleWebhookRequest } from "./webhook";
-import { nikohOrder, nikohToMusic, nikohToReview, nikohToText, nikohWithReceipt, startUz } from "./testing/paths";
+import { nikohOrder, nikohToMusic, nikohToReview, nikohToText, nikohWithReceipt, startUz, pickDesign } from "./testing/paths";
 import { ADMIN, Sim } from "./testing/sim";
 
 const prepare = async (s: Sim, id: number, lang = uz.langUz) => { await s.start(id); await s.click(id, lang); };
@@ -132,8 +132,7 @@ describe("тестировщик: странный ввод", () => {
     const t = new Sim();
     await startUz(t, 1);
     await t.click(1, uz.category.nikoh);
-    await t.click(1, /Анимацияли/);
-    await t.click(1, uz.catalog.buy);
+    await pickDesign(t, 1, "animated");
     await t.sticker(1);
     expect((await t.user(1))!.step).toBe("groom");
     await t.voice(1);
@@ -226,8 +225,7 @@ describe("тестировщик: странный ввод", () => {
     const s = new Sim();
     await startUz(s, 1);
     await s.click(1, uz.category.nikoh);
-    await s.click(1, /Анимацияли/);
-    await s.click(1, uz.catalog.buy);
+    await pickDesign(s, 1, "animated");
     await s.text(1, "Азиз");
     await s.text(1, "Мадина");
     while ((await s.user(1))!.step !== "evDate") {

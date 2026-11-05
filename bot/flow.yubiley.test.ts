@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ru } from "@/texts/bot-ru";
 import { Sim } from "./testing/sim";
 import { buttonLabels } from "./testing/fake-tg";
-import { startRu } from "./testing/paths";
+import { startRu, pickDesign, setChoices } from "./testing/paths";
 import { designsFor } from "./flow/util";
 
 describe("юбилей (шаг 6)", () => {
@@ -10,8 +10,7 @@ describe("юбилей (шаг 6)", () => {
     const sim = new Sim();
     await startRu(sim, 5);
     await sim.click(5, ru.category.yubiley);
-    await sim.click(5, /Анимированное/);
-    await sim.click(5, ru.catalog.buy);
+    await pickDesign(sim, 5, "animated");
     expect(sim.lastText(5)).toBe(ru.form.personYubiley);
     await sim.text(5, "Мукаррам опа");
     await sim.click(5, ru.form.relations.ona);
@@ -26,9 +25,7 @@ describe("юбилей (шаг 6)", () => {
     await sim.text(5, "Шымкент");
     await sim.text(5, ru.event.skip);
     await sim.click(5, ru.event.noMore);
-    await sim.click(5, ru.text.pick(1));
-    await sim.click(5, ru.music.none);
-    await sim.click(5, ru.rsvp.no);
+    await setChoices(sim, 5, { text: 1, music: "none", rsvp: false });
     expect(sim.lastText(5)).toContain(ru.review.age(60));
     await sim.click(5, ru.review.confirm);
     const [o] = await sim.repo.listOrdersByUser(5);

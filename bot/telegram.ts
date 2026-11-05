@@ -99,6 +99,19 @@ export function createTg(api: Api, token: string): Tg {
       const m = await api.sendDocument(chatId, file, { ...sendExtra(opts), ...(opts.caption ? { caption: opts.caption } : {}) });
       return { messageId: m.message_id, fileId: m.document?.file_id };
     },
+    async sendMediaGroup(chatId, photos) {
+      const ms = await api.sendMediaGroup(chatId, photos.map((p) => ({ type: "photo" as const, media: p.url, ...(p.caption ? { caption: p.caption } : {}) })));
+      const messageIds = ms.map((m) => m.message_id);
+      return { messageId: messageIds[0], messageIds };
+    },
+    async deleteMessage(chatId, messageId) {
+      try {
+        await api.deleteMessage(chatId, messageId);
+      } catch (e) {
+        // Уже удалено или старше 48 часов — тогда просто оставляем
+        if (!(e instanceof Error && /message to delete not found|message can't be deleted/i.test(e.message))) throw e;
+      }
+    },
     async setMenuButton(chatId, button) {
       await api.setChatMenuButton({
         ...(chatId ? { chat_id: chatId } : {}),

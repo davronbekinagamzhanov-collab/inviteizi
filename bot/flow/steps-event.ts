@@ -3,6 +3,7 @@ import { VENUES, venuePickerUrl } from "../venues";
 import type { Ctx, Result, Step } from "./types";
 import type { EventKind } from "@/lib/types";
 import { addableKinds } from "@/lib/order-rules";
+import { chosenByBot } from "./steps-final";
 import type { InlineButton } from "../tg";
 import { addMonths, calendarMonth, kzTime, kzToday } from "../calendar";
 import { isMapLink, parseTime } from "../parse";
@@ -223,9 +224,9 @@ async function afterEvent(c: Ctx): Promise<Result> {
   const count = data(c).events.filter(isCompleteEvent).length;
   if (count >= MAX_EVENTS) {
     await send(c, c.tx.event.maxReached);
-    return { to: "text" };
+    return chosenByBot(c);
   }
-  return { to: addable(c).length ? "more" : "text" };
+  return addable(c).length ? { to: "more" } : chosenByBot(c);
 }
 
 function placeChoices(c:Ctx){
@@ -276,13 +277,13 @@ async function mapMessage(c:Ctx):Promise<Result>{
       e.venueName=u.title;e.address=u.address;
     }
     e.location={lat:u.lat,lng:u.lng};delete e.mapUrl;
-    await send(c,c.tx.event.locationSaved,mainMenu(c.tx));return afterEvent(c);
+    await send(c,c.tx.event.locationSaved,mainMenu());return afterEvent(c);
   }
   if(u.kind==="text"){
     const v=u.text.trim();
     // Old reply-keyboard messages remain readable after upgrading to inline controls.
-    if(v===c.tx.event.skip){await send(c,c.tx.ok,mainMenu(c.tx));return afterEvent(c);}
-    if(isMapLink(v)){e.mapUrl=v;delete e.location;await send(c,c.tx.event.locationSaved,mainMenu(c.tx));return afterEvent(c);}
+    if(v===c.tx.event.skip){await send(c,c.tx.ok,mainMenu());return afterEvent(c);}
+    if(isMapLink(v)){e.mapUrl=v;delete e.location;await send(c,c.tx.event.locationSaved,mainMenu());return afterEvent(c);}
   }
   return {hint:c.tx.event.badLocation};
 }
@@ -322,7 +323,7 @@ export const more: Step = {
     await send(c, c.tx.event.more(list), inline([...rows, [ib(c, c.tx.event.noMore, "done")], backRow(c)]));
   },
   async onButton(c, v) {
-    if (v === "done") return { to: "text" };
+    if (v === "done") return chosenByBot(c);
     if (v.startsWith("add:")) {
       const kind = v.slice(4) as EventKind;
       if (!addable(c).includes(kind)) return null;

@@ -18,6 +18,7 @@ import {
   inline,
   isCompleteEvent,
   mainMenu,
+  startMenu,
   namesOf,
   ownerUrl,
   PAID_STATUSES,
@@ -290,7 +291,7 @@ export const receipt: Step = {
       console.error("notifyAdmins", e instanceof Error ? e.name : "Error");
       await recordBotError(c.deps, toEntry(e, c.u, c.step, "ack"));
     }
-    await sendAfterCommit(c, c.chatId, c.tx.pay.receiptGot, { markup: mainMenu(c.tx) });
+    await sendAfterCommit(c, c.chatId, c.tx.pay.receiptGot, { markup: mainMenu() });
     return { done: true };
   },
 };
@@ -387,7 +388,7 @@ async function sendLinkPack(deps: Deps, o: OrderRecord, afterPayment: boolean) {
       return false;
     }
   };
-  const linkSent = await attempt("ссылка", () => tg.sendMessage(client, tx.pay.paid(url), { markup: mainMenu(tx) }));
+  const linkSent = await attempt("ссылка", () => tg.sendMessage(client, tx.pay.paid(url), { markup: mainMenu() }));
   await attempt("QR", async () => {
     const png = await QRCode.toBuffer(url, { width: 600, margin: 2 });
     await tg.sendPhoto(client, new Uint8Array(png), { caption: tx.pay.qrCaption });
@@ -487,7 +488,7 @@ const MY_LIMIT = 10;
 export async function myOrders(c: Ctx) {
   const list = (await c.deps.repo.listOrdersByUser(c.user.id)).slice(0, MY_LIMIT);
   if (!list.length) {
-    await send(c, c.tx.my.empty, mainMenu(c.tx));
+    await send(c, c.tx.my.empty, await startMenu(c));
     return;
   }
   for (const o of list) {

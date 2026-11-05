@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { uz } from "@/texts/bot-uz";
 import { handleCronRequest, handleWebhookRequest } from "./webhook";
 import { Sim } from "./testing/sim";
-import { nikohOrder, startUz } from "./testing/paths";
+import { nikohOrder, startUz, pickDesign } from "./testing/paths";
 
 const SECRET = "s3cr3t-webhook";
 
@@ -73,7 +73,7 @@ describe("webhook /api/bot", () => {
     expect(sim.lastText(1)).toBe(uz.chooseLang);
   });
   it("потеря ответа COMMIT: повтор текста не становится ответом следующего поля",async()=>{
-    const sim=new Sim(); await startUz(sim,1); await sim.click(1,uz.category.nikoh); await sim.click(1,/Анимацияли/); await sim.click(1,uz.catalog.buy);
+    const sim=new Sim(); await startUz(sim,1); await sim.click(1,uz.category.nikoh); await pickDesign(sim, 1, "animated");
     const save=sim.repo.saveStep.bind(sim.repo);
     vi.spyOn(sim.repo,"saveStep").mockImplementationOnce(async(...args)=>{await save(...args);throw new Error("lost commit acknowledgement");});
     const opts={secret:SECRET,getDeps:()=>sim.deps},h={"x-telegram-bot-api-secret-token":SECRET};

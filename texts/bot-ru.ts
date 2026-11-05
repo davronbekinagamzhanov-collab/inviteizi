@@ -58,17 +58,20 @@ export const ru = {
   langSaved: "✅ Язык: русский.",
 
   menu: {
-    create: "💌 Создать приглашение",
+    create: "✨ Создать приглашение",
     my: "📂 Мои приглашения",
-    help: "❓ Помощь",
-    lang: "🌐 Тил / Язык",
+    help: "💬 Помощь",
+    lang: "🌐 Язык",
   },
+  menuLegacy: { create: "💌 Создать приглашение", help: "❓ Помощь", lang: "🌐 Тил / Язык" },
+  menuSaved: (n: number) => (n ? `❤️ Избранное (${n})` : "❤️ Избранное"),
+  menuButton: "✨ Открыть",
 
   welcome: (name: string | null) =>
-    `Здравствуйте${name ? `, ${name}` : ""}! 🌸\nЯ сделаю красивое приглашение на ваш той — оно открывается на телефоне.\nЧтобы начать, нажмите «💌 Создать приглашение».`,
-  idle: "Чтобы начать, нажмите «💌 Создать приглашение» 👇",
+    `Здравствуйте${name ? `, ${name}` : ""}! 🌸\nКрасивое приглашение, которое открывается на телефоне, — за 5 минут.\nНажмите «✨ Создать приглашение» 👇`,
+  idle: "Чтобы начать, нажмите «✨ Создать приглашение» 👇",
   help:
-    "❓ Как это работает:\n1. Выбираете той и дизайн.\n2. Пишете имена, дату и место.\n3. Смотрите образец и платите через Kaspi.\n4. Отправляете ссылку гостям.\n\nДополнительные изменения (владелец делает вручную) — 2 000 ₸. Есть вопросы — напишите 👇",
+    "💬 Как заказать:\n1. «✨ Создать приглашение» → выберите дизайн.\n2. Напишите имена, дату и место — образец увидите сразу.\n3. Оплатите через Kaspi и пришлите чек — придёт ссылка.\n\nЕсть вопросы — «📞 Связаться» 👇",
   contact: "📞 Связаться",
 
   back: "⬅️ Назад",
@@ -76,7 +79,7 @@ export const ru = {
   pressButton: "Пожалуйста, нажмите одну из кнопок 👇",
   needLetters: "Пожалуйста, напишите буквами ✍️",
   sendText: "Пожалуйста, напишите ответ текстом ✍️",
-  oldButton: "Эта кнопка устарела. Ответьте на последний вопрос 👇",
+  oldButton: "Эта кнопка устарела 👇",
   tooLong: (max: number) => `Слишком длинно 🙂 Не больше ${max} знаков.`,
   ok: "👌",
   error: "😔 Произошла ошибка. Попробуйте ещё раз чуть позже.",
@@ -102,7 +105,13 @@ export const ru = {
 
   catalog: {
     photoCredit: (author: string, license: string, source: string) => `Фото: ${author} · ${license}\n${source}`,
-    caption: (n: number, name: string, format: string, price: string) => `№${n} · ${name}\n${format} · ${price}`,
+    caption: (n: number, name: string, _format: string, price: string) => `№${n} · ${name}\n${price}`,
+    pageTitle: "Выберите дизайн 👇\n«👁» — открыть на телефоне.",
+    line: (mark: string, n: number, name: string, price: string, photo: boolean) => `${mark} №${n} ${name} — ${price}${photo ? " · 📷 можно своё фото" : ""}`,
+    pick: (mark: string) => `${mark} Выбираю этот`,
+    view: (mark: string) => `${mark} 👁 Образец`,
+    range: (from: number, to: number, total: number) => `${from}–${to} / ${total}`,
+    chosen: (n: number, name: string) => `✅ Выбран: №${n} ${name}`,
     /** Строка под подписью у дизайнов, куда клиент может поставить своё фото */
     withPhoto: "📷 Можно добавить своё фото",
     demo: "👁 Образец",
@@ -209,7 +218,7 @@ export const ru = {
     example: "❓ Пример",
     exampleText: (url: string) => `Вот, посмотрите, где будет фото 👇\n${url}\n\nВаше фото встанет на это место.`,
     uploadAsk: "Пришлите фото сюда: от 1 до 3 📤\nМожно обычным фото или файлом (до 10 МБ).",
-    accepted: (n: number, max: number) => `✅ Фото принято (${n}/${max}).\nПришлите ещё или нажмите «Готово».`,
+    accepted: (n: number) => `📷 Фото: ${n} шт. ✅\nПришлите ещё или нажмите «Готово».`,
     done: "✅ Готово",
     again: "🔄 Заново",
     saving: "⏳ Сохраняем фото…",
@@ -241,8 +250,8 @@ export const ru = {
   },
 
   review: {
-    title: "📝 Проверьте, всё ли верно:",
-    design: (n: number, name: string, format: string, price: string) => `Дизайн: №${n} ${name} (${format} · ${price})`,
+    title: "✨ Бот выбрал за вас. Хотите — поменяйте через ✏️:",
+    design: (n: number, name: string, _format: string, price: string) => `Дизайн: №${n} ${name} · ${price}`,
     groom: (s: string) => `Жених: ${s}`,
     bride: (s: string) => `Невеста: ${s}`,
     person: (s: string) => `Имя: ${s}`,
@@ -395,7 +404,7 @@ export const ru = {
   },
 
   my: {
-    empty: "Пока приглашений нет. Нажмите «💌 Создать приглашение» 👇",
+    empty: "Пока приглашений нет. Нажмите «✨ Создать приглашение» 👇",
     item: (n: number, title: string, status: string, url: string) => `#${n} · ${title}\n${status}\n${url}`,
     statuses,
     link: "🔗 Ссылка",

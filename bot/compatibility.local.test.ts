@@ -8,7 +8,7 @@ import {PgRepo} from "./repo-pg";
 import type {Sql} from "@/lib/db";
 import {designs,PRICES} from "@/templates/registry";
 import {Sim,ADMIN} from "./testing/sim";
-import {startUz,nikohToReview} from "./testing/paths";
+import { startUz, nikohToReview, pickDesign } from "./testing/paths";
 import {uz} from "@/texts/bot-uz";
 import {pageMode,invitationData} from "@/lib/orders";
 
@@ -29,7 +29,7 @@ describe.skipIf(process.env.INVITEIZI_LOCAL_PG!=="1")("compatibility with main b
   const sim=()=>{const s=new Sim();s.deps.repo=repo;return s;};
 
   it("buy still enters the existing form when analytics_events does not exist",async()=>{
-    const s=sim();await startUz(s,720001);await s.click(720001,uz.category.nikoh);await s.click(720001,/Анимацияли/);await s.click(720001,uz.catalog.buy);
+    const s=sim();await startUz(s,720001);await s.click(720001,uz.category.nikoh);await pickDesign(s, 720001, "animated");
     expect((await repo.getUser(720001))?.step).toBe("groom");
     expect(s.lastText(720001)).toBe(uz.form.groom);
   });

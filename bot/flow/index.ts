@@ -4,27 +4,27 @@
  */
 import type { BotUpdate } from "../update";
 import type { Ctx, Deps, Draft, Result, Step, StepId } from "./types";
-import { cat, catalog, fmt } from "./steps-order";
+import { cat, catalog, dropCatalog, fmt } from "./steps-order";
 import { age, bride, cause, groom, hosts, person, relation, sideAsk, sideBride } from "./steps-form";
 import { photoAsk, photoUpload } from "./steps-photo";
 import { evPlaces, evVenueName, evMap, evLink, evAddress, evDate, evLoc, evSameDay, evTime, evTimeCustom, evVenue, more } from "./steps-event";
 import { evMenu, music, musicList, musicOwn, review, rsvp, text, textOwn } from "./steps-final";
 import { approve, askReceipt, askRejectReason, editOrder, myOrders, payOrder, receipt, reject, resendLink, rsvpAnswers } from "./orders";
 import { cmdFind, cmdOrders, cmdStats } from "./admin";
-import { mainMenu, send, texts, txFor } from "./util";
+import { mainMenu, ownerUrl, send, startMenu, texts, txFor } from "./util";
 import type { Lang } from "@/lib/domain";
 import { dashboard } from "./dashboard";
 import { partnerAction, partnerContact, partnerName, partnerRate, partnerRateEdit, partnerStats } from "./partners";
 import { favorites, favoriteAction } from "./favorites";
 import { activeDesigns } from "@/templates/registry";
-import { designsFor } from "./util";
+import { catalogList, pageOf } from "./steps-order";
 import { rememberUpdate } from "../update";
 import { classifyError, isUnreachable, recordBotError, toEntry } from "../errors";
 import { beginAttempt } from "./delivery";
 
 const idle: Step = {
   async ask(c) {
-    await send(c, c.tx.idle, mainMenu(c.tx));
+    await send(c, c.tx.idle, await startMenu(c));
   },
 };
 
@@ -175,7 +175,8 @@ async function apply(c: Ctx, r: Result) {
 
 async function goBack(c: Ctx) {
   delete c.s.venueNameInput;
-  if (steps[c.step].replyKeyboard) await send(c, c.tx.ok, mainMenu(c.tx));
+  if (c.step === "catalog") await dropCatalog(c);
+  if (steps[c.step].replyKeyboard) await send(c, c.tx.ok, mainMenu());
   const prev = c.s.back?.pop();
   if (!prev) {
     c.step = "idle";
@@ -208,32 +209,56 @@ async function chooseLang(c: Ctx, lang: string) {
   c.lang = lang as Lang;
   c.tx = texts[c.lang];
   // Сначала сообщение, потом запись: при повторе после сбоя клиент всё равно получит приветствие
+  await setAppButton(c);
   if (first) {
-    await send(c, c.tx.welcome(c.user.firstName), mainMenu(c.tx));
+    await send(c, c.tx.welcome(c.user.firstName), await startMenu(c));
     await c.deps.repo.setLang(c.user.id, lang);
     return;
   }
   await c.deps.repo.setLang(c.user.id, lang);
-  await send(c, c.tx.langSaved, mainMenu(c.tx));
-  await reask(c);
+  if (c.step === "idle") await send(c, c.tx.langSaved, await startMenu(c));
+  else {
+    await send(c, c.tx.langSaved);
+    await reask(c);
+  }
+}
+
+/** Кнопка меню Telegram у поля ввода: «✨ Очиш» открывает приложение (на языке клиента) */
+async function setAppButton(c: Ctx) {
+  if (c.chatId !== c.user.id) return;
+  const url = c.deps.env.miniAppUrl;
+  await c.deps.tg.setMenuButton(c.chatId, url ? { text: c.tx.menuButton, url } : null).catch((e) => console.warn("menu button", e instanceof Error ? e.name : "Error"));
+}
+
+/** Убрать старую нижнюю клавиатуру незаметно: служебное сообщение сразу удаляется */
+async function dropReplyKeyboard(c: Ctx) {
+  try {
+    const m = await c.deps.tg.sendMessage(c.chatId, c.tx.ok, { markup: mainMenu() });
+    await c.deps.tg.deleteMessage(c.chatId, m.messageId);
+  } catch (e) {
+    console.warn("reply keyboard", e instanceof Error ? e.name : "Error");
+  }
 }
 
 async function welcome(c: Ctx) {
+  await dropCatalog(c);
   c.step = "idle";
   c.s = { q: c.s.q };
+  await dropReplyKeyboard(c);
+  await setAppButton(c);
   // Запись последней: записанный update повторно не обрабатывается, и приветствие бы потерялось
-  await send(c, c.tx.welcome(c.user.firstName), mainMenu(c.tx));
+  await send(c, c.tx.welcome(c.user.firstName), await startMenu(c));
   await save(c);
 }
 
 async function help(c: Ctx) {
-  await send(c, c.tx.help, { inline: [[{ text: c.tx.contact, url: `https://t.me/${c.deps.env.ownerUsername.replace(/^@/, "")}` }]] });
+  await send(c, c.tx.help, { inline: [[{ text: c.tx.contact, url: ownerUrl(c) }]] });
 }
 
 type MenuKey = keyof (typeof texts)["uz"]["menu"];
 function menuKey(text: string): MenuKey | null {
   for (const tx of Object.values(texts)) {
-    for (const [k, label] of Object.entries(tx.menu)) if (label === text) return k as MenuKey;
+    for (const labels of [tx.menu, tx.menuLegacy]) for (const [k, label] of Object.entries(labels)) if (label === text) return k as MenuKey;
   }
   return null;
 }
@@ -256,7 +281,7 @@ async function menu(c: Ctx, key: MenuKey) {
 
 async function unknown(c: Ctx) {
   if (c.step === "idle") {
-    await send(c, `${c.tx.unknown} ${c.tx.idle}`, mainMenu(c.tx));
+    await send(c, `${c.tx.unknown} ${c.tx.idle}`, await startMenu(c));
     return;
   }
   await send(c, c.tx.unknown);
@@ -335,8 +360,26 @@ async function toast(c: Ctx, text: string) {
   c.answered = true;
 }
 
+/**
+ * Нажали старую кнопку. Двойное нажатие (кнопка прошлого вопроса) — только всплывашка.
+ * Совсем старая — у того сообщения убираем кнопки и пишем «Бу тугма эскирган 👇» + меню или текущий вопрос.
+ */
+async function stale(c: Ctx, n?: number) {
+  if (n !== undefined && c.step !== "idle" && n === (c.s.q ?? 0) - 1) return toast(c, c.tx.oldButton);
+  await toast(c, c.tx.oldButton);
+  await c.deps.tg.editMessageReplyMarkup(c.chatId, c.u.messageId, null).catch(() => undefined);
+  if (c.step === "idle") return void (await send(c, c.tx.oldButton, await startMenu(c)));
+  await send(c, c.tx.oldButton);
+  await ask(c);
+}
+
 async function onCallback(c: Ctx, d: string) {
   if (d === "favorites") return favorites(c);
+  if (d.startsWith("m:")) {
+    const key = d.slice(2);
+    if (key === "create" || key === "my" || key === "help" || key === "lang") return menu(c, key);
+    return stale(c);
+  }
   if (d.startsWith("dash:")) {
     const [, view, period, a, b] = d.split(":");
     const r = await dashboard(c, view, period, a, b);
@@ -353,10 +396,10 @@ async function onCallback(c: Ctx, d: string) {
     if (c.chatId !== c.user.id || !(await c.deps.repo.listFavorites(c.user.id)).includes(id)) return;
     const design = activeDesigns().find(d => d.id === id);
     if (!design) return;
-    const catIdx = designsFor(design.occasion, design.format).findIndex(d => d.id === id);
+    const catIdx = pageOf(catalogList({ s: { occasion: design.occasion } }), id);
     // Идёт правка заказа или заполнение анкеты того же тадбира: меняем дизайн в ней, а не начинаем новый заказ
     if (c.s.data && c.s.occasion === design.occasion && !c.s.paid) {
-      c.s = { ...c.s, format: design.format, catIdx, ret: c.s.ret ?? (c.s.orderId ? "review" : undefined), back: [] };
+      c.s = { ...c.s, catIdx, ret: c.s.ret ?? (c.s.orderId ? "review" : undefined), back: [] };
       c.step = "catalog";
       return ask(c);
     }
@@ -390,13 +433,13 @@ async function onCallback(c: Ctx, d: string) {
       return reject(c, n, b ?? "");
     case "a": {
       const value = d.split(":").slice(2).join(":");
-      if (n !== (c.s.q ?? 0) || c.step === "idle") return toast(c, c.tx.oldButton);
+      if (n !== (c.s.q ?? 0) || c.step === "idle") return stale(c, n);
       if (value === "x") return;
       if (value === "back") return goBack(c);
       const step = steps[c.step];
-      if (!step.onButton) return toast(c, c.tx.oldButton);
+      if (!step.onButton) return stale(c, n);
       return apply(c, await step.onButton(c, value));
     }
   }
-  return toast(c, c.tx.oldButton);
+  return stale(c);
 }

@@ -12,7 +12,8 @@ export function formatFlowContract(make:()=>{sim:Sim;repo:Repo},base:number){
     vi.stubEnv("ADMIN_IDS",String(ADMIN));vi.stubEnv("OWNER_TELEGRAM_ID",String(ADMIN));
     const {sim:s,repo}=make(),id=base+i;
     await nikohToReview(s,id,undefined,format);
-    expect(s.lastText(id)).toContain(uz.format.names[format]);
+    // v2: слова формата клиент не видит — только цена (и «Бот танлади» в заголовке сводки)
+    expect(s.lastText(id)).not.toContain(uz.format.names[format]);
     expect(s.lastText(id)).toContain(PRICES[format].toLocaleString("ru-RU").replace(/\u00a0/g," "));
     await s.click(id,uz.review.confirm);
     const [o]=await repo.listOrdersByUser(id);
