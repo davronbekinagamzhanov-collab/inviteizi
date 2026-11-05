@@ -81,6 +81,703 @@
    "uz": []
   }
  },
+ "gul-doira": {
+  "number": 117,
+  "format": "animated",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ },
+ "suzani-medalyon": {
+  "number": 129,
+  "format": "simple",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ },
+ "suvbuyoq-tuman": {
+  "number": 139,
+  "format": "animated",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ },
+ "suvbuyoq-zumrad": {
+  "number": 140,
+  "format": "animated",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ },
+ "suvbuyoq-upa": {
+  "number": 141,
+  "format": "animated",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ },
+ "nur-varaq": {
+  "number": 130,
+  "format": "scroll",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ },
+ "girih-barg": {
+  "number": 118,
+  "format": "animated",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ },
+ "oq-maktub": {
+  "number": 127,
+  "format": "simple",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ },
+ "xotira-albom": {
+  "number": 132,
+  "format": "scroll",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ },
+ "muhrli-maktub": {
+  "number": 119,
+  "format": "animated",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ },
+ "ipak-albom": {
+  "number": 128,
+  "format": "simple",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ },
+ "shohona-baxmal": {
+  "number": 70,
+  "format": "scroll",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ },
+ "oltin-monogramma": {
+  "number": 1,
+  "format": "animated",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ },
+ "sapfir": {
+  "number": 23,
+  "format": "simple",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ },
+ "ganch-peshtoq": {
+  "number": 61,
+  "format": "animated",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ },
+ "visol-hikoya": {
+  "number": 133,
+  "format": "animated",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ },
+ "ganch-darvoza": {
+  "number": 134,
+  "format": "animated",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ },
  "bog": {
   "number": 115,
   "format": "scroll",
@@ -122,9 +819,624 @@
    "uz": []
   }
  },
+ "lola-medalyon": {
+  "number": 136,
+  "format": "simple",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ },
+ "lola-bodom": {
+  "number": 121,
+  "format": "animated",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ },
+ "doppi-kitob": {
+  "number": 135,
+  "format": "scroll",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ },
+ "doppicha": {
+  "number": 78,
+  "format": "simple",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ },
+ "qozon-tongi": {
+  "number": 125,
+  "format": "animated",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ },
  "tong-dasturxon": {
   "number": 116,
   "format": "scroll",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ },
+ "non-albom": {
+  "number": 124,
+  "format": "simple",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ },
+ "tonggi-piyola": {
+  "number": 120,
+  "format": "animated",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ },
+ "tong-varaq": {
+  "number": 126,
+  "format": "scroll",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ },
+ "choy-maktub": {
+  "number": 123,
+  "format": "simple",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ },
+ "zarhal-lavha": {
+  "number": 87,
+  "format": "animated",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ },
+ "umr-kitobi": {
+  "number": 137,
+  "format": "scroll",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ },
+ "hurmat-maktub": {
+  "number": 138,
+  "format": "simple",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ },
+ "pion-guldasta": {
+  "number": 51,
+  "format": "animated",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ },
+ "umr-daraxti": {
+  "number": 81,
+  "format": "scroll",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ },
+ "bordo-guldasta": {
+  "number": 122,
+  "format": "simple",
   "uz360": {
    "errors": [],
    "htmlLang": "uz",
