@@ -75,8 +75,8 @@ describe("проверка перед оплатой — приложение", 
     expect(await app.confirmPay(s.deps, { ...u, id: 10 }, r.order.id)).toEqual({ error: "notFound" });
     const c = await app.confirmPay(s.deps, u, r.order.id);
     if (!("ok" in c)) throw new Error(JSON.stringify(c));
-    expect(c.order.confirmed).toBe(true);
+    expect(c.order!.confirmed).toBe(true);
     expect((await s.repo.getOrder(r.order.id))!.payConfirmedAt).toEqual(s.clock);
-    expect(appUz.pay.note(c.order.number)).toBe(`Изоҳга ёзинг: #${c.order.number}`);
+    expect(appUz.pay.note(c.order!.number)).toBe(`Изоҳга ёзинг: #${c.order!.number}`);
   });
 });
