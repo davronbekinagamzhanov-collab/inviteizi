@@ -106,7 +106,7 @@ describe("сигнал об ошибках владельцу (ночь п.5)", 
     await runCron(s.deps);
     await runCron(s.deps);
     expect(alerts()).toHaveLength(1);
-    expect(alerts()[0].text).toContain("3 ошибок за час — TimeoutError: db timeout");
+    expect(alerts()[0].text).toContain("3 ошибки за час — TimeoutError: db timeout");
     s.advance(60);
     for (let i = 0; i < 3; i++) await s.repo.logBotError(err);
     await runCron(s.deps);
@@ -125,6 +125,71 @@ describe("сигнал об ошибках владельцу (ночь п.5)", 
     expect(s.tg.to(ADMIN).some((m) => m.text?.startsWith("⚠️ Бот:"))).toBe(false);
     s.clock = new Date("2026-11-02T03:05:00Z"); // 08:05
     await runCron(s.deps);
-    expect(s.tg.to(ADMIN).filter((m) => m.text?.startsWith("⚠️ Бот:")).at(-1)?.text).toContain("4 ошибок за ночь");
+    expect(s.tg.to(ADMIN).filter((m) => m.text?.startsWith("⚠️ Бот:")).at(-1)?.text).toContain("4 ошибки за ночь");
+  });
+});
+
+describe("ночной ревьюер: исправления", () => {
+  it("№1: НАМУНА закрылась (24 ч) — проверка перед оплатой без мёртвой ссылки", async () => {
+    const { nikohOrder } = await import("./testing/paths");
+    const s = new Sim();
+    const o = await nikohOrder(s, 1);
+    s.advance(25 * 60);
+    await s.callback(1, `pay:${o.number}`, 1);
+    expect(s.lastText(1)).toContain("24 соатдан кейин ёпилган");
+    expect(s.lastText(1)).not.toContain(`/${o.slug}`);
+  });
+
+  it("№2: приложение — после смены дизайна (цены) подтверждение сбрасывается", async () => {
+    const s = new Sim();
+    const u: AppUser = { id: 5, firstName: "Апа", username: "u5", languageCode: "uz" };
+    const nikoh = activeDesigns().filter((d) => d.occasion === "nikoh");
+    const a = nikoh.find((d) => d.format === "animated")!;
+    const b = nikoh.find((d) => d.format === "simple")!;
+    const form = { hosts: "Оила", groom: "Азиз", bride: "Мадина", events: [{ date: "2027-06-12", time: "18:00", venueName: "Зал", address: "Сайрам" }] };
+    const r = await app.submitDraft(s.deps, u, { templateId: a.id, form });
+    if (!("ok" in r)) throw new Error(JSON.stringify(r));
+    await app.confirmPay(s.deps, u, r.order.id);
+    const r2 = await app.submitDraft(s.deps, u, { templateId: b.id, form, orderId: r.order.id });
+    if (!("ok" in r2)) throw new Error(JSON.stringify(r2));
+    expect(r2.order.amount).not.toBe(r.order.amount);
+    expect(r2.order.confirmed).toBe(false);
+  });
+
+  it("№2б: чат — старая кнопка «✅ …тўлаймиз» после правки снова показывает проверку", async () => {
+    const { nikohOrder } = await import("./testing/paths");
+    const s = new Sim();
+    const o = await nikohOrder(s, 1);
+    await s.click(1, /^💳 Тўлаш/);
+    const btn = s.last(1)!;
+    const data = (btn.markup as { inline: { text: string; data?: string }[][] }).inline[0][0].data!;
+    const fresh = (await s.repo.getOrder(o.id))!;
+    await s.repo.updateOrder(o.id, { data: { ...fresh.data, groom: "Сардор" } });
+    await s.callback(1, data, btn.id);
+    expect(s.lastText(1)).toContain("Тўловдан олдин текширинг");
+    expect(s.lastText(1)).toContain("Сардор");
+  });
+
+  it("№3: вчерашняя кнопка «✅ Да, выплатил» в карточке не проводит новую выплату", async () => {
+    const s = new Sim();
+    const p = await s.repo.createPartner({ code: "dokon333", name: "Дўкон", telegramId: null, username: null, rate: 500, status: "active" });
+    await prepare(s, ADMIN, uz.langRu);
+    await s.start(1, partnerSource("dokon333"));
+    const a = await nikohWithReceipt(s, 1);
+    await s.callback(ADMIN, `ok:${a.number}`, 1);
+    await s.callback(ADMIN, `pa:paid:${p.id}:500:0`, 1);
+    expect(s.repo.payouts).toHaveLength(1);
+    await s.start(2, partnerSource("dokon333"));
+    const b = await nikohWithReceipt(s, 2);
+    await s.callback(ADMIN, `ok:${b.number}`, 1);
+    await s.callback(ADMIN, `pa:paid:${p.id}:500:0`, 1);
+    expect(s.repo.payouts).toHaveLength(1);
+  });
+
+  it("№4: «100 ₸» и «50 тг» — сумма, а не процент", async () => {
+    const { parseRate } = await import("./flow/partners");
+    expect(parseRate("100 ₸")).toEqual({ rate: 100, pct: null });
+    expect(parseRate("50 тг")).toEqual({ rate: 50, pct: null });
+    expect(parseRate("50")).toEqual({ rate: 0, pct: 50 });
   });
 });

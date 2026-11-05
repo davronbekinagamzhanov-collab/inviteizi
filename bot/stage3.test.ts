@@ -242,9 +242,9 @@ describe("владелец и админы вне статистики", () => {
     await s.start(1, partnerSource("aaaa1111"));
     const o = await nikohWithReceipt(s, 1);
     await approve(s, o.number);
-    await s.callback(ADMIN, `dp:ok:${p.id}:2000`, 1);
+    await s.callback(ADMIN, `dp:ok:${p.id}:2000:0`, 1);
     expect(s.repo.payouts).toEqual([]);
-    await s.callback(ADMIN, `dp:ok:${p.id}:1000`, 1);
+    await s.callback(ADMIN, `dp:ok:${p.id}:1000:0`, 1);
     expect(s.repo.payouts).toHaveLength(1);
   });
 });

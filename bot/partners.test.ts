@@ -393,7 +393,7 @@ describe("выплаты с карточки", () => {
     expect(s.lastText(ADMIN)).toBe(T.payConfirm("Салон Малика", "1 000 ₸", "+7 701 123 45 67"));
     const screen = s.last(ADMIN)!.id;
     await s.click(ADMIN, T.btn.payYes);
-    await s.callback(ADMIN, `pa:paid:${p.id}:1000`, screen);
+    await s.callback(ADMIN, `pa:paid:${p.id}:1000:0`, screen);
     expect(s.repo.payouts).toHaveLength(1);
     expect(s.lastText(ADMIN)).toBe(T.payStale);
   });
@@ -446,7 +446,7 @@ describe("лимиты Telegram на новые тексты", () => {
     for (const a of [T.already, T.decided.active, T.decided.rejected, ru.oldButton]) expect(a.length).toBeLessThanOrEqual(TG_LIMITS.alert);
     const labels = [...Object.values(T.btn).map((b) => (typeof b === "function" ? b("1 000 000 ₸") : b)), uz.role.phoneButton, ru.role.phoneButton, ...Object.values(T.schedule)];
     for (const l of labels) expect(l.length, l).toBeLessThanOrEqual(TG_LIMITS.button);
-    for (const data of ["pa:paid:2147483647:1000000", "pa:sset:2147483647:monthly", "pa:l:0:999"]) expect(Buffer.byteLength(data)).toBeLessThanOrEqual(TG_LIMITS.callbackData);
+    for (const data of ["pa:paid:2147483647:1000000:9999", "pa:sset:2147483647:monthly", "pa:l:0:999"]) expect(Buffer.byteLength(data)).toBeLessThanOrEqual(TG_LIMITS.callbackData);
   });
 });
 

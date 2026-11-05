@@ -306,7 +306,7 @@ export const ru = {
 
   pay: {
     /** Проверка перед оплатой: без «✅ … тўлаймиз» реквизиты не показываются */
-    check: (lines: string, url: string) => `🔎 Проверьте перед оплатой:\n\n${lines}\n\n👁 Образец: ${url}\n\n⚠️ После оплаты приглашение изменить нельзя, деньги не возвращаются. Проверьте образец 👆`,
+    check: (lines: string, url: string | null) => `🔎 Проверьте перед оплатой:\n\n${lines}\n\n${url ? `👁 Образец: ${url}` : "👁 Образец закрыт через 24 часа. Данные — выше; после оплаты ссылка откроется полностью."}\n\n⚠️ После оплаты приглашение изменить нельзя, деньги не возвращаются. Проверьте образец 👆`,
     confirmYes: "✅ Всё верно, оплачиваем",
     /** Одно сообщение после оплаты (подпись к QR): ссылка, как разослать, спасибо */
     paidPack: (url: string) => `🎉 Оплата подтверждена! Ваше приглашение готово:\n${url}\n\n📷 QR-код: гость наводит камеру телефона — приглашение открывается.\n📤 Гостям — кнопкой ниже.\n\n🙏 Спасибо! Поздравляем с торжеством!`,
@@ -472,6 +472,7 @@ export const ru = {
     joinTaken: "Этот партнёр уже подключён к другому аккаунту Telegram. Если есть вопрос — 📞 Связаться.",
     joinShare: (link: string) => `Здравствуйте! 🤝\nВы партнёр InviteIZI.\nНажмите ссылку — в Telegram откроется меню партнёра:\n${link}`,
     schedule: { daily: "каждый день", weekly: "каждый понедельник", monthly: "1-го числа каждого месяца" } as Record<string, string>,
+    rateLine: (rate: string) => `Ваша ставка: ${rate} — с каждой оплаты`,
     payDay: (when: string) => `День выплаты: ${when}`,
     onHold: (amount: string) => `Ждёт подтверждения: ${amount}`,
     countOnly: "Этот QR только для счёта — без выплат.",
@@ -669,7 +670,7 @@ export const staff = {
     mgrNote: (name: string, amount: string) => `💸 ${name}: выплачено ${amount}`,
     mgrPayToday: (month: string, count: string, bonus: string, amount: string, owner: string) =>
       `💰 За ${month}: ${count} × 500 ₸${bonus ? ` + бонус ${bonus}` : ""} = ${amount}.\n${owner} переведёт сегодня.`,
-    errors: (n: number, period: string, top: string) => `⚠️ Бот: ${n} ошибок ${period} — ${top || "без описания"}\nПодробности — в журнале bot_errors (Supabase).`,
+    errors: (n: number, period: string, top: string) => `⚠️ Бот: ${n} ${n % 10 === 1 && n % 100 !== 11 ? "ошибка" : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? "ошибки" : "ошибок"} ${period} — ${top || "без описания"}\nПодробности — в журнале bot_errors (Supabase).`,
     errorsHour: "за час",
     errorsNight: "за ночь",
     mgrPaidOut: (amount: string, month: string) => `✅ Вам переведено ${amount} за ${month}.`,

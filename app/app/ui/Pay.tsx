@@ -75,10 +75,14 @@ export function Pay({ order, pay, onDone, onToast }: { order: AppOrder; pay: Pay
       <div className={s.screen}>
         <h1 className={s.title}>{T.pay.checkTitle}</h1>
         <Section title={order.title}>
-          <p className={s.label}>{(order.check ?? "").split("\n").slice(1).join("\n")}</p>
-          <a className={`${s.btn} ${s.btnGhost} ${s.btnSmall}`} href={order.url} target="_blank" rel="noopener">
-            {T.pay.checkOpen}
-          </a>
+          <p className={s.label}>{(order.check ?? "").split("\n").slice(1).filter((l) => !l.startsWith("💳")).join("\n")}</p>
+          {order.namunaOpen !== false ? (
+            <a className={`${s.btn} ${s.btnGhost} ${s.btnSmall}`} href={order.url} target="_blank" rel="noopener">
+              {T.pay.checkOpen}
+            </a>
+          ) : (
+            <p className={s.help}>{T.pay.namunaClosed}</p>
+          )}
         </Section>
         <div className={s.payAmount}>
           <small>{T.pay.amount}</small>

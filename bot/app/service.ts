@@ -11,6 +11,7 @@ import { getDesign, isOnSale } from "@/templates/registry";
 import { tPlain as t } from "@/texts/uz-cyrl";
 import { kzToday } from "../calendar";
 import { PAID_STATUSES, PAYABLE_STATUSES, txFor } from "../flow/util";
+import { pageMode } from "@/lib/orders";
 import { adminCard, checkLines, decisionButtons, upsertDraftOrder, type UpsertOutcome } from "../flow/orders";
 import { validateForm, type FieldError, type FormInput, cleanOwnText, graphemes, MAX_CUSTOM_TEXT } from "@/lib/order-rules";
 import { isQuiet } from "@/lib/quiet-hours";
@@ -45,6 +46,8 @@ export type AppOrder = {
   url: string;
   /** v2: короткая сводка для проверки перед оплатой («📅 14.11.2026, 18:00 · Наврўз») и подтверждена ли она */
   check: string;
+  /** НАМУНА ещё открыта (24 часа после создания) */
+  namunaOpen: boolean;
   confirmed: boolean;
   canEdit: boolean;
   canPay: boolean;
@@ -81,7 +84,7 @@ function namesOf(d: InvitationData) {
   return d.occasion === "nikoh" ? `${d.groom ?? ""} & ${d.bride ?? ""}` : (d.person ?? "");
 }
 
-export function appOrder(deps: Deps, o: OrderRecord): AppOrder {
+export function appOrder(deps: Deps, o: OrderRecord, lang: Lang = "uz"): AppOrder {
   return {
     id: o.id,
     number: o.number,
@@ -91,7 +94,8 @@ export function appOrder(deps: Deps, o: OrderRecord): AppOrder {
     date: o.data.events[0]?.date ?? null,
     amount: o.amount,
     url: `${deps.env.publicBaseUrl}/${o.slug}`,
-    check: checkLines(o),
+    check: checkLines(o, lang),
+    namunaOpen: pageMode(o, deps.now()) !== "expired",
     // Подтверждение действует для текущей суммы (сменили дизайн/цену — проверить снова)
     confirmed: Boolean(o.payConfirmedAt) && o.status === "awaiting_payment",
     canEdit: PAYABLE_STATUSES.includes(o.status),
@@ -151,7 +155,7 @@ export async function openSession(deps: Deps, u: AppUser): Promise<AppSession> {
   const lang = langFor(user.lang, u.languageCode, Boolean(deps.env.kazakhEnabled));
   if (!user.lang) await deps.repo.setLang(u.id, lang);
   const all = await deps.repo.listOrdersByUser(u.id);
-  const orders = all.slice(0, MAX_ORDERS).map((o) => appOrder(deps, o));
+  const orders = all.slice(0, MAX_ORDERS).map((o) => appOrder(deps, o, lang));
   // Черновик правки заказа, который уже оплачен или на проверке чека, — больше не черновик: новый заказ с чистого листа
   let draft = draftOf(user.state as Draft);
   const bound = draft?.orderId ? all.find((o) => o.id === draft!.orderId) : undefined;
@@ -177,10 +181,12 @@ export async function confirmPay(deps: Deps, u: AppUser, orderId: unknown) {
   if (typeof orderId !== "string") return { error: "notFound" as const };
   const o = await deps.repo.getOrder(orderId).catch(() => null);
   if (!o || o.userId !== u.id) return { error: "notFound" as const };
+  if (o.status === "receipt_sent") return { error: "waiting" as const };
   if (!PAYABLE_STATUSES.includes(o.status)) return { error: "closed" as const };
   if (eventsPassed(deps, o)) return { error: "passed" as const };
   const r = await deps.repo.transition(o.id, PAYABLE_STATUSES, "awaiting_payment", { payConfirmedAt: deps.now() });
-  return r ? { ok: true as const, order: appOrder(deps, r) } : { error: "closed" as const };
+  if (!r) return { error: "closed" as const };
+  return { ok: true as const, order: appOrder(deps, r, (await deps.repo.getUser(u.id))?.lang ?? "uz") };
 }
 
 export async function setLang(deps: Deps, u: AppUser, lang: unknown) {
@@ -301,12 +307,12 @@ export async function submitDraft(deps: Deps, u: AppUser, d: AppDraft): Promise<
       } else {
         await deps.repo.saveStep(u.id, "idle", { q: q + 2, templateId: draft.templateId, occasion: draft.occasion, format: draft.format, orderId: r.order.id, music: draft.music, data: draft.data } as Record<string, unknown>);
       }
-      return { ok: true, order: appOrder(deps, r.order), created: r.kind === "created" };
+      return { ok: true, order: appOrder(deps, r.order, user.lang ?? "uz"), created: r.kind === "created" };
     }
     case "race": {
       // Двойное нажатие: заказ уже создан параллельным запросом — отдаём его
       const last = (await deps.repo.listOrdersByUser(u.id))[0];
-      return last && PAYABLE_STATUSES.includes(last.status) ? { ok: true, order: appOrder(deps, last), created: false } : { error: "busy" };
+      return last && PAYABLE_STATUSES.includes(last.status) ? { ok: true, order: appOrder(deps, last, user.lang ?? "uz"), created: false } : { error: "busy" };
     }
     case "catalogChanged":
       return { error: "design" };
@@ -338,7 +344,8 @@ export async function newDraft(deps: Deps, u: AppUser) {
 }
 
 export async function listOrders(deps: Deps, u: AppUser) {
-  return { orders: (await deps.repo.listOrdersByUser(u.id)).slice(0, MAX_ORDERS).map((o) => appOrder(deps, o)) };
+  const lang = (await deps.repo.getUser(u.id))?.lang ?? "uz";
+  return { orders: (await deps.repo.listOrdersByUser(u.id)).slice(0, MAX_ORDERS).map((o) => appOrder(deps, o, lang)) };
 }
 
 // ── Чек из приложения ──

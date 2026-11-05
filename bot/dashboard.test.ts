@@ -347,8 +347,8 @@ describe("партнёры", () => {
     for (const part of [`${uz.panel.partner.scanned}: 3`, `${uz.panel.partner.started}: 2`, `${uz.panel.partner.paid}: 2`]) expect(screen.text).toContain(part);
     await s.callback(ADMIN, `dp:pay:${p.id}:2000`, 1);
     expect(s.repo.payouts).toEqual([]);
-    await s.callback(ADMIN, `dp:ok:${p.id}:2000`, 1);
-    await s.callback(ADMIN, `dp:ok:${p.id}:2000`, 1);
+    await s.callback(ADMIN, `dp:ok:${p.id}:2000:0`, 1);
+    await s.callback(ADMIN, `dp:ok:${p.id}:2000:0`, 1);
     expect(s.repo.payouts).toHaveLength(1);
     expect(s.lastText(ADMIN)).toBe(uz.panel.partner.payStale);
   });

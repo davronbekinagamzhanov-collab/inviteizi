@@ -90,6 +90,19 @@ describe("v2: миграции и новые запросы PgRepo на PGlite",
     expect((await repo.settlePartnerProposal(p.id, true))?.ratePercent).toBe(20);
   });
 
+  it("миграция pay_confirm ещё не применена — оплата не встаёт (заказ сохраняется без новой отметки)", async () => {
+    await repo.touchUser({ id: 777201 });
+    const o = await repo.createOrder({ userId: 777201, occasion: "nikoh", format: "animated", templateId: "muhr", data: { occasion: "nikoh", groom: "А", bride: "Б", hosts: "О", events: [] }, music: { kind: "none" }, amount: 8000, slugBase: "no-migr", status: "preview" });
+    await sql`reset role`;
+    await sql`alter table public.orders drop column pay_confirmed_at`;
+    await sql`set role inviteizi_server`;
+    const r = await repo.transition(o.id, ["preview"], "awaiting_payment", { payConfirmedAt: new Date() });
+    expect(r?.status).toBe("awaiting_payment");
+    await sql`reset role`;
+    await sql.unsafe(await readFile("supabase/migrations/20261111120000_pay_confirm.sql", "utf8"));
+    await sql`set role inviteizi_server`;
+  });
+
   it("повторное применение новой миграции безопасно", async () => {
     await sql`reset role`;
     await sql.unsafe(await readFile("supabase/migrations/20261108120000_notices.sql", "utf8"));

@@ -34,6 +34,7 @@ import { getDesign, isOnSale } from "@/templates/registry";
 import { rememberUpdate } from "../update";
 import { recordBotError, toEntry } from "../errors";
 import { paidNotices } from "./notify";
+import { pageMode } from "@/lib/orders";
 import { isQuiet } from "@/lib/quiet-hours";
 import { creditPartnerSafely } from "./partners";
 import { isSeller } from "./panel";
@@ -114,6 +115,8 @@ export async function upsertDraftOrder(deps: Deps, userId: number, s: Draft, exp
       // Тот же формат — согласованная сумма (каталог её не меняет); другой формат — цена этого формата
       format: s.format,
       amount: s.format === old.format ? old.amount : PRICES[s.format],
+      // Заказ изменили — перед оплатой клиент снова проверяет его
+      ...(old.payConfirmedAt ? { payConfirmedAt: null } : {}),
     });
     if (!o) {
       const current = await repo.getOrder(old.id);
@@ -210,10 +213,14 @@ export async function editOrder(c: Ctx, n: number): Promise<Result> {
 
 /** «Тўлаш»: реквизиты Kaspi, статус awaiting_payment, ждём чек */
 /** Короткая сводка заказа для проверки перед оплатой: имена, дата, время, место */
-export function checkLines(o: OrderRecord) {
+export function checkLines(o: OrderRecord, lang: Lang = "uz") {
+  const tx = txFor(lang);
+  const names = o.data.occasion === "nikoh" ? `${o.data.groom ?? ""} ${lang === "ru" ? "и" : lang === "kk" ? "және" : "ва"} ${o.data.bride ?? ""}` : (o.data.person ?? "");
+  const many = o.data.events.length > 1;
   return [
-    namesOf(o.data),
-    ...o.data.events.map((e) => `📅 ${fmtDate(e.date)}, ${e.time} · ${e.venueName}`),
+    names,
+    ...o.data.events.map((e) => `📅 ${many ? `${tx.event.kinds[e.kind]}: ` : ""}${fmtDate(e.date)}, ${e.time} · ${e.venueName}`),
+    `💳 ${price(o.amount)}`,
   ].join("\n");
 }
 
@@ -221,7 +228,14 @@ export function checkLines(o: OrderRecord) {
  * «💳 Тўлаш»: сначала проверка (имена, дата, место, НАМУНА и предупреждение, что после оплаты не меняется
  * и деньги не возвращаются). Реквизиты — только после «✅ Ҳаммаси тўғри, тўлаймиз» (confirmed), время записывается.
  */
-export async function payOrder(c: Ctx, n: number, confirmed = false): Promise<Result> {
+/** Отметка содержания заказа для кнопки «✅ …тўлаймиз»: заказ поменяли после проверки — кнопка устарела */
+export const checkStamp = (o: OrderRecord) => {
+  let h = 0;
+  for (const ch of JSON.stringify([o.templateId, o.amount, o.data.groom, o.data.bride, o.data.person, o.data.events])) h = (h * 31 + ch.charCodeAt(0)) | 0;
+  return (h >>> 0).toString(36);
+};
+
+export async function payOrder(c: Ctx, n: number, confirmed = false, stamp?: string): Promise<Result> {
   const o = await ownOrder(c, n);
   if (!o) {
     await send(c, c.tx.order.notFound);
@@ -239,11 +253,14 @@ export async function payOrder(c: Ctx, n: number, confirmed = false): Promise<Re
     await send(c, c.tx.pay.eventPassed, inline(orderButtons(c, o, false).filter((r) => !r.some((b) => "data" in b && b.data.startsWith("pay:")))));
     return { done: true };
   }
+  // Старая кнопка (заказ изменили или сменилась цена после проверки) — показываем проверку заново
+  if (confirmed && stamp !== undefined && stamp !== `${o.amount}:${checkStamp(o)}`) confirmed = false;
   if (!confirmed) {
     await send(
       c,
-      c.tx.pay.check(checkLines(o), pageUrl(c, o.slug)),
-      inline([[{ text: c.tx.pay.confirmYes, data: `payok:${o.number}` }], [{ text: c.tx.order.edit, data: `edit:${o.number}` }]]),
+      // НАМУНА живёт 24 часа: если уже закрыта — не даём мёртвую ссылку
+      c.tx.pay.check(checkLines(o, c.lang), pageMode(o, c.deps.now()) === "expired" ? null : pageUrl(c, o.slug)),
+      inline([[{ text: c.tx.pay.confirmYes, data: `payok:${o.number}:${o.amount}:${checkStamp(o)}` }], [{ text: c.tx.order.edit, data: `edit:${o.number}` }]]),
     );
     return { stay: true };
   }

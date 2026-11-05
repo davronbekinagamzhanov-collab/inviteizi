@@ -454,8 +454,8 @@ async function onCallback(c: Ctx, d: string) {
     return r ? apply(c, r) : undefined;
   }
   if (d.startsWith("pa:")) {
-    const [, action, id = "", x = ""] = d.split(":");
-    const r = await ptAction(c, action, id, x);
+    const [, action, id = "", x = "", extra = ""] = d.split(":");
+    const r = await ptAction(c, action, id, x, extra);
     return r ? apply(c, r) : undefined;
   }
   if (d.startsWith("st:") || d.startsWith("sm:")) {
@@ -497,8 +497,8 @@ async function onCallback(c: Ctx, d: string) {
     return r ? apply(c, r) : undefined;
   }
   if (d.startsWith("dp:")) {
-    const [, action, id, amount] = d.split(":");
-    const r = await partnerAction(c, action, id, amount);
+    const [, action, id, amount, version = ""] = d.split(":");
+    const r = await partnerAction(c, action, id, amount, version);
     return r ? apply(c, r) : undefined;
   }
   if (d.startsWith("fav:")) {
@@ -524,8 +524,10 @@ async function onCallback(c: Ctx, d: string) {
       return;
     case "pay":
       return apply(c, await payOrder(c, n));
-    case "payok":
-      return apply(c, await payOrder(c, n, true));
+    case "payok": {
+      const [, , amount, mark] = d.split(":");
+      return apply(c, await payOrder(c, n, true, amount !== undefined ? `${amount}:${mark ?? ""}` : undefined));
+    }
     case "rcpt":
       return apply(c, await askReceipt(c, n, b === undefined ? undefined : Number(b)));
     case "edit":

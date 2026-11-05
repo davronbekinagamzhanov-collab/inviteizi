@@ -1022,9 +1022,24 @@ export class PgRepo implements Repo {
   }
 
   /** update … where id = $1 [and status = any($2)] returning — атомарно, вместе с тадбирами */
-  private update(id: string, from: OrderStatus[] | null, patch: OrderPatch) {
+  /**
+   * Колонки v2 появляются миграциями (pay_confirm, invite_langs). Если миграцию ещё не применили (42703),
+   * повторяем без этих колонок: оплата и правка не встают, теряется только новая отметка.
+   */
+  private async update(id: string, from: OrderStatus[] | null, patch: OrderPatch) {
+    try {
+      return await this.updateOnce(id, from, patch, false);
+    } catch (e) {
+      if (!isMissingColumn(e)) throw e;
+      console.warn("orders: миграция v2 не применена — сохраняю без новых колонок");
+      return this.updateOnce(id, from, patch, true);
+    }
+  }
+
+  private updateOnce(id: string, from: OrderStatus[] | null, patch: OrderPatch, legacy: boolean) {
     return this.sql.begin(async (tx) => {
       const cols = patchColumns(patch);
+      if (legacy) for (const k of ["pay_confirmed_at", "langs", "custom_text_i18n"]) delete cols[k];
       const rows = from
         ? await tx`update public.orders set ${tx(cols)}
                    where id = ${id} and status = any(${tx.array(from)}::text[]) returning id`

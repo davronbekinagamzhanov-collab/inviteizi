@@ -77,8 +77,11 @@ export function parseRate(raw: string): RateSpec | null {
   const t = raw.trim();
   if (!t) return null;
   const pctMark = /%\s*$/.test(t);
-  const n = Number(t.replace(/[\s ₸%]/g, ""));
+  // «100 ₸», «50 тг» — это сумма, а не процент
+  const tenge = /(₸|тг|тенге)\s*$/i.test(t);
+  const n = Number(t.replace(/[\s ₸%]|тг|тенге/gi, ""));
   if (!Number.isInteger(n) || n < 0) return null;
+  if (tenge) return n <= MAX_RATE ? { rate: n, pct: null } : null;
   if (n === 0 && !pctMark) return { rate: 0, pct: null };
   if (pctMark || n <= 100) return n <= 100 ? { rate: 0, pct: n } : null;
   return n <= MAX_RATE ? { rate: n, pct: null } : null;
@@ -223,7 +226,7 @@ const isOwner = async (c: Ctx) => (await roleOf(c)) === "owner";
 const canAddPartners = async (c: Ctx) => ["owner", "manager"].includes(await roleOf(c));
 
 /** Кнопки dp: панели-отчёта. Ставка, выплаты и QR — только владелец */
-export async function partnerAction(c: Ctx, action: string, idArg: string, amountArg: string): Promise<Result | void> {
+export async function partnerAction(c: Ctx, action: string, idArg: string, amountArg: string, versionArg = ""): Promise<Result | void> {
   if (action === "new" && (await canAddPartners(c))) return startNewPartner(c);
   if (!(await isOwner(c))) {
     await send(c, c.tx.dashboard.denied);
@@ -240,12 +243,14 @@ export async function partnerAction(c: Ctx, action: string, idArg: string, amoun
   const amount = Number(amountArg);
   if (!Number.isInteger(amount) || amount <= 0) return;
   if (action === "pay") {
-    await send(c, t.payConfirm(partner.name, price(amount)), inline([[{ text: t.payYes, data: `dp:ok:${partner.id}:${amount}` }]]));
+    const version = await payoutVersion(c.deps, partner.id);
+    await send(c, t.payConfirm(partner.name, price(amount)), inline([[{ text: t.payYes, data: `dp:ok:${partner.id}:${amount}:${version}` }]]));
     return;
   }
   if (action === "ok") {
-    // Сумма в кнопке: двойное нажатие или устаревшая кнопка не проведут выплату второй раз
-    const done = await c.deps.repo.recordPartnerPayout(partner.id, amount, c.user.id);
+    // Сумма и номер выплаты в кнопке: двойное нажатие или вчерашняя кнопка не проведут выплату второй раз
+    const fresh = versionArg === String(await payoutVersion(c.deps, partner.id));
+    const done = fresh && (await c.deps.repo.recordPartnerPayout(partner.id, amount, c.user.id));
     if (done) await afterPartnerPayout(c.deps, partner, amount);
     await send(c, done ? t.paidDone(partner.name, price(amount)) : t.payStale);
   }
@@ -346,7 +351,12 @@ async function toast(c: Ctx, text: string) {
 const OWNER_ONLY = new Set(["ok", "no", "pok", "pno", "rate", "sch", "sset", "pay", "paid"]);
 
 /** Кнопки pa:… владельца и менеджера */
-export async function ptAction(c: Ctx, action: string, idArg: string, x: string): Promise<Result | void> {
+/** Сколько выплат партнёру уже было — «версия» для кнопок выплаты */
+export async function payoutVersion(deps: Deps, partnerId: number) {
+  return (await deps.repo.panelSnapshot()).payouts.filter((x) => x.partnerId === partnerId).length;
+}
+
+export async function ptAction(c: Ctx, action: string, idArg: string, x: string, extra = ""): Promise<Result | void> {
   const role = await roleOf(c);
   if (role !== "owner" && role !== "manager") return void (await toast(c, c.tx.oldButton));
   if (action === "new") return startNewPartner(c);
@@ -386,15 +396,17 @@ export async function ptAction(c: Ctx, action: string, idArg: string, x: string)
     case "pay": {
       const amount = Number(x);
       if (!Number.isInteger(amount) || amount <= 0) return;
+      const version = await payoutVersion(c.deps, p.id);
       return show(c, {
         text: T.payConfirm(p.name, price(amount), p.kaspi ? fmtPhone(p.kaspi) : T.none),
-        rows: [[{ text: T.btn.payYes, data: `pa:paid:${p.id}:${amount}` }], [{ text: S.back, data: `pa:v:${p.id}` }]],
+        rows: [[{ text: T.btn.payYes, data: `pa:paid:${p.id}:${amount}:${version}` }], [{ text: S.back, data: `pa:v:${p.id}` }]],
       });
     }
     case "paid": {
       const amount = Number(x);
-      // Сумма в кнопке: двойное нажатие или устаревшая кнопка не проведут выплату второй раз
-      const done = Number.isInteger(amount) && amount > 0 && (await c.deps.repo.recordPartnerPayout(p.id, amount, c.user.id));
+      // Сумма и номер выплаты в кнопке: двойное нажатие или вчерашняя кнопка не проведут выплату второй раз
+      const fresh = extra === String(await payoutVersion(c.deps, p.id));
+      const done = fresh && Number.isInteger(amount) && amount > 0 && (await c.deps.repo.recordPartnerPayout(p.id, amount, c.user.id));
       if (done) await afterPartnerPayout(c.deps, p, amount);
       return show(c, { text: done ? T.paidDone(p.name, price(amount)) : T.payStale, rows: [[{ text: S.back, data: `pa:v:${p.id}` }]] });
     }
@@ -840,6 +852,8 @@ export function payoutsText(c: Ctx, p: Partner, r: PartnerRow) {
     t.payoutsText({ earned: price(r.earned), paidOut: price(r.paidOut), due: price(r.due) }),
     ...(r.onHold > 0 ? [t.onHold(price(r.onHold))] : []),
     t.payDay(t.schedule[p.schedule]),
+    // Свой «договор»: партнёр видит ставку и сколько получит с каждой цены
+    t.rateLine(p.ratePercent != null ? `${p.ratePercent}% (${rateExamples(p.ratePercent)})` : price(p.rate)),
   ].join("\n");
 }
 

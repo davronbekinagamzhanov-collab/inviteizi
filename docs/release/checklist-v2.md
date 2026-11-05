@@ -21,8 +21,9 @@ Vercel, Telegram webhook и `main` не трогались.
 | 8 | `supabase/migrations/20261112120000_partner_percent.sql` | Ставка партнёра в процентах (10/15/20/свой %) |
 | 9 | `supabase/migrations/20261113120000_error_alerts.sql` | Бот читает журнал ошибок — сигнал «⚠️ Бот: N ошибок за час» |
 
-Все 9 — до Merge, строго по порядку. Без 1–2 и 8 экраны партнёров упадут (новые колонки); без 5 и 7 не сохранятся
-языки и подтверждение оплаты; без 4, 6, 9 соответствующие функции молчат, но бот не падает.
+Все 9 — до Merge, строго по порядку. Без 1–2 и 8 экраны партнёров упадут (новые колонки). Без 5 и 7 бот не падает
+(сохраняет заказ без новых полей), но языки приглашения и время подтверждения оплаты не запишутся; без 4, 6, 9
+соответствующие функции молчат.
 
 Проверка после шагов: `select count(*) from public.managers; select count(*) from public.bot_notices; select langs, pay_confirmed_at from public.orders limit 1; select rate_percent from public.partners limit 1;` — ошибок нет, у старых заказов `{uz}`.
 
@@ -91,9 +92,13 @@ Vercel, Telegram webhook и `main` не трогались.
 
 **Как восстановить** (если базу испортили): скачайте нужный `.dump` из Actions → Artifacts, распакуйте zip и на
 компьютере с установленным PostgreSQL 17 выполните (строка — та же Session pooler):
-`pg_restore --clean --if-exists --no-owner --no-privileges --schema=public -d "СТРОКА" inviteizi-ГГГГ-ММ-ДД.dump`.
-Лучше сначала восстановить в новый пустой проект Supabase и проверить, затем — в боевой. Файлы (фото, песни) в бэкап
-не входят: они лежат в Storage Supabase отдельно.
+`pg_restore --clean --if-exists --no-owner --schema=public -d "СТРОКА" inviteizi-ГГГГ-ММ-ДД.dump`
+В дампе есть права (GRANT) и политики RLS — после восстановления бот сразу снова может читать и писать.
+Проверка: `select count(*) from public.orders;` и открыть в боте «📊 Статистика».
+Восстанавливаете в **новый** проект Supabase (не боевой) — сначала в нём SQL Editor:
+`create role inviteizi_server;`, затем та же команда. Файлы (фото, песни) в бэкап не входят: они лежат
+в Storage Supabase отдельно. Бэкап по расписанию заработает после Merge в `main` (GitHub запускает расписание только из
+основной ветки); до этого — кнопкой «Run workflow», выбрав ветку `feature/v2`.
 
 ## 7. Что не делаем без отдельного «да»
 

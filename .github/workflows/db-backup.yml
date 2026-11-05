@@ -1,5 +1,6 @@
 # Ежедневный бэкап базы InviteIZI (Supabase, PostgreSQL 17).
-# Раз в сутки pg_dump схемы public → файл .dump → артефакт GitHub, хранится 14 дней (бесплатно).
+# Раз в сутки pg_dump схемы public (с правами GRANT и политиками RLS) → файл .dump → артефакт GitHub, 14 дней (бесплатно).
+# Репозиторий приватный: артефакты видят только участники репозитория.
 # Строка подключения — ТОЛЬКО из секрета репозитория DB_BACKUP_URL (Settings → Secrets → Actions).
 # Нет секрета — шаг пишет предупреждение и завершается без ошибки (пока владелец его не добавит).
 # Как восстановить — docs/release/checklist-v2.md, раздел «Бэкап».
@@ -53,7 +54,7 @@ jobs:
           set -euo pipefail
           file="inviteizi-$(date -u +%Y-%m-%d).dump"
           /usr/lib/postgresql/17/bin/pg_dump "$DB_BACKUP_URL" \
-            --format=custom --compress=9 --no-owner --no-privileges \
+            --format=custom --compress=9 --no-owner \
             --schema=public --file="$file"
           # Проверка: архив читается и в нём есть таблица заказов
           /usr/lib/postgresql/17/bin/pg_restore --list "$file" | grep -q "TABLE public orders"
