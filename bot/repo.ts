@@ -174,4 +174,6 @@ export interface Repo {
   claimDueNotices(now: Date, limit: number): Promise<Notice[]>;
   /** Выплата менеджеру за месяц: один раз; false — уже выплачено */
   recordManagerPayout(p: Omit<ManagerPayout, "createdAt"> & { createdBy: number }): Promise<boolean>;
+  /** Средняя оценка отзывов за промежуток (orderIds — только эти заказы; null — все). Нет таблицы — null */
+  reviewSummary?(from: Date, to: Date, orderIds: string[] | null): Promise<{ avg: number; count: number } | null>;
 }

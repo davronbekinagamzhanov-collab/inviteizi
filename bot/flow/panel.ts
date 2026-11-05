@@ -7,14 +7,10 @@
 import type { InlineButton } from "../tg";
 import type { OrderRecord } from "@/lib/domain";
 import { overview, partnerRows, type Partner, type PartnerRow } from "@/lib/owner-panel";
-import { periodStart } from "@/lib/analytics";
 import { isQuiet } from "@/lib/quiet-hours";
 import {
   hashToken,
   INVITE_TTL_MS,
-  MANAGER_BONUS,
-  MANAGER_GOAL,
-  MANAGER_PER_ORDER,
   managerName,
   managerSource,
   newToken,
@@ -24,6 +20,8 @@ import { texts } from "./util";
 import { editOrSend, inline, namesOf, ownerUrl, PAYABLE_STATUSES, pageUrl, price, roleOf, send } from "./util";
 import { orderButtons, sendReceiptTo } from "./orders";
 import { panelData, partnerRowOf, payoutsText, ptList, sendPack, startNewPartner } from "./partners";
+import { managerEarningsScreen, partnerStatsScreen, statsScreen } from "./stats";
+import { exportScreen } from "./export";
 import type { Ctx, Result } from "./types";
 
 type Screen = { text: string; rows: InlineButton[][] };
@@ -162,32 +160,6 @@ async function newManagerLink(c: Ctx): Promise<Screen> {
   return { text: S.managerLink(link), rows: [back("pn:set")] };
 }
 
-// ── Экраны менеджера ──
-
-async function managerStats(c: Ctx): Promise<Screen> {
-  const s = await panelData(c.deps);
-  const now = c.deps.now();
-  const mine = new Set(s.partners.filter((p) => p.managedBy === c.user.id).map((p) => p.id));
-  const earnings = s.earnings.filter((e) => mine.has(e.partnerId));
-  const month = +periodStart("month", now);
-  return {
-    text: S.myStats({ partners: mine.size, paidMonth: earnings.filter((e) => +e.createdAt >= month).length, paidAll: earnings.length }),
-    rows: [back()],
-  };
-}
-
-async function managerEarnings(c: Ctx): Promise<Screen> {
-  const s = await panelData(c.deps);
-  const mine = new Set(s.partners.filter((p) => p.managedBy === c.user.id).map((p) => p.id));
-  const month = +periodStart("month", c.deps.now());
-  const paid = s.earnings.filter((e) => mine.has(e.partnerId) && +e.createdAt >= month).length;
-  const total = paid * MANAGER_PER_ORDER + (paid >= MANAGER_GOAL ? MANAGER_BONUS : 0);
-  return {
-    text: S.earnings({ paidMonth: paid, perOrder: price(MANAGER_PER_ORDER), bonus: price(MANAGER_BONUS), goal: MANAGER_GOAL, month: price(total) }),
-    rows: [back()],
-  };
-}
-
 // ── Заказ для клиента ──
 
 function clientHow(c: Ctx): Screen {
@@ -295,7 +267,13 @@ const PARTNER = new Set(["ps", "pq", "pp", "self"]);
  * Вернёт { kind: "dashboard" } для статистики и партнёров владельца (их рисует панель-отчёт),
  * Result — если нужно войти в шаг диалога, иначе ничего.
  */
-export async function panelAction(c: Ctx, action: string, arg: string): Promise<Result | { dashboard: [string, string, string] } | void> {
+/** Статистика партнёра (месяц); null — человек больше не партнёр */
+async function partnerScreen(c: Ctx) {
+  const p = await c.deps.repo.findPartnerForUser(c.user.id, c.user.username);
+  return p ? partnerStatsScreen(c, p) : null;
+}
+
+export async function panelAction(c: Ctx, action: string, arg: string): Promise<Result | void> {
   const role = await roleOf(c);
   if (action === "home") {
     if (!(await roleHome(c))) await toast(c, c.tx.oldButton);
@@ -310,7 +288,7 @@ export async function panelAction(c: Ctx, action: string, arg: string): Promise<
 
   switch (action) {
     case "stats":
-      return { dashboard: ["general", "all", ""] };
+      return show(c, await statsScreen(c, "owner"));
     case "pt":
       return show(c, await ptList(c, "owner"));
     case "rc": {
@@ -323,7 +301,7 @@ export async function panelAction(c: Ctx, action: string, arg: string): Promise<
     case "po":
       return show(c, await payouts(c));
     case "ex":
-      return show(c, { text: S.exportSoon, rows: [back()] });
+      return show(c, await exportScreen(c, ""));
     case "set":
       return show(c, await settings(c));
     case "madd":
@@ -339,11 +317,11 @@ export async function panelAction(c: Ctx, action: string, arg: string): Promise<
     case "self":
       return { enter: "cat" };
     case "ms":
-      return show(c, await managerStats(c));
+      return show(c, await statsScreen(c, "manager"));
     case "mp":
       return show(c, await ptList(c, "manager"));
     case "me":
-      return show(c, await managerEarnings(c));
+      return show(c, await managerEarningsScreen(c));
     case "mpn":
       return startNewPartner(c);
     case "mq": {
@@ -353,6 +331,7 @@ export async function panelAction(c: Ctx, action: string, arg: string): Promise<
       return;
     }
     case "ps":
+      return show(c, (await partnerScreen(c)) ?? { text: c.tx.oldButton, rows: [] });
     case "pp":
     case "pq": {
       const p = await c.deps.repo.findPartnerForUser(c.user.id, c.user.username);
@@ -360,13 +339,7 @@ export async function panelAction(c: Ctx, action: string, arg: string): Promise<
       if (action === "pq") return void (await sendPack(c, p));
       const r = await partnerRowOf(c.deps, p);
       if (!r) return void (await toast(c, c.tx.oldButton));
-      const bk = [{ text: c.tx.back, data: "pn:home" }];
-      if (action === "pp") return show(c, { text: payoutsText(c, p, r), rows: [bk] });
-      const link = `https://t.me/${await c.deps.tg.botUsername()}?start=p_${p.code}`;
-      return show(c, {
-        text: c.tx.partner.stats({ link, scanned: r.scanned, started: r.started, paid: r.paid, earned: price(r.earned), paidOut: price(r.paidOut), due: price(r.due) }),
-        rows: [bk],
-      });
+      return show(c, { text: payoutsText(c, p, r), rows: [[{ text: c.tx.back, data: "pn:home" }]] });
     }
   }
 }

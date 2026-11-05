@@ -275,9 +275,8 @@ describe("лимиты Telegram для новых текстов", () => {
   it("панели, кнопки и сообщения в пределах лимитов", () => {
     const long = "Муҳаммадали Абдураҳмонов Салон «Малика» ва шериклари";
     const texts = [
-      staff.clientHow, staff.exportSoon, staff.managerLink(`https://t.me/inviteizi_bot?start=mgr_${"a".repeat(20)}`),
-      staff.myStats({ partners: 999, paidMonth: 999, paidAll: 99999 }),
-      staff.earnings({ paidMonth: 30, perOrder: "500 ₸", bonus: "15 000 ₸", goal: 30, month: "30 000 ₸" }),
+      staff.clientHow, staff.st.exHint, staff.managerLink(`https://t.me/inviteizi_bot?start=mgr_${"a".repeat(20)}`),
+      staff.st.earnRule("500 ₸", "15 000 ₸", 30),
       ...[uz, ru].flatMap((tx) => [
         tx.role.partnerHome(long, false), tx.role.claimed("https://inviteizi.vercel.app/" + "a".repeat(60), "10 000 ₸"),
         tx.role.clientShare({ url: "https://inviteizi.vercel.app/" + "a".repeat(60), amount: "10 000 ₸", phone: "+7 700 000 00 00", name: long, bot: `https://t.me/inviteizi_bot?start=o_${"a".repeat(20)}` }),

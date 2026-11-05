@@ -436,6 +436,10 @@ export const uz = {
     paidOut: (amount: string) => `✅ ${amount} ўтказилди. Kaspi'ни текширинг.`,
     gotIt: "👍 Олдим",
     thanks: "Раҳмат! 🤝",
+    /** v2, часть 8: статистика партнёра */
+    periods: { w: "Ҳафта", m: "Ой", a: "Ҳаммаси" } as Record<string, string>,
+    statsText: (s: { period: string; scanned: number; paid: number; earned: string; paidOut: string; due: string; link: string }) =>
+      `📊 Статистика · ${s.period}\n\nQR сканерлади: ${s.scanned}\nТўлов: ${s.paid}\n\nЖами ишланган: ${s.earned}\nТўланган: ${s.paidOut}\nТўланиши керак: ${s.due}\n\nҲаволангиз:\n${s.link}`,
     /** QR и постер A4 (v2, часть 6). На постере — без эмодзи: шрифт постера их не рисует */
     qrCaption: (name: string, link: string) => `🔳 ${name}\n${link}\n\nПостер A4 (PDF ва PNG) — пастдаги тугма 👇`,
     posterUz: "📄 Постер · ўзбекча",

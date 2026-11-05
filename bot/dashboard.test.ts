@@ -47,7 +47,7 @@ describe("права на панель", () => {
 
   it("второй админ видит панель", async () => {
     const s = new Sim();
-    expect((await open(s, ADMIN2)).text).toContain(uz.panel.labels.paid);
+    expect((await open(s, ADMIN2)).text).toContain(staff.st.sections.money);
   });
 
   it("партнёр не админ: панель закрыта, /hamkor только его цифры", async () => {
@@ -99,7 +99,7 @@ describe("одно сообщение", () => {
     const s = new Sim();
     await prepare(s, ADMIN, ru.langRu);
     await s.command(ADMIN, "dashboard");
-    expect(s.lastText(ADMIN)).toContain(ru.panel.labels.created);
+    expect(s.lastText(ADMIN)).toContain(staff.st.title(staff.st.range.d("1 ноября")));
   });
 });
 
@@ -111,12 +111,13 @@ describe("расчёты", () => {
     await nikohWithReceipt(s, 2);
     await nikohToMusic(s, 3);
     await s.command(ADMIN, "dashboard");
-    const text = s.lastText(ADMIN);
-    expect(text).toContain(`${uz.panel.labels.created}: 2`);
-    expect(text).toContain(`${uz.panel.labels.paid}: 1`);
-    expect(text).toMatch(new RegExp(`${uz.panel.labels.revenue}: 8.000 ₸`));
-    expect(text).toMatch(new RegExp(`${uz.panel.labels.average}: 8.000 ₸`));
-    expect(text).toContain(`${uz.panel.labels.waiting}: 1`);
+    const screen = s.last(ADMIN);
+    expect(screen.text).toContain(staff.st.paid(1, "8 000 ₸"));
+    expect(screen.text).toContain(staff.st.average("8 000 ₸"));
+    await s.callback(ADMIN, "st:d:fn", screen.id);
+    expect(screen.text).toContain(staff.st.fnSamples(2, "67%"));
+    expect(screen.text).toContain(staff.st.fnPaid(1, "50%"));
+    expect(screen.text).toContain(`${staff.n.steps.receipt_sent} 1`);
   });
 
   it("период: граница суток по Алматы, оплата считается по дате оплаты", async () => {

@@ -192,7 +192,11 @@ export type PartnerRow = {
 };
 
 export function partnerRows(s: PanelSnapshot, period: Period, now: Date): PartnerRow[] {
-  const inside = within(period, now);
+  return partnerRowsWithin(s, within(period, now));
+}
+
+/** То же за любой промежуток: inside(дата) — попадает ли событие в период */
+export function partnerRowsWithin(s: PanelSnapshot, inside: (d: Date) => boolean): PartnerRow[] {
   return s.partners.map((partner) => {
     const source = partnerSource(partner.code);
     const users = s.users.filter((u) => u.source === source);

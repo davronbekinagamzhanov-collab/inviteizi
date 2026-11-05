@@ -1,3 +1,5 @@
+import { staff } from "@/texts/bot-ru";
+import { price } from "./flow/util";
 import { describe, expect, it } from "vitest";
 import { handleRsvpRequest, cleanName, RSVP_IP_HOUR_LIMIT, RSVP_ORDER_LIMIT } from "@/lib/rsvp";
 import { invitationData, pageMode } from "@/lib/orders";
@@ -182,7 +184,9 @@ describe("владелец и админы вне статистики", () => {
     await s.callback(ADMIN, "fav:add:oq-ot", 1);
     await s.command(ADMIN, "dashboard");
     const screen = s.last(ADMIN);
-    for (const label of [uz.panel.labels.clients, uz.panel.labels.created, uz.panel.labels.paid, uz.panel.labels.waiting]) expect(screen.text).toContain(`${label}: 0`);
+    expect(screen.text).toContain(staff.st.none);
+    await s.callback(ADMIN, "st:y:fn", screen.id);
+    expect(screen.text).toContain(staff.st.none);
     await s.callback(ADMIN, "dash:orders:all", screen.id);
     expect(screen.text).toContain(uz.panel.empty);
     await s.callback(ADMIN, "dash:music:all", screen.id);
@@ -206,8 +210,9 @@ describe("владелец и админы вне статистики", () => {
     await s.start(ADMIN);
     await s.click(ADMIN, uz.langUz);
     await s.command(ADMIN, "dashboard");
-    expect(s.lastText(ADMIN)).toContain(`${uz.panel.labels.paid}: 1`);
-    expect(s.lastText(ADMIN)).toContain(`${uz.panel.labels.created}: 1`);
+    expect(s.lastText(ADMIN)).toContain(staff.st.paid(1, price(b.amount)));
+    await s.callback(ADMIN, "st:d:fn", s.last(ADMIN).id);
+    expect(s.lastText(ADMIN)).toContain(staff.st.fnSamples(1, "100%"));
     expect((await s.repo.stats(s.clock)).orders.total).toBe(1);
   });
 

@@ -11,7 +11,7 @@ import { evPlaces, evVenueName, evMap, evLink, evAddress, evDate, evLoc, evSameD
 import { evMenu, music, musicList, musicOwn, review, rsvp, text, textOwn } from "./steps-final";
 import { approve, askReceipt, askRejectReason, editOrder, myOrders, payOrder, receipt, reject, resendLink, rsvpAnswers } from "./orders";
 import { cmdFind, cmdOrders, cmdStats } from "./admin";
-import { mainMenu, ownerUrl, send, startMenu, texts, txFor } from "./util";
+import { mainMenu, ownerUrl, roleOf, send, startMenu, texts, txFor } from "./util";
 import type { Lang } from "@/lib/domain";
 import { dashboard } from "./dashboard";
 import {
@@ -41,6 +41,8 @@ import { beginAttempt } from "./delivery";
 import { acceptManager, claimOrder, panelAction, roleHome, showClaimed, toClient } from "./panel";
 import { parseStartToken } from "@/lib/roles";
 import { gotPayout, payManagerAction, payPartnerAction } from "./notify";
+import { partnerStatsAction, statsAction } from "./stats";
+import { exportAction } from "./export";
 
 const idle: Step = {
   async ask(c) {
@@ -381,6 +383,8 @@ async function route(c: Ctx) {
 async function onCommand(c: Ctx, command: string, args: string) {
   if (command === "favorites") return favorites(c);
   if (command === "dashboard") {
+    // v2: /dashboard владельца — новая «📊 Статистика»; остальным — прежний отказ
+    if (c.chatId === c.user.id && (await roleOf(c)) === "owner") return statsAction(c, "st", "d", "money");
     const r = await dashboard(c);
     return r ? apply(c, r) : undefined;
   }
@@ -438,11 +442,6 @@ async function onCallback(c: Ctx, d: string) {
   if (d.startsWith("pn:")) {
     const [, action, arg = ""] = d.split(":");
     const r = await panelAction(c, action, arg);
-    if (r && "dashboard" in r) {
-      const [view, period, a] = r.dashboard;
-      const res = await dashboard(c, view, period, a);
-      return res ? apply(c, res) : undefined;
-    }
     return r ? apply(c, r) : undefined;
   }
   if (d.startsWith("pa:")) {
@@ -450,6 +449,12 @@ async function onCallback(c: Ctx, d: string) {
     const r = await ptAction(c, action, id, x);
     return r ? apply(c, r) : undefined;
   }
+  if (d.startsWith("st:") || d.startsWith("sm:")) {
+    const [prefix, p = "", sec = ""] = d.split(":");
+    return statsAction(c, prefix as "st" | "sm", p, sec);
+  }
+  if (d.startsWith("sp:")) return partnerStatsAction(c, d.slice(3));
+  if (d.startsWith("ex:")) return exportAction(c, d.slice(3));
   if (d.startsWith("po:")) {
     const [, id = "", amount = ""] = d.split(":");
     return payPartnerAction(c, id, amount);
