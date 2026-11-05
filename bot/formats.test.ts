@@ -42,7 +42,7 @@ describe("three invitation formats",()=>{
     expect(getDesign("shohona-baxmal")?.format).toBe("scroll");
     await s.callback(3,`edit:${o.number}`,1);expect(s.lastText(3)).toContain("6 543 ₸");
     await s.click(3,uz.review.editNames);await s.text(3,"Эски тариф");await s.text(3,"Мадина");await s.click(3,uz.review.confirm);
-    await s.callback(3,`pay:${o.number}`,1);expect(s.lastText(3)).toContain("6 543 ₸");
+    await s.callback(3,`payok:${o.number}`,1);expect(s.lastText(3)).toContain("6 543 ₸");
     await s.photo(3,"old-quote");await s.callback(ADMIN,`ok:${o.number}`,1);
     expect(await s.repo.getOrder(o.id)).toMatchObject({format:"simple",amount:6543,slug:o.slug,status:"active"});
     const metrics=await s.repo.analytics(ADMIN,"all",s.clock);
@@ -73,7 +73,7 @@ describe("three invitation formats",()=>{
     const s=new Sim();
     for(const [i,f] of FORMATS.entries()){
       const o=await nikohOrder(s,100+i,undefined,f);
-      await s.callback(100+i,`pay:${o.number}`,1);await s.photo(100+i,"dashboard-format");await s.callback(ADMIN,`ok:${o.number}`,1);
+      await s.callback(100+i,`payok:${o.number}`,1);await s.photo(100+i,"dashboard-format");await s.callback(ADMIN,`ok:${o.number}`,1);
     }
     await s.start(ADMIN);await s.click(ADMIN,uz.langUz);await s.command(ADMIN,"dashboard");
     const screen=s.last(ADMIN);

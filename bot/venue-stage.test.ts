@@ -93,7 +93,7 @@ describe("owner catalog and independent place entry",()=>{
     expect(o.data.events).toHaveLength(2);expect(o.data.events.map(e=>e.mapUrl)).toEqual([VENUES[0].mapUrl,VENUES[6].mapUrl]);
     expect(o.data.sides).toEqual({groom:"Куёвлар оиласи",bride:"Келинлар оиласи"});
     expect(invitationData(o).sides).toEqual(o.data.sides);expect(pageMode(o,s.clock)).toBe("demo");
-    await s.callback(1,`pay:${o.number}`,1);await s.photo(1,"receipt");await s.callback(ADMIN,`ok:${o.number}`,1);
+    await s.callback(1,`payok:${o.number}`,1);await s.photo(1,"receipt");await s.callback(ADMIN,`ok:${o.number}`,1);
     const paid=(await s.repo.getOrder(o.id))!;expect(pageMode(paid,s.clock)).toBe("full");expect(invitationData(paid).sides).toEqual(o.data.sides);
   });
   it("optional map picker is restricted to the existing HTTPS origin",()=>{
@@ -128,8 +128,8 @@ describe("optional payment card and immutable existing amounts",()=>{
   });
   it.each(["uz","ru"] as const)("%s: phone works with and without a card; amount and confirmation remain idempotent",async lang=>{
     const s=new Sim(),o=await nikohOrder(s,1),tx=lang==="uz"?uz:ru;await s.repo.setLang(1,lang);
-    await s.callback(1,`pay:${o.number}`,1);expect(s.lastText(1)).toContain(s.deps.env.kaspiPhone);expect(s.lastText(1)).not.toContain("undefined");
-    s.deps.env.paymentCardNumber="0000 0000 0000 0000";await s.callback(1,`pay:${o.number}`,1);
+    await s.callback(1,`payok:${o.number}`,1);expect(s.lastText(1)).toContain(s.deps.env.kaspiPhone);expect(s.lastText(1)).not.toContain("undefined");
+    s.deps.env.paymentCardNumber="0000 0000 0000 0000";await s.callback(1,`payok:${o.number}`,1);
     expect(s.lastText(1)).toContain(tx.pay.card("0000 0000 0000 0000"));expect(inlineButtons(s.last(1))).toContainEqual({text:tx.pay.copyCard,copy:"0000 0000 0000 0000"});
     expect(inlineButtons(s.last(1))).toContainEqual({text:tx.pay.copy,copy:s.deps.env.kaspiPhone.replace(/[^\d+]/g,"")});
     await s.photo(1,"receipt");await s.callback(ADMIN,`ok:${o.number}`,1);await s.callback(ADMIN,`ok:${o.number}`,1);
@@ -140,7 +140,7 @@ describe("optional payment card and immutable existing amounts",()=>{
     await s.callback(1,`edit:${o.number}`,1);await s.click(1,uz.review.editDesign);await pickDesign(s,1,"ipak");
     expect(s.lastText(1)).toContain("10 000 ₸");await s.click(1,uz.review.confirm);
     expect(await s.repo.getOrder(o.id)).toMatchObject({format:"animated",amount:10000,slug:o.slug});
-    await s.callback(1,`pay:${o.number}`,1);expect(s.lastText(1)).toContain("10 000 ₸");await s.photo(1,"receipt");await s.callback(ADMIN,`ok:${o.number}`,1);await s.callback(1,`edit:${o.number}`,1);
+    await s.callback(1,`payok:${o.number}`,1);expect(s.lastText(1)).toContain("10 000 ₸");await s.photo(1,"receipt");await s.callback(ADMIN,`ok:${o.number}`,1);await s.callback(1,`edit:${o.number}`,1);
     expect(s.lastText(1)).toBe(uz.order.closed);expect(await s.repo.getOrder(o.id)).toMatchObject({amount:10000,format:"animated"});
   });
 });

@@ -26,7 +26,7 @@ export function formatFlowContract(make:()=>{sim:Sim;repo:Repo},base:number){
     await s.click(id,uz.review.confirm);
     expect(await repo.getOrder(o.id)).toMatchObject({format,amount:o.amount,slug:o.slug,data:{groom:"Янги исм"}});
     const before=await repo.analytics(ADMIN,"all",s.clock);
-    await s.callback(id,`pay:${o.number}`,1);await s.photo(id,"format-receipt");
+    await s.callback(id,`payok:${o.number}`,1);await s.photo(id,"format-receipt");
     expect((await repo.getOrder(o.id))?.status).toBe("receipt_sent");
     await s.callback(ADMIN,`ok:${o.number}`,1);await s.callback(ADMIN,`ok:${o.number}`,1);
     const paid=(await repo.getOrder(o.id))!;

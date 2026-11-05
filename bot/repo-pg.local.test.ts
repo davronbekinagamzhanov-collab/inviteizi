@@ -94,7 +94,7 @@ describe.skipIf(process.env.INVITEIZI_LOCAL_PG !== "1")("PgRepo through isolated
     await repo.saveStep(760002,"review",{q:200,orderId:o.id,occasion:o.occasion,format:"simple",templateId:"sapfir",data:o.data,music:o.music});await sim.callback(760002,"a:200:ok",1);
     expect(await repo.getOrder(o.id)).toMatchObject({format:"animated",amount:10000});
     const before=(await repo.analytics(500,"all",sim.clock)).revenue;
-    await sim.callback(760002,`pay:${o.number}`,1);await sim.photo(760002,"receipt");await sim.callback(500,`ok:${o.number}`,1);await sim.callback(500,`ok:${o.number}`,1);
+    await sim.callback(760002,`payok:${o.number}`,1);await sim.photo(760002,"receipt");await sim.callback(500,`ok:${o.number}`,1);await sim.callback(500,`ok:${o.number}`,1);
     expect(await repo.getOrder(o.id)).toMatchObject({amount:10000,format:"animated",status:"active",slug:o.slug});
     expect((await repo.analytics(500,"all",sim.clock)).revenue-before).toBe(10000);
   });

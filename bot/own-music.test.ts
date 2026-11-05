@@ -165,6 +165,7 @@ describe("оплата и заказ: сбой сообщения после з�
     const sim = new Sim();
     await nikohOrder(sim, 1);
     await sim.click(1, /Тўлаш|💳/);
+    await sim.click(1, /^✅ (Ҳаммаси тўғри|Всё верно|Бәрі дұрыс)/);
     const log = vi.spyOn(console, "error").mockImplementation(() => {});
     try {
       const real = sim.tg.sendMessage.bind(sim.tg);

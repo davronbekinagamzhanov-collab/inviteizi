@@ -76,7 +76,7 @@ describe("RSVP", () => {
     await prepare(s, ADMIN);
     const o = await rsvpOrder(s, 1);
     expect((await post(s, rsvpRequest(answer(o.slug)))).status).toBe(404);
-    await s.callback(1, `pay:${o.number}`, 1);
+    await s.callback(1,`payok:${o.number}`, 1);
     await s.photo(1, "receipt");
     await approve(s, o.number);
     expect((await post(s, rsvpRequest(answer(o.slug)))).status).toBe(204);
@@ -99,7 +99,7 @@ describe("RSVP", () => {
     const s = new Sim();
     await prepare(s, ADMIN);
     const o = await rsvpOrder(s, 1);
-    await s.callback(1, `pay:${o.number}`, 1);
+    await s.callback(1,`payok:${o.number}`, 1);
     await s.photo(1, "receipt");
     await approve(s, o.number);
     expect((await post(s, rsvpRequest(answer(o.slug), "1.1.1.1", "https://evil.test"))).status).toBe(400);

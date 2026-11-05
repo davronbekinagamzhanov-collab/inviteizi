@@ -62,7 +62,7 @@ describe.skipIf(process.env.INVITEIZI_LOCAL_PG!=="1")("compatibility with main b
     const s=sim();await repo.touchUser({id:720003});await repo.setLang(720003,"uz");
     const o=await repo.createOrder({userId:720003,occasion:"nikoh",format:"animated",templateId:"ganch-peshtoq",data:{occasion:"nikoh",groom:"Азиз",bride:"Мадина",hosts:"Оила",events:[]},music:{kind:"none"},amount:4321,slugBase:"compat-payment",status:"preview"});
     const before=(await repo.stats(s.clock)).revenue.total;
-    await s.callback(720003,`pay:${o.number}`,1);await s.photo(720003,"fixture-receipt");
+    await s.callback(720003,`payok:${o.number}`,1);await s.photo(720003,"fixture-receipt");
     expect((await repo.getOrder(o.id))?.status).toBe("receipt_sent");
     await s.callback(ADMIN,`ok:${o.number}`,1);await s.callback(ADMIN,`ok:${o.number}`,1);
     expect((await repo.getOrder(o.id))?.status).toBe("active");

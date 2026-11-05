@@ -20,6 +20,7 @@ describe("оплата Kaspi и чек", () => {
     const sim = new Sim();
     const o = await nikohOrder(sim, 1);
     await sim.click(1, /^💳 Тўлаш/);
+    await sim.click(1, /^✅ (Ҳаммаси тўғри|Всё верно|Бәрі дұрыс)/);
     const m = sim.last(1);
     expect(m.text).toMatch(/^💳 Kaspi орқали 8.000 ₸ ўтказинг:/);
     expect(m.text).toContain("📱 +7 700 000 00 00");
@@ -40,6 +41,7 @@ describe("оплата Kaspi и чек", () => {
     await admins(sim);
     const o = await nikohOrder(sim, 1);
     await sim.click(1, /^💳 Тўлаш/);
+    await sim.click(1, /^✅ (Ҳаммаси тўғри|Всё верно|Бәрі дұрыс)/);
     await sim.text(1, "тўладим");
     expect(sim.tg.to(1).at(-2)?.text).toBe(uz.pay.receiptBad);
     await sim.photo(1, "PHOTO_1");
@@ -65,6 +67,7 @@ describe("оплата Kaspi и чек", () => {
     await admins(sim);
     await nikohOrder(sim, 1);
     await sim.click(1, /^💳 Тўлаш/);
+    await sim.click(1, /^✅ (Ҳаммаси тўғри|Всё верно|Бәрі дұрыс)/);
     await sim.document(1, "PDF_1", "application/pdf", "kaspi.pdf");
     expect(sim.last(ADMIN)).toMatchObject({ type: "document", media: "PDF_1" });
     const [o] = await sim.repo.listOrdersByUser(1);
@@ -76,7 +79,7 @@ describe("оплата Kaspi и чек", () => {
     const o = await nikohOrder(sim, 1);
     await sim.start(2);
     await sim.click(2, uz.langUz);
-    await sim.callback(2, `pay:${o.number}`, 1);
+    await sim.callback(2,`payok:${o.number}`, 1);
     expect(sim.lastText(2)).toBe(uz.order.notFound);
     expect((await sim.repo.getOrder(o.id))?.status).toBe("preview");
   });
@@ -185,6 +188,7 @@ describe("подтверждение админом", () => {
     await setChoices(sim, 2, { text: 1, music: "none", rsvp: false });
     await sim.click(2, ru.review.confirm);
     await sim.click(2, /^💳 Оплатить/);
+    await sim.click(2, /^✅ (Ҳаммаси тўғри|Всё верно|Бәрі дұрыс)/);
     await sim.photo(2, "P");
     await sim.click(ADMIN, uz.admin.reject);
     await sim.click(ADMIN, uz.admin.reasons.sum);

@@ -476,6 +476,7 @@ export class MemoryRepo implements Repo {
       paymentRemindedAt: null,
       adminRemindedAt: null,
       expiresAt: null,
+      payConfirmedAt: null,
     };
     this.orders.set(rec.id, rec);
     return clone(rec);

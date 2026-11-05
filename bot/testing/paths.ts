@@ -126,6 +126,8 @@ export async function nikohOrder(sim: Sim, id: number, names: [string, string] =
 export async function nikohWithReceipt(sim: Sim, id: number, names?: [string, string]) {
   await nikohOrder(sim, id, names);
   await sim.click(id, /^💳 Тўлаш/);
+  // v2: проверка перед оплатой — «✅ Ҳаммаси тўғри, тўлаймиз»
+  await sim.click(id, uz.pay.confirmYes);
   await sim.photo(id, `RECEIPT_${id}`);
   const [order] = await sim.repo.listOrdersByUser(id);
   return order;

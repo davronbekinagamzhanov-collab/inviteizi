@@ -2,7 +2,7 @@
 /** Оплата: сумма, реквизиты Kaspi с «Нусха олиш», чек — прямо здесь. Потом «Чек қабул қилинди ✅» */
 import { useRef, useState } from "react";
 import type { AppOrder, ReceiptResult } from "@/bot/app/service";
-import { ApiError, MAX_FILE, shrinkImage, upload } from "./api";
+import { api, ApiError, MAX_FILE, shrinkImage, upload } from "./api";
 import { Section, useT } from "./shared";
 import { copyText, haptic } from "./telegram";
 import s from "../app.module.css";
@@ -14,6 +14,28 @@ export function Pay({ order, pay, onDone, onToast }: { order: AppOrder; pay: Pay
   const input = useRef<HTMLInputElement>(null);
   const [progress, setProgress] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Проверка перед оплатой: реквизиты — только после «✅ Ҳаммаси тўғри, тўлаймиз»
+  const [confirmed, setConfirmed] = useState(order.confirmed);
+  const [busy, setBusy] = useState(false);
+
+  async function confirm() {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const r = await api<{ ok: true } | { error: string }>("confirmPay", { orderId: order.id });
+      if ("ok" in r) {
+        haptic.ok();
+        setConfirmed(true);
+      } else {
+        haptic.error();
+        setError(T.pay.errors[r.error as keyof typeof T.pay.errors] ?? T.serverError);
+      }
+    } catch (e) {
+      setError(e instanceof ApiError && e.code === "offline" ? T.offline : T.serverError);
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function copy(v: string) {
     if (await copyText(v.replace(/\s+/g, ""))) {
@@ -48,6 +70,29 @@ export function Pay({ order, pay, onDone, onToast }: { order: AppOrder; pay: Pay
     }
   }
 
+  if (!confirmed) {
+    return (
+      <div className={s.screen}>
+        <h1 className={s.title}>{T.pay.checkTitle}</h1>
+        <Section title={order.title}>
+          <p className={s.label}>{(order.check ?? "").split("\n").slice(1).join("\n")}</p>
+          <a className={`${s.btn} ${s.btnGhost} ${s.btnSmall}`} href={order.url} target="_blank" rel="noopener">
+            {T.pay.checkOpen}
+          </a>
+        </Section>
+        <div className={s.payAmount}>
+          <small>{T.pay.amount}</small>
+          <b>{T.price(order.amount)}</b>
+        </div>
+        <p className={s.formErr} style={{ color: "var(--ink)" }}>{T.pay.checkWarn}</p>
+        {error && <p className={s.formErr} role="alert">{error}</p>}
+        <button type="button" className={`${s.btn} ${s.btnWide}`} onClick={confirm} disabled={busy}>
+          {T.pay.checkYes}
+        </button>
+      </div>
+    );
+  }
+
   const rows: [string, string][] = [[T.pay.phone, pay.phone], ...(pay.card ? ([[T.pay.card, pay.card]] as [string, string][]) : []), [T.pay.name, pay.name]];
   return (
     <div className={s.screen}>
@@ -70,7 +115,15 @@ export function Pay({ order, pay, onDone, onToast }: { order: AppOrder; pay: Pay
             )}
           </div>
         ))}
-        <p className={s.note}>{T.pay.note(order.number)}</p>
+        <div className={s.req}>
+          <span>
+            <small>{T.pay.note(order.number)}</small>
+            <b>#{order.number}</b>
+          </span>
+          <button type="button" className={`${s.btn} ${s.btnGhost} ${s.btnSmall}`} onClick={() => copy(`#${order.number}`)}>
+            {T.pay.copy}
+          </button>
+        </div>
       </Section>
       {error && <p className={s.formErr} role="alert">{error}</p>}
       <button type="button" className={`${s.btn} ${s.btnWide}`} onClick={() => input.current?.click()} disabled={progress !== null}>

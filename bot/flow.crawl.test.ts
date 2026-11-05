@@ -100,7 +100,7 @@ async function walk(lang: "uz" | "ru", occasion: Occasion, format: "animated" | 
   // После анкеты: заказ, оплата, подтверждение, меню и команды
   const [order] = (await sim.repo.listOrdersByUser(ID)).filter((o) => o.format === format && o.occasion === occasion);
   expect(order).toBeTruthy();
-  await sim.callback(ID, `pay:${order.number}`, sim.last(ID).id);
+  await sim.callback(ID,`payok:${order.number}`, sim.last(ID).id);
   await sim.photo(ID, "RECEIPT");
   await sim.start(ADMIN);
   await sim.click(ADMIN, lang === "uz" ? uz.langUz : ru.langRu);

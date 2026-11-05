@@ -209,7 +209,19 @@ export async function editOrder(c: Ctx, n: number): Promise<Result> {
 }
 
 /** «Тўлаш»: реквизиты Kaspi, статус awaiting_payment, ждём чек */
-export async function payOrder(c: Ctx, n: number): Promise<Result> {
+/** Короткая сводка заказа для проверки перед оплатой: имена, дата, время, место */
+export function checkLines(o: OrderRecord) {
+  return [
+    namesOf(o.data),
+    ...o.data.events.map((e) => `📅 ${fmtDate(e.date)}, ${e.time} · ${e.venueName}`),
+  ].join("\n");
+}
+
+/**
+ * «💳 Тўлаш»: сначала проверка (имена, дата, место, НАМУНА и предупреждение, что после оплаты не меняется
+ * и деньги не возвращаются). Реквизиты — только после «✅ Ҳаммаси тўғри, тўлаймиз» (confirmed), время записывается.
+ */
+export async function payOrder(c: Ctx, n: number, confirmed = false): Promise<Result> {
   const o = await ownOrder(c, n);
   if (!o) {
     await send(c, c.tx.order.notFound);
@@ -227,7 +239,15 @@ export async function payOrder(c: Ctx, n: number): Promise<Result> {
     await send(c, c.tx.pay.eventPassed, inline(orderButtons(c, o, false).filter((r) => !r.some((b) => "data" in b && b.data.startsWith("pay:")))));
     return { done: true };
   }
-  await c.deps.repo.transition(o.id, PAYABLE_STATUSES, "awaiting_payment");
+  if (!confirmed) {
+    await send(
+      c,
+      c.tx.pay.check(checkLines(o), pageUrl(c, o.slug)),
+      inline([[{ text: c.tx.pay.confirmYes, data: `payok:${o.number}` }], [{ text: c.tx.order.edit, data: `edit:${o.number}` }]]),
+    );
+    return { stay: true };
+  }
+  await c.deps.repo.transition(o.id, PAYABLE_STATUSES, "awaiting_payment", { payConfirmedAt: c.deps.now() });
   const env = c.deps.env;
   const card=env.paymentCardNumber?.trim();
   const paymentRows:InlineButton[][]=[[{text:c.tx.pay.copy,copy:env.kaspiPhone.replace(/[^\d+]/g,"")}]];

@@ -11,7 +11,7 @@ import { getDesign, isOnSale } from "@/templates/registry";
 import { tPlain as t } from "@/texts/uz-cyrl";
 import { kzToday } from "../calendar";
 import { PAID_STATUSES, PAYABLE_STATUSES, txFor } from "../flow/util";
-import { adminCard, decisionButtons, upsertDraftOrder, type UpsertOutcome } from "../flow/orders";
+import { adminCard, checkLines, decisionButtons, upsertDraftOrder, type UpsertOutcome } from "../flow/orders";
 import { validateForm, type FieldError, type FormInput, cleanOwnText, graphemes, MAX_CUSTOM_TEXT } from "@/lib/order-rules";
 import { isQuiet } from "@/lib/quiet-hours";
 import { PHOTO_MAX_COUNT } from "../own-photo";
@@ -43,6 +43,9 @@ export type AppOrder = {
   date: string | null;
   amount: number;
   url: string;
+  /** v2: короткая сводка для проверки перед оплатой («📅 14.11.2026, 18:00 · Наврўз») и подтверждена ли она */
+  check: string;
+  confirmed: boolean;
   canEdit: boolean;
   canPay: boolean;
   paid: boolean;
@@ -88,6 +91,9 @@ export function appOrder(deps: Deps, o: OrderRecord): AppOrder {
     date: o.data.events[0]?.date ?? null,
     amount: o.amount,
     url: `${deps.env.publicBaseUrl}/${o.slug}`,
+    check: checkLines(o),
+    // Подтверждение действует для текущей суммы (сменили дизайн/цену — проверить снова)
+    confirmed: Boolean(o.payConfirmedAt) && o.status === "awaiting_payment",
     canEdit: PAYABLE_STATUSES.includes(o.status),
     canPay: PAYABLE_STATUSES.includes(o.status) && !eventsPassed(deps, o),
     paid: PAID_STATUSES.includes(o.status),
@@ -164,6 +170,17 @@ export async function openSession(deps: Deps, u: AppUser): Promise<AppSession> {
     pay: { phone: deps.env.kaspiPhone, name: deps.env.kaspiName, card: deps.env.paymentCardNumber ?? null },
     extraLangs: allowedLangs(deps),
   };
+}
+
+/** «✅ Ҳаммаси тўғри, тўлаймиз» в приложении: время подтверждения в заказе, дальше — реквизиты */
+export async function confirmPay(deps: Deps, u: AppUser, orderId: unknown) {
+  if (typeof orderId !== "string") return { error: "notFound" as const };
+  const o = await deps.repo.getOrder(orderId).catch(() => null);
+  if (!o || o.userId !== u.id) return { error: "notFound" as const };
+  if (!PAYABLE_STATUSES.includes(o.status)) return { error: "closed" as const };
+  if (eventsPassed(deps, o)) return { error: "passed" as const };
+  const r = await deps.repo.transition(o.id, PAYABLE_STATUSES, "awaiting_payment", { payConfirmedAt: deps.now() });
+  return r ? { ok: true as const, order: appOrder(deps, r) } : { error: "closed" as const };
 }
 
 export async function setLang(deps: Deps, u: AppUser, lang: unknown) {

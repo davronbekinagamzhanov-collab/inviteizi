@@ -159,6 +159,7 @@ describe("казахский везде (KAZAKH_ENABLED)", () => {
     const [o] = await s.repo.listOrdersByUser(1);
     expect(o.data).toMatchObject({ langs: ["kk"], mainLang: "kk" });
     await s.click(1, /^💳 Төлеу/);
+    await s.click(1, /^✅ (Ҳаммаси тўғри|Всё верно|Бәрі дұрыс)/);
     await s.photo(1, "RECEIPT_1");
     expect(s.tg.to(1).some((m) => m.text === kk.pay.receiptGot)).toBe(true);
     await s.callback(ADMIN, `ok:${o.number}`, 1);

@@ -35,13 +35,15 @@ describe("находки ревьюера", () => {
   it("1. сменили формат после «Тўлаш» — старая кнопка чека показывает реквизиты с новой суммой", async () => {
     const sim = new Sim();
     const o = await nikohOrder(sim, ID);
-    await sim.callback(ID, `pay:${o.number}`, sim.last(ID).id);
+    await sim.callback(ID,`payok:${o.number}`, sim.last(ID).id);
     const old = receiptButton(sim);
     expect(old.data).toBe(`rcpt:${o.number}:${PRICES.animated}`);
     await switchFormat(sim, o.number, "simple");
     expect((await sim.repo.getOrder(o.id))!.amount).toBe(PRICES.simple);
     await sim.callback(ID, old.data!, 1);
-    // не шаг «пришлите чек» по старой сумме, а новые реквизиты
+    // не шаг «пришлите чек» по старой сумме: цена изменилась — снова проверка, затем новые реквизиты
+    expect(sim.lastText(ID)).toContain("Тўловдан олдин текширинг");
+    await sim.click(ID, uz.pay.confirmYes);
     expect(receiptButton(sim).data).toBe(`rcpt:${o.number}:${PRICES.simple}`);
     expect(sim.lastText(ID)).not.toBe(uz.pay.receiptAsk);
     // новая кнопка уже ведёт к приёму чека
@@ -86,10 +88,10 @@ describe("находки ревьюера", () => {
   it("5. тадбир давно прошёл — «Тўлаш» и старая кнопка чека не принимают оплату", async () => {
     const sim = new Sim();
     const o = await nikohOrder(sim, ID);
-    await sim.callback(ID, `pay:${o.number}`, sim.last(ID).id);
+    await sim.callback(ID,`payok:${o.number}`, sim.last(ID).id);
     const old = receiptButton(sim);
     sim.advance(90 * 24 * 60);
-    await sim.callback(ID, `pay:${o.number}`, 1);
+    await sim.callback(ID,`payok:${o.number}`, 1);
     expect(sim.lastText(ID)).toBe(uz.pay.eventPassed);
     expect((inlineButtons(sim.last(ID)) as Button[]).some((b) => b.data?.startsWith("pay:"))).toBe(false);
     await sim.callback(ID, old.data!, 1);

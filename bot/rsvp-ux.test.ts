@@ -30,7 +30,7 @@ async function paidOrder(s: Sim, id: number) {
   await s.click(id, uz.rsvp.yes);
   await s.click(id, uz.review.confirm);
   const o = (await s.repo.listOrdersByStatus(["preview", "awaiting_payment"])).find((x) => x.userId === id)!;
-  await s.callback(id, `pay:${o.number}`, 1);
+  await s.callback(id,`payok:${o.number}`, 1);
   await s.photo(id, "receipt");
   await s.callback(ADMIN, `ok:${o.number}`, 1);
   return (await s.repo.getOrder(o.id))!;

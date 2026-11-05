@@ -189,7 +189,7 @@ describe("тестировщик: странный ввод", () => {
     const s = new Sim();
     await prepare(s, ADMIN);
     const o = await nikohOrder(s, 1);
-    await s.callback(1, `pay:${o.number}`, 1);
+    await s.callback(1,`payok:${o.number}`, 1);
     await s.sticker(1);
     expect((await s.repo.getOrder(o.id))!.status).not.toBe("receipt_sent");
     await s.document(1, "ZIP", "application/zip", "a.zip");
@@ -200,7 +200,7 @@ describe("тестировщик: странный ввод", () => {
     expect((await s.repo.getOrder(o.id))!.receipt?.fileId).toBe("PDF1");
     await s.callback(ADMIN, `nr:${o.number}:money`, 1);
     expect((await s.repo.getOrder(o.id))!.status).toBe("rejected");
-    await s.callback(1, `pay:${o.number}`, 1);
+    await s.callback(1,`payok:${o.number}`, 1);
     await s.photo(1, "THIRD");
     expect((await s.repo.getOrder(o.id))!.status).toBe("receipt_sent");
     await s.callback(ADMIN, `ok:${o.number}`, 1);

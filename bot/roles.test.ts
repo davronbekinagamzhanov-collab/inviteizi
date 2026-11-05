@@ -219,6 +219,7 @@ describe("заказ для клиента", () => {
     expect((await s.repo.getOrder(o.id))!.userId).toBe(CLIENT);
     expect((await s.repo.getUser(CLIENT))!.source).toBeNull();
     await s.click(CLIENT, /^💳 Тўлаш/);
+    await s.click(CLIENT, /^✅ (Ҳаммаси тўғри|Всё верно|Бәрі дұрыс)/);
     await s.photo(CLIENT, "RECEIPT_C");
     expect((await s.repo.getOrder(o.id))!.status).toBe("receipt_sent");
 
@@ -253,6 +254,7 @@ describe("заказ для клиента", () => {
     const token = /start=o_([a-z0-9]+)/.exec(s.lastText(MANAGER))![1];
     await s.start(CLIENT, `o_${token}`);
     await s.click(CLIENT, /^💳 Тўлаш/);
+    await s.click(CLIENT, /^✅ (Ҳаммаси тўғри|Всё верно|Бәрі дұрыс)/);
     await s.photo(CLIENT, "RECEIPT_M");
     await s.callback(ADMIN, `ok:${o.number}`, 1);
     expect((await s.repo.getOrder(o.id))!.status).toBe("active");

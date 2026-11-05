@@ -83,6 +83,8 @@ export type OrderRecord = {
   adminRemindedAt: Date | null;
   /** После этой даты ссылка показывает заглушку (последний тадбир + 30 дней) */
   expiresAt: Date | null;
+  /** v2: клиент нажал «✅ Ҳаммаси тўғри, тўлаймиз» (проверил НАМУНА и согласился, что после оплаты не меняется) */
+  payConfirmedAt?: Date | null;
 };
 
 export type NewOrder = Pick<
@@ -107,6 +109,7 @@ export type OrderPatch = Partial<
     | "paymentRemindedAt"
     | "adminRemindedAt"
     | "expiresAt"
+    | "payConfirmedAt"
   >
 >;
 

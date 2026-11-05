@@ -225,7 +225,7 @@ describe("правки до оплаты — та же ссылка НАМУНА
 describe("оплата и закрытие правок", () => {
   it("чек → ✅ админа → ссылка; после этого правок нет, только «🆕 Янги таклифнома»", async () => {
     const { sim, o, tx } = await walk("ru", "yubiley", "plain");
-    await sim.callback(ID, `pay:${o.number}`, sim.last(ID).id);
+    await sim.callback(ID,`payok:${o.number}`, sim.last(ID).id);
     await sim.photo(ID, "RECEIPT");
     await sim.photo(ID, "RECEIPT2"); // второй чек — не второй заказ
     expect((await sim.repo.listOrdersByUser(ID))).toHaveLength(1);

@@ -102,6 +102,8 @@ type OrderRow = {
   langs?: string[] | null;
   custom_text_i18n?: Partial<Record<ExtraLang, string>> | null;
   admin_reminded_at: Date | null;
+  /** v2: нет колонки до миграции pay_confirm — тогда undefined */
+  pay_confirmed_at?: Date | null;
   expires_at: Date | null;
   events: EventJson[];
 };
@@ -208,6 +210,7 @@ function toOrder(r: OrderRow): OrderRecord {
     paidAt: r.paid_at,
     paymentRemindedAt: r.payment_reminded_at,
     adminRemindedAt: r.admin_reminded_at,
+    payConfirmedAt: r.pay_confirmed_at ?? null,
     expiresAt: r.expires_at,
   };
 }
@@ -292,6 +295,7 @@ function patchColumns(p: OrderPatch): Columns {
   if (p.paidAt !== undefined) c.paid_at = p.paidAt;
   if (p.paymentRemindedAt !== undefined) c.payment_reminded_at = p.paymentRemindedAt;
   if (p.adminRemindedAt !== undefined) c.admin_reminded_at = p.adminRemindedAt;
+  if (p.payConfirmedAt !== undefined) c.pay_confirmed_at = p.payConfirmedAt;
   if (p.expiresAt !== undefined) c.expires_at = p.expiresAt;
   // updated_at всё равно ставит триггер; так в update всегда есть хотя бы одна колонка
   c.updated_at = new Date();

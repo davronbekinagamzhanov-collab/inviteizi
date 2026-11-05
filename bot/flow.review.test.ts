@@ -45,6 +45,7 @@ describe("находки ревью бота", () => {
     await nikohOrder(sim, 1);
     const before = await qOf(sim, 1);
     await sim.click(1, /^💳 Тўлаш/);
+    await sim.click(1, /^✅ (Ҳаммаси тўғри|Всё верно|Бәрі дұрыс)/);
     expect(await qOf(sim, 1)).toBeGreaterThanOrEqual(before);
   });
 
