@@ -363,6 +363,19 @@ export const uz = {
       rateSaved: (amount: string) => `✅ Янги ставка: ${amount}. Кейинги тўловлардан бошлаб ишлайди.`,
     },
   },
+  /** v2, часть 9: языки приглашения */
+  langs: {
+    names: { ru: "Русча", kk: "Қозоқча" } as Record<string, string>,
+    review: (list: string) => `🌐 Тиллар: Ўзбекча${list ? ` · ${list}` : ""}`,
+    edit: "🌐 Тиллар",
+    ask: (kk: boolean) => `🌐 Тиллар\n\nЎзбек тили доим бор. Меҳмонлар ${kk ? "рус ёки қозоқ" : "рус"} тилида ўқиши учун қўшинг — меҳмон ўзи танлайди. Нархи ўзгармайди.`,
+    on: (name: string) => `✅ ${name}`,
+    off: (name: string) => `➕ ${name}`,
+    example: (name: string) => `👁 Мисол · ${name}`,
+    ownButton: (name: string) => `✍️ Ўз матнингиз · ${name}`,
+    ownAsk: (name: string) => `✍️ Ўз матнингизни ${name.toLowerCase()} ёзинг (600 белгигача).\nЁзмасангиз, бу тилда ҳам ўзбекча матн кўринади.`,
+    done: "✅ Тайёр",
+  },
   partner: {
     paidNotice: (amount: string) => `Сизнинг кодингиз орқали янги буюртма тўланди ✅ +${amount}`,
     stats: (s: { link: string; scanned: number; started: number; paid: number; earned: string; paidOut: string; due: string }) =>

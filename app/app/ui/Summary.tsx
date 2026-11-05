@@ -1,7 +1,7 @@
 "use client";
 /** «Бот сиз учун танлади»: матн · мусиқа · меҳмонлар жавоби · тиллар — у каждого ✏️; цена крупно; ссылка НАМУНА */
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { InvitationData } from "@/lib/types";
+import type { ExtraLang, InvitationData } from "@/lib/types";
 import { graphemes, MAX_CUSTOM_TEXT } from "@/lib/order-rules";
 import { tPlain as inv } from "@/texts/uz-cyrl";
 import { useT } from "./shared";
@@ -9,7 +9,7 @@ import { haptic } from "./telegram";
 import s from "../app.module.css";
 
 export type Track = { id: string; title: string; url: string };
-type Open = "text" | "music" | "rsvp" | null;
+type Open = "text" | "music" | "rsvp" | "langs" | null;
 
 type Props = {
   data: InvitationData;
@@ -17,11 +17,18 @@ type Props = {
   customText?: string;
   music?: { kind: "list"; musicId: string } | { kind: "none" };
   rsvp: boolean;
+  /** v2: языки кроме узбекского, свой текст на них, какие языки можно добавить */
+  langs: ExtraLang[];
+  customTexts: Partial<Record<ExtraLang, string>>;
+  extraLangs: ExtraLang[];
+  /** Демо дизайна (для «👁 Мисол» на выбранном языке) */
+  demoUrl: string | null;
+  onExample: (url: string) => void;
   tracks: Track[];
   price: number;
   namunaUrl: string | null;
   status: string;
-  onChange: (patch: { textId?: string; customText?: string; music?: Props["music"]; rsvp?: boolean }) => void;
+  onChange: (patch: { textId?: string; customText?: string; music?: Props["music"]; rsvp?: boolean; langs?: ExtraLang[]; customTexts?: Partial<Record<ExtraLang, string>> }) => void;
   onNamuna: () => void;
 };
 
@@ -132,12 +139,60 @@ export function Summary(p: Props) {
       </div>
 
       <div className={s.item}>
-        <div className={s.itemHead} style={{ cursor: "default" }}>
+        <button type="button" className={s.itemHead} onClick={() => toggleOpen("langs")} aria-expanded={open === "langs"}>
           <span>
             <b>{T.summary.langs}</b>
-            <small>{T.summary.langsValue}</small>
+            <small>{T.summary.langsValue(p.langs.map((l) => T.summary.langNames[l]).join(" · "))}</small>
           </span>
-        </div>
+          <i className={s.editMark} aria-hidden>{open === "langs" ? "✓" : T.summary.edit}</i>
+        </button>
+        {open === "langs" && (
+          <div className={s.itemBody}>
+            <span className={s.help}>{T.summary.langsHint(p.extraLangs.includes("kk"))}</span>
+            {p.extraLangs.map((l) => {
+              const on = p.langs.includes(l);
+              return (
+                <div key={l} className={s.track}>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={on}
+                    aria-label={T.summary.langNames[l]}
+                    className={s.toggle}
+                    onClick={() => {
+                      haptic.tap();
+                      p.onChange({ langs: on ? p.langs.filter((x) => x !== l) : p.extraLangs.filter((x) => x === l || p.langs.includes(x)) });
+                    }}
+                  />
+                  <b style={{ flex: 1 }}>{T.summary.langNames[l]}</b>
+                  {p.demoUrl && (
+                    <button type="button" className={`${s.btn} ${s.btnSmall}`} onClick={() => { haptic.tap(); p.onExample(`${p.demoUrl}?lang=${l}`); }}>
+                      {T.summary.langExample}
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+            {p.customText &&
+              p.langs.map((l) => {
+                const value = p.customTexts[l] ?? "";
+                const n = graphemes(value);
+                return (
+                  <label key={l} className={s.field}>
+                    <span className={s.label}>{T.summary.ownTextIn(T.summary.langNames[l])}</span>
+                    <textarea
+                      className={`${s.input} ${n > MAX_CUSTOM_TEXT ? s.inputErr : ""}`}
+                      value={value}
+                      lang={l}
+                      name={`customText-${l}`}
+                      onChange={(e) => p.onChange({ customTexts: { ...p.customTexts, [l]: e.target.value } })}
+                    />
+                    <span className={n > MAX_CUSTOM_TEXT ? s.err : s.help}>{n > MAX_CUSTOM_TEXT ? T.summary.ownTextLong(MAX_CUSTOM_TEXT) : value ? T.summary.ownTextCount(n, MAX_CUSTOM_TEXT) : T.summary.ownTextInHint}</span>
+                  </label>
+                );
+              })}
+          </div>
+        )}
       </div>
 
       <div className={s.total}>

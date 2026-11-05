@@ -2,6 +2,7 @@ import type { Repo } from "../repo";
 import type { Tg } from "../tg";
 import type { BotUpdate } from "../update";
 import type { Format, InvitationData, InvitationEvent, Lang, MusicChoice, Occasion, UserRecord } from "@/lib/domain";
+import type { ExtraLang } from "@/lib/types";
 import type { BotTexts } from "@/texts/bot-uz";
 import type { PayoutSchedule } from "@/lib/owner-panel";
 
@@ -69,6 +70,8 @@ export type StepId =
   | "musicList"
   | "musicOwn"
   | "rsvp"
+  | "langs"
+  | "langText"
   | "review"
   | "evMenu"
   | "receipt"
@@ -115,6 +118,8 @@ export type Draft = {
   data?: DraftData;
   /** Индекс тадбира, который сейчас заполняется */
   ev?: number;
+  /** v2: для какого языка клиент пишет свой текст (шаг langText) */
+  langText?: ExtraLang;
   calMonth?: string;
   venuePage?: number;
   venueNameInput?: string;

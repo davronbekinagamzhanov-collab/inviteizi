@@ -8,7 +8,7 @@ import { cat, catalog, dropCatalog, fmt } from "./steps-order";
 import { age, bride, cause, groom, hosts, person, relation, sideAsk, sideBride } from "./steps-form";
 import { photoAsk, photoUpload } from "./steps-photo";
 import { evPlaces, evVenueName, evMap, evLink, evAddress, evDate, evLoc, evSameDay, evTime, evTimeCustom, evVenue, more } from "./steps-event";
-import { evMenu, music, musicList, musicOwn, review, rsvp, text, textOwn } from "./steps-final";
+import { evMenu, langs, langText, music, musicList, musicOwn, review, rsvp, text, textOwn } from "./steps-final";
 import { approve, askReceipt, askRejectReason, editOrder, myOrders, payOrder, receipt, reject, resendLink, rsvpAnswers } from "./orders";
 import { cmdFind, cmdOrders, cmdStats } from "./admin";
 import { mainMenu, ownerUrl, roleOf, send, startMenu, texts, txFor } from "./util";
@@ -80,6 +80,8 @@ export const steps: Record<StepId, Step> = {
   musicList,
   musicOwn,
   rsvp,
+  langs,
+  langText,
   review,
   evMenu,
   receipt,

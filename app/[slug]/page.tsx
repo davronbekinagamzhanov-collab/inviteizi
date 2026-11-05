@@ -68,7 +68,11 @@ async function Invitation({ params }: { params: PageProps<"/[slug]">["params"] }
 
   const { default: Design } = await loadOrderDesign(design, page.data.designVersion);
   // Фото клиента — только у дизайнов с clientPhotos (наҳорги ош — никогда): старые фото после смены дизайна не всплывают
-  const data = design.clientPhotos ? page.data : { ...page.data, photos: undefined };
+  const withPhotos = design.clientPhotos ? page.data : { ...page.data, photos: undefined };
+  // Казахский — только пока он включён (KAZAKH_ENABLED); выключили — гость видит узбекский и русский
+  const allowed = env.extraLangs();
+  const langs = withPhotos.langs?.filter((l) => allowed.includes(l));
+  const data = { ...withPhotos, langs: langs?.length ? langs : undefined };
   return <Design data={glueData(data)} mode={page.mode} art={existingArt(design)} />;
 }
 

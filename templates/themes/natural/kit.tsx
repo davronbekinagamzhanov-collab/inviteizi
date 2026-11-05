@@ -15,8 +15,8 @@ import { glueWords } from "@/lib/typography";
 import { monthGrid, type WeddingDate } from "@/lib/wedding-date";
 import s from "./natural.module.css";
 
-/** Буквы, которых нет в Great Vibes */
-const MISSING_IN_SCRIPT = /[қғҳҚҒҲ]/;
+/** Буквы, которых нет в Great Vibes (узбекские и казахские) */
+const MISSING_IN_SCRIPT = /[қғҳәңөұүһіҚҒҲӘҢӨҰҮҺІ]/;
 export const scriptFamily = (text: string) =>
   MISSING_IN_SCRIPT.test(text) ? "var(--n-script-alt)" : "var(--n-script)";
 

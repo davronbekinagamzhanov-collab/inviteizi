@@ -1,0 +1,89 @@
+{
+ "muhr": {
+  "number": 113,
+  "format": "animated",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [
+    "Программа",
+    "Приходите"
+   ],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [
+    "Бағдарлама"
+   ],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ },
+ "suvbuyoq-tuman": {
+  "number": 139,
+  "format": "animated",
+  "uz360": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": [],
+   "switchTo": "kk"
+  },
+  "ru360": {
+   "errors": [],
+   "htmlLang": "ru",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "kk360": {
+   "errors": [],
+   "htmlLang": "kk",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  },
+  "uz430": {
+   "errors": [],
+   "htmlLang": "uz",
+   "afterTap": "playing",
+   "music": "ok",
+   "overflowX": 0,
+   "outside": [],
+   "uz": []
+  }
+ }
+}

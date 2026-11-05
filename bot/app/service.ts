@@ -5,7 +5,7 @@
  */
 import type { Deps, Draft } from "../flow/types";
 import type { Lang, MusicChoice, OrderRecord, OrderStatus } from "@/lib/domain";
-import type { InvitationData } from "@/lib/types";
+import type { ExtraLang, InvitationData } from "@/lib/types";
 import type { AppUser } from "@/lib/tg-init-data";
 import { getDesign, isOnSale } from "@/templates/registry";
 import { tPlain as t } from "@/texts/uz-cyrl";
@@ -25,6 +25,9 @@ export type AppDraft = {
   customText?: string;
   music?: { kind: "list"; musicId: string } | { kind: "none" };
   rsvp?: boolean;
+  /** v2: языки кроме узбекского и свой текст на них */
+  langs?: ExtraLang[];
+  customTexts?: Partial<Record<ExtraLang, string>>;
   /** Правка неоплаченного заказа: та же ссылка */
   orderId?: string;
 };
@@ -53,6 +56,8 @@ export type AppSession = {
   orders: AppOrder[];
   today: string;
   pay: { phone: string; name: string; card: string | null };
+  /** Какие языки можно добавить (казахский — только при KAZAKH_ENABLED) */
+  extraLangs: ExtraLang[];
 };
 
 const MAX_ORDERS = 20;
@@ -95,14 +100,37 @@ function draftOf(s: Draft): AppDraft | null {
   const d = s.data ?? {};
   return {
     templateId: s.templateId,
-    form: { ...d, photos: undefined, textId: undefined, customText: undefined, rsvp: undefined } as FormInput,
+    form: { ...d, photos: undefined, textId: undefined, customText: undefined, rsvp: undefined, langs: undefined, customTexts: undefined } as FormInput,
     photos: d.photos,
     textId: d.textId,
     customText: d.customText,
     music: s.music && s.music.kind !== "own" ? s.music : undefined,
     rsvp: d.rsvp,
+    langs: d.langs,
+    customTexts: d.customTexts,
     orderId: s.orderId,
   };
+}
+
+/** Языки, которые клиент может добавить сейчас */
+export const allowedLangs = (deps: Deps): ExtraLang[] => (deps.env.kazakhEnabled ? ["ru", "kk"] : ["ru"]);
+
+/** Языки из приложения: только разрешённые, без повторов. Пусто — undefined (только узбекский) */
+export function cleanLangs(deps: Deps, raw: unknown): ExtraLang[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const ok = allowedLangs(deps).filter((l) => raw.includes(l));
+  return ok.length ? ok : undefined;
+}
+
+/** Свой текст на других языках: только для выбранных языков и только если есть свой узбекский текст */
+export function cleanCustomTexts(langs: ExtraLang[] | undefined, own: string | undefined, raw: unknown): Partial<Record<ExtraLang, string>> | undefined {
+  if (!own || !langs || !raw || typeof raw !== "object") return undefined;
+  const out: Partial<Record<ExtraLang, string>> = {};
+  for (const l of langs) {
+    const v = cleanOwnText((raw as Record<string, unknown>)[l]);
+    if ("value" in v) out[l] = v.value;
+  }
+  return Object.keys(out).length ? out : undefined;
 }
 
 export async function openSession(deps: Deps, u: AppUser): Promise<AppSession> {
@@ -119,6 +147,7 @@ export async function openSession(deps: Deps, u: AppUser): Promise<AppSession> {
     orders,
     today: kzToday(deps.now()),
     pay: { phone: deps.env.kaspiPhone, name: deps.env.kaspiName, card: deps.env.paymentCardNumber ?? null },
+    extraLangs: allowedLangs(deps),
   };
 }
 
@@ -155,6 +184,7 @@ function toDraft(deps: Deps, prev: Draft, d: AppDraft, data: Partial<InvitationD
   const music: MusicChoice | undefined = d.music?.kind === "none" ? { kind: "none" } : d.music?.kind === "list" && typeof d.music.musicId === "string" ? { kind: "list", musicId: d.music.musicId.slice(0, 64) } : prev.music;
   const own = cleanOwnText(d.customText);
   const photos = design?.clientPhotos ? cleanPhotos(deps, d.photos) : undefined;
+  const langs = cleanLangs(deps, d.langs);
   return {
     q: prev.q,
     handledUpdates: prev.handledUpdates,
@@ -171,6 +201,9 @@ function toDraft(deps: Deps, prev: Draft, d: AppDraft, data: Partial<InvitationD
       textId: typeof d.textId === "string" ? d.textId.slice(0, 32) : undefined,
       customText: "value" in own ? own.value : undefined,
       rsvp: d.rsvp !== false,
+      // Языки сняли — пишем «пусто», чтобы заказ вернулся к одному узбекскому (до этого колонку не трогаем)
+      langs: langs ?? (prev.data?.langs?.length ? [] : undefined),
+      customTexts: cleanCustomTexts(langs, "value" in own ? own.value : undefined, d.customTexts) ?? (prev.data?.customTexts ? {} : undefined),
     },
   };
 }

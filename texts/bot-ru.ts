@@ -367,6 +367,18 @@ export const ru = {
       rateSaved: (amount: string) => `✅ Новая ставка: ${amount}. Действует со следующих оплат.`,
     },
   },
+  langs: {
+    names: { ru: "Русский", kk: "Казахский" } as Record<string, string>,
+    review: (list: string) => `🌐 Языки: узбекский${list ? ` · ${list.toLowerCase()}` : ""}`,
+    edit: "🌐 Языки",
+    ask: (kk: boolean) => `🌐 Языки\n\nУзбекский есть всегда. Добавьте ${kk ? "русский или казахский" : "русский"}, чтобы гости могли читать на нём, — гость выбирает сам. Цена не меняется.`,
+    on: (name: string) => `✅ ${name}`,
+    off: (name: string) => `➕ ${name}`,
+    example: (name: string) => `👁 Пример · ${name.toLowerCase()}`,
+    ownButton: (name: string) => `✍️ Ваш текст · ${name.toLowerCase()}`,
+    ownAsk: (name: string) => `✍️ Напишите свой текст на языке «${name.toLowerCase()}» (до 600 знаков).\nЕсли не написать, на этом языке будет узбекский текст.`,
+    done: "✅ Готово",
+  },
   partner: {
     paidNotice: (amount: string) => `По вашему коду оплачен новый заказ ✅ +${amount}`,
     stats: (s: { link: string; scanned: number; started: number; paid: number; earned: string; paidOut: string; due: string }) =>

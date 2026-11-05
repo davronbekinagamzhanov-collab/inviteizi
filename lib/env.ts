@@ -64,6 +64,8 @@ export const env = {
   miniAppEnabled: () => optional("MINI_APP_ENABLED")?.toLowerCase() !== "false",
   /** Казахский язык приглашения (ждёт проверки носителем). По умолчанию выключен */
   kazakhEnabled: () => optional("KAZAKH_ENABLED")?.toLowerCase() === "true",
+  /** Языки приглашения кроме узбекского, которые можно выбрать сейчас (казахский — только при KAZAKH_ENABLED=true) */
+  extraLangs: (): ("ru" | "kk")[] => (env.kazakhEnabled() ? ["ru", "kk"] : ["ru"]),
   /** Есть ли доступ к базе (для тестов и страниц, которые без базы показывают заглушку) */
   hasDatabase: () => Boolean(optional("DATABASE_URL") || optional("DB_SERVER_PASSWORD")),
 };

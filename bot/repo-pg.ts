@@ -21,7 +21,7 @@ import type {
   Stats,
   UserRecord,
 } from "@/lib/domain";
-import type { EventKind, Occasion, Relation } from "@/lib/types";
+import { EXTRA_LANGS, type EventKind, type ExtraLang, type Occasion, type Relation } from "@/lib/types";
 import { db, type Sql, type Tx } from "@/lib/db";
 import { env } from "@/lib/env";
 import { isReservedSlug } from "@/lib/slug";
@@ -96,6 +96,9 @@ type OrderRow = {
   rsvp: boolean | null;
   /** Нет колонки до миграции client_photos — тогда undefined */
   photos?: string[] | null;
+  /** v2: нет колонок до миграции invite_langs — тогда undefined */
+  langs?: string[] | null;
+  custom_text_i18n?: Partial<Record<ExtraLang, string>> | null;
   admin_reminded_at: Date | null;
   expires_at: Date | null;
   events: EventJson[];
@@ -159,6 +162,10 @@ function toData(r: OrderRow): InvitationData {
   put(d, "customText", r.custom_text);
   put(d, "rsvp", r.rsvp);
   if (r.photos?.length) d.photos = r.photos;
+  const extra = EXTRA_LANGS.filter((l) => r.langs?.includes(l));
+  if (extra.length) d.langs = extra;
+  const own = Object.fromEntries(EXTRA_LANGS.flatMap((l) => (typeof r.custom_text_i18n?.[l] === "string" && r.custom_text_i18n[l] ? [[l, r.custom_text_i18n[l]]] : [])));
+  if (Object.keys(own).length) d.customTexts = own;
   return d;
 }
 
@@ -211,7 +218,7 @@ function toMusicRecord(r: MusicRow): MusicRecord {
   };
 }
 
-type Columns = Record<string, string | number | boolean | Date | string[] | null>;
+type Columns = Record<string, string | number | boolean | Date | string[] | Partial<Record<ExtraLang, string>> | null>;
 
 function dataColumns(d: InvitationData): Columns {
   return {
@@ -231,6 +238,9 @@ function dataColumns(d: InvitationData): Columns {
     rsvp: d.rsvp ?? null,
     // Колонка photos появляется миграцией client_photos: заказы без фото её не трогают
     ...(d.photos !== undefined && { photos: d.photos.length ? d.photos : null }),
+    // v2: колонки языков появляются миграцией invite_langs — заказы без языков их не трогают
+    ...(d.langs !== undefined && { langs: ["uz", ...EXTRA_LANGS.filter((l) => d.langs!.includes(l))] }),
+    ...(d.customTexts !== undefined && { custom_text_i18n: Object.keys(d.customTexts).length ? d.customTexts : null }),
   };
 }
 

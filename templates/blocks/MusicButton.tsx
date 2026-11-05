@@ -34,6 +34,8 @@ export function MusicButton({
       type="button"
       onClick={onToggle}
       aria-label={playing ? t.music.pause : t.music.play}
+      aria-pressed={playing}
+      data-music-button
       initial={{ opacity: 0, scale: 0.6 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: 0.3, duration: MOTION.fast, ease: MOTION.ease }}

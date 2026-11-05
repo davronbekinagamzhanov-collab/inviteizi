@@ -28,10 +28,20 @@ export function glueData(d: InvitationData): InvitationData {
 }
 
 /** Весь объект текстов со склейкой: строки, результаты функций, вложенные объекты и массивы */
-export function glueDeep<T>(value: T): T {
-  if (typeof value === "string") return glueWords(value) as T;
-  if (typeof value === "function") return ((...args: unknown[]) => glueDeep((value as (...a: unknown[]) => unknown)(...args))) as T;
-  if (Array.isArray(value)) return value.map(glueDeep) as T;
-  if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, glueDeep(v)])) as T;
+export function glueDeep<T>(value: T, glue: (s: string) => string = glueWords): T {
+  if (typeof value === "string") return glue(value) as T;
+  if (typeof value === "function") return ((...args: unknown[]) => glueDeep((value as (...a: unknown[]) => unknown)(...args), glue)) as T;
+  if (Array.isArray(value)) return value.map((v) => glueDeep(v, glue)) as T;
+  if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, glueDeep(v, glue)])) as T;
   return value;
+}
+
+/** Русский: короткие предлоги и союзы («в», «и», «на», «по»…) не висят в конце строки */
+export function glueRuWords(text: string) {
+  return text.replace(/(^|[\s(«])(и|а|в|во|с|со|к|ко|у|о|об|на|за|по|до|из|от|не)[^\S\n]+/giu, `$1$2${NBSP}`);
+}
+
+/** Казахский: «және», «мен» прилипают к следующему слову */
+export function glueKkWords(text: string) {
+  return text.replace(/(^|\s)(және|мен|бен|пен)[^\S\n]+/giu, `$1$2${NBSP}`);
 }

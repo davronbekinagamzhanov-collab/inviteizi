@@ -3,7 +3,9 @@ import type { Ctx, Result, Step, StepId } from "./types";
 import { getDesign } from "@/templates/registry";
 import type { InlineButton } from "../tg";
 import { tPlain as t } from "@/texts/uz-cyrl";
-import { backRow, data, designLine, editOrSend, eventLabel, finalData, fmtDate, ib, inline, MAX_CUSTOM_TEXT, MAX_MUSIC_BYTES, send } from "./util";
+import { backRow, data, demoUrl, designLine, editOrSend, eventLabel, finalData, fmtDate, ib, inline, MAX_CUSTOM_TEXT, MAX_MUSIC_BYTES, send } from "./util";
+import { cleanOwnText, graphemes } from "@/lib/order-rules";
+import type { ExtraLang } from "@/lib/types";
 import { catalogList, pageOf } from "./steps-order";
 import { confirmDraft } from "./orders";
 import { photoStepFor } from "./steps-photo";
@@ -103,6 +105,77 @@ export const rsvp: Step = {
     data(c).rsvp = v === "yes";
     if (v === "yes") await send(c, c.tx.rsvp.how);
     return { to: "review" };
+  },
+};
+
+// ── v2, часть 9: языки приглашения (узбекский есть всегда) ──
+
+/** «…/demo/muhr#dt=…» → «…/demo/muhr?lang=ru#dt=…» */
+const withLang = (url: string, l: ExtraLang) => {
+  const [base, hash] = url.split("#");
+  return `${base}?lang=${l}${hash ? `#${hash}` : ""}`;
+};
+
+const allowedLangs = (c: Ctx): ExtraLang[] => (c.deps.env.kazakhEnabled ? ["ru", "kk"] : ["ru"]);
+
+function langsScreen(c: Ctx) {
+  const d = data(c);
+  const on = d.langs ?? [];
+  const L = c.tx.langs;
+  const rows: InlineButton[][] = allowedLangs(c).map((l) => [
+    ib(c, on.includes(l) ? L.on(L.names[l]) : L.off(L.names[l]), `t:${l}`),
+    ...(c.s.templateId ? [{ text: L.example(L.names[l]), url: withLang(demoUrl(c, c.s.templateId), l) }] : []),
+  ]);
+  // Свой текст: перевод клиент пишет сам
+  if (d.customText) for (const l of on) rows.push([ib(c, L.ownButton(L.names[l]), `own:${l}`)]);
+  rows.push([ib(c, L.done, "done")]);
+  return { text: L.ask(allowedLangs(c).includes("kk")), markup: inline(rows) };
+}
+
+export const langs: Step = {
+  async ask(c) {
+    const { text, markup } = langsScreen(c);
+    await send(c, text, markup);
+  },
+  async onButton(c, v) {
+    const d = data(c);
+    if (v === "done") return { to: "review" };
+    const [kind, l] = v.split(":") as [string, ExtraLang];
+    if (!allowedLangs(c).includes(l)) return null;
+    if (kind === "t") {
+      const on = d.langs ?? [];
+      d.langs = on.includes(l) ? on.filter((x) => x !== l) : allowedLangs(c).filter((x) => x === l || on.includes(x));
+      if (on.includes(l) && d.customTexts?.[l]) {
+        const rest = { ...d.customTexts };
+        delete rest[l];
+        d.customTexts = rest;
+      }
+      // Тот же экран, обновлённые галочки — без нового сообщения
+      const { text, markup } = langsScreen(c);
+      await editOrSend(c, text, markup);
+      return { stay: true };
+    }
+    if (kind === "own" && d.customText && d.langs?.includes(l)) {
+      c.s.langText = l;
+      return { to: "langText" };
+    }
+    return null;
+  },
+};
+
+export const langText: Step = {
+  async ask(c) {
+    const l = c.s.langText ?? "ru";
+    await send(c, c.tx.langs.ownAsk(c.tx.langs.names[l]), inline([backRow(c)]));
+  },
+  async onMessage(c) {
+    if (c.u.kind !== "text") return null;
+    const l = c.s.langText;
+    const own = cleanOwnText(c.u.text);
+    if (!l || !("value" in own)) return own && "problem" in own && own.problem === "long" ? { hint: c.tx.text.tooLong(graphemes(c.u.text)) } : null;
+    const d = data(c);
+    d.customTexts = { ...d.customTexts, [l]: own.value };
+    return { to: "langs" };
   },
 };
 
@@ -239,6 +312,7 @@ async function summary(c: Ctx) {
   }
   lines.push(await musicLine(c));
   lines.push(d.rsvp ? c.tx.rsvp.reviewOn : c.tx.rsvp.reviewOff);
+  lines.push(c.tx.langs.review((d.langs ?? []).map((l) => c.tx.langs.names[l]).join(" · ")));
   if (photoStepFor(c)) lines.push(c.tx.photo.review(d.photos?.length ?? 0));
   return { text: lines.join("\n"), d };
 }
@@ -260,7 +334,8 @@ export const review: Step = {
     rows.push(row2);
     d.events.forEach((e, i) => rows.push([ib(c, r.editEvent(i + 1, eventLabel(c.tx, e.kind)), `ev:${i}`)]));
     rows.push([ib(c, r.editText, "text"), ib(c, r.editMusic, "music"), ib(c, r.editDesign, "design")]);
-    rows.push(photoStepFor(c) ? [ib(c, c.tx.rsvp.edit, "rsvp"), ib(c, c.tx.photo.edit, "photo")] : [ib(c, c.tx.rsvp.edit, "rsvp")]);
+    rows.push(photoStepFor(c) ? [ib(c, c.tx.rsvp.edit, "rsvp"), ib(c, c.tx.photo.edit, "photo")] : [ib(c, c.tx.rsvp.edit, "rsvp"), ib(c, c.tx.langs.edit, "langs")]);
+    if (photoStepFor(c)) rows.push([ib(c, c.tx.langs.edit, "langs")]);
     rows.push([ib(c, r.confirm, "ok")]);
     if (c.s.back.length) rows.push(backRow(c));
     await send(c, text, inline(rows));
@@ -286,6 +361,8 @@ export const review: Step = {
         return edit("music");
       case "rsvp":
         return edit("rsvp");
+      case "langs":
+        return edit("langs");
       case "photo":
         return photoStepFor(c) ? edit("photoAsk") : null;
       case "design":
@@ -305,7 +382,7 @@ export const review: Step = {
   },
 };
 
-function goEdit(c: Ctx, to: "groom" | "person" | "relation" | "hosts" | "sideAsk" | "cause" | "age" | "text" | "music" | "rsvp" | "photoAsk" | "fmt" | "catalog"): Result {
+function goEdit(c: Ctx, to: "groom" | "person" | "relation" | "hosts" | "sideAsk" | "cause" | "age" | "text" | "music" | "rsvp" | "langs" | "photoAsk" | "fmt" | "catalog"): Result {
   c.s.ret = "review";
   return { to };
 }

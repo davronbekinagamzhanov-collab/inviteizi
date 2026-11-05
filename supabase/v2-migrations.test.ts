@@ -23,6 +23,7 @@ describe("v2: миграции и новые запросы PgRepo на PGlite",
     await server.start();
     const port = Number(server.getServerConn().split(":").at(-1));
     sql = postgres({ host: "127.0.0.1", port, username: "postgres", password: "postgres", database: "postgres", ssl: false, max: 1, prepare: false, connect_timeout: 5, onnotice: () => {}, types: { bigint: { to: 20, from: [20], serialize: String, parse: Number } } }) as unknown as Sql;
+    await pg.query("insert into public.templates(id,number,occasion,format,price) values('muhr',113,'nikoh','animated',8000)");
     await sql`set role inviteizi_server`;
     repo = new PgRepo(sql);
   }, 60_000);
@@ -57,9 +58,28 @@ describe("v2: миграции и новые запросы PgRepo на PGlite",
     expect(s.partnersReady).toBe(true);
   });
 
+  it("языки приглашения: сохраняются, читаются, лишнее отбрасывается; без языков — только узбекский", async () => {
+    await repo.touchUser({ id: 777001 });
+    const base = { occasion: "nikoh" as const, groom: "Азиз", bride: "Мадина", hosts: "Оила", events: [], customText: "Ўз матним" };
+    const o = await repo.createOrder({ userId: 777001, occasion: "nikoh", format: "simple", templateId: "muhr", data: { ...base, langs: ["ru", "kk"], customTexts: { ru: "Мой текст" } }, music: { kind: "none" }, amount: 5000, slugBase: "langs-test", status: "preview" });
+    expect((await repo.getOrder(o.id))?.data).toMatchObject({ langs: ["ru", "kk"], customTexts: { ru: "Мой текст" } });
+    await repo.updateOrder(o.id, { data: { ...base, langs: [], customTexts: {} } });
+    const back = (await repo.getOrder(o.id))!.data;
+    expect(back.langs).toBeUndefined();
+    expect(back.customTexts).toBeUndefined();
+    const plain = await repo.createOrder({ userId: 777001, occasion: "nikoh", format: "simple", templateId: "muhr", data: base, music: { kind: "none" }, amount: 5000, slugBase: "langs-plain", status: "preview" });
+    const [row] = await sql<{ langs: string[] }[]>`select langs from public.orders where id = ${plain.id}`;
+    expect(row.langs).toEqual(["uz"]);
+    await sql`reset role`;
+    await expect(sql`update public.orders set langs = '{ru}' where id = ${plain.id}`).rejects.toThrow(/orders_langs_check/);
+    await expect(sql`update public.orders set langs = '{uz,en}' where id = ${plain.id}`).rejects.toThrow(/orders_langs_check/);
+    await sql`set role inviteizi_server`;
+  });
+
   it("повторное применение новой миграции безопасно", async () => {
     await sql`reset role`;
     await sql.unsafe(await readFile("supabase/migrations/20261108120000_notices.sql", "utf8"));
+    await sql.unsafe(await readFile("supabase/migrations/20261109120000_invite_langs.sql", "utf8"));
     await sql`set role inviteizi_server`;
     expect(await repo.queueNotice({ key: "after-rerun", chatId: 2, text: "ok", dueAt: new Date() })).toBe(true);
   });

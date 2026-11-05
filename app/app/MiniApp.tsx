@@ -383,6 +383,11 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
                   customText={draft.customText}
                   music={draft.music}
                   rsvp={draft.rsvp !== false}
+                  langs={draft.langs ?? []}
+                  customTexts={draft.customTexts ?? {}}
+                  extraLangs={session.extraLangs ?? ["ru"]}
+                  demoUrl={draft.templateId ? `/demo/${draft.templateId}` : null}
+                  onExample={(url) => setViewer(url)}
                   tracks={tracks}
                   price={price}
                   namunaUrl={order?.url ?? null}
