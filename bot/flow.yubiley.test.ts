@@ -3,6 +3,7 @@ import { ru } from "@/texts/bot-ru";
 import { Sim } from "./testing/sim";
 import { buttonLabels } from "./testing/fake-tg";
 import { startRu } from "./testing/paths";
+import { designsFor } from "./flow/util";
 
 describe("юбилей (шаг 6)", () => {
   it("весь путь на русском: имя, кем приходится, возраст, тадбир → заказ с НАМУНА", async () => {
@@ -31,7 +32,7 @@ describe("юбилей (шаг 6)", () => {
     expect(sim.lastText(5)).toContain(ru.review.age(60));
     await sim.click(5, ru.review.confirm);
     const [o] = await sim.repo.listOrdersByUser(5);
-    expect(o).toMatchObject({ occasion: "yubiley", templateId: "pion-guldasta", status: "preview", slug: "mukarram-opa" });
+    expect(o).toMatchObject({ occasion: "yubiley", templateId: designsFor("yubiley", "animated")[0].id, status: "preview", slug: "mukarram-opa" });
     expect(o.data).toMatchObject({ person: "Мукаррам опа", relation: "ona", age: 60 });
     expect(buttonLabels(sim.last(5)).some((l) => l.startsWith("💳"))).toBe(true);
   });

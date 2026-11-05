@@ -1,6 +1,6 @@
 /** API приложения (/app): одно действие на запрос. Пользователь — только из проверенного initData */
 import { createBotDeps } from "@/bot/deps";
-import { appUserFrom, json, unauthorized } from "@/lib/app-auth";
+import { appGate, json } from "@/lib/app-auth";
 import * as app from "@/bot/app/service";
 import type { Lang } from "@/lib/domain";
 
@@ -8,8 +8,8 @@ export const maxDuration = 30;
 const MAX_BODY = 32_000;
 
 export async function POST(req: Request) {
-  const user = appUserFrom(req);
-  if (!user) return unauthorized();
+  const user = appGate(req);
+  if (user instanceof Response) return user;
   const raw = await req.text();
   if (raw.length > MAX_BODY) return json({ error: "bad" }, 413);
   let body: { action?: string; [k: string]: unknown };

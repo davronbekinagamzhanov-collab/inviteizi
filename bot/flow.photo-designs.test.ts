@@ -83,8 +83,10 @@ describe("пометка «с фото» и шаг фото по дизайну"
     // ✏️ Дизайн → другой формат → дизайн без фото
     await s.click(1, uz.review.editDesign);
     await s.click(1, new RegExp(uz.format.names.simple));
-    const target = designsFor("nikoh", "simple")[0];
-    expect(target.clientPhotos).toBeFalsy();
+    const simple = designsFor("nikoh", "simple");
+    const target = simple.find((d) => !d.clientPhotos)!;
+    expect(target).toBeDefined();
+    for (let k = 0; k < simple.indexOf(target); k++) await s.click(1, "▶");
     await s.click(1, uz.catalog.buy);
     const st = await state(s, 1);
     expect(st.templateId).toBe(target.id);

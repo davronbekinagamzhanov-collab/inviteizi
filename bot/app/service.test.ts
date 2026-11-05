@@ -235,6 +235,6 @@ describe("приложение: избранное и музыка", () => {
   it("мелодии тадбира с адресом для ▶", async () => {
     const sim = new Sim();
     const r = await app.musicFor(sim.deps, getDesign(first("nikoh").id)!.id, "ru");
-    expect("tracks" in r && r.tracks[0]).toEqual({ id: "yor-yor", title: "Ёр-ёр", url: "https://cdn.test/music/yor-yor.mp3" });
+    expect("tracks" in r && r.tracks?.[0]).toEqual({ id: "yor-yor", title: "Ёр-ёр", url: "https://cdn.test/music/yor-yor.mp3" });
   });
 });

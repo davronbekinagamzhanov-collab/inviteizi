@@ -264,12 +264,24 @@ export const HIDDEN_03_11: readonly string[] = [
   "sunnat-muqova", "sunnat-nasab", "sahar-ipagi", "sahar-maktubi", "umr-sahifalari", "ehtirom-kartasi"
 ];
 
-/** Дизайны для клиентов: только принятые */
-export const DISPLAY_PRIORITY: readonly string[] = [
-  // Натуральные пилоты — первыми в своих тадбирах
-  "muhr", "ipak", "bog", "tong-dasturxon",
-  "oltin-monogramma", "ganch-peshtoq",
-];
+/**
+ * Порядок каталога — ОДИН список на тадбир (бот, приложение, сайт /catalog).
+ * Первым — сильнейший за 8 000 ₸; цены смешаны, чтобы сразу было видно недорогие (5 000 и 6 000 ₸).
+ * Никоҳ: 113, 114 и сильнейший 8 000 первыми, места 5–7 — «Пятна» (их id добавляются, когда дизайны готовы).
+ */
+export const CATALOG_ORDER: Record<Occasion, readonly string[]> = {
+  nikoh: [
+    "muhr", "ipak", "gul-doira", "suzani-medalyon",
+    "suvbuyoq-tuman", "suvbuyoq-zumrad", "suvbuyoq-upa",
+    "nur-varaq", "girih-barg", "oq-maktub", "xotira-albom", "muhrli-maktub", "ipak-albom",
+    "shohona-baxmal", "oltin-monogramma", "sapfir", "ganch-peshtoq", "visol-hikoya",
+  ],
+  sunnat: ["ganch-darvoza", "bog", "lola-medalyon", "lola-bodom", "doppi-kitob", "doppicha"],
+  nahorgi: ["qozon-tongi", "tong-dasturxon", "non-albom", "tonggi-piyola", "tong-varaq", "choy-maktub"],
+  yubiley: ["zarhal-lavha", "umr-kitobi", "hurmat-maktub", "pion-guldasta", "umr-daraxti", "bordo-guldasta"],
+};
+/** Все id по порядку (для сортировки) */
+export const DISPLAY_PRIORITY: readonly string[] = Object.values(CATALOG_ORDER).flat();
 export function catalogPosition(d: Pick<Design,"id"|"number">) {
   const i = DISPLAY_PRIORITY.indexOf(d.id);
   return i < 0 ? 1000 + d.number : i;

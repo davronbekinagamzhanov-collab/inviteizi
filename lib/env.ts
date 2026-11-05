@@ -60,10 +60,10 @@ export const env = {
     if (!password) throw new MissingEnvError("DATABASE_URL или DB_SERVER_PASSWORD");
     return `postgres://inviteizi_server.${SUPABASE_REF}:${encodeURIComponent(password)}@${POOLER_HOST}:6543/postgres`;
   },
-  /** Есть ли доступ к базе (для тестов и страниц, которые без базы показывают заглушку) */
   /** Заказ через приложение (Mini App). false — «✨ Таклифнома яратиш» ведёт по чату. По умолчанию true */
   miniAppEnabled: () => optional("MINI_APP_ENABLED")?.toLowerCase() !== "false",
   /** Казахский язык приглашения (ждёт проверки носителем). По умолчанию выключен */
   kazakhEnabled: () => optional("KAZAKH_ENABLED")?.toLowerCase() === "true",
+  /** Есть ли доступ к базе (для тестов и страниц, которые без базы показывают заглушку) */
   hasDatabase: () => Boolean(optional("DATABASE_URL") || optional("DB_SERVER_PASSWORD")),
 };

@@ -13,8 +13,10 @@ describe("catalog photo attribution",()=>{
     const tx=lang==="uz"?uz:ru;
     await sim.click(1,tx.category.nahorgi);await sim.click(1,new RegExp(tx.format.names.scroll));
     const credit=photoAttributions["tonggi-choy"]!;
-    // первый — натуральный пилот (подпись авторов фото — на самой странице), дальше tonggi-choy
+    // первый — натуральный пилот (подпись авторов фото — на самой странице), за ним «Тонг варақ» (порядок CATALOG_ORDER), дальше tonggi-choy
     expect(sim.last(1).media).toContain("/covers/tong-dasturxon.jpg");
+    await sim.click(1,"▶");
+    expect(sim.last(1).media).toContain("/covers/tong-varaq.jpg");
     await sim.click(1,"▶");
     expect(sim.last(1).media).toContain("/covers/tonggi-choy.jpg");
     expect(sim.lastText(1)).toContain(tx.catalog.photoCredit(credit.author,credit.license,credit.source));
