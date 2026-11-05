@@ -47,7 +47,7 @@ async function createPartner(s: Sim, who: number, o: { name?: string; phone?: st
   await s.text(who, o.name ?? "Салон Малика");
   await s.text(who, o.phone ?? "+7 701 123 45 67");
   if (typeof o.rate === "string") await s.text(who, o.rate);
-  else await s.click(who, o.rate ?? /^1.000 ₸$/);
+  else await s.click(who, o.rate ?? /^1.000 ₸ фикс\.$/);
   await s.click(who, T.schedule[o.schedule ?? "weekly"]);
   await s.click(who, T.create);
   const link = [...texts(s, who)].reverse().find((t) => /start=join_/.test(t)) ?? "";
@@ -122,7 +122,7 @@ describe("создание", () => {
   it("двойное «✅ Создать» создаёт одного партнёра", async () => {
     const s = new Sim();
     await createPartner(s, ADMIN);
-    const confirm = [...s.tg.to(ADMIN)].reverse().find((m) => m.text.startsWith("Проверьте:"))!;
+    const confirm = [...s.tg.to(ADMIN)].reverse().find((m) => m.text.startsWith("📄 Договор"))!;
     const data = (confirm.markup as { inline: { text: string; data?: string }[][] }).inline.flat().find((b) => b.text === T.create)!.data!;
     await s.callback(ADMIN, data, confirm.id);
     expect(s.repo.partners).toHaveLength(1);
@@ -195,7 +195,7 @@ describe("подтверждение", () => {
     const s = new Sim();
     const { p } = await pending(s);
     await s.callback(ADMIN, `pa:rate:${p.id}`, s.last(ADMIN)!.id);
-    await s.click(ADMIN, /^500 ₸$/);
+    await s.text(ADMIN, "500");
     expect(s.repo.partners[0]).toMatchObject({ rate: 500, status: "pending" });
     expect(s.lastText(ADMIN)).toContain(T.terms("500 ₸", T.scheduleLower.weekly));
     await s.click(ADMIN, T.btn.approve);
@@ -509,4 +509,55 @@ describe("Казахский постер (дополнение к части 6)
     await on.click(ADMIN, ru.role.posterKk);
     expect(on.tg.to(ADMIN).at(-1)!.fileName).toBe(`inviteizi-${p.code}-kk.png`);
   }, 30_000);
+});
+
+describe("ставка в процентах («договор», ночная доводка п.4)", () => {
+  it("15% от 8 000 / 6 000 / 5 000 → 1 200 / 900 / 750 ₸; договор с примерами; разбор ввода", async () => {
+    const { earningFor } = await import("@/lib/owner-panel");
+    const { parseRate, rateExamples } = await import("./flow/partners");
+    const p = { rate: 0, ratePercent: 15 };
+    expect([8000, 6000, 5000].map((a) => earningFor(p, a))).toEqual([1200, 900, 750]);
+    expect(earningFor({ rate: 0, ratePercent: 12 }, 6543)).toBe(785); // округление до целых тенге
+    expect(earningFor({ rate: 700, ratePercent: null }, 8000)).toBe(700);
+    expect(rateExamples(15)).toBe("8 000 → 1 200 ₸ · 6 000 → 900 ₸ · 5 000 → 750 ₸");
+    expect(parseRate("15%")).toEqual({ rate: 0, pct: 15 });
+    expect(parseRate("12")).toEqual({ rate: 0, pct: 12 });
+    expect(parseRate("1 000 ₸")).toEqual({ rate: 1000, pct: null });
+    expect(parseRate("0")).toEqual({ rate: 0, pct: null });
+    expect(parseRate("150%")).toBeNull();
+    expect(parseRate("абв")).toBeNull();
+
+    const s = new Sim();
+    await createPartner(s, ADMIN, { rate: /^⭐ 15%$/ });
+    const contract = [...s.tg.to(ADMIN)].reverse().find((m) => m.text.startsWith("📄 Договор"))!.text;
+    expect(contract).toContain("15% от оплаты (8 000 → 1 200 ₸ · 6 000 → 900 ₸ · 5 000 → 750 ₸)");
+    expect(contract).toContain("👤 Привёл: владелец");
+    expect(s.repo.partners[0]).toMatchObject({ ratePercent: 15 });
+  });
+
+  it("начисление — процент от фактически оплаченной суммы; смена ставки — только для новых заказов", async () => {
+    const s = new Sim();
+    await createPartner(s, ADMIN, { rate: /^⭐ 15%$/ });
+    const p = s.repo.partners[0];
+    await start(s, CLIENT, partnerSource(p.code));
+    const a = await nikohWithReceipt(s, CLIENT);
+    await s.callback(ADMIN, `ok:${a.number}`, 1);
+    expect(s.repo.earnings.at(-1)!.amount).toBe(Math.round(a.amount * 0.15));
+    await s.repo.setPartnerRate(p.id, 0, 20);
+    expect(s.repo.earnings[0].amount).toBe(Math.round(a.amount * 0.15));
+    await start(s, 2, partnerSource(p.code));
+    const b = await nikohWithReceipt(s, 2, ["Сардор", "Нилуфар"]);
+    await s.callback(ADMIN, `ok:${b.number}`, 1);
+    expect(s.repo.earnings.at(-1)!.amount).toBe(Math.round(b.amount * 0.2));
+  });
+
+  it("ставка 0% — только счёт, без выплат; менеджер с 15% ждёт ✅ владельца", async () => {
+    const s = new Sim();
+    await createPartner(s, ADMIN, { name: "Уличный QR", rate: "0%" });
+    expect(s.repo.partners[0]).toMatchObject({ ratePercent: 0 });
+    await makeManager(s);
+    await createPartner(s, MANAGER, { name: "Салон 15", rate: /^⭐ 15%$/ });
+    expect(s.repo.partners[1]).toMatchObject({ ratePercent: 15, status: "pending", managedBy: MANAGER });
+    expect(texts(s, ADMIN).some((t) => t.includes("15% от оплаты"))).toBe(true);
+  });
 });

@@ -37,6 +37,8 @@ export type Partner = {
   telegramId: number | null;
   username: string | null;
   rate: number;
+  /** v2: ставка в процентах от оплаченной суммы (null — фиксированная rate ₸) */
+  ratePercent?: number | null;
   createdAt: Date;
   /** Менеджер, который привёл; null — партнёр владельца */
   managedBy: number | null;
@@ -49,6 +51,7 @@ export type Partner = {
   /** Предложение менеджера (ставка + график), ждёт ✅ владельца; null — нет */
   proposedRate: number | null;
   proposedSchedule: PayoutSchedule | null;
+  proposedRatePercent?: number | null;
   /** null — владельцу о новом партнёре / предложении ещё не сообщили */
   ownerNotifiedAt: Date | null;
   sleepNotifiedAt: Date | null;
@@ -218,3 +221,7 @@ export function partnerRowsWithin(s: PanelSnapshot, inside: (d: Date) => boolean
     };
   });
 }
+
+/** Начисление партнёру за оплату: процент от фактически оплаченной суммы (до целых тенге) или фиксированная ставка */
+export const earningFor = (p: Pick<Partner, "rate" | "ratePercent">, paidAmount: number) =>
+  p.ratePercent != null ? Math.round((paidAmount * p.ratePercent) / 100) : p.rate;

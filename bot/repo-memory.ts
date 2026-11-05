@@ -1,5 +1,5 @@
 import { RSVP_IP_HOUR_LIMIT, RSVP_ORDER_LIMIT, type RsvpInput, type RsvpRecord } from "@/lib/rsvp";
-import type { ManagerPayout, PanelOrder, PanelSnapshot, Partner, PartnerEarning, PartnerPayout, PayoutSchedule } from "@/lib/owner-panel";
+import { earningFor, type ManagerPayout, type PanelOrder, type PanelSnapshot, type Partner, type PartnerEarning, type PartnerPayout, type PayoutSchedule } from "@/lib/owner-panel";
 import type { NewPartner, Notice, PartnerPatch } from "./repo";
 import type { BotErrorEntry } from "./errors";
 import type { ClaimStatus, InviteKind, InviteUse, Manager } from "@/lib/roles";
@@ -162,6 +162,8 @@ export class MemoryRepo implements Repo {
       telegramId: p.telegramId,
       username: p.username,
       rate: p.rate,
+      ratePercent: p.ratePercent ?? null,
+      proposedRatePercent: null,
       managedBy: p.managedBy ?? null,
       phone: p.phone ?? null,
       kaspi: null,
@@ -181,9 +183,9 @@ export class MemoryRepo implements Repo {
     const p = this.partners.find((x) => x.id === id);
     return p ? { ...p } : null;
   }
-  async setPartnerRate(id: number, rate: number) {
+  async setPartnerRate(id: number, rate: number, ratePercent: number | null = null) {
     const p = this.partners.find((x) => x.id === id);
-    if (p) p.rate = rate;
+    if (p) Object.assign(p, { rate, ratePercent });
   }
   async updatePartner(id: number, patch: PartnerPatch) {
     const p = this.partners.find((x) => x.id === id);
@@ -202,15 +204,15 @@ export class MemoryRepo implements Repo {
     p.status = status;
     return true;
   }
-  async proposePartnerTerms(id: number, rate: number, schedule: PayoutSchedule) {
+  async proposePartnerTerms(id: number, rate: number, schedule: PayoutSchedule, ratePercent: number | null = null) {
     const p = this.partners.find((x) => x.id === id);
-    if (p) Object.assign(p, { proposedRate: rate, proposedSchedule: schedule, ownerNotifiedAt: null });
+    if (p) Object.assign(p, { proposedRate: rate, proposedRatePercent: ratePercent, proposedSchedule: schedule, ownerNotifiedAt: null });
   }
   async settlePartnerProposal(id: number, accept: boolean) {
     const p = this.partners.find((x) => x.id === id);
     if (!p || p.proposedRate === null || p.proposedSchedule === null) return null;
-    if (accept) Object.assign(p, { rate: p.proposedRate, schedule: p.proposedSchedule });
-    Object.assign(p, { proposedRate: null, proposedSchedule: null });
+    if (accept) Object.assign(p, { rate: p.proposedRate, ratePercent: p.proposedRatePercent ?? null, schedule: p.proposedSchedule });
+    Object.assign(p, { proposedRate: null, proposedRatePercent: null, proposedSchedule: null });
     return { ...p };
   }
   async findPartnerForUser(userId: number, username: string | null) {
@@ -231,8 +233,10 @@ export class MemoryRepo implements Repo {
     if (!partner || partner.status === "rejected" || partner.telegramId === clientId || this.earnings.some((e) => e.orderId === orderId)) return null;
     const client = this.users.get(clientId);
     if (client?.username && client.username.toLowerCase() === partner.username?.toLowerCase()) return null;
-    this.earnings.push({ orderId, partnerId: partner.id, amount: partner.rate, delivered: false, createdAt: this.now() });
-    return { partner: { ...partner }, amount: partner.rate };
+    // Процент — от фактически оплаченной суммы заказа
+    const amount = earningFor(partner, this.orders.get(orderId)?.amount ?? 0);
+    this.earnings.push({ orderId, partnerId: partner.id, amount, delivered: false, createdAt: this.now() });
+    return { partner: { ...partner }, amount };
   }
   async markEarningDelivered(orderId: string) {
     const e = this.earnings.find((x) => x.orderId === orderId);

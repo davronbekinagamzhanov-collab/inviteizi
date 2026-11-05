@@ -218,7 +218,7 @@ describe("партнёры", () => {
     await s.text(ADMIN, "кирил");
     expect(s.tg.to(ADMIN).some((m) => m.text === staff.pt.badPhone)).toBe(true);
     await s.text(ADMIN, "8 701 123 45 67");
-    await s.click(ADMIN, /^1.000 ₸$/);
+    await s.click(ADMIN, /^1.000 ₸ фикс\.$/);
     await s.click(ADMIN, staff.pt.schedule.weekly);
     await s.click(ADMIN, staff.pt.create);
     const [p] = s.repo.partners;

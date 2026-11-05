@@ -134,7 +134,7 @@ export type Draft = {
   /** Заказ уже оплачен: формат (и цену) менять нельзя */
   paid?: boolean;
   /** Новый партнёр, пока его заполняют */
-  partnerDraft?: { name?: string; phone?: string; rate?: number; schedule?: PayoutSchedule };
+  partnerDraft?: { name?: string; phone?: string; rate?: number; ratePercent?: number | null; schedule?: PayoutSchedule };
   /** Номер заказа «для клиента», который человек забрал до выбора языка: показать после выбора */
   claimed?: number;
   /** Партнёр, которому меняют ставку (или который знакомится с ботом по ссылке join_) */

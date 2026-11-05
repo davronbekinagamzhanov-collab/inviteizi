@@ -28,6 +28,8 @@ export type NewPartner = {
   telegramId: number | null;
   username: string | null;
   rate: number;
+  /** Процент от оплаты (null — фиксированная rate) */
+  ratePercent?: number | null;
   managedBy?: number | null;
   phone?: string | null;
   schedule?: PayoutSchedule;
@@ -121,7 +123,7 @@ export interface Repo {
   /** Новый партнёр. status pending — создал менеджер, ждёт ✅ владельца; ownerNotifiedAt — владельцу уже сообщили */
   createPartner(p: NewPartner): Promise<Partner>;
   getPartner(id: number): Promise<Partner | null>;
-  setPartnerRate(id: number, rate: number): Promise<void>;
+  setPartnerRate(id: number, rate: number, ratePercent?: number | null): Promise<void>;
   /** Телефон, Kaspi, график, метки уведомлений */
   updatePartner(id: number, patch: PartnerPatch): Promise<void>;
   /** Ссылка join_: привязать Telegram, если партнёр ни к кому другому не привязан и не отклонён. null — нельзя */
@@ -129,7 +131,7 @@ export interface Repo {
   /** pending → active / rejected ровно один раз; false — уже решено (двойное нажатие) */
   decidePartner(id: number, status: "active" | "rejected"): Promise<boolean>;
   /** Менеджер предлагает ставку и график: ждут ✅ владельца (метка «сообщили» сбрасывается) */
-  proposePartnerTerms(id: number, rate: number, schedule: PayoutSchedule): Promise<void>;
+  proposePartnerTerms(id: number, rate: number, schedule: PayoutSchedule, ratePercent?: number | null): Promise<void>;
   /** ✅ — ставка и график из предложения, ❌ — предложение убирается. null — предложения уже нет */
   settlePartnerProposal(id: number, accept: boolean): Promise<Partner | null>;
   /** Партнёр этого человека: по id или по username (id тогда запоминается). Отклонённый не считается. Нет таблицы или партнёра — null */

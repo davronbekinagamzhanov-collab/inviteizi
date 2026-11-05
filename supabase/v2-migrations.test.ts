@@ -76,10 +76,25 @@ describe("v2: миграции и новые запросы PgRepo на PGlite",
     await sql`set role inviteizi_server`;
   });
 
+  it("ставка в процентах: начисление 15% от оплаченной суммы; подтверждение перед оплатой сохраняется", async () => {
+    await repo.touchUser({ id: 777101 });
+    const p = await repo.createPartner({ code: "pct15abc", name: "Салон 15", telegramId: null, username: null, rate: 0, ratePercent: 15, status: "active" });
+    expect(p.ratePercent).toBe(15);
+    const o = await repo.createOrder({ userId: 777101, occasion: "nikoh", format: "animated", templateId: "muhr", data: { occasion: "nikoh", groom: "А", bride: "Б", hosts: "О", events: [] }, music: { kind: "none" }, amount: 8000, slugBase: "pct-test", status: "preview" });
+    const confirmed = await repo.transition(o.id, ["preview"], "awaiting_payment", { payConfirmedAt: new Date("2026-11-06T05:00:00Z") });
+    expect(confirmed?.payConfirmedAt?.toISOString()).toBe("2026-11-06T05:00:00.000Z");
+    await repo.transition(o.id, ["awaiting_payment"], "active", { paidAt: new Date() });
+    const credit = await repo.creditPartnerOrder(o.id, 777101, "pct15abc");
+    expect(credit?.amount).toBe(1200);
+    await repo.proposePartnerTerms(p.id, 0, "monthly", 20);
+    expect((await repo.settlePartnerProposal(p.id, true))?.ratePercent).toBe(20);
+  });
+
   it("повторное применение новой миграции безопасно", async () => {
     await sql`reset role`;
     await sql.unsafe(await readFile("supabase/migrations/20261108120000_notices.sql", "utf8"));
     await sql.unsafe(await readFile("supabase/migrations/20261109120000_invite_langs.sql", "utf8"));
+    for (const f of ["20261110120000_care.sql", "20261111120000_pay_confirm.sql", "20261112120000_partner_percent.sql"]) await sql.unsafe(await readFile(`supabase/migrations/${f}`, "utf8"));
     await sql`set role inviteizi_server`;
     expect(await repo.queueNotice({ key: "after-rerun", chatId: 2, text: "ok", dueAt: new Date() })).toBe(true);
   });

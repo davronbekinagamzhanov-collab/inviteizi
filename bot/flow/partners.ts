@@ -25,6 +25,7 @@ import { isQuiet } from "@/lib/quiet-hours";
 import { posterPdf, renderPosterPng } from "@/lib/poster";
 import { posterKk } from "@/texts/invite-kk";
 import { activeDesigns, PRICES } from "@/templates/registry";
+import { earningFor } from "@/lib/owner-panel";
 import { staff as S } from "@/texts/bot-ru";
 import type { InlineButton } from "../tg";
 import { recordBotError, toEntry } from "../errors";
@@ -36,7 +37,6 @@ import type { Ctx, Deps, Result, Step } from "./types";
 const PAGE = 8;
 export const DEFAULT_RATE = 1000;
 const MAX_RATE = 1_000_000;
-const RATE_PRESETS = [0, 500, 1000, 2000];
 export const SLEEP_AFTER_MS = 14 * 24 * 3_600_000;
 const CODE_ALPHABET = "abcdefghjkmnpqrstuvwxyz23456789";
 const T = S.pt;
@@ -67,14 +67,40 @@ export function normalizeKaspi(raw: string): string | null {
 /** +77011234567 → +7 701 123 45 67 */
 export const fmtPhone = (p: string) => p.replace(/^\+7(\d{3})(\d{3})(\d{2})(\d{2})$/, "+7 $1 $2 $3 $4");
 
-const parseRate = (raw: string) => {
-  const n = Number(raw.replace(/[\s ₸]/g, ""));
-  return raw.trim() && Number.isInteger(n) && n >= 0 && n <= MAX_RATE ? n : null;
-};
+/** Ставка: процент от оплаты (pct) или фиксированная сумма (rate ₸, pct = null) */
+export type RateSpec = { rate: number; pct: number | null };
+export const DEFAULT_PERCENT = 15;
+export const PERCENT_PRESETS = [10, 15, 20];
+
+/** «15%», «15» (до 100) — процент; «1000», «1 000 ₸» — сумма; «0» — только счёт */
+export function parseRate(raw: string): RateSpec | null {
+  const t = raw.trim();
+  if (!t) return null;
+  const pctMark = /%\s*$/.test(t);
+  const n = Number(t.replace(/[\s ₸%]/g, ""));
+  if (!Number.isInteger(n) || n < 0) return null;
+  if (n === 0 && !pctMark) return { rate: 0, pct: null };
+  if (pctMark || n <= 100) return n <= 100 ? { rate: 0, pct: n } : null;
+  return n <= MAX_RATE ? { rate: n, pct: null } : null;
+}
+
+/** «8 000 → 1 200 ₸ · 6 000 → 900 ₸ · 5 000 → 750 ₸» — сколько партнёр получит с каждой цены */
+export function rateExamples(pct: number) {
+  const prices = [...new Set(Object.values(PRICES))].sort((a, b) => b - a);
+  return prices.map((p) => `${price(p).replace(/ ₸$/, "")} → ${price(earningFor({ rate: 0, ratePercent: pct }, p))}`).join(" · ");
+}
 
 const isSchedule = (v: string): v is PayoutSchedule => (SCHEDULES as string[]).includes(v);
 
-const termsOf = (rate: number, schedule: PayoutSchedule) => (rate === 0 ? T.noPayout : T.terms(price(rate), T.scheduleLower[schedule]));
+const termsOf = (rate: number, schedule: PayoutSchedule, pct: number | null = null) =>
+  pct != null && pct > 0
+    ? T.termsPct(pct, rateExamples(pct), T.scheduleLower[schedule])
+    : pct === 0 || rate === 0
+      ? T.noPayout
+      : T.terms(price(rate), T.scheduleLower[schedule]);
+/** «15%» или «1 000 ₸» */
+const rateLabel = (rate: number, pct: number | null) => (pct != null ? T.pct(pct) : price(rate));
+const termsOfPartner = (p: Pick<Partner, "rate" | "ratePercent" | "schedule">) => termsOf(p.rate, p.schedule, p.ratePercent ?? null);
 
 const tgOf = (p: Pick<Partner, "username" | "telegramId">) => (p.username ? `@${p.username}` : p.telegramId ? `id ${p.telegramId}` : T.notJoined);
 
@@ -188,7 +214,7 @@ export function partnerDetail(c: Ctx, s: PanelSnapshot, rows: PartnerRow[], p: P
   if (r.due > 0) buttons.push([{ text: t.pay(price(r.due)), data: `dp:pay:${r.partner.id}:${r.due}` }]);
   buttons.push([{ text: t.qr, data: `dp:qr:${r.partner.id}` }, { text: t.rate, data: `dp:rate:${r.partner.id}` }], back);
   return {
-    text: `${r.partner.name}\n${tgOf(r.partner)} · ${t.rateValue}: ${price(r.partner.rate)}\n\n${statLine(c, r)}${r.undelivered ? `\n${t.undelivered(r.undelivered)}` : ""}`,
+    text: `${r.partner.name}\n${tgOf(r.partner)} · ${t.rateValue}: ${rateLabel(r.partner.rate, r.partner.ratePercent ?? null)}\n\n${statLine(c, r)}${r.undelivered ? `\n${t.undelivered(r.undelivered)}` : ""}`,
     rows: buttons,
   };
 }
@@ -278,14 +304,14 @@ async function managerLabel(deps: Deps, id: number | null) {
 
 export async function ptCard(c: Ctx, role: "owner" | "manager", p: Partner): Promise<Screen> {
   const r = (await visibleRows(c, role)).find((x) => x.partner.id === p.id);
-  const proposal = hasProposal(p) && p.proposedSchedule ? termsOf(p.proposedRate!, p.proposedSchedule) : "";
+  const proposal = hasProposal(p) && p.proposedSchedule ? termsOf(p.proposedRate!, p.proposedSchedule, p.proposedRatePercent ?? null) : "";
   const card = T.card({
     name: p.name,
     status: T.status[p.status],
     phone: p.phone ? fmtPhone(p.phone) : T.none,
     tg: tgOf(p),
     kaspi: p.kaspi ? fmtPhone(p.kaspi) : T.none,
-    terms: termsOf(p.rate, p.schedule),
+    terms: termsOfPartner(p),
     manager: role === "owner" ? await managerLabel(c.deps, p.managedBy) : "",
     proposal,
   });
@@ -393,12 +419,12 @@ async function ownerCard(deps: Deps, p: Partner): Promise<Screen> {
   const manager = (await managerLabel(deps, p.managedBy)) || "—";
   if (p.status === "active" && p.proposedRate !== null && p.proposedSchedule) {
     return {
-      text: T.proposal(manager, p.name, `${price(p.rate)} → ${price(p.proposedRate)}`, `${T.scheduleLower[p.schedule]} → ${T.scheduleLower[p.proposedSchedule]}`),
+      text: T.proposal(manager, p.name, `${rateLabel(p.rate, p.ratePercent ?? null)} → ${rateLabel(p.proposedRate, p.proposedRatePercent ?? null)}`, `${T.scheduleLower[p.schedule]} → ${T.scheduleLower[p.proposedSchedule]}`),
       rows: [[{ text: T.btn.approve, data: `pa:pok:${p.id}` }, { text: T.btn.reject, data: `pa:pno:${p.id}` }]],
     };
   }
   return {
-    text: T.newFrom(manager, p.name, p.phone ? fmtPhone(p.phone) : T.none, termsOf(p.rate, p.schedule)),
+    text: T.newFrom(manager, p.name, p.phone ? fmtPhone(p.phone) : T.none, termsOfPartner(p)),
     rows: [[{ text: T.btn.approve, data: `pa:ok:${p.id}` }], [{ text: T.btn.editRate, data: `pa:rate:${p.id}` }], [{ text: T.btn.reject, data: `pa:no:${p.id}` }]],
   };
 }
@@ -432,7 +458,7 @@ async function decide(c: Ctx, p: Partner, status: "active" | "rejected") {
   }
   await toast(c, T.decided[status]);
   const fresh = (await c.deps.repo.getPartner(p.id)) ?? p;
-  if (p.managedBy !== null) await tellBringer(c.deps, fresh, status === "active" ? T.toManagerApproved(p.name, termsOf(fresh.rate, fresh.schedule)) : T.toManagerRejected(p.name));
+  if (p.managedBy !== null) await tellBringer(c.deps, fresh, status === "active" ? T.toManagerApproved(p.name, termsOfPartner(fresh)) : T.toManagerRejected(p.name));
   return show(c, await ptCard(c, "owner", fresh));
 }
 
@@ -443,7 +469,7 @@ async function settleProposal(c: Ctx, p: Partner, accept: boolean) {
     return show(c, await ptCard(c, "owner", (await c.deps.repo.getPartner(p.id)) ?? p));
   }
   await toast(c, accept ? T.decided.active : T.decided.rejected);
-  if (p.managedBy !== null) await tellBringer(c.deps, after, accept ? T.toManagerProposalOk(p.name, termsOf(after.rate, after.schedule)) : T.toManagerProposalNo(p.name));
+  if (p.managedBy !== null) await tellBringer(c.deps, after, accept ? T.toManagerProposalOk(p.name, termsOfPartner(after)) : T.toManagerProposalNo(p.name));
   return show(c, await ptCard(c, "owner", after));
 }
 
@@ -463,7 +489,15 @@ const staffText = (step: (c: Ctx, text: string) => Promise<Result>) => async (c:
   return step(c, c.u.text.trim());
 };
 
-const rateButtons = (c: Ctx) => [RATE_PRESETS.map((r) => ib(c, price(r), `r:${r}`))];
+/** [10%] [15%] [20%] / [✏️ Свой %] [0 ₸ — только счёт] [1 000 ₸ фикс.] */
+const rateButtons = (c: Ctx) => [
+  PERCENT_PRESETS.map((p) => ib(c, `${p === DEFAULT_PERCENT ? "⭐ " : ""}${T.pct(p)}`, `p:${p}`)),
+  [ib(c, T.ownPct, "own"), ib(c, price(0), "r:0"), ib(c, T.fixedBtn(price(1000)), "r:1000")],
+];
+/** Кнопка ставки → RateSpec; «own» — подсказка написать процент */
+const rateFromButton = (v: string): RateSpec | "own" | null =>
+  v === "own" ? "own" : v.startsWith("p:") ? parseRate(`${v.slice(2)}%`) : v.startsWith("r:") ? (v === "r:0" ? { rate: 0, pct: null } : parseRate(v.slice(2)) && { rate: Number(v.slice(2)), pct: null }) : null;
+const askRateText = () => T.askRate(rateExamples(DEFAULT_PERCENT));
 const scheduleButtons = (c: Ctx) => SCHEDULES.map((s) => [ib(c, T.schedule[s], `s:${s}`)]);
 
 export const partnerName: Step = {
@@ -491,19 +525,20 @@ export const partnerPhone: Step = {
 
 export const partnerRate: Step = {
   async ask(c) {
-    await send(c, T.askRate, inline([...rateButtons(c), staffBack(c)]));
+    await send(c, askRateText(), inline([...rateButtons(c), staffBack(c)]));
   },
   async onButton(c, v) {
     if (!(await canAddPartners(c))) return { done: true };
-    const rate = v.startsWith("r:") ? parseRate(v.slice(2)) : null;
-    if (rate === null) return null;
-    c.s.partnerDraft = { ...c.s.partnerDraft, rate };
+    const r = rateFromButton(v);
+    if (r === "own") return { hint: T.ownPctAsk };
+    if (r === null) return null;
+    c.s.partnerDraft = { ...c.s.partnerDraft, rate: r.rate, ratePercent: r.pct };
     return { to: "partnerSchedule" };
   },
   onMessage: staffText(async (c, text) => {
-    const rate = parseRate(text);
-    if (rate === null) return { hint: T.badRate };
-    c.s.partnerDraft = { ...c.s.partnerDraft, rate };
+    const r = parseRate(text);
+    if (r === null) return { hint: T.badRate };
+    c.s.partnerDraft = { ...c.s.partnerDraft, rate: r.rate, ratePercent: r.pct };
     return { to: "partnerSchedule" };
   }),
 };
@@ -524,7 +559,10 @@ export const partnerSchedule: Step = {
 export const partnerConfirm: Step = {
   async ask(c) {
     const d = c.s.partnerDraft ?? {};
-    await send(c, T.confirm(d.name ?? "", d.phone ? fmtPhone(d.phone) : T.none, termsOf(d.rate ?? DEFAULT_RATE, d.schedule ?? "weekly")), inline([[ib(c, T.create, "go")], staffBack(c)]));
+    const role = await roleOf(c);
+    const bringer = role === "manager" ? (c.user.username ? `@${c.user.username}` : (c.user.firstName ?? `id ${c.user.id}`)) : T.bringerOwner;
+    const terms = termsOf(d.rate ?? DEFAULT_RATE, d.schedule ?? "weekly", d.ratePercent ?? null);
+    await send(c, T.contract({ name: d.name ?? "", phone: d.phone ? fmtPhone(d.phone) : T.none, terms, bringer }), inline([[ib(c, T.create, "go")], staffBack(c)]));
   },
   async onButton(c, v) {
     const role = await roleOf(c);
@@ -538,6 +576,7 @@ export const partnerConfirm: Step = {
       telegramId: null,
       username: null,
       rate: d.rate,
+      ratePercent: d.ratePercent ?? null,
       phone: d.phone,
       schedule: d.schedule,
       // Партнёр менеджера ждёт ✅ владельца; партнёр владельца подтверждён сразу
@@ -556,46 +595,51 @@ export const partnerConfirm: Step = {
 /** Владелец меняет ставку (с карточки партнёра или из карточки решения). Действует для новых заказов */
 export const partnerRateEdit: Step = {
   async ask(c) {
-    await send(c, T.askRate, inline([...rateButtons(c), staffBack(c)]));
+    await send(c, askRateText(), inline([...rateButtons(c), staffBack(c)]));
   },
   async onButton(c, v) {
-    return v.startsWith("r:") ? saveRate(c, v.slice(2)) : null;
+    const r = rateFromButton(v);
+    if (r === "own") return { hint: T.ownPctAsk };
+    return r ? saveRate(c, r) : null;
   },
   onMessage: staffText(saveRate),
 };
 
-async function saveRate(c: Ctx, raw: string): Promise<Result> {
+async function saveRate(c: Ctx, raw: string | RateSpec): Promise<Result> {
   if (!(await isOwner(c))) return { done: true };
-  const rate = parseRate(raw);
-  if (rate === null) return { hint: T.badRate };
+  const r = typeof raw === "string" ? parseRate(raw) : raw;
+  if (r === null) return { hint: T.badRate };
   const p = c.s.partnerId ? await c.deps.repo.getPartner(c.s.partnerId) : null;
   if (!p || p.status === "rejected") return { done: true };
-  await c.deps.repo.setPartnerRate(p.id, rate);
-  const after = { ...p, rate };
+  // Только для новых заказов: прошлые начисления записаны суммой в момент оплаты
+  await c.deps.repo.setPartnerRate(p.id, r.rate, r.pct);
+  const after = { ...p, rate: r.rate, ratePercent: r.pct };
   // Партнёр ещё ждёт решения — та же карточка с ✅ / ❌, уже с новой ставкой
   if (p.status === "pending") {
     const card = await ownerCard(c.deps, after);
     await send(c, card.text, inline(card.rows));
-  } else await send(c, T.rateSaved(termsOf(rate, p.schedule)), inline([[{ text: S.back, data: `pa:v:${p.id}` }]]));
+  } else await send(c, T.rateSaved(termsOfPartner(after)), inline([[{ text: S.back, data: `pa:v:${p.id}` }]]));
   return { done: true };
 }
 
 /** Менеджер предлагает ставку и график своему партнёру: применятся после ✅ владельца */
 export const partnerPropose: Step = {
   async ask(c) {
-    await send(c, T.proposeAsk, inline([...rateButtons(c), staffBack(c)]));
+    await send(c, T.proposeAsk(rateExamples(DEFAULT_PERCENT)), inline([...rateButtons(c), staffBack(c)]));
   },
   async onButton(c, v) {
-    return v.startsWith("r:") ? proposeRate(c, v.slice(2)) : null;
+    const r = rateFromButton(v);
+    if (r === "own") return { hint: T.ownPctAsk };
+    return r ? proposeRate(c, r) : null;
   },
   onMessage: staffText(proposeRate),
 };
 
-async function proposeRate(c: Ctx, raw: string): Promise<Result> {
+async function proposeRate(c: Ctx, raw: string | RateSpec): Promise<Result> {
   if ((await roleOf(c)) !== "manager") return { done: true };
-  const rate = parseRate(raw);
-  if (rate === null) return { hint: T.badRate };
-  c.s.partnerDraft = { rate };
+  const r = typeof raw === "string" ? parseRate(raw) : raw;
+  if (r === null) return { hint: T.badRate };
+  c.s.partnerDraft = { rate: r.rate, ratePercent: r.pct };
   return { to: "partnerProposeSchedule" };
 }
 
@@ -607,10 +651,11 @@ export const partnerProposeSchedule: Step = {
     if ((await roleOf(c)) !== "manager") return { done: true };
     const s = v.slice(2);
     const rate = c.s.partnerDraft?.rate;
+    const pct = c.s.partnerDraft?.ratePercent ?? null;
     if (!v.startsWith("s:") || !isSchedule(s) || rate === undefined) return null;
     const p = c.s.partnerId ? await c.deps.repo.getPartner(c.s.partnerId) : null;
     if (!p || p.managedBy !== c.user.id || p.status === "rejected") return { done: true };
-    await c.deps.repo.proposePartnerTerms(p.id, rate, s);
+    await c.deps.repo.proposePartnerTerms(p.id, rate, s, pct);
     // Партнёр ещё не подтверждён: предложение и есть его условия — владелец решит одной карточкой
     if (p.status === "pending") await c.deps.repo.settlePartnerProposal(p.id, true);
     await send(c, T.proposeSent, inline([[{ text: S.back, data: `pa:v:${p.id}` }]]));
@@ -789,7 +834,8 @@ export async function partnerRowOf(deps: Deps, p: Partner) {
 /** «💰 Тўловларим»: начислено, выплачено, к выплате, день выплаты */
 export function payoutsText(c: Ctx, p: Partner, r: PartnerRow) {
   const t = c.tx.role;
-  if (p.rate === 0 && r.earned === 0) return `${t.payouts}\n\n${t.countOnly}`;
+  const countOnly = p.ratePercent != null ? p.ratePercent === 0 : p.rate === 0;
+  if (countOnly && r.earned === 0) return `${t.payouts}\n\n${t.countOnly}`;
   return [
     t.payoutsText({ earned: price(r.earned), paidOut: price(r.paidOut), due: price(r.due) }),
     ...(r.onHold > 0 ? [t.onHold(price(r.onHold))] : []),

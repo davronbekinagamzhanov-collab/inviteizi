@@ -680,7 +680,17 @@ export const staff = {
     askName: "➕ Новый партнёр\n\nКак называется? Например: Салон Малика",
     askPhone: "📞 Телефон партнёра?\nНапример: +7 701 123 45 67",
     badPhone: "Не похоже на номер 🙂 Пример: +7 701 123 45 67",
-    askRate: "💰 Сколько платим за один оплаченный заказ?\nНажмите кнопку или напишите сумму.\n\n0 ₸ — только счёт, без выплат (уличный QR, магазин).",
+    askRate: (examples: string) =>
+      `💰 Ставка партнёра — процент от каждой оплаты.\nОбычно 15%: ${examples}\n\nНажмите кнопку или напишите число: до 100 — это процент (например 12), больше — фиксированная сумма в тенге (например 1000).\n0 ₸ — только счёт, без выплат (уличный QR, магазин).`,
+    pct: (p: number) => `${p}%`,
+    ownPct: "✏️ Свой %",
+    ownPctAsk: "Напишите процент цифрой, например 12",
+    fixedBtn: (amount: string) => `${amount} фикс.`,
+    examples: (list: string) => list,
+    termsPct: (pct: number, examples: string, schedule: string) => `${pct}% от оплаты (${examples}) · ${schedule}`,
+    contract: (c: { name: string; phone: string; terms: string; bringer: string }) =>
+      `📄 Договор с партнёром\n\n🤝 ${c.name}\n📞 ${c.phone}\n💰 Ставка: ${c.terms}\n👤 Привёл: ${c.bringer}\n\nПроверьте и нажмите «✅ Создать».`,
+    bringerOwner: "владелец",
     badRate: "Напишите сумму цифрами. Например: 1000",
     askSchedule: "📅 Как часто платить?",
     schedule: { daily: "Каждый день", weekly: "Раз в неделю, пн", monthly: "Раз в месяц, 1-го" } as Record<string, string>,
@@ -728,7 +738,7 @@ export const staff = {
     paidDone: (name: string, amount: string) => `✅ ${name}: ${amount} — отмечено как выплачено.`,
     payStale: "Сумма изменилась или уже отмечена. Откройте партнёра заново.",
     rateSaved: (terms: string) => `✅ Сохранено: ${terms}. Действует для новых заказов.`,
-    proposeAsk: "✏️ Новая ставка за оплаченный заказ?\nНажмите кнопку или напишите сумму. Изменится после ✅ владельца.",
+    proposeAsk: (examples: string) => `✏️ Новая ставка? Процент от оплаты (15%: ${examples}) или сумма в тенге.\nИзменится после ✅ владельца, для новых заказов.`,
     proposeSent: "✅ Отправлено владельцу. Изменится после его ✅.",
     // Владельцу
     newFrom: (manager: string, name: string, phone: string, terms: string) => `🤝 Новый партнёр от ${manager}\n${name} · ${phone}\n${terms}`,

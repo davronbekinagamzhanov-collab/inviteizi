@@ -1,5 +1,5 @@
 import { RSVP_IP_HOUR_LIMIT, RSVP_ORDER_LIMIT, type RsvpInput, type RsvpRecord } from "@/lib/rsvp";
-import type { ManagerPayout, PanelOrder, PanelSnapshot, Partner, PartnerEarning, PartnerPayout, PanelUser, PayoutSchedule } from "@/lib/owner-panel";
+import { earningFor, type ManagerPayout, type PanelOrder, type PanelSnapshot, type Partner, type PartnerEarning, type PartnerPayout, type PanelUser, type PayoutSchedule } from "@/lib/owner-panel";
 import type { BotErrorEntry } from "./errors";
 import type { ClaimStatus, InviteKind, InviteUse, Manager } from "@/lib/roles";
 /**
@@ -347,7 +347,7 @@ const isUniqueSlugViolation = (e: unknown) =>
 
 const PARTNER_COLUMNS = `id, code, name, telegram_id as "telegramId", username, rate, created_at as "createdAt", managed_by as "managedBy",
   phone, kaspi, schedule, status, proposed_rate as "proposedRate", proposed_schedule as "proposedSchedule",
-  owner_notified_at as "ownerNotifiedAt", sleep_notified_at as "sleepNotifiedAt"`;
+  owner_notified_at as "ownerNotifiedAt", sleep_notified_at as "sleepNotifiedAt", rate_percent as "ratePercent", proposed_rate_percent as "proposedRatePercent"`;
 const PARTNER_PATCH: Record<keyof PartnerPatch, string> = { phone: "phone", kaspi: "kaspi", schedule: "schedule", ownerNotifiedAt: "owner_notified_at", sleepNotifiedAt: "sleep_notified_at" };
 const MANAGER_COLUMNS = `telegram_id as "telegramId", code, username, first_name as "firstName", invited_by as "invitedBy", active, created_at as "createdAt", removed_at as "removedAt"`;
 /** Миграция партнёров ещё не применена */
@@ -597,8 +597,8 @@ export class PgRepo implements Repo {
   }
 
   async createPartner(p: NewPartner) {
-    const [r] = await this.sql<Partner[]>`insert into public.partners(code,name,telegram_id,username,rate,managed_by,phone,schedule,status,owner_notified_at)
-      values(${p.code},${p.name},${p.telegramId},${p.username},${p.rate},${p.managedBy ?? null},${p.phone ?? null},${p.schedule ?? "weekly"},${p.status ?? "active"},${p.ownerNotifiedAt ?? null})
+    const [r] = await this.sql<Partner[]>`insert into public.partners(code,name,telegram_id,username,rate,rate_percent,managed_by,phone,schedule,status,owner_notified_at)
+      values(${p.code},${p.name},${p.telegramId},${p.username},${p.rate},${p.ratePercent ?? null},${p.managedBy ?? null},${p.phone ?? null},${p.schedule ?? "weekly"},${p.status ?? "active"},${p.ownerNotifiedAt ?? null})
       returning ${this.sql.unsafe(PARTNER_COLUMNS)}`;
     return r;
   }
@@ -609,8 +609,8 @@ export class PgRepo implements Repo {
     return r ?? null;
   }
 
-  async setPartnerRate(id: number, rate: number) {
-    await this.sql`update public.partners set rate = ${rate} where id = ${id}`;
+  async setPartnerRate(id: number, rate: number, ratePercent: number | null = null) {
+    await this.sql`update public.partners set rate = ${rate}, rate_percent = ${ratePercent} where id = ${id}`;
   }
 
   async updatePartner(id: number, patch: PartnerPatch) {
@@ -634,16 +634,16 @@ export class PgRepo implements Repo {
     return rows.length > 0;
   }
 
-  async proposePartnerTerms(id: number, rate: number, schedule: PayoutSchedule) {
-    await this.sql`update public.partners set proposed_rate = ${rate}, proposed_schedule = ${schedule}, owner_notified_at = null where id = ${id}`;
+  async proposePartnerTerms(id: number, rate: number, schedule: PayoutSchedule, ratePercent: number | null = null) {
+    await this.sql`update public.partners set proposed_rate = ${rate}, proposed_rate_percent = ${ratePercent}, proposed_schedule = ${schedule}, owner_notified_at = null where id = ${id}`;
   }
 
   async settlePartnerProposal(id: number, accept: boolean) {
     // Одно обновление: двойное нажатие не применит предложение дважды
     const [r] = accept
-      ? await this.sql<Partner[]>`update public.partners set rate = proposed_rate, schedule = proposed_schedule, proposed_rate = null, proposed_schedule = null
+      ? await this.sql<Partner[]>`update public.partners set rate = proposed_rate, rate_percent = proposed_rate_percent, schedule = proposed_schedule, proposed_rate = null, proposed_rate_percent = null, proposed_schedule = null
           where id = ${id} and proposed_rate is not null returning ${this.sql.unsafe(PARTNER_COLUMNS)}`
-      : await this.sql<Partner[]>`update public.partners set proposed_rate = null, proposed_schedule = null
+      : await this.sql<Partner[]>`update public.partners set proposed_rate = null, proposed_rate_percent = null, proposed_schedule = null
           where id = ${id} and proposed_rate is not null returning ${this.sql.unsafe(PARTNER_COLUMNS)}`;
     return r ?? null;
   }
@@ -673,8 +673,11 @@ export class PgRepo implements Repo {
       and p.telegram_id is distinct from ${clientId}
       and not exists (select 1 from public.users u where u.id = ${clientId} and p.username is not null and lower(u.username) = lower(p.username))`;
     if (!partner) return null;
+    // Процент — от фактически оплаченной суммы заказа (округление до целых тенге)
+    const [order] = await this.sql<{ amount: number }[]>`select amount from public.orders where id = ${orderId}`;
+    const amount = earningFor(partner, order?.amount ?? 0);
     const [row] = await this.sql<{ amount: number }[]>`insert into public.partner_earnings(order_id,partner_id,amount)
-      values(${orderId},${partner.id},${partner.rate}) on conflict (order_id) do nothing returning amount`;
+      values(${orderId},${partner.id},${amount}) on conflict (order_id) do nothing returning amount`;
     return row ? { partner, amount: row.amount } : null;
   }
 
