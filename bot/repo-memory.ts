@@ -1,6 +1,7 @@
 import { RSVP_IP_HOUR_LIMIT, RSVP_ORDER_LIMIT, type RsvpInput, type RsvpRecord } from "@/lib/rsvp";
 import type { PanelOrder, PanelSnapshot, Partner, PartnerEarning, PartnerPayout } from "@/lib/owner-panel";
 import type { BotErrorEntry } from "./errors";
+import type { ClaimStatus, InviteKind, InviteUse, Manager } from "@/lib/roles";
 /**
  * Repo в памяти — для тестов бота. Поведение то же, что у bot/repo-pg.ts (см. bot/repo.contract.ts).
  * Записи отдаются копиями (как из базы): изменить их снаружи нельзя.
@@ -45,7 +46,8 @@ export class MemoryRepo implements Repo {
   partnersReady = true;
   rsvp: (RsvpInput & { createdAt: Date; updatedAt: Date })[] = [];
   async staffIds() {
-    return [...new Set([...this.adminIds, ...(this.ownerId ? [this.ownerId] : [])])];
+    // Менеджеры (и снятые): их собственные заказы и клики — не продажи
+    return [...new Set([...this.adminIds, ...(this.ownerId ? [this.ownerId] : []), ...this.managers.map((m) => m.telegramId)])];
   }
   async saveRsvp(input: RsvpInput) {
     const now = this.now();
@@ -86,8 +88,8 @@ export class MemoryRepo implements Repo {
     const users = [...this.users.values()].map((u) => ({ id: u.id, createdAt: u.createdAt, source: u.source }));
     return { orders, users, partners: this.partners.map((p) => ({ ...p })), earnings: this.earnings.map((e) => ({ ...e })), payouts: this.payouts.map((p) => ({ ...p })), partnersReady: this.partnersReady };
   }
-  async createPartner(p: { code: string; name: string; telegramId: number | null; username: string | null; rate: number }) {
-    const partner: Partner = { ...p, id: this.partners.length + 1, createdAt: this.now() };
+  async createPartner(p: { code: string; name: string; telegramId: number | null; username: string | null; rate: number; managedBy?: number | null }) {
+    const partner: Partner = { ...p, managedBy: p.managedBy ?? null, id: this.partners.length + 1, createdAt: this.now() };
     this.partners.push(partner);
     return { ...partner };
   }
@@ -138,6 +140,63 @@ export class MemoryRepo implements Repo {
     return [...this.orders.values()]
       .filter((o) => (o.status === "active" || o.status === "archived") && !credited.has(o.id) && codes.has(this.users.get(o.userId)?.source ?? ""))
       .map((o) => ({ id: o.id, userId: o.userId }));
+  }
+  // ── Роли (v2) ──
+  managers: Manager[] = [];
+  invites: { tokenHash: string; kind: InviteKind; createdBy: number; partnerId: number | null; expiresAt: Date; usedBy: number | null }[] = [];
+  clientOrders: { orderId: string; createdBy: number; tokenHash: string; refSource: string | null; claimedBy: number | null }[] = [];
+  async listManagers() {
+    return clone(this.managers);
+  }
+  async getManager(id: number) {
+    const m = this.managers.find((x) => x.telegramId === id && x.active);
+    return m ? clone(m) : null;
+  }
+  async addManager(m: { telegramId: number; code: string; username: string | null; firstName: string | null; invitedBy: number }) {
+    const old = this.managers.find((x) => x.telegramId === m.telegramId);
+    if (old) Object.assign(old, { active: true, username: m.username, firstName: m.firstName, invitedBy: m.invitedBy });
+    else this.managers.push({ ...m, active: true, createdAt: this.now() });
+    return clone(this.managers.find((x) => x.telegramId === m.telegramId)!);
+  }
+  async removeManager(id: number) {
+    const m = this.managers.find((x) => x.telegramId === id && x.active);
+    if (!m) return false;
+    m.active = false;
+    return true;
+  }
+  async createInvite(i: { tokenHash: string; kind: InviteKind; createdBy: number; expiresAt: Date; partnerId?: number | null }) {
+    this.invites.push({ ...i, partnerId: i.partnerId ?? null, usedBy: null });
+  }
+  async useInvite(tokenHash: string, kind: InviteKind, userId: number, now: Date): Promise<InviteUse> {
+    const i = this.invites.find((x) => x.tokenHash === tokenHash && x.kind === kind);
+    if (!i) return { status: "none" };
+    if (i.usedBy !== null) return { status: "used" };
+    if (+i.expiresAt <= +now) return { status: "expired" };
+    i.usedBy = userId;
+    return { status: "ok", createdBy: i.createdBy, partnerId: i.partnerId };
+  }
+  async issueClientOrder(o: { orderId: string; createdBy: number; tokenHash: string; refSource: string | null }) {
+    const old = this.clientOrders.find((x) => x.orderId === o.orderId);
+    if (old?.claimedBy) return;
+    if (old) Object.assign(old, o);
+    else this.clientOrders.push({ ...o, claimedBy: null });
+  }
+  async claimClientOrder(tokenHash: string, clientId: number): Promise<{ status: ClaimStatus; order?: OrderRecord }> {
+    const co = this.clientOrders.find((x) => x.tokenHash === tokenHash);
+    const order = co ? this.orders.get(co.orderId) : undefined;
+    if (!co || !order) return { status: "none" };
+    if (co.claimedBy === clientId) return { status: "mine", order: clone(order) };
+    if (co.claimedBy !== null) return { status: "used" };
+    if (co.createdBy === clientId) return { status: "creator", order: clone(order) };
+    if (!["draft", "preview", "awaiting_payment", "rejected"].includes(order.status) || order.userId !== co.createdBy) return { status: "closed" };
+    co.claimedBy = clientId;
+    order.userId = clientId;
+    order.updatedAt = this.now();
+    return { status: "claimed", order: clone(order) };
+  }
+  async clientOrderRef(orderId: string) {
+    const co = this.clientOrders.find((x) => x.orderId === orderId && x.claimedBy !== null);
+    return co ? { ref: co.refSource } : null;
   }
   botErrors: BotErrorEntry[] = [];
   async logBotError(entry: BotErrorEntry) {

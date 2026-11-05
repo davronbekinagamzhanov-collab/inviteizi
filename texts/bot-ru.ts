@@ -403,6 +403,23 @@ export const ru = {
     sourceLine: (source: string, users: number, paid: number) => `${source}: ${users} чел., ${paid} оплат`,
   },
 
+  role: {
+    partnerTitle: "🤝 Партнёр InviteIZI",
+    menu: "🤝 Меню партнёра",
+    partnerHome: (name: string) => `🤝 Партнёр InviteIZI\n${name}`,
+    stats: "📊 Статистика",
+    qr: "🔳 QR и постер",
+    payouts: "💰 Мои выплаты",
+    self: "✨ Приглашение для себя",
+    payoutsText: (s: { earned: string; paidOut: string; due: string }) => `💰 Мои выплаты\n\nВсего заработано: ${s.earned}\nВыплачено: ${s.paidOut}\nК выплате: ${s.due}`,
+    claimed: (url: string, amount: string) => `🎉 Ваше приглашение готово!\n${url}\n\nЦена: ${amount}\nЧтобы оплатить, нажмите кнопку ниже 👇`,
+    claimUsed: "Эта ссылка уже использована. Если есть вопрос — 📞 Связаться.",
+    claimClosed: "Этот заказ уже оплачен или закрыт.",
+    claimNone: "Ссылка неверная или устарела.",
+    clientShare: (s: { url: string; amount: string; phone: string; name: string; bot: string }) =>
+      `Здравствуйте! 🌸\nВаше приглашение готово (НАМУНА):\n${s.url}\n\nЦена: ${s.amount}\nKaspi: ${s.phone} (${s.name})\n\nПосле оплаты отправьте чек в этого бота:\n${s.bot}`,
+  },
+
   my: {
     empty: "Пока приглашений нет. Нажмите «✨ Создать приглашение» 👇",
     item: (n: number, title: string, status: string, url: string) => `#${n} · ${title}\n${status}\n${url}`,
@@ -411,3 +428,70 @@ export const ru = {
   },
 } satisfies BotTexts;
 
+
+/**
+ * Панели владельца и менеджера — ТОЛЬКО по-русски (решение v2), поэтому вне BotTexts.
+ * Каждый экран — одно живое сообщение с «◀️ Назад».
+ */
+export const staff = {
+  back: "◀️ Назад",
+  ownerTitle: "👋 Панель InviteIZI",
+  managerTitle: "👋 Панель менеджера InviteIZI",
+  today: (paid: number, sum: string) => (paid ? `Сегодня: оплат ${paid} · ${sum}` : "Сегодня оплат пока нет"),
+  networkLine: (partners: number) => `Партнёров в вашей сети: ${partners}`,
+  btn: {
+    panel: "👋 Панель",
+    stats: "📊 Статистика",
+    receipts: (n: number) => (n > 0 ? `🧾 Чеки (${n})` : "🧾 Чеки"),
+    partners: "🤝 Партнёры",
+    payouts: (n: number) => (n > 0 ? `💰 Выплаты (${n})` : "💰 Выплаты"),
+    client: "🆕 Заказ для клиента",
+    export: "📤 Выгрузка",
+    create: "✨ Создать приглашение",
+    settings: "⚙️ Настройки",
+    myStats: "📊 Моя статистика",
+    myPartners: "🤝 Мои партнёры",
+    newPartner: "➕ Новый партнёр",
+    earnings: "💰 Мой заработок",
+    openApp: "✨ Открыть приложение",
+    inChat: "💬 Собрать в чате",
+    myOrders: "📋 Мои заказы",
+    addManager: "➕ Менеджер",
+    removeManager: (name: string) => `❌ Снять: ${name}`,
+    toClient: "📤 Отправить клиенту",
+    waUz: "📲 WhatsApp · ўзбекча",
+    waRu: "📲 WhatsApp · русский",
+  },
+  receiptsNone: "🧾 Чеков на проверке нет ✅",
+  receiptsTitle: (n: number) => `🧾 Ждут проверки: ${n}`,
+  receiptLine: (n: number, names: string, amount: string, at: string) => `#${n} · ${names} · ${amount} · ${at}`,
+  receiptBtn: (n: number, amount: string) => `🧾 #${n} · ${amount}`,
+  payoutsNone: "💰 К выплате сейчас ничего нет ✅",
+  payoutsTitle: "💰 К выплате",
+  payoutLine: (name: string, amount: string, manager: string) => `${name}${manager ? ` (${manager})` : ""} — ${amount}`,
+  clientHow:
+    "🆕 Заказ для клиента\n\n1. Соберите приглашение за клиента — в приложении или в чате.\n2. В «📋 Мои заказы» нажмите «📤 Отправить клиенту».\n3. Перешлите готовое сообщение в WhatsApp. Клиент оплатит и пришлёт чек в бота сам.",
+  clientNotPayable: "Этот заказ уже оплачен, на проверке или закрыт.",
+  clientOwnLink: "Это ссылка для клиента — перешлите её ему. Сами её открывать не нужно 🙂",
+  exportSoon: "📤 Выгрузка\n\nОплаты, выплаты и долги в Excel — выберите период.",
+  settingsTitle: "⚙️ Настройки",
+  managersNone: "Менеджеров пока нет.",
+  managersTitle: "Менеджеры:",
+  managerLine: (name: string, partners: number) => `• ${name} — партнёров: ${partners}`,
+  managerLink: (link: string) => `➕ Ссылка для нового менеджера\n${link}\n\nОдноразовая, действует 72 часа. Отправьте её человеку лично.`,
+  managerRemoved: "Менеджер снят",
+  managerWelcome: "✅ Вы менеджер InviteIZI.",
+  managerJoined: (name: string) => `✅ ${name} теперь менеджер.`,
+  ownerIsOwner: "Вы владелец — эта ссылка для другого человека.",
+  inviteUsed: "Эта ссылка уже использована. Попросите новую у владельца.",
+  inviteExpired: "Срок ссылки истёк. Попросите новую у владельца.",
+  inviteNone: "Ссылка неверная.",
+  myStats: (s: { partners: number; paidMonth: number; paidAll: number }) =>
+    `📊 Моя статистика\n\nПартнёров: ${s.partners}\nОплат сети за месяц: ${s.paidMonth}\nОплат сети за всё время: ${s.paidAll}`,
+  myPartnersNone: "🤝 Мои партнёры\n\nПока никого. Нажмите «➕ Новый партнёр».",
+  myPartnersTitle: "🤝 Мои партнёры",
+  myPartnerLine: (name: string, paid: number) => `${name} — оплат: ${paid}`,
+  earnings: (s: { paidMonth: number; perOrder: string; bonus: string; goal: number; month: string }) =>
+    `💰 Мой заработок\n\n${s.perOrder} за каждый оплаченный заказ вашей сети + ${s.bonus} при ${s.goal}+ оплатах за месяц.\n\nЭтот месяц: ${s.paidMonth}/${s.goal} · ${s.month}`,
+  denied: "Этот раздел только для владельца.",
+};

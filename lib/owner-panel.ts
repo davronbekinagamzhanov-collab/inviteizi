@@ -25,7 +25,7 @@ export type PanelOrder = {
   updatedAt: Date;
 };
 export type PanelUser = { id: number; createdAt: Date; source: string | null };
-export type Partner = { id: number; code: string; name: string; telegramId: number | null; username: string | null; rate: number; createdAt: Date };
+export type Partner = { id: number; code: string; name: string; telegramId: number | null; username: string | null; rate: number; createdAt: Date; /** Менеджер, который привёл; null — партнёр владельца */ managedBy: number | null };
 export type PartnerEarning = { orderId: string; partnerId: number; amount: number; delivered: boolean; createdAt: Date };
 export type PartnerPayout = { partnerId: number; amount: number; createdAt: Date };
 export type PanelSnapshot = {

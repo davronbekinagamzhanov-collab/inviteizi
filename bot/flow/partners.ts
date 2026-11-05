@@ -10,7 +10,7 @@ import type { OrderRecord } from "@/lib/domain";
 import { parsePartnerSource, partnerRows, partnerSource, withoutStaff, type PanelSnapshot, type Partner, type PartnerRow } from "@/lib/owner-panel";
 import type { InlineButton } from "../tg";
 import { recordBotError, toEntry } from "../errors";
-import { backRow, ib, inline, price, send, txFor } from "./util";
+import { backRow, ib, inline, price, roleOf, send, txFor } from "./util";
 import type { Ctx, Deps, Result, Step } from "./types";
 
 const PAGE = 8;
@@ -35,6 +35,8 @@ const parseRate = (raw: string) => {
 };
 
 const isStaff = async (c: Ctx) => c.chatId === c.user.id && (await c.deps.repo.isAdmin(c.user.id));
+/** Создавать партнёров могут владелец и менеджер (партнёр менеджера — в его сети) */
+const canAddPartners = async (c: Ctx) => ["owner", "manager"].includes(await roleOf(c));
 
 const contactOf = (p: Partner) => (p.username ? `@${p.username}` : p.telegramId ? `id ${p.telegramId}` : "—");
 
@@ -42,7 +44,7 @@ async function linkOf(deps: Deps, p: Partner) {
   return `https://t.me/${await deps.tg.botUsername()}?start=${partnerSource(p.code)}`;
 }
 
-async function sendPack(c: Ctx, p: Partner) {
+export async function sendPack(c: Ctx, p: Partner) {
   const link = await linkOf(c.deps, p);
   const png = await QRCode.toBuffer(link, { width: 600, margin: 2 });
   await c.deps.tg.sendPhoto(c.chatId, new Uint8Array(png), { caption: c.tx.panel.partner.pack(p.name, link, price(p.rate)) });
@@ -97,6 +99,11 @@ export function partnerDetail(c: Ctx, s: PanelSnapshot, rows: PartnerRow[], p: P
 
 /** Кнопки партнёров: права проверяются при каждом нажатии */
 export async function partnerAction(c: Ctx, action: string, idArg: string, amountArg: string): Promise<Result | void> {
+  if (action === "new" && (await canAddPartners(c))) {
+    c.s.partnerDraft = {};
+    return { enter: "partnerName" };
+  }
+  // Ставка, выплаты и чужие QR — только владелец
   if (!(await isStaff(c))) {
     await send(c, c.tx.dashboard.denied);
     return;
@@ -135,7 +142,7 @@ export async function partnerAction(c: Ctx, action: string, idArg: string, amoun
 // ── Добавление партнёра ──
 
 const staffOnly = (step: (c: Ctx, text: string) => Promise<Result>) => async (c: Ctx): Promise<Result> => {
-  if (!(await isStaff(c))) return { done: true };
+  if (!(await canAddPartners(c))) return { done: true };
   if (c.u.kind !== "text" || !c.u.text.trim()) return null;
   return step(c, c.u.text.trim());
 };
@@ -166,7 +173,8 @@ export const partnerContact: Step = {
 async function finishPartner(c: Ctx, rate: number): Promise<Result> {
   const d = c.s.partnerDraft;
   if (!d?.name) return { to: "partnerName" };
-  const partner = await c.deps.repo.createPartner({ code: newPartnerCode(), name: d.name, telegramId: d.telegramId ?? null, username: d.username ?? null, rate });
+  const managedBy = (await roleOf(c)) === "manager" ? c.user.id : null;
+  const partner = await c.deps.repo.createPartner({ code: newPartnerCode(), name: d.name, telegramId: d.telegramId ?? null, username: d.username ?? null, rate, managedBy });
   await sendPack(c, partner);
   return { done: true };
 }
@@ -176,7 +184,7 @@ export const partnerRate: Step = {
     await send(c, c.tx.panel.partner.askRate, inline([[ib(c, price(DEFAULT_RATE), "default")], backRow(c)]));
   },
   async onButton(c, v) {
-    if (!(await isStaff(c))) return { done: true };
+    if (!(await canAddPartners(c))) return { done: true };
     return v === "default" ? finishPartner(c, DEFAULT_RATE) : null;
   },
   onMessage: staffOnly(async (c, text) => {
@@ -190,6 +198,7 @@ export const partnerRateEdit: Step = {
     await send(c, c.tx.panel.partner.askRate, inline([backRow(c)]));
   },
   onMessage: staffOnly(async (c, text) => {
+    if (!(await isStaff(c))) return { done: true };
     const rate = parseRate(text);
     if (rate === null) return { hint: c.tx.panel.partner.badRate };
     if (c.s.partnerId) await c.deps.repo.setPartnerRate(c.s.partnerId, rate);
@@ -213,6 +222,8 @@ async function recipientOf(deps: Deps, p: Partner) {
 export async function creditPartner(deps: Deps, order: Pick<OrderRecord, "id" | "userId">) {
   // Заказ владельца или админа: ни начисления, ни сообщения партнёру
   if ((await deps.repo.staffIds()).includes(order.userId)) return;
+  // Заказ, собранный сотрудником для клиента: продажа менеджера или владельца, не партнёра
+  if (await deps.repo.clientOrderRef(order.id)) return;
   const client = await deps.repo.getUser(order.userId);
   const code = parsePartnerSource(client?.source ?? null);
   if (!code) return;

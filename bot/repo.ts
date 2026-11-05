@@ -19,6 +19,7 @@ import type { Analytics, Period, EventKind } from "@/lib/analytics";
 import type { BotErrorEntry } from "./errors";
 import type { PanelSnapshot, Partner } from "@/lib/owner-panel";
 import type { RsvpInput, RsvpRecord } from "@/lib/rsvp";
+import type { ClaimStatus, InviteKind, InviteUse, Manager } from "@/lib/roles";
 
 export interface Repo {
   /** Журнал ошибок бота: entry уже очищен от личных данных */
@@ -99,7 +100,7 @@ export interface Repo {
   rsvpDigestDue(dayStart: Date): Promise<{ id: string; number: number; userId: number; since: Date | null }[]>;
   /** Ставит метку сводки; false — сегодня её уже забрал другой запуск */
   claimRsvpDigest(orderId: string, dayStart: Date, now: Date): Promise<boolean>;
-  createPartner(p: { code: string; name: string; telegramId: number | null; username: string | null; rate: number }): Promise<Partner>;
+  createPartner(p: { code: string; name: string; telegramId: number | null; username: string | null; rate: number; managedBy?: number | null }): Promise<Partner>;
   getPartner(id: number): Promise<Partner | null>;
   setPartnerRate(id: number, rate: number): Promise<void>;
   /** Партнёр этого человека: по id или по username (id тогда запоминается). Нет таблицы или партнёра — null */
@@ -115,4 +116,23 @@ export interface Repo {
   recordPartnerPayout(partnerId: number, expected: number, createdBy: number): Promise<boolean>;
   /** Оплаченные заказы пришедших от партнёра клиентов без начисления */
   uncreditedPartnerOrders(): Promise<{ id: string; userId: number }[]>;
+
+  // ── Роли (v2): менеджеры, одноразовые ссылки, заказы «для клиента». Таблиц ещё нет — пусто / none ──
+  /** Все менеджеры, и снятые тоже (active = false) */
+  listManagers(): Promise<Manager[]>;
+  /** Активный менеджер или null */
+  getManager(id: number): Promise<Manager | null>;
+  /** Назначить (снятого — вернуть) */
+  addManager(m: { telegramId: number; code: string; username: string | null; firstName: string | null; invitedBy: number }): Promise<Manager>;
+  /** false — уже снят или не был менеджером */
+  removeManager(id: number, now: Date): Promise<boolean>;
+  createInvite(i: { tokenHash: string; kind: InviteKind; createdBy: number; expiresAt: Date; partnerId?: number | null }): Promise<void>;
+  /** Атомарно: ссылка срабатывает один раз и только до expiresAt */
+  useInvite(tokenHash: string, kind: InviteKind, userId: number, now: Date): Promise<InviteUse>;
+  /** Неоплаченный заказ сотрудника → ссылка для клиента (повтор заменяет ссылку, пока клиент не забрал) */
+  issueClientOrder(o: { orderId: string; createdBy: number; tokenHash: string; refSource: string | null }): Promise<void>;
+  /** Клиент забирает заказ: заказ переходит к нему (user_id), один раз */
+  claimClientOrder(tokenHash: string, clientId: number, now: Date): Promise<{ status: ClaimStatus; order?: OrderRecord }>;
+  /** Забранный клиентом заказ «для клиента»: кому засчитать (m_<код> менеджера; ref null — напрямую). null — обычный заказ */
+  clientOrderRef(orderId: string): Promise<{ ref: string | null } | null>;
 }

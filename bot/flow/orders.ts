@@ -8,6 +8,7 @@ import type { InlineButton } from "../tg";
 import { PRICES } from "@/templates/registry";
 import { tPlain as t } from "@/texts/uz-cyrl";
 import { uz } from "@/texts/bot-uz";
+import { staff } from "@/texts/bot-ru";
 import { slugify } from "@/lib/slug";
 import {
   backRow,
@@ -32,6 +33,7 @@ import { getDesign, isOnSale } from "@/templates/registry";
 import { rememberUpdate } from "../update";
 import { recordBotError, toEntry } from "../errors";
 import { creditPartnerSafely } from "./partners";
+import { isSeller } from "./panel";
 import { kzToday } from "../calendar";
 
 /** Последний тадбир уже прошёл (по времени Казахстана): платить за такую ссылку бессмысленно — она сразу заглушка */
@@ -60,10 +62,12 @@ async function sendAfterCommit(c: Ctx, chatId: number, text: string, opts?: Para
 
 // ── Создание / сохранение из сводки ──
 
-function orderButtons(c: Ctx, o: OrderRecord): InlineButton[][] {
+/** seller — владелец или менеджер: может отдать неоплаченный заказ клиенту (cl:<n>) */
+export function orderButtons(c: Ctx, o: OrderRecord, seller: boolean): InlineButton[][] {
   const rows: InlineButton[][] = [];
   if (PAYABLE_STATUSES.includes(o.status)) rows.push([{ text: c.tx.order.pay(price(o.amount)), data: `pay:${o.number}` }]);
   rows.push([{ text: c.tx.order.edit, data: `edit:${o.number}` }]);
+  if (seller && PAYABLE_STATUSES.includes(o.status)) rows.push([{ text: staff.btn.toClient, data: `cl:${o.number}` }]);
   return rows;
 }
 
@@ -157,10 +161,10 @@ export async function confirmDraft(c: Ctx): Promise<Result> {
     case "race":
       return { ignore: true };
     case "updated":
-      await send(c, c.tx.order.updated(pageUrl(c, r.order.slug)), inline(orderButtons(c, r.order)));
+      await send(c, c.tx.order.updated(pageUrl(c, r.order.slug)), inline(orderButtons(c, r.order, await isSeller(c))));
       return { done: true };
     case "created":
-      await sendAfterCommit(c, c.chatId, c.tx.order.created(pageUrl(c, r.order.slug)), { markup: inline(orderButtons(c, r.order)) });
+      await sendAfterCommit(c, c.chatId, c.tx.order.created(pageUrl(c, r.order.slug)), { markup: inline(orderButtons(c, r.order, await isSeller(c))) });
       // Repo already finished this draft in the same transaction. Do not overwrite a newer dialog.
       return { ignore: true };
   }
@@ -217,7 +221,7 @@ export async function payOrder(c: Ctx, n: number): Promise<Result> {
     return { done: true };
   }
   if (eventsPassed(c, o)) {
-    await send(c, c.tx.pay.eventPassed, inline(orderButtons(c, o).filter((r) => !r.some((b) => "data" in b && b.data.startsWith("pay:")))));
+    await send(c, c.tx.pay.eventPassed, inline(orderButtons(c, o, false).filter((r) => !r.some((b) => "data" in b && b.data.startsWith("pay:")))));
     return { done: true };
   }
   await c.deps.repo.transition(o.id, PAYABLE_STATUSES, "awaiting_payment");
@@ -253,7 +257,7 @@ export async function askReceipt(c: Ctx, n: number, shownAmount?: number): Promi
     return { done: true };
   }
   if (eventsPassed(c, o)) {
-    await send(c, c.tx.pay.eventPassed, inline(orderButtons(c, o).filter((r) => !r.some((b) => "data" in b && b.data.startsWith("pay:")))));
+    await send(c, c.tx.pay.eventPassed, inline(orderButtons(c, o, false).filter((r) => !r.some((b) => "data" in b && b.data.startsWith("pay:")))));
     return { done: true };
   }
   // Клиент видел реквизиты с другой суммой (цена сменилась) — показываем актуальные
@@ -323,17 +327,21 @@ export const decisionButtons = (tx: ReturnType<typeof txFor>, n: number): Inline
 ];
 
 /** Чек + карточка заказа + кнопки решения — каждому админу */
-export async function notifyAdmins(deps: Deps, o: OrderRecord, prefix = "") {
+/** Чек заказа одному админу: фото/файл с карточкой и кнопками решения */
+export async function sendReceiptTo(deps: Deps, adminId: number, o: OrderRecord, prefix = "") {
   const client = await deps.repo.getUser(o.userId);
+  const lang = await langOf(deps, adminId);
+  const caption = prefix + adminCard(deps, o, lang, client);
+  const opts = { caption, markup: inline(decisionButtons(txFor(lang), o.number)) };
+  if (o.receipt?.kind === "document") await deps.tg.sendDocument(adminId, o.receipt.fileId, opts);
+  else if (o.receipt) await deps.tg.sendPhoto(adminId, o.receipt.fileId, opts);
+  else await deps.tg.sendMessage(adminId, caption, { markup: opts.markup });
+}
+
+export async function notifyAdmins(deps: Deps, o: OrderRecord, prefix = "") {
   for (const adminId of await deps.repo.listAdminIds()) {
-    const lang = await langOf(deps, adminId);
-    const tx = txFor(lang);
-    const caption = prefix + adminCard(deps, o, lang, client);
-    const opts = { caption, markup: inline(decisionButtons(tx, o.number)) };
     try {
-      if (o.receipt?.kind === "document") await deps.tg.sendDocument(adminId, o.receipt.fileId, opts);
-      else if (o.receipt) await deps.tg.sendPhoto(adminId, o.receipt.fileId, opts);
-      else await deps.tg.sendMessage(adminId, caption, { markup: opts.markup });
+      await sendReceiptTo(deps, adminId, o, prefix);
     } catch (e) {
       // Админ мог не запускать бота — остальным всё равно отправляем
       console.error("notifyAdmins", e instanceof Error ? e.name : "Error");
@@ -491,6 +499,7 @@ export async function myOrders(c: Ctx) {
     await send(c, c.tx.my.empty, await startMenu(c));
     return;
   }
+  const seller = await isSeller(c);
   for (const o of list) {
     // До оплаты — всё можно менять; чек на проверке — ждём; ссылка выдана — заказ закрыт
     const rows: InlineButton[][] = [];
@@ -499,6 +508,7 @@ export async function myOrders(c: Ctx) {
         { text: c.tx.order.edit, data: `edit:${o.number}` },
         { text: c.tx.order.pay(price(o.amount)), data: `pay:${o.number}` },
       ]);
+      if (seller) rows.push([{ text: staff.btn.toClient, data: `cl:${o.number}` }]);
     }
     const last: InlineButton[] = o.status === "active" ? [{ text: c.tx.my.link, data: `link:${o.number}` }] : [];
     if (o.status === "active" && o.data.rsvp) rows.push([{ text: c.tx.rsvp.answers, data: `rsvp:${o.number}` }]);

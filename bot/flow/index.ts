@@ -21,6 +21,8 @@ import { catalogList, pageOf } from "./steps-order";
 import { rememberUpdate } from "../update";
 import { classifyError, isUnreachable, recordBotError, toEntry } from "../errors";
 import { beginAttempt } from "./delivery";
+import { acceptManager, claimOrder, panelAction, roleHome, showClaimed, toClient } from "./panel";
+import { parseStartToken } from "@/lib/roles";
 
 const idle: Step = {
   async ask(c) {
@@ -85,7 +87,8 @@ export async function handle(baseDeps: Deps, u: BotUpdate): Promise<boolean> {
       id: u.from.id,
       username: u.from.username,
       firstName: u.from.firstName,
-      source: isStart && u.args ? u.args.slice(0, 64) : null,
+      // Одноразовые ссылки (mgr_, join_, o_) — не источник клиента и не должны лежать в базе
+      source: isStart && u.args && !parseStartToken(u.args) ? u.args.slice(0, 64) : null,
     });
     if (u.updateId !== undefined && rememberUpdate(user.state.handledUpdates).includes(u.updateId)) {
       attempt.finish();
@@ -211,8 +214,14 @@ async function chooseLang(c: Ctx, lang: string) {
   // Сначала сообщение, потом запись: при повторе после сбоя клиент всё равно получит приветствие
   await setAppButton(c);
   if (first) {
-    await send(c, c.tx.welcome(c.user.firstName), await startMenu(c));
+    const claimed = c.s.claimed ? await c.deps.repo.getOrderByNumber(c.s.claimed) : null;
+    if (claimed) await showClaimed(c, claimed);
+    else if (!(await roleHome(c, true))) await send(c, c.tx.welcome(c.user.firstName), await startMenu(c));
     await c.deps.repo.setLang(c.user.id, lang);
+    if (c.s.claimed) {
+      c.s = { q: c.s.q };
+      await save(c);
+    }
     return;
   }
   await c.deps.repo.setLang(c.user.id, lang);
@@ -247,7 +256,7 @@ async function welcome(c: Ctx) {
   await dropReplyKeyboard(c);
   await setAppButton(c);
   // Запись последней: записанный update повторно не обрабатывается, и приветствие бы потерялось
-  await send(c, c.tx.welcome(c.user.firstName), await startMenu(c));
+  if (!(await roleHome(c))) await send(c, c.tx.welcome(c.user.firstName), await startMenu(c));
   await save(c);
 }
 
@@ -302,6 +311,20 @@ async function route(c: Ctx) {
   }
 
   if (u.kind === "command" && u.command === "start") {
+    const token = parseStartToken(u.args);
+    if (token?.kind === "mgr") {
+      await acceptManager(c, token.token);
+      if (!c.user.lang) return askLang(c);
+      return welcome(c);
+    }
+    if (token?.kind === "o") {
+      const r = await claimOrder(c, token.token);
+      if (r === "askLang") {
+        await save(c);
+        return askLang(c);
+      }
+      return;
+    }
     if (!c.user.lang) return askLang(c);
     return welcome(c);
   }
@@ -379,6 +402,20 @@ async function onCallback(c: Ctx, d: string) {
     const key = d.slice(2);
     if (key === "create" || key === "my" || key === "help" || key === "lang") return menu(c, key);
     return stale(c);
+  }
+  if (d.startsWith("pn:")) {
+    const [, action, arg = ""] = d.split(":");
+    const r = await panelAction(c, action, arg);
+    if (r && "dashboard" in r) {
+      const [view, period, a] = r.dashboard;
+      const res = await dashboard(c, view, period, a);
+      return res ? apply(c, res) : undefined;
+    }
+    return r ? apply(c, r) : undefined;
+  }
+  if (d.startsWith("cl:")) {
+    const r = await toClient(c, Number(d.slice(3)));
+    return r ? apply(c, r) : undefined;
   }
   if (d.startsWith("dash:")) {
     const [, view, period, a, b] = d.split(":");

@@ -10,6 +10,7 @@ import { PERIODS, type Period } from "@/lib/analytics";
 import { designTypes, musicStats, orderPage, overview, partnerRows, revenueBreakdown, topDesigns, type PanelSnapshot } from "@/lib/owner-panel";
 import { DESIGN_STYLES, FORMATS, PRICES, type DesignStyle, type Format } from "@/templates/registry";
 import { panelData, partnerDetail, partnerList } from "./partners";
+import { staff } from "@/texts/bot-ru";
 
 const VIEWS = ["general", "revenue", "orders", "designs", "partners", "music"] as const;
 type View = (typeof VIEWS)[number];
@@ -130,7 +131,7 @@ export async function dashboard(c: Ctx, viewArg = "general", periodArg = "all", 
     : a ? partnerDetail(c, s, partnerRows(s, p, now), p, a) : partnerList(c, s, partnerRows(s, p, now), p, b);
   const periods = PERIODS.map((k) => ({ text: `${k === p ? "✓ " : ""}${tx.periods[k]}`, data: `dash:${v}:${k}` }));
   const nav = VIEWS.map((k) => ({ text: `${k === v ? "• " : ""}${tx.views[k]}`, data: `dash:${k}:${p}` }));
-  const markup = inline([periods, ...screen.rows, nav.slice(0, 2), nav.slice(2, 4), nav.slice(4, 6)]);
+  const markup = inline([periods, ...screen.rows, nav.slice(0, 2), nav.slice(2, 4), nav.slice(4, 6), [{ text: staff.back, data: "pn:home" }]]);
   const text = `${tx.title} · ${tx.periods[p]}\n${tx.views[v]}\n\n${screen.text}`;
   if (c.u.kind === "callback") await editOrSend(c, text, markup);
   else await send(c, text, markup);

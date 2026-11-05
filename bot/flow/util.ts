@@ -6,7 +6,8 @@ import type { EventKind } from "@/lib/types";
 import { getDesign, PRICES, FORMATS, type Format, activeDesigns } from "@/templates/registry";
 import { tPlain as t } from "@/texts/uz-cyrl";
 import { uz, type BotTexts } from "@/texts/bot-uz";
-import { ru } from "@/texts/bot-ru";
+import { ru, staff } from "@/texts/bot-ru";
+import type { Role } from "@/lib/roles";
 import { demoToken } from "@/lib/demo-tracking";
 import { isEditImpossible } from "../errors";
 
@@ -37,6 +38,10 @@ export function mainMenu(): Markup {
 /** Главное меню: одно сообщение с кнопками. «✨ Таклифнома яратиш» — приложение (или чат, если приложение выключено) */
 export async function startMenu(c: Ctx): Promise<{ inline: InlineButton[][] }> {
   const tx = c.tx;
+  // У владельца, менеджера и партнёра вместо клиентского меню — одна кнопка их панели
+  const role = await roleOf(c);
+  if (role === "owner" || role === "manager") return { inline: [[{ text: staff.btn.panel, data: "pn:home" }]] };
+  if (role === "partner") return { inline: [[{ text: tx.role.menu, data: "pn:home" }]] };
   const saved = c.chatId === c.user.id ? (await c.deps.repo.listFavorites(c.user.id)).length : 0;
   const app = c.deps.env.miniAppUrl;
   return {
@@ -47,6 +52,15 @@ export async function startMenu(c: Ctx): Promise<{ inline: InlineButton[][] }> {
       [{ text: tx.menu.lang, data: "m:lang" }, { text: tx.menu.help, data: "m:help" }],
     ],
   };
+}
+
+/** Роль человека в личном чате. В группе — всегда клиент: панели там не открываются */
+export async function roleOf(c: Pick<Ctx, "deps" | "user" | "chatId">): Promise<Role> {
+  if (c.chatId !== c.user.id) return "client";
+  if (await c.deps.repo.isAdmin(c.user.id)) return "owner";
+  if (await c.deps.repo.getManager(c.user.id)) return "manager";
+  if (await c.deps.repo.findPartnerForUser(c.user.id, c.user.username)) return "partner";
+  return "client";
 }
 
 export async function send(c: Ctx, text: string, markup?: Markup) {

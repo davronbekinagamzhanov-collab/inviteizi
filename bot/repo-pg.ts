@@ -1,6 +1,7 @@
 import { RSVP_IP_HOUR_LIMIT, RSVP_ORDER_LIMIT, type RsvpInput, type RsvpRecord } from "@/lib/rsvp";
 import type { PanelOrder, PanelSnapshot, Partner, PartnerEarning, PartnerPayout, PanelUser } from "@/lib/owner-panel";
 import type { BotErrorEntry } from "./errors";
+import type { ClaimStatus, InviteKind, InviteUse, Manager } from "@/lib/roles";
 /**
  * Repo на Postgres (Supabase) через lib/db.ts (роль inviteizi_server).
  * Поведение — как у bot/repo-memory.ts (общий набор тестов bot/repo.contract.ts).
@@ -316,7 +317,8 @@ const isUniqueSlugViolation = (e: unknown) =>
   typeof e === "object" && e !== null && (e as { code?: string }).code === "23505" &&
   String((e as { constraint_name?: string }).constraint_name ?? "").includes("slug");
 
-const PARTNER_COLUMNS = `id, code, name, telegram_id as "telegramId", username, rate, created_at as "createdAt"`;
+const PARTNER_COLUMNS = `id, code, name, telegram_id as "telegramId", username, rate, created_at as "createdAt", managed_by as "managedBy"`;
+const MANAGER_COLUMNS = `telegram_id as "telegramId", code, username, first_name as "firstName", invited_by as "invitedBy", active, created_at as "createdAt"`;
 /** Миграция партнёров ещё не применена */
 const isMissingTable = (e: unknown) => (e as { code?: string } | null)?.code === "42P01";
 
@@ -372,7 +374,9 @@ export class PgRepo implements Repo {
   }
 
   async staffIds() {
-    return [...new Set([...(await this.listAdminIds()), ...(env.ownerId() ? [env.ownerId() as number] : [])])];
+    // Менеджеры (и снятые): их собственные заказы и клики — не продажи
+    const managers = (await this.listManagers()).map((m) => m.telegramId);
+    return [...new Set([...(await this.listAdminIds()), ...(env.ownerId() ? [env.ownerId() as number] : []), ...managers])];
   }
 
   async saveRsvp(input: RsvpInput) {
@@ -436,9 +440,9 @@ export class PgRepo implements Repo {
     }
   }
 
-  async createPartner(p: { code: string; name: string; telegramId: number | null; username: string | null; rate: number }) {
-    const [r] = await this.sql<Partner[]>`insert into public.partners(code,name,telegram_id,username,rate)
-      values(${p.code},${p.name},${p.telegramId},${p.username},${p.rate}) returning ${this.sql.unsafe(PARTNER_COLUMNS)}`;
+  async createPartner(p: { code: string; name: string; telegramId: number | null; username: string | null; rate: number; managedBy?: number | null }) {
+    const [r] = await this.sql<Partner[]>`insert into public.partners(code,name,telegram_id,username,rate,managed_by)
+      values(${p.code},${p.name},${p.telegramId},${p.username},${p.rate},${p.managedBy ?? null}) returning ${this.sql.unsafe(PARTNER_COLUMNS)}`;
     return r;
   }
 
@@ -500,6 +504,100 @@ export class PgRepo implements Repo {
       await tx`insert into public.partner_payouts(partner_id,amount,created_by) values(${partnerId},${expected},${createdBy})`;
       return true;
     });
+  }
+
+  // ── Роли (v2) ──
+  async listManagers() {
+    try {
+      return [...(await this.sql<Manager[]>`select ${this.sql.unsafe(MANAGER_COLUMNS)} from public.managers order by created_at`)];
+    } catch (e) {
+      if (isMissingTable(e)) return [];
+      throw e;
+    }
+  }
+
+  async getManager(id: number) {
+    if (!Number.isSafeInteger(id)) return null;
+    try {
+      const [r] = await this.sql<Manager[]>`select ${this.sql.unsafe(MANAGER_COLUMNS)} from public.managers where telegram_id = ${id} and active`;
+      return r ?? null;
+    } catch (e) {
+      if (isMissingTable(e)) return null;
+      throw e;
+    }
+  }
+
+  async addManager(m: { telegramId: number; code: string; username: string | null; firstName: string | null; invitedBy: number }) {
+    const [r] = await this.sql<Manager[]>`insert into public.managers(telegram_id,code,username,first_name,invited_by)
+      values(${m.telegramId},${m.code},${m.username},${m.firstName},${m.invitedBy})
+      on conflict (telegram_id) do update set active = true, removed_at = null, username = excluded.username, first_name = excluded.first_name, invited_by = excluded.invited_by
+      returning ${this.sql.unsafe(MANAGER_COLUMNS)}`;
+    return r;
+  }
+
+  async removeManager(id: number, now: Date) {
+    const rows = await this.sql`update public.managers set active = false, removed_at = ${now} where telegram_id = ${id} and active returning telegram_id`;
+    return rows.length > 0;
+  }
+
+  async createInvite(i: { tokenHash: string; kind: InviteKind; createdBy: number; expiresAt: Date; partnerId?: number | null }) {
+    await this.sql`insert into public.staff_invites(token_hash,kind,created_by,partner_id,expires_at)
+      values(${i.tokenHash},${i.kind},${i.createdBy},${i.partnerId ?? null},${i.expiresAt})`;
+  }
+
+  async useInvite(tokenHash: string, kind: InviteKind, userId: number, now: Date): Promise<InviteUse> {
+    try {
+      // Одно обновление: два одновременных нажатия не используют ссылку дважды
+      const [r] = await this.sql<{ createdBy: number; partnerId: number | null }[]>`update public.staff_invites set used_by = ${userId}, used_at = ${now}
+        where token_hash = ${tokenHash} and kind = ${kind} and used_by is null and expires_at > ${now}
+        returning created_by as "createdBy", partner_id as "partnerId"`;
+      if (r) return { status: "ok", createdBy: Number(r.createdBy), partnerId: r.partnerId === null ? null : Number(r.partnerId) };
+      const [old] = await this.sql<{ used: boolean }[]>`select used_by is not null as used from public.staff_invites where token_hash = ${tokenHash} and kind = ${kind}`;
+      return { status: !old ? "none" : old.used ? "used" : "expired" };
+    } catch (e) {
+      if (isMissingTable(e)) return { status: "none" };
+      throw e;
+    }
+  }
+
+  async issueClientOrder(o: { orderId: string; createdBy: number; tokenHash: string; refSource: string | null }) {
+    await this.sql`insert into public.client_orders(order_id,created_by,token_hash,ref_source)
+      values(${o.orderId},${o.createdBy},${o.tokenHash},${o.refSource})
+      on conflict (order_id) do update set token_hash = excluded.token_hash, ref_source = excluded.ref_source, created_by = excluded.created_by
+      where public.client_orders.claimed_by is null`;
+  }
+
+  async claimClientOrder(tokenHash: string, clientId: number, now: Date): Promise<{ status: ClaimStatus; order?: OrderRecord }> {
+    try {
+      return await this.sql.begin(async (tx) => {
+        const [co] = await tx<{ orderId: string; createdBy: number; claimedBy: number | null }[]>`select order_id as "orderId", created_by as "createdBy", claimed_by as "claimedBy"
+          from public.client_orders where token_hash = ${tokenHash} for update`;
+        if (!co) return { status: "none" as const };
+        const claimedBy = co.claimedBy === null ? null : Number(co.claimedBy);
+        if (claimedBy === clientId) return { status: "mine" as const, order: (await loadOrder(tx, co.orderId)) ?? undefined };
+        if (claimedBy !== null) return { status: "used" as const };
+        if (Number(co.createdBy) === clientId) return { status: "creator" as const, order: (await loadOrder(tx, co.orderId)) ?? undefined };
+        const moved = await tx`update public.orders set user_id = ${clientId}, updated_at = ${now}
+          where id = ${co.orderId} and user_id = ${co.createdBy} and status in ('draft','preview','awaiting_payment','rejected') returning id`;
+        if (!moved.length) return { status: "closed" as const };
+        await tx`update public.client_orders set claimed_by = ${clientId}, claimed_at = ${now} where order_id = ${co.orderId}`;
+        return { status: "claimed" as const, order: (await loadOrder(tx, co.orderId)) ?? undefined };
+      });
+    } catch (e) {
+      if (isMissingTable(e)) return { status: "none" };
+      throw e;
+    }
+  }
+
+  async clientOrderRef(orderId: string) {
+    if (!UUID.test(orderId)) return null;
+    try {
+      const [r] = await this.sql<{ ref: string | null }[]>`select ref_source as ref from public.client_orders where order_id = ${orderId} and claimed_by is not null`;
+      return r ? { ref: r.ref } : null;
+    } catch (e) {
+      if (isMissingTable(e)) return null;
+      throw e;
+    }
   }
 
   async uncreditedPartnerOrders() {

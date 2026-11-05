@@ -115,6 +115,8 @@ export type Draft = {
   paid?: boolean;
   /** Новый партнёр, пока его заполняют */
   partnerDraft?: { name?: string; telegramId?: number | null; username?: string | null };
+  /** Номер заказа «для клиента», который человек забрал до выбора языка: показать после выбора */
+  claimed?: number;
   /** Партнёр, которому меняют ставку */
   partnerId?: number;
 };

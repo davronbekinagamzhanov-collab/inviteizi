@@ -398,6 +398,23 @@ export const uz = {
     sourceLine: (source: string, users: number, paid: number) => `${source}: ${users} киши, ${paid} та тўлов`,
   },
 
+  role: {
+    partnerTitle: "🤝 InviteIZI ҳамкори",
+    menu: "🤝 Ҳамкор менюси",
+    partnerHome: (name: string) => `🤝 InviteIZI ҳамкори\n${name}`,
+    stats: "📊 Статистика",
+    qr: "🔳 QR ва постер",
+    payouts: "💰 Тўловларим",
+    self: "✨ Ўзимга таклифнома",
+    payoutsText: (s: { earned: string; paidOut: string; due: string }) => `💰 Тўловларим\n\nЖами ишланган: ${s.earned}\nТўланган: ${s.paidOut}\nТўланиши керак: ${s.due}`,
+    claimed: (url: string, amount: string) => `🎉 Таклифномангиз тайёр!\n${url}\n\nНархи: ${amount}\nТўлаш учун пастдаги тугмани босинг 👇`,
+    claimUsed: "Бу ҳавола аллақачон ишлатилган. Саволингиз бўлса — 📞 Боғланиш.",
+    claimClosed: "Бу буюртма аллақачон тўланган ёки ёпилган.",
+    claimNone: "Ҳавола нотўғри ёки эскирган.",
+    clientShare: (s: { url: string; amount: string; phone: string; name: string; bot: string }) =>
+      `Ассалому алайкум! 🌸\nТаклифномангиз тайёр (НАМУНА):\n${s.url}\n\nНархи: ${s.amount}\nKaspi: ${s.phone} (${s.name})\n\nТўлагач, чекни шу ботга юборинг:\n${s.bot}`,
+  },
+
   my: {
     empty: "Ҳозирча таклифномангиз йўқ. «✨ Таклифнома яратиш» тугмасини босинг 👇",
     item: (n: number, title: string, status: string, url: string) => `#${n} · ${title}\n${status}\n${url}`,

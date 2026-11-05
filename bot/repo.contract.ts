@@ -293,5 +293,60 @@ export function repoContract(makeRepo: () => Promise<Repo>) {
       const none = (await repo.ordersAbandonedAtPayment(past)).filter((o) => o.userId === u);
       expect(none).toEqual([]);
     });
+    // ── Роли (v2) ──
+    it("менеджер: назначить, снять, вернуть; в staffIds и после снятия", async () => {
+      const repo = await makeRepo();
+      const id = uid();
+      const m = await repo.addManager({ telegramId: id, code: `c${tag}${seq}`.slice(0, 32), username: "mgr", firstName: "Менеджер", invitedBy: 1 });
+      expect(m).toMatchObject({ telegramId: id, active: true, invitedBy: 1 });
+      expect(await repo.getManager(id)).toMatchObject({ telegramId: id });
+      expect(await repo.staffIds()).toContain(id);
+      expect(await repo.removeManager(id, new Date())).toBe(true);
+      expect(await repo.removeManager(id, new Date())).toBe(false);
+      expect(await repo.getManager(id)).toBeNull();
+      expect(await repo.staffIds()).toContain(id);
+      await repo.addManager({ telegramId: id, code: m.code, username: "mgr", firstName: "Менеджер", invitedBy: 1 });
+      expect((await repo.getManager(id))?.code).toBe(m.code);
+    });
+
+    it("одноразовая ссылка: срабатывает один раз, не после срока, только своего вида", async () => {
+      const repo = await makeRepo();
+      const now = new Date();
+      const base = `${tag}${seq}`.replace(/[^0-9a-f]/g, "a");
+      const hash = (n: number) => `${base}${n}`.padEnd(64, "0").slice(0, 64);
+      await repo.createInvite({ tokenHash: hash(1), kind: "manager", createdBy: 7, expiresAt: new Date(+now + 60_000) });
+      await repo.createInvite({ tokenHash: hash(2), kind: "manager", createdBy: 7, expiresAt: new Date(+now - 1) });
+      expect(await repo.useInvite(hash(1), "partner", uid(), now)).toEqual({ status: "none" });
+      expect(await repo.useInvite(hash(1), "manager", uid(), now)).toEqual({ status: "ok", createdBy: 7, partnerId: null });
+      expect(await repo.useInvite(hash(1), "manager", uid(), now)).toEqual({ status: "used" });
+      expect(await repo.useInvite(hash(2), "manager", uid(), now)).toEqual({ status: "expired" });
+      expect(await repo.useInvite(hash(3), "manager", uid(), now)).toEqual({ status: "none" });
+    });
+
+    it("заказ для клиента: клиент забирает один раз, продавец — нет, оплаченный — закрыт", async () => {
+      const repo = await makeRepo();
+      const seller = uid();
+      const client = uid();
+      const other = uid();
+      await repo.touchUser({ id: client });
+      const o = await newOrder(repo, seller, { status: "preview" });
+      const h = `${tag}${seq}`.padEnd(64, "b").replace(/[^0-9a-f]/g, "c").slice(0, 64);
+      await repo.issueClientOrder({ orderId: o.id, createdBy: seller, tokenHash: h, refSource: "m_abcd1234" });
+      expect(await repo.clientOrderRef(o.id)).toBeNull();
+      expect((await repo.claimClientOrder(h, seller, new Date())).status).toBe("creator");
+      const r = await repo.claimClientOrder(h, client, new Date());
+      expect(r.status).toBe("claimed");
+      expect(r.order?.userId).toBe(client);
+      expect((await repo.claimClientOrder(h, client, new Date())).status).toBe("mine");
+      expect((await repo.claimClientOrder(h, other, new Date())).status).toBe("used");
+      expect(await repo.clientOrderRef(o.id)).toEqual({ ref: "m_abcd1234" });
+
+      const paid = await newOrder(repo, seller, { status: "preview" });
+      const h2 = h.slice(0, 63) + "f";
+      await repo.issueClientOrder({ orderId: paid.id, createdBy: seller, tokenHash: h2, refSource: null });
+      await repo.transition(paid.id, ["preview"], "receipt_sent");
+      expect((await repo.claimClientOrder(h2, client, new Date())).status).toBe("closed");
+      expect((await repo.getOrder(paid.id))?.userId).toBe(seller);
+    });
   });
 }
