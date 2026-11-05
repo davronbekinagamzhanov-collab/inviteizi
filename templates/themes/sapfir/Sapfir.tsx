@@ -119,6 +119,8 @@ export default function Sapfir({ data, mode }: TemplateProps) {
               <button
                 type="button"
                 onClick={inv.toggleMusic}
+                data-music-button
+                aria-pressed={inv.playing}
                 aria-label={inv.playing ? t.music.pause : t.music.play}
                 className="relative flex h-12 w-12 items-center justify-center rounded-full text-[#F3D58A] ring-1 ring-[#F3D58A]/70 transition active:scale-90"
               >

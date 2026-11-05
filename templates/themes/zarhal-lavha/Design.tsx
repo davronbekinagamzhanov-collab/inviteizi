@@ -48,5 +48,5 @@ const Content=memo(function Content({data,inv}:{data:InvitationData;inv:Invitati
       <Reveal className="mx-5 mt-10 border-double border-y-4 border-gold/40 px-5 py-9 text-center"><p className="text-[22px] italic leading-relaxed">{inv.blessing}</p><p className="mt-8 text-[15px] text-muted">{t.hosts.respectDeep}</p><p ref={hosts} className="mt-3 w-full leading-snug [--fit:25px]"><span className="text-[length:var(--fit)]"><Words text={data.hosts}/></span></p><p className="mt-6 text-[17px] text-primary">{t.hosts.waiting}</p></Reveal>
     </main>
   </>;
-},(a,b)=>a.data===b.data&&a.inv.mode===b.inv.mode);
+},(a,b)=>a.data===b.data&&a.inv.mode===b.inv.mode&&a.inv.lang===b.inv.lang);
 function Filigree(){return <svg data-decor aria-hidden="true" viewBox="0 0 320 100" className="mx-auto w-full max-w-[310px]" fill="none" stroke="#b28b53" strokeWidth="1.2"><path d="M12 50h45q25 0 35-20t26 0q12 22 42 20q30 2 42-20t26 0q10 20 35 20h45M38 58q25 37 53 5M282 58q-25 37-53 5M75 44q-17-31 12-28q22 6 6 28M245 44q17-31-12-28q-22 6-6 28"/><path d="M160 14q-29 28 0 44q29-16 0-44ZM160 87q-19-19 0-29q19 10 0 29Z" fill="#dfc798" fillOpacity=".45"/><path d="m132 54-8 12 12 5M188 54l8 12-12 5"/><circle cx="160" cy="50" r="5" fill="#b28b53"/></svg>;}

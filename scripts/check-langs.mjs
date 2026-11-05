@@ -41,7 +41,19 @@ function measure(uzWords) {
     if (!el || !text || el.closest("[data-decor],[aria-hidden='true'],script,style") || !visible(el)) continue;
     const r = document.createRange();
     r.selectNodeContents(n);
-    for (const q of r.getClientRects()) if (q.width > 0 && (q.right > innerWidth + 1 || q.left < -1)) out.outside.push(text.slice(0, 40));
+    // Текст на соседней странице альбома/книги (внутри блока с overflow) — спрятан намеренно, не считаем
+    let clip = null;
+    for (let e = el.parentElement; e && e !== document.body; e = e.parentElement) {
+      const cs = getComputedStyle(e);
+      if (/(hidden|auto|scroll|clip)/.test(cs.overflowX)) { clip = { rect: e.getBoundingClientRect(), scroller: /(auto|scroll)/.test(cs.overflowX) }; break; }
+    }
+    // В ленте, которую листают пальцем вбок, край следующей карточки виден намеренно
+    if (clip?.scroller) continue;
+    for (const q of r.getClientRects()) {
+      if (!q.width) continue;
+      if (clip && (q.left >= clip.rect.right - 1 || q.right <= clip.rect.left + 1)) continue;
+      if (q.right > innerWidth + 1 || q.left < -1) out.outside.push(text.slice(0, 40));
+    }
     for (const w of uzWords) if (text.includes(w)) out.uz.push(text.slice(0, 50));
   }
   out.outside = [...new Set(out.outside)].slice(0, 8);
@@ -88,7 +100,9 @@ for (const d of list) {
     else await page.mouse.click(width / 2, 300);
     await page.waitForTimeout(2600);
     r.afterTap = await page.evaluate(audioState);
-    const btn = page.locator("[data-music-button]:not([data-music-hint])").first();
+    // Круглая кнопка появляется, когда заставка закончилась (у конвертов — до ~5 с)
+    const btn = page.locator("[data-music-button]:not([data-music-hint]):visible").last();
+    await btn.waitFor({ state: "visible", timeout: 6000 }).catch(() => undefined);
     if (await btn.count()) {
       await btn.click({ force: true }).catch(() => undefined);
       await page.waitForTimeout(300);

@@ -60,7 +60,7 @@ const PremiumContent=memo(function PremiumContent({data,inv,concept}:{data:Templ
    <section className={s.blessing}><p>{inv.blessing}</p><div className={s.folioRule}/><p className={s.caption}>{t.hosts.respectDeep}</p><FamilyName text={data.hosts}/><p className={s.waiting}>{t.hosts.waiting}</p></section>
   </main>
  </>;
-},(a,b)=>a.data===b.data&&a.inv.mode===b.inv.mode&&a.concept===b.concept);
+},(a,b)=>a.data===b.data&&a.inv.mode===b.inv.mode&&a.inv.lang===b.inv.lang&&a.concept===b.concept);
 
 function FamilyName({text}:{text?:string}){
  const ref=useFitWords<HTMLHeadingElement>(23);
