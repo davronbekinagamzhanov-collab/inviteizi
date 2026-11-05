@@ -14,6 +14,8 @@
 .flap { position: absolute; inset: 0; background: linear-gradient(180deg, #8098ae 0%, #758ea5 100%); clip-path: polygon(0 0, 100% 0, 100% 34%, 50% 66%, 0 34%); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
 .flapRosette { margin-top: 15svh; width: 58px; height: 58px; color: #e6edf2; opacity: .55; transition: opacity var(--m-fast) var(--m-ease); }
 .flapMono { margin-top: 16px; display: flex; align-items: center; gap: 12px; font-family: var(--n-serif); font-size: 40px; font-weight: 300; letter-spacing: .04em; color: #eef2f5; transition: opacity var(--m-fast) var(--m-ease); }
+.flapNames { margin-top: 14px; max-width: 82%; text-align: center; font-family: var(--n-serif); font-size: 21px; line-height: 1.25; letter-spacing: .02em; color: #eef2f5; overflow-wrap: anywhere; transition: opacity var(--m-fast) var(--m-ease); }
+.flapDate { margin-top: 6px; font-family: var(--n-serif); font-size: 15px; letter-spacing: .18em; color: #dfe6ec; opacity: .9; transition: opacity var(--m-fast) var(--m-ease); }
 .flapMono i, .sealMono i, .heroMono i { display: block; width: 1px; height: 30px; background: currentColor; opacity: .7; }
 .seal { position: absolute; left: 50%; top: 66%; width: 92px; height: 92px; margin: -46px 0 0 -46px; z-index: 5; }
 .sealHalf { position: absolute; inset: 0; transition: transform var(--m-fast) var(--m-ease), opacity var(--m-fast) var(--m-ease) .1s; }
@@ -24,7 +26,7 @@
 .sealMono { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 7px; font-family: var(--n-serif); font-size: 25px; font-weight: 600; color: #c9d6e2; text-shadow: 0 -1px 0 rgba(0,0,0,.35); transition: opacity var(--m-fast) var(--m-ease); }
 .sealMono i { height: 22px; }
 .openWord { position: absolute; left: 0; right: 0; bottom: 12svh; z-index: 6; text-align: center; font-size: 48px; color: #f3f4f2; transition: opacity var(--m-fast) var(--m-ease); }
-.opening[data-started="true"] .sealMono, .opening[data-started="true"] .openWord, .opening[data-started="true"] .flapMono { opacity: 0; }
+.opening[data-started="true"] .sealMono, .opening[data-started="true"] .openWord, .opening[data-started="true"] .flapMono, .opening[data-started="true"] .flapNames, .opening[data-started="true"] .flapDate { opacity: 0; }
 .opening[data-started="true"] .sealLeft { transform: translate3d(-18px, 10px, 0) rotate(-16deg); opacity: 0; }
 .opening[data-started="true"] .sealRight { transform: translate3d(18px, 12px, 0) rotate(14deg); opacity: 0; }
 .opening[data-started="true"] .flapWrap { transform: rotateX(-165deg); opacity: 0; }

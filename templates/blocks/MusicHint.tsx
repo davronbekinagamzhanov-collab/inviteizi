@@ -23,6 +23,11 @@ export function MusicHint({ inv }: { inv: Invitation }) {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- раз заиграло, подсказка больше не нужна
     if (inv.playing) setTouched(true);
   }, [inv.playing]);
+  // Видна первые 5 секунд: замечают сразу, а дальше она не закрывает имена и дату (остаётся круглая кнопка)
+  useEffect(() => {
+    const id = setTimeout(() => setTouched(true), 5000);
+    return () => clearTimeout(id);
+  }, []);
   if (!inv.hasMusic || inv.hasOpening || touched) return null;
   const shown = onFirstScreen && !inv.playing;
   return (

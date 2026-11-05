@@ -210,7 +210,7 @@ function Screen({ side, w, h, on, initial }: { side: "left" | "right"; w: number
         </g>
       </svg>
       <span
-        className="gold-text absolute font-display text-[34px] leading-none font-semibold"
+        className="absolute font-display text-[34px] leading-none font-semibold text-[#9a7633]"
         style={{ top: my, transform: "translateY(-55%)", ...(left ? { right: 7 } : { left: 7 }) }}
       >
         {initial}

@@ -43,3 +43,7 @@
 .finale { min-height: 260px; }
 .finLeft { left: -10%; top: 0; width: 40%; --r: 24deg; }
 .finRight { right: -10%; top: 0; width: 40%; --r: -24deg; }
+
+/* Дата на клапане конверта — первый экран */
+.flapDate { display: block; margin-top: 8px; font-family: var(--n-serif); font-size: 15px; letter-spacing: .18em; color: #fffaf4; opacity: .9; text-align: center; }
+.envelope[data-started="true"] .flapDate { opacity: 0; transition: opacity var(--m-fast) var(--m-ease); }

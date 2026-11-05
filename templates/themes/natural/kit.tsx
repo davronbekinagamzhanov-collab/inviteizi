@@ -44,7 +44,10 @@ export function Script({
       const limit = Math.min(box.width, window.innerWidth - 16) * 0.86;
       let size = parseFloat(getComputedStyle(el).fontSize);
       const over = () => {
-        const r = el.getBoundingClientRect();
+        // Ширина самого текста (блок может быть растянут на всю строку)
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        const r = range.getBoundingClientRect();
         return r.width > limit || r.left < 12 || r.right > window.innerWidth - 12;
       };
       for (let i = 0; i < 12 && over() && size > 14; i++) {
