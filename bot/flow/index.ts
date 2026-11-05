@@ -30,6 +30,7 @@ import {
   partnerSchedule,
   partnerStats,
   ptAction,
+  sendPoster,
 } from "./partners";
 import { favorites, favoriteAction } from "./favorites";
 import { activeDesigns } from "@/templates/registry";
@@ -447,6 +448,10 @@ async function onCallback(c: Ctx, d: string) {
     const [, action, id = "", x = ""] = d.split(":");
     const r = await ptAction(c, action, id, x);
     return r ? apply(c, r) : undefined;
+  }
+  if (d.startsWith("pq:")) {
+    const [, id = "", lang = ""] = d.split(":");
+    return sendPoster(c, id, lang);
   }
   if (d.startsWith("cl:")) {
     const r = await toClient(c, Number(d.slice(3)));

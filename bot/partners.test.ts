@@ -449,3 +449,46 @@ describe("лимиты Telegram на новые тексты", () => {
     for (const data of ["pa:paid:2147483647:1000000", "pa:sset:2147483647:monthly", "pa:l:0:999"]) expect(Buffer.byteLength(data)).toBeLessThanOrEqual(TG_LIMITS.callbackData);
   });
 });
+
+describe("QR и постер (часть 6)", () => {
+  it("QR с кнопками постера; постер — PDF и PNG; партнёр получает на своём языке, чужой — нет", async () => {
+    const s = new Sim();
+    const token = await createPartner(s, ADMIN);
+    const p = s.repo.partners[0];
+    const qr = s.last(ADMIN)!;
+    expect(qr.type).toBe("photo");
+    expect(qr.text).toBe(ru.role.qrCaption(p.name, `https://t.me/inviteizi_test_bot?start=p_${p.code}`));
+    await s.click(ADMIN, ru.role.posterUz);
+    const [pdf, png] = s.tg.to(ADMIN).slice(-2);
+    expect([pdf.type, pdf.fileName, png.fileName]).toEqual(["document", `inviteizi-${p.code}-uz.pdf`, `inviteizi-${p.code}-uz.png`]);
+    expect(Buffer.from(pdf.media as Uint8Array).subarray(0, 8).toString("latin1")).toBe("%PDF-1.4");
+    expect(pdf.text).toBe(ru.role.posterReady(p.name));
+
+    await join(s, token);
+    await s.start(PARTNER);
+    await s.click(PARTNER, uz.role.qr);
+    expect(s.lastText(PARTNER)).toBe(uz.role.qrCaption(p.name, `https://t.me/inviteizi_test_bot?start=p_${p.code}`));
+    await s.click(PARTNER, uz.role.posterRu);
+    expect(s.tg.to(PARTNER).at(-1)!.fileName).toBe(`inviteizi-${p.code}-ru.png`);
+
+    await start(s, CLIENT);
+    await start(s, 901);
+    const before = s.tg.messages.length;
+    for (const id of [CLIENT, 901]) {
+      await s.callback(id, `pq:${p.id}:uz`, 1);
+      expect(lastToast(s)).toBe(uz.oldButton);
+    }
+    expect(s.tg.messages.length).toBe(before);
+  }, 30_000);
+
+  it("менеджер — постер только своих партнёров", async () => {
+    const s = new Sim();
+    await makeManager(s);
+    await createPartner(s, ADMIN, { name: "Партнёр владельца" });
+    await createPartner(s, MANAGER, { name: "Мой салон" });
+    await s.callback(MANAGER, "pq:1:ru", 1);
+    expect(lastToast(s)).toBe(ru.oldButton);
+    await s.click(MANAGER, ru.role.posterRu);
+    expect(s.tg.to(MANAGER).at(-1)!.fileName).toMatch(/-ru\.png$/);
+  }, 30_000);
+});

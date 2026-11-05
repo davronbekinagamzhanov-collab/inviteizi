@@ -359,7 +359,6 @@ export const uz = {
       askRate: "Битта тўланган буюртма учун ставка? Тугмани босинг ёки суммани ёзинг.",
       badRate: "Суммани рақам билан ёзинг. Масалан: 1000",
       rateSaved: (amount: string) => `✅ Янги ставка: ${amount}. Кейинги тўловлардан бошлаб ишлайди.`,
-      pack: (name: string, link: string, rate: string) => `🤝 ${name}\nСтавка: ${rate}\n${link}`,
     },
   },
   partner: {
@@ -420,6 +419,19 @@ export const uz = {
     payDay: (when: string) => `Тўлов куни: ${when}`,
     onHold: (amount: string) => `Тасдиқ кутилмоқда: ${amount}`,
     countOnly: "Бу QR фақат ҳисоб учун — тўлов йўқ.",
+    /** QR и постер A4 (v2, часть 6). На постере — без эмодзи: шрифт постера их не рисует */
+    qrCaption: (name: string, link: string) => `🔳 ${name}\n${link}\n\nПостер A4 (PDF ва PNG) — пастдаги тугма 👇`,
+    posterUz: "📄 Постер · ўзбекча",
+    posterRu: "📄 Постер · русча",
+    posterReady: (name: string) => `📄 ${name} — постер A4. PDF — чоп этиш учун, PNG — телефонга.`,
+    poster: {
+      title: "Онлайн таклифнома — 5 дақиқада",
+      sub: "Мусиқа · харита · меҳмонлар жавоби",
+      scan: "QR'ни сканерланг",
+      pricePre: "",
+      pricePost: " дан",
+      sample: "Намуна",
+    },
     stats: "📊 Статистика",
     qr: "🔳 QR ва постер",
     payouts: "💰 Тўловларим",

@@ -2,7 +2,7 @@
  * Партнёры (v2, часть 5): создание (название → телефон → ставка → график), ссылка join_ на 7 дней,
  * подтверждение владельцем партнёров менеджера, предложения ставки, «спящие», начисление за оплаченный заказ.
  * Экраны владельца и менеджера — по-русски (staff.pt), партнёра — на его языке (role).
- * Кнопки: pa:<действие>:<id>[:<x>] — права проверяются при каждом нажатии.
+ * Кнопки: pa:<действие>:<id>[:<x>], постер — pq:<id>:<uz|ru>; права проверяются при каждом нажатии.
  * Старые кнопки панели-отчёта (dp:…) работают как раньше.
  */
 import { randomBytes } from "node:crypto";
@@ -22,6 +22,8 @@ import {
 } from "@/lib/owner-panel";
 import { hashToken, INVITE_TTL_MS, managerName, newToken } from "@/lib/roles";
 import { isQuiet } from "@/lib/quiet-hours";
+import { posterPdf, renderPosterPng } from "@/lib/poster";
+import { activeDesigns, PRICES } from "@/templates/registry";
 import { staff as S } from "@/texts/bot-ru";
 import type { InlineButton } from "../tg";
 import { recordBotError, toEntry } from "../errors";
@@ -80,10 +82,50 @@ async function linkOf(deps: Deps, p: Partner) {
   return `https://t.me/${await deps.tg.botUsername()}?start=${partnerSource(p.code)}`;
 }
 
+/** Демо для маленького QR «Намуна»: сильнейший дизайн никоҳ, код партнёра в #p= (кнопки демо ведут в бота с p_<код>) */
+export const posterDemoUrl = (deps: Deps, p: Partner) => `${deps.env.publicBaseUrl}/demo/${activeDesigns().find((d) => d.occasion === "nikoh")?.id ?? "muhr"}#p=${p.code}`;
+
+/** Кто может получить QR и постер партнёра: владелец, менеджер — своего, сам партнёр */
+async function canSeePack(c: Ctx, p: Partner) {
+  const role = await roleOf(c);
+  if (role === "owner") return true;
+  if (role === "manager") return p.managedBy === c.user.id;
+  return role === "partner" && p.telegramId === c.user.id;
+}
+
+/** QR (PNG) с подписью и кнопками постера A4 на двух языках. Сотрудникам — по-русски */
 export async function sendPack(c: Ctx, p: Partner) {
   const link = await linkOf(c.deps, p);
-  const png = await QRCode.toBuffer(link, { width: 600, margin: 2 });
-  await c.deps.tg.sendPhoto(c.chatId, new Uint8Array(png), { caption: c.tx.panel.partner.pack(p.name, link, price(p.rate)) });
+  const tx = (await roleOf(c)) === "partner" ? c.tx : texts.ru;
+  const png = await QRCode.toBuffer(link, { width: 800, margin: 4 });
+  await c.deps.tg.sendPhoto(c.chatId, new Uint8Array(png), {
+    caption: tx.role.qrCaption(p.name, link),
+    markup: inline([[{ text: tx.role.posterUz, data: `pq:${p.id}:uz` }, { text: tx.role.posterRu, data: `pq:${p.id}:ru` }]]),
+  });
+}
+
+/** pq:<id>:<язык> — постер A4: PDF для печати и PNG для телефона */
+export async function sendPoster(c: Ctx, idArg: string, lang: string) {
+  const p = await c.deps.repo.getPartner(Number(idArg));
+  if (!p || (lang !== "uz" && lang !== "ru") || !(await canSeePack(c, p))) {
+    if (c.u.kind === "callback") {
+      await c.deps.tg.answerCallbackQuery(c.u.callbackId, { text: c.tx.oldButton });
+      c.answered = true;
+    }
+    return;
+  }
+  const png = await renderPosterPng({
+    text: texts[lang].role.poster,
+    botUrl: await linkOf(c.deps, p),
+    demoUrl: posterDemoUrl(c.deps, p),
+    partner: p.name,
+    minPrice: Math.min(...activeDesigns().map((d) => PRICES[d.format])),
+  });
+  const pdf = await posterPdf(png);
+  const tx = (await roleOf(c)) === "partner" ? c.tx : texts.ru;
+  const file = `inviteizi-${p.code}-${lang}`;
+  await c.deps.tg.sendDocument(c.chatId, pdf, { fileName: `${file}.pdf`, caption: tx.role.posterReady(p.name) });
+  await c.deps.tg.sendDocument(c.chatId, png, { fileName: `${file}.png` });
 }
 
 /** Одноразовая ссылка партнёру (7 дней) + кнопки WhatsApp на узбекском и русском */
