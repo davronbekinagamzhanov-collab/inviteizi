@@ -15,15 +15,15 @@ import {
   MANAGER_BONUS,
   MANAGER_GOAL,
   MANAGER_PER_ORDER,
+  managerName,
   managerSource,
   newToken,
-  type Manager,
 } from "@/lib/roles";
 import { staff as S } from "@/texts/bot-ru";
 import { texts } from "./util";
 import { editOrSend, inline, namesOf, ownerUrl, PAYABLE_STATUSES, pageUrl, price, roleOf, send } from "./util";
 import { orderButtons, sendReceiptTo } from "./orders";
-import { panelData, sendPack } from "./partners";
+import { panelData, partnerRowOf, payoutsText, ptList, sendPack, startNewPartner } from "./partners";
 import type { Ctx, Result } from "./types";
 
 type Screen = { text: string; rows: InlineButton[][] };
@@ -48,10 +48,7 @@ const clock = (d: Date) => new Date(+d + 5 * 3_600_000).toISOString().slice(11, 
 const createButton = (c: Ctx, text: string): InlineButton =>
   c.deps.env.miniAppUrl ? { text, webApp: c.deps.env.miniAppUrl } : { text, data: "pn:mk" };
 
-const managerName = (m: Pick<Manager, "username" | "firstName" | "telegramId">) =>
-  m.username ? `@${m.username}` : m.firstName?.slice(0, 32) || `id ${m.telegramId}`;
 
-const networkOf = (rows: PartnerRow[], managerId: number) => rows.filter((r) => r.partner.managedBy === managerId);
 
 // ── Домашние экраны ──
 
@@ -90,7 +87,7 @@ async function managerHome(c: Ctx): Promise<Screen> {
 function partnerHome(c: Ctx, p: Partner): Screen {
   const r = c.tx.role;
   return {
-    text: r.partnerHome(p.name),
+    text: r.partnerHome(p.name, p.status === "pending"),
     rows: [
       [{ text: r.stats, data: "pn:ps" }, { text: r.qr, data: "pn:pq" }],
       [{ text: r.payouts, data: "pn:pp" }, { text: c.tx.contact, url: ownerUrl(c) }],
@@ -139,7 +136,7 @@ async function payouts(c: Ctx): Promise<Screen> {
   };
   return {
     text: [S.payoutsTitle, "", ...rows.map((r) => S.payoutLine(r.partner.name.slice(0, 40), price(r.due), who(r)))].join("\n"),
-    rows: [...rows.slice(0, 10).map((r) => [{ text: `${r.partner.name.slice(0, 30)} · ${price(r.due)}`, data: `dash:partners:all:${r.partner.id}` }]), back()],
+    rows: [...rows.slice(0, 10).map((r) => [{ text: `${r.partner.name.slice(0, 30)} · ${price(r.due)}`, data: `pa:v:${r.partner.id}` }]), back()],
   };
 }
 
@@ -179,15 +176,6 @@ async function managerStats(c: Ctx): Promise<Screen> {
   };
 }
 
-async function managerPartners(c: Ctx): Promise<Screen> {
-  const rows = networkOf(partnerRows(await panelData(c.deps), "all", c.deps.now()), c.user.id);
-  if (!rows.length) return { text: S.myPartnersNone, rows: [[{ text: S.btn.newPartner, data: "pn:mpn" }], back()] };
-  return {
-    text: [S.myPartnersTitle, "", ...rows.map((r) => S.myPartnerLine(r.partner.name.slice(0, 40), r.paid))].join("\n"),
-    rows: [...rows.slice(0, 10).map((r) => [{ text: `🔳 ${r.partner.name.slice(0, 40)}`, data: `pn:mq:${r.partner.id}` }]), back()],
-  };
-}
-
 async function managerEarnings(c: Ctx): Promise<Screen> {
   const s = await panelData(c.deps);
   const mine = new Set(s.partners.filter((p) => p.managedBy === c.user.id).map((p) => p.id));
@@ -198,12 +186,6 @@ async function managerEarnings(c: Ctx): Promise<Screen> {
     text: S.earnings({ paidMonth: paid, perOrder: price(MANAGER_PER_ORDER), bonus: price(MANAGER_BONUS), goal: MANAGER_GOAL, month: price(total) }),
     rows: [back()],
   };
-}
-
-// ── Экраны партнёра ──
-
-async function partnerRow(c: Ctx, p: Partner) {
-  return partnerRows(await panelData(c.deps), "all", c.deps.now()).find((r) => r.partner.id === p.id) ?? null;
 }
 
 // ── Заказ для клиента ──
@@ -330,7 +312,7 @@ export async function panelAction(c: Ctx, action: string, arg: string): Promise<
     case "stats":
       return { dashboard: ["general", "all", ""] };
     case "pt":
-      return { dashboard: ["partners", "all", ""] };
+      return show(c, await ptList(c, "owner"));
     case "rc": {
       if (!arg) return show(c, await receipts(c));
       const o = await c.deps.repo.getOrderByNumber(Number(arg));
@@ -359,12 +341,11 @@ export async function panelAction(c: Ctx, action: string, arg: string): Promise<
     case "ms":
       return show(c, await managerStats(c));
     case "mp":
-      return show(c, await managerPartners(c));
+      return show(c, await ptList(c, "manager"));
     case "me":
       return show(c, await managerEarnings(c));
     case "mpn":
-      c.s.partnerDraft = {};
-      return { enter: "partnerName" };
+      return startNewPartner(c);
     case "mq": {
       const p = await c.deps.repo.getPartner(Number(arg));
       if (!p || p.managedBy !== c.user.id) return void (await toast(c, c.tx.oldButton));
@@ -377,10 +358,10 @@ export async function panelAction(c: Ctx, action: string, arg: string): Promise<
       const p = await c.deps.repo.findPartnerForUser(c.user.id, c.user.username);
       if (!p) return void (await toast(c, c.tx.oldButton));
       if (action === "pq") return void (await sendPack(c, p));
-      const r = await partnerRow(c, p);
+      const r = await partnerRowOf(c.deps, p);
       if (!r) return void (await toast(c, c.tx.oldButton));
       const bk = [{ text: c.tx.back, data: "pn:home" }];
-      if (action === "pp") return show(c, { text: c.tx.role.payoutsText({ earned: price(r.earned), paidOut: price(r.paidOut), due: price(r.due) }), rows: [bk] });
+      if (action === "pp") return show(c, { text: payoutsText(c, p, r), rows: [bk] });
       const link = `https://t.me/${await c.deps.tg.botUsername()}?start=p_${p.code}`;
       return show(c, {
         text: c.tx.partner.stats({ link, scanned: r.scanned, started: r.started, paid: r.paid, earned: price(r.earned), paidOut: price(r.paidOut), due: price(r.due) }),

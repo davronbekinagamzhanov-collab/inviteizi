@@ -84,6 +84,11 @@ export class Sim {
     await this.send({ ...this.base(id), kind: "location", lat, lng });
   }
 
+  /** Контакт: own — свой номер кнопкой «📱 Рақамни юбориш» */
+  async contact(id: number, phone: string, own = true) {
+    await this.send({ ...this.base(id), kind: "contact", phone, own });
+  }
+
   async photo(id: number, fileId = "RECEIPT_PHOTO") {
     await this.send({ ...this.base(id), kind: "photo", fileId });
   }

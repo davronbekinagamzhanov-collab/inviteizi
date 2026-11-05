@@ -31,6 +31,10 @@ export function newToken(length = 20) {
   return [...randomBytes(length)].map((b) => TOKEN_ALPHABET[b % TOKEN_ALPHABET.length]).join("");
 }
 
+/** Как показать менеджера: @username, имя или id */
+export const managerName = (m: Pick<Manager, "username" | "firstName" | "telegramId">) =>
+  m.username ? `@${m.username}` : m.firstName?.slice(0, 32) || `id ${m.telegramId}`;
+
 export const hashToken = (token: string) => createHash("sha256").update(token).digest("hex");
 
 /** Метки ?start=…: mgr_ (стать менеджером), join_ (стать партнёром), o_ (забрать заказ). Это не источник клиента */

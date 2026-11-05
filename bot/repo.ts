@@ -17,9 +17,23 @@ import type {
 import type { Occasion } from "@/lib/types";
 import type { Analytics, Period, EventKind } from "@/lib/analytics";
 import type { BotErrorEntry } from "./errors";
-import type { PanelSnapshot, Partner } from "@/lib/owner-panel";
+import type { PanelSnapshot, Partner, PayoutSchedule } from "@/lib/owner-panel";
 import type { RsvpInput, RsvpRecord } from "@/lib/rsvp";
 import type { ClaimStatus, InviteKind, InviteUse, Manager } from "@/lib/roles";
+
+export type NewPartner = {
+  code: string;
+  name: string;
+  telegramId: number | null;
+  username: string | null;
+  rate: number;
+  managedBy?: number | null;
+  phone?: string | null;
+  schedule?: PayoutSchedule;
+  status?: "pending" | "active";
+  ownerNotifiedAt?: Date | null;
+};
+export type PartnerPatch = Partial<Pick<Partner, "phone" | "kaspi" | "schedule" | "ownerNotifiedAt" | "sleepNotifiedAt">>;
 
 export interface Repo {
   /** Журнал ошибок бота: entry уже очищен от личных данных */
@@ -100,10 +114,21 @@ export interface Repo {
   rsvpDigestDue(dayStart: Date): Promise<{ id: string; number: number; userId: number; since: Date | null }[]>;
   /** Ставит метку сводки; false — сегодня её уже забрал другой запуск */
   claimRsvpDigest(orderId: string, dayStart: Date, now: Date): Promise<boolean>;
-  createPartner(p: { code: string; name: string; telegramId: number | null; username: string | null; rate: number; managedBy?: number | null }): Promise<Partner>;
+  /** Новый партнёр. status pending — создал менеджер, ждёт ✅ владельца; ownerNotifiedAt — владельцу уже сообщили */
+  createPartner(p: NewPartner): Promise<Partner>;
   getPartner(id: number): Promise<Partner | null>;
   setPartnerRate(id: number, rate: number): Promise<void>;
-  /** Партнёр этого человека: по id или по username (id тогда запоминается). Нет таблицы или партнёра — null */
+  /** Телефон, Kaspi, график, метки уведомлений */
+  updatePartner(id: number, patch: PartnerPatch): Promise<void>;
+  /** Ссылка join_: привязать Telegram, если партнёр ни к кому другому не привязан и не отклонён. null — нельзя */
+  bindPartner(id: number, userId: number, username: string | null): Promise<Partner | null>;
+  /** pending → active / rejected ровно один раз; false — уже решено (двойное нажатие) */
+  decidePartner(id: number, status: "active" | "rejected"): Promise<boolean>;
+  /** Менеджер предлагает ставку и график: ждут ✅ владельца (метка «сообщили» сбрасывается) */
+  proposePartnerTerms(id: number, rate: number, schedule: PayoutSchedule): Promise<void>;
+  /** ✅ — ставка и график из предложения, ❌ — предложение убирается. null — предложения уже нет */
+  settlePartnerProposal(id: number, accept: boolean): Promise<Partner | null>;
+  /** Партнёр этого человека: по id или по username (id тогда запоминается). Отклонённый не считается. Нет таблицы или партнёра — null */
   findPartnerForUser(userId: number, username: string | null): Promise<Partner | null>;
   findUserByUsername(username: string): Promise<UserRecord | null>;
   /**

@@ -1,5 +1,6 @@
 import { RSVP_IP_HOUR_LIMIT, RSVP_ORDER_LIMIT, type RsvpInput, type RsvpRecord } from "@/lib/rsvp";
-import type { PanelOrder, PanelSnapshot, Partner, PartnerEarning, PartnerPayout } from "@/lib/owner-panel";
+import type { PanelOrder, PanelSnapshot, Partner, PartnerEarning, PartnerPayout, PayoutSchedule } from "@/lib/owner-panel";
+import type { NewPartner, PartnerPatch } from "./repo";
 import type { BotErrorEntry } from "./errors";
 import type { ClaimStatus, InviteKind, InviteUse, Manager } from "@/lib/roles";
 /**
@@ -88,8 +89,25 @@ export class MemoryRepo implements Repo {
     const users = [...this.users.values()].map((u) => ({ id: u.id, createdAt: u.createdAt, source: u.source }));
     return { orders, users, partners: this.partners.map((p) => ({ ...p })), earnings: this.earnings.map((e) => ({ ...e })), payouts: this.payouts.map((p) => ({ ...p })), partnersReady: this.partnersReady };
   }
-  async createPartner(p: { code: string; name: string; telegramId: number | null; username: string | null; rate: number; managedBy?: number | null }) {
-    const partner: Partner = { ...p, managedBy: p.managedBy ?? null, id: this.partners.length + 1, createdAt: this.now() };
+  async createPartner(p: NewPartner) {
+    const partner: Partner = {
+      code: p.code,
+      name: p.name,
+      telegramId: p.telegramId,
+      username: p.username,
+      rate: p.rate,
+      managedBy: p.managedBy ?? null,
+      phone: p.phone ?? null,
+      kaspi: null,
+      schedule: p.schedule ?? "weekly",
+      status: p.status ?? "active",
+      proposedRate: null,
+      proposedSchedule: null,
+      ownerNotifiedAt: p.ownerNotifiedAt ?? null,
+      sleepNotifiedAt: null,
+      id: this.partners.length + 1,
+      createdAt: this.now(),
+    };
     this.partners.push(partner);
     return { ...partner };
   }
@@ -101,10 +119,39 @@ export class MemoryRepo implements Repo {
     const p = this.partners.find((x) => x.id === id);
     if (p) p.rate = rate;
   }
+  async updatePartner(id: number, patch: PartnerPatch) {
+    const p = this.partners.find((x) => x.id === id);
+    if (p) Object.assign(p, patch);
+  }
+  async bindPartner(id: number, userId: number, username: string | null) {
+    const p = this.partners.find((x) => x.id === id);
+    if (!p || p.status === "rejected" || (p.telegramId !== null && p.telegramId !== userId)) return null;
+    if (this.partners.some((x) => x.id !== id && x.telegramId === userId && x.status !== "rejected")) return null;
+    Object.assign(p, { telegramId: userId, username });
+    return { ...p };
+  }
+  async decidePartner(id: number, status: "active" | "rejected") {
+    const p = this.partners.find((x) => x.id === id);
+    if (!p || p.status !== "pending") return false;
+    p.status = status;
+    return true;
+  }
+  async proposePartnerTerms(id: number, rate: number, schedule: PayoutSchedule) {
+    const p = this.partners.find((x) => x.id === id);
+    if (p) Object.assign(p, { proposedRate: rate, proposedSchedule: schedule, ownerNotifiedAt: null });
+  }
+  async settlePartnerProposal(id: number, accept: boolean) {
+    const p = this.partners.find((x) => x.id === id);
+    if (!p || p.proposedRate === null || p.proposedSchedule === null) return null;
+    if (accept) Object.assign(p, { rate: p.proposedRate, schedule: p.proposedSchedule });
+    Object.assign(p, { proposedRate: null, proposedSchedule: null });
+    return { ...p };
+  }
   async findPartnerForUser(userId: number, username: string | null) {
     if (!this.partnersReady) return null;
     const name = username?.toLowerCase();
-    const p = this.partners.find((x) => x.telegramId === userId) ?? this.partners.find((x) => x.telegramId === null && !!name && x.username?.toLowerCase() === name);
+    const live = this.partners.filter((x) => x.status !== "rejected");
+    const p = live.find((x) => x.telegramId === userId) ?? live.find((x) => x.telegramId === null && !!name && x.username?.toLowerCase() === name);
     if (!p) return null;
     p.telegramId = userId;
     return { ...p };
@@ -115,7 +162,7 @@ export class MemoryRepo implements Repo {
   }
   async creditPartnerOrder(orderId: string, clientId: number, code: string) {
     const partner = this.partners.find((p) => p.code === code);
-    if (!partner || partner.telegramId === clientId || this.earnings.some((e) => e.orderId === orderId)) return null;
+    if (!partner || partner.status === "rejected" || partner.telegramId === clientId || this.earnings.some((e) => e.orderId === orderId)) return null;
     const client = this.users.get(clientId);
     if (client?.username && client.username.toLowerCase() === partner.username?.toLowerCase()) return null;
     this.earnings.push({ orderId, partnerId: partner.id, amount: partner.rate, delivered: false, createdAt: this.now() });
@@ -128,6 +175,7 @@ export class MemoryRepo implements Repo {
   async recordPartnerPayout(partnerId: number, expected: number, createdBy: number) {
     void createdBy;
     const staff = await this.staffIds();
+    if (this.partners.find((p) => p.id === partnerId)?.status !== "active") return false;
     const earned = this.earnings.filter((e) => e.partnerId === partnerId && !staff.includes(this.orders.get(e.orderId)?.userId ?? 0)).reduce((n, e) => n + e.amount, 0);
     const paid = this.payouts.filter((p) => p.partnerId === partnerId).reduce((n, p) => n + p.amount, 0);
     if (expected <= 0 || earned - paid !== expected) return false;

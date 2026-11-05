@@ -14,7 +14,23 @@ import { cmdFind, cmdOrders, cmdStats } from "./admin";
 import { mainMenu, ownerUrl, send, startMenu, texts, txFor } from "./util";
 import type { Lang } from "@/lib/domain";
 import { dashboard } from "./dashboard";
-import { partnerAction, partnerContact, partnerName, partnerRate, partnerRateEdit, partnerStats } from "./partners";
+import {
+  acceptPartnerInvite,
+  joinKaspi,
+  joinLang,
+  joinPhone,
+  partnerAction,
+  partnerConfirm,
+  partnerName,
+  partnerPhone,
+  partnerPropose,
+  partnerProposeSchedule,
+  partnerRate,
+  partnerRateEdit,
+  partnerSchedule,
+  partnerStats,
+  ptAction,
+} from "./partners";
 import { favorites, favoriteAction } from "./favorites";
 import { activeDesigns } from "@/templates/registry";
 import { catalogList, pageOf } from "./steps-order";
@@ -64,9 +80,16 @@ export const steps: Record<StepId, Step> = {
   evMenu,
   receipt,
   partnerName,
-  partnerContact,
+  partnerPhone,
   partnerRate,
+  partnerSchedule,
+  partnerConfirm,
   partnerRateEdit,
+  partnerPropose,
+  partnerProposeSchedule,
+  joinLang,
+  joinPhone,
+  joinKaspi,
 };
 
 const BACK_LIMIT = 60;
@@ -305,8 +328,8 @@ async function route(c: Ctx) {
   if (u.kind === "callback") {
     const d = u.data;
     if (d.startsWith("lang:")) return chooseLang(c, d.slice(5));
-    // Решение по чеку — даже если админ ещё не выбрал язык
-    if (!c.user.lang && !/^(ok|no|nr):/.test(d)) return askLang(c);
+    // Решение по чеку — даже если админ ещё не выбрал язык; партнёр по ссылке выбирает язык своим шагом
+    if (!c.user.lang && !/^(ok|no|nr):/.test(d) && c.step !== "joinLang") return askLang(c);
     return onCallback(c, d);
   }
 
@@ -314,6 +337,12 @@ async function route(c: Ctx) {
     const token = parseStartToken(u.args);
     if (token?.kind === "mgr") {
       await acceptManager(c, token.token);
+      if (!c.user.lang) return askLang(c);
+      return welcome(c);
+    }
+    if (token?.kind === "join") {
+      const r = await acceptPartnerInvite(c, token.token);
+      if (r !== "home" && r !== "failed") return apply(c, r);
       if (!c.user.lang) return askLang(c);
       return welcome(c);
     }
@@ -328,7 +357,8 @@ async function route(c: Ctx) {
     if (!c.user.lang) return askLang(c);
     return welcome(c);
   }
-  if (!c.user.lang) return askLang(c);
+  // Партнёр по ссылке ещё не выбрал язык: повторить его вопрос (на двух языках), а не общий
+  if (!c.user.lang) return c.step === "joinLang" ? ask(c) : askLang(c);
 
   if (u.kind === "command") return onCommand(c, u.command, u.args);
 
@@ -411,6 +441,11 @@ async function onCallback(c: Ctx, d: string) {
       const res = await dashboard(c, view, period, a);
       return res ? apply(c, res) : undefined;
     }
+    return r ? apply(c, r) : undefined;
+  }
+  if (d.startsWith("pa:")) {
+    const [, action, id = "", x = ""] = d.split(":");
+    const r = await ptAction(c, action, id, x);
     return r ? apply(c, r) : undefined;
   }
   if (d.startsWith("cl:")) {

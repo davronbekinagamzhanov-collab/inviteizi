@@ -13,7 +13,7 @@ export type InlineButton =
   /** Открыть страницу окном внутри Telegram (только личные чаты, только https) */
   | { text: string; webApp: string };
 
-export type ReplyButton = { text: string; location?: boolean };
+export type ReplyButton = { text: string; location?: boolean; contact?: boolean };
 
 export type Markup =
   | { inline: InlineButton[][] }

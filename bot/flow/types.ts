@@ -3,6 +3,7 @@ import type { Tg } from "../tg";
 import type { BotUpdate } from "../update";
 import type { Format, InvitationData, InvitationEvent, Lang, MusicChoice, Occasion, UserRecord } from "@/lib/domain";
 import type { BotTexts } from "@/texts/bot-uz";
+import type { PayoutSchedule } from "@/lib/owner-panel";
 
 export type BotEnv = {
   ownerUsername: string;
@@ -70,9 +71,16 @@ export type StepId =
   | "evMenu"
   | "receipt"
   | "partnerName"
-  | "partnerContact"
+  | "partnerPhone"
   | "partnerRate"
-  | "partnerRateEdit";
+  | "partnerSchedule"
+  | "partnerConfirm"
+  | "partnerRateEdit"
+  | "partnerPropose"
+  | "partnerProposeSchedule"
+  | "joinLang"
+  | "joinPhone"
+  | "joinKaspi";
 
 /** Данные анкеты по ходу заполнения (тадбиры могут быть недозаполнены) */
 export type DraftData = Omit<Partial<InvitationData>, "events"> & { events?: Partial<InvitationEvent>[] };
@@ -114,10 +122,10 @@ export type Draft = {
   /** Заказ уже оплачен: формат (и цену) менять нельзя */
   paid?: boolean;
   /** Новый партнёр, пока его заполняют */
-  partnerDraft?: { name?: string; telegramId?: number | null; username?: string | null };
+  partnerDraft?: { name?: string; phone?: string; rate?: number; schedule?: PayoutSchedule };
   /** Номер заказа «для клиента», который человек забрал до выбора языка: показать после выбора */
   claimed?: number;
-  /** Партнёр, которому меняют ставку */
+  /** Партнёр, которому меняют ставку (или который знакомится с ботом по ссылке join_) */
   partnerId?: number;
 };
 

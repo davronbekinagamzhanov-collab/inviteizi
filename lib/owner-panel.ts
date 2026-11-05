@@ -25,7 +25,34 @@ export type PanelOrder = {
   updatedAt: Date;
 };
 export type PanelUser = { id: number; createdAt: Date; source: string | null };
-export type Partner = { id: number; code: string; name: string; telegramId: number | null; username: string | null; rate: number; createdAt: Date; /** Менеджер, который привёл; null — партнёр владельца */ managedBy: number | null };
+/** График выплат: каждый день / раз в неделю (пн) / раз в месяц (1-го) */
+export type PayoutSchedule = "daily" | "weekly" | "monthly";
+export const SCHEDULES: PayoutSchedule[] = ["daily", "weekly", "monthly"];
+/** pending — создал менеджер, ждёт ✅ владельца (QR работает, оплаты считаются, выплаты нет); rejected — отклонён */
+export type PartnerStatus = "pending" | "active" | "rejected";
+export type Partner = {
+  id: number;
+  code: string;
+  name: string;
+  telegramId: number | null;
+  username: string | null;
+  rate: number;
+  createdAt: Date;
+  /** Менеджер, который привёл; null — партнёр владельца */
+  managedBy: number | null;
+  /** +77011234567 */
+  phone: string | null;
+  /** Куда переводить: телефон Kaspi или номер карты */
+  kaspi: string | null;
+  schedule: PayoutSchedule;
+  status: PartnerStatus;
+  /** Предложение менеджера (ставка + график), ждёт ✅ владельца; null — нет */
+  proposedRate: number | null;
+  proposedSchedule: PayoutSchedule | null;
+  /** null — владельцу о новом партнёре / предложении ещё не сообщили */
+  ownerNotifiedAt: Date | null;
+  sleepNotifiedAt: Date | null;
+};
 export type PartnerEarning = { orderId: string; partnerId: number; amount: number; delivered: boolean; createdAt: Date };
 export type PartnerPayout = { partnerId: number; amount: number; createdAt: Date };
 export type PanelSnapshot = {
@@ -150,6 +177,10 @@ export type PartnerRow = {
   earned: number;
   paidOut: number;
   due: number;
+  /** Начислено, но партнёр ещё не подтверждён владельцем: к выплате станет после ✅ */
+  onHold: number;
+  /** Последний скан (первый вход по коду); null — сканов не было */
+  lastScanAt: Date | null;
   /** Сколько сообщений об оплате не дошло (партнёр не нажимал /start) */
   undelivered: number;
 };
@@ -170,7 +201,9 @@ export function partnerRows(s: PanelSnapshot, period: Period, now: Date): Partne
       paid: earnings.filter((e) => inside(e.createdAt)).length,
       earned,
       paidOut,
-      due: earned - paidOut,
+      due: partner.status === "active" ? earned - paidOut : 0,
+      onHold: partner.status === "pending" ? earned - paidOut : 0,
+      lastScanAt: users.reduce<Date | null>((d, u) => (!d || u.createdAt > d ? u.createdAt : d), null),
       undelivered: earnings.filter((e) => !e.delivered).length,
     };
   });

@@ -1,5 +1,5 @@
 import { RSVP_IP_HOUR_LIMIT, RSVP_ORDER_LIMIT, type RsvpInput, type RsvpRecord } from "@/lib/rsvp";
-import type { PanelOrder, PanelSnapshot, Partner, PartnerEarning, PartnerPayout, PanelUser } from "@/lib/owner-panel";
+import type { PanelOrder, PanelSnapshot, Partner, PartnerEarning, PartnerPayout, PanelUser, PayoutSchedule } from "@/lib/owner-panel";
 import type { BotErrorEntry } from "./errors";
 import type { ClaimStatus, InviteKind, InviteUse, Manager } from "@/lib/roles";
 /**
@@ -7,7 +7,7 @@ import type { ClaimStatus, InviteKind, InviteUse, Manager } from "@/lib/roles";
  * Поведение — как у bot/repo-memory.ts (общий набор тестов bot/repo.contract.ts).
  * Таблицы: supabase/migrations/*_schema.sql.
  */
-import type { Repo } from "./repo";
+import type { NewPartner, PartnerPatch, Repo } from "./repo";
 import type {
   InvitationData,
   InvitationEvent,
@@ -317,7 +317,10 @@ const isUniqueSlugViolation = (e: unknown) =>
   typeof e === "object" && e !== null && (e as { code?: string }).code === "23505" &&
   String((e as { constraint_name?: string }).constraint_name ?? "").includes("slug");
 
-const PARTNER_COLUMNS = `id, code, name, telegram_id as "telegramId", username, rate, created_at as "createdAt", managed_by as "managedBy"`;
+const PARTNER_COLUMNS = `id, code, name, telegram_id as "telegramId", username, rate, created_at as "createdAt", managed_by as "managedBy",
+  phone, kaspi, schedule, status, proposed_rate as "proposedRate", proposed_schedule as "proposedSchedule",
+  owner_notified_at as "ownerNotifiedAt", sleep_notified_at as "sleepNotifiedAt"`;
+const PARTNER_PATCH: Record<keyof PartnerPatch, string> = { phone: "phone", kaspi: "kaspi", schedule: "schedule", ownerNotifiedAt: "owner_notified_at", sleepNotifiedAt: "sleep_notified_at" };
 const MANAGER_COLUMNS = `telegram_id as "telegramId", code, username, first_name as "firstName", invited_by as "invitedBy", active, created_at as "createdAt"`;
 /** Миграция партнёров ещё не применена */
 const isMissingTable = (e: unknown) => (e as { code?: string } | null)?.code === "42P01";
@@ -440,9 +443,10 @@ export class PgRepo implements Repo {
     }
   }
 
-  async createPartner(p: { code: string; name: string; telegramId: number | null; username: string | null; rate: number; managedBy?: number | null }) {
-    const [r] = await this.sql<Partner[]>`insert into public.partners(code,name,telegram_id,username,rate,managed_by)
-      values(${p.code},${p.name},${p.telegramId},${p.username},${p.rate},${p.managedBy ?? null}) returning ${this.sql.unsafe(PARTNER_COLUMNS)}`;
+  async createPartner(p: NewPartner) {
+    const [r] = await this.sql<Partner[]>`insert into public.partners(code,name,telegram_id,username,rate,managed_by,phone,schedule,status,owner_notified_at)
+      values(${p.code},${p.name},${p.telegramId},${p.username},${p.rate},${p.managedBy ?? null},${p.phone ?? null},${p.schedule ?? "weekly"},${p.status ?? "active"},${p.ownerNotifiedAt ?? null})
+      returning ${this.sql.unsafe(PARTNER_COLUMNS)}`;
     return r;
   }
 
@@ -456,13 +460,48 @@ export class PgRepo implements Repo {
     await this.sql`update public.partners set rate = ${rate} where id = ${id}`;
   }
 
+  async updatePartner(id: number, patch: PartnerPatch) {
+    const row = Object.fromEntries(Object.entries(patch).map(([k, v]) => [PARTNER_PATCH[k as keyof PartnerPatch], v]));
+    const cols = Object.keys(row);
+    if (!cols.length || !Number.isSafeInteger(id)) return;
+    await this.sql`update public.partners set ${this.sql(row, cols)} where id = ${id}`;
+  }
+
+  async bindPartner(id: number, userId: number, username: string | null) {
+    // Один человек — один действующий партнёр; чужую привязку ссылка не перезаписывает
+    const [r] = await this.sql<Partner[]>`update public.partners set telegram_id = ${userId}, username = ${username}
+      where id = ${id} and status <> 'rejected' and (telegram_id is null or telegram_id = ${userId})
+        and not exists (select 1 from public.partners x where x.id <> ${id} and x.telegram_id = ${userId} and x.status <> 'rejected')
+      returning ${this.sql.unsafe(PARTNER_COLUMNS)}`;
+    return r ?? null;
+  }
+
+  async decidePartner(id: number, status: "active" | "rejected") {
+    const rows = await this.sql`update public.partners set status = ${status} where id = ${id} and status = 'pending' returning id`;
+    return rows.length > 0;
+  }
+
+  async proposePartnerTerms(id: number, rate: number, schedule: PayoutSchedule) {
+    await this.sql`update public.partners set proposed_rate = ${rate}, proposed_schedule = ${schedule}, owner_notified_at = null where id = ${id}`;
+  }
+
+  async settlePartnerProposal(id: number, accept: boolean) {
+    // Одно обновление: двойное нажатие не применит предложение дважды
+    const [r] = accept
+      ? await this.sql<Partner[]>`update public.partners set rate = proposed_rate, schedule = proposed_schedule, proposed_rate = null, proposed_schedule = null
+          where id = ${id} and proposed_rate is not null returning ${this.sql.unsafe(PARTNER_COLUMNS)}`
+      : await this.sql<Partner[]>`update public.partners set proposed_rate = null, proposed_schedule = null
+          where id = ${id} and proposed_rate is not null returning ${this.sql.unsafe(PARTNER_COLUMNS)}`;
+    return r ?? null;
+  }
+
   async findPartnerForUser(userId: number, username: string | null) {
     try {
-      const [byId] = await this.sql<Partner[]>`select ${this.sql.unsafe(PARTNER_COLUMNS)} from public.partners where telegram_id = ${userId} order by id limit 1`;
+      const [byId] = await this.sql<Partner[]>`select ${this.sql.unsafe(PARTNER_COLUMNS)} from public.partners where telegram_id = ${userId} and status <> 'rejected' order by id limit 1`;
       if (byId) return byId;
       if (!username) return null;
       const [bound] = await this.sql<Partner[]>`update public.partners set telegram_id = ${userId}
-        where id = (select id from public.partners where telegram_id is null and lower(username) = lower(${username}) order by id limit 1)
+        where id = (select id from public.partners where telegram_id is null and status <> 'rejected' and lower(username) = lower(${username}) order by id limit 1)
         returning ${this.sql.unsafe(PARTNER_COLUMNS)}`;
       return bound ?? null;
     } catch (e) {
@@ -477,7 +516,7 @@ export class PgRepo implements Repo {
   }
 
   async creditPartnerOrder(orderId: string, clientId: number, code: string) {
-    const [partner] = await this.sql<Partner[]>`select ${this.sql.unsafe(PARTNER_COLUMNS)} from public.partners p where code = ${code}
+    const [partner] = await this.sql<Partner[]>`select ${this.sql.unsafe(PARTNER_COLUMNS)} from public.partners p where code = ${code} and p.status <> 'rejected'
       and p.telegram_id is distinct from ${clientId}
       and not exists (select 1 from public.users u where u.id = ${clientId} and p.username is not null and lower(u.username) = lower(p.username))`;
     if (!partner) return null;
@@ -494,7 +533,7 @@ export class PgRepo implements Repo {
     const staff = this.sql.array((await this.staffIds()).map(String));
     return this.sql.begin(async (tx) => {
       // Блокировка партнёра: две одновременные выплаты идут по очереди
-      const [p] = await tx`select id from public.partners where id = ${partnerId} for update`;
+      const [p] = await tx`select id from public.partners where id = ${partnerId} and status = 'active' for update`;
       if (!p || expected <= 0) return false;
       const [{ due }] = await tx<{ due: number }[]>`select
         (select coalesce(sum(e.amount),0) from public.partner_earnings e join public.orders o on o.id = e.order_id

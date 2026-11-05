@@ -25,7 +25,7 @@ function markupOf(m?: Markup): InlineKeyboardMarkup | ReplyKeyboardMarkup | Repl
   if ("inline" in m) return inlineKb(m.inline);
   if ("reply" in m) {
     return {
-      keyboard: m.reply.map((row) => row.map((b) => (b.location ? { text: b.text, request_location: true } : { text: b.text }))),
+      keyboard: m.reply.map((row) => row.map((b) => (b.location ? { text: b.text, request_location: true } : b.contact ? { text: b.text, request_contact: true } : { text: b.text }))),
       resize_keyboard: true,
       is_persistent: true,
       ...(m.oneTime ? { one_time_keyboard: true } : {}),

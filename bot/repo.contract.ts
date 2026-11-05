@@ -309,6 +309,26 @@ export function repoContract(makeRepo: () => Promise<Repo>) {
       expect((await repo.getManager(id))?.code).toBe(m.code);
     });
 
+    it("партнёр (часть 5): без Telegram, привязка один раз, решение один раз, предложение", async () => {
+      const repo = await makeRepo();
+      const code = `p${tag}${++seq}`.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 32);
+      const p = await repo.createPartner({ code, name: "Салон", telegramId: null, username: null, rate: 0, phone: "+77011234567", schedule: "monthly", status: "pending", managedBy: 7 });
+      expect(p).toMatchObject({ status: "pending", schedule: "monthly", phone: "+77011234567", kaspi: null, proposedRate: null, ownerNotifiedAt: null, sleepNotifiedAt: null });
+      const a = uid();
+      const b = uid();
+      expect(await repo.bindPartner(p.id, a, "salon")).toMatchObject({ telegramId: a, username: "salon" });
+      expect(await repo.bindPartner(p.id, b, null)).toBeNull();
+      await repo.updatePartner(p.id, { kaspi: "4400 4301 2345 6789", ownerNotifiedAt: new Date() });
+      expect((await repo.getPartner(p.id))?.kaspi).toBe("4400 4301 2345 6789");
+      expect(await repo.decidePartner(p.id, "active")).toBe(true);
+      expect(await repo.decidePartner(p.id, "rejected")).toBe(false);
+      await repo.proposePartnerTerms(p.id, 1500, "daily");
+      expect((await repo.getPartner(p.id))?.ownerNotifiedAt).toBeNull();
+      expect(await repo.settlePartnerProposal(p.id, true)).toMatchObject({ rate: 1500, schedule: "daily", proposedRate: null });
+      expect(await repo.settlePartnerProposal(p.id, true)).toBeNull();
+      expect((await repo.findPartnerForUser(a, null))?.id).toBe(p.id);
+    });
+
     it("одноразовая ссылка: срабатывает один раз, не после срока, только своего вида", async () => {
       const repo = await makeRepo();
       const now = new Date();

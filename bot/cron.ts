@@ -5,17 +5,27 @@
  *  - архив: прошёл expiresAt (последний тадбир + 30 дней) → archived (ссылка показывает заглушку).
  *  - хозяину: вечером сводка новых ответов гостей (один раз в день и только если они есть).
  *  - фото клиента: удаляются через 30 дней после конца приглашения (expiresAt + 30 дней).
+ *  - партнёры: карточки владельцу, отложенные на ночь; «спящие» (14 дней без сканов) — тому, кто привёл.
  * Каждое напоминание — одна попытка: если пользователь заблокировал бота, повторять не будем.
  */
 import type { Deps } from "./flow/types";
 import { adminCard, decisionButtons } from "./flow/orders";
 import { inline, pageUrl, price, txFor } from "./flow/util";
-import { creditPartner } from "./flow/partners";
+import { creditPartner, flushOwnerNotices, notifySleeping } from "./flow/partners";
 import { rsvpTotals } from "@/lib/rsvp";
 import { expiresAtOf } from "@/lib/orders";
 import { PHOTO_KEEP_AFTER_EXPIRY_MS } from "./own-photo";
 
-export type CronResult = { adminReminded: number; clientReminded: number; archived: number; rsvpDigests: number; photosRemoved: number; errors: number };
+export type CronResult = {
+  adminReminded: number;
+  clientReminded: number;
+  archived: number;
+  rsvpDigests: number;
+  photosRemoved: number;
+  partnerNotices: number;
+  sleeping: number;
+  errors: number;
+};
 
 const MIN = 60_000;
 export const ADMIN_REMIND_AFTER_MIN = 30;
@@ -65,7 +75,7 @@ async function removeOldPhotos(deps: Deps, now: Date, r: CronResult) {
 export async function runCron(deps: Deps): Promise<CronResult> {
   const { repo, tg } = deps;
   const now = deps.now();
-  const r: CronResult = { adminReminded: 0, clientReminded: 0, archived: 0, rsvpDigests: 0, photosRemoved: 0, errors: 0 };
+  const r: CronResult = { adminReminded: 0, clientReminded: 0, archived: 0, rsvpDigests: 0, photosRemoved: 0, partnerNotices: 0, sleeping: 0, errors: 0 };
   const ctx = { deps };
 
   // ── Админам: чек ждёт ──
@@ -126,6 +136,15 @@ export async function runCron(deps: Deps): Promise<CronResult> {
   } catch (e) {
     r.errors++;
     console.error("cron partners", e instanceof Error ? e.name : "Error");
+  }
+
+  // ── Партнёры: карточки владельцу после тихих часов, «спящие» ──
+  try {
+    r.partnerNotices = await flushOwnerNotices(deps);
+    r.sleeping = await notifySleeping(deps);
+  } catch (e) {
+    r.errors++;
+    console.error("cron partner notices", e instanceof Error ? e.name : "Error");
   }
 
   // ── Хозяину: вечерняя сводка ответов гостей ──
