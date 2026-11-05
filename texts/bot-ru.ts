@@ -669,6 +669,9 @@ export const staff = {
     mgrNote: (name: string, amount: string) => `💸 ${name}: выплачено ${amount}`,
     mgrPayToday: (month: string, count: string, bonus: string, amount: string, owner: string) =>
       `💰 За ${month}: ${count} × 500 ₸${bonus ? ` + бонус ${bonus}` : ""} = ${amount}.\n${owner} переведёт сегодня.`,
+    errors: (n: number, period: string, top: string) => `⚠️ Бот: ${n} ошибок ${period} — ${top || "без описания"}\nПодробности — в журнале bot_errors (Supabase).`,
+    errorsHour: "за час",
+    errorsNight: "за ночь",
     mgrPaidOut: (amount: string, month: string) => `✅ Вам переведено ${amount} за ${month}.`,
   },
   /** Партнёры (v2, часть 5) */

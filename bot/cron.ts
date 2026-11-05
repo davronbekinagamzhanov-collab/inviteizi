@@ -16,7 +16,7 @@ import { creditPartner, flushOwnerNotices, notifySleeping } from "./flow/partner
 import { rsvpTotals } from "@/lib/rsvp";
 import { expiresAtOf } from "@/lib/orders";
 import { PHOTO_KEEP_AFTER_EXPIRY_MS } from "./own-photo";
-import { eveningReports, flushNotices, payDayNotices } from "./flow/notify";
+import { errorAlert, eveningReports, flushNotices, payDayNotices } from "./flow/notify";
 import { cleanup, nudges, reviewRequests } from "./flow/care";
 import { isQuiet, kzHour, QUIET_TO } from "@/lib/quiet-hours";
 
@@ -34,6 +34,7 @@ export type CronResult = {
   nudges: number;
   reviews: number;
   cleaned: number;
+  errorAlerts: number;
   errors: number;
 };
 
@@ -88,7 +89,7 @@ async function removeOldPhotos(deps: Deps, now: Date, r: CronResult) {
 export async function runCron(deps: Deps): Promise<CronResult> {
   const { repo, tg } = deps;
   const now = deps.now();
-  const r: CronResult = { adminReminded: 0, clientReminded: 0, archived: 0, rsvpDigests: 0, photosRemoved: 0, partnerNotices: 0, sleeping: 0, notices: 0, payDay: 0, evening: 0, nudges: 0, reviews: 0, cleaned: 0, errors: 0 };
+  const r: CronResult = { adminReminded: 0, clientReminded: 0, archived: 0, rsvpDigests: 0, photosRemoved: 0, partnerNotices: 0, sleeping: 0, notices: 0, payDay: 0, evening: 0, nudges: 0, reviews: 0, cleaned: 0, errorAlerts: 0, errors: 0 };
   const ctx = { deps };
 
   // ── Админам: чек ждёт > 30 мин — днём (08:00–21:00), дальше каждые 2 часа до 21:00 ──
@@ -175,6 +176,7 @@ export async function runCron(deps: Deps): Promise<CronResult> {
     r.notices = await flushNotices(deps);
     r.payDay = await payDayNotices(deps);
     r.evening = await eveningReports(deps);
+    r.errorAlerts = await errorAlert(deps);
   } catch (e) {
     r.errors++;
     console.error("cron notices", e instanceof Error ? e.name : "Error");

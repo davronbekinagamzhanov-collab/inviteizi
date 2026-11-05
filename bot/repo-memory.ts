@@ -132,6 +132,19 @@ export class MemoryRepo implements Repo {
     const list = this.reviews.filter((r) => +r.createdAt >= +from && +r.createdAt < +to && (!orderIds || orderIds.includes(r.orderId)));
     return list.length ? { avg: list.reduce((n, r) => n + r.stars, 0) / list.length, count: list.length } : null;
   }
+  async errorSummary(since: Date) {
+    const list = this.botErrors.filter((e) => +(e as { at?: Date }).at! >= +since);
+    const counts = new Map<string, number>();
+    for (const e of list) {
+      const k = `${e.errorName}${e.errorCode ? ` ${e.errorCode}` : ""}: ${e.message.slice(0, 80)}`;
+      counts.set(k, (counts.get(k) ?? 0) + 1);
+    }
+    const top = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "";
+    return { count: list.length, top };
+  }
+  async noticeSentSince(prefix: string, since: Date) {
+    return [...this.notices.values()].some((n) => n.key.startsWith(prefix) && n.sentAt && +n.sentAt >= +since);
+  }
   async staleDraftStates(before: Date) {
     return [...this.users.values()].filter((u) => +u.lastSeenAt < +before && u.state && Object.keys(u.state).some((k) => k === "data" || k === "music")).map((u) => ({ id: u.id, state: clone(u.state) }));
   }
@@ -319,7 +332,8 @@ export class MemoryRepo implements Repo {
   }
   botErrors: BotErrorEntry[] = [];
   async logBotError(entry: BotErrorEntry) {
-    this.botErrors.push(entry);
+    // Время записи — как created_at в базе (для сигнала «≥3 ошибок за час»)
+    this.botErrors.push({ ...entry, at: this.now() } as BotErrorEntry);
   }
   private favorites = new Map<number, Map<string,number>>();
   private analyticsEvents = new Map<string, MetricEvent>();

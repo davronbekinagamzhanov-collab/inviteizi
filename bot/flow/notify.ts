@@ -397,3 +397,23 @@ export async function gotPayout(c: Ctx) {
   await c.deps.tg.editMessageReplyMarkup(c.chatId, c.u.messageId, null).catch(() => undefined);
   await toast(c, c.tx.role.thanks);
 }
+
+// ── Сигнал об ошибках: ≥3 за час — владельцу одно сообщение, не чаще раза в 2 часа, ночью — утром ──
+
+export const ERROR_ALERT_MIN = 3;
+const ERROR_ALERT_EVERY = 2 * HOUR;
+
+export async function errorAlert(deps: Deps) {
+  const now = deps.now();
+  if (isQuiet(now)) return 0;
+  // Первый утренний запуск смотрит и ночь (с 22:00), дальше — последний час
+  const morning = kzHour(now) === 8;
+  const since = new Date(+now - (morning ? 10 : 1) * HOUR);
+  if (await deps.repo.noticeSentSince("err:", new Date(+now - ERROR_ALERT_EVERY))) return 0;
+  const sum = await deps.repo.errorSummary(since);
+  if (!sum || sum.count < ERROR_ALERT_MIN) return 0;
+  const text = N.errors(sum.count, morning ? N.errorsNight : N.errorsHour, sum.top.slice(0, 160));
+  let sent = 0;
+  for (const id of await deps.repo.listAdminIds()) if (await notify(deps, `err:${+now}:${id}`, id, text)) sent++;
+  return sent;
+}

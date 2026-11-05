@@ -91,3 +91,40 @@ describe("одно сообщение после оплаты (ночная за
     for (const tx of [uz, ru, kk]) for (const t of [tx.pay.paidPack(url), tx.pay.linkPack(url)]) expect(t.length).toBeLessThanOrEqual(1024);
   });
 });
+
+describe("сигнал об ошибках владельцу (ночь п.5)", () => {
+  const err = { step: "review", updateKind: "callback", errorName: "TimeoutError", errorCode: null, message: "db timeout", stack: null, outcome: "retry" as const };
+  it("≥3 ошибок за час — одно сообщение; повтор не раньше чем через 2 часа; 2 ошибки — тишина", async () => {
+    const s = new Sim();
+    await prepare(s, ADMIN, uz.langRu);
+    const alerts = () => s.tg.to(ADMIN).filter((m) => m.text?.startsWith("⚠️ Бот:"));
+    await s.repo.logBotError(err);
+    await s.repo.logBotError(err);
+    await runCron(s.deps);
+    expect(alerts()).toHaveLength(0);
+    await s.repo.logBotError(err);
+    await runCron(s.deps);
+    await runCron(s.deps);
+    expect(alerts()).toHaveLength(1);
+    expect(alerts()[0].text).toContain("3 ошибок за час — TimeoutError: db timeout");
+    s.advance(60);
+    for (let i = 0; i < 3; i++) await s.repo.logBotError(err);
+    await runCron(s.deps);
+    expect(alerts()).toHaveLength(1);
+    s.advance(61);
+    for (let i = 0; i < 3; i++) await s.repo.logBotError(err);
+    await runCron(s.deps);
+    expect(alerts()).toHaveLength(2);
+  });
+
+  it("ночью — молчит, утром в 08:xx — сообщает про ночь", async () => {
+    const s = new Sim({ now: "2026-11-01T18:00:00Z" }); // 23:00
+    await prepare(s, ADMIN, uz.langRu);
+    for (let i = 0; i < 4; i++) await s.repo.logBotError(err);
+    await runCron(s.deps);
+    expect(s.tg.to(ADMIN).some((m) => m.text?.startsWith("⚠️ Бот:"))).toBe(false);
+    s.clock = new Date("2026-11-02T03:05:00Z"); // 08:05
+    await runCron(s.deps);
+    expect(s.tg.to(ADMIN).filter((m) => m.text?.startsWith("⚠️ Бот:")).at(-1)?.text).toContain("4 ошибок за ночь");
+  });
+});

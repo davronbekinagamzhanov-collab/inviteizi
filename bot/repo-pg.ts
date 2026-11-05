@@ -563,6 +563,29 @@ export class PgRepo implements Repo {
     }
   }
 
+  async errorSummary(since: Date) {
+    try {
+      const rows = await this.sql<{ reason: string; n: number }[]>`select error_name || coalesce(' ' || error_code, '') || ': ' || left(message, 80) as reason, count(*)::int as n
+        from public.bot_errors where created_at >= ${since} group by 1 order by 2 desc limit 1`;
+      const [{ count }] = await this.sql<{ count: number }[]>`select count(*)::int as count from public.bot_errors where created_at >= ${since}`;
+      return { count, top: rows[0]?.reason ?? "" };
+    } catch (e) {
+      const code = (e as { code?: string } | null)?.code;
+      if (code === "42501" || isMissingTable(e)) return null;
+      throw e;
+    }
+  }
+
+  async noticeSentSince(prefix: string, since: Date) {
+    try {
+      const rows = await this.sql`select 1 from public.bot_notices where key like ${prefix + "%"} and sent_at >= ${since} limit 1`;
+      return rows.length > 0;
+    } catch (e) {
+      if (isMissingTable(e)) return false;
+      throw e;
+    }
+  }
+
   async staleDraftStates(before: Date) {
     const rows = await this.sql<{ id: number; state: Record<string, unknown> }[]>`select id, state from public.users
       where last_seen_at < ${before} and (state ? 'data' or state ? 'music') limit 500`;
