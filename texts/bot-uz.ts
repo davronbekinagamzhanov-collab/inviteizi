@@ -38,6 +38,9 @@ export const uz = {
   chooseLang: "Тилни танланг / Выберите язык 👇",
   langUz: "🇺🇿 Ўзбекча",
   langRu: "🇷🇺 Русский",
+  langKk: "🇰🇿 Қазақша",
+  /** При KAZAKH_ENABLED: выбор из трёх языков */
+  chooseLang3: "Тилни танланг / Выберите язык / Тілді таңдаңыз 👇",
   langSaved: "✅ Тил: ўзбекча.",
 
   menu: {
@@ -365,7 +368,7 @@ export const uz = {
   },
   /** v2, часть 9: языки приглашения */
   langs: {
-    names: { ru: "Русча", kk: "Қозоқча" } as Record<string, string>,
+    names: { ru: "Русча", kk: "Қозоқча", uz: "Ўзбекча" } as Record<string, string>,
     review: (list: string) => `🌐 Тиллар: Ўзбекча${list ? ` · ${list}` : ""}`,
     edit: "🌐 Тиллар",
     ask: (kk: boolean) => `🌐 Тиллар\n\nЎзбек тили доим бор. Меҳмонлар ${kk ? "рус ёки қозоқ" : "рус"} тилида ўқиши учун қўшинг — меҳмон ўзи танлайди. Нархи ўзгармайди.`,
@@ -375,6 +378,9 @@ export const uz = {
     ownButton: (name: string) => `✍️ Ўз матнингиз · ${name}`,
     ownAsk: (name: string) => `✍️ Ўз матнингизни ${name.toLowerCase()} ёзинг (600 белгигача).\nЁзмасангиз, бу тилда ҳам ўзбекча матн кўринади.`,
     done: "✅ Тайёр",
+    mainAsk: "Таклифнома қайси тилда очилсин?",
+    mainHint: "Меҳмоннинг телефони танланган тилларидан бирида бўлса — ўша тилда очилади.",
+    main: (name: string) => `Асосий тил: ${name.toLowerCase()}`,
   },
   partner: {
     paidNotice: (amount: string) => `Сизнинг кодингиз орқали янги буюртма тўланди ✅ +${amount}`,
@@ -419,6 +425,7 @@ export const uz = {
       `🤝 InviteIZI ҳамкори\n${name}${pending ? "\n\n⏳ Тасдиқ кутилмоқда. QR ишлайди, тўловлар ҳисобланади." : ""}`,
     /** Ссылка join_: язык ещё не выбран — текст на двух языках */
     joinHello: "🤝 Сиз InviteIZI ҳамкорисиз!\n🤝 Вы партнёр InviteIZI!\n\nТилни танланг · Выберите язык",
+    joinHello3: "🤝 Сиз InviteIZI ҳамкорисиз!\n🤝 Вы партнёр InviteIZI!\n🤝 Сіз InviteIZI серіктесісіз!\n\nТилни танланг · Выберите язык · Тілді таңдаңыз",
     askPhone: "📱 Рақамингизни юборинг — пастдаги тугмани босинг 👇",
     phoneButton: "📱 Рақамни юбориш",
     badPhone: "Пастдаги «📱 Рақамни юбориш» тугмасини босинг 👇",
@@ -457,6 +464,7 @@ export const uz = {
     qrCaption: (name: string, link: string) => `🔳 ${name}\n${link}\n\nПостер A4 (PDF ва PNG) — пастдаги тугма 👇`,
     posterUz: "📄 Постер · ўзбекча",
     posterRu: "📄 Постер · русча",
+    posterKk: "📄 Постер · қозоқча",
     posterReady: (name: string) => `📄 ${name} — постер A4. PDF — чоп этиш учун, PNG — телефонга.`,
     poster: {
       title: "Онлайн таклифнома — 5 дақиқада",

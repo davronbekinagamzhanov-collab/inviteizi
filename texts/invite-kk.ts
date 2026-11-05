@@ -18,8 +18,6 @@ export const posterKk: PosterText = {
   sample: "Үлгі",
 };
 
-/** Подпись кнопки постера (у сотрудников по-русски, у партнёра — на его языке) */
-export const posterKkButton = { uz: "📄 Постер · қозоқча", ru: "📄 Постер · казахский" } as const;
 
 // ── Пригласительное на казахском (v2, часть 9). Ключи — как в texts/uz-cyrl.ts ──
 

@@ -164,6 +164,9 @@ function toData(r: OrderRow): InvitationData {
   if (r.photos?.length) d.photos = r.photos;
   const extra = EXTRA_LANGS.filter((l) => r.langs?.includes(l));
   if (extra.length) d.langs = extra;
+  // Главный язык страницы — первый в списке
+  const main = r.langs?.[0];
+  if (main && main !== "uz" && extra.includes(main as ExtraLang)) d.mainLang = main as ExtraLang;
   const own = Object.fromEntries(EXTRA_LANGS.flatMap((l) => (typeof r.custom_text_i18n?.[l] === "string" && r.custom_text_i18n[l] ? [[l, r.custom_text_i18n[l]]] : [])));
   if (Object.keys(own).length) d.customTexts = own;
   return d;
@@ -220,6 +223,13 @@ function toMusicRecord(r: MusicRow): MusicRecord {
 
 type Columns = Record<string, string | number | boolean | Date | string[] | Partial<Record<ExtraLang, string>> | null>;
 
+/** Колонка orders.langs: главный язык первым, узбекский всегда есть */
+function langsColumn(langs: ExtraLang[], main?: ExtraLang) {
+  const extra = EXTRA_LANGS.filter((l) => langs.includes(l));
+  const first = main && extra.includes(main) ? main : "uz";
+  return [first, ...["uz", ...extra].filter((l) => l !== first)];
+}
+
 function dataColumns(d: InvitationData): Columns {
   return {
     occasion: d.occasion,
@@ -239,7 +249,7 @@ function dataColumns(d: InvitationData): Columns {
     // Колонка photos появляется миграцией client_photos: заказы без фото её не трогают
     ...(d.photos !== undefined && { photos: d.photos.length ? d.photos : null }),
     // v2: колонки языков появляются миграцией invite_langs — заказы без языков их не трогают
-    ...(d.langs !== undefined && { langs: ["uz", ...EXTRA_LANGS.filter((l) => d.langs!.includes(l))] }),
+    ...(d.langs !== undefined && { langs: langsColumn(d.langs, d.mainLang) }),
     ...(d.customTexts !== undefined && { custom_text_i18n: Object.keys(d.customTexts).length ? d.customTexts : null }),
   };
 }

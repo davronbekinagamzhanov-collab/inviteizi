@@ -23,7 +23,7 @@ import {
 import { hashToken, INVITE_TTL_MS, managerName, newToken } from "@/lib/roles";
 import { isQuiet } from "@/lib/quiet-hours";
 import { posterPdf, renderPosterPng } from "@/lib/poster";
-import { posterKk, posterKkButton } from "@/texts/invite-kk";
+import { posterKk } from "@/texts/invite-kk";
 import { activeDesigns, PRICES } from "@/templates/registry";
 import { staff as S } from "@/texts/bot-ru";
 import type { InlineButton } from "../tg";
@@ -104,7 +104,7 @@ export async function sendPack(c: Ctx, p: Partner) {
     caption: tx.role.qrCaption(p.name, link),
     markup: inline([
       [{ text: tx.role.posterUz, data: `pq:${p.id}:uz` }, { text: tx.role.posterRu, data: `pq:${p.id}:ru` }],
-      ...(c.deps.env.kazakhEnabled ? [[{ text: posterKkButton[tx === texts.ru ? "ru" : "uz"], data: `pq:${p.id}:kk` }]] : []),
+      ...(c.deps.env.kazakhEnabled ? [[{ text: tx.role.posterKk, data: `pq:${p.id}:kk` }]] : []),
     ]),
   });
 }
@@ -659,10 +659,11 @@ async function myPartner(c: Ctx) {
 export const joinLang: Step = {
   async ask(c) {
     const tx = texts.uz;
-    await send(c, tx.role.joinHello, inline([[ib(c, tx.langUz, "uz"), ib(c, tx.langRu, "ru")]]));
+    const kk = Boolean(c.deps.env.kazakhEnabled);
+    await send(c, kk ? tx.role.joinHello3 : tx.role.joinHello, inline([[ib(c, tx.langUz, "uz"), ib(c, tx.langRu, "ru"), ...(kk ? [ib(c, tx.langKk, "kk")] : [])]]));
   },
   async onButton(c, v) {
-    if (v !== "uz" && v !== "ru") return null;
+    if (v !== "uz" && v !== "ru" && !(v === "kk" && c.deps.env.kazakhEnabled)) return null;
     if (!(await myPartner(c))) return { done: true };
     await c.deps.repo.setLang(c.user.id, v);
     c.user.lang = v;

@@ -22,7 +22,7 @@ const MONDAY_10 = "2026-11-02T05:05:00Z"; // понедельник, 10:05 в С
 
 const prepare = async (s: Sim, id: number, lang = uz.langUz) => {
   await s.start(id);
-  if (s.lastText(id) === uz.chooseLang) await s.click(id, lang);
+  if (s.lastText(id)?.startsWith("Тилни танланг")) await s.click(id, lang);
 };
 
 /** Менеджер, его партнёр и партнёр владельца (оба подтверждены, у обоих есть Telegram) */

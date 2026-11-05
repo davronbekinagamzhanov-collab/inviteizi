@@ -118,6 +118,10 @@ describe("стартовый язык страницы", () => {
     expect(pickLang(["uz", "ru"], "kk", "kk", ["en-US"])).toBe("uz");
     expect(pickLang([...all], null, null, ["uz-UZ", "ru"])).toBe("uz");
     expect(pickLang(["uz"], "ru", "ru", ["ru"])).toBe("uz");
+    // Главный язык заказа — если телефон гостя не на выбранном языке
+    expect(pickLang(["uz", "ru"], null, null, ["en-US"], "ru")).toBe("ru");
+    expect(pickLang(["uz", "ru"], null, null, ["uz-UZ"], "ru")).toBe("uz");
+    expect(pickLang(["uz", "ru", "kk"], null, null, ["kk-KZ"], "ru")).toBe("kk");
   });
 });
 

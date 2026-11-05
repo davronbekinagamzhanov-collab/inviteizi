@@ -12,7 +12,6 @@ import { normalizeKaspi, normalizePhone, SLEEP_AFTER_MS } from "./flow/partners"
 import { TG_LIMITS } from "./testing/fake-tg";
 import { nikohWithReceipt } from "./testing/paths";
 import { ADMIN, ADMIN2, Sim } from "./testing/sim";
-import { posterKkButton } from "@/texts/invite-kk";
 
 const T = staff.pt;
 const MANAGER = 700;
@@ -22,7 +21,7 @@ const CLIENT = 1;
 const start = async (s: Sim, id: number, payload = "", lang = uz.langUz) => {
   const had = (await s.repo.getUser(id))?.lang;
   await s.start(id, payload);
-  if (!had && s.lastText(id) === uz.chooseLang) await s.click(id, lang);
+  if (!had && s.lastText(id)?.startsWith("Тилни танланг")) await s.click(id, lang);
 };
 const lastToast = (s: Sim) => s.tg.answers.at(-1)?.text;
 const texts = (s: Sim, id: number) => s.tg.to(id).map((m) => m.text);
@@ -507,7 +506,7 @@ describe("Казахский постер (дополнение к части 6)
     on.deps.env = { ...on.deps.env, kazakhEnabled: true };
     await createPartner(on, ADMIN);
     const p = on.repo.partners[0];
-    await on.click(ADMIN, posterKkButton.ru);
+    await on.click(ADMIN, ru.role.posterKk);
     expect(on.tg.to(ADMIN).at(-1)!.fileName).toBe(`inviteizi-${p.code}-kk.png`);
   }, 30_000);
 });

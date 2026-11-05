@@ -66,7 +66,7 @@ export function InvitationShell({
   return (
     // reducedMotion="user": если в телефоне отключены анимации, не мучаем гостя
     <MotionConfig reducedMotion="user">
-      <div style={style} className={`min-h-svh ${fontsClassName} ${backdropClassName}`}>
+      <div style={inv.langReady ? style : { ...style, visibility: "hidden" }} className={`min-h-svh ${fontsClassName} ${backdropClassName}`}>
         <div
           data-opened={inv.opened}
           className={`relative mx-auto min-h-svh w-full max-w-[430px] overflow-x-clip font-body ${className ?? ""}`}

@@ -28,6 +28,7 @@ import {
   price,
   send,
   txFor,
+  texts,
 } from "./util";
 import { getDesign, isOnSale } from "@/templates/registry";
 import { rememberUpdate } from "../update";
@@ -364,16 +365,22 @@ async function already(c: Ctx) {
 }
 
 /** Текст для гостей (всегда ўзбекча) */
+const RU_CAUSE: Record<string, string> = { nikoh: "по случаю свадьбы", sunnat: "по случаю суннат-тоя", yubiley: "по случаю юбилея" };
+const KK_CAUSE: Record<string, string> = { nikoh: "үйлену тойына", sunnat: "сүндет тойына", yubiley: "мерейтойына" };
+
 export function guestShareText(o: OrderRecord, url: string) {
   const d = o.data;
-  const g = uz.guest;
+  // Гостям — на главном языке приглашения (по умолчанию узбекский)
+  const main = d.mainLang && d.langs?.includes(d.mainLang) ? d.mainLang : "uz";
+  const g = texts[main].guest;
+  const cause = main === "kk" ? KK_CAUSE[d.cause ?? "nikoh"] : main === "ru" ? RU_CAUSE[d.cause ?? "nikoh"] : t.occasionTitles[d.cause ?? "nikoh"].toLowerCase();
   const what =
     d.occasion === "nikoh"
       ? g.nikoh(d.groom ?? "", d.bride ?? "")
       : d.occasion === "sunnat"
         ? g.sunnat(d.person ?? "")
         : d.occasion === "nahorgi"
-          ? g.nahorgi(d.person ?? "", t.occasionTitles[d.cause ?? "nikoh"].toLowerCase())
+          ? g.nahorgi(d.person ?? "", cause)
           : g.yubiley(d.person ?? "");
   const first = d.events[0];
   return g.share(what, first ? `${fmtDate(first.date)}, ${first.time}` : "", url);

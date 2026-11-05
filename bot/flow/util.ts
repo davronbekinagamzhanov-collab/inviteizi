@@ -7,11 +7,12 @@ import { getDesign, PRICES, FORMATS, type Format, activeDesigns } from "@/templa
 import { tPlain as t } from "@/texts/uz-cyrl";
 import { uz, type BotTexts } from "@/texts/bot-uz";
 import { ru, staff } from "@/texts/bot-ru";
+import { kk } from "@/texts/bot-kk";
 import type { Role } from "@/lib/roles";
 import { demoToken } from "@/lib/demo-tracking";
 import { isEditImpossible } from "../errors";
 
-export const texts: Record<Lang, BotTexts> = { uz, ru };
+export const texts: Record<Lang, BotTexts> = { uz, ru, kk };
 export const txFor = (lang: Lang | null | undefined): BotTexts => texts[lang ?? "uz"];
 
 /** Песня клиента — до 20 МБ */

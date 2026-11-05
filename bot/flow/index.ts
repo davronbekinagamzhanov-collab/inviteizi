@@ -232,11 +232,14 @@ async function reask(c: Ctx) {
 
 async function askLang(c: Ctx) {
   const tx = texts.uz;
-  await send(c, tx.chooseLang, { inline: [[{ text: tx.langUz, data: "lang:uz" }, { text: tx.langRu, data: "lang:ru" }]] });
+  // Казахский — только при KAZAKH_ENABLED (тексты ждут проверки носителем)
+  const kk = Boolean(c.deps.env.kazakhEnabled);
+  const row = [{ text: tx.langUz, data: "lang:uz" }, { text: tx.langRu, data: "lang:ru" }, ...(kk ? [{ text: tx.langKk, data: "lang:kk" }] : [])];
+  await send(c, kk ? tx.chooseLang3 : tx.chooseLang, { inline: [row] });
 }
 
 async function chooseLang(c: Ctx, lang: string) {
-  if (lang !== "uz" && lang !== "ru") return;
+  if (lang !== "uz" && lang !== "ru" && !(lang === "kk" && c.deps.env.kazakhEnabled)) return;
   const first = !c.user.lang;
   c.lang = lang as Lang;
   c.tx = texts[c.lang];

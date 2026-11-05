@@ -18,7 +18,7 @@ const OTHER = 2;
 const start = async (s: Sim, id: number, payload = "", lang = uz.langUz) => {
   const had = (await s.repo.getUser(id))?.lang;
   await s.start(id, payload);
-  if (!had && s.lastText(id) === uz.chooseLang) await s.click(id, lang);
+  if (!had && s.lastText(id)?.startsWith("Тилни танланг")) await s.click(id, lang);
 };
 const buttons = (s: Sim, id: number) => (s.last(id)?.markup && "inline" in s.last(id)!.markup! ? (s.last(id)!.markup as { inline: { text: string }[][] }).inline.flat().map((b) => b.text) : []);
 const lastToast = (s: Sim) => s.tg.answers.at(-1)?.text;

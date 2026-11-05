@@ -21,6 +21,7 @@ type Props = {
   langs: ExtraLang[];
   customTexts: Partial<Record<ExtraLang, string>>;
   extraLangs: ExtraLang[];
+  mainLang?: ExtraLang;
   /** Демо дизайна (для «👁 Мисол» на выбранном языке) */
   demoUrl: string | null;
   onExample: (url: string) => void;
@@ -28,7 +29,7 @@ type Props = {
   price: number;
   namunaUrl: string | null;
   status: string;
-  onChange: (patch: { textId?: string; customText?: string; music?: Props["music"]; rsvp?: boolean; langs?: ExtraLang[]; customTexts?: Partial<Record<ExtraLang, string>> }) => void;
+  onChange: (patch: { textId?: string; customText?: string; music?: Props["music"]; rsvp?: boolean; langs?: ExtraLang[]; customTexts?: Partial<Record<ExtraLang, string>>; mainLang?: ExtraLang }) => void;
   onNamuna: () => void;
 };
 
@@ -161,7 +162,8 @@ export function Summary(p: Props) {
                     className={s.toggle}
                     onClick={() => {
                       haptic.tap();
-                      p.onChange({ langs: on ? p.langs.filter((x) => x !== l) : p.extraLangs.filter((x) => x === l || p.langs.includes(x)) });
+                      const next = on ? p.langs.filter((x) => x !== l) : p.extraLangs.filter((x) => x === l || p.langs.includes(x));
+                      p.onChange({ langs: next, ...(on && p.mainLang === l ? { mainLang: undefined } : {}) });
                     }}
                   />
                   <b style={{ flex: 1 }}>{T.summary.langNames[l]}</b>
@@ -173,6 +175,26 @@ export function Summary(p: Props) {
                 </div>
               );
             })}
+            {p.langs.length > 0 && (
+              <div className={s.field}>
+                <span className={s.label}>{T.summary.mainLang}</span>
+                <div className={s.seg} role="radiogroup" aria-label={T.summary.mainLang}>
+                  {(["uz", ...p.langs] as ("uz" | ExtraLang)[]).map((l) => (
+                    <button
+                      key={l}
+                      type="button"
+                      role="radio"
+                      className={s.segBtn}
+                      aria-checked={(p.mainLang ?? "uz") === l}
+                      onClick={() => { haptic.select(); p.onChange({ mainLang: l === "uz" ? undefined : l }); }}
+                    >
+                      {T.langSwitch[l]}
+                    </button>
+                  ))}
+                </div>
+                <span className={s.help}>{T.summary.mainLangHint}</span>
+              </div>
+            )}
             {p.customText &&
               p.langs.map((l) => {
                 const value = p.customTexts[l] ?? "";

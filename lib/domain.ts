@@ -7,7 +7,7 @@ import type { Format } from "@/templates/registry";
 
 // Format derives from the single catalog: animated / scroll / simple.
 export type { Format };
-export type Lang = "uz" | "ru";
+export type Lang = "uz" | "ru" | "kk";
 
 /** Статусы заказа (CLAUDE.md): draft → preview → awaiting_payment → receipt_sent → active → archived (+ rejected) */
 export type OrderStatus =

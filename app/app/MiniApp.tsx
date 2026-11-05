@@ -11,6 +11,7 @@ import { previewData } from "@/lib/preview-data";
 import { getDesign, PRICES, type Design } from "@/templates/registry";
 import { appUz } from "@/texts/app-uz";
 import { appRu } from "@/texts/app-ru";
+import { appKk } from "@/texts/app-kk";
 import { api, ApiError } from "./ui/api";
 import { Catalog, Heart, type Chip } from "./ui/Catalog";
 import { emptyForm, Form } from "./ui/Form";
@@ -45,7 +46,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
   const [phase, setPhase] = useState<Phase>("boot");
   const [session, setSession] = useState<AppSession | null>(null);
   const [lang, setLang] = useState<Lang>("uz");
-  const T = lang === "ru" ? appRu : appUz;
+  const T = lang === "ru" ? appRu : lang === "kk" ? appKk : appUz;
   const [chip, setChip] = useState<Chip>("nikoh");
   const [favorites, setFavorites] = useState<string[]>([]);
   const [draft, setDraft] = useState<AppDraft | null>(null);
@@ -326,7 +327,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
 
   return (
     <TextsContext.Provider value={T}>
-      <div className={`${s.root} ${fontClass}`} lang={lang === "ru" ? "ru" : "uz-Cyrl"}>
+      <div className={`${s.root} ${fontClass}`} lang={lang === "ru" ? "ru" : lang === "kk" ? "kk" : "uz-Cyrl"}>
         {phase === "ready" && screen.name !== "view" && (
           <header className={s.header}>
             <div className={s.headerRow}>
@@ -341,8 +342,8 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
               <button type="button" className={s.iconBtn} onClick={() => (screen.name === "orders" ? undefined : go({ name: "orders" }))} aria-label={T.myOrders}>
                 📂
               </button>
-              <span className={s.langs} role="group" aria-label="Тил / Язык">
-                {(["uz", "ru"] as Lang[]).map((l) => (
+              <span className={s.langs} role="group" aria-label="Тил / Язык / Тіл">
+                {(["uz", "ru", ...(session?.extraLangs?.includes("kk") ? ["kk"] : [])] as Lang[]).map((l) => (
                   <button key={l} type="button" aria-pressed={lang === l} onClick={() => changeLang(l)}>
                     {T.langSwitch[l]}
                   </button>
@@ -386,6 +387,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
                   langs={draft.langs ?? []}
                   customTexts={draft.customTexts ?? {}}
                   extraLangs={session.extraLangs ?? ["ru"]}
+                  mainLang={draft.mainLang}
                   demoUrl={draft.templateId ? `/demo/${draft.templateId}` : null}
                   onExample={(url) => setViewer(url)}
                   tracks={tracks}

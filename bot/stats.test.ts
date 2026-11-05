@@ -18,7 +18,7 @@ const PARTNER = 900;
 
 const prepare = async (s: Sim, id: number, lang = uz.langUz) => {
   await s.start(id);
-  if (s.lastText(id) === uz.chooseLang) await s.click(id, lang);
+  if (s.lastText(id)?.startsWith("Тилни танланг")) await s.click(id, lang);
 };
 
 async function setup(s: Sim) {

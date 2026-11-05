@@ -55,6 +55,8 @@ export const ru = {
   chooseLang: uz.chooseLang,
   langUz: uz.langUz,
   langRu: uz.langRu,
+  langKk: uz.langKk,
+  chooseLang3: uz.chooseLang3,
   langSaved: "✅ Язык: русский.",
 
   menu: {
@@ -328,7 +330,14 @@ export const ru = {
     reminder: (url: string) => `👋 Ваше приглашение готово:\n${url}\nПосле оплаты надпись «НАМУНА» уберём.`,
   },
 
-  guest: uz.guest,
+  /** Гостям — если главный язык приглашения русский. Имена не склоняем: после тире */
+  guest: {
+    nikoh: (groom: string, bride: string) => `на свадьбу — ${groom} и ${bride}`,
+    sunnat: (person: string) => `на суннат-той — ${person}`,
+    nahorgi: (person: string, cause: string) => `на утренний плов ${cause} — ${person}`,
+    yubiley: (person: string) => `на юбилей — ${person}`,
+    share: (what: string, date: string, url: string) => `Ассаляму алейкум! 🌸\nПриглашаем Вас ${what}.\n📅 ${date}\n\nПриглашение: ${url}`,
+  },
 
   dashboard: {
     denied: "Нет доступа к этому отчёту. Откройте его в личном чате с ботом.",
@@ -368,7 +377,7 @@ export const ru = {
     },
   },
   langs: {
-    names: { ru: "Русский", kk: "Казахский" } as Record<string, string>,
+    names: { ru: "Русский", kk: "Казахский", uz: "Узбекский" } as Record<string, string>,
     review: (list: string) => `🌐 Языки: узбекский${list ? ` · ${list.toLowerCase()}` : ""}`,
     edit: "🌐 Языки",
     ask: (kk: boolean) => `🌐 Языки\n\nУзбекский есть всегда. Добавьте ${kk ? "русский или казахский" : "русский"}, чтобы гости могли читать на нём, — гость выбирает сам. Цена не меняется.`,
@@ -378,6 +387,9 @@ export const ru = {
     ownButton: (name: string) => `✍️ Ваш текст · ${name.toLowerCase()}`,
     ownAsk: (name: string) => `✍️ Напишите свой текст на языке «${name.toLowerCase()}» (до 600 знаков).\nЕсли не написать, на этом языке будет узбекский текст.`,
     done: "✅ Готово",
+    mainAsk: "На каком языке открывать приглашение?",
+    mainHint: "Если язык телефона гостя есть среди выбранных — откроется на нём.",
+    main: (name: string) => `Главный язык: ${name.toLowerCase()}`,
   },
   partner: {
     paidNotice: (amount: string) => `По вашему коду оплачен новый заказ ✅ +${amount}`,
@@ -421,6 +433,7 @@ export const ru = {
     partnerHome: (name: string, pending: boolean) =>
       `🤝 Партнёр InviteIZI\n${name}${pending ? "\n\n⏳ Ждёт подтверждения. QR работает, оплаты считаются." : ""}`,
     joinHello: uz.role.joinHello,
+    joinHello3: uz.role.joinHello3,
     askPhone: "📱 Отправьте ваш номер — нажмите кнопку внизу 👇",
     phoneButton: "📱 Отправить номер",
     badPhone: "Нажмите кнопку «📱 Отправить номер» внизу 👇",
@@ -457,6 +470,7 @@ export const ru = {
     qrCaption: (name: string, link: string) => `🔳 ${name}\n${link}\n\nПостер A4 (PDF и PNG) — кнопка ниже 👇`,
     posterUz: "📄 Постер · узбекский",
     posterRu: "📄 Постер · русский",
+    posterKk: "📄 Постер · казахский",
     posterReady: (name: string) => `📄 ${name} — постер A4. PDF — для печати, PNG — для телефона.`,
     poster: {
       title: "Онлайн-приглашение за 5 минут",

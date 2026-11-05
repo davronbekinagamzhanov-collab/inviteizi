@@ -10,8 +10,8 @@ import { t } from "./uz-cyrl";
 const sum = (n: number) => `${n.toLocaleString("ru-RU").replace(/ | /g, " ")} ₸`;
 
 export const appUz = {
-  lang: "uz" as "uz" | "ru",
-  langSwitch: { uz: "ЎЗ", ru: "РУ" },
+  lang: "uz" as "uz" | "ru" | "kk",
+  langSwitch: { uz: "ЎЗ", ru: "РУ", kk: "ҚЗ" },
   openInTelegram: "Бу саҳифа Telegram ичида очилади.\nInviteIZI ботига кириб, «✨ Таклифнома яратиш» тугмасини босинг.",
   loading: "Юкланмоқда…",
   offline: "Интернет йўқ. Қайта уриниб кўринг.",
@@ -121,7 +121,9 @@ export const appUz = {
     langs: "🌐 Тиллар",
     langsValue: (list: string) => `Ўзбекча${list ? ` · ${list}` : ""}`,
     langsHint: (kk: boolean) => `Ўзбек тили доим бор. Меҳмонлар ${kk ? "рус ёки қозоқ" : "рус"} тилида ўқиши учун қўшинг — меҳмон ўзи танлайди. Нархи ўзгармайди.`,
-    langNames: { ru: "Русча", kk: "Қозоқча" } as Record<string, string>,
+    langNames: { ru: "Русча", kk: "Қозоқча", uz: "Ўзбекча" } as Record<string, string>,
+    mainLang: "Таклифнома қайси тилда очилсин?",
+    mainLangHint: "Меҳмоннинг телефони танланган тилда бўлса — ўша тилда очилади.",
     langExample: "👁 Мисол",
     ownTextIn: (lang: string) => `✍️ Ўз матнингиз · ${lang}`,
     ownTextInHint: "Ўзингиз таржима қилиб ёзинг. Бўш қолса, бу тилда ҳам ўзбекча матн кўринади.",

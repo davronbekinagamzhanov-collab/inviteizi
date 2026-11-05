@@ -28,6 +28,8 @@ export type AppDraft = {
   /** v2: языки кроме узбекского и свой текст на них */
   langs?: ExtraLang[];
   customTexts?: Partial<Record<ExtraLang, string>>;
+  /** Главный язык страницы (нет — узбекский) */
+  mainLang?: ExtraLang;
   /** Правка неоплаченного заказа: та же ссылка */
   orderId?: string;
 };
@@ -63,9 +65,13 @@ export type AppSession = {
 const MAX_ORDERS = 20;
 const ORDER_TITLE_MAX = 90;
 
-function langFor(saved: Lang | null, code: string | null): Lang {
+/** Язык интерфейса: сохранённый → язык Telegram (казахский — только при KAZAKH_ENABLED) → узбекский */
+function langFor(saved: Lang | null, code: string | null, kazakh: boolean): Lang {
+  if (saved === "kk" && !kazakh) return "uz";
   if (saved) return saved;
-  return code?.toLowerCase().startsWith("ru") ? "ru" : "uz";
+  const c = code?.toLowerCase() ?? "";
+  if (kazakh && c.startsWith("kk")) return "kk";
+  return c.startsWith("ru") ? "ru" : "uz";
 }
 
 function namesOf(d: InvitationData) {
@@ -100,7 +106,7 @@ function draftOf(s: Draft): AppDraft | null {
   const d = s.data ?? {};
   return {
     templateId: s.templateId,
-    form: { ...d, photos: undefined, textId: undefined, customText: undefined, rsvp: undefined, langs: undefined, customTexts: undefined } as FormInput,
+    form: { ...d, photos: undefined, textId: undefined, customText: undefined, rsvp: undefined, langs: undefined, customTexts: undefined, mainLang: undefined } as FormInput,
     photos: d.photos,
     textId: d.textId,
     customText: d.customText,
@@ -108,6 +114,7 @@ function draftOf(s: Draft): AppDraft | null {
     rsvp: d.rsvp,
     langs: d.langs,
     customTexts: d.customTexts,
+    mainLang: d.mainLang,
     orderId: s.orderId,
   };
 }
@@ -135,7 +142,7 @@ export function cleanCustomTexts(langs: ExtraLang[] | undefined, own: string | u
 
 export async function openSession(deps: Deps, u: AppUser): Promise<AppSession> {
   const user = await deps.repo.touchUser({ id: u.id, username: u.username, firstName: u.firstName });
-  const lang = langFor(user.lang, u.languageCode);
+  const lang = langFor(user.lang, u.languageCode, Boolean(deps.env.kazakhEnabled));
   if (!user.lang) await deps.repo.setLang(u.id, lang);
   const orders = (await deps.repo.listOrdersByUser(u.id)).slice(0, MAX_ORDERS).map((o) => appOrder(deps, o));
   return {
@@ -152,7 +159,7 @@ export async function openSession(deps: Deps, u: AppUser): Promise<AppSession> {
 }
 
 export async function setLang(deps: Deps, u: AppUser, lang: unknown) {
-  if (lang !== "uz" && lang !== "ru") return { error: "bad" as const };
+  if (lang !== "uz" && lang !== "ru" && !(lang === "kk" && deps.env.kazakhEnabled)) return { error: "bad" as const };
   await deps.repo.touchUser({ id: u.id, username: u.username, firstName: u.firstName });
   await deps.repo.setLang(u.id, lang);
   return { ok: true as const };
@@ -204,6 +211,8 @@ function toDraft(deps: Deps, prev: Draft, d: AppDraft, data: Partial<InvitationD
       // Языки сняли — пишем «пусто», чтобы заказ вернулся к одному узбекскому (до этого колонку не трогаем)
       langs: langs ?? (prev.data?.langs?.length ? [] : undefined),
       customTexts: cleanCustomTexts(langs, "value" in own ? own.value : undefined, d.customTexts) ?? (prev.data?.customTexts ? {} : undefined),
+      // Главный язык — только из выбранных; иначе узбекский
+      mainLang: typeof d.mainLang === "string" && langs?.includes(d.mainLang) ? d.mainLang : undefined,
     },
   };
 }

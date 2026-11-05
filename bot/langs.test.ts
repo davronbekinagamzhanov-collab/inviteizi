@@ -110,3 +110,79 @@ describe("приложение: языки", () => {
     expect((await s.repo.getOrder(r.order.id))!.data.langs ?? []).toEqual([]);
   });
 });
+
+import { kk } from "@/texts/bot-kk";
+import { pickDesign } from "./testing/paths";
+import { ADMIN } from "./testing/sim";
+
+/** Служебные узбекские слова, которых не должно быть в казахских сообщениях бота */
+const UZ_ONLY = /тугма|Таклифнома|Илтимос|босинг|юборинг|Ҳа\b/;
+
+describe("казахский везде (KAZAKH_ENABLED)", () => {
+  it("без флага кнопки «Қазақша» нет и lang:kk не срабатывает", async () => {
+    const s = new Sim();
+    await s.start(1);
+    expect(s.lastText(1)).toBe(uz.chooseLang);
+    expect(JSON.stringify(s.last(1)!.markup)).not.toContain("lang:kk");
+    await s.callback(1, "lang:kk", s.last(1)!.id);
+    expect((await s.repo.getUser(1))?.lang).toBeNull();
+  });
+
+  it("полный путь клиента на казахском в чате: язык → тадбир → дизайн → анкета → сводка → оплата → ссылка", async () => {
+    const s = new Sim();
+    s.deps.env = { ...s.deps.env, kazakhEnabled: true };
+    await s.start(1);
+    expect(s.lastText(1)).toBe(uz.chooseLang3);
+    await s.click(1, kk.langKk);
+    expect(s.tg.to(1).some((m) => m.text === kk.welcome(null) || m.text?.startsWith("Ассалаумағалейкум"))).toBe(true);
+    await s.text(1, kk.menu.create);
+    await s.click(1, kk.category.nikoh);
+    await pickDesign(s, 1);
+    await s.text(1, "Азиз");
+    await s.text(1, "Мадина");
+    await s.click(1, kk.form.relationsNikoh.farzand!);
+    await s.text(1, "Кәрімовтар отбасы");
+    await s.click(1, kk.form.sideNo);
+    await s.click(1, "14");
+    await s.click(1, "18:00");
+    await s.text(1, "«Наурыз» той залы");
+    await s.text(1, "Сайрам, Әмір Темір көшесі 45");
+    await s.text(1, kk.event.skip);
+    await s.click(1, kk.event.noMore);
+    expect(s.lastText(1)).toContain(kk.review.title);
+    await s.click(1, kk.langs.edit);
+    await s.click(1, kk.langs.off(kk.langs.names.kk));
+    await s.click(1, "ҚЗ");
+    await s.click(1, kk.langs.done);
+    expect(s.lastText(1)).toContain(kk.langs.main(kk.langs.names.kk));
+    await s.click(1, kk.review.confirm);
+    const [o] = await s.repo.listOrdersByUser(1);
+    expect(o.data).toMatchObject({ langs: ["kk"], mainLang: "kk" });
+    await s.click(1, /^💳 Төлеу/);
+    await s.photo(1, "RECEIPT_1");
+    expect(s.tg.to(1).some((m) => m.text === kk.pay.receiptGot)).toBe(true);
+    await s.callback(ADMIN, `ok:${o.number}`, 1);
+    expect(s.tg.to(1).some((m) => m.text?.startsWith("🎉 Төлем расталды!"))).toBe(true);
+    for (const m of s.tg.to(1)) if (m.text && !/Тилни танланг/.test(m.text)) expect(m.text, m.text).not.toMatch(UZ_ONLY);
+  });
+
+  it("приложение: сессия на казахском, главный язык — только из выбранных", async () => {
+    const s = new Sim();
+    s.deps.env = { ...s.deps.env, kazakhEnabled: true };
+    const kkUser: AppUser = { id: 9, firstName: "Апа", username: "u9", languageCode: "kk" };
+    expect((await app.openSession(s.deps, kkUser)).lang).toBe("kk");
+    expect(await app.setLang(s.deps, kkUser, "kk")).toEqual({ ok: true });
+    const r = await app.submitDraft(s.deps, kkUser, { templateId: design.id, form, langs: ["ru", "kk"], mainLang: "ru" });
+    if (!("ok" in r)) throw new Error(JSON.stringify(r));
+    expect((await s.repo.getOrder(r.order.id))!.data).toMatchObject({ langs: ["ru", "kk"], mainLang: "ru" });
+    const bad = await app.submitDraft(s.deps, user(10), { templateId: design.id, form, langs: ["ru"], mainLang: "kk" });
+    if (!("ok" in bad)) throw new Error(JSON.stringify(bad));
+    expect((await s.repo.getOrder(bad.order.id))!.data.mainLang).toBeUndefined();
+    // Флаг выключили — казахский интерфейс недоступен
+    s.deps.env = { ...s.deps.env, kazakhEnabled: false };
+    expect(await app.setLang(s.deps, kkUser, "kk")).toEqual({ error: "bad" });
+    expect((await app.openSession(s.deps, kkUser)).lang).toBe("uz");
+  });
+});
+
+const design = activeDesigns().find((d) => d.occasion === "nikoh")!;

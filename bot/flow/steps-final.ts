@@ -116,6 +116,8 @@ const withLang = (url: string, l: ExtraLang) => {
   return `${base}?lang=${l}${hash ? `#${hash}` : ""}`;
 };
 
+const SHORT = { uz: "ЎЗ", ru: "РУ", kk: "ҚЗ" } as const;
+
 const allowedLangs = (c: Ctx): ExtraLang[] => (c.deps.env.kazakhEnabled ? ["ru", "kk"] : ["ru"]);
 
 function langsScreen(c: Ctx) {
@@ -128,8 +130,12 @@ function langsScreen(c: Ctx) {
   ]);
   // Свой текст: перевод клиент пишет сам
   if (d.customText) for (const l of on) rows.push([ib(c, L.ownButton(L.names[l]), `own:${l}`)]);
+  // Главный язык: на нём страница открывается, если телефон гостя не на другом выбранном языке
+  const main = d.mainLang && on.includes(d.mainLang) ? d.mainLang : "uz";
+  if (on.length) rows.push((["uz", ...on] as const).map((l) => ib(c, `${l === main ? "✓ " : ""}${SHORT[l]}`, `m:${l}`)));
   rows.push([ib(c, L.done, "done")]);
-  return { text: L.ask(allowedLangs(c).includes("kk")), markup: inline(rows) };
+  const text = L.ask(allowedLangs(c).includes("kk")) + (on.length ? `\n\n${L.mainAsk}\n${L.main(L.names[main])}\n${L.mainHint}` : "");
+  return { text, markup: inline(rows) };
 }
 
 export const langs: Step = {
@@ -141,10 +147,17 @@ export const langs: Step = {
     const d = data(c);
     if (v === "done") return { to: "review" };
     const [kind, l] = v.split(":") as [string, ExtraLang];
+    if (kind === "m" && ((l as string) === "uz" || d.langs?.includes(l))) {
+      d.mainLang = (l as string) === "uz" ? undefined : l;
+      const { text, markup } = langsScreen(c);
+      await editOrSend(c, text, markup);
+      return { stay: true };
+    }
     if (!allowedLangs(c).includes(l)) return null;
     if (kind === "t") {
       const on = d.langs ?? [];
       d.langs = on.includes(l) ? on.filter((x) => x !== l) : allowedLangs(c).filter((x) => x === l || on.includes(x));
+      if (on.includes(l) && d.mainLang === l) delete d.mainLang;
       if (on.includes(l) && d.customTexts?.[l]) {
         const rest = { ...d.customTexts };
         delete rest[l];
@@ -313,6 +326,7 @@ async function summary(c: Ctx) {
   lines.push(await musicLine(c));
   lines.push(d.rsvp ? c.tx.rsvp.reviewOn : c.tx.rsvp.reviewOff);
   lines.push(c.tx.langs.review((d.langs ?? []).map((l) => c.tx.langs.names[l]).join(" · ")));
+  if (d.mainLang && d.langs?.includes(d.mainLang)) lines.push(c.tx.langs.main(c.tx.langs.names[d.mainLang]));
   if (photoStepFor(c)) lines.push(c.tx.photo.review(d.photos?.length ?? 0));
   return { text: lines.join("\n"), d };
 }

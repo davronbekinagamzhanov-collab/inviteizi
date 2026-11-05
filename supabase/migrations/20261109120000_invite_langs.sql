@@ -14,3 +14,7 @@ alter table public.orders add constraint orders_langs_check
 alter table public.orders drop constraint if exists orders_custom_text_i18n_check;
 alter table public.orders add constraint orders_custom_text_i18n_check
   check (custom_text_i18n is null or (jsonb_typeof(custom_text_i18n) = 'object' and octet_length(custom_text_i18n::text) <= 8000));
+
+-- Казахский язык бота (только при KAZAKH_ENABLED=true; тексты ждут проверки носителем)
+alter table public.users drop constraint if exists users_lang_check;
+alter table public.users add constraint users_lang_check check (lang in ('uz', 'ru', 'kk'));

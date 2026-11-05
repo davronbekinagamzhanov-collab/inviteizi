@@ -7,7 +7,7 @@ const sum = (n: number) => `${n.toLocaleString("ru-RU").replace(/ | /g, " ")}
 
 export const appRu: AppTexts = {
   lang: "ru",
-  langSwitch: { uz: "ЎЗ", ru: "РУ" },
+  langSwitch: { uz: "ЎЗ", ru: "РУ", kk: "ҚЗ" },
   openInTelegram: "Эта страница открывается внутри Telegram.\nЗайдите в бот InviteIZI и нажмите «✨ Создать приглашение».",
   loading: "Загрузка…",
   offline: "Нет интернета. Попробуйте ещё раз.",
@@ -117,7 +117,9 @@ export const appRu: AppTexts = {
     langs: "🌐 Языки",
     langsValue: (list: string) => `Узбекский${list ? ` · ${list}` : ""}`,
     langsHint: (kk: boolean) => `Узбекский есть всегда. Добавьте ${kk ? "русский или казахский" : "русский"}, чтобы гости могли читать на нём, — гость выбирает сам. Цена не меняется.`,
-    langNames: { ru: "Русский", kk: "Казахский" } as Record<string, string>,
+    langNames: { ru: "Русский", kk: "Казахский", uz: "Узбекский" } as Record<string, string>,
+    mainLang: "На каком языке открывать приглашение?",
+    mainLangHint: "Если телефон гостя на одном из выбранных языков — откроется на нём.",
     langExample: "👁 Пример",
     ownTextIn: (lang: string) => `✍️ Ваш текст · ${lang}`,
     ownTextInHint: "Переведите и напишите сами. Если оставить пустым, на этом языке будет узбекский текст.",

@@ -23,24 +23,26 @@ type Options = {
 /** Где помним язык гостя (общий для всех приглашений: человек обычно читает на одном языке) */
 export const LANG_KEY = "inviteizi:lang";
 
-/** Стартовый язык: ?lang= в адресе → выбор гостя раньше → язык телефона → узбекский */
-export function pickLang(available: InviteLang[], url: string | null, saved: string | null, phone: readonly string[]): InviteLang {
+/** Стартовый язык: ?lang= в адресе → выбор гостя раньше → язык телефона (если клиент его выбрал) → главный язык заказа */
+export function pickLang(available: InviteLang[], url: string | null, saved: string | null, phone: readonly string[], main: InviteLang = "uz"): InviteLang {
   const ok = (x: string | null | undefined): x is InviteLang => Boolean(x) && available.includes(x as InviteLang);
   if (ok(url)) return url;
   if (ok(saved)) return saved;
   for (const p of phone) {
     const short = p.toLowerCase().slice(0, 2);
-    if (short === "uz") return "uz";
     if (ok(short)) return short;
   }
-  return "uz";
+  return ok(main) ? main : "uz";
 }
 
 export function useInvitation(raw: InvitationData, mode: InvitationMode, opts: Options = {}) {
   // Языки этой страницы: узбекский всегда, русский/казахский — если клиент добавил
   const langs: InviteLang[] = ["uz", ...INVITE_LANGS.filter((l) => l !== "uz" && raw.langs?.includes(l as "ru" | "kk"))];
   const langsKey = langs.join(",");
+  const main: InviteLang = raw.mainLang && langs.includes(raw.mainLang) ? raw.mainLang : "uz";
   const [lang, setLang] = useState<InviteLang>("uz");
+  // Несколько языков: пока не выбран язык гостя, страницу не показываем (без мигания узбекским на миг)
+  const [langReady, setLangReady] = useState(langs.length < 2);
   // Язык ставится до того, как дизайн возьмёт тексты (t.… читает его при каждом обращении)
   setInviteLang(langs.includes(lang) ? lang : "uz");
   useEffect(() => {
@@ -52,10 +54,11 @@ export function useInvitation(raw: InvitationData, mode: InvitationMode, opts: O
       // приватный режим: язык не помним
     }
     const url = new URLSearchParams(window.location.search).get("lang");
-    const next = pickLang(langsKey.split(",") as InviteLang[], url, saved, navigator.languages?.length ? navigator.languages : [navigator.language]);
+    const next = pickLang(langsKey.split(",") as InviteLang[], url, saved, navigator.languages?.length ? navigator.languages : [navigator.language], main);
     // eslint-disable-next-line react-hooks/set-state-in-effect -- язык телефона известен только в браузере
     setLang(next);
-  }, [langsKey]);
+    setLangReady(true);
+  }, [langsKey, main]);
   useEffect(() => {
     document.documentElement.lang = lang;
   }, [lang]);
@@ -208,6 +211,8 @@ export function useInvitation(raw: InvitationData, mode: InvitationMode, opts: O
     /** v2: язык страницы и доступные языки; setLang запоминает выбор гостя */
     lang: langs.includes(lang) ? lang : ("uz" as InviteLang),
     langs,
+    /** false — язык гостя ещё выбирается (первый кадр после загрузки) */
+    langReady,
     setLang(next: InviteLang) {
       if (!langs.includes(next)) return;
       setLang(next);

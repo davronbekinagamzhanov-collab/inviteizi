@@ -1,6 +1,7 @@
 /** Готовые пути по боту для сценарных тестов */
 import { uz } from "@/texts/bot-uz";
 import { ru } from "@/texts/bot-ru";
+import { kk } from "@/texts/bot-kk";
 import type { Format } from "@/lib/domain";
 import { FORMATS } from "@/templates/registry";
 import type { Draft } from "../flow/types";
@@ -25,7 +26,7 @@ export async function pickDesign(sim: Sim, id: number, which?: Format | string) 
     await sim.click(id, "▶");
   }
   const mark = ["1️⃣", "2️⃣", "3️⃣"][idx % PAGE];
-  await sim.click(id, new RegExp(`^${mark} (${uz.catalog.pick("").trim()}|${ru.catalog.pick("").trim()})$`));
+  await sim.click(id, new RegExp(`^${mark} (${uz.catalog.pick("").trim()}|${ru.catalog.pick("").trim()}|${kk.catalog.pick("").trim()})$`));
   return target;
 }
 

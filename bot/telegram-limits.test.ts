@@ -2,6 +2,7 @@
 import { describe, expect, it } from "vitest";
 import { uz } from "@/texts/bot-uz";
 import { ru, staff } from "@/texts/bot-ru";
+import { kk } from "@/texts/bot-kk";
 import { activeDesigns } from "@/templates/registry";
 import { TG_LIMITS } from "./testing/fake-tg";
 
@@ -31,7 +32,7 @@ describe("лимиты Telegram: панели владельца и менедж
   });
 });
 
-describe.each([["uz", uz], ["ru", ru]] as const)("лимиты Telegram: %s", (_, tx) => {
+describe.each([["uz", uz], ["ru", ru], ["kk", kk]] as const)("лимиты Telegram: %s", (_, tx) => {
   it("любой текст помещается в сообщение", () => {
     for (const [path, text] of strings(tx, "tx")) expect(text.length, path).toBeLessThanOrEqual(TG_LIMITS.message);
   });
