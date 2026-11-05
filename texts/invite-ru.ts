@@ -274,11 +274,12 @@ export const ru = {
     metaDescription: (d: InvitationData, dateText?: string) => [pageInviteTo[d.occasion], dateText].filter(Boolean).join(" · "),
     loading: "Открываем приглашение…",
     expired: { title: "Срок приглашения истёк", body: "Торжество уже прошло. Большое спасибо за Ваш приход и добрые пожелания!", brand: "InviteIZI — онлайн-приглашения" },
+    namunaExpired: { title: "Срок образца истёк", body: "Это неоплаченный образец. Когда владелец оплатит его в боте, по этой ссылке откроется полное приглашение." },
     notFound: { title: "Приглашение не найдено", body: "Проверьте ссылку или попросите пригласившего прислать её ещё раз." },
   },
   footer: { madeWith: "Создано в InviteIZI" },
   /** Первый экран без открытия: кнопка музыки */
-  musicHint: "Включить музыку",
+  musicHint: "Музыка",
 };
 
 /** Свои заголовки дизайнов (ключи — как в headings из uz-cyrl.ts) */

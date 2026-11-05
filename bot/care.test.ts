@@ -15,11 +15,17 @@ const DAY = 86_400_000;
 const nudgesTo = (s: Sim, id: number) => s.tg.to(id).filter((m) => uz.care.nudges.includes(m.text ?? ""));
 /** Дата в 12:00 по Сайраму через n дней после 1 ноября */
 const noon = (n: number) => new Date(Date.parse("2026-11-01T07:00:00Z") + n * DAY);
+/** Тадбир через полгода — напоминания не упираются в дату тадбира */
+async function farWedding(s: Sim, id: number) {
+  const [o] = await s.repo.listOrdersByUser(id);
+  await s.repo.updateOrder(o.id, { data: { ...o.data, events: o.data.events.map((e) => ({ ...e, date: "2027-05-15" })) } });
+}
 
 describe("напоминания не купившим", () => {
   it("1, 7, 14, 28 дней — четыре разных текста, не больше; повтор cron не дублирует", async () => {
     const s = new Sim();
     await nikohOrder(s, 1);
+    await farWedding(s, 1);
     for (const day of [0, 1, 1, 3, 7, 7, 14, 28, 40, 60]) {
       s.clock = noon(day);
       await runCron(s.deps);
@@ -94,6 +100,16 @@ describe("напоминания не купившим", () => {
     staff.clock = noon(2);
     await runCron(staff.deps);
     expect(nudgesTo(staff, ADMIN)).toHaveLength(0);
+  });
+
+  it("тадбир прошёл — напоминаний нет", async () => {
+    const s = new Sim();
+    await nikohOrder(s, 1); // тадбир 14 ноября
+    s.clock = noon(15);
+    await runCron(s.deps);
+    s.clock = noon(28);
+    await runCron(s.deps);
+    expect(nudgesTo(s, 1).filter((m) => m.text === uz.care.nudges[3])).toHaveLength(0);
   });
 });
 

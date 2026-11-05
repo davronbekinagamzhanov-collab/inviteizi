@@ -188,7 +188,7 @@ describe("день выплаты 10:00", () => {
 
     // Старая кнопка ещё раз (второй админ, двойное нажатие) — без второй выплаты
     const list2 = s.tg.to(ADMIN2).filter((m) => m.text?.startsWith("💰 Выплаты")).at(-1)!;
-    await s.callback(ADMIN2, `po:${s.repo.partners[0].id}:2000`, list2.id);
+    await s.callback(ADMIN2, `po:${s.repo.partners[0].id}:2000:0`, list2.id);
     expect(s.tg.answers.at(-1)?.text).toBe(N.payStale);
     expect(s.repo.payouts).toHaveLength(1);
 
@@ -286,6 +286,6 @@ describe("лимиты Telegram (часть 7)", () => {
     for (const t of long) expect(t.length, t).toBeLessThanOrEqual(TG_LIMITS.message);
     for (const b of [N.payBtn(L.slice(0, 24), "1 000 000 ₸"), uz.role.gotIt, ru.role.gotIt]) expect(b.length, b).toBeLessThanOrEqual(TG_LIMITS.button);
     for (const a of [N.payOk, N.payStale, uz.role.thanks, ru.role.thanks]) expect(a.length).toBeLessThanOrEqual(TG_LIMITS.alert);
-    for (const d of ["po:2147483647:1000000", `mp:9007199254740991:202612:1000000`, "pg"]) expect(Buffer.byteLength(d)).toBeLessThanOrEqual(TG_LIMITS.callbackData);
+    for (const d of ["po:2147483647:1000000:9999", `mp:9007199254740991:202612:1000000`, "pg"]) expect(Buffer.byteLength(d)).toBeLessThanOrEqual(TG_LIMITS.callbackData);
   });
 });

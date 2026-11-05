@@ -144,13 +144,21 @@ export async function openSession(deps: Deps, u: AppUser): Promise<AppSession> {
   const user = await deps.repo.touchUser({ id: u.id, username: u.username, firstName: u.firstName });
   const lang = langFor(user.lang, u.languageCode, Boolean(deps.env.kazakhEnabled));
   if (!user.lang) await deps.repo.setLang(u.id, lang);
-  const orders = (await deps.repo.listOrdersByUser(u.id)).slice(0, MAX_ORDERS).map((o) => appOrder(deps, o));
+  const all = await deps.repo.listOrdersByUser(u.id);
+  const orders = all.slice(0, MAX_ORDERS).map((o) => appOrder(deps, o));
+  // Черновик правки заказа, который уже оплачен или на проверке чека, — больше не черновик: новый заказ с чистого листа
+  let draft = draftOf(user.state as Draft);
+  const bound = draft?.orderId ? all.find((o) => o.id === draft!.orderId) : undefined;
+  if (draft?.orderId && (!bound || !PAYABLE_STATUSES.includes(bound.status))) {
+    draft = null;
+    await deps.repo.saveStep(u.id, "idle", { q: ((user.state as Draft).q ?? 0) + 1 });
+  }
   return {
     userId: u.id,
     lang,
     firstName: user.firstName,
     favorites: await deps.repo.listFavorites(u.id),
-    draft: draftOf(user.state as Draft),
+    draft,
     orders,
     today: kzToday(deps.now()),
     pay: { phone: deps.env.kaspiPhone, name: deps.env.kaspiName, card: deps.env.paymentCardNumber ?? null },

@@ -18,7 +18,7 @@ import { expiresAtOf } from "@/lib/orders";
 import { PHOTO_KEEP_AFTER_EXPIRY_MS } from "./own-photo";
 import { eveningReports, flushNotices, payDayNotices } from "./flow/notify";
 import { cleanup, nudges, reviewRequests } from "./flow/care";
-import { kzHour, QUIET_TO } from "@/lib/quiet-hours";
+import { isQuiet, kzHour, QUIET_TO } from "@/lib/quiet-hours";
 
 export type CronResult = {
   adminReminded: number;
@@ -125,7 +125,8 @@ export async function runCron(deps: Deps): Promise<CronResult> {
   }
 
   // ── Клиенту: пропал на оплате ──
-  for (const o of await repo.ordersAbandonedAtPayment(new Date(now.getTime() - CLIENT_REMIND_AFTER_MIN * MIN))) {
+  // Тихие часы: ночью клиенту не пишем — напоминание уйдёт утром (метку не ставим)
+  for (const o of isQuiet(now) ? [] : await repo.ordersAbandonedAtPayment(new Date(now.getTime() - CLIENT_REMIND_AFTER_MIN * MIN))) {
     const tx = txFor((await repo.getUser(o.userId))?.lang);
     try {
       await tg.sendMessage(o.userId, tx.pay.reminder(pageUrl(ctx, o.slug)), {

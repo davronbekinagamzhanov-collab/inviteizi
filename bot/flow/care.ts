@@ -60,6 +60,10 @@ export async function nudges(deps: Deps) {
     if (partnerIds.has(userId) || orders.some((o) => isPaid(o) || o.status === "receipt_sent")) continue;
     const open = orders.filter((o) => OPEN.has(o.status)).sort((a, b) => +b.updatedAt - +a.updatedAt);
     if (!open.length) continue;
+    // Тадбир уже прошёл — напоминать незачем
+    const full = await deps.repo.getOrder(open[0].id);
+    const last = full ? lastEventDate(full) : undefined;
+    if (last && last < kzDay(now)) continue;
     const user = await deps.repo.getUser(userId);
     if (!user || user.nudgeOff) continue;
     const k = user.nudgeCount ?? 0;

@@ -227,8 +227,8 @@ describe("владелец и админы вне статистики", () => {
     expect(s.repo.earnings).toEqual([]);
     expect(s.tg.to(50).some((m) => m.text?.includes("✅ +"))).toBe(false);
     await s.command(50, "hamkor");
-    expect(s.lastText(50)).toContain("Сканерлади: 0");
-    expect(s.lastText(50)).toContain("Буюртма бошлади: 0");
+    expect(s.lastText(50)).toContain("QR сканерлади: 0");
+    expect(s.lastText(50)).not.toContain("Буюртма бошлади");
     expect(p.id).toBe(1);
   });
 

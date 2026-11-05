@@ -14,6 +14,8 @@ export type Manager = {
   invitedBy: number;
   active: boolean;
   createdAt: Date;
+  /** Когда сняли (null — работает). Оплаты сети после снятия ему не засчитываются */
+  removedAt?: Date | null;
 };
 
 export type InviteKind = "manager" | "partner";

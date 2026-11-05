@@ -5,7 +5,8 @@ import { t } from "@/texts/uz-cyrl";
 import type { Invitation } from "./useInvitation";
 
 /**
- * Дизайн без заставки (Оддий, Варақланадиган): на первом экране мягкая заметная кнопка «▶ Мусиқани ёқиш».
+ * Дизайн без заставки (Оддий, Варақланадиган): на первом экране мягкая заметная кнопка «▶ Мусиқа»
+ * рядом с круглой кнопкой музыки в углу — так она не закрывает имена и дату.
  * Браузер включает звук только после нажатия — поэтому кнопка, а не автозапуск. Уходит, когда музыка играет
  * или гость пролистал первый экран (там уже есть круглая кнопка музыки).
  */
@@ -35,7 +36,7 @@ export function MusicHint({ inv }: { inv: Invitation }) {
         setTouched(true);
         inv.toggleMusic();
       }}
-      className={`fixed left-1/2 bottom-[calc(5.25rem+env(safe-area-inset-bottom))] z-40 inline-flex h-11 -translate-x-1/2 items-center gap-2 whitespace-nowrap rounded-full bg-[var(--n-paper,#fffaf2)]/90 pl-3 pr-4 font-sans text-[14px] font-medium text-[var(--n-ink,#3b2a1e)] shadow-[0_8px_22px_-10px_rgba(40,30,20,.55)] ring-1 ring-[var(--n-ink,#3b2a1e)]/15 backdrop-blur-sm transition-[opacity,transform] duration-500 ease-[cubic-bezier(.22,1,.36,1)] active:scale-95 ${shown ? "opacity-100" : "pointer-events-none translate-y-2 opacity-0"}`}
+      className={`fixed right-[calc(max(1rem,calc((100vw-430px)/2+1rem))+3.75rem)] ${inv.mode === "demo" ? "bottom-[calc(3.6rem+env(safe-area-inset-bottom))]" : "bottom-[calc(1.1rem+env(safe-area-inset-bottom))]"} z-40 inline-flex h-11 items-center gap-2 whitespace-nowrap rounded-full bg-[var(--n-paper,#fffaf2)]/90 pl-3 pr-4 font-sans text-[14px] font-medium text-[var(--n-ink,#3b2a1e)] shadow-[0_8px_22px_-10px_rgba(40,30,20,.55)] ring-1 ring-[var(--n-ink,#3b2a1e)]/15 backdrop-blur-sm transition-[opacity,transform] duration-500 ease-[cubic-bezier(.22,1,.36,1)] active:scale-95 ${shown ? "opacity-100" : "pointer-events-none translate-y-2 opacity-0"}`}
     >
       <span aria-hidden className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--n-ink,#3b2a1e)] text-[var(--n-paper,#fffaf2)]">
         <svg viewBox="0 0 24 24" className="ml-0.5 h-3.5 w-3.5"><path fill="currentColor" d="M8 5.5v13l11-6.5z" /></svg>

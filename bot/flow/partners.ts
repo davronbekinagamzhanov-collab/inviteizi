@@ -797,21 +797,13 @@ export function payoutsText(c: Ctx, p: Partner, r: PartnerRow) {
   ].join("\n");
 }
 
-/** true — партнёр увидел свои цифры */
+/** /hamkor: партнёр видит свою статистику (только сканы и оплаты — неоплаченные заказы не показываем). true — показано */
 export async function partnerStats(c: Ctx): Promise<boolean> {
   if (c.chatId !== c.user.id) return false;
   const partner = await c.deps.repo.findPartnerForUser(c.user.id, c.user.username);
   if (!partner) return false;
-  const row = await partnerRowOf(c.deps, partner);
-  if (!row) return false;
-  await send(c, c.tx.partner.stats({
-    link: await linkOf(c.deps, partner),
-    scanned: row.scanned,
-    started: row.started,
-    paid: row.paid,
-    earned: price(row.earned),
-    paidOut: price(row.paidOut),
-    due: price(row.due),
-  }));
+  const { partnerStatsScreen } = await import("./stats");
+  const screen = await partnerStatsScreen(c, partner);
+  await send(c, screen.text, inline(screen.rows));
   return true;
 }

@@ -64,7 +64,7 @@ describe("атакующий: чужие заказы и права", () => {
     }
     expect(s.repo.payouts).toEqual([]);
     await s.command(ATTACKER, "hamkor");
-    expect(s.lastText(ATTACKER)).toContain("Тўлади: 0");
+    expect(s.lastText(ATTACKER)).toContain("Тўлов: 0");
     expect(s.lastText(ATTACKER)).not.toContain("bbbb2222");
   });
 

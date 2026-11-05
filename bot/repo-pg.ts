@@ -345,7 +345,7 @@ const PARTNER_COLUMNS = `id, code, name, telegram_id as "telegramId", username, 
   phone, kaspi, schedule, status, proposed_rate as "proposedRate", proposed_schedule as "proposedSchedule",
   owner_notified_at as "ownerNotifiedAt", sleep_notified_at as "sleepNotifiedAt"`;
 const PARTNER_PATCH: Record<keyof PartnerPatch, string> = { phone: "phone", kaspi: "kaspi", schedule: "schedule", ownerNotifiedAt: "owner_notified_at", sleepNotifiedAt: "sleep_notified_at" };
-const MANAGER_COLUMNS = `telegram_id as "telegramId", code, username, first_name as "firstName", invited_by as "invitedBy", active, created_at as "createdAt"`;
+const MANAGER_COLUMNS = `telegram_id as "telegramId", code, username, first_name as "firstName", invited_by as "invitedBy", active, created_at as "createdAt", removed_at as "removedAt"`;
 /** Миграция партнёров ещё не применена */
 const isMissingTable = (e: unknown) => (e as { code?: string } | null)?.code === "42P01";
 const isMissingColumn = (e: unknown) => (e as { code?: string } | null)?.code === "42703";

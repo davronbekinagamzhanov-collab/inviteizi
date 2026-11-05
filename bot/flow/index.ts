@@ -465,8 +465,8 @@ async function onCallback(c: Ctx, d: string) {
   if (d.startsWith("sp:")) return partnerStatsAction(c, d.slice(3));
   if (d.startsWith("ex:")) return exportAction(c, d.slice(3));
   if (d.startsWith("po:")) {
-    const [, id = "", amount = ""] = d.split(":");
-    return payPartnerAction(c, id, amount);
+    const [, id = "", amount = "", version = ""] = d.split(":");
+    return payPartnerAction(c, id, amount, version);
   }
   if (d.startsWith("mp:")) {
     const [, id = "", month = "", amount = ""] = d.split(":");

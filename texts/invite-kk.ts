@@ -259,10 +259,11 @@ export const kk = {
     metaDescription: (d: InvitationData, dateText?: string) => [pageInviteTo[d.occasion], dateText].filter(Boolean).join(" · "),
     loading: "Шақыру ашылуда…",
     expired: { title: "Шақырудың мерзімі бітті", body: "Той өтіп кетті. Келгеніңіз бен ізгі тілектеріңіз үшін үлкен рақмет!", brand: "InviteIZI — онлайн шақырулар" },
+    namunaExpired: { title: "Үлгінің мерзімі бітті", body: "Бұл — төленбеген үлгі. Иесі оны ботта төлегенде, осы сілтемеде толық шақыру ашылады." },
     notFound: { title: "Шақыру табылмады", body: "Сілтемені тексеріңіз немесе шақырған адамнан қайта жіберуін сұраңыз." },
   },
   footer: { madeWith: "InviteIZI арқылы жасалды" },
-  musicHint: "Музыканы қосу",
+  musicHint: "Музыка",
 };
 
 export const kkHeadings: Record<string, Partial<Record<"countdown" | "date" | "program" | "venue" | "heart" | "blessing" | "tap" | "thanks" | "waiting", string>>> = {

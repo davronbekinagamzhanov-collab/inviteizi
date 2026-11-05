@@ -268,14 +268,15 @@ export class MemoryRepo implements Repo {
   }
   async addManager(m: { telegramId: number; code: string; username: string | null; firstName: string | null; invitedBy: number }) {
     const old = this.managers.find((x) => x.telegramId === m.telegramId);
-    if (old) Object.assign(old, { active: true, username: m.username, firstName: m.firstName, invitedBy: m.invitedBy });
+    if (old) Object.assign(old, { active: true, removedAt: null, username: m.username, firstName: m.firstName, invitedBy: m.invitedBy });
     else this.managers.push({ ...m, active: true, createdAt: this.now() });
     return clone(this.managers.find((x) => x.telegramId === m.telegramId)!);
   }
-  async removeManager(id: number) {
+  async removeManager(id: number, now?: Date) {
     const m = this.managers.find((x) => x.telegramId === id && x.active);
     if (!m) return false;
     m.active = false;
+    m.removedAt = now ?? this.now();
     return true;
   }
   async createInvite(i: { tokenHash: string; kind: InviteKind; createdBy: number; expiresAt: Date; partnerId?: number | null }) {

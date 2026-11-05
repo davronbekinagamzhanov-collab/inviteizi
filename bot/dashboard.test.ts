@@ -63,7 +63,7 @@ describe("права на панель", () => {
     expect(s.lastText(50)).toBe(uz.dashboard.denied);
     await s.command(50, "hamkor");
     const text = s.lastText(50);
-    expect(text).toContain("Тўлади: 1");
+    expect(text).toContain("Тўлов: 1");
     expect(text).toContain("start=p_aaaa1111");
     expect(text).not.toContain("bbbb2222");
     expect(text).not.toContain("Клиент");
@@ -304,7 +304,7 @@ describe("партнёры", () => {
     await paidOrder(s, 1, code);
     expect(s.repo.earnings).toMatchObject([{ delivered: true }]);
     await s.command(50, "hamkor");
-    expect(s.lastText(50)).toContain("Тўлади: 1");
+    expect(s.lastText(50)).toContain("Тўлов: 1");
     expect(s.repo.partners[0].telegramId).toBe(50);
   });
 

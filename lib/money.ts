@@ -73,7 +73,10 @@ export function attributionOf(s: PanelSnapshot, managers: Manager[], o: Pick<Pan
 export function managerPaid(s: PanelSnapshot, managers: Manager[], managerId: number, from: Date, to: Date) {
   return s.orders.filter((o) => {
     if (!isPaid(o) || +paidAt(o) < +from || +paidAt(o) >= +to) return false;
-    return attributionOf(s, managers, o).manager?.telegramId === managerId;
+    const m = attributionOf(s, managers, o).manager;
+    // Снятому менеджеру — только оплаты, пришедшие, пока он работал
+    if (m?.telegramId !== managerId) return false;
+    return m.active || !m.removedAt || +paidAt(o) < +m.removedAt;
   });
 }
 

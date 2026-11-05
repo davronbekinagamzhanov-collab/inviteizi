@@ -62,7 +62,8 @@ async function Invitation({ params }: { params: PageProps<"/[slug]">["params"] }
     if (current) permanentRedirect(`/${current}`);
     notFound();
   }
-  if (page.mode === "expired") return <Expired />;
+  // До оплаты НАМУНА живёт 24 часа: гостю — что это неоплаченный образец, а не «тадбир ўтди»
+  if (page.mode === "expired") return <Expired texts={page.order.status === "active" || page.order.status === "archived" ? undefined : t.invitationPage.namunaExpired} />;
   const design = getDesign(page.order.templateId);
   if (!design) notFound();
 

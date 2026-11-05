@@ -256,7 +256,7 @@ export async function eveningReports(deps: Deps) {
 const ownerFirstName = (deps: Deps) => deps.env.kaspiName.split(/\s+/)[0] || "InviteIZI";
 
 type PayItem =
-  | { kind: "partner"; partner: Partner; amount: number; count: number; done: boolean; manager: Manager | null }
+  | { kind: "partner"; partner: Partner; amount: number; count: number; done: boolean; manager: Manager | null; version: number }
   | { kind: "manager"; manager: Manager; month: string; amount: number; count: number; done: boolean };
 
 /** Кому платить сегодня: партнёры по графику (к выплате > 0 или уже выплачено сегодня), 1-го — менеджеры за прошлый месяц */
@@ -268,8 +268,10 @@ export function payItems(s: PanelSnapshot, managers: Manager[], now: Date): PayI
     if (p.status !== "active" || !isPayDay(p.schedule, now)) continue;
     const todayPaid = s.payouts.filter((x) => x.partnerId === p.id && +x.createdAt >= +from).reduce((n, x) => n + x.amount, 0);
     const manager = managers.find((m) => m.telegramId === p.managedBy) ?? null;
-    if (r.due > 0) items.push({ kind: "partner", partner: p, amount: r.due, count: unpaidCount(s, p.id), done: false, manager });
-    else if (todayPaid > 0) items.push({ kind: "partner", partner: p, amount: todayPaid, count: 0, done: true, manager });
+    // Сколько выплат уже было: старая кнопка (вчерашняя, у второго админа) с тем же долгом не проведёт выплату
+    const version = s.payouts.filter((x) => x.partnerId === p.id).length;
+    if (r.due > 0) items.push({ kind: "partner", partner: p, amount: r.due, count: unpaidCount(s, p.id), done: false, manager, version });
+    else if (todayPaid > 0) items.push({ kind: "partner", partner: p, amount: todayPaid, count: 0, done: true, manager, version });
   }
   if (new Date(+now + 5 * HOUR).getUTCDate() === 1) {
     const month = prevMonth(kzMonth(now));
@@ -299,7 +301,7 @@ export function payScreen(items: PayItem[], now: Date) {
     .map((x) =>
       x.kind === "manager"
         ? [{ text: N.payBtn(managerName(x.manager).slice(0, 24), price(x.amount)), data: `mp:${x.manager.telegramId}:${x.month.replace("-", "")}:${x.amount}` }]
-        : [{ text: N.payBtn(x.partner.name.slice(0, 24), price(x.amount)), data: `po:${x.partner.id}:${x.amount}` }],
+        : [{ text: N.payBtn(x.partner.name.slice(0, 24), price(x.amount)), data: `po:${x.partner.id}:${x.amount}:${x.version}` }],
     );
   const all = items.length > 0 && rows.length === 0;
   return { text: [N.payTitle(ruDate(now)), "", ...lines, ...(all ? ["", N.payAll] : [])].join("\n"), rows };
@@ -361,11 +363,13 @@ async function refreshPayScreen(c: Ctx) {
 }
 
 /** po:<партнёр>:<сумма> — выплата партнёру из списка дня. Только владелец; сумма в кнопке — без дублей */
-export async function payPartnerAction(c: Ctx, idArg: string, amountArg: string) {
+export async function payPartnerAction(c: Ctx, idArg: string, amountArg: string, versionArg = "") {
   if (!(await c.deps.repo.isAdmin(c.user.id))) return toast(c, c.tx.oldButton);
   const p = await c.deps.repo.getPartner(Number(idArg));
   const amount = Number(amountArg);
-  const done = Boolean(p) && Number.isInteger(amount) && amount > 0 && (await c.deps.repo.recordPartnerPayout(p!.id, amount, c.user.id));
+  const paidBefore = p ? (await c.deps.repo.panelSnapshot()).payouts.filter((x) => x.partnerId === p.id).length : -1;
+  const fresh = versionArg === String(paidBefore);
+  const done = Boolean(p) && fresh && Number.isInteger(amount) && amount > 0 && (await c.deps.repo.recordPartnerPayout(p!.id, amount, c.user.id));
   if (done) await afterPartnerPayout(c.deps, p!, amount);
   await toast(c, done ? N.payOk : N.payStale);
   await refreshPayScreen(c);

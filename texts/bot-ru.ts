@@ -591,7 +591,7 @@ export const staff = {
     range: { d: (date: string) => `сегодня, ${date}`, w: "7 дней", m: (month: string) => month, y: (year: string) => `${year} год` },
     paid: (n: number, sum: string) => `Оплат: ${n} · ${sum}`,
     average: (sum: string) => `Средний чек: ${sum}`,
-    formats: (a: number, s: number, o: number) => `Анимация ${a} · Варақ ${s} · Оддий ${o}`,
+    formats: (a: number, s: number, o: number) => `Анимация ${a} · листаемые ${s} · простые ${o}`,
     occasions: (list: string) => list,
     partnersCost: (earned: string, paid: string) => `Партнёрам начислено: ${earned} · выплачено: ${paid}`,
     managersCost: (sum: string) => `Менеджерам: ${sum}`,
