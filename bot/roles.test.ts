@@ -199,12 +199,20 @@ describe("заказ для клиента", () => {
     return { o, token: token!, text };
   }
 
-  it("📤 Отправить клиенту: одно сообщение с НАМУНА, суммой, реквизитами и ссылкой в бота + WhatsApp", async () => {
+  it("📤 Отправить клиенту: сначала НАМУНА и предупреждение, сумма и ссылка в бота; реквизитов нет + WhatsApp", async () => {
     const s = new Sim();
     const { o, text } = await shareFromOwner(s);
     expect(text).toContain(`/${o.slug}`);
-    expect(text).toContain("НАМУНА");
-    expect(text).toContain("чекни шу ботга юборинг");
+    const namuna = text.indexOf("НАМУНА");
+    const warn = text.indexOf("Тўловдан кейин ўзгартириб бўлмайди, пул қайтарилмайди");
+    expect(namuna).toBeGreaterThan(-1);
+    expect(warn).toBeGreaterThan(namuna);
+    expect(text.indexOf("start=o_")).toBeGreaterThan(warn);
+    // Реквизиты Kaspi — только в боте после «✅ Ҳаммаси тўғри»
+    expect(text).not.toContain(s.deps.env.kaspiPhone);
+    expect(text).not.toContain("Kaspi");
+    const wa = (s.last(ADMIN)!.markup as { inline: { url?: string }[][] }).inline.flat().map((x) => decodeURIComponent(x.url ?? ""));
+    for (const u of wa) expect(u).not.toContain(s.deps.env.kaspiPhone);
     const b = s.last(ADMIN)!.markup as { inline: { text: string; url?: string }[][] };
     expect(b.inline.flat().map((x) => x.text)).toEqual([staff.btn.waUz, staff.btn.waRu]);
     expect(b.inline.flat().every((x) => x.url?.startsWith("https://wa.me/?text="))).toBe(true);
@@ -281,7 +289,7 @@ describe("лимиты Telegram для новых текстов", () => {
       staff.st.earnRule("500 ₸", "15 000 ₸", 30),
       ...[uz, ru].flatMap((tx) => [
         tx.role.partnerHome(long, false), tx.role.claimed("https://inviteizi.vercel.app/" + "a".repeat(60), "10 000 ₸"),
-        tx.role.clientShare({ url: "https://inviteizi.vercel.app/" + "a".repeat(60), amount: "10 000 ₸", phone: "+7 700 000 00 00", name: long, bot: `https://t.me/inviteizi_bot?start=o_${"a".repeat(20)}` }),
+        tx.role.clientShare({ url: "https://inviteizi.vercel.app/" + "a".repeat(60), amount: "10 000 ₸", bot: `https://t.me/inviteizi_bot?start=o_${"a".repeat(20)}` }),
         tx.role.payoutsText({ earned: "1 000 000 ₸", paidOut: "1 000 000 ₸", due: "1 000 000 ₸" }),
       ]),
     ];

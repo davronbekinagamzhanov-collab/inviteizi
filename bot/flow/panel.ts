@@ -180,7 +180,7 @@ const waLink = (text: string) => {
   return url.length <= 2000 ? url : null;
 };
 
-/** cl:<n> — готовое сообщение для WhatsApp: НАМУНА, сумма, реквизиты, ссылка в бота для чека */
+/** cl:<n> — готовое сообщение для WhatsApp: НАМУНА, предупреждение, сумма, ссылка в бота (реквизиты — там, после подтверждения) */
 export async function toClient(c: Ctx, n: number): Promise<Result | void> {
   const role = await roleOf(c);
   if (role !== "owner" && role !== "manager") return void (await toast(c, c.tx.oldButton));
@@ -190,8 +190,8 @@ export async function toClient(c: Ctx, n: number): Promise<Result | void> {
   const manager = role === "manager" ? await c.deps.repo.getManager(c.user.id) : null;
   const token = newToken();
   await c.deps.repo.issueClientOrder({ orderId: o.id, createdBy: c.user.id, tokenHash: hashToken(token), refSource: manager ? managerSource(manager.code) : null });
-  const env = c.deps.env;
-  const share = { url: pageUrl(c, o.slug), amount: price(o.amount), phone: env.kaspiPhone, name: env.kaspiName, bot: `https://t.me/${await c.deps.tg.botUsername()}?start=o_${token}` };
+  // Реквизитов здесь нет: клиент увидит их в боте только после предупреждения и «✅ Ҳаммаси тўғри»
+  const share = { url: pageUrl(c, o.slug), amount: price(o.amount), bot: `https://t.me/${await c.deps.tg.botUsername()}?start=o_${token}` };
   const uz = texts.uz.role.clientShare(share);
   const ru = texts.ru.role.clientShare(share);
   const wa = [[uz, S.btn.waUz], [ru, S.btn.waRu]].flatMap(([text, label]) => {
