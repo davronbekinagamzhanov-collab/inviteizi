@@ -8,7 +8,8 @@ import { uz } from "@/texts/bot-uz";
 import { ru, staff } from "@/texts/bot-ru";
 import { partnerSource } from "@/lib/owner-panel";
 import { runCron } from "./cron";
-import { normalizeKaspi, normalizePhone, SLEEP_AFTER_MS } from "./flow/partners";
+import { normalizeKaspi, normalizePhone, panelData, SLEEP_AFTER_MS } from "./flow/partners";
+import { ownerEvening } from "./flow/notify";
 import { TG_LIMITS } from "./testing/fake-tg";
 import { nikohWithReceipt } from "./testing/paths";
 import { ADMIN, ADMIN2, Sim } from "./testing/sim";
@@ -527,6 +528,21 @@ describe("Ссылка партнёра текстом (fix/app-polish)", () => 
     await s.click(PARTNER, uz.role.stats);
     expect(s.lastText(PARTNER)).toContain(`${uz.role.statsText({ period: "", scanned: 0, paid: 1, earned: "", paidOut: "", due: "", link: "" }).split("\n").find((l) => l.startsWith("Тўлов"))}`);
   }, 30_000);
+});
+
+describe("партнёр — не новый клиент (ревьюер, п. 16)", () => {
+  it("отчёт 20:00 и статистика: 1 клиент по QR + партнёр по join_ = 1 новый клиент", async () => {
+    const s = new Sim();
+    const token = await createPartner(s, ADMIN);
+    const p = s.repo.partners[0];
+    await join(s, token);
+    await start(s, CLIENT, partnerSource(p.code));
+    const snap = await panelData(s.deps);
+    expect(snap.users.map((u) => u.id)).toEqual([CLIENT]);
+    expect(ownerEvening(snap, [], s.deps.now())).toContain(staff.n.scans(1, 1));
+    const a = await s.repo.analytics(ADMIN, "today", s.deps.now());
+    expect(a.newUsers).toBe(1);
+  });
 });
 
 describe("Казахский постер (дополнение к части 6)", () => {

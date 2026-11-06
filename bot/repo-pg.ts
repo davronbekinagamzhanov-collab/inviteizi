@@ -387,9 +387,10 @@ export class PgRepo implements Repo {
       const events = await tx<MetricEvent[]>`select kind, user_id as "userId", target, created_at as "createdAt" from public.analytics_events`;
       const [config] = await tx<{ started_at: Date }[]>`select started_at from public.analytics_config where singleton`;
       const music = await tx<{ id: string; titleRu: string; titleUz: string }[]>`select id, title_ru as "titleRu", title_uz as "titleUz" from public.music`;
-      return { orders: [...orders], users: [...users], events: [...events], since: config.started_at, music: [...music] } satisfies AnalyticsInput;
+      const partners = await tx<{ id: string }[]>`select telegram_id::text as id from public.partners where telegram_id is not null`;
+      return { input: { orders: [...orders], users: [...users], events: [...events], since: config.started_at, music: [...music] } satisfies AnalyticsInput, partnerIds: partners.map((p) => Number(p.id)) };
     });
-    return summarize(withoutStaffAnalytics(input, await this.staffIds()), period, now, customers && owner);
+    return summarize(withoutStaffAnalytics(input.input, await this.staffIds(), input.partnerIds), period, now, customers && owner);
   }
 
   async listFavorites(userId: number) {

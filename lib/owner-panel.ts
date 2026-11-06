@@ -78,10 +78,12 @@ export type PanelSnapshot = {
 export function withoutStaff(s: PanelSnapshot, staff: number[]): PanelSnapshot {
   const ids = new Set(staff);
   const staffOrders = new Set(s.orders.filter((o) => ids.has(o.userId)).map((o) => o.id));
+  // Партнёр, открывший свою join_/p_-ссылку, — не новый клиент (отчёт 20:00, статистика, сканы)
+  const partnerUsers = new Set(s.partners.map((p) => p.telegramId).filter((x): x is number => typeof x === "number"));
   return {
     ...s,
     orders: s.orders.filter((o) => !staffOrders.has(o.id)),
-    users: s.users.filter((u) => !ids.has(u.id)),
+    users: s.users.filter((u) => !ids.has(u.id) && !partnerUsers.has(u.id)),
     earnings: s.earnings.filter((e) => !staffOrders.has(e.orderId)),
   };
 }

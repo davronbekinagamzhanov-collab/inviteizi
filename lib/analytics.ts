@@ -10,9 +10,11 @@ export type Metric = { id: string; orders: number; paid: number; revenue: number
 export type AnalyticsInput = { orders: MetricOrder[]; users: MetricUser[]; events: MetricEvent[]; since: Date; music?: { id: string; titleRu: string; titleUz: string }[] };
 
 /** Owner and admins never appear in the numbers, whatever they do in the bot. */
-export function withoutStaffAnalytics<T extends AnalyticsInput>(input: T, staff: number[]): T {
+/** staff — сотрудники (без их заказов и кликов); nonClients — партнёры: их заказы остаются, но «клиентами» они не считаются */
+export function withoutStaffAnalytics<T extends AnalyticsInput>(input: T, staff: number[], nonClients: number[] = []): T {
   const ids = new Set(staff);
-  return { ...input, orders: input.orders.filter((o) => !ids.has(o.userId)), users: input.users.filter((u) => !ids.has(u.id)), events: input.events.filter((e) => !ids.has(e.userId)) };
+  const notClients = new Set(nonClients);
+  return { ...input, orders: input.orders.filter((o) => !ids.has(o.userId)), users: input.users.filter((u) => !ids.has(u.id) && !notClients.has(u.id)), events: input.events.filter((e) => !ids.has(e.userId)) };
 }
 
 /** Calendar days in Asia/Almaty (UTC+5); today plus the preceding 6/29 days. */

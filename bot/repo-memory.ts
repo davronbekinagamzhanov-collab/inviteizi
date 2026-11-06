@@ -346,7 +346,7 @@ export class MemoryRepo implements Repo {
   async analytics(actorId: number, period: Period, now: Date, customers = false) {
     const owner = await this.isOwner(actorId);
     if (!(await this.canAnalyze(actorId)) || (customers && !owner)) throw new Error("Analytics access denied");
-    return summarize(withoutStaffAnalytics({ orders: [...this.orders.values()], users: [...this.users.values()], events: [...this.analyticsEvents.values()], since: this.trackingSince, music: this.music }, await this.staffIds()), period, now, customers && owner);
+    return summarize(withoutStaffAnalytics({ orders: [...this.orders.values()], users: [...this.users.values()], events: [...this.analyticsEvents.values()], since: this.trackingSince, music: this.music }, await this.staffIds(), this.partners.flatMap((p) => (p.telegramId ? [p.telegramId] : []))), period, now, customers && owner);
   }
   async listFavorites(userId: number) {
     return [...(this.favorites.get(userId)??new Map<string,number>())]
