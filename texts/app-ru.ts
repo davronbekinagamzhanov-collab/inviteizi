@@ -95,6 +95,8 @@ export const appRu: AppTexts = {
     addEvent: (kind: string) => `＋ Добавить: ${kind}`,
     removeEvent: "Убрать",
     next: "Дальше",
+    editData: "✏️ Изменить данные",
+    saveBack: "Сохранить и вернуться",
     errors: {
       empty: "Заполните это поле",
       letters: "Напишите буквами",

@@ -48,10 +48,12 @@ function Loading() {
 type Screen =
   | { name: "catalog" }
   | { name: "view"; id: string }
-  | { name: "form" }
+  /** ret — правка из итога/проверки: «Сақлаш ва қайтиш» возвращает туда же */
+  | { name: "form"; ret?: boolean }
   | { name: "photos" }
   | { name: "summary" }
-  | { name: "pay"; orderId: string }
+  /** check — проверка перед оплатой, pay — реквизиты и чек (назад с реквизитов → проверка) */
+  | { name: "pay"; orderId: string; step: "check" | "pay" }
   | { name: "wait"; orderId: string; night: boolean }
   | { name: "orders" };
 
@@ -231,7 +233,8 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
         if (r.error === "fields") {
           setErrors(r.fields);
           haptic.error();
-          reset([{ name: "catalog" }, { name: "form" }]);
+          // Остаёмся на анкете или открываем её поверх (назад — туда, откуда пришли)
+          setStack((st) => (st[st.length - 1].name === "form" ? st : [...st, { name: "form", ret: true }]));
           setToast(T.form.errors.fix);
           return null;
         }
@@ -299,7 +302,8 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
     const same = draft && design && design.occasion === next.occasion;
     setDraft(same ? { ...draft, templateId: id } : { templateId: id, form: emptyForm(next.occasion), rsvp: true, draftId: newDraftId() });
     setErrors([]);
-    reset([{ name: "catalog" }, { name: "form" }]);
+    // Назад с анкеты — к просмотру дизайна
+    go({ name: "form" });
   }
 
   // После первой попытки ошибки пересчитываются на ходу: исправил — красное сразу уходит
@@ -326,6 +330,8 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
     setBusy(false);
     if (!o) return;
     haptic.ok();
+    // Правка из итога/проверки: НАМУНА обновлена (та же ссылка) — возвращаемся туда
+    if (screen.name === "form" && screen.ret) return back();
     go(design.clientPhotos ? { name: "photos" } : { name: "summary" });
   }
 
@@ -344,7 +350,26 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
     await pending.current;
     const o = await submit(draft);
     setBusy(false);
-    if (o) go({ name: "pay", orderId: o.id });
+    if (o) go({ name: "pay", orderId: o.id, step: "check" });
+  }
+
+  /** «✏️ Маълумотларни ўзгартириш» на итоге и на проверке перед оплатой: анкета с текущими данными поверх */
+  async function editData(o?: AppOrder) {
+    if (busy) return;
+    haptic.tap();
+    if (!o || draft?.orderId === o.id) return go({ name: "form", ret: true });
+    setBusy(true);
+    try {
+      const r = await api<{ draft?: AppDraft; error?: string }>("edit", { orderId: o.id });
+      if (!r.draft) return setToast(T.orders.closedEdit);
+      setDraft(r.draft);
+      setErrors([]);
+      go({ name: "form", ret: true });
+    } catch {
+      setToast(T.serverError);
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function editOrder(o: AppOrder) {
@@ -357,7 +382,8 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
       setErrors([]);
       const d = getDesign(r.draft.templateId ?? "");
       if (d) setChip(d.occasion);
-      reset([{ name: "catalog" }, { name: "form" }]);
+      // Назад с анкеты — в «Менинг таклифномаларим»
+      go({ name: "form" });
     } catch {
       setToast(T.serverError);
     } finally {
@@ -472,7 +498,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
         main = { text: T.view.choose, onClick: () => choose(screen.id) };
         break;
       case "form":
-        main = { text: T.form.next, onClick: formNext, progress: busy };
+        main = { text: screen.ret ? T.form.saveBack : T.form.next, onClick: formNext, progress: busy };
         break;
       case "photos":
         main = { text: draft?.photos?.length ? T.photos.next : T.photos.skip, onClick: toSummary, progress: busy || photosBusy > 0 };
@@ -570,14 +596,15 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
                   status={saveStatus}
                   onChange={(patch) => patchDraft(patch, true)}
                   onNamuna={() => order && setViewer(order.url)}
+                  onEdit={() => editData()}
                 />
               )}
               {screen.name === "pay" && (() => {
                 const o = orders.find((x) => x.id === screen.orderId);
-                return o ? <Pay order={o} pay={session.pay} onToast={setToast} onTerms={() => setViewer(lang === "uz" ? "/terms" : "/terms/ru")} onDone={(night) => { setOrders((l) => l.map((x) => (x.id === o.id ? { ...x, status: "receipt_sent", canPay: false, canEdit: false } : x))); setDraft(null); reset([{ name: "catalog" }, { name: "wait", orderId: o.id, night }]); }} /> : null;
+                return o ? <Pay key={screen.step} order={o} step={screen.step} onConfirmed={(c) => { setOrders((l) => l.map((x) => (x.id === c.id ? c : x))); go({ name: "pay", orderId: o.id, step: "pay" }); }} onEdit={() => editData(o)} busy={busy} pay={session.pay} onToast={setToast} onTerms={() => setViewer(lang === "uz" ? "/terms" : "/terms/ru")} onDone={(night) => { setOrders((l) => l.map((x) => (x.id === o.id ? { ...x, status: "receipt_sent", canPay: false, canEdit: false } : x))); setDraft(null); reset([{ name: "catalog" }, { name: "wait", orderId: o.id, night }]); }} /> : null;
               })()}
-              {screen.name === "wait" && waitOrder && <Waiting order={waitOrder} night={screen.night} onToast={setToast} onResend={() => reset([{ name: "catalog" }, { name: "orders" }, { name: "pay", orderId: waitOrder.id }])} />}
-              {screen.name === "orders" && <Orders orders={orders} onEdit={editOrder} onPay={(o) => go({ name: "pay", orderId: o.id })} onStatus={(o) => go({ name: "wait", orderId: o.id, night: isQuiet(new Date()) })} onCancel={cancelOrder} onToast={setToast} busy={busy} />}
+              {screen.name === "wait" && waitOrder && <Waiting order={waitOrder} night={screen.night} onToast={setToast} onResend={() => reset([{ name: "catalog" }, { name: "orders" }, { name: "pay", orderId: waitOrder.id, step: waitOrder.confirmed ? "pay" : "check" }])} />}
+              {screen.name === "orders" && <Orders orders={orders} onEdit={editOrder} onPay={(o) => go({ name: "pay", orderId: o.id, step: o.confirmed ? "pay" : "check" })} onStatus={(o) => go({ name: "wait", orderId: o.id, night: isQuiet(new Date()) })} onCancel={cancelOrder} onToast={setToast} busy={busy} />}
             </>
           )}
         </main>

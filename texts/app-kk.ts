@@ -99,6 +99,8 @@ export const appKk: AppTexts = {
     addEvent: (kind: string) => `＋ ${kind} қосу`,
     removeEvent: "Алып тастау",
     next: "Жалғастыру",
+    editData: "✏️ Деректерді өзгерту",
+    saveBack: "Сақтау және оралу",
     errors: {
       empty: "Осы жерді толтырыңыз",
       letters: "Әріптермен жазыңыз",

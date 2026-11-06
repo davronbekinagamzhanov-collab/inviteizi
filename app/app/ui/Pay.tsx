@@ -10,13 +10,13 @@ import s from "../app.module.css";
 
 type PayInfo = { phone: string; name: string; card: string | null };
 
-export function Pay({ order, pay, onDone, onToast, onTerms }: { order: AppOrder; pay: PayInfo; onDone: (night: boolean) => void; onToast: (t: string) => void; onTerms: () => void }) {
+export function Pay({ order, step, pay, onDone, onToast, onTerms, onConfirmed, onEdit, busy: editBusy }: { order: AppOrder; step: "check" | "pay"; pay: PayInfo; onDone: (night: boolean) => void; onToast: (t: string) => void; onTerms: () => void; onConfirmed: (o: AppOrder) => void; onEdit: () => void; busy?: boolean }) {
   const T = useT();
   const input = useRef<HTMLInputElement>(null);
   const [progress, setProgress] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
-  // Проверка перед оплатой: реквизиты — только после «✅ Ҳаммаси тўғри, тўлаймиз»
-  const [confirmed, setConfirmed] = useState(order.confirmed);
+  // Проверка перед оплатой: реквизиты — только после «✅ Ҳаммаси тўғри, тўлаймиз» (отдельный шаг: «назад» с реквизитов → проверка)
+  const confirmed = step === "pay";
   const [busy, setBusy] = useState(false);
   const [agree, setAgree] = useState(false);
 
@@ -28,10 +28,10 @@ export function Pay({ order, pay, onDone, onToast, onTerms }: { order: AppOrder;
     }
     setBusy(true);
     try {
-      const r = await api<{ ok: true } | { error: string }>("confirmPay", { orderId: order.id, terms: true });
+      const r = await api<{ ok: true; order: AppOrder } | { error: string }>("confirmPay", { orderId: order.id, terms: true });
       if ("ok" in r) {
         haptic.ok();
-        setConfirmed(true);
+        onConfirmed(r.order ?? { ...order, confirmed: true });
       } else {
         haptic.error();
         setError(T.pay.errors[r.error as keyof typeof T.pay.errors] ?? T.serverError);
@@ -89,6 +89,9 @@ export function Pay({ order, pay, onDone, onToast, onTerms }: { order: AppOrder;
           ) : (
             <p className={s.help}>{T.pay.namunaClosed}</p>
           )}
+          <button type="button" className={`${s.btn} ${s.btnGhost} ${s.btnWide} ${s.btnEdit}`} onClick={onEdit} disabled={editBusy} aria-busy={editBusy} data-edit-data>
+            {T.form.editData}
+          </button>
         </Section>
         <div className={s.payAmount}>
           <small>{T.pay.amount}</small>
