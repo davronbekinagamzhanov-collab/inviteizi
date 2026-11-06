@@ -1,0 +1,218 @@
+[
+  {
+    "id": "muhr",
+    "first": 10.41,
+    "scrolled": null,
+    "ok": true
+  },
+  {
+    "id": "ipak",
+    "first": 10.32,
+    "scrolled": null,
+    "ok": true
+  },
+  {
+    "id": "gul-doira",
+    "first": 10.16,
+    "scrolled": null,
+    "ok": true
+  },
+  {
+    "id": "suzani-medalyon",
+    "first": 13.32,
+    "scrolled": null,
+    "ok": true
+  },
+  {
+    "id": "suvbuyoq-tuman",
+    "first": 11.95,
+    "scrolled": null,
+    "ok": true
+  },
+  {
+    "id": "suvbuyoq-zumrad",
+    "first": 13.13,
+    "scrolled": null,
+    "ok": true
+  },
+  {
+    "id": "suvbuyoq-upa",
+    "first": 11.65,
+    "scrolled": null,
+    "ok": true
+  },
+  {
+    "id": "nur-varaq",
+    "first": 13.59,
+    "scrolled": null,
+    "ok": true
+  },
+  {
+    "id": "girih-barg",
+    "first": 10.44,
+    "scrolled": null,
+    "ok": true
+  },
+  {
+    "id": "oq-maktub",
+    "first": 11.46,
+    "scrolled": null,
+    "ok": true
+  },
+  {
+    "id": "xotira-albom",
+    "first": 12.48,
+    "scrolled": null,
+    "ok": true
+  },
+  {
+    "id": "muhrli-maktub",
+    "first": 9.86,
+    "scrolled": null,
+    "ok": true
+  },
+  {
+    "id": "ipak-albom",
+    "first": 12.63,
+    "scrolled": null,
+    "ok": true
+  },
+  {
+    "id": "shohona-baxmal",
+    "first": 8.63,
+    "scrolled": 8.63,
+    "ok": true
+  },
+  {
+    "id": "oltin-monogramma",
+    "first": 8.63,
+    "scrolled": 8.77,
+    "ok": true
+  },
+  {
+    "id": "sapfir",
+    "first": 16.15,
+    "scrolled": 16.71,
+    "ok": true
+  },
+  {
+    "id": "ganch-peshtoq",
+    "first": 9.16,
+    "scrolled": 8.76,
+    "ok": true
+  },
+  {
+    "id": "visol-hikoya",
+    "first": 14.77,
+    "scrolled": null,
+    "ok": true
+  },
+  {
+    "id": "ganch-darvoza",
+    "first": 13.67,
+    "scrolled": null,
+    "ok": true
+  },
+  {
+    "id": "bog",
+    "first": 9.82,
+    "scrolled": null,
+    "ok": true
+  },
+  {
+    "id": "lola-medalyon",
+    "first": 13.52,
+    "scrolled": null,
+    "ok": true
+  },
+  {
+    "id": "lola-bodom",
+    "first": 10.79,
+    "scrolled": null,
+    "ok": true
+  },
+  {
+    "id": "doppi-kitob",
+    "first": 13.88,
+    "scrolled": null,
+    "ok": true
+  },
+  {
+    "id": "doppicha",
+    "first": 8.63,
+    "scrolled": 8.5,
+    "ok": true
+  },
+  {
+    "id": "qozon-tongi",
+    "first": 14.06,
+    "scrolled": null,
+    "ok": true
+  },
+  {
+    "id": "tong-dasturxon",
+    "first": 11.29,
+    "scrolled": null,
+    "ok": true
+  },
+  {
+    "id": "non-albom",
+    "first": 12.05,
+    "scrolled": null,
+    "ok": true
+  },
+  {
+    "id": "tonggi-piyola",
+    "first": 11.5,
+    "scrolled": null,
+    "ok": true
+  },
+  {
+    "id": "tong-varaq",
+    "first": 11.9,
+    "scrolled": null,
+    "ok": true
+  },
+  {
+    "id": "choy-maktub",
+    "first": 12.1,
+    "scrolled": null,
+    "ok": true
+  },
+  {
+    "id": "zarhal-lavha",
+    "first": 8.88,
+    "scrolled": 8.6,
+    "ok": true
+  },
+  {
+    "id": "umr-kitobi",
+    "first": 12.73,
+    "scrolled": null,
+    "ok": true
+  },
+  {
+    "id": "hurmat-maktub",
+    "first": 11.6,
+    "scrolled": null,
+    "ok": true
+  },
+  {
+    "id": "pion-guldasta",
+    "first": 8.74,
+    "scrolled": 8.49,
+    "ok": true
+  },
+  {
+    "id": "umr-daraxti",
+    "first": 8.63,
+    "scrolled": 8.51,
+    "ok": true
+  },
+  {
+    "id": "bordo-guldasta",
+    "first": 12.6,
+    "scrolled": null,
+    "ok": true
+  }
+]
