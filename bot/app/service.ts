@@ -4,7 +4,7 @@
  * Черновик лежит в users.state (как у чата): закрыл приложение — открыл — продолжает; в чате тоже виден.
  */
 import type { Deps, Draft } from "../flow/types";
-import type { Lang, MusicChoice, OrderRecord, OrderStatus } from "@/lib/domain";
+import type { Lang, MusicChoice, MusicRecord, OrderRecord, OrderStatus } from "@/lib/domain";
 import { EXTRA_LANGS, type ExtraLang, type InvitationData } from "@/lib/types";
 import type { AppUser } from "@/lib/tg-init-data";
 import { getDesign, isOnSale } from "@/templates/registry";
@@ -16,6 +16,7 @@ import { adminCard, checkLines, decisionButtons, upsertDraftOrder, type UpsertOu
 import { validateForm, type FieldError, type FormInput, cleanOwnText, graphemes, MAX_CUSTOM_TEXT } from "@/lib/order-rules";
 import { isQuiet } from "@/lib/quiet-hours";
 import { PHOTO_MAX_COUNT } from "../own-photo";
+import { ownMusicPath } from "../own-music";
 import { removeUnusedMedia } from "../flow/care";
 
 /** Черновик, как его хранит и присылает приложение */
@@ -25,7 +26,8 @@ export type AppDraft = {
   photos?: string[];
   textId?: string;
   customText?: string;
-  music?: { kind: "list"; musicId: string } | { kind: "none" };
+  /** own — своя песня клиента (загружена из приложения прямо в бакет music или из чата) */
+  music?: { kind: "list"; musicId: string } | { kind: "none" } | { kind: "own"; url: string; title?: string };
   rsvp?: boolean;
   /** v2: языки кроме узбекского и свой текст на них */
   langs?: ExtraLang[];
@@ -134,7 +136,7 @@ function draftOf(s: Draft): AppDraft | null {
     photos: d.photos,
     textId: d.textId,
     customText: d.customText,
-    music: s.music && s.music.kind !== "own" ? s.music : undefined,
+    music: !s.music ? undefined : s.music.kind !== "own" ? s.music : s.music.url ? { kind: "own", url: s.music.url, title: s.music.title } : undefined,
     rsvp: d.rsvp,
     langs: d.langs,
     customTexts: d.customTexts,
@@ -222,8 +224,32 @@ export async function toggleFavorite(deps: Deps, u: AppUser, templateId: unknown
 export async function musicFor(deps: Deps, templateId: unknown, lang: Lang) {
   const design = typeof templateId === "string" ? getDesign(templateId) : undefined;
   if (!design) return { error: "bad" as const };
-  const list = await deps.repo.listMusic(design.occasion);
-  return { tracks: list.map((m) => ({ id: m.id, title: lang === "ru" ? m.titleRu : m.titleUz, url: m.fileUrl })) };
+  const title = (m: MusicRecord) => (lang === "ru" ? m.titleRu : m.titleUz);
+  const mine = await deps.repo.listMusic(design.occasion);
+  const ids = new Set(mine.map((m) => m.id));
+  // «Бошқа мусиқалар»: мелодии остальных тадбиров с подписью категории
+  const others = (await deps.repo.listMusic()).filter((m) => !ids.has(m.id) && m.occasion && m.occasion !== design.occasion);
+  return {
+    tracks: mine.map((m) => ({ id: m.id, title: title(m), url: m.fileUrl })),
+    others: others.map((m) => ({ id: m.id, title: title(m), url: m.fileUrl, occasion: m.occasion! })),
+  };
+}
+
+export const OWN_MUSIC_MAX = 20 * 1024 * 1024;
+const OWN_MUSIC_EXT = ["mp3", "m4a", "aac", "ogg", "oga", "opus", "wav"];
+
+/**
+ * Своя песня из приложения: подписанная ссылка на загрузку прямо в бакет music (телефон грузит сам,
+ * с процентом; лимит тела Vercel 4,5 МБ не мешает). До 20 МБ, только аудио.
+ */
+export async function musicUpload(deps: Deps, ext: unknown, size: unknown) {
+  const e = typeof ext === "string" ? ext.toLowerCase().replace(/^\./, "") : "";
+  if (!OWN_MUSIC_EXT.includes(e)) return { error: "format" as const };
+  if (typeof size !== "number" || size <= 0) return { error: "format" as const };
+  if (size > OWN_MUSIC_MAX) return { error: "tooBig" as const };
+  if (!deps.signMusicUpload) return { error: "server" as const };
+  const id = Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, "0")).join("");
+  return deps.signMusicUpload(`own/${id}.${e}`);
 }
 
 /** Фото клиента: только наши адреса из бакета photos, не больше трёх */
@@ -236,7 +262,14 @@ function cleanPhotos(deps: Deps, photos: unknown): string[] | undefined {
 /** Черновик приложения → черновик чата (users.state). Музыка «своя» из чата сохраняется, если её не меняли */
 function toDraft(deps: Deps, prev: Draft, d: AppDraft, data: Partial<InvitationData>): Draft {
   const design = d.templateId ? getDesign(d.templateId) : undefined;
-  const music: MusicChoice | undefined = d.music?.kind === "none" ? { kind: "none" } : d.music?.kind === "list" && typeof d.music.musicId === "string" ? { kind: "list", musicId: d.music.musicId.slice(0, 64) } : prev.music;
+  const music: MusicChoice | undefined =
+    d.music?.kind === "none"
+      ? { kind: "none" }
+      : d.music?.kind === "list" && typeof d.music.musicId === "string"
+        ? { kind: "list", musicId: d.music.musicId.slice(0, 64) }
+        : d.music?.kind === "own" && typeof d.music.url === "string" && ownMusicPath(d.music.url) && /^https:\/\/[a-z0-9]+\.supabase\.co\/storage\/v1\/object\/public\/music\/own\//.test(d.music.url)
+          ? { kind: "own", fileId: prev.music?.kind === "own" && prev.music.url === d.music.url ? prev.music.fileId : "app", url: d.music.url, title: typeof d.music.title === "string" ? d.music.title.slice(0, 60) : undefined }
+          : prev.music;
   const own = cleanOwnText(d.customText);
   const photos = design?.clientPhotos ? cleanPhotos(deps, d.photos) : undefined;
   const langs = cleanLangs(deps, d.langs);
@@ -304,8 +337,10 @@ export async function submitDraft(deps: Deps, u: AppUser, d: AppDraft): Promise<
   const prev = user.state as Draft;
   const draft = toDraft(deps, prev, d, v.data);
   // Мелодия только из списка этого тадбира; несуществующая (или чужого тадбира) — первая по умолчанию
+  // Мелодия — из нашего списка (своего тадбира или «Бошқа мусиқалар»); несуществующая — первая мелодия тадбира
   const tracks = await deps.repo.listMusic(design.occasion);
-  if (!draft.music || (draft.music.kind === "list" && !tracks.some((t) => t.id === (draft.music as { musicId: string }).musicId))) {
+  const all = await deps.repo.listMusic();
+  if (!draft.music || (draft.music.kind === "list" && !all.some((t) => t.id === (draft.music as { musicId: string }).musicId))) {
     draft.music = tracks[0] ? { kind: "list", musicId: tracks[0].id } : { kind: "none" };
   }
   // Готовый текст должен существовать для этого тадбира, иначе — лучший (первый)

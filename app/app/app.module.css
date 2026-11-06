@@ -1542,3 +1542,84 @@ textarea.input {
   color: var(--muted);
   font-size: 16px;
 }
+
+/* ── Музыка: категории и своя песня (п.21) ── */
+.musicGroup {
+  margin: 14px 0 8px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.track .option {
+  justify-content: space-between;
+  gap: 8px;
+}
+.trackCat {
+  flex: none;
+  font-size: 13px;
+  color: var(--muted);
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--gold-soft);
+}
+.ownMusic {
+  display: grid;
+  gap: 6px;
+  margin: 12px 0 10px;
+}
+.ownMusic .btn {
+  margin: 0;
+}
+.progress {
+  display: block;
+  height: 4px;
+  border-radius: 4px;
+  background: var(--gold-soft);
+  overflow: hidden;
+}
+.progress i {
+  display: block;
+  height: 100%;
+  background: var(--gold);
+  transition: width 0.2s linear;
+}
+
+/* Шапка: назад + логотип + «?» + «Мои» + языки помещаются и на 320 px */
+.headerRow {
+  gap: 6px;
+  padding: 10px 12px;
+}
+.headerRow .iconBtn {
+  min-width: 44px;
+  width: 44px;
+  padding: 0;
+  flex: none;
+}
+.headerRow .brand {
+  font-size: clamp(21px, 6.4vw, 27px);
+  white-space: nowrap;
+}
+.headerRow .langs {
+  flex: none;
+}
+.headerRow .langs button {
+  min-width: 40px;
+}
+@media (max-width: 350px) {
+  .headerRow {
+    gap: 4px;
+    padding: 10px 8px;
+  }
+  .headerRow .iconBtn {
+    min-width: 40px;
+    width: 40px;
+    height: 40px;
+  }
+  .headerRow .langs button {
+    min-width: 36px;
+    height: 34px;
+    font-size: 14px;
+  }
+}

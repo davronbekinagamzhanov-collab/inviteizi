@@ -161,3 +161,46 @@ it("п.18, чат: в проверке перед оплатой есть ссы
   expect(sim.tg.to(102).some((m) => m.text?.includes("/terms"))).toBe(true);
   expect((await sim.repo.getOrder(o.id))!.termsAcceptedAt).toBeInstanceOf(Date);
 });
+
+describe("п.21: музыка", () => {
+  const music = [
+    { id: "yor-yor", titleUz: "Ёр-ёр", titleRu: "Ёр-ёр", fileUrl: "https://cdn.test/music/yor-yor.mp3", telegramFileId: null, sort: 1, occasion: "nikoh" as const },
+    { id: "osh-kuy", titleUz: "Ош куйи", titleRu: "Ош куйи", fileUrl: "https://cdn.test/music/osh.mp3", telegramFileId: null, sort: 2, occasion: "nahorgi" as const },
+  ];
+  const OWN = `https://abcd.supabase.co/storage/v1/object/public/music/own/${"c".repeat(32)}.mp3`;
+
+  it("готовые мелодии других тадбиров — ниже, с категорией; выбранная сохраняется в заказе и играет в НАМУНА", async () => {
+    const { invitationData } = await import("@/lib/orders");
+    const sim = new Sim({ music });
+    const m = await app.musicFor(sim.deps, design.id, "uz");
+    if ("error" in m) throw new Error("music");
+    expect(m.tracks.map((t) => t.id)).toEqual(["yor-yor"]);
+    expect(m.others).toEqual([{ id: "osh-kuy", title: "Ош куйи", url: "https://cdn.test/music/osh.mp3", occasion: "nahorgi" }]);
+    const r = await app.submitDraft(sim.deps, user(103), { templateId: design.id, form, music: { kind: "list", musicId: "osh-kuy" } });
+    if (!("ok" in r)) throw new Error(JSON.stringify(r));
+    const o = (await sim.repo.getOrder(r.order.id))!;
+    expect(o.music).toEqual({ kind: "list", musicId: "osh-kuy" });
+    expect(invitationData(o, "https://cdn.test/music/osh.mp3").musicUrl).toBe("https://cdn.test/music/osh.mp3");
+  });
+
+  it("своя песня из приложения: подписанная загрузка (до 20 МБ, только аудио), сохраняется в заказе и играет в НАМУНА", async () => {
+    const { invitationData } = await import("@/lib/orders");
+    const sim = new Sim({ music });
+    sim.deps.signMusicUpload = async (path) => ({ signedUrl: `https://abcd.supabase.co/sign/${path}`, url: `https://abcd.supabase.co/storage/v1/object/public/music/${path}` });
+    expect(await app.musicUpload(sim.deps, "exe", 100)).toEqual({ error: "format" });
+    expect(await app.musicUpload(sim.deps, "mp3", 21 * 1024 * 1024)).toEqual({ error: "tooBig" });
+    const up = await app.musicUpload(sim.deps, "MP3", 3_000_000);
+    if ("error" in up) throw new Error("upload");
+    expect(up.url).toMatch(/\/music\/own\/[a-f0-9]{32}\.mp3$/);
+    const r = await app.submitDraft(sim.deps, user(104), { templateId: design.id, form, music: { kind: "own", url: OWN, title: "Бизнинг қўшиқ" } });
+    if (!("ok" in r)) throw new Error(JSON.stringify(r));
+    const o = (await sim.repo.getOrder(r.order.id))!;
+    expect(o.music).toMatchObject({ kind: "own", url: OWN, title: "Бизнинг қўшиқ" });
+    expect(invitationData(o).musicUrl).toBe(OWN);
+    expect((await app.openSession(sim.deps, user(104))).draft?.music).toEqual({ kind: "own", url: OWN, title: "Бизнинг қўшиқ" });
+    // Чужой адрес вместо нашего бакета не принимается
+    const bad = await app.submitDraft(sim.deps, user(105), { templateId: design.id, form, music: { kind: "own", url: `https://evil.test/storage/v1/object/public/music/own/${"d".repeat(32)}.mp3` } });
+    if (!("ok" in bad)) throw new Error("bad");
+    expect((await sim.repo.getOrder(bad.order.id))!.music).toEqual({ kind: "list", musicId: "yor-yor" });
+  });
+});

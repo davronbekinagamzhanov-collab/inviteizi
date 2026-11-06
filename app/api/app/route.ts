@@ -43,6 +43,10 @@ export async function POST(req: Request) {
         return json(await app.confirmPay(deps, user, body.orderId, body.terms));
       case "orders":
         return json(await app.listOrders(deps, user));
+      case "musicUpload": {
+        const r = await app.musicUpload(deps, body.ext, body.size);
+        return json(r, "error" in r ? (r.error === "server" ? 500 : 400) : 200);
+      }
       case "cancel":
         return json(await app.cancelOrder(deps, user, body.orderId));
       // Панель владельца: только ADMIN_IDS, остальным 403

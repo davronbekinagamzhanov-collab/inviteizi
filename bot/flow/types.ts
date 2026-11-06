@@ -33,6 +33,8 @@ export type Deps = {
   savePhotoBytes?: (bytes: Uint8Array) => Promise<string>;
   /** Удалить фото клиента из Storage (cron, через 30 дней после конца приглашения) */
   removePhotos?: (urls: string[]) => Promise<void>;
+  /** Своя песня из приложения: подписанная ссылка на загрузку в бакет music (путь own/<hex>.<ext>) */
+  signMusicUpload?: (path: string) => Promise<{ signedUrl: string; url: string }>;
   /** Удалить свои песни клиентов из Storage (автоочистка неоплаченных черновиков) */
   removeMusic?: (urls: string[]) => Promise<void>;
 };

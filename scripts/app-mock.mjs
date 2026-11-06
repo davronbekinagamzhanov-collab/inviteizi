@@ -35,7 +35,10 @@ export function mockServer(lang, base) {
           st.favorites = body.saved ? [body.templateId, ...st.favorites] : st.favorites.filter((x) => x !== body.templateId);
           return route.fulfill({ json: { favorites: st.favorites } });
         case "music":
-          return route.fulfill({ json: { tracks: [{ id: "m1", title: "Ёр-ёр", url: "/music/none.mp3" }, { id: "m2", title: "Тўй муборак", url: "/music/none.mp3" }] } });
+          return route.fulfill({ json: { tracks: [{ id: "m1", title: "Ёр-ёр", url: "/music/none.mp3" }, { id: "m2", title: "Тўй муборак", url: "/music/none.mp3" }], others: [{ id: "m3", title: "Ош куйи", url: "/music/none.mp3", occasion: "nahorgi" }] } });
+        case "musicUpload":
+          if (body.size > 20 * 1024 * 1024) return route.fulfill({ status: 400, json: { error: "tooBig" } });
+          return route.fulfill({ json: { signedUrl: "https://storage.mock/upload/own.mp3", url: "https://abcd.supabase.co/storage/v1/object/public/music/own/" + "e".repeat(32) + ".mp3" } });
         case "draft":
           st.draft = body.draft;
           return route.fulfill({ json: { ok: true } });

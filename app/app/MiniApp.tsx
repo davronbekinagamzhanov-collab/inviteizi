@@ -109,6 +109,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
   const [errors, setErrors] = useState<FieldError[]>([]);
   const [stack, setStack] = useState<Screen[]>([{ name: "catalog" }]);
   const [tracks, setTracks] = useState<Track[]>([]);
+  const [otherTracks, setOtherTracks] = useState<Track[]>([]);
   const [toast, setToast] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [saveStatus, setSaveStatus] = useState("");
@@ -404,8 +405,12 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
   useEffect(() => {
     if (screen.name !== "summary" || !design) return;
     let alive = true;
-    api<{ tracks?: Track[] }>("music", { templateId: design.id, lang })
-      .then((r) => alive && setTracks(r.tracks ?? []))
+    api<{ tracks?: Track[]; others?: Track[] }>("music", { templateId: design.id, lang })
+      .then((r) => {
+        if (!alive) return;
+        setTracks(r.tracks ?? []);
+        setOtherTracks(r.others ?? []);
+      })
       .catch(() => undefined);
     return () => {
       alive = false;
@@ -519,6 +524,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
                   demoUrl={draft.templateId ? `/demo/${draft.templateId}` : null}
                   onExample={(url) => setViewer(url)}
                   tracks={tracks}
+                  others={otherTracks}
                   price={price}
                   namunaUrl={order?.url ?? null}
                   status={saveStatus}

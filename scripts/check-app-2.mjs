@@ -144,6 +144,19 @@ for (const lang of ["uz", "ru"]) {
     await page.waitForTimeout(1500);
     const err = await page.getByText(T.summary.musicError).isVisible();
     ok(err || (await play.getAttribute("data-state")) === "playing", "мелодия играет или мягкая ошибка");
+    // п.21: «Бошқа мусиқалар» с категорией; своя песня — ошибка формата/размера с «Қайта», потом процент и «Тайёр»
+    ok(await page.getByText(T.summary.otherMusic).isVisible(), "«Бошқа мусиқалар» видны");
+    ok(await page.locator('[data-track="m3"]').getByText(T.occasions.nahorgi).isVisible(), "у чужой мелодии — подпись категории");
+    await page.route("https://storage.mock/**", async (r) => { await new Promise((x) => setTimeout(x, 600)); return r.fulfill({ status: 200, body: "" }); });
+    const own = page.locator('input[name="ownMusic"]');
+    await own.setInputFiles([{ name: "notes.txt", mimeType: "text/plain", buffer: Buffer.from("hello") }]);
+    ok(await page.getByText(T.summary.ownFormat).isVisible(), "не аудио — понятная ошибка");
+    await own.setInputFiles([{ name: "big.mp3", mimeType: "audio/mpeg", buffer: Buffer.alloc(21 * 1024 * 1024) }]);
+    ok(await page.getByText(T.summary.ownTooBig).isVisible() && (await page.getByRole("button", { name: T.summary.ownRetry }).isVisible()), "больше 20 МБ — ошибка и «Қайта»");
+    await own.setInputFiles([{ name: "Bizning qoshiq.mp3", mimeType: "audio/mpeg", buffer: Buffer.alloc(200_000, 1) }]);
+    await page.locator('[data-own-music="uploading"]').waitFor({ timeout: 5000 }).then(() => ok(true, "идёт загрузка с процентом")).catch(() => ok(false, "индикатор загрузки"));
+    await page.locator('[data-own-music="done"]').waitFor();
+    ok(await page.locator('[data-track="own"]').getAttribute("aria-pressed") === "true", "своя песня выбрана — «Тайёр»");
     await page.screenshot({ path: `${out}/${lang}-04-music.png` });
 
     // Оплата → ожидание → готово
