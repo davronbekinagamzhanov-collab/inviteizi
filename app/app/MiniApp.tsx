@@ -20,7 +20,7 @@ import { Summary, type Track } from "./ui/Summary";
 import { Done, Pay } from "./ui/Pay";
 import { Orders } from "./ui/Orders";
 import { MainAction, TextsContext, Toast } from "./ui/shared";
-import { haptic, insideTelegram, setupTelegram, tg, useBackButton } from "./ui/telegram";
+import { haptic, insideTelegram, setupTelegram, tg, useBackButton, useNativeMainVisible } from "./ui/telegram";
 import s from "./app.module.css";
 
 type Screen =
@@ -59,6 +59,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
   const [saveStatus, setSaveStatus] = useState("");
   const [viewer, setViewer] = useState<string | null>(null);
   const screen = stack[stack.length - 1];
+  const nativeMain = useNativeMainVisible();
   const design: Design | undefined = draft?.templateId ? getDesign(draft.templateId) : undefined;
   const order = orders.find((o) => o.id === draft?.orderId) ?? null;
 
@@ -416,23 +417,24 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
 
         {phase === "ready" && screen.name === "view" && (
           <div className={s.viewer}>
-            <iframe src={`/demo/${screen.id}`} title={screen.id} />
             <div className={s.viewerTop}>
               <button type="button" className={s.backPill} onClick={back}>
                 {T.view.back}
               </button>
               <Heart on={favorites.includes(screen.id)} onToggle={() => toggleFavorite(screen.id, !favorites.includes(screen.id))} />
             </div>
+            <iframe src={`/demo/${screen.id}`} title={screen.id} />
+            {!nativeMain && <div className={s.viewerBottom} aria-hidden="true" />}
           </div>
         )}
         {viewer && (
           <div className={s.viewer} role="dialog" aria-modal="true">
-            <iframe src={viewer} title="НАМУНА" />
             <div className={s.viewerTop}>
               <button type="button" className={s.backPill} onClick={() => setViewer(null)}>
                 ✕ {T.form.previewClose}
               </button>
             </div>
+            <iframe src={viewer} title="НАМУНА" />
           </div>
         )}
 
