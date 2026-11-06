@@ -82,3 +82,10 @@ export const PencilIcon = (p: { size?: number }) => (
     <path d="M14.8 5.6l3.6 3.6M5 19l1-4.3L15.6 5a1.6 1.6 0 0 1 2.3 0l1.1 1.1a1.6 1.6 0 0 1 0 2.3L9.3 18z" />
   </Svg>
 );
+export const HelpIcon = (p: { size?: number }) => (
+  <Svg {...p}>
+    <circle cx="12" cy="12" r="8.6" />
+    <path d="M9.6 9.4a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.1-2.4 3.7" />
+    <circle className={s.iconFill} cx="12" cy="16.9" r="1.05" />
+  </Svg>
+);

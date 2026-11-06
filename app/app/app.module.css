@@ -1470,3 +1470,18 @@ textarea.input {
   accent-color: var(--gold-deep);
   flex: none;
 }
+
+/* ── «Ёрдам» ── */
+.helpSteps {
+  list-style: decimal;
+  margin: 0 0 12px;
+  padding: 0 0 0 22px;
+  display: grid;
+  gap: 8px;
+  font-size: 16px;
+  line-height: 1.45;
+}
+.helpSteps li::marker {
+  color: var(--gold-deep);
+  font-weight: 700;
+}

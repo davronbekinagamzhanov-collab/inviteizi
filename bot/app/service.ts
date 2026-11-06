@@ -69,6 +69,8 @@ export type AppSession = {
   pay: { phone: string; name: string; card: string | null };
   /** Какие языки можно добавить (казахский — только при KAZAKH_ENABLED) */
   extraLangs: ExtraLang[];
+  /** «Боғланиш» в «Ёрдам»: Telegram владельца */
+  contact: string;
 };
 
 const MAX_ORDERS = 20;
@@ -185,6 +187,7 @@ export async function openSession(deps: Deps, u: AppUser): Promise<AppSession> {
     today: kzToday(deps.now()),
     pay: { phone: deps.env.kaspiPhone, name: deps.env.kaspiName, card: deps.env.paymentCardNumber ?? null },
     extraLangs: allowedLangs(deps),
+    contact: `https://t.me/${deps.env.ownerUsername.replace(/^@/, "")}`,
   };
 }
 

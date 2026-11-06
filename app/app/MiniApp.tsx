@@ -22,7 +22,8 @@ import { isQuiet } from "@/lib/quiet-hours";
 import { Orders } from "./ui/Orders";
 import { MainAction, TextsContext, Toast } from "./ui/shared";
 import { haptic, insideTelegram, setupTelegram, tg, useBackButton, useNativeMainVisible } from "./ui/telegram";
-import { BackIcon, CloseIcon, FolderIcon } from "./ui/icons";
+import { BackIcon, CloseIcon, FolderIcon, HelpIcon } from "./ui/icons";
+import { Help } from "./ui/Help";
 import s from "./app.module.css";
 
 type Screen =
@@ -65,6 +66,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
   const [saveStatus, setSaveStatus] = useState("");
   const [viewer, setViewer] = useState<string | null>(null);
   const [bigOpen, setBigPreview] = useState(false);
+  const [help, setHelp] = useState(false);
   const screen = stack[stack.length - 1];
   // Большое превью живёт только на анкете: ушли с неё — закрыто
   const bigPreview = bigOpen && screen.name === "form";
@@ -117,7 +119,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
     setStack(list);
     window.scrollTo({ top: 0 });
   }, []);
-  useBackButton(stack.length > 1 || !!viewer || bigPreview, () => (bigPreview ? setBigPreview(false) : viewer ? setViewer(null) : back()));
+  useBackButton(stack.length > 1 || !!viewer || bigPreview || help, () => (help ? setHelp(false) : bigPreview ? setBigPreview(false) : viewer ? setViewer(null) : back()));
 
   // ── Черновик: сохраняем на сервере с задержкой ──
   const firstDraft = useRef(true);
@@ -362,7 +364,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
   const price = order?.amount ?? (design ? PRICES[design.format] : 0);
 
   // Своя кнопка внизу страницы видна (native MainButton не показана, а у экрана есть главное действие)
-  const ownBar = !nativeMain && phase === "ready" && !viewer && !bigPreview && MAIN_SCREENS.has(screen.name);
+  const ownBar = !nativeMain && phase === "ready" && !viewer && !bigPreview && !help && MAIN_SCREENS.has(screen.name);
 
   // ── Главная кнопка экрана ──
   let main: { text: string | null; onClick: () => void; progress?: boolean } = { text: null, onClick: () => undefined };
@@ -388,7 +390,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
         break;
     }
   }
-  if (viewer || bigPreview) main = { text: null, onClick: () => undefined };
+  if (viewer || bigPreview || help) main = { text: null, onClick: () => undefined };
 
   const resume =
     draft?.templateId && design && screen.name === "catalog"
@@ -409,6 +411,9 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
               <span className={s.brand}>
                 Invite<b>IZI</b>
               </span>
+              <button type="button" className={s.iconBtn} onClick={() => { haptic.tap(); setHelp(true); }} aria-label={T.help} data-help-btn>
+                <HelpIcon />
+              </button>
               <button type="button" className={s.iconBtn} onClick={() => (screen.name === "orders" ? undefined : go({ name: "orders" }))} aria-label={T.myOrders} aria-pressed={screen.name === "orders"}>
                 <FolderIcon />
               </button>
@@ -503,6 +508,16 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
           </div>
         )}
 
+        {help && session && (
+          <Help
+            contact={session.contact}
+            onClose={() => setHelp(false)}
+            onTerms={() => {
+              setHelp(false);
+              setViewer(lang === "uz" ? "/terms" : "/terms/ru");
+            }}
+          />
+        )}
         <MainAction text={main.text} onClick={main.onClick} progress={main.progress} />
         <Toast text={toast} onDone={() => setToast(null)} />
       </div>

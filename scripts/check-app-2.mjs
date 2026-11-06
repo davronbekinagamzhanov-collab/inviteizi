@@ -71,6 +71,13 @@ for (const lang of ["uz", "ru"]) {
       ok(await page.getByText(T.catalog.tipPhoto).isVisible(), "📷 — подсказка про своё фото");
       ok(!(await page.locator("iframe").count()), "после долгого нажатия дизайн не открылся");
     }
+    // п.19: «Ёрдам» в шапке
+    await page.locator("[data-help-btn]").click();
+    await page.locator("[data-help]").waitFor();
+    ok((await page.locator("[data-help] li").count()) === 5 && (await page.getByRole("button", { name: T.helpContact }).isVisible()), "«Ёрдам»: 5 шагов и «Боғланиш»");
+    await page.waitForTimeout(500);
+    await page.screenshot({ path: `${out}/${lang}-00-help.png` });
+    await page.locator("[data-help]").getByRole("button", { name: T.catalog.close }).click();
     await page.evaluate(() => scrollTo(0, 0));
     await page.locator("[data-prices]").click();
     await page.locator("[data-prices-sheet]").waitFor();

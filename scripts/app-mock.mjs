@@ -27,7 +27,7 @@ export function mockServer(lang, base) {
       st.calls.push(body.action);
       switch (body.action) {
         case "session":
-          return route.fulfill({ json: { userId: 1, lang: st.lang, firstName: "Test", favorites: st.favorites, draft: st.draft, orders, today: TODAY, pay: { phone: "+7 700 123 45 67", name: "Давронбек И.", card: null } } });
+          return route.fulfill({ json: { userId: 1, lang: st.lang, firstName: "Test", favorites: st.favorites, draft: st.draft, orders, today: TODAY, pay: { phone: "+7 700 123 45 67", name: "Давронбек И.", card: null }, contact: "https://t.me/inviteizi_owner" } });
         case "lang":
           st.lang = body.lang;
           return route.fulfill({ json: { ok: true } });
