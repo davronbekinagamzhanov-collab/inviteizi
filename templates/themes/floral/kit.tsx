@@ -229,8 +229,8 @@ export function FloralInvitation({ data, mode, cfg }: { data: InvitationData; mo
     const id = requestAnimationFrame(() => setMounted(true));
     return () => cancelAnimationFrame(id);
   }, []);
-  // Нажали «очинг» — через время открытия (шторка 1,1 с, конверт overlayMs) показываем страницу
-  const openMs = reduced ? 0 : cfg.opening === "custom" ? (cfg.overlayMs ?? 2000) : 1100;
+  // Нажали «очинг» — через время открытия (шторка 1,7 с, конверт overlayMs) показываем страницу
+  const openMs = reduced ? 0 : cfg.opening === "custom" ? (cfg.overlayMs ?? 2000) : 1700;
   const { started, opened, finishOpening } = inv;
   useEffect(() => {
     if (!started || opened) return;

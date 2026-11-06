@@ -5,10 +5,11 @@
  *  - у каждой секции своё пятно (public/art/patno/<тон>-<секция>.webp, рисует scripts/make-patno.mjs);
  *  - программа — тонкая линия с каплями; календарь — неделя строкой, день тўя в капле;
  *  - адрес — карточка с акварельным краем; финал — большое пятно с именами.
- * Открытия-заставки нет: имена и дата видны с первого кадра, пятно под ними «растекается» (1,6 с).
+ * Открытие (fix/app-polish-2, аудит 8 000 ₸): на обложке — маленькое пятно с именами и каплей; по нажатию пятно
+ * растекается на весь экран (≈2 с), бумага уходит, под ней — первая секция, где пятно продолжает «растекаться».
  * Дизайны отличаются только тоном пятен и бумаги (tuman / zumrad / upa).
  */
-import type { CSSProperties, ReactNode } from "react";
+import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
 import type { TemplateProps } from "../types";
 import type { Score } from "../../blocks/synth";
 import { useInvitation, type Invitation } from "../../blocks/useInvitation";
@@ -94,8 +95,22 @@ function Week({ inv }: { inv: Invitation }) {
   );
 }
 
+const OPEN_MS = 2100;
+
 export function Patno({ data, mode, melody, skin }: TemplateProps & { melody: Score; skin: PatnoSkin }) {
-  const inv = useInvitation(data, mode, { melody, opening: false });
+  const inv = useInvitation(data, mode, { melody });
+  // Раскрытие пятна длится ~2 с; конец — по таймеру (и при отключённых анимациях тоже)
+  const { started, opened } = inv;
+  const finish = useRef(inv.finishOpening);
+  useEffect(() => {
+    finish.current = inv.finishOpening;
+  });
+  useEffect(() => {
+    if (!started || opened) return;
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const id = setTimeout(() => finish.current(), reduce ? 350 : OPEN_MS);
+    return () => clearTimeout(id);
+  }, [started, opened]);
   const w = inv.main.when;
   const tone = skin.tone;
   const vars = {
@@ -126,7 +141,28 @@ export function Patno({ data, mode, melody, skin }: TemplateProps & { melody: Sc
       musicButtonClassName={s.music}
       rsvpLook={rsvp}
     >
-      {/* 1. Обложка: имена и дата с первого кадра, пятно под ними растекается */}
+      {/* 0. Заставка: пятно-капля с именами; по нажатию пятно растекается на весь экран */}
+      {!inv.opened && (
+        <div
+          className={cx(s.cover, inv.started && s.coverGo)}
+          role="button"
+          tabIndex={0}
+          aria-label={t.opening.tapToOpen}
+          onClick={inv.start}
+          onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && inv.start()}
+          data-cover
+        >
+          <Wash tone={tone} part="hero" className={s.coverWash} eager />
+          <div className={s.coverInner}>
+            <p className={s.kicker}>{t.opening.invitation}</p>
+            <Names inv={inv} as="p" className={s.coverNames} />
+            <Drop className={s.coverDrop} />
+            <p className={s.coverTap}>{t.opening.tapToOpen}</p>
+          </div>
+        </div>
+      )}
+
+      {/* 1. Обложка: имена и дата, пятно под ними растекается (после заставки) */}
       <section className={s.hero} data-tone={tone}>
         <Wash tone={tone} part="hero" className={s.heroWash} eager />
         <p className={s.kicker}>{t.opening.invitation}</p>

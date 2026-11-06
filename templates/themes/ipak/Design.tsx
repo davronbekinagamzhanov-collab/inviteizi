@@ -234,7 +234,8 @@ export default function Ipak({ data, mode }: TemplateProps) {
       )}
 
       {!inv.opened && (
-        <div className={s.opening} data-started={inv.started}>
+        // Нажимается вся заставка (подсказка «экранга босинг»); кнопка ▶ — для клавиатуры и чтеца
+        <div className={s.opening} data-started={inv.started} onClick={open}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={video.poster} alt="" aria-hidden className={s.video} />
           <video
@@ -263,7 +264,10 @@ export default function Ipak({ data, mode }: TemplateProps) {
           <button
             type="button"
             data-open
-            onClick={open}
+            onClick={(e) => {
+              e.stopPropagation();
+              open();
+            }}
             disabled={inv.started}
             aria-label={t.natural.playHint}
             className={s.play}
