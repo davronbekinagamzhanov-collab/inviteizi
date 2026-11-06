@@ -1,0 +1,356 @@
+/* Панель владельца: спокойно, крупные цифры, без лишнего. Те же цвета, что в приложении */
+.root {
+  --milk: #f7efe3;
+  --card: #fffaf2;
+  --line: rgba(168, 119, 42, 0.22);
+  --ink: #3b2a1e;
+  --muted: #7a6654;
+  --gold: #a8772a;
+  --ok: #3f7d4e;
+  --err: #b0362c;
+  min-height: 100svh;
+  background: var(--milk);
+  color: var(--ink);
+  font-family: var(--font-app), "Segoe UI", system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.4;
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
+}
+.root *,
+.root *::before,
+.root *::after {
+  box-sizing: border-box;
+}
+.center {
+  min-height: 70svh;
+  display: grid;
+  place-items: center;
+  padding: 0 24px;
+  text-align: center;
+}
+.top {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: calc(8px + env(safe-area-inset-top)) 16px 8px;
+  background: color-mix(in srgb, var(--milk) 94%, transparent);
+  backdrop-filter: blur(8px);
+}
+.periods,
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  padding: 4px;
+  border-radius: 14px;
+  background: #efe3cf;
+}
+.periods button,
+.tabs button {
+  min-height: 40px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.periods button[aria-selected="true"],
+.tabs button[aria-selected="true"] {
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: 0 2px 8px -4px rgba(59, 42, 30, 0.4);
+}
+.tabs {
+  margin: 20px 0 14px;
+}
+.tabs button {
+  font-size: 14px;
+}
+.wrap {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 4px 16px calc(32px + env(safe-area-inset-bottom));
+  transition: opacity 0.2s ease;
+}
+.label {
+  margin: 4px 0 12px;
+  color: var(--muted);
+  font-size: 15px;
+}
+.cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--card);
+}
+.cardWide {
+  grid-column: span 2;
+}
+.card small {
+  color: var(--muted);
+  font-size: 14px;
+}
+.card strong {
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+.card span {
+  color: var(--muted);
+  font-size: 14px;
+}
+.search {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  font: inherit;
+  color: var(--ink);
+}
+.filters {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+.filters select {
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  font: inherit;
+  font-size: 15px;
+  color: var(--ink);
+}
+.count {
+  margin: 10px 2px 6px;
+  color: var(--muted);
+  font-size: 14px;
+}
+.empty {
+  margin: 24px 0;
+  text-align: center;
+  color: var(--muted);
+}
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.row {
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--card);
+  min-width: 0;
+}
+.rowHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+}
+.amount {
+  flex: none;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.ellipsis {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rowMain {
+  margin: 2px 0 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.rowSub {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.rowFoot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+.badge {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #f1e2c3;
+  font-size: 13px;
+  font-weight: 600;
+}
+.badgeOk {
+  background: #dcebdc;
+  color: var(--ok);
+}
+.link {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gold);
+  cursor: pointer;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px 10px;
+  margin: 10px 0 0;
+}
+.grid div {
+  min-width: 0;
+}
+.grid dt {
+  color: var(--muted);
+  font-size: 13px;
+}
+.grid dd {
+  margin: 0;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.debt {
+  color: var(--err);
+}
+.rating {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.rating li {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+}
+.place {
+  font-weight: 700;
+  color: var(--gold);
+  text-align: center;
+}
+.nums {
+  color: var(--muted);
+  font-size: 14px;
+  white-space: nowrap;
+}
+.nums b {
+  color: var(--ink);
+  font-size: 17px;
+}
+.funnel {
+  display: grid;
+  gap: 14px;
+}
+.stepHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.stepHead b {
+  font-size: 26px;
+  font-variant-numeric: tabular-nums;
+}
+.bar {
+  height: 10px;
+  margin-top: 4px;
+  border-radius: 999px;
+  background: #efe3cf;
+  overflow: hidden;
+}
+.bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--gold);
+}
+.h3 {
+  margin: 8px 0 0;
+  font-size: 15px;
+  color: var(--muted);
+  font-weight: 600;
+}
+.stuck {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.stuck li {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+}
+.excel {
+  width: 100%;
+  min-height: 50px;
+  margin-top: 24px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--ink);
+  color: #fff8ec;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.hint {
+  margin: 10px 0 0;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  padding: 12px 18px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff8ec;
+  font-size: 15px;
+  white-space: nowrap;
+}

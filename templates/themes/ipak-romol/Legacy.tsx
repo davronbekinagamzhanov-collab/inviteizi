@@ -14,7 +14,7 @@ import { MapButton } from "../../blocks/MapButton";
 import { Countdown } from "../../blocks/Countdown";
 import { Reveal } from "../../blocks/Reveal";
 import { melody } from "./melody";
-import { SILK, fontClasses, vars } from "./style";
+import { MISSING_IN_SCRIPT, SILK, fontClasses, vars } from "./style";
 import { Words, useFitWords } from "./fit";
 import { Bead, EASE, Fringe, HemBand, IslimiCartouche, SilkBackdrop, SilverGoldDefs, Sprig } from "./decor";
 
@@ -82,7 +82,7 @@ export default function Design({ data, mode }: TemplateProps) {
                 <span className="block text-[length:var(--fit)]">
                   <Words text={data.groom ?? ""} />
                 </span>
-                <span className="-my-[0.06em] block font-accent text-[clamp(26px,9cqw,34px)] leading-none" style={GOLD_INK}>
+                <span className={`-my-[0.06em] block ${MISSING_IN_SCRIPT.test(t.cover.andWord) ? "font-display" : "font-accent"} text-[clamp(26px,9cqw,34px)] leading-none`} style={GOLD_INK}>
                   {t.cover.andWord}
                 </span>
                 <span className="block text-[length:var(--fit)]">

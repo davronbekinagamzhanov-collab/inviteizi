@@ -173,8 +173,19 @@ describe("приложение: чек", () => {
   async function order(sim: Sim, id: number) {
     const r = await app.submitDraft(sim.deps, user(id), { templateId: first("nikoh").id, form: form("nikoh") });
     if (!("ok" in r)) throw new Error("ожидали заказ");
+    expect(await app.confirmPay(sim.deps, user(id), r.order.id)).toMatchObject({ ok: true });
     return r.order;
   }
+
+  it("чек напрямую через API без «✅ Ҳаммаси тўғри» — отказ notConfirmed, заказ остаётся к оплате, админам ничего", async () => {
+    const sim = new Sim();
+    const r = await app.submitDraft(sim.deps, user(80), { templateId: first("nikoh").id, form: form("nikoh") });
+    if (!("ok" in r)) throw new Error("ожидали заказ");
+    const res = await app.submitReceipt(sim.deps, user(80), r.order.id, { bytes: await jpeg(), mime: "image/jpeg", name: "chek.jpg" });
+    expect(res).toEqual({ error: "notConfirmed" });
+    expect((await sim.repo.getOrder(r.order.id))!.status).not.toBe("receipt_sent");
+    expect(sim.tg.messages.filter((m) => m.chatId === ADMIN || m.chatId === ADMIN2)).toHaveLength(0);
+  });
 
   it("фото чека → карточка обоим админам, второй получает тот же file_id; двойная отправка — «ждите»", async () => {
     const sim = new Sim();
@@ -206,7 +217,7 @@ describe("приложение: чек", () => {
     expect(await app.submitReceipt(sim.deps, user(83), o.id, { bytes: new TextEncoder().encode("not an image"), mime: "image/heic", name: "a.heic" })).toEqual({ error: "format" });
     expect(await app.submitReceipt(sim.deps, user(83), o.id, { bytes: new Uint8Array(), mime: "image/jpeg", name: "a.jpg" })).toEqual({ error: "format" });
     expect(await app.submitReceipt(sim.deps, user(83), o.id, { bytes: new Uint8Array(app.RECEIPT_MAX_BYTES + 1), mime: "image/jpeg", name: "a.jpg" })).toEqual({ error: "tooBig" });
-    expect((await sim.repo.getOrder(o.id))!.status).toBe("preview");
+    expect((await sim.repo.getOrder(o.id))!.status).toBe("awaiting_payment");
   });
 
   it("ни один админ не получил чек — заказ снова к оплате, клиенту «отправьте ещё раз»", async () => {
@@ -216,7 +227,7 @@ describe("приложение: чек", () => {
       throw new Error("blocked");
     };
     expect(await app.submitReceipt(sim.deps, user(84), o.id, { bytes: await jpeg(), mime: "image/jpeg", name: "a.jpg" })).toEqual({ error: "send" });
-    expect((await sim.repo.getOrder(o.id))!.status).toBe("preview");
+    expect((await sim.repo.getOrder(o.id))!.status).toBe("awaiting_payment");
   });
 
   it("тадбир прошёл — чек не принимается", async () => {

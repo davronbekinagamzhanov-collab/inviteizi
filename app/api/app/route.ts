@@ -2,6 +2,7 @@
 import { createBotDeps } from "@/bot/deps";
 import { appGate, json } from "@/lib/app-auth";
 import * as app from "@/bot/app/service";
+import { ownerExport, ownerPanel } from "@/bot/app/owner";
 import type { Lang } from "@/lib/domain";
 
 export const maxDuration = 30;
@@ -41,6 +42,15 @@ export async function POST(req: Request) {
         return json(await app.confirmPay(deps, user, body.orderId));
       case "orders":
         return json(await app.listOrders(deps, user));
+      // Панель владельца: только ADMIN_IDS, остальным 403
+      case "owner": {
+        const r = await ownerPanel(deps, user.id, body.period);
+        return "error" in r ? json(r, 403) : json(r);
+      }
+      case "ownerExport": {
+        const r = await ownerExport(deps, user.id, body.period);
+        return "error" in r ? json(r, 403) : json(r);
+      }
       default:
         return json({ error: "bad" }, 400);
     }

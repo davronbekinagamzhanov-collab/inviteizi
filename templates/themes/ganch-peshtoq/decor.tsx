@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { GROUND, PLASTER, SHADE, SURFACE } from "./style";
+import { GIRIH_RELIEF, ISLIMI_RELIEF, LATTICE_RELIEF } from "./relief";
 
 /* ───────────────────────── Геометрия ───────────────────────── */
 
@@ -258,7 +259,11 @@ export function GanchDefs() {
           <stop offset="1" stopColor="#FFE6B0" stopOpacity="0" />
         </radialGradient>
 
-        {/* Рельеф ганча: светлая кромка сверху-слева, тень снизу-справа и мягкая падающая тень на фон */}
+        {/*
+          Рельеф ганча: светлая кромка сверху-слева, тень снизу-справа и мягкая падающая тень на фон.
+          На странице НЕ используется (тяжёлый: первое открытие дёргалось) — им запечены плитки узоров
+          (scripts/bake-ganch-relief.mjs → relief.ts, паттерны gp-*-r ниже). Менять узор — перезапечь.
+        */}
         <filter id="gp-relief" x="-5%" y="-5%" width="110%" height="110%" colorInterpolationFilters="sRGB">
           <feGaussianBlur in="SourceAlpha" stdDeviation="0.5" result="a" />
           <feOffset in="a" dx="1.1" dy="1.4" result="down" />
@@ -299,6 +304,17 @@ export function GanchDefs() {
           ].map(([x, y]) => (
             <polygon key={`${x}${y}`} points={diamond(x, y, 1.9)} fill={SURFACE} />
           ))}
+        </pattern>
+
+        {/* Узоры с готовым рельефом (картинки): ислими, гирих, решётка панжара с прозрачными отверстиями */}
+        <pattern id="gp-islimi-r" width="64" height="64" patternUnits="userSpaceOnUse">
+          <image href={ISLIMI_RELIEF} width="64" height="64" preserveAspectRatio="none" />
+        </pattern>
+        <pattern id="gp-girih-r" width="14" height="14" viewBox="0 0 14 14" patternUnits="userSpaceOnUse">
+          <image href={GIRIH_RELIEF} width="14" height="14" preserveAspectRatio="none" />
+        </pattern>
+        <pattern id="gp-lattice-r" width="26" height="26" patternUnits="userSpaceOnUse">
+          <image href={LATTICE_RELIEF} width="26" height="26" preserveAspectRatio="none" />
         </pattern>
 
         {/* Отверстия панжара: звёзды и ромбы (чёрное — дырка) */}
@@ -390,7 +406,7 @@ export function PeshtoqArt({ g, idp, glow = 0 }: { g: Peshtoq; idp: string; glow
   return (
     <svg aria-hidden data-decor viewBox={`0 0 ${f(g.w)} ${f(g.h)}`} preserveAspectRatio="none" className="pointer-events-none absolute inset-0 h-full w-full">
       <defs>
-        <pattern id={`${idp}-gb`} href="#gp-girih" x={f(x0)} y={f(y0)} width={f(bx)} height={f(by)} />
+        <pattern id={`${idp}-gb`} href="#gp-girih-r" x={f(x0)} y={f(y0)} width={f(bx)} height={f(by)} />
         <clipPath id={`${idp}-n`}>
           <path d={niche} />
         </clipPath>
@@ -401,7 +417,7 @@ export function PeshtoqArt({ g, idp, glow = 0 }: { g: Peshtoq; idp: string; glow
 
       {/* кайма с гирихом */}
       <path d={band} fill={GROUND} fillRule="evenodd" />
-      <path d={band} fill={`url(#${idp}-gb)`} fillRule="evenodd" filter="url(#gp-relief)" />
+      <path d={band} fill={`url(#${idp}-gb)`} fillRule="evenodd" />
       {corners.map(([x, y], i) => (
         <g key={i}>
           <rect x={f(x)} y={f(y)} width={f(bx)} height={f(by)} fill={SURFACE} />
@@ -414,7 +430,7 @@ export function PeshtoqArt({ g, idp, glow = 0 }: { g: Peshtoq; idp: string; glow
       {/* панель с ислими вокруг арки */}
       <g clipPath={`url(#${idp}-p)`}>
         <rect x={f(ix0)} y={f(iy0)} width={f(ix1 - ix0)} height={f(iy1 - iy0)} fill={GROUND} />
-        <rect x={f(ix0)} y={f(iy0)} width={f(ix1 - ix0)} height={f(iy1 - iy0)} fill="url(#gp-islimi)" filter="url(#gp-relief)" />
+        <rect x={f(ix0)} y={f(iy0)} width={f(ix1 - ix0)} height={f(iy1 - iy0)} fill="url(#gp-islimi-r)" />
         {/* гладкий архивольт вокруг проёма */}
         <path d={volt} fill={PLASTER} />
         <Bead d={volt} width={2.6} />
@@ -568,7 +584,7 @@ export function Kitoba({ children, className = "" }: { children: ReactNode; clas
       {w > 0 && (
         <svg aria-hidden data-decor viewBox={`0 0 ${f(w)} ${f(h)}`} className="pointer-events-none absolute inset-0 h-full w-full overflow-visible">
           <path d={shape(1)} fill={GROUND} />
-          <path d={shape(1)} fill="url(#gp-islimi)" filter="url(#gp-relief)" opacity={0.85} />
+          <path d={shape(1)} fill="url(#gp-islimi-r)" opacity={0.85} />
           <path d={shape(9)} fill={SURFACE} />
           <Bead d={shape(1)} width={2} />
           <Bead d={shape(9)} width={2.2} />
@@ -595,10 +611,10 @@ export function GirihPanel({ children, className = "" }: { children: ReactNode; 
       {w > 0 && (
         <svg aria-hidden data-decor viewBox={`0 0 ${f(w)} ${f(h)}`} className="pointer-events-none absolute inset-0 h-full w-full overflow-visible">
           <defs>
-            <pattern id={id} href="#gp-girih" x={0} y={0} width={f(bx)} height={f(by)} />
+            <pattern id={id} href="#gp-girih-r" x={0} y={0} width={f(bx)} height={f(by)} />
           </defs>
           <path d={ring} fill={GROUND} fillRule="evenodd" />
-          <path d={ring} fill={`url(#${id})`} fillRule="evenodd" filter="url(#gp-relief)" />
+          <path d={ring} fill={`url(#${id})`} fillRule="evenodd" />
           <rect x={f(bx)} y={f(by)} width={f(w - 2 * bx)} height={f(h - 2 * by)} fill={SURFACE} />
           <Bead d={`M0 0H${f(w)}V${f(h)}H0Z`} width={1.5} />
           <Bead d={`M${f(bx)} ${f(by)}H${f(w - bx)}V${f(h - by)}H${f(bx)}Z`} width={1.6} />

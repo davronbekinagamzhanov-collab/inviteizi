@@ -20,7 +20,7 @@ import { Summary, type Track } from "./ui/Summary";
 import { Done, Pay } from "./ui/Pay";
 import { Orders } from "./ui/Orders";
 import { MainAction, TextsContext, Toast } from "./ui/shared";
-import { haptic, insideTelegram, setupTelegram, tg, useBackButton } from "./ui/telegram";
+import { haptic, insideTelegram, setupTelegram, tg, useBackButton, useNativeMainVisible } from "./ui/telegram";
 import s from "./app.module.css";
 
 type Screen =
@@ -35,6 +35,8 @@ type Screen =
 
 type Phase = "boot" | "noTelegram" | "error" | "ready";
 const SAVE_DELAY = 700;
+/** Экраны с главной кнопкой (см. switch ниже) */
+const MAIN_SCREENS = new Set<Screen["name"]>(["view", "form", "photos", "summary", "done", "orders"]);
 const RESUBMIT_DELAY = 900;
 
 function namesOf(d: AppDraft) {
@@ -59,6 +61,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
   const [saveStatus, setSaveStatus] = useState("");
   const [viewer, setViewer] = useState<string | null>(null);
   const screen = stack[stack.length - 1];
+  const nativeMain = useNativeMainVisible();
   const design: Design | undefined = draft?.templateId ? getDesign(draft.templateId) : undefined;
   const order = orders.find((o) => o.id === draft?.orderId) ?? null;
 
@@ -300,6 +303,9 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
   const summaryData = useMemo(() => (design && draft ? previewData(design.sample, draft.form, extras) : null), [design, draft, extras]);
   const price = order?.amount ?? (design ? PRICES[design.format] : 0);
 
+  // Своя кнопка внизу страницы видна (native MainButton не показана, а у экрана есть главное действие)
+  const ownBar = !nativeMain && phase === "ready" && !viewer && MAIN_SCREENS.has(screen.name);
+
   // ── Главная кнопка экрана ──
   let main: { text: string | null; onClick: () => void; progress?: boolean } = { text: null, onClick: () => undefined };
   if (phase === "ready") {
@@ -333,7 +339,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
 
   return (
     <TextsContext.Provider value={T}>
-      <div className={`${s.root} ${fontClass}`} lang={lang === "ru" ? "ru" : lang === "kk" ? "kk" : "uz-Cyrl"}>
+      <div className={`${s.root} ${ownBar ? "" : s.nativeMain} ${fontClass}`} lang={lang === "ru" ? "ru" : lang === "kk" ? "kk" : "uz-Cyrl"}>
         {phase === "ready" && screen.name !== "view" && (
           <header className={s.header}>
             <div className={s.headerRow}>
@@ -416,23 +422,24 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
 
         {phase === "ready" && screen.name === "view" && (
           <div className={s.viewer}>
-            <iframe src={`/demo/${screen.id}`} title={screen.id} />
             <div className={s.viewerTop}>
               <button type="button" className={s.backPill} onClick={back}>
                 {T.view.back}
               </button>
               <Heart on={favorites.includes(screen.id)} onToggle={() => toggleFavorite(screen.id, !favorites.includes(screen.id))} />
             </div>
+            <iframe src={`/demo/${screen.id}`} title={screen.id} />
+            {!nativeMain && <div className={s.viewerBottom} aria-hidden="true" />}
           </div>
         )}
         {viewer && (
           <div className={s.viewer} role="dialog" aria-modal="true">
-            <iframe src={viewer} title="НАМУНА" />
             <div className={s.viewerTop}>
               <button type="button" className={s.backPill} onClick={() => setViewer(null)}>
                 ✕ {T.form.previewClose}
               </button>
             </div>
+            <iframe src={viewer} title="НАМУНА" />
           </div>
         )}
 

@@ -1,11 +1,9 @@
 "use client";
 /** Общее для экранов приложения: тексты, тост, главная кнопка (native в Telegram, своя — в браузере) */
-import { createContext, useContext, useEffect, useSyncExternalStore, type ReactNode } from "react";
+import { createContext, useContext, useEffect, type ReactNode } from "react";
 import type { AppTexts } from "@/texts/app-uz";
-import { insideTelegram, useMainButton } from "./telegram";
+import { useMainButton, useNativeMainVisible } from "./telegram";
 import s from "../app.module.css";
-
-const noSubscribe = () => () => undefined;
 
 export const TextsContext = createContext<AppTexts | null>(null);
 export const useT = () => useContext(TextsContext)!;
@@ -23,11 +21,14 @@ export function Toast({ text, onDone }: { text: string | null; onDone: () => voi
   ) : null;
 }
 
-/** Главное действие экрана. В Telegram — native MainButton, в браузере — кнопка внизу страницы */
+/**
+ * Главное действие экрана. В Telegram — native MainButton; своя кнопка внизу страницы показывается всегда,
+ * когда native-кнопка не видна (вне Telegram, скрипт ещё не загрузился, старый клиент).
+ */
 export function MainAction({ text, onClick, active = true, progress = false }: { text: string | null; onClick: () => void; active?: boolean; progress?: boolean }) {
   useMainButton(text, onClick, { active, progress });
-  const inside = useSyncExternalStore(noSubscribe, insideTelegram, () => true);
-  if (inside || !text) return null;
+  const native = useNativeMainVisible();
+  if (native || !text) return null;
   return (
     <div className={s.mainBar}>
       <button type="button" className={s.btn} onClick={onClick} disabled={!active || progress} data-main-action>
