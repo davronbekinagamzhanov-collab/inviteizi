@@ -158,7 +158,7 @@ export const kk = {
   weekdaysShort,
   occasionTitles,
   eventTitles,
-  opening: { tapToOpen: "Ашу үшін басыңыз", invitation: "Шақыру", welcome: "Қош келдіңіз" },
+  opening: { tapToOpen: "Ашу үшін басыңыз", tapScreen: "Ашу үшін экранды басыңыз", invitation: "Шақыру", welcome: "Қош келдіңіз" },
   cover: { inviteEyebrow: "Тойға шақырамыз", and: "&", andWord: "және", scrollHint: "Төмен сырғытыңыз" },
   invite(d: InvitationData): { greeting: string; body: string } {
     if (d.customText) return { greeting: "", body: d.customTexts?.kk || d.customText };

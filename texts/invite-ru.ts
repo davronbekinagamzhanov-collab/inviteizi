@@ -173,7 +173,7 @@ export const ru = {
   weekdaysShort,
   occasionTitles,
   eventTitles,
-  opening: { tapToOpen: "Нажмите, чтобы открыть", invitation: "Приглашение", welcome: "Добро пожаловать" },
+  opening: { tapToOpen: "Нажмите, чтобы открыть", tapScreen: "Нажмите на экран, чтобы открыть", invitation: "Приглашение", welcome: "Добро пожаловать" },
   cover: { inviteEyebrow: "Приглашаем на свадьбу", and: "&", andWord: "и", scrollHint: "Листайте вниз" },
   invite(d: InvitationData): { greeting: string; body: string } {
     if (d.customText) return { greeting: "", body: d.customTexts?.ru || d.customText };
