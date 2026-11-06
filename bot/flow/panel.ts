@@ -70,9 +70,9 @@ async function ownerHome(c: Ctx): Promise<Screen> {
 }
 
 /** /app → /app/owner (панель владельца в приложении; доступ проверяет сервер по initData) */
-export function ownerAppUrl(miniAppUrl: string) {
+export function ownerAppUrl(miniAppUrl: string, page: "owner" | "panel" = "owner") {
   const u = new URL(miniAppUrl);
-  u.pathname = `${u.pathname.replace(/\/$/, "")}/owner`;
+  u.pathname = `${u.pathname.replace(/\/$/, "")}/${page}`;
   u.search = "";
   return u.toString();
 }
@@ -86,6 +86,7 @@ async function managerHome(c: Ctx): Promise<Screen> {
       [{ text: S.btn.myStats, data: "pn:ms" }, { text: S.btn.myPartners, data: "pn:mp" }],
       [{ text: S.btn.newPartner, data: "pn:mpn" }, { text: S.btn.earnings, data: "pn:me" }],
       [{ text: S.btn.client, data: "pn:cl" }],
+      ...(c.deps.env.miniAppUrl ? [[{ text: S.btn.ownerApp, webApp: ownerAppUrl(c.deps.env.miniAppUrl, "panel") }]] : []),
       [createButton(c, S.btn.create)],
     ],
   };
@@ -98,6 +99,7 @@ function partnerHome(c: Ctx, p: Partner): Screen {
     rows: [
       [{ text: r.stats, data: "pn:ps" }, { text: r.qr, data: "pn:pq" }],
       [{ text: r.payouts, data: "pn:pp" }, { text: c.tx.contact, url: ownerUrl(c) }],
+      ...(c.deps.env.miniAppUrl ? [[{ text: r.panel, webApp: ownerAppUrl(c.deps.env.miniAppUrl, "panel") }]] : []),
       [c.deps.env.miniAppUrl ? { text: r.self, webApp: c.deps.env.miniAppUrl } : { text: r.self, data: "pn:self" }],
     ],
   };

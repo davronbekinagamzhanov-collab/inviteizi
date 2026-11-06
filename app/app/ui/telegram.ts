@@ -19,6 +19,7 @@ type Btn = {
 
 export type WebApp = {
   initData: string;
+  initDataUnsafe?: { user?: { language_code?: string } };
   platform: string;
   version: string;
   ready(): void;

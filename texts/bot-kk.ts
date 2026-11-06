@@ -391,6 +391,7 @@ export const kk: BotTexts = {
   admin: ru.admin,
 
   role: {
+    panel: "🖥 Панель",
     partnerTitle: "🤝 InviteIZI серіктесі",
     menu: "🤝 Серіктес мәзірі",
     partnerHome: (name: string, pending: boolean) => `🤝 InviteIZI серіктесі\n${name}${pending ? "\n\n⏳ Растау күтілуде. QR жұмыс істейді, төлемдер есептеледі." : ""}`,

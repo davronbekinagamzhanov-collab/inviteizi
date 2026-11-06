@@ -454,6 +454,7 @@ export const ru = {
   },
 
   role: {
+    panel: "🖥 Панель",
     partnerTitle: "🤝 Партнёр InviteIZI",
     menu: "🤝 Меню партнёра",
     partnerHome: (name: string, pending: boolean) =>

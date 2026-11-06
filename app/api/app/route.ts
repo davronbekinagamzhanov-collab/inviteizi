@@ -2,6 +2,7 @@
 import { createBotDeps } from "@/bot/deps";
 import { appGate, json } from "@/lib/app-auth";
 import * as app from "@/bot/app/service";
+import { partnerPoster, rolePanel } from "@/bot/app/roles-panel";
 import { ownerExport, ownerPanel } from "@/bot/app/owner";
 import type { Lang } from "@/lib/domain";
 
@@ -47,6 +48,15 @@ export async function POST(req: Request) {
       // Панель владельца: только ADMIN_IDS, остальным 403
       case "owner": {
         const r = await ownerPanel(deps, user.id, body.period);
+        return "error" in r ? json(r, 403) : json(r);
+      }
+      // Панель менеджера/партнёра: роль по initData, остальным 403
+      case "rolePanel": {
+        const r = await rolePanel(deps, user, body.period);
+        return "error" in r ? json(r, 403) : json(r);
+      }
+      case "partnerPoster": {
+        const r = await partnerPoster(deps, user, body.lang);
         return "error" in r ? json(r, 403) : json(r);
       }
       case "ownerExport": {

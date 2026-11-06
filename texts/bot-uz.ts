@@ -446,6 +446,7 @@ export const uz = {
   },
 
   role: {
+    panel: "🖥 Панель",
     partnerTitle: "🤝 InviteIZI ҳамкори",
     menu: "🤝 Ҳамкор менюси",
     partnerHome: (name: string, pending: boolean) =>
