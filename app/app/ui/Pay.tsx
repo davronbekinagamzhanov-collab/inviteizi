@@ -10,7 +10,7 @@ import s from "../app.module.css";
 
 type PayInfo = { phone: string; name: string; card: string | null };
 
-export function Pay({ order, step, pay, onDone, onToast, onTerms, onConfirmed, onEdit, busy: editBusy }: { order: AppOrder; step: "check" | "pay"; pay: PayInfo; onDone: (night: boolean) => void; onToast: (t: string) => void; onTerms: () => void; onConfirmed: (o: AppOrder) => void; onEdit: () => void; busy?: boolean }) {
+export function Pay({ order, step, pay, onDone, onToast, onTerms, onConfirmed, onEdit, busy: editBusy }: { order: AppOrder; step: "check" | "pay"; pay: PayInfo; onDone: (night: boolean) => void; onToast: (t: string) => void; onTerms: () => void; onConfirmed: (o: AppOrder) => void; onEdit: (o: AppOrder) => void; busy?: boolean }) {
   const T = useT();
   const input = useRef<HTMLInputElement>(null);
   const [progress, setProgress] = useState<number | null>(null);
@@ -89,7 +89,7 @@ export function Pay({ order, step, pay, onDone, onToast, onTerms, onConfirmed, o
           ) : (
             <p className={s.help}>{T.pay.namunaClosed}</p>
           )}
-          <button type="button" className={`${s.btn} ${s.btnGhost} ${s.btnWide} ${s.btnEdit}`} onClick={onEdit} disabled={editBusy} aria-busy={editBusy} data-edit-data>
+          <button type="button" className={`${s.btn} ${s.btnGhost} ${s.btnWide} ${s.btnEdit}`} onClick={() => onEdit(order)} disabled={editBusy} aria-busy={editBusy} data-edit-data>
             {T.form.editData}
           </button>
         </Section>
