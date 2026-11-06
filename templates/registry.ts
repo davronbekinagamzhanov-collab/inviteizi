@@ -284,7 +284,8 @@ export const CATALOG_ORDER: Record<Occasion, readonly string[]> = {
   ],
   sunnat: ["ganch-darvoza", "bog", "lola-medalyon", "lola-bodom", "doppi-kitob", "doppicha"],
   nahorgi: ["qozon-tongi", "tong-dasturxon", "non-albom", "tonggi-piyola", "tong-varaq", "choy-maktub"],
-  yubiley: ["zarhal-lavha", "umr-kitobi", "hurmat-maktub", "pion-guldasta", "umr-daraxti", "bordo-guldasta"],
+  // 06.11: два последних подняты наверх по просьбе владельца
+  yubiley: ["umr-daraxti", "bordo-guldasta", "zarhal-lavha", "umr-kitobi", "hurmat-maktub", "pion-guldasta"],
 };
 /** Все id по порядку (для сортировки) */
 export const DISPLAY_PRIORITY: readonly string[] = Object.values(CATALOG_ORDER).flat();

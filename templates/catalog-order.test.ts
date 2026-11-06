@@ -12,8 +12,9 @@ describe("порядок каталога", () => {
     for (const o of OCCASIONS) for (const id of CATALOG_ORDER[o]) { const d = getDesign(id); if (d) expect(d.occasion).toBe(o); }
   });
 
-  it("первым — дизайн за 8 000 ₸; в никоҳ первые 113 и 114", () => {
-    for (const o of OCCASIONS) expect(PRICES[list(o)[0].format]).toBe(8_000);
+  it("первым — дизайн за 8 000 ₸ (юбилей — решение владельца 06.11: первые два — бывшие последние); в никоҳ первые 113 и 114", () => {
+    for (const o of OCCASIONS.filter((x) => x !== "yubiley")) expect(PRICES[list(o)[0].format]).toBe(8_000);
+    expect(list("yubiley").slice(0, 2).map((d) => d.id)).toEqual(["umr-daraxti", "bordo-guldasta"]);
     expect(list("nikoh").slice(0, 2).map((d) => d.number)).toEqual([113, 114]);
   });
 
