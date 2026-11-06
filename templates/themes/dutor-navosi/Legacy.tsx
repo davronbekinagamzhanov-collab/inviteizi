@@ -8,7 +8,7 @@ import {Reveal} from "../../blocks/Reveal";
 import {MapButton} from "../../blocks/MapButton";
 import {Countdown} from "../../blocks/Countdown";
 import {designTexts} from "@/texts/uz-cyrl";
-const font=localFont({src:[{path:"../../../assets/fonts/Lora-Regular.ttf"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--dn-font",display:"swap"});
+const font=localFont({ preload: false,src:[{path:"../../../assets/fonts/Lora-Regular.ttf"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--dn-font",display:"swap"});
 const vars=designVars({primary:"#815345",primaryDark:"#613a31",gold:"#b39870",goldLight:"#e7d4b6",paper:"#fcf5e9",ink:"#554338",muted:"#735d4c"},{display:"var(--dn-font)",accent:"var(--dn-font)",body:"var(--dn-font)"});
 const t=designTexts("dutor-navosi");
 /** A diagonal two-string dutar and paired voices; the musical system itself remains unchanged. */

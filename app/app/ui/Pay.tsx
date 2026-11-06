@@ -4,12 +4,13 @@ import { useRef, useState } from "react";
 import type { AppOrder, ReceiptResult } from "@/bot/app/service";
 import { api, ApiError, MAX_FILE, shrinkImage, upload } from "./api";
 import { Section, useT } from "./shared";
-import { copyText, haptic } from "./telegram";
+import { copyText, haptic, openLink, shareLink } from "./telegram";
+import { CheckIcon, ClockIcon, CloseIcon, SpinnerIcon } from "./icons";
 import s from "../app.module.css";
 
 type PayInfo = { phone: string; name: string; card: string | null };
 
-export function Pay({ order, pay, onDone, onToast }: { order: AppOrder; pay: PayInfo; onDone: (night: boolean) => void; onToast: (t: string) => void }) {
+export function Pay({ order, pay, onDone, onToast, onTerms }: { order: AppOrder; pay: PayInfo; onDone: (night: boolean) => void; onToast: (t: string) => void; onTerms: () => void }) {
   const T = useT();
   const input = useRef<HTMLInputElement>(null);
   const [progress, setProgress] = useState<number | null>(null);
@@ -17,12 +18,17 @@ export function Pay({ order, pay, onDone, onToast }: { order: AppOrder; pay: Pay
   // Проверка перед оплатой: реквизиты — только после «✅ Ҳаммаси тўғри, тўлаймиз»
   const [confirmed, setConfirmed] = useState(order.confirmed);
   const [busy, setBusy] = useState(false);
+  const [agree, setAgree] = useState(false);
 
   async function confirm() {
     if (busy) return;
+    if (!agree) {
+      haptic.error();
+      return setError(T.pay.errors.terms);
+    }
     setBusy(true);
     try {
-      const r = await api<{ ok: true } | { error: string }>("confirmPay", { orderId: order.id });
+      const r = await api<{ ok: true } | { error: string }>("confirmPay", { orderId: order.id, terms: true });
       if ("ok" in r) {
         haptic.ok();
         setConfirmed(true);
@@ -89,8 +95,18 @@ export function Pay({ order, pay, onDone, onToast }: { order: AppOrder; pay: Pay
           <b>{T.price(order.amount)}</b>
         </div>
         <p className={s.formErr} style={{ color: "var(--ink)" }}>{T.pay.checkWarn}</p>
+        <div className={s.terms}>
+          <label>
+            <input type="checkbox" checked={agree} onChange={(e) => { haptic.select(); setAgree(e.target.checked); setError(null); }} name="terms" />
+            <span>{T.pay.termsAgree}</span>
+          </label>
+          <button type="button" className={s.textMore} onClick={onTerms}>
+            {T.pay.termsLink}
+          </button>
+        </div>
         {error && <p className={s.formErr} role="alert">{error}</p>}
-        <button type="button" className={`${s.btn} ${s.btnWide}`} onClick={confirm} disabled={busy}>
+        <button type="button" className={`${s.btn} ${s.btnWide}`} onClick={confirm} disabled={busy || !agree} aria-busy={busy}>
+          {busy ? <SpinnerIcon size={20} /> : null}
           {T.pay.checkYes}
         </button>
       </div>
@@ -130,8 +146,15 @@ export function Pay({ order, pay, onDone, onToast }: { order: AppOrder; pay: Pay
         </div>
       </Section>
       {error && <p className={s.formErr} role="alert">{error}</p>}
-      <button type="button" className={`${s.btn} ${s.btnWide}`} onClick={() => input.current?.click()} disabled={progress !== null}>
-        {progress !== null ? `${T.pay.sending} ${Math.round(progress * 100)}%` : T.pay.upload}
+      <button type="button" className={`${s.btn} ${s.btnWide}`} onClick={() => input.current?.click()} disabled={progress !== null} aria-busy={progress !== null}>
+        {progress !== null ? (
+          <>
+            <SpinnerIcon size={20} />
+            {`${T.pay.sending} ${Math.round(progress * 100)}%`}
+          </>
+        ) : (
+          T.pay.upload
+        )}
       </button>
       <p className={s.status}>{T.pay.uploadHint}</p>
       <input ref={input} type="file" accept="image/*,application/pdf" hidden onChange={(e) => send(e.target.files?.[0])} />
@@ -139,14 +162,64 @@ export function Pay({ order, pay, onDone, onToast }: { order: AppOrder; pay: Pay
   );
 }
 
-export function Done({ night }: { night: boolean }) {
+/**
+ * После чека: «Тўловингиз текширилмоқда» (экран сам спрашивает статус — MiniApp),
+ * подтвердили — «Таклифномангиз тайёр!» с крупной ссылкой; отказ — причина и «Чекни қайта юбориш».
+ */
+export function Waiting({ order, night, onResend, onToast }: { order: AppOrder; night: boolean; onResend: () => void; onToast: (t: string) => void }) {
   const T = useT();
+  if (order.status === "active") {
+    return (
+      <div className={s.done} data-state="ready">
+        <div className={`${s.doneMark} ${s.doneOk}`} aria-hidden>
+          <CheckIcon size={44} />
+        </div>
+        <h1 className={s.title}>{T.pay.readyTitle}</h1>
+        <p>{T.pay.readyLead}</p>
+        <a className={s.readyLink} href={order.url} target="_blank" rel="noopener" onClick={(e) => { e.preventDefault(); openLink(order.url); }}>
+          {order.url.replace(/^https?:\/\//, "")}
+        </a>
+        <div className={s.doneActions}>
+          <button type="button" className={`${s.btn} ${s.btnWide}`} onClick={() => shareLink(order.url, T.orders.shareText)}>
+            {T.pay.readyShare}
+          </button>
+          <button type="button" className={`${s.btn} ${s.btnGhost} ${s.btnWide}`} onClick={async () => { if (await copyText(order.url)) { haptic.ok(); onToast(T.orders.copied); } }}>
+            {T.pay.readyCopy}
+          </button>
+        </div>
+      </div>
+    );
+  }
+  if (order.status === "rejected") {
+    return (
+      <div className={s.done} data-state="rejected">
+        <div className={`${s.doneMark} ${s.doneErr}`} aria-hidden>
+          <CloseIcon size={40} />
+        </div>
+        <h1 className={s.title}>{T.pay.rejectedTitle}</h1>
+        {order.rejectReason && (
+          <p>
+            {T.pay.rejectedReason}: <b>{order.rejectReason}</b>
+          </p>
+        )}
+        <div className={s.doneActions}>
+          <button type="button" className={`${s.btn} ${s.btnWide}`} onClick={onResend}>
+            {T.pay.resend}
+          </button>
+        </div>
+      </div>
+    );
+  }
   return (
-    <div className={s.done}>
-      <div className={s.doneMark} aria-hidden>✅</div>
-      <h1 className={s.title}>{T.pay.doneTitle}</h1>
-      <p>{night ? T.pay.doneNight : T.pay.doneDay}</p>
-      <p style={{ color: "var(--muted)", fontSize: 16 }}>{T.pay.doneWhere}</p>
+    <div className={s.done} data-state="waiting" aria-busy="true">
+      <div className={s.waitRing} aria-hidden>
+        <ClockIcon size={34} />
+      </div>
+      <h1 className={s.title}>{T.pay.waitTitle}</h1>
+      <p>{night ? T.pay.waitNight : T.pay.waitDay}</p>
+      <p className={s.waitNumber}>
+        {T.pay.waitNumber} №{order.number} · {T.price(order.amount)}
+      </p>
     </div>
   );
 }

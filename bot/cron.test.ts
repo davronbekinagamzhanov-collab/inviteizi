@@ -58,7 +58,10 @@ describe("cron: напоминания и архив", () => {
     sim.clock = new Date("2026-12-14T18:00:00Z");
     expect(await runCron(sim.deps)).toMatchObject({ archived: 0 });
     expect((await sim.repo.getOrder(o.id))?.status).toBe("active");
-    sim.clock = new Date("2026-12-14T19:00:00Z");
+    // Тяжёлые задания — только в первом запуске часа (экономия Vercel): в 19:20 ещё не архивируем
+    sim.clock = new Date("2026-12-14T19:20:00Z");
+    expect(await runCron(sim.deps)).toMatchObject({ archived: 0 });
+    sim.clock = new Date("2026-12-14T20:00:00Z");
     expect(await runCron(sim.deps)).toMatchObject({ archived: 1 });
     expect((await sim.repo.getOrder(o.id))?.status).toBe("archived");
   });

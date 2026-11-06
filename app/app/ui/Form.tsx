@@ -11,24 +11,13 @@ import { previewData, type PreviewExtras } from "@/lib/preview-data";
 import { VENUES } from "@/bot/venues";
 import { Field, Section, useT } from "./shared";
 import { PreviewCard } from "./Preview";
+import { TextChoice } from "./TextChoice";
 import { haptic } from "./telegram";
+import { DEFAULT_TIME } from "./form-defaults";
+export { emptyForm } from "./form-defaults";
 import s from "../app.module.css";
 
 /** Вместо пустого «--:--» — обычное время тадбира (клиент поменяет одним касанием) */
-const DEFAULT_TIME: Record<EventKind, string> = {
-  nikohBazm: "18:00",
-  nahorgi: "06:00",
-  sunnatBazm: "18:00",
-  yubileyBazm: "18:00",
-  kelinSalom: "09:00",
-  nikohMarosim: "14:00",
-};
-
-export function emptyForm(occasion: Occasion): FormInput {
-  const kind = MAIN_EVENT[occasion];
-  return { occasion, relation: RELATIONS[occasion][0], events: [{ kind, time: DEFAULT_TIME[kind] }] } as FormInput;
-}
-
 type Props = {
   design: Design;
   form: FormInput;
@@ -36,9 +25,14 @@ type Props = {
   today: string;
   errors: FieldError[];
   onChange: (f: FormInput) => void;
+  /** Превью на весь экран (состояние у MiniApp: native-кнопки и «назад» его закрывают) */
+  big: boolean;
+  onBig: (open: boolean) => void;
+  /** п.16: текст приглашения прямо в анкете (те же поля, что у итога) */
+  onText: (p: { textId?: string; customText?: string }) => void;
 };
 
-export function Form({ design, form, extras, today, errors, onChange }: Props) {
+export function Form({ design, form, extras, today, errors, onChange, big, onBig, onText }: Props) {
   const T = useT();
   const occ = design.occasion;
   const f = fieldsFor(occ);
@@ -67,7 +61,7 @@ export function Form({ design, form, extras, today, errors, onChange }: Props) {
     <div className={s.screen}>
       <h1 className={s.title}>{T.form.title}</h1>
       <p className={s.lead}>{T.form.lead}</p>
-      <PreviewCard templateId={design.id} data={data} />
+      <PreviewCard templateId={design.id} data={data} big={big} onBig={onBig} />
       {errors.length > 0 && <p className={s.formErr}>{T.form.errors.fix}</p>}
 
       <Section>
@@ -122,6 +116,8 @@ export function Form({ design, form, extras, today, errors, onChange }: Props) {
           </Field>
         )}
       </Section>
+
+      <TextChoice data={data} textId={extras.textId} customText={extras.customText} onChange={onText} />
 
       {events.map((e, i) => {
         const kind = (i === 0 ? MAIN_EVENT[occ] : e.kind) as EventKind;

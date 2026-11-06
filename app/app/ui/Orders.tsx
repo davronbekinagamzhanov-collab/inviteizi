@@ -4,13 +4,39 @@ import Image from "next/image";
 import { useState } from "react";
 import QRCode from "qrcode";
 import type { AppOrder } from "@/bot/app/service";
-import { getDesign } from "@/templates/registry";
+import { getDesign, thumbOf } from "@/templates/registry";
 import { fmtDate } from "./format";
 import { useT } from "./shared";
+import { CheckIcon, ClockIcon, CloseIcon, SpinnerIcon } from "./icons";
+import { CancelButton } from "./Cancel";
 import { copyText, haptic, openLink, shareLink } from "./telegram";
 import s from "../app.module.css";
 
-export function Orders({ orders, onEdit, onPay, onToast }: { orders: AppOrder[]; onEdit: (o: AppOrder) => void; onPay: (o: AppOrder) => void; onToast: (t: string) => void }) {
+type Props = {
+  orders: AppOrder[];
+  onEdit: (o: AppOrder) => void;
+  onPay: (o: AppOrder) => void;
+  onStatus: (o: AppOrder) => void;
+  onCancel: (o: AppOrder) => Promise<boolean>;
+  onToast: (t: string) => void;
+  /** Идёт «Ўзгартириш» / «Янги»: кнопки закрыты от двойного нажатия */
+  busy?: boolean;
+};
+
+/** Статус простыми словами: Қоралама / Текширилмоқда / Тайёр / Рад этилди (+ срок истёк) */
+function StatusBadge({ o }: { o: AppOrder }) {
+  const T = useT();
+  const kind = o.status === "active" ? "ok" : o.status === "receipt_sent" ? "wait" : o.status === "rejected" ? "err" : o.status === "archived" ? "off" : "draft";
+  return (
+    <span className={s.badge} data-kind={kind}>
+      {kind === "ok" ? <CheckIcon size={15} /> : kind === "wait" ? <ClockIcon size={15} /> : kind === "err" ? <CloseIcon size={15} /> : null}
+      {T.orders.statuses[o.status]}
+    </span>
+  );
+}
+
+export function Orders({ orders, onEdit, onPay, onStatus, onCancel, onToast, busy = false }: Props) {
+  const [editing, setEditing] = useState<string | null>(null);
   const T = useT();
   const [qr, setQr] = useState<{ id: string; src: string } | null>(null);
 
@@ -28,19 +54,24 @@ export function Orders({ orders, onEdit, onPay, onToast }: { orders: AppOrder[];
         const cover = getDesign(o.templateId)?.cover;
         return (
           <article key={o.id} className={s.order} style={{ animationDelay: `${Math.min(i, 6) * 90}ms` }}>
-            {cover ? <Image className={s.orderCover} src={cover} alt="" width={76} height={135} /> : <span className={s.orderCover} />}
+            {cover ? <Image className={s.orderCover} src={thumbOf(cover)} alt="" width={76} height={135} /> : <span className={s.orderCover} />}
             <div style={{ minWidth: 0 }}>
               <p className={s.orderMeta}>
                 {T.orders.number(o.number)} · {T.price(o.amount)}
               </p>
               <p className={s.orderTitle}>{o.title}</p>
               {o.date && <p className={s.orderMeta}>{fmtDate(o.date)}</p>}
-              <span className={`${s.badge} ${o.paid ? s.badgeOk : ""}`}>{T.orders.statuses[o.status]}</span>
+              <StatusBadge o={o} />
             </div>
             <div className={s.orderActions}>
               {o.status !== "archived" && (
                 <button type="button" className={`${s.btn} ${s.btnGhost} ${s.btnSmall}`} onClick={() => openLink(o.url)}>
                   {T.orders.open}
+                </button>
+              )}
+              {(o.status === "receipt_sent" || o.status === "rejected") && (
+                <button type="button" className={`${s.btn} ${o.status === "receipt_sent" ? "" : s.btnGhost} ${s.btnSmall}`} onClick={() => onStatus(o)}>
+                  {T.pay.status}
                 </button>
               )}
               {o.canPay && (
@@ -49,7 +80,8 @@ export function Orders({ orders, onEdit, onPay, onToast }: { orders: AppOrder[];
                 </button>
               )}
               {o.canEdit && (
-                <button type="button" className={`${s.btn} ${s.btnGhost} ${s.btnSmall}`} onClick={() => onEdit(o)}>
+                <button type="button" className={`${s.btn} ${s.btnGhost} ${s.btnSmall}`} disabled={busy} aria-busy={busy && editing === o.id} onClick={() => { setEditing(o.id); onEdit(o); }}>
+                  {busy && editing === o.id ? <SpinnerIcon size={18} /> : null}
                   {T.orders.edit}
                 </button>
               )}
@@ -66,6 +98,7 @@ export function Orders({ orders, onEdit, onPay, onToast }: { orders: AppOrder[];
                   </button>
                 </>
               )}
+              {o.canEdit && <CancelButton onCancel={() => onCancel(o)} />}
             </div>
             {qr?.id === o.id && (
               <div className={s.qr}>

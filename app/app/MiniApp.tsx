@@ -4,6 +4,7 @@
  * Черновик сохраняется на сервере (закрыл — открыл — продолжает), заказ — тот же, что видит чат.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import type { AppDraft, AppOrder, AppSession, SubmitResult } from "@/bot/app/service";
 import type { Lang } from "@/lib/domain";
 import { validateForm, type FieldError, type FormInput } from "@/lib/order-rules";
@@ -14,14 +15,35 @@ import { appRu } from "@/texts/app-ru";
 import { appKk } from "@/texts/app-kk";
 import { api, ApiError } from "./ui/api";
 import { Catalog, Heart, type Chip } from "./ui/Catalog";
-import { emptyForm, Form } from "./ui/Form";
-import { Photos } from "./ui/Photos";
-import { Summary, type Track } from "./ui/Summary";
-import { Done, Pay } from "./ui/Pay";
-import { Orders } from "./ui/Orders";
+import { emptyForm } from "./ui/form-defaults";
+
+import type { Track } from "./ui/Summary";
+
+import { isQuiet } from "@/lib/quiet-hours";
+
 import { MainAction, TextsContext, Toast } from "./ui/shared";
-import { haptic, insideTelegram, setupTelegram, tg, useBackButton, useNativeMainVisible } from "./ui/telegram";
+import { haptic, initDataOf, insideTelegram, setupTelegram, tg, useBackButton, useNativeMainVisible } from "./ui/telegram";
+import { BackIcon, CloseIcon, FolderIcon, HelpIcon } from "./ui/icons";
+
+import { Boot } from "./ui/Boot";
 import s from "./app.module.css";
+
+// Первый экран — только каталог; остальные экраны догружаются, когда понадобятся (медленный интернет)
+const Form = dynamic(() => import("./ui/Form").then((m) => m.Form), { loading: Loading });
+const Photos = dynamic(() => import("./ui/Photos").then((m) => m.Photos), { loading: Loading });
+const Summary = dynamic(() => import("./ui/Summary").then((m) => m.Summary), { loading: Loading });
+const Pay = dynamic(() => import("./ui/Pay").then((m) => m.Pay), { loading: Loading });
+const Waiting = dynamic(() => import("./ui/Pay").then((m) => m.Waiting), { loading: Loading });
+const Orders = dynamic(() => import("./ui/Orders").then((m) => m.Orders), { loading: Loading });
+const Help = dynamic(() => import("./ui/Help").then((m) => m.Help));
+
+function Loading() {
+  return (
+    <div className={s.center} aria-busy="true">
+      <span className={s.bootBar} />
+    </div>
+  );
+}
 
 type Screen =
   | { name: "catalog" }
@@ -30,13 +52,15 @@ type Screen =
   | { name: "photos" }
   | { name: "summary" }
   | { name: "pay"; orderId: string }
-  | { name: "done"; night: boolean }
+  | { name: "wait"; orderId: string; night: boolean }
   | { name: "orders" };
 
 type Phase = "boot" | "noTelegram" | "error" | "ready";
 const SAVE_DELAY = 700;
 /** Экраны с главной кнопкой (см. switch ниже) */
-const MAIN_SCREENS = new Set<Screen["name"]>(["view", "form", "photos", "summary", "done", "orders"]);
+const MAIN_SCREENS = new Set<Screen["name"]>(["view", "form", "photos", "summary", "wait", "orders"]);
+/** Экран ожидания проверки чека спрашивает статус раз в 10 с, только пока открыт и виден */
+const POLL_MS = 10_000;
 const RESUBMIT_DELAY = 900;
 
 function namesOf(d: AppDraft) {
@@ -44,8 +68,37 @@ function namesOf(d: AppDraft) {
   return [f.groom, f.bride].filter(Boolean).join(" & ") || f.person || "";
 }
 
+/** Скрипт Telegram пришёл позже первого экрана — настраиваем его, как только появится */
+function waitTelegram() {
+  const id = setInterval(() => {
+    if (!tg()) return;
+    clearInterval(id);
+    setupTelegram();
+  }, 250);
+  setTimeout(() => clearInterval(id), 60_000);
+}
+
+function guessLang(): Lang {
+  try {
+    const user = JSON.parse(new URLSearchParams(initDataOf()).get("user") ?? "{}") as { language_code?: string };
+    return user.language_code?.startsWith("ru") ? "ru" : "uz";
+  } catch {
+    return "uz";
+  }
+}
+
+/** Через 8 с загрузки — «Интернет секин, кутинг…» и «Қайта уриниш» */
+const SLOW_MS = 8000;
+
 export default function MiniApp({ fontClass }: { fontClass: string }) {
   const [phase, setPhase] = useState<Phase>("boot");
+  const [slow, setSlow] = useState(false);
+  const [offline, setOffline] = useState(false);
+  useEffect(() => {
+    if (phase !== "boot") return;
+    const id = setTimeout(() => setSlow(true), SLOW_MS);
+    return () => clearTimeout(id);
+  }, [phase]);
   const [session, setSession] = useState<AppSession | null>(null);
   const [lang, setLang] = useState<Lang>("uz");
   const T = lang === "ru" ? appRu : lang === "kk" ? appKk : appUz;
@@ -56,21 +109,31 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
   const [errors, setErrors] = useState<FieldError[]>([]);
   const [stack, setStack] = useState<Screen[]>([{ name: "catalog" }]);
   const [tracks, setTracks] = useState<Track[]>([]);
+  const [otherTracks, setOtherTracks] = useState<Track[]>([]);
   const [toast, setToast] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [photosBusy, setPhotosBusy] = useState(0);
   const [saveStatus, setSaveStatus] = useState("");
   const [viewer, setViewer] = useState<string | null>(null);
+  const [bigOpen, setBigPreview] = useState(false);
+  const [help, setHelp] = useState(false);
   const screen = stack[stack.length - 1];
+  // Большое превью живёт только на анкете: ушли с неё — закрыто
+  const bigPreview = bigOpen && screen.name === "form";
   const nativeMain = useNativeMainVisible();
   const design: Design | undefined = draft?.templateId ? getDesign(draft.templateId) : undefined;
   const order = orders.find((o) => o.id === draft?.orderId) ?? null;
 
   // ── Запуск ──
   const boot = useCallback(async () => {
-    // Скрипт Telegram грузится после страницы: ждём до 10 с (медленный интернет)
-    for (let i = 0; i < 100 && !tg(); i++) await new Promise((r) => setTimeout(r, 100));
+    // Подпись Telegram есть в адресе — сразу идём на сервер; скрипт Telegram догрузится сам (кнопки, вибро).
+    // Без подписи в адресе ждём скрипт до 10 с (старые клиенты)
+    if (!initDataOf()) for (let i = 0; i < 100 && !tg(); i++) await new Promise((r) => setTimeout(r, 100));
     setupTelegram();
-    if (!tg()?.initData) return setPhase("noTelegram");
+    if (!tg()) waitTelegram();
+    if (!initDataOf()) return setPhase("noTelegram");
+    // До ответа сервера — язык Telegram (экран загрузки уже на нём)
+    setLang(guessLang());
     try {
       const sess = await api<AppSession>("session");
       setSession(sess);
@@ -86,6 +149,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
       else if (want && getDesign(want)) setStack([{ name: "catalog" }, { name: "view", id: want }]);
       setPhase("ready");
     } catch (e) {
+      setOffline(e instanceof ApiError && e.code === "offline");
       setPhase(e instanceof ApiError && e.code === "auth" ? "noTelegram" : "error");
     }
   }, []);
@@ -96,18 +160,21 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
 
   // ── Навигация ──
   const go = useCallback((sc: Screen) => {
+    setBigPreview(false);
     setStack((st) => [...st, sc]);
     window.scrollTo({ top: 0 });
   }, []);
   const back = useCallback(() => {
+    setBigPreview(false);
     setStack((st) => (st.length > 1 ? st.slice(0, -1) : st));
     window.scrollTo({ top: 0 });
   }, []);
   const reset = useCallback((list: Screen[]) => {
+    setBigPreview(false);
     setStack(list);
     window.scrollTo({ top: 0 });
   }, []);
-  useBackButton(stack.length > 1 || !!viewer, () => (viewer ? setViewer(null) : back()));
+  useBackButton(stack.length > 1 || !!viewer || bigPreview || help, () => (help ? setHelp(false) : bigPreview ? setBigPreview(false) : viewer ? setViewer(null) : back()));
 
   // ── Черновик: сохраняем на сервере с задержкой ──
   const firstDraft = useRef(true);
@@ -238,7 +305,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
   }
 
   async function toSummary() {
-    if (!draft) return;
+    if (!draft || busy || photosBusy) return;
     setBusy(true);
     await submit(draft);
     setBusy(false);
@@ -256,6 +323,8 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
   }
 
   async function editOrder(o: AppOrder) {
+    if (busy) return;
+    setBusy(true);
     try {
       const r = await api<{ draft?: AppDraft; error?: string }>("edit", { orderId: o.id });
       if (!r.draft) return setToast(T.orders.closedEdit);
@@ -266,18 +335,46 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
       reset([{ name: "catalog" }, { name: "form" }]);
     } catch {
       setToast(T.serverError);
+    } finally {
+      setBusy(false);
     }
   }
 
   async function newOne() {
+    if (busy) return;
+    setBusy(true);
     try {
       await api("new");
     } catch {
       /* черновик просто начнём заново на телефоне */
     }
+    setBusy(false);
     setDraft(null);
     setErrors([]);
     reset([{ name: "catalog" }]);
+  }
+
+  /** «Бекор қилиш»: заказ (или черновик без заказа) удаляется на сервере с личными данными */
+  async function cancelOrder(o: AppOrder | null): Promise<boolean> {
+    try {
+      const r = await api<{ ok?: true; error?: string }>("cancel", o ? { orderId: o.id } : {});
+      if (!r.ok) {
+        setToast(r.error === "waiting" ? T.pay.errors.waiting : T.orders.closedEdit);
+        if (o) refreshOrders();
+        return false;
+      }
+      haptic.ok();
+      if (o) setOrders((l) => l.filter((x) => x.id !== o.id));
+      if (!o || draft?.orderId === o.id) {
+        setDraft(null);
+        setErrors([]);
+      }
+      setToast(T.orders.cancelled);
+      return true;
+    } catch (e) {
+      setToast(e instanceof ApiError && e.code === "offline" ? T.offline : T.serverError);
+      return false;
+    }
   }
 
   async function changeLang(l: Lang) {
@@ -287,12 +384,41 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
     api("lang", { lang: l }).catch(() => undefined);
   }
 
+  // Ожидание чека и «Мои»: статус с сервера — раз в 7 с на экране ожидания и при каждом возвращении в приложение
+  const refreshOrders = useCallback(async () => {
+    if (document.visibilityState !== "visible") return;
+    try {
+      const r = await api<{ orders?: AppOrder[] }>("orders");
+      if (r.orders) setOrders(r.orders);
+    } catch {
+      /* нет сети — спросим в следующий раз */
+    }
+  }, []);
+  useEffect(() => {
+    if (phase !== "ready" || (screen.name !== "wait" && screen.name !== "orders")) return;
+    const id = screen.name === "wait" ? setInterval(refreshOrders, POLL_MS) : undefined;
+    document.addEventListener("visibilitychange", refreshOrders);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener("visibilitychange", refreshOrders);
+    };
+  }, [phase, screen.name, refreshOrders]);
+  const waitOrder = screen.name === "wait" ? orders.find((o) => o.id === screen.orderId) : undefined;
+  useEffect(() => {
+    if (waitOrder?.status === "active") haptic.ok();
+    else if (waitOrder?.status === "rejected") haptic.error();
+  }, [waitOrder?.status]);
+
   // Мелодии тадбира — когда дошли до итога
   useEffect(() => {
     if (screen.name !== "summary" || !design) return;
     let alive = true;
-    api<{ tracks?: Track[] }>("music", { templateId: design.id, lang })
-      .then((r) => alive && setTracks(r.tracks ?? []))
+    api<{ tracks?: Track[]; others?: Track[] }>("music", { templateId: design.id, lang })
+      .then((r) => {
+        if (!alive) return;
+        setTracks(r.tracks ?? []);
+        setOtherTracks(r.others ?? []);
+      })
       .catch(() => undefined);
     return () => {
       alive = false;
@@ -304,7 +430,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
   const price = order?.amount ?? (design ? PRICES[design.format] : 0);
 
   // Своя кнопка внизу страницы видна (native MainButton не показана, а у экрана есть главное действие)
-  const ownBar = !nativeMain && phase === "ready" && !viewer && MAIN_SCREENS.has(screen.name);
+  const ownBar = !nativeMain && phase === "ready" && !viewer && !bigPreview && !help && MAIN_SCREENS.has(screen.name);
 
   // ── Главная кнопка экрана ──
   let main: { text: string | null; onClick: () => void; progress?: boolean } = { text: null, onClick: () => undefined };
@@ -317,42 +443,45 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
         main = { text: T.form.next, onClick: formNext, progress: busy };
         break;
       case "photos":
-        main = { text: draft?.photos?.length ? T.photos.next : T.photos.skip, onClick: toSummary, progress: busy };
+        main = { text: draft?.photos?.length ? T.photos.next : T.photos.skip, onClick: toSummary, progress: busy || photosBusy > 0 };
         break;
       case "summary":
         main = { text: T.summary.pay(price), onClick: toPay, progress: busy };
         break;
-      case "done":
-        main = { text: T.myOrders, onClick: () => reset([{ name: "catalog" }, { name: "orders" }]) };
+      case "wait":
+        main = waitOrder?.status === "rejected" ? { text: null, onClick: () => undefined } : { text: T.myOrders, onClick: () => reset([{ name: "catalog" }, { name: "orders" }]) };
         break;
       case "orders":
-        main = { text: T.orders.newOne, onClick: newOne };
+        main = { text: T.orders.newOne, onClick: newOne, progress: busy };
         break;
     }
   }
-  if (viewer) main = { text: null, onClick: () => undefined };
+  if (viewer || bigPreview || help) main = { text: null, onClick: () => undefined };
 
   const resume =
     draft?.templateId && design && screen.name === "catalog"
-      ? { title: `${T.occasions[design.occasion]} · ${namesOf(draft) || T.catalog.continueTitle}`, onResume: () => go(draft.orderId ? { name: "summary" } : { name: "form" }) }
+      ? { title: `${T.occasions[design.occasion]} · ${namesOf(draft) || T.catalog.continueTitle}`, onResume: () => go(draft.orderId ? { name: "summary" } : { name: "form" }), onCancel: () => cancelOrder(order ?? (draft.orderId ? ({ id: draft.orderId } as AppOrder) : null)) }
       : null;
 
   return (
     <TextsContext.Provider value={T}>
-      <div className={`${s.root} ${ownBar ? "" : s.nativeMain} ${fontClass}`} lang={lang === "ru" ? "ru" : lang === "kk" ? "kk" : "uz-Cyrl"}>
+      <div data-app-root className={`${s.root} ${ownBar ? "" : s.nativeMain} ${fontClass}`} lang={lang === "ru" ? "ru" : lang === "kk" ? "kk" : "uz-Cyrl"}>
         {phase === "ready" && screen.name !== "view" && (
           <header className={s.header}>
             <div className={s.headerRow}>
               {!insideTelegram() && stack.length > 1 && (
                 <button type="button" className={s.iconBtn} onClick={back} aria-label={T.back}>
-                  ◀
+                  <BackIcon />
                 </button>
               )}
               <span className={s.brand}>
                 Invite<b>IZI</b>
               </span>
-              <button type="button" className={s.iconBtn} onClick={() => (screen.name === "orders" ? undefined : go({ name: "orders" }))} aria-label={T.myOrders}>
-                📂
+              <button type="button" className={s.iconBtn} onClick={() => { haptic.tap(); setHelp(true); }} aria-label={T.help} data-help-btn>
+                <HelpIcon />
+              </button>
+              <button type="button" className={s.iconBtn} onClick={() => (screen.name === "orders" ? undefined : go({ name: "orders" }))} aria-label={T.myOrders} aria-pressed={screen.name === "orders"}>
+                <FolderIcon />
               </button>
               <span className={s.langs} role="group" aria-label="Тил / Язык / Тіл">
                 {(["uz", "ru", ...(session?.extraLangs?.includes("kk") ? ["kk"] : [])] as Lang[]).map((l) => (
@@ -366,13 +495,13 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
         )}
 
         <main className={s.wrap}>
-          {phase === "boot" && <p className={s.center}>{T.loading}</p>}
+          {phase === "boot" && <Boot slow={slow} onRetry={() => window.location.reload()} />}
           {phase === "noTelegram" && <p className={s.center}>{T.openInTelegram}</p>}
           {phase === "error" && (
             <div className={s.center}>
               <div>
-                <p>{T.serverError}</p>
-                <button type="button" className={s.btn} onClick={() => { setPhase("boot"); boot(); }}>
+                <p>{offline ? T.offline : T.serverError}</p>
+                <button type="button" className={s.btn} onClick={() => { setSlow(false); setPhase("boot"); boot(); }}>
                   {T.retry}
                 </button>
               </div>
@@ -384,10 +513,10 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
                 <Catalog chip={chip} onChip={(c) => { haptic.select(); setChip(c); }} favorites={favorites} onFavorite={toggleFavorite} onOpen={(d) => go({ name: "view", id: d.id })} resume={resume} />
               )}
               {screen.name === "form" && design && draft && (
-                <Form key={design.id} design={design} form={draft.form ?? emptyForm(design.occasion)} extras={extras} today={session.today} errors={errors} onChange={changeForm} />
+                <Form key={design.id} design={design} form={draft.form ?? emptyForm(design.occasion)} extras={extras} today={session.today} errors={errors} onChange={changeForm} big={bigPreview} onBig={setBigPreview} onText={(t) => patchDraft(t)} />
               )}
               {screen.name === "photos" && draft && (
-                <Photos photos={draft.photos ?? []} onChange={(photos) => patchDraft({ photos })} onToast={setToast} />
+                <Photos photos={draft.photos ?? []} onChange={(photos) => patchDraft({ photos })} onToast={setToast} onPending={setPhotosBusy} />
               )}
               {screen.name === "summary" && draft && summaryData && (
                 <Summary
@@ -403,6 +532,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
                   demoUrl={draft.templateId ? `/demo/${draft.templateId}` : null}
                   onExample={(url) => setViewer(url)}
                   tracks={tracks}
+                  others={otherTracks}
                   price={price}
                   namunaUrl={order?.url ?? null}
                   status={saveStatus}
@@ -412,10 +542,10 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
               )}
               {screen.name === "pay" && (() => {
                 const o = orders.find((x) => x.id === screen.orderId);
-                return o ? <Pay order={o} pay={session.pay} onToast={setToast} onDone={(night) => { setOrders((l) => l.map((x) => (x.id === o.id ? { ...x, status: "receipt_sent", canPay: false, canEdit: false } : x))); setDraft(null); reset([{ name: "catalog" }, { name: "done", night }]); }} /> : null;
+                return o ? <Pay order={o} pay={session.pay} onToast={setToast} onTerms={() => setViewer(lang === "uz" ? "/terms" : "/terms/ru")} onDone={(night) => { setOrders((l) => l.map((x) => (x.id === o.id ? { ...x, status: "receipt_sent", canPay: false, canEdit: false } : x))); setDraft(null); reset([{ name: "catalog" }, { name: "wait", orderId: o.id, night }]); }} /> : null;
               })()}
-              {screen.name === "done" && <Done night={screen.night} />}
-              {screen.name === "orders" && <Orders orders={orders} onEdit={editOrder} onPay={(o) => go({ name: "pay", orderId: o.id })} onToast={setToast} />}
+              {screen.name === "wait" && waitOrder && <Waiting order={waitOrder} night={screen.night} onToast={setToast} onResend={() => reset([{ name: "catalog" }, { name: "orders" }, { name: "pay", orderId: waitOrder.id }])} />}
+              {screen.name === "orders" && <Orders orders={orders} onEdit={editOrder} onPay={(o) => go({ name: "pay", orderId: o.id })} onStatus={(o) => go({ name: "wait", orderId: o.id, night: isQuiet(new Date()) })} onCancel={cancelOrder} onToast={setToast} busy={busy} />}
             </>
           )}
         </main>
@@ -424,6 +554,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
           <div className={s.viewer}>
             <div className={s.viewerTop}>
               <button type="button" className={s.backPill} onClick={back}>
+                <BackIcon size={18} />
                 {T.view.back}
               </button>
               <Heart on={favorites.includes(screen.id)} onToggle={() => toggleFavorite(screen.id, !favorites.includes(screen.id))} />
@@ -436,13 +567,24 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
           <div className={s.viewer} role="dialog" aria-modal="true">
             <div className={s.viewerTop}>
               <button type="button" className={s.backPill} onClick={() => setViewer(null)}>
-                ✕ {T.form.previewClose}
+                <CloseIcon size={18} />
+                {T.form.previewClose}
               </button>
             </div>
             <iframe src={viewer} title="НАМУНА" />
           </div>
         )}
 
+        {help && session && (
+          <Help
+            contact={session.contact}
+            onClose={() => setHelp(false)}
+            onTerms={() => {
+              setHelp(false);
+              setViewer(lang === "uz" ? "/terms" : "/terms/ru");
+            }}
+          />
+        )}
         <MainAction text={main.text} onClick={main.onClick} progress={main.progress} />
         <Toast text={toast} onDone={() => setToast(null)} />
       </div>

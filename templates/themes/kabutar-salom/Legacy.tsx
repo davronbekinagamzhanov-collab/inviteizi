@@ -12,7 +12,7 @@ import {MapButton} from "../../blocks/MapButton";
 import {Countdown} from "../../blocks/Countdown";
 import {designTexts} from "@/texts/uz-cyrl";
 import styles from "./opening.module.css";
-const font=localFont({src:[{path:"../../../assets/fonts/Lora-Regular.ttf"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--ks-font",display:"swap"});
+const font=localFont({ preload: false,src:[{path:"../../../assets/fonts/Lora-Regular.ttf"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--ks-font",display:"swap"});
 const vars=designVars({primary:"#8a6676",primaryDark:"#674b58",gold:"#ad9775",goldLight:"#e6d8c4",paper:"#fcf7f0",ink:"#574953",muted:"#71616a"},{display:"var(--ks-font)",accent:"var(--ks-font)",body:"var(--ks-font)"});
 const t=designTexts("kabutar-salom");
 /** A sculpted paper dove unfolds one wing and takes a finite diagonal flight, revealing the page. */

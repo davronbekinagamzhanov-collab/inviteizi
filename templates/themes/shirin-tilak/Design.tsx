@@ -8,7 +8,7 @@ import {MapButton} from "../../blocks/MapButton";
 import {Reveal} from "../../blocks/Reveal";
 import {Countdown} from "../../blocks/Countdown";
 import {designTexts} from "@/texts/uz-cyrl";
-const font=localFont({src:"../../../assets/fonts/PTSerif-Regular.ttf",variable:"--st-font",display:"swap"});
+const font=localFont({ preload: false,src:"../../../assets/fonts/PTSerif-Regular.ttf",variable:"--st-font",display:"swap"});
 const vars=designVars({primary:"#89592c",primaryDark:"#704922",gold:"#b4925d",goldLight:"#ead8ae",paper:"#fcf6e8",ink:"#594a33",muted:"#756347"},{display:"var(--st-font)",accent:"var(--st-font)",body:"var(--st-font)"});
 const t=designTexts("shirin-tilak");
 /** Amber novvot facets: a sweet-wishes folio with angular margins, rather than textile or floral borders. */

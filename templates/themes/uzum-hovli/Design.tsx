@@ -8,7 +8,7 @@ import {Reveal} from "../../blocks/Reveal";
 import {Calendar} from "../../blocks/Calendar";
 import {MapButton} from "../../blocks/MapButton";
 import {designTexts} from "@/texts/uz-cyrl";
-const font=localFont({src:[{path:"../../../assets/fonts/Lora-Regular.ttf"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--uh-font",display:"swap"});
+const font=localFont({ preload: false,src:[{path:"../../../assets/fonts/Lora-Regular.ttf"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--uh-font",display:"swap"});
 const vars=designVars({primary:"#596850",primaryDark:"#394933",gold:"#a28a60",goldLight:"#e4d4b6",paper:"#faf6e9",ink:"#454b3d",muted:"#5e6652"},{display:"var(--uh-font)",accent:"var(--uh-font)",body:"var(--uh-font)"});
 const t=designTexts("uzum-hovli");
 /** A grape pergola over a courtyard: an architectural garden, not a floral album. */

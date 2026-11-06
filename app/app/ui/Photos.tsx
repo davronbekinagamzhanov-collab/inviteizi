@@ -4,12 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { ApiError, shrinkImage, upload } from "./api";
 import { useT } from "./shared";
 import { haptic } from "./telegram";
+import { CameraIcon, SpinnerIcon } from "./icons";
 import s from "../app.module.css";
 
 export const MAX_PHOTOS = 3;
 type Pending = { key: string; preview: string; progress: number };
 
-export function Photos({ photos, onChange, onToast }: { photos: string[]; onChange: (p: string[]) => void; onToast: (t: string) => void }) {
+export function Photos({ photos, onChange, onToast, onPending }: { photos: string[]; onChange: (p: string[]) => void; onToast: (t: string) => void; onPending?: (n: number) => void }) {
   const T = useT();
   const input = useRef<HTMLInputElement>(null);
   const [pending, setPending] = useState<Pending[]>([]);
@@ -18,6 +19,11 @@ export function Photos({ photos, onChange, onToast }: { photos: string[]; onChan
     latest.current = photos;
   }, [photos]);
   const free = MAX_PHOTOS - photos.length - pending.length;
+  // Пока фото грузятся, «Давом этиш» закрыта: фото не потеряются
+  useEffect(() => {
+    onPending?.(pending.length);
+  }, [pending.length, onPending]);
+  useEffect(() => () => onPending?.(0), [onPending]);
 
   async function pick(files: FileList | null) {
     if (!files?.length) return;
@@ -64,6 +70,10 @@ export function Photos({ photos, onChange, onToast }: { photos: string[]; onChan
           <div key={p.key} className={s.photo} aria-busy="true" aria-label={T.photos.uploading}>
             {/* eslint-disable-next-line @next/next/no-img-element -- локальный предпросмотр */}
             <img src={p.preview} alt="" style={{ opacity: 0.55 }} />
+            <span className={s.photoPct}>
+              <SpinnerIcon size={22} />
+              {Math.round(p.progress * 100)}%
+            </span>
             <span className={s.progress}>
               <i style={{ width: `${Math.round(p.progress * 100)}%` }} />
             </span>
@@ -72,6 +82,7 @@ export function Photos({ photos, onChange, onToast }: { photos: string[]; onChan
       </div>
       {free > 0 && (
         <button type="button" className={`${s.btn} ${s.btnGhost} ${s.btnWide}`} onClick={() => input.current?.click()}>
+          <CameraIcon size={20} />
           {photos.length ? T.photos.addMore : T.photos.add}
         </button>
       )}

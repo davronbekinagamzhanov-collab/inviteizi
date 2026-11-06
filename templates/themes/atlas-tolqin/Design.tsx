@@ -14,8 +14,8 @@ import { Countdown } from "../../blocks/Countdown";
 import { MapButton } from "../../blocks/MapButton";
 import { designTexts } from "@/texts/uz-cyrl";
 
-const display=localFont({variable:"--at-display",src:[{path:"../../../assets/fonts/Lora-Regular.ttf",weight:"400 700",style:"normal"},{path:"../../../assets/fonts/Lora-Italic.ttf",weight:"400 700",style:"italic"}]});
-const body=localFont({src:[{path:"../../../assets/fonts/google/ptsans/PT_Sans-Web-Regular.woff2",weight:"400",style:"normal"}],display:"swap",variable:"--at-body"});
+const display=localFont({ preload: false,variable:"--at-display",src:[{path:"../../../assets/fonts/Lora-Regular.ttf",weight:"400 700",style:"normal"},{path:"../../../assets/fonts/Lora-Italic.ttf",weight:"400 700",style:"italic"}]});
+const body=localFont({ preload: false,src:[{path:"../../../assets/fonts/google/ptsans/PT_Sans-Web-Regular.woff2",weight:"400",style:"normal"}],display:"swap",variable:"--at-body"});
 const vars=designVars({primary:"#725778",primaryDark:"#56405e",gold:"#b49a65",goldLight:"#ecdbb5",paper:"#fcf7ef",ink:"#433f4f",muted:"#807482",accent:"#b1797e"},{display:"var(--at-display)",accent:"var(--at-display)",body:"var(--at-body)"});
 const t=designTexts("atlas-tolqin");
 

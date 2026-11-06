@@ -13,7 +13,7 @@ import { managerName, MANAGER_BONUS, MANAGER_GOAL, MANAGER_PER_ORDER, type Manag
 import { activeDesigns } from "@/templates/registry";
 import { staff } from "@/texts/bot-ru";
 import type { InlineButton } from "../tg";
-import { panelData, partnerRowOf } from "./partners";
+import { panelData, panelDataWithStaff, partnerRowOf, staffOrdersWithin } from "./partners";
 import { designName, editOrSend, inline, price, roleOf, send, texts } from "./util";
 import type { Ctx } from "./types";
 
@@ -194,9 +194,10 @@ export async function statsScreen(c: Ctx, role: "owner" | "manager", pArg = "d",
   const sec: Sec = isSec(secArg) ? secArg : "money";
   const now = c.deps.now();
   const r = rangeOf(p, now);
-  const full = await panelData(c.deps);
+  const { s: full, staffOrders } = await panelDataWithStaff(c.deps);
   const managers = await c.deps.repo.listManagers();
   const s = role === "owner" ? full : networkOf(full, managers, c.user.id);
+  const testOrders = role === "owner" ? staffOrdersWithin(staffOrders, r.from, r.to) : 0;
   const reviews = sec === "fn" ? await c.deps.repo.reviewSummary?.(r.from, r.to, role === "owner" ? null : s.orders.map((o) => o.id)) : undefined;
   const body =
     sec === "money"
@@ -208,7 +209,8 @@ export async function statsScreen(c: Ctx, role: "owner" | "manager", pArg = "d",
         : sec === "ds"
           ? designsSection(s, r)
           : funnel(s, r, reviews ?? undefined);
-  return { text: [role === "owner" ? S.title(r.label) : S.titleNet(r.label), S.sections[sec], "", body].join("\n"), rows: keyboard(role === "owner" ? "st" : "sm", p, sec) };
+  const note = testOrders ? ["", S.staffExcluded(testOrders)] : [];
+  return { text: [role === "owner" ? S.title(r.label) : S.titleNet(r.label), S.sections[sec], "", body, ...note].join("\n"), rows: keyboard(role === "owner" ? "st" : "sm", p, sec) };
 }
 
 function moneyNet(net: PanelSnapshot, full: PanelSnapshot, managers: Manager[], r: Range, p: P, managerId: number) {

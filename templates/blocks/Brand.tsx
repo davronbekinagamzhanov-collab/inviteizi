@@ -7,7 +7,7 @@ const BOTTOM = "bottom-[calc(1.5rem+env(safe-area-inset-bottom))]";
 // В НАМУНА внизу плашка «Тўловдан сўнг…» — поднимаем над ней, как кнопку музыки
 const BOTTOM_RAISED = "bottom-[calc(4rem+env(safe-area-inset-bottom))]";
 
-/** Маленькая плашка на всё время просмотра. Без размытия фона: оно тормозит на слабых телефонах */
+/** Маленькая плашка на всё время просмотра: плотная «пилюля» с лёгким размытием — читается на любом узоре (контраст ≥ 4,5, scripts/check-badge.mjs) */
 export function BrandBadge({ raised }: { raised: boolean }) {
   return (
     <a
@@ -16,7 +16,7 @@ export function BrandBadge({ raised }: { raised: boolean }) {
       target="_blank"
       rel="noopener"
       aria-label={t.brand.badgeLabel}
-      className={`fixed ${LEFT} ${raised ? BOTTOM_RAISED : BOTTOM} z-40 inline-flex h-8 items-center gap-1 rounded-full bg-[#2b1f16]/60 px-3 font-sans text-[12px] font-medium tracking-wide text-white shadow-md shadow-black/20 ring-1 ring-white/25 active:scale-95`}
+      className={`fixed ${LEFT} ${raised ? BOTTOM_RAISED : BOTTOM} z-40 inline-flex h-8 items-center gap-1 rounded-full bg-[#2b1f16]/80 px-3 font-sans text-[12px] font-medium tracking-wide text-white shadow-md shadow-black/20 ring-1 ring-white/25 backdrop-blur-[6px] active:scale-95`}
     >
       <span aria-hidden className="text-[#f0d596]">✦</span>
       {t.brand.badge}

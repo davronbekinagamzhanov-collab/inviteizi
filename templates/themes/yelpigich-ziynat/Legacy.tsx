@@ -12,7 +12,7 @@ import {MapButton} from "../../blocks/MapButton";
 import {Countdown} from "../../blocks/Countdown";
 import {designTexts} from "@/texts/uz-cyrl";
 import styles from "./opening.module.css";
-const font=localFont({src:[{path:"../../../assets/fonts/Lora-Regular.ttf"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--yz-font",display:"swap"});
+const font=localFont({ preload: false,src:[{path:"../../../assets/fonts/Lora-Regular.ttf"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--yz-font",display:"swap"});
 const vars=designVars({primary:"#496777",primaryDark:"#344d59",gold:"#a59879",goldLight:"#dfd7be",paper:"#f5f7ef",ink:"#43535b",muted:"#5c6970"},{display:"var(--yz-font)",accent:"var(--yz-font)",body:"var(--yz-font)"});
 const t=designTexts("yelpigich-ziynat");
 export default function Design({data,mode}:TemplateProps){

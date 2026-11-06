@@ -8,7 +8,7 @@ import {Words,useFitWords} from "../../blocks/FitWords";
 import {MapButton} from "../../blocks/MapButton";
 import {designTexts} from "@/texts/uz-cyrl";
 
-const font=localFont({src:"../../../assets/fonts/PTSerif-Regular.ttf",variable:"--zv-type",display:"swap"});
+const font=localFont({ preload: false,src:"../../../assets/fonts/PTSerif-Regular.ttf",variable:"--zv-type",display:"swap"});
 const vars=designVars({primary:"#87604e",primaryDark:"#65483d",gold:"#b39159",goldLight:"#e4cfaa",paper:"#fbf4e6",ink:"#53473d",muted:"#857a6b"},{display:"var(--zv-type)",accent:"var(--zv-type)",body:"var(--zv-type)"});
 const t=designTexts("zarvaraq");
 

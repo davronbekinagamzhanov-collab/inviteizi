@@ -12,7 +12,7 @@ import {Reveal} from "../../blocks/Reveal";
 import {Calendar} from "../../blocks/Calendar";
 import {designTexts} from "@/texts/uz-cyrl";
 import { MOTION } from "@/templates/blocks/motion";
-const font=localFont({src:[{path:"../../../assets/fonts/Lora-Regular.ttf"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--zl-font",display:"swap"});
+const font=localFont({ preload: false,src:[{path:"../../../assets/fonts/Lora-Regular.ttf"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--zl-font",display:"swap"});
 const vars=designVars({primary:"#89623c",primaryDark:"#634328",gold:"#b28b53",goldLight:"#ead7b6",paper:"#fcf6eb",ink:"#514332",muted:"#71614e"},{display:"var(--zl-font)",accent:"var(--zl-font)",body:"var(--zl-font)"});
 const t=designTexts("zarhal-lavha");
 

@@ -30,7 +30,7 @@ export function SoftBrandBadge() {
       aria-label={t.brand.badgeLabel}
       aria-hidden={!shown}
       tabIndex={shown ? undefined : -1}
-      className={`fixed ${TOP} z-40 inline-flex h-8 items-center gap-1.5 rounded-full bg-[var(--n-paper,#fff)]/80 px-3 font-sans text-[12px] font-medium tracking-wide text-[var(--n-ink,#2b1f16)] shadow-[0_4px_14px_-8px_rgba(40,30,20,.5)] ring-1 ring-[var(--n-ink,#2b1f16)]/12 transition-[opacity,transform] duration-500 ease-[cubic-bezier(.22,1,.36,1)] active:scale-95 ${shown ? "opacity-100" : "pointer-events-none -translate-y-2 opacity-0"}`}
+      className={`fixed ${TOP} z-40 inline-flex h-8 items-center gap-1.5 rounded-full bg-[var(--n-paper,#fff)]/90 px-3 backdrop-blur-[6px] font-sans text-[12px] font-medium tracking-wide text-[var(--n-ink,#2b1f16)] shadow-[0_4px_14px_-8px_rgba(40,30,20,.5)] ring-1 ring-[var(--n-ink,#2b1f16)]/12 transition-[opacity,transform] duration-500 ease-[cubic-bezier(.22,1,.36,1)] active:scale-95 ${shown ? "opacity-100" : "pointer-events-none -translate-y-2 opacity-0"}`}
     >
       <span aria-hidden className="text-[var(--n-accent,#8c7764)]">✦</span>
       {t.brand.badge}

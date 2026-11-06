@@ -6,6 +6,14 @@ const nextConfig: NextConfig = {
     "/*/opengraph-image": ["./assets/fonts/*.ttf", "./public/og/**/*"],
   },
   cacheComponents: true,
+  // Vercel Hobby: без оптимизации картинок на лету — все картинки уже готовые сжатые WebP
+  // (обложки каталога — public/covers/thumb, 480 px). Лимит Image Optimization больше не расходуется.
+  images: { unoptimized: true },
+  // Статика из public — в кэш браузера и CDN на год: повторные заходы не тратят трафик
+  async headers() {
+    const year = [{ key: "Cache-Control", value: "public, max-age=31536000, stale-while-revalidate=86400" }];
+    return ["/covers/:path*", "/art/:path*", "/floral/:path*", "/music/:path*", "/audio/:path*", "/og/:path*", "/pilots/:path*", "/materials/:path*"].map((source) => ({ source, headers: year }));
+  },
   // без значка Next.js в углу: владелец смотрит пригласительные с телефона в режиме разработки
   devIndicators: false,
   partialPrefetching: true,

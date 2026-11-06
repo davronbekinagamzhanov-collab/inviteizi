@@ -177,12 +177,16 @@ export async function cleanup(deps: Deps) {
     await deps.repo.saveStep(u.id, "idle", {});
   }
   if (!removed.length) return 0;
-  // Файл мог достаться и другому заказу того же клиента (та же песня, то же фото) — такие не трогаем
+  await removeUnusedMedia(deps, removed);
+  return removed.length;
+}
+
+/** Удалить из хранилища фото и песни удалённых заказов. Файл мог достаться и другому заказу (та же песня, то же фото) — такие не трогаем */
+export async function removeUnusedMedia(deps: Deps, removed: { photos: string[]; music: string | null }[]) {
   const left = await deps.repo.listOrdersByStatus(["draft", "preview", "awaiting_payment", "receipt_sent", "active", "archived", "rejected"]);
   const used = new Set(left.flatMap((o) => [...(o.data.photos ?? []), ...(o.music.kind === "own" && o.music.url ? [o.music.url] : [])]));
   const photos = [...new Set(removed.flatMap((r) => r.photos))].filter((u) => !used.has(u));
   const music = [...new Set(removed.map((r) => r.music).filter((u): u is string => Boolean(u)))].filter((u) => !used.has(u));
   if (photos.length) await deps.removePhotos?.(photos);
   if (music.length) await deps.removeMusic?.(music);
-  return removed.length;
 }

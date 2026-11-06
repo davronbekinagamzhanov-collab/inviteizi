@@ -2,6 +2,7 @@
 import { createBotDeps } from "@/bot/deps";
 import { appGate, json } from "@/lib/app-auth";
 import * as app from "@/bot/app/service";
+import { partnerPoster, rolePanel } from "@/bot/app/roles-panel";
 import { ownerExport, ownerPanel } from "@/bot/app/owner";
 import type { Lang } from "@/lib/domain";
 
@@ -39,13 +40,28 @@ export async function POST(req: Request) {
       case "new":
         return json(await app.newDraft(deps, user));
       case "confirmPay":
-        return json(await app.confirmPay(deps, user, body.orderId));
+        return json(await app.confirmPay(deps, user, body.orderId, body.terms));
       case "orders":
         return json(await app.listOrders(deps, user));
+      case "musicUpload": {
+        const r = await app.musicUpload(deps, body.ext, body.size);
+        return json(r, "error" in r ? (r.error === "server" ? 500 : 400) : 200);
+      }
+      case "cancel":
+        return json(await app.cancelOrder(deps, user, body.orderId));
       // Панель владельца: только ADMIN_IDS, остальным 403
       case "owner": {
         const r = await ownerPanel(deps, user.id, body.period);
         return "error" in r ? json(r, 403) : json(r);
+      }
+      // Панель менеджера/партнёра: роль по initData, остальным 403
+      case "rolePanel": {
+        const r = await rolePanel(deps, user, body.period);
+        return "error" in r ? json(r, 403) : json(r);
+      }
+      case "partnerPoster": {
+        const r = await partnerPoster(deps, user, body.lang);
+        return "error" in r ? json(r, r.error === "tooOften" ? 429 : 403) : json(r);
       }
       case "ownerExport": {
         const r = await ownerExport(deps, user.id, body.period);

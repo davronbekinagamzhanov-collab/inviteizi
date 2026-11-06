@@ -15,8 +15,8 @@ import { Countdown } from "../../blocks/Countdown";
 import { MapButton } from "../../blocks/MapButton";
 import { designTexts } from "@/texts/uz-cyrl";
 
-const display=localFont({src:[{path:"../../../assets/fonts/google/ebgaramond/EBGaramond[wght].woff2",weight:"400.0 800.0",style:"normal"},{path:"../../../assets/fonts/google/ebgaramond/EBGaramond-Italic[wght].woff2",weight:"400.0 800.0",style:"italic"}],display:"swap",variable:"--bg-display"});
-const body=localFont({src:[{path:"../../../assets/fonts/google/ptserif/PT_Serif-Web-Regular.woff2",weight:"400",style:"normal"}],display:"swap",variable:"--bg-body"});
+const display=localFont({ preload: false,src:[{path:"../../../assets/fonts/google/ebgaramond/EBGaramond[wght].woff2",weight:"400.0 800.0",style:"normal"},{path:"../../../assets/fonts/google/ebgaramond/EBGaramond-Italic[wght].woff2",weight:"400.0 800.0",style:"italic"}],display:"swap",variable:"--bg-display"});
+const body=localFont({ preload: false,src:[{path:"../../../assets/fonts/google/ptserif/PT_Serif-Web-Regular.woff2",weight:"400",style:"normal"}],display:"swap",variable:"--bg-body"});
 const vars=designVars({primary:"#698b9e",primaryDark:"#48677b",gold:"#bca16f",goldLight:"#e6d7b4",paper:"#fbf8f1",ink:"#485b62",muted:"#87918e",accent:"#c6b7ba"},{display:"var(--bg-display)",accent:"var(--bg-display)",body:"var(--bg-body)"});
 const t=designTexts("bodom-guli");
 

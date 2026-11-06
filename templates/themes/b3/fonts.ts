@@ -6,7 +6,7 @@ import localFont from "next/font/local";
  */
 
 /** S1 «Фото-ҳикоя»: контрастный Playfair поверх фото */
-export const playfair = localFont({
+export const playfair = localFont({ preload: false,
   src: [
     { path: "../../../assets/fonts/google/playfair/Playfair[opsz,wdth,wght].woff2", style: "normal", weight: "300 900" },
     { path: "../../../assets/fonts/google/playfair/Playfair-Italic[opsz,wdth,wght].woff2", style: "italic", weight: "300 900" },
@@ -16,7 +16,7 @@ export const playfair = localFont({
 });
 
 /** S2 «Варақ», S6 «Китоб»: книжный EB Garamond */
-export const garamond = localFont({
+export const garamond = localFont({ preload: false,
   src: [
     { path: "../../../assets/fonts/google/ebgaramond/EBGaramond[wght].woff2", style: "normal", weight: "400 800" },
     { path: "../../../assets/fonts/google/ebgaramond/EBGaramond-Italic[wght].woff2", style: "italic", weight: "400 800" },
@@ -26,7 +26,7 @@ export const garamond = localFont({
 });
 
 /** S3 «Мактуб»: крупный и плотный Vollkorn — читается без очков */
-export const vollkorn = localFont({
+export const vollkorn = localFont({ preload: false,
   src: [
     { path: "../../../assets/fonts/google/vollkorn/Vollkorn[wght].woff2", style: "normal", weight: "400 900" },
     { path: "../../../assets/fonts/google/vollkorn/Vollkorn-Italic[wght].woff2", style: "italic", weight: "400 900" },
@@ -36,7 +36,7 @@ export const vollkorn = localFont({
 });
 
 /** S4 «Дарвоза»: Alegreya — каллиграфичный, но прямой */
-export const alegreya = localFont({
+export const alegreya = localFont({ preload: false,
   src: [
     { path: "../../../assets/fonts/google/alegreya/Alegreya[wght].woff2", style: "normal", weight: "400 900" },
     { path: "../../../assets/fonts/google/alegreya/Alegreya-Italic[wght].woff2", style: "italic", weight: "400 900" },
@@ -46,7 +46,7 @@ export const alegreya = localFont({
 });
 
 /** S5 «Альбом»: Piazzolla */
-export const piazzolla = localFont({
+export const piazzolla = localFont({ preload: false,
   src: [
     { path: "../../../assets/fonts/google/piazzolla/Piazzolla[opsz,wght].woff2", style: "normal", weight: "300 800" },
     { path: "../../../assets/fonts/google/piazzolla/Piazzolla-Italic[opsz,wght].woff2", style: "italic", weight: "300 800" },
@@ -56,7 +56,7 @@ export const piazzolla = localFont({
 });
 
 /** S7 «Медальон»: Cormorant Unicase для подписей-капителей */
-export const unicase = localFont({
+export const unicase = localFont({ preload: false,
   src: [
     { path: "../../../assets/fonts/google/cormorantunicase/CormorantUnicase-Regular.woff2", style: "normal", weight: "400" },
     { path: "../../../assets/fonts/google/cormorantunicase/CormorantUnicase-SemiBold.woff2", style: "normal", weight: "600" },

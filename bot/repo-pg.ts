@@ -104,6 +104,8 @@ type OrderRow = {
   admin_reminded_at: Date | null;
   /** v2: нет колонки до миграции pay_confirm — тогда undefined */
   pay_confirmed_at?: Date | null;
+  /** п.18: нет колонки до миграции terms — тогда undefined */
+  terms_accepted_at?: Date | null;
   expires_at: Date | null;
   events: EventJson[];
 };
@@ -211,6 +213,7 @@ function toOrder(r: OrderRow): OrderRecord {
     paymentRemindedAt: r.payment_reminded_at,
     adminRemindedAt: r.admin_reminded_at,
     payConfirmedAt: r.pay_confirmed_at ?? null,
+    termsAcceptedAt: r.terms_accepted_at ?? null,
     expiresAt: r.expires_at,
   };
 }
@@ -296,6 +299,7 @@ function patchColumns(p: OrderPatch): Columns {
   if (p.paymentRemindedAt !== undefined) c.payment_reminded_at = p.paymentRemindedAt;
   if (p.adminRemindedAt !== undefined) c.admin_reminded_at = p.adminRemindedAt;
   if (p.payConfirmedAt !== undefined) c.pay_confirmed_at = p.payConfirmedAt;
+  if (p.termsAcceptedAt !== undefined) c.terms_accepted_at = p.termsAcceptedAt;
   if (p.expiresAt !== undefined) c.expires_at = p.expiresAt;
   // updated_at всё равно ставит триггер; так в update всегда есть хотя бы одна колонка
   c.updated_at = new Date();
@@ -612,6 +616,26 @@ export class PgRepo implements Repo {
       const deleted = new Set(gone.map((g) => g.id));
       return rows.filter((r) => deleted.has(r.id)).map((r) => ({ photos: r.photos ?? [], music: r.music_kind === "own" ? r.music_url : null }));
     });
+  }
+
+  async cancelOrder(orderId: string, userId: number) {
+    if (!/^[0-9a-f-]{36}$/i.test(orderId)) return null;
+    return this.sql.begin(async (tx) => {
+      const [r] = await tx<{ id: string; photos: string[] | null; music_url: string | null; music_kind: string }[]>`
+        select id, photos, music_url, music_kind from public.orders
+        where id = ${orderId} and user_id = ${userId} and status in ('draft', 'preview', 'awaiting_payment', 'rejected') and paid_at is null
+          and not exists (select 1 from public.partner_earnings e where e.order_id = orders.id)
+        for update`;
+      if (!r) return null;
+      await tx`delete from public.client_orders where order_id = ${r.id}`;
+      await tx`delete from public.orders where id = ${r.id}`;
+      return { photos: r.photos ?? [], music: r.music_kind === "own" ? r.music_url : null };
+    });
+  }
+
+  async recordCancellation(c: { step: number; occasion?: string | null; format?: string | null; templateId?: string | null }) {
+    await this.sql`insert into public.order_cancellations(step, occasion, format, template_id)
+      values(${Math.min(5, Math.max(1, Math.round(c.step)))}, ${c.occasion ?? null}, ${c.format ?? null}, ${c.templateId ?? null})`;
   }
 
   async recordManagerPayout(p: Omit<ManagerPayout, "createdAt"> & { createdBy: number }) {
@@ -1030,18 +1054,26 @@ export class PgRepo implements Repo {
    */
   private async update(id: string, from: OrderStatus[] | null, patch: OrderPatch) {
     try {
-      return await this.updateOnce(id, from, patch, false);
+      return await this.updateOnce(id, from, patch, 0);
     } catch (e) {
       if (!isMissingColumn(e)) throw e;
-      console.warn("orders: миграция v2 не применена — сохраняю без новых колонок");
-      return this.updateOnce(id, from, patch, true);
+      // Сначала без самой новой колонки (terms — п.18), потом без всех колонок v2
+      try {
+        console.warn("orders: миграция terms не применена — сохраняю без terms_accepted_at");
+        return await this.updateOnce(id, from, patch, 1);
+      } catch (e2) {
+        if (!isMissingColumn(e2)) throw e2;
+        console.warn("orders: миграция v2 не применена — сохраняю без новых колонок");
+        return this.updateOnce(id, from, patch, 2);
+      }
     }
   }
 
-  private updateOnce(id: string, from: OrderStatus[] | null, patch: OrderPatch, legacy: boolean) {
+  private updateOnce(id: string, from: OrderStatus[] | null, patch: OrderPatch, legacy: 0 | 1 | 2) {
     return this.sql.begin(async (tx) => {
       const cols = patchColumns(patch);
-      if (legacy) for (const k of ["pay_confirmed_at", "langs", "custom_text_i18n"]) delete cols[k];
+      if (legacy >= 1) delete cols.terms_accepted_at;
+      if (legacy >= 2) for (const k of ["pay_confirmed_at", "langs", "custom_text_i18n"]) delete cols[k];
       const rows = from
         ? await tx`update public.orders set ${tx(cols)}
                    where id = ${id} and status = any(${tx.array(from)}::text[]) returning id`

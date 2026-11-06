@@ -1,10 +1,15 @@
 "use client";
 import Image from "next/image";
+import { useState } from "react";
 import type { Occasion } from "@/lib/types";
-import { activeDesigns, PRICES, type Design } from "@/templates/registry";
+import { activeDesigns, PRICES, thumbOf, type Design } from "@/templates/registry";
 import { t as inv } from "@/texts/uz-cyrl";
 import { useT } from "./shared";
 import { haptic } from "./telegram";
+import { CancelButton } from "./Cancel";
+import { useHoldTips, type HoldProps } from "./hold";
+import { CameraIcon, CloseIcon, InfoIcon } from "./icons";
+import type { Format } from "@/lib/domain";
 import s from "../app.module.css";
 
 export const OCCASIONS: Occasion[] = ["nikoh", "nahorgi", "sunnat", "yubiley"];
@@ -21,10 +26,11 @@ export function HeartIcon({ on, size = 22 }: { on: boolean; size?: number }) {
   );
 }
 
-export function Heart({ on, onToggle, className }: { on: boolean; onToggle: () => void; className?: string }) {
+export function Heart({ on, onToggle, className, hold }: { on: boolean; onToggle: () => void; className?: string; hold?: HoldProps }) {
   const T = useT();
   return (
     <button
+      {...hold}
       type="button"
       className={`${s.heart} ${on ? s.heartOn : ""} ${className ?? ""}`}
       aria-pressed={on}
@@ -47,14 +53,21 @@ export function Catalog(props: {
   favorites: string[];
   onFavorite: (id: string, on: boolean) => void;
   onOpen: (d: Design) => void;
-  resume: { title: string; onResume: () => void } | null;
+  resume: { title: string; onResume: () => void; onCancel: () => Promise<boolean> } | null;
 }) {
   const T = useT();
   const all = activeDesigns();
   const list = props.chip === "saved" ? props.favorites.map((id) => all.find((d) => d.id === id)).filter((d): d is Design => !!d) : all.filter((d) => d.occasion === props.chip);
+  const { bind, layer } = useHoldTips();
+  const [prices, setPrices] = useState(false);
   return (
     <div className={s.screen}>
-      <h1 className={s.title}>{T.catalog.title}</h1>
+      <div className={s.titleRow}>
+        <h1 className={s.title}>{T.catalog.title}</h1>
+        <button type="button" className={s.infoBtn} aria-label={T.catalog.pricesBtn} onClick={() => { haptic.tap(); setPrices(true); }} data-prices>
+          <InfoIcon />
+        </button>
+      </div>
       <p className={s.lead}>{T.catalog.lead}</p>
       {props.resume && (
         <div className={s.resume}>
@@ -65,6 +78,7 @@ export function Catalog(props: {
           <button type="button" className={`${s.btn} ${s.btnSmall}`} onClick={props.resume.onResume}>
             {T.catalog.continueAction}
           </button>
+          <CancelButton onCancel={props.resume.onCancel} />
         </div>
       )}
       <nav className={s.chips} aria-label={T.catalog.title}>
@@ -86,21 +100,61 @@ export function Catalog(props: {
           {list.map((d, i) => (
             <li key={d.id} className={s.tile} style={{ animationDelay: `${Math.min(i, 8) * 90}ms` }}>
               <button type="button" className={s.cover} onClick={() => props.onOpen(d)} aria-label={inv.designs[d.id]} data-design={d.id}>
-                <Image src={d.cover} alt="" fill sizes="(max-width: 480px) 50vw, 240px" priority={i < 4} />
-                <span className={s.pricePill}>{T.price(PRICES[d.format])}</span>
+                <Image src={thumbOf(d.cover)} alt="" fill sizes="(max-width: 480px) 50vw, 240px" priority={i < 4} />
+                <span className={s.pricePill} {...bind(T.catalog.tipPrice[d.format])}>
+                  {T.price(PRICES[d.format])}
+                </span>
                 {d.clientPhotos && (
-                  <span className={s.photoBadge} title={T.catalog.photo}>
-                    📷
+                  <span className={s.photoBadge} aria-label={T.catalog.tipPhoto} {...bind(T.catalog.tipPhoto)}>
+                    <CameraIcon size={19} />
                   </span>
                 )}
               </button>
-              <Heart on={props.favorites.includes(d.id)} onToggle={() => props.onFavorite(d.id, !props.favorites.includes(d.id))} />
+              <Heart on={props.favorites.includes(d.id)} onToggle={() => props.onFavorite(d.id, !props.favorites.includes(d.id))} hold={bind(T.catalog.tipSave)} />
               <p className={s.tileName}>{inv.designs[d.id]}</p>
               {props.chip === "saved" && <p className={s.tileSub}>{T.occasions[d.occasion]}</p>}
             </li>
           ))}
         </ul>
       )}
+      {layer}
+      {prices && <PricesSheet onClose={() => setPrices(false)} onOpen={(d) => { setPrices(false); props.onOpen(d); }} />}
+    </div>
+  );
+}
+
+const FORMATS: Format[] = ["animated", "scroll", "simple"];
+
+/** «Нархлар фарқи»: 8 000 — очилиш анимацияси, 6 000 — варақланади, 5 000 — бир саҳифа; по примеру-демо на каждый */
+function PricesSheet({ onClose, onOpen }: { onClose: () => void; onOpen: (d: Design) => void }) {
+  const T = useT();
+  const all = activeDesigns();
+  return (
+    <div className={s.sheetBack} onClick={onClose} role="presentation">
+      <div className={s.sheet} role="dialog" aria-modal="true" aria-label={T.catalog.pricesTitle} onClick={(e) => e.stopPropagation()} data-prices-sheet>
+        <div className={s.sheetHead}>
+          <h2>{T.catalog.pricesTitle}</h2>
+          <button type="button" className={s.backPill} onClick={onClose}>
+            <CloseIcon size={18} />
+            {T.catalog.close}
+          </button>
+        </div>
+        {FORMATS.map((f) => {
+          const example = all.find((d) => d.format === f && d.occasion === "nikoh") ?? all.find((d) => d.format === f);
+          return (
+            <div key={f} className={s.priceRow} data-format={f}>
+              <b>{T.price(PRICES[f])}</b>
+              <p>{T.catalog.pricesRows[f]}</p>
+              {example && (
+                <button type="button" className={`${s.btn} ${s.btnGhost} ${s.btnSmall}`} onClick={() => { haptic.tap(); onOpen(example); }}>
+                  {T.catalog.pricesExample}
+                </button>
+              )}
+            </div>
+          );
+        })}
+        <p className={s.help}>{T.catalog.pricesNote}</p>
+      </div>
     </div>
   );
 }

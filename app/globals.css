@@ -146,3 +146,40 @@ body {
     animation: none;
   }
 }
+
+/* Подсказка открытия (templates/blocks/TapHint.tsx): палец «нажимает», вокруг расходится кольцо */
+@keyframes tap-ring {
+  0% {
+    transform: scale(0.55);
+    opacity: 0.9;
+  }
+  80%,
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+@keyframes tap-finger {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translateY(2px) scale(0.92);
+  }
+}
+.tap-ring {
+  animation: tap-ring 1.8s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+.tap-finger {
+  animation: tap-finger 1.8s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tap-ring,
+  .tap-finger {
+    animation: none;
+  }
+  .tap-ring {
+    opacity: 0.35;
+  }
+}

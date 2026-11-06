@@ -86,6 +86,8 @@ async function removeOldPhotos(deps: Deps, now: Date, r: CronResult) {
   }
 }
 
+const CRON_EVERY_MIN = 10;
+
 export async function runCron(deps: Deps): Promise<CronResult> {
   const { repo, tg } = deps;
   const now = deps.now();
@@ -141,14 +143,18 @@ export async function runCron(deps: Deps): Promise<CronResult> {
     await repo.updateOrder(o.id, { paymentRemindedAt: now });
   }
 
+  // Тяжёлые суточные задания (архив, удаление фото, «спящие», автоочистка, отзывы) — раз в час, в первом запуске часа:
+  // pg_cron зовёт каждые 10 минут, а этим заданиям точность до часа не нужна (экономия функций Vercel и базы)
+  const hourly = now.getUTCMinutes() < CRON_EVERY_MIN;
+
   // ── Архив ──
-  for (const o of await repo.listOrdersByStatus(["active"])) {
+  for (const o of hourly ? await repo.listOrdersByStatus(["active"]) : []) {
     if (o.expiresAt && o.expiresAt <= now && (await repo.transition(o.id, ["active"], "archived"))) r.archived++;
   }
 
   // ── Фото клиента: через 30 дней после того, как ссылка закрылась ──
   try {
-    await removeOldPhotos(deps, now, r);
+    if (hourly) await removeOldPhotos(deps, now, r);
   } catch (e) {
     r.errors++;
     console.error("cron photos", e instanceof Error ? e.name : "Error");
@@ -165,7 +171,7 @@ export async function runCron(deps: Deps): Promise<CronResult> {
   // ── Партнёры: карточки владельцу после тихих часов, «спящие» ──
   try {
     r.partnerNotices = await flushOwnerNotices(deps);
-    r.sleeping = await notifySleeping(deps);
+    if (hourly) r.sleeping = await notifySleeping(deps);
   } catch (e) {
     r.errors++;
     console.error("cron partner notices", e instanceof Error ? e.name : "Error");
@@ -185,8 +191,10 @@ export async function runCron(deps: Deps): Promise<CronResult> {
   // ── v2, часть 10: напоминания не купившим, отзывы, автоочистка ──
   try {
     r.nudges = await nudges(deps);
-    r.reviews = await reviewRequests(deps);
-    r.cleaned = await cleanup(deps);
+    if (hourly) {
+      r.reviews = await reviewRequests(deps);
+      r.cleaned = await cleanup(deps);
+    }
   } catch (e) {
     r.errors++;
     console.error("cron care", e instanceof Error ? e.name : "Error");

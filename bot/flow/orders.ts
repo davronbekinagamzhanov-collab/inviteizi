@@ -259,12 +259,13 @@ export async function payOrder(c: Ctx, n: number, confirmed = false, stamp?: str
     await send(
       c,
       // НАМУНА живёт 24 часа: если уже закрыта — не даём мёртвую ссылку
-      c.tx.pay.check(checkLines(o, c.lang), pageMode(o, c.deps.now()) === "expired" ? null : pageUrl(c, o.slug)),
+      c.tx.pay.check(checkLines(o, c.lang), pageMode(o, c.deps.now()) === "expired" ? null : pageUrl(c, o.slug), `${c.deps.env.publicBaseUrl}/terms${c.lang === "ru" ? "/ru" : ""}`),
       inline([[{ text: c.tx.pay.confirmYes, data: `payok:${o.number}:${o.amount}:${checkStamp(o)}` }], [{ text: c.tx.order.edit, data: `edit:${o.number}` }]]),
     );
     return { stay: true };
   }
-  await c.deps.repo.transition(o.id, PAYABLE_STATUSES, "awaiting_payment", { payConfirmedAt: c.deps.now() });
+  // «✅ Ҳаммаси тўғри» в чате — согласие и с проверкой, и с условиями (ссылка /terms — в том же сообщении)
+  await c.deps.repo.transition(o.id, PAYABLE_STATUSES, "awaiting_payment", { payConfirmedAt: c.deps.now(), termsAcceptedAt: c.deps.now() });
   const env = c.deps.env;
   const card=env.paymentCardNumber?.trim();
   const paymentRows:InlineButton[][]=[[{text:c.tx.pay.copy,copy:env.kaspiPhone.replace(/[^\d+]/g,"")}]];

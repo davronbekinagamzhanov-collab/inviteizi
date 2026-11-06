@@ -6,7 +6,7 @@ import Link from "next/link";
 
 import { t } from "@/texts/uz-cyrl";
 import type { Occasion } from "@/lib/types";
-import { activeDesigns, PRICES } from "@/templates/registry";
+import { activeDesigns, PRICES, thumbOf } from "@/templates/registry";
 
 const display = localFont({src:[{path:"../../assets/fonts/google/cormorantgaramond/CormorantGaramond[wght].woff2",weight:"300.0 700.0",style:"normal"}],display:"swap",variable:"--font-catalog-display"});
 const body = localFont({src:[{path:"../../assets/fonts/google/ptserif/PT_Serif-Web-Regular.woff2",weight:"400",style:"normal"},{path:"../../assets/fonts/google/ptserif/PT_Serif-Web-Bold.woff2",weight:"700",style:"normal"}],display:"swap",variable:"--font-catalog-body"});
@@ -56,7 +56,7 @@ export default function CatalogPage() {
                     <div className="relative aspect-[9/16] w-full">
                       {hasCover(d.cover) && (
                         <Image
-                          src={d.cover}
+                          src={thumbOf(d.cover)}
                           alt={t.designs[d.id]}
                           fill
                           sizes="(max-width: 480px) 50vw, 240px"

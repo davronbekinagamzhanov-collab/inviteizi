@@ -4,7 +4,7 @@
  * Черновик лежит в users.state (как у чата): закрыл приложение — открыл — продолжает; в чате тоже виден.
  */
 import type { Deps, Draft } from "../flow/types";
-import type { Lang, MusicChoice, OrderRecord, OrderStatus } from "@/lib/domain";
+import type { Lang, MusicChoice, MusicRecord, OrderRecord, OrderStatus } from "@/lib/domain";
 import { EXTRA_LANGS, type ExtraLang, type InvitationData } from "@/lib/types";
 import type { AppUser } from "@/lib/tg-init-data";
 import { getDesign, isOnSale } from "@/templates/registry";
@@ -16,6 +16,8 @@ import { adminCard, checkLines, decisionButtons, upsertDraftOrder, type UpsertOu
 import { validateForm, type FieldError, type FormInput, cleanOwnText, graphemes, MAX_CUSTOM_TEXT } from "@/lib/order-rules";
 import { isQuiet } from "@/lib/quiet-hours";
 import { PHOTO_MAX_COUNT } from "../own-photo";
+import { ownMusicPath } from "../own-music";
+import { removeUnusedMedia } from "../flow/care";
 
 /** Черновик, как его хранит и присылает приложение */
 export type AppDraft = {
@@ -24,7 +26,8 @@ export type AppDraft = {
   photos?: string[];
   textId?: string;
   customText?: string;
-  music?: { kind: "list"; musicId: string } | { kind: "none" };
+  /** own — своя песня клиента (загружена из приложения прямо в бакет music или из чата) */
+  music?: { kind: "list"; musicId: string } | { kind: "none" } | { kind: "own"; url: string; title?: string };
   rsvp?: boolean;
   /** v2: языки кроме узбекского и свой текст на них */
   langs?: ExtraLang[];
@@ -52,6 +55,8 @@ export type AppOrder = {
   canEdit: boolean;
   canPay: boolean;
   paid: boolean;
+  /** Чек не принят: причина на языке клиента */
+  rejectReason: string | null;
   createdAt: string;
 };
 
@@ -66,6 +71,8 @@ export type AppSession = {
   pay: { phone: string; name: string; card: string | null };
   /** Какие языки можно добавить (казахский — только при KAZAKH_ENABLED) */
   extraLangs: ExtraLang[];
+  /** «Боғланиш» в «Ёрдам»: Telegram владельца */
+  contact: string;
 };
 
 const MAX_ORDERS = 20;
@@ -97,12 +104,21 @@ export function appOrder(deps: Deps, o: OrderRecord, lang: Lang = "uz"): AppOrde
     check: checkLines(o, lang),
     namunaOpen: pageMode(o, deps.now()) !== "expired",
     // Подтверждение действует для текущей суммы (сменили дизайн/цену — проверить снова)
-    confirmed: Boolean(o.payConfirmedAt) && o.status === "awaiting_payment",
+    confirmed: Boolean(o.payConfirmedAt) && (o.status === "awaiting_payment" || o.status === "rejected"),
     canEdit: PAYABLE_STATUSES.includes(o.status),
     canPay: PAYABLE_STATUSES.includes(o.status) && !eventsPassed(deps, o),
     paid: PAID_STATUSES.includes(o.status),
+    rejectReason: o.status === "rejected" ? reasonIn(o.rejectReason, lang) : null,
     createdAt: o.createdAt.toISOString(),
   };
+}
+
+/** Причина отказа хранится по-узбекски (как видит админ) — клиенту на его языке */
+function reasonIn(reason: string | null | undefined, lang: Lang): string | null {
+  if (!reason) return null;
+  const uzReasons = txFor("uz").admin.reasons;
+  const code = Object.keys(uzReasons).find((k) => uzReasons[k] === reason);
+  return code ? (txFor(lang).admin.reasons[code] ?? reason) : reason;
 }
 
 function eventsPassed(deps: Deps, o: OrderRecord) {
@@ -120,7 +136,7 @@ function draftOf(s: Draft): AppDraft | null {
     photos: d.photos,
     textId: d.textId,
     customText: d.customText,
-    music: s.music && s.music.kind !== "own" ? s.music : undefined,
+    music: !s.music ? undefined : s.music.kind !== "own" ? s.music : s.music.url ? { kind: "own", url: s.music.url, title: s.music.title } : undefined,
     rsvp: d.rsvp,
     langs: d.langs,
     customTexts: d.customTexts,
@@ -173,18 +189,21 @@ export async function openSession(deps: Deps, u: AppUser): Promise<AppSession> {
     today: kzToday(deps.now()),
     pay: { phone: deps.env.kaspiPhone, name: deps.env.kaspiName, card: deps.env.paymentCardNumber ?? null },
     extraLangs: allowedLangs(deps),
+    contact: `https://t.me/${deps.env.ownerUsername.replace(/^@/, "")}`,
   };
 }
 
 /** «✅ Ҳаммаси тўғри, тўлаймиз» в приложении: время подтверждения в заказе, дальше — реквизиты */
-export async function confirmPay(deps: Deps, u: AppUser, orderId: unknown) {
+export async function confirmPay(deps: Deps, u: AppUser, orderId: unknown, terms?: unknown) {
   if (typeof orderId !== "string") return { error: "notFound" as const };
+  // п.18: без «Шартларга розиман» реквизиты не показываем
+  if (terms !== true) return { error: "terms" as const };
   const o = await deps.repo.getOrder(orderId).catch(() => null);
   if (!o || o.userId !== u.id) return { error: "notFound" as const };
   if (o.status === "receipt_sent") return { error: "waiting" as const };
   if (!PAYABLE_STATUSES.includes(o.status)) return { error: "closed" as const };
   if (eventsPassed(deps, o)) return { error: "passed" as const };
-  const r = await deps.repo.transition(o.id, PAYABLE_STATUSES, "awaiting_payment", { payConfirmedAt: deps.now() });
+  const r = await deps.repo.transition(o.id, PAYABLE_STATUSES, "awaiting_payment", { payConfirmedAt: deps.now(), termsAcceptedAt: deps.now() });
   if (!r) return { error: "closed" as const };
   return { ok: true as const, order: appOrder(deps, r, (await deps.repo.getUser(u.id))?.lang ?? "uz") };
 }
@@ -205,8 +224,32 @@ export async function toggleFavorite(deps: Deps, u: AppUser, templateId: unknown
 export async function musicFor(deps: Deps, templateId: unknown, lang: Lang) {
   const design = typeof templateId === "string" ? getDesign(templateId) : undefined;
   if (!design) return { error: "bad" as const };
-  const list = await deps.repo.listMusic(design.occasion);
-  return { tracks: list.map((m) => ({ id: m.id, title: lang === "ru" ? m.titleRu : m.titleUz, url: m.fileUrl })) };
+  const title = (m: MusicRecord) => (lang === "ru" ? m.titleRu : m.titleUz);
+  const mine = await deps.repo.listMusic(design.occasion);
+  const ids = new Set(mine.map((m) => m.id));
+  // «Бошқа мусиқалар»: мелодии остальных тадбиров с подписью категории
+  const others = (await deps.repo.listMusic()).filter((m) => !ids.has(m.id) && m.occasion && m.occasion !== design.occasion);
+  return {
+    tracks: mine.map((m) => ({ id: m.id, title: title(m), url: m.fileUrl })),
+    others: others.map((m) => ({ id: m.id, title: title(m), url: m.fileUrl, occasion: m.occasion! })),
+  };
+}
+
+export const OWN_MUSIC_MAX = 20 * 1024 * 1024;
+const OWN_MUSIC_EXT = ["mp3", "m4a", "aac", "ogg", "oga", "opus", "wav"];
+
+/**
+ * Своя песня из приложения: подписанная ссылка на загрузку прямо в бакет music (телефон грузит сам,
+ * с процентом; лимит тела Vercel 4,5 МБ не мешает). До 20 МБ, только аудио.
+ */
+export async function musicUpload(deps: Deps, ext: unknown, size: unknown) {
+  const e = typeof ext === "string" ? ext.toLowerCase().replace(/^\./, "") : "";
+  if (!OWN_MUSIC_EXT.includes(e)) return { error: "format" as const };
+  if (typeof size !== "number" || size <= 0) return { error: "format" as const };
+  if (size > OWN_MUSIC_MAX) return { error: "tooBig" as const };
+  if (!deps.signMusicUpload) return { error: "server" as const };
+  const id = Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, "0")).join("");
+  return deps.signMusicUpload(`own/${id}.${e}`);
 }
 
 /** Фото клиента: только наши адреса из бакета photos, не больше трёх */
@@ -219,7 +262,14 @@ function cleanPhotos(deps: Deps, photos: unknown): string[] | undefined {
 /** Черновик приложения → черновик чата (users.state). Музыка «своя» из чата сохраняется, если её не меняли */
 function toDraft(deps: Deps, prev: Draft, d: AppDraft, data: Partial<InvitationData>): Draft {
   const design = d.templateId ? getDesign(d.templateId) : undefined;
-  const music: MusicChoice | undefined = d.music?.kind === "none" ? { kind: "none" } : d.music?.kind === "list" && typeof d.music.musicId === "string" ? { kind: "list", musicId: d.music.musicId.slice(0, 64) } : prev.music;
+  const music: MusicChoice | undefined =
+    d.music?.kind === "none"
+      ? { kind: "none" }
+      : d.music?.kind === "list" && typeof d.music.musicId === "string"
+        ? { kind: "list", musicId: d.music.musicId.slice(0, 64) }
+        : d.music?.kind === "own" && typeof d.music.url === "string" && ownMusicPath(d.music.url) && /^https:\/\/[a-z0-9]+\.supabase\.co\/storage\/v1\/object\/public\/music\/own\//.test(d.music.url)
+          ? { kind: "own", fileId: prev.music?.kind === "own" && prev.music.url === d.music.url ? prev.music.fileId : "app", url: d.music.url, title: typeof d.music.title === "string" ? d.music.title.slice(0, 60) : undefined }
+          : prev.music;
   const own = cleanOwnText(d.customText);
   const photos = design?.clientPhotos ? cleanPhotos(deps, d.photos) : undefined;
   const langs = cleanLangs(deps, d.langs);
@@ -287,8 +337,10 @@ export async function submitDraft(deps: Deps, u: AppUser, d: AppDraft): Promise<
   const prev = user.state as Draft;
   const draft = toDraft(deps, prev, d, v.data);
   // Мелодия только из списка этого тадбира; несуществующая (или чужого тадбира) — первая по умолчанию
+  // Мелодия — из нашего списка (своего тадбира или «Бошқа мусиқалар»); несуществующая — первая мелодия тадбира
   const tracks = await deps.repo.listMusic(design.occasion);
-  if (!draft.music || (draft.music.kind === "list" && !tracks.some((t) => t.id === (draft.music as { musicId: string }).musicId))) {
+  const all = await deps.repo.listMusic();
+  if (!draft.music || (draft.music.kind === "list" && !all.some((t) => t.id === (draft.music as { musicId: string }).musicId))) {
     draft.music = tracks[0] ? { kind: "list", musicId: tracks[0].id } : { kind: "none" };
   }
   // Готовый текст должен существовать для этого тадбира, иначе — лучший (первый)
@@ -334,6 +386,53 @@ export async function editOrder(deps: Deps, u: AppUser, orderId: unknown): Promi
   const draft: Draft = { q: (prev.q ?? 0) + 1, occasion: o.occasion, format: o.format, templateId: o.templateId, orderId: o.id, music: o.music, data: { ...o.data } };
   await deps.repo.saveStep(u.id, "idle", draft as Record<string, unknown>);
   return { draft: draftOf(draft)! };
+}
+
+/** Шаг, на котором клиент ушёл: 1 дизайн · 2 анкета · 3 НАМУНА · 4 проверил перед оплатой · 5 чек не приняли */
+function cancelStep(o: OrderRecord | null, d: Draft): number {
+  if (o) return o.status === "rejected" ? 5 : o.payConfirmedAt ? 4 : 3;
+  const f = (d.data ?? {}) as Partial<InvitationData>;
+  return f.groom || f.bride || f.person || f.events?.length ? 2 : 1;
+}
+
+/**
+ * «Бекор қилиш»: незаконченный заказ (или черновик без заказа) удаляется вместе с именами, текстами,
+ * фото и своей песней; остаётся только обезличенная запись «отменён на шаге N». Чужой, оплаченный
+ * или с чеком на проверке — нельзя.
+ */
+export async function cancelOrder(deps: Deps, u: AppUser, orderId: unknown): Promise<{ ok: true } | { error: "notFound" | "closed" | "waiting" }> {
+  const user = await deps.repo.getUser(u.id);
+  const st = (user?.state ?? {}) as Draft;
+  let order: OrderRecord | null = null;
+  // Плашка черновика без orderId, а черновик привязан к заказу — отменяем этот заказ
+  if ((orderId === undefined || orderId === null) && st.orderId) orderId = st.orderId;
+  if (orderId !== undefined && orderId !== null) {
+    if (typeof orderId !== "string") return { error: "notFound" };
+    order = await deps.repo.getOrder(orderId).catch(() => null);
+    if (!order || order.userId !== u.id) return { error: "notFound" };
+    if (order.status === "receipt_sent") return { error: "waiting" };
+    if (!PAYABLE_STATUSES.includes(order.status)) return { error: "closed" };
+  } else if (!st.templateId && !st.data) return { error: "notFound" };
+  const step = cancelStep(order, st);
+  const removed: { photos: string[]; music: string | null }[] = [];
+  if (order) {
+    const r = await deps.repo.cancelOrder(order.id, u.id);
+    if (!r) return { error: "closed" };
+    removed.push(r);
+  }
+  // Черновик в users.state (если он об этом заказе или без заказа) — тоже стираем
+  // Черновик стираем, только если это он: отменяют его самого или заказ, к которому он привязан.
+  // Новый черновик клиента (ещё без заказа) при отмене старого заказа не трогаем
+  if (!order || st.orderId === order.id) {
+    removed.push({ photos: st.data?.photos ?? [], music: st.music?.kind === "own" ? (st.music.url ?? null) : null });
+    await deps.repo.saveStep(u.id, "idle", { q: (st.q ?? 0) + 1 });
+  }
+  const design = getDesign(order?.templateId ?? st.templateId ?? "");
+  await deps.repo
+    .recordCancellation({ step, occasion: design?.occasion ?? null, format: design?.format ?? null, templateId: design?.id ?? null })
+    .catch((e) => console.error("cancel record", e instanceof Error ? e.name : "Error"));
+  await removeUnusedMedia(deps, removed).catch((e) => console.error("cancel media", e instanceof Error ? e.name : "Error"));
+  return { ok: true };
 }
 
 /** Начать новое приглашение: черновик очищается (заказы остаются) */

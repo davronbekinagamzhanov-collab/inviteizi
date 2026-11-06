@@ -9,7 +9,7 @@ import {Calendar} from "../../blocks/Calendar";
 import {Countdown} from "../../blocks/Countdown";
 import {Reveal} from "../../blocks/Reveal";
 import {designTexts} from "@/texts/uz-cyrl";
-const font=localFont({src:[{path:"../../../assets/fonts/Lora-Regular.ttf"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--rs-font",display:"swap"});
+const font=localFont({ preload: false,src:[{path:"../../../assets/fonts/Lora-Regular.ttf"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--rs-font",display:"swap"});
 const vars=designVars({primary:"#506e56",primaryDark:"#354d3d",gold:"#a69c6d",goldLight:"#dedcc0",paper:"#f7f7ec",ink:"#425247",muted:"#5e6b58"},{display:"var(--rs-font)",accent:"var(--rs-font)",body:"var(--rs-font)"});
 const t=designTexts("rayhon-sahari");
 

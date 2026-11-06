@@ -6,7 +6,7 @@ import {InvitationShell} from "../../blocks/InvitationShell";
 import {Words,useFitWords} from "../../blocks/FitWords";
 import {MapButton} from "../../blocks/MapButton";
 import {designTexts} from "@/texts/uz-cyrl";
-const font=localFont({src:"../../../assets/fonts/PTSerif-Regular.ttf",variable:"--an-font",display:"swap"});
+const font=localFont({ preload: false,src:"../../../assets/fonts/PTSerif-Regular.ttf",variable:"--an-font",display:"swap"});
 const vars=designVars({primary:"#965e46",primaryDark:"#704333",gold:"#b79c72",goldLight:"#eed8b5",paper:"#fcf4e9",ink:"#50493c",muted:"#706252"},{display:"var(--an-font)",accent:"var(--an-font)",body:"var(--an-font)"});
 const t=designTexts("adras-nishon");
 

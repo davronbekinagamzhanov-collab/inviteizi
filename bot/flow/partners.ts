@@ -109,7 +109,7 @@ const tgOf = (p: Pick<Partner, "username" | "telegramId">) => (p.username ? `@${
 
 // ── Ссылки и QR ──
 
-async function linkOf(deps: Deps, p: Partner) {
+export async function linkOf(deps: Deps, p: Partner) {
   return `https://t.me/${await deps.tg.botUsername()}?start=${partnerSource(p.code)}`;
 }
 
@@ -155,19 +155,25 @@ export async function sendPoster(c: Ctx, idArg: string, lang: string) {
     }
     return;
   }
+  const tx = (await roleOf(c)) === "partner" ? c.tx : texts.ru;
+  await sendPosterTo(c.deps, c.chatId, p, lang as "uz" | "ru" | "kk", tx);
+}
+
+/** Постер A4 (PDF + PNG) и ссылка партнёра — в чат chatId. Из бота (pq:) и из панели партнёра в приложении */
+export async function sendPosterTo(deps: Deps, chatId: number, p: Partner, lang: "uz" | "ru" | "kk", tx: typeof texts.ru) {
+  const link = await linkOf(deps, p);
   const png = await renderPosterPng({
-    text: lang === "kk" ? posterKk : texts[lang as "uz" | "ru"].role.poster,
-    botUrl: await linkOf(c.deps, p),
-    demoUrl: posterDemoUrl(c.deps, p),
+    text: lang === "kk" ? posterKk : texts[lang].role.poster,
+    botUrl: link,
+    demoUrl: posterDemoUrl(deps, p),
     partner: p.name,
     minPrice: Math.min(...activeDesigns().map((d) => PRICES[d.format])),
   });
   const pdf = await posterPdf(png);
-  const tx = (await roleOf(c)) === "partner" ? c.tx : texts.ru;
   const file = `inviteizi-${p.code}-${lang}`;
-  await c.deps.tg.sendDocument(c.chatId, pdf, { fileName: `${file}.pdf`, caption: tx.role.posterReady(p.name) });
-  await c.deps.tg.sendDocument(c.chatId, png, { fileName: `${file}.png` });
-  await sendRefLink(c, await linkOf(c.deps, p), tx);
+  await deps.tg.sendDocument(chatId, pdf, { fileName: `${file}.pdf`, caption: tx.role.posterReady(p.name) });
+  await deps.tg.sendDocument(chatId, png, { fileName: `${file}.png` });
+  await deps.tg.sendMessage(chatId, tx.role.refLink(link), { markup: inline([[{ text: tx.role.copyLink, copy: link }]]), noPreview: true });
 }
 
 /** Одноразовая ссылка партнёру (7 дней) + кнопки WhatsApp на узбекском и русском */
@@ -184,6 +190,17 @@ async function joinLink(c: Ctx, p: Partner) {
 
 /** Снимок для всех цифр панели и /hamkor: без владельца и админов */
 export const panelData = async (deps: Deps) => withoutStaff(await deps.repo.panelSnapshot(), await deps.repo.staffIds());
+
+/** Тот же снимок + заказы сотрудников (владелец, админы, менеджеры) отдельно: в цифры не идут, но владельцу видно, сколько их */
+export async function panelDataWithStaff(deps: Deps) {
+  const raw = await deps.repo.panelSnapshot();
+  const staff = new Set(await deps.repo.staffIds());
+  return { s: withoutStaff(raw, [...staff]), staffOrders: raw.orders.filter((o) => staff.has(o.userId)) };
+}
+
+/** Тестовые заказы сотрудников за период (созданы или оплачены в нём) */
+export const staffOrdersWithin = (orders: { createdAt: Date; paidAt: Date | null }[], from: Date, to: Date) =>
+  orders.filter((o) => [o.createdAt, o.paidAt].some((d) => d && +d >= +from && +d < +to)).length;
 
 // ── Экраны панели-отчёта (/dashboard, язык владельца) ──
 

@@ -163,6 +163,19 @@ export class MemoryRepo implements Repo {
     return out;
   }
 
+  cancellations: { step: number; occasion: string | null; format: string | null; templateId: string | null; createdAt: Date }[] = [];
+  async cancelOrder(orderId: string, userId: number) {
+    const o = this.orders.get(orderId);
+    if (!o || o.userId !== userId || !["draft", "preview", "awaiting_payment", "rejected"].includes(o.status) || o.paidAt) return null;
+    if (this.earnings.some((e) => e.orderId === o.id)) return null;
+    this.clientOrders = this.clientOrders.filter((x) => x.orderId !== o.id);
+    this.orders.delete(o.id);
+    return { photos: o.data.photos ?? [], music: o.music.kind === "own" ? (o.music.url ?? null) : null };
+  }
+  async recordCancellation(c: { step: number; occasion?: string | null; format?: string | null; templateId?: string | null }) {
+    this.cancellations.push({ step: Math.min(5, Math.max(1, Math.round(c.step))), occasion: c.occasion ?? null, format: c.format ?? null, templateId: c.templateId ?? null, createdAt: this.now() });
+  }
+
   async recordManagerPayout(p: Omit<ManagerPayout, "createdAt"> & { createdBy: number }) {
     if (p.amount <= 0 || this.managerPayouts.some((x) => x.managerId === p.managerId && x.month === p.month)) return false;
     this.managerPayouts.push({ managerId: p.managerId, month: p.month, amount: p.amount, orders: p.orders, createdAt: this.now() });

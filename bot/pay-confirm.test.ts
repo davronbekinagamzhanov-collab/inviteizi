@@ -55,7 +55,7 @@ describe("проверка перед оплатой — чат", () => {
   it("лимиты на uz/ru/kk", () => {
     const long = Array(3).fill(`📅 31.12.2027, 23:59 · ${"Ш".repeat(80)}`).join("\n");
     for (const tx of [uz, ru, kk]) {
-      expect(tx.pay.check(`${"Ш".repeat(80)} ва ${"Ш".repeat(80)}\n${long}`, `https://inviteizi.vercel.app/${"a".repeat(60)}`).length).toBeLessThanOrEqual(TG_LIMITS.message);
+      expect(tx.pay.check(`${"Ш".repeat(80)} ва ${"Ш".repeat(80)}\n${long}`, `https://inviteizi.vercel.app/${"a".repeat(60)}`, "https://inviteizi.vercel.app/terms/ru").length).toBeLessThanOrEqual(TG_LIMITS.message);
       expect(tx.pay.confirmYes.length).toBeLessThanOrEqual(TG_LIMITS.button);
     }
     expect(Buffer.byteLength("payok:99999999")).toBeLessThanOrEqual(TG_LIMITS.callbackData);
@@ -72,8 +72,8 @@ describe("проверка перед оплатой — приложение", 
     if (!("ok" in r)) throw new Error(JSON.stringify(r));
     expect(r.order.confirmed).toBe(false);
     expect(r.order.check).toContain("12.06.2027, 18:00 · Наврўз");
-    expect(await app.confirmPay(s.deps, { ...u, id: 10 }, r.order.id)).toEqual({ error: "notFound" });
-    const c = await app.confirmPay(s.deps, u, r.order.id);
+    expect(await app.confirmPay(s.deps, { ...u, id: 10 }, r.order.id, true)).toEqual({ error: "notFound" });
+    const c = await app.confirmPay(s.deps, u, r.order.id, true);
     if (!("ok" in c)) throw new Error(JSON.stringify(c));
     expect(c.order!.confirmed).toBe(true);
     expect((await s.repo.getOrder(r.order.id))!.payConfirmedAt).toEqual(s.clock);

@@ -107,8 +107,24 @@ describe("v2: миграции и новые запросы PgRepo на PGlite",
     await sql`reset role`;
     await sql.unsafe(await readFile("supabase/migrations/20261108120000_notices.sql", "utf8"));
     await sql.unsafe(await readFile("supabase/migrations/20261109120000_invite_langs.sql", "utf8"));
-    for (const f of ["20261110120000_care.sql", "20261111120000_pay_confirm.sql", "20261112120000_partner_percent.sql"]) await sql.unsafe(await readFile(`supabase/migrations/${f}`, "utf8"));
+    for (const f of ["20261110120000_care.sql", "20261111120000_pay_confirm.sql", "20261112120000_partner_percent.sql", "20261114120000_cancellations.sql"]) await sql.unsafe(await readFile(`supabase/migrations/${f}`, "utf8"));
     await sql`set role inviteizi_server`;
     expect(await repo.queueNotice({ key: "after-rerun", chatId: 2, text: "ok", dueAt: new Date() })).toBe(true);
+  });
+
+  it("отмена клиентом: только свой неоплаченный заказ; запись шага без user_id", async () => {
+    await repo.touchUser({ id: 777301 });
+    const data = { occasion: "nikoh" as const, groom: "А", bride: "Б", hosts: "О", events: [], photos: ["p1"] };
+    const o = await repo.createOrder({ userId: 777301, occasion: "nikoh", format: "animated", templateId: "muhr", data, music: { kind: "none" }, amount: 8000, slugBase: "cancel-test", status: "preview" });
+    expect(await repo.cancelOrder(o.id, 777302)).toBeNull();
+    expect(await repo.cancelOrder("not-a-uuid", 777301)).toBeNull();
+    const paid = await repo.createOrder({ userId: 777301, occasion: "nikoh", format: "animated", templateId: "muhr", data, music: { kind: "none" }, amount: 8000, slugBase: "cancel-paid", status: "preview" });
+    await repo.updateOrder(paid.id, { status: "active", paidAt: new Date() });
+    expect(await repo.cancelOrder(paid.id, 777301)).toBeNull();
+    expect(await repo.cancelOrder(o.id, 777301)).toEqual({ photos: ["p1"], music: null });
+    expect(await repo.getOrder(o.id)).toBeNull();
+    await repo.recordCancellation({ step: 3, occasion: "nikoh", format: "animated", templateId: "muhr" });
+    const [row] = await sql<{ step: number; template_id: string }[]>`select step, template_id from public.order_cancellations`;
+    expect(row).toMatchObject({ step: 3, template_id: "muhr" });
   });
 });

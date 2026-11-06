@@ -9,7 +9,7 @@ import {Calendar} from "../../blocks/Calendar";
 import {Countdown} from "../../blocks/Countdown";
 import {Reveal} from "../../blocks/Reveal";
 import {designTexts} from "@/texts/uz-cyrl";
-const font=localFont({src:"../../../assets/fonts/PTSerif-Regular.ttf",variable:"--sy-font",display:"swap"});
+const font=localFont({ preload: false,src:"../../../assets/fonts/PTSerif-Regular.ttf",variable:"--sy-font",display:"swap"});
 const vars=designVars({primary:"#966257",primaryDark:"#704b43",gold:"#b6a172",goldLight:"#e7dabb",paper:"#faf5e9",ink:"#564c42",muted:"#8b8173"},{display:"var(--sy-font)",accent:"var(--sy-font)",body:"var(--sy-font)"});
 const t=designTexts("suzani-yol");
 

@@ -11,7 +11,7 @@ import {MapButton} from "../../blocks/MapButton";
 import {Reveal} from "../../blocks/Reveal";
 import {Countdown} from "../../blocks/Countdown";
 import {designTexts} from "@/texts/uz-cyrl";
-const font=localFont({src:[{path:"../../../assets/fonts/Lora-Regular.ttf"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--vr-font",display:"swap"});
+const font=localFont({ preload: false,src:[{path:"../../../assets/fonts/Lora-Regular.ttf"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--vr-font",display:"swap"});
 const vars=designVars({primary:"#886b78",primaryDark:"#634d59",gold:"#b29a77",goldLight:"#e9d9c2",paper:"#fcf7f1",ink:"#574b51",muted:"#72616a"},{display:"var(--vr-font)",accent:"var(--vr-font)",body:"var(--vr-font)"});
 const t=designTexts("visol-rishta");
 

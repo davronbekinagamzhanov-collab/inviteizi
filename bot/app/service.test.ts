@@ -173,7 +173,7 @@ describe("приложение: чек", () => {
   async function order(sim: Sim, id: number) {
     const r = await app.submitDraft(sim.deps, user(id), { templateId: first("nikoh").id, form: form("nikoh") });
     if (!("ok" in r)) throw new Error("ожидали заказ");
-    expect(await app.confirmPay(sim.deps, user(id), r.order.id)).toMatchObject({ ok: true });
+    expect(await app.confirmPay(sim.deps, user(id), r.order.id, true)).toMatchObject({ ok: true });
     return r.order;
   }
 

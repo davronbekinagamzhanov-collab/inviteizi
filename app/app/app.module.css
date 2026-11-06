@@ -454,16 +454,21 @@
 }
 .previewOpen {
   position: absolute;
-  left: 8px;
   right: 8px;
-  bottom: 8px;
-  min-height: 44px;
-  border-radius: 12px;
+  top: 8px;
+  min-height: 40px;
+  padding: 0 14px 0 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
   border: 0;
   background: rgba(255, 250, 242, 0.95);
+  box-shadow: 0 6px 16px -8px rgba(59, 42, 30, 0.6), 0 0 0 1px var(--line);
+  backdrop-filter: blur(6px);
   font: inherit;
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--ink);
   cursor: pointer;
 }
@@ -699,6 +704,7 @@ textarea.input {
   overflow: hidden;
 }
 .editMark {
+  color: var(--gold-deep);
   width: 44px;
   height: 44px;
   border-radius: 999px;
@@ -1058,5 +1064,573 @@ textarea.input {
   .root * {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── SVG-иконки (app/app/ui/icons.tsx) ── */
+.icon {
+  display: block;
+  flex: none;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.icon .iconFill {
+  fill: currentColor;
+  stroke: none;
+}
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spin {
+    animation: breathe 1.6s ease-in-out infinite;
+  }
+}
+@keyframes breathe {
+  50% {
+    opacity: 0.45;
+  }
+}
+.play {
+  display: grid;
+  place-items: center;
+  transition: transform 0.15s var(--ease), background 0.2s var(--ease);
+}
+.play:active {
+  transform: scale(0.92);
+}
+.play[data-state="playing"] {
+  background: var(--gold-deep);
+  color: #fff8ec;
+}
+.trackErr {
+  margin: -4px 0 10px 62px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+/* ── Ожидание проверки / готово / отказ (ui/Pay.tsx Waiting) ── */
+.doneOk {
+  color: var(--ok);
+}
+.doneErr {
+  background: #f6e2dc;
+  color: var(--err);
+}
+.waitRing {
+  position: relative;
+  width: 112px;
+  height: 112px;
+  margin: 0 auto 22px;
+  display: grid;
+  place-items: center;
+  color: var(--gold-deep);
+  border-radius: 999px;
+  background: var(--gold-soft);
+}
+.waitRing::before {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  border-radius: 999px;
+  border: 3px solid transparent;
+  border-top-color: var(--gold);
+  border-right-color: var(--gold);
+  animation: spin 1.3s linear infinite;
+}
+.waitRing::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  box-shadow: 0 0 0 0 rgba(168, 119, 42, 0.35);
+  animation: halo 2.4s var(--ease) infinite;
+}
+@keyframes halo {
+  70%,
+  100% {
+    box-shadow: 0 0 0 22px rgba(168, 119, 42, 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .waitRing::before {
+    animation: breathe 1.8s ease-in-out infinite;
+  }
+  .waitRing::after {
+    animation: none;
+  }
+}
+.waitNumber {
+  color: var(--muted);
+  font-size: 15px !important;
+  margin-top: 18px !important;
+}
+.readyLink {
+  display: block;
+  margin: 14px auto 6px;
+  padding: 16px 14px;
+  border-radius: var(--r);
+  background: var(--card);
+  box-shadow: 0 0 0 1px var(--line);
+  color: var(--gold-deep);
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.3;
+  word-break: break-all;
+  text-decoration: none;
+}
+.doneActions {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+.doneActions .btn {
+  margin: 0;
+}
+
+/* ── Статусы заказов и отмена ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.badge[data-kind="ok"] {
+  background: #e5f0e3;
+  color: var(--ok);
+}
+.badge[data-kind="wait"] {
+  background: #fbefd6;
+  color: #8a5d1c;
+}
+.badge[data-kind="err"] {
+  background: #f6e2dc;
+  color: var(--err);
+}
+.badge[data-kind="off"] {
+  background: #ece6dd;
+  color: var(--muted);
+}
+.btnQuiet {
+  color: var(--muted);
+  box-shadow: none;
+  background: transparent;
+}
+.btnDanger {
+  background: var(--err);
+  color: #fff;
+}
+.confirm {
+  flex: 1 1 100%;
+  padding: 12px;
+  border-radius: 14px;
+  background: #fbf1ec;
+  box-shadow: 0 0 0 1px rgba(176, 54, 44, 0.22);
+  animation: fade 0.3s var(--ease) both;
+}
+.confirm p {
+  margin: 0 0 10px;
+  font-size: 15px;
+  line-height: 1.4;
+}
+.confirm > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.resume {
+  flex-wrap: wrap;
+}
+.resume .btnQuiet {
+  min-height: 44px;
+  padding: 0 6px;
+}
+
+.backPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+.viewerTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* ── Подсказка по долгому нажатию (ui/hold.tsx) ── */
+.root [data-hold] {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.cover,
+.cover img {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.holdTip {
+  position: fixed;
+  z-index: 60;
+  max-width: 232px;
+  transform: translate(-50%, calc(-100% - 10px));
+  padding: 9px 13px;
+  border-radius: 14px;
+  background: rgba(59, 42, 30, 0.94);
+  color: #fff8ec;
+  font-size: 15px;
+  line-height: 1.3;
+  text-align: center;
+  pointer-events: none;
+  box-shadow: 0 12px 26px -12px rgba(30, 20, 10, 0.7);
+  animation: tipIn 0.22s var(--ease) both;
+}
+.holdTip::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -5px;
+  width: 10px;
+  height: 10px;
+  background: inherit;
+  transform: translateX(-50%) rotate(45deg);
+  border-radius: 2px;
+}
+@keyframes tipIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-100% - 4px));
+  }
+}
+
+/* ── «Нархлар фарқи» ── */
+.titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.infoBtn {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  margin-top: 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--gold-deep);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.sheetBack {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  background: rgba(40, 28, 18, 0.38);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: fade 0.25s var(--ease) both;
+}
+.sheet {
+  width: 100%;
+  max-width: 430px;
+  max-height: 88svh;
+  overflow-y: auto;
+  padding: 18px 16px calc(18px + env(safe-area-inset-bottom));
+  border-radius: 22px 22px 0 0;
+  background: var(--milk);
+  box-shadow: 0 -18px 40px -24px rgba(40, 28, 18, 0.6);
+  animation: sheetUp 0.35s var(--ease) both;
+}
+@keyframes sheetUp {
+  from {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+}
+.sheetHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 12px;
+}
+.sheetHead h2 {
+  margin: 0;
+  font-size: 21px;
+}
+.priceRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 12px;
+  align-items: center;
+  padding: 14px;
+  margin: 0 0 10px;
+  border-radius: 16px;
+  background: var(--card);
+  box-shadow: 0 0 0 1px var(--line);
+}
+.priceRow b {
+  font-size: 19px;
+}
+.priceRow p {
+  grid-column: 1;
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.35;
+}
+.priceRow button {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+
+/* ── «Таклифнома матни» в анкете (ui/TextChoice.tsx) ── */
+.textBlock {
+  background: var(--card);
+  border-radius: var(--r);
+  padding: 16px;
+  margin: 0 0 14px;
+  box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--gold) 45%, transparent);
+}
+.textCard {
+  padding: 14px 14px 6px;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 0 0 1px var(--line);
+  text-align: center;
+}
+.textCard p {
+  margin: 0;
+  font-family: var(--font-brand), Georgia, serif;
+  font-size: 17px;
+  line-height: 1.55;
+  white-space: pre-line;
+  animation: fade 0.35s var(--ease) both;
+}
+.textClamp {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+}
+.textMore {
+  min-height: 40px;
+  border: 0;
+  background: none;
+  color: var(--gold-deep);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.textActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 6px;
+}
+
+/* ── «Шартларга розиман» (п.18) ── */
+.terms {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 14px 0 6px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: 0 0 0 1px var(--line);
+}
+.terms label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 44px;
+}
+.terms input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--gold-deep);
+  flex: none;
+}
+
+/* ── «Ёрдам» ── */
+.helpSteps {
+  list-style: decimal;
+  margin: 0 0 12px;
+  padding: 0 0 0 22px;
+  display: grid;
+  gap: 8px;
+  font-size: 16px;
+  line-height: 1.45;
+}
+.helpSteps li::marker {
+  color: var(--gold-deep);
+  font-weight: 700;
+}
+
+/* ── Первый экран загрузки (ui/Boot.tsx) ── */
+.boot {
+  min-height: 70svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  text-align: center;
+}
+.bootLogo {
+  margin: 0;
+  font-family: var(--font-brand), Georgia, serif;
+  font-size: 40px;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+.bootLogo b {
+  color: var(--gold);
+  font-weight: 600;
+}
+.bootBar {
+  position: relative;
+  width: 120px;
+  height: 3px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--gold-soft);
+}
+.bootBar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  border-radius: 3px;
+  background: var(--gold);
+  animation: bootSlide 1.2s var(--ease) infinite;
+}
+@keyframes bootSlide {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bootBar::after {
+    animation: breathe 1.6s ease-in-out infinite;
+  }
+}
+.bootText {
+  margin: 0;
+  color: var(--muted);
+  font-size: 16px;
+}
+
+/* ── Музыка: категории и своя песня (п.21) ── */
+.musicGroup {
+  margin: 14px 0 8px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.track .option {
+  justify-content: space-between;
+  gap: 8px;
+}
+.trackCat {
+  flex: none;
+  font-size: 13px;
+  color: var(--muted);
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--gold-soft);
+}
+.ownMusic {
+  display: grid;
+  gap: 6px;
+  margin: 12px 0 10px;
+}
+.ownMusic .btn {
+  margin: 0;
+}
+.upBar {
+  display: block;
+  height: 4px;
+  border-radius: 4px;
+  background: var(--gold-soft);
+  overflow: hidden;
+}
+.upBar i {
+  display: block;
+  height: 100%;
+  background: var(--gold);
+  transition: width 0.2s linear;
+}
+.photoPct {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 4px;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* Шапка: назад + логотип + «?» + «Мои» + языки помещаются и на 320 px */
+.headerRow {
+  gap: 6px;
+  padding: 10px 12px;
+}
+.headerRow .iconBtn {
+  min-width: 44px;
+  width: 44px;
+  padding: 0;
+  flex: none;
+}
+.headerRow .brand {
+  font-size: clamp(21px, 6.4vw, 27px);
+  white-space: nowrap;
+}
+.headerRow .langs {
+  flex: none;
+}
+.headerRow .langs button {
+  min-width: 40px;
+}
+@media (max-width: 350px) {
+  .headerRow {
+    gap: 4px;
+    padding: 10px 8px;
+  }
+  .headerRow .iconBtn {
+    min-width: 40px;
+    width: 40px;
+    height: 40px;
+  }
+  .headerRow .langs button {
+    min-width: 36px;
+    height: 34px;
+    font-size: 14px;
   }
 }

@@ -8,7 +8,7 @@ import {Words,useFitWords} from "../../blocks/FitWords";
 import {MapButton} from "../../blocks/MapButton";
 import {designTexts} from "@/texts/uz-cyrl";
 
-const font=localFont({src:"../../../assets/fonts/PTSerif-Regular.ttf",variable:"--oc-type",display:"swap"});
+const font=localFont({ preload: false,src:"../../../assets/fonts/PTSerif-Regular.ttf",variable:"--oc-type",display:"swap"});
 const vars=designVars({primary:"#315c81",primaryDark:"#264765",gold:"#b19b70",goldLight:"#e1d0aa",paper:"#fcf9ef",ink:"#344655",muted:"#6b797c"},{display:"var(--oc-type)",accent:"var(--oc-type)",body:"var(--oc-type)"});
 const t=designTexts("oq-chinni");
 

@@ -1,21 +1,23 @@
 "use client";
 /** «Бот сиз учун танлади»: матн · мусиқа · меҳмонлар жавоби · тиллар — у каждого ✏️; цена крупно; ссылка НАМУНА */
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { ExtraLang, InvitationData } from "@/lib/types";
+import type { ExtraLang, InvitationData, Occasion } from "@/lib/types";
+import { OwnMusic } from "./OwnMusic";
 import { graphemes, MAX_CUSTOM_TEXT } from "@/lib/order-rules";
 import { tPlain as inv } from "@/texts/uz-cyrl";
 import { useT } from "./shared";
 import { haptic } from "./telegram";
+import { CheckIcon, PauseIcon, PencilIcon, PlayIcon, SpinnerIcon } from "./icons";
 import s from "../app.module.css";
 
-export type Track = { id: string; title: string; url: string };
+export type Track = { id: string; title: string; url: string; occasion?: Occasion };
 type Open = "text" | "music" | "rsvp" | "langs" | null;
 
 type Props = {
   data: InvitationData;
   textId?: string;
   customText?: string;
-  music?: { kind: "list"; musicId: string } | { kind: "none" };
+  music?: { kind: "list"; musicId: string } | { kind: "none" } | { kind: "own"; url: string; title?: string };
   rsvp: boolean;
   /** v2: языки кроме узбекского, свой текст на них, какие языки можно добавить */
   langs: ExtraLang[];
@@ -26,6 +28,8 @@ type Props = {
   demoUrl: string | null;
   onExample: (url: string) => void;
   tracks: Track[];
+  /** «Бошқа мусиқалар»: мелодии других тадбиров (с подписью категории) */
+  others: Track[];
   price: number;
   namunaUrl: string | null;
   status: string;
@@ -42,24 +46,47 @@ export function Summary(p: Props) {
   const options = useMemo(() => inv.inviteOptions(p.data), [p.data]);
   const chosen = options.find((o) => o.id === p.textId) ?? options[0];
   const music = p.music ?? (p.tracks[0] ? { kind: "list" as const, musicId: p.tracks[0].id } : { kind: "none" as const });
-  const track = music.kind === "list" ? p.tracks.find((t) => t.id === music.musicId) : undefined;
+  const track = music.kind === "list" ? [...p.tracks, ...p.others].find((t) => t.id === music.musicId) : music.kind === "own" ? { id: "own", title: music.title || T.summary.ownTitle, url: music.url } : undefined;
 
-  // ▶ прослушать: одна мелодия за раз, стоп при уходе с экрана
+  // ▶ прослушать: одна мелодия за раз; пока грузится — кружок; не открылась — мягкое сообщение; стоп при уходе с экрана
   const audio = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState<string | null>(null);
+  const [loading, setLoading] = useState<string | null>(null);
+  const [failed, setFailed] = useState<string | null>(null);
   useEffect(() => () => audio.current?.pause(), []);
+  function stop() {
+    audio.current?.pause();
+    audio.current = null;
+    setPlaying(null);
+    setLoading(null);
+  }
   function toggle(t: Track) {
     haptic.tap();
-    if (playing === t.id) {
-      audio.current?.pause();
-      setPlaying(null);
-      return;
-    }
-    audio.current?.pause();
-    audio.current = new Audio(t.url);
-    audio.current.onended = () => setPlaying(null);
-    audio.current.play().then(() => setPlaying(t.id)).catch(() => setPlaying(null));
+    if (playing === t.id || loading === t.id) return stop();
+    stop();
+    setFailed(null);
+    const a = new Audio(t.url);
+    audio.current = a;
+    setLoading(t.id);
+    const fail = () => {
+      if (audio.current !== a) return;
+      stop();
+      setFailed(t.id);
+      haptic.error();
+    };
+    a.onended = () => audio.current === a && stop();
+    a.onerror = fail;
+    a.onplaying = () => {
+      if (audio.current !== a) return;
+      setLoading(null);
+      setPlaying(t.id);
+    };
+    a.play().catch(fail);
   }
+
+  const selected = (t: Track) => (t.id === "own" ? music.kind === "own" : music.kind === "list" && music.musicId === t.id);
+  // Свой тадбир → «Бошқа мусиқалар» (с подписью категории) → своя песня
+  const list: (Track | "group")[] = [...p.tracks, ...(music.kind === "own" ? [{ id: "own", title: music.title || T.summary.ownTitle, url: music.url }] : []), ...(p.others.length ? (["group"] as const) : []), ...p.others];
 
   const toggleOpen = (k: Open) => {
     haptic.select();
@@ -78,7 +105,7 @@ export function Summary(p: Props) {
             <b>{T.summary.text}</b>
             <small>{p.customText ? firstLine(p.customText) : firstLine(`${chosen?.greeting ?? ""} ${chosen?.body ?? ""}`)}</small>
           </span>
-          <i className={s.editMark} aria-hidden>{open === "text" ? "✓" : T.summary.edit}</i>
+          <i className={s.editMark} aria-hidden>{open === "text" ? <CheckIcon size={20} /> : <PencilIcon size={20} />}</i>
         </button>
         {open === "text" && (
           <div className={s.itemBody}>
@@ -108,21 +135,44 @@ export function Summary(p: Props) {
             <b>{T.summary.music}</b>
             <small>{track ? track.title : T.summary.noMusic}</small>
           </span>
-          <i className={s.editMark} aria-hidden>{open === "music" ? "✓" : T.summary.edit}</i>
+          <i className={s.editMark} aria-hidden>{open === "music" ? <CheckIcon size={20} /> : <PencilIcon size={20} />}</i>
         </button>
         {open === "music" && (
           <div className={s.itemBody}>
-            {p.tracks.map((t) => (
-              <div key={t.id} className={s.track}>
-                <button type="button" className={s.play} aria-label={`${T.summary.play} ${t.title}`} onClick={() => toggle(t)}>
-                  {playing === t.id ? T.summary.pause : T.summary.play}
-                </button>
-                <button type="button" className={s.option} aria-pressed={music.kind === "list" && music.musicId === t.id} onClick={() => { haptic.select(); p.onChange({ music: { kind: "list", musicId: t.id } }); }}>
-                  {t.title}
-                </button>
-              </div>
-            ))}
-            <button type="button" className={s.option} aria-pressed={music.kind === "none"} onClick={() => { haptic.select(); audio.current?.pause(); setPlaying(null); p.onChange({ music: { kind: "none" } }); }}>
+            {list.map((t) =>
+              t === "group" ? (
+                <p key="group" className={s.musicGroup}>
+                  {T.summary.otherMusic}
+                </p>
+              ) : (
+            <div key={t.id} className={s.track}>
+              <button
+                type="button"
+                className={s.play}
+                data-state={loading === t.id ? "loading" : playing === t.id ? "playing" : "idle"}
+                aria-label={`${loading === t.id ? T.summary.musicLoading : playing === t.id ? T.summary.pause : T.summary.play}: ${t.title}`}
+                aria-busy={loading === t.id}
+                onClick={() => toggle(t)}
+              >
+                {loading === t.id ? <SpinnerIcon /> : playing === t.id ? <PauseIcon /> : <PlayIcon />}
+              </button>
+              <button
+                type="button"
+                className={s.option}
+                aria-pressed={selected(t)}
+                data-track={t.id}
+                onClick={() => { haptic.select(); if (t.id !== "own") p.onChange({ music: { kind: "list", musicId: t.id } }); }}
+              >
+                <span>{t.title}</span>
+                {t.occasion && <small className={s.trackCat}>{T.occasions[t.occasion]}</small>}
+              </button>
+            </div>
+          
+              ),
+            )}
+            <OwnMusic onDone={(url, title) => { stop(); setFailed(null); p.onChange({ music: { kind: "own", url, title } }); }} />
+            {failed && <p className={s.trackErr} role="alert">{T.summary.musicError}</p>}
+            <button type="button" className={s.option} aria-pressed={music.kind === "none"} onClick={() => { haptic.select(); stop(); p.onChange({ music: { kind: "none" } }); }}>
               {T.summary.noMusic}
             </button>
           </div>
@@ -145,7 +195,7 @@ export function Summary(p: Props) {
             <b>{T.summary.langs}</b>
             <small>{T.summary.langsValue(p.langs.map((l) => T.summary.langNames[l]).join(" · "))}</small>
           </span>
-          <i className={s.editMark} aria-hidden>{open === "langs" ? "✓" : T.summary.edit}</i>
+          <i className={s.editMark} aria-hidden>{open === "langs" ? <CheckIcon size={20} /> : <PencilIcon size={20} />}</i>
         </button>
         {open === "langs" && (
           <div className={s.itemBody}>

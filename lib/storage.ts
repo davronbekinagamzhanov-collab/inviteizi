@@ -50,6 +50,12 @@ export async function uploadFile(
   return PUBLIC_BUCKETS.has(bucket) ? publicUrl(bucket, path) : path;
 }
 
+/** Подписанная ссылка на загрузку прямо с телефона (своя песня из приложения: мимо лимита тела Vercel 4,5 МБ) */
+export async function signedUpload(bucket: Bucket, path: string): Promise<{ signedUrl: string; url: string }> {
+  const { signedUrl } = await gate<{ signedUrl: string }>({ action: "signUpload", bucket, path });
+  return { signedUrl, url: publicUrl(bucket, path) };
+}
+
 /** Временная ссылка на чтение (для приватных бакетов: чеки) */
 export async function signedReadUrl(bucket: Bucket, path: string, seconds = 3600): Promise<string> {
   const { signedUrl } = await gate<{ signedUrl: string }>({ action: "signRead", bucket, path, expiresIn: seconds });

@@ -8,7 +8,7 @@ export const TODAY = "2026-11-05";
 export function mockServer(lang, base) {
   let n = 100;
   const orders = [];
-  const st = { lang, favorites: [], draft: null, calls: [] };
+  const st = { lang, favorites: [], draft: null, calls: [], orders, rolePanel: null };
   return {
     st,
     async handle(route) {
@@ -27,7 +27,7 @@ export function mockServer(lang, base) {
       st.calls.push(body.action);
       switch (body.action) {
         case "session":
-          return route.fulfill({ json: { userId: 1, lang: st.lang, firstName: "Test", favorites: st.favorites, draft: st.draft, orders, today: TODAY, pay: { phone: "+7 700 123 45 67", name: "Давронбек И.", card: null } } });
+          return route.fulfill({ json: { userId: 1, lang: st.lang, firstName: "Test", favorites: st.favorites, draft: st.draft, orders, today: TODAY, pay: { phone: "+7 700 123 45 67", name: "Давронбек И.", card: null }, contact: "https://t.me/inviteizi_owner" } });
         case "lang":
           st.lang = body.lang;
           return route.fulfill({ json: { ok: true } });
@@ -35,7 +35,10 @@ export function mockServer(lang, base) {
           st.favorites = body.saved ? [body.templateId, ...st.favorites] : st.favorites.filter((x) => x !== body.templateId);
           return route.fulfill({ json: { favorites: st.favorites } });
         case "music":
-          return route.fulfill({ json: { tracks: [{ id: "m1", title: "Ёр-ёр", url: "/music/none.mp3" }, { id: "m2", title: "Тўй муборак", url: "/music/none.mp3" }] } });
+          return route.fulfill({ json: { tracks: [{ id: "m1", title: "Ёр-ёр", url: "/music/none.mp3" }, { id: "m2", title: "Тўй муборак", url: "/music/none.mp3" }], others: [{ id: "m3", title: "Ош куйи", url: "/music/none.mp3", occasion: "nahorgi" }] } });
+        case "musicUpload":
+          if (body.size > 20 * 1024 * 1024) return route.fulfill({ status: 400, json: { error: "tooBig" } });
+          return route.fulfill({ json: { signedUrl: "https://storage.mock/upload/own.mp3", url: "https://abcd.supabase.co/storage/v1/object/public/music/own/" + "e".repeat(32) + ".mp3" } });
         case "draft":
           st.draft = body.draft;
           return route.fulfill({ json: { ok: true } });
@@ -62,6 +65,17 @@ export function mockServer(lang, base) {
           return route.fulfill({ json: { ok: true } });
         case "orders":
           return route.fulfill({ json: { orders } });
+        case "cancel": {
+          const i = orders.findIndex((x) => x.id === body.orderId);
+          if (body.orderId && i < 0) return route.fulfill({ json: { error: "notFound" } });
+          if (i >= 0) orders.splice(i, 1);
+          st.draft = null;
+          return route.fulfill({ json: { ok: true } });
+        }
+        case "rolePanel":
+          return st.rolePanel ? route.fulfill({ json: st.rolePanel }) : route.fulfill({ status: 403, json: { error: "forbidden" } });
+        case "partnerPoster":
+          return route.fulfill({ json: { ok: true } });
         default:
           return route.fulfill({ status: 400, json: { error: "bad" } });
       }

@@ -124,11 +124,12 @@ try {
           await page.locator("[data-main-action]").click();
           await page.getByText(T.pay.checkWarn).waitFor();
           await check("11a-pay-check");
+          await page.locator('input[name="terms"]').check();
           await page.getByRole("button", { name: T.pay.checkYes }).click();
           await page.getByText(T.pay.how).waitFor();
           await check("11-pay");
           await page.locator('input[type="file"]').setInputFiles([{ name: "chek.jpg", mimeType: "image/jpeg", buffer: photoBytes }]);
-          await page.getByText(T.pay.doneTitle).waitFor();
+          await page.getByText(T.pay.waitTitle).waitFor();
           await check("12-done");
           await page.locator("[data-main-action]").click();
           await page.getByText(T.orders.statuses.receipt_sent).waitFor();

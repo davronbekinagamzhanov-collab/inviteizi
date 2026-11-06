@@ -86,6 +86,8 @@ async function open(width, lang, extraHash = "") {
   });
   await page.goto(`${base}/app#tgWebAppData=${fakeInit}&tgWebAppVersion=8.0${extraHash}`, { waitUntil: "domcontentloaded" });
   await page.locator("[data-design]").first().waitFor({ timeout: 40_000 });
+  // п.20: каталог показывается, не дожидаясь telegram-web-app.js; native-кнопки — после того, как скрипт придёт
+  await page.waitForFunction(() => window.__tg && window.__tg.ready > 0, null, { timeout: 40_000 });
   return { ctx, page, server, errors };
 }
 
@@ -193,11 +195,12 @@ try {
       await page.getByText(T.pay.checkWarn).waitFor();
       await page.waitForFunction(() => !window.__tg.main.visible);
       await step("06-pay-check");
+      await page.locator('input[name="terms"]').check();
       await page.getByRole("button", { name: T.pay.checkYes }).click();
       await page.getByText(T.pay.how).waitFor();
       await step("07-pay");
       await page.locator('input[type="file"]').setInputFiles([{ name: "chek.jpg", mimeType: "image/jpeg", buffer: photoBytes }]);
-      await page.getByText(T.pay.doneTitle).waitFor();
+      await page.getByText(T.pay.waitTitle).waitFor();
       await waitMain(page, T.myOrders);
       await step("08-done");
       await press(page, "main");

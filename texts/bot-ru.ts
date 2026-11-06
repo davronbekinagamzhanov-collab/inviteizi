@@ -267,7 +267,7 @@ export const ru = {
       `${i}. ${kind}\n   ${date}, ${time}\n   ${venue}\n   ${address}\n   ${map}`,
     hasMap: "🗺 Карта: есть",
     noMap: "🗺 Карта: нет",
-    textPreset: (i: number) => `Текст: вариант ${i}`,
+    textPreset: (i: number, s?: string) => `Текст: вариант ${i}${s ? `\n«${s}»` : ""}`,
     textOwn: (s: string) => `Текст: свой («${s}…»)`,
     musicList: (s: string) => `Музыка: ${s}`,
     musicOwn: (s: string) => `Музыка: ваша песня (${s})`,
@@ -306,7 +306,7 @@ export const ru = {
 
   pay: {
     /** Проверка перед оплатой: без «✅ … тўлаймиз» реквизиты не показываются */
-    check: (lines: string, url: string | null) => `🔎 Проверьте перед оплатой:\n\n${lines}\n\n${url ? `👁 Образец: ${url}` : "👁 Образец закрыт через 24 часа. Данные — выше; после оплаты ссылка откроется полностью."}\n\n⚠️ После оплаты приглашение изменить нельзя, деньги не возвращаются. Проверьте образец 👆`,
+    check: (lines: string, url: string | null, terms: string) => `🔎 Проверьте перед оплатой:\n\n${lines}\n\n${url ? `👁 Образец: ${url}` : "👁 Образец закрыт через 24 часа. Данные — выше; после оплаты ссылка откроется полностью."}\n\n⚠️ После оплаты приглашение изменить нельзя, деньги не возвращаются. Проверьте образец 👆\n\n📄 Условия: ${terms}\n«✅ Всё верно» — согласие с условиями.`,
     confirmYes: "✅ Всё верно, оплачиваем",
     /** Одно сообщение после оплаты (подпись к QR): ссылка, как разослать, спасибо */
     paidPack: (url: string) => `🎉 Оплата подтверждена! Ваше приглашение готово:\n${url}\n\n📷 QR-код: гость наводит камеру телефона — приглашение открывается.\n📤 Гостям — кнопкой ниже.\n\n🙏 Спасибо! Поздравляем с торжеством!`,
@@ -454,6 +454,7 @@ export const ru = {
   },
 
   role: {
+    panel: "🖥 Панель",
     partnerTitle: "🤝 Партнёр InviteIZI",
     menu: "🤝 Меню партнёра",
     partnerHome: (name: string, pending: boolean) =>
@@ -599,6 +600,7 @@ export const staff = {
     sections: { money: "💰 Деньги", pt: "🤝 Партнёры", ds: "🎨 Дизайны", fn: "📉 Где уходят" } as Record<string, string>,
     title: (range: string) => `📊 Статистика · ${range}`,
     titleNet: (range: string) => `📊 Моя сеть · ${range}`,
+    staffExcluded: (n: number) => `ℹ️ Тестовые заказы админов не учитываются (${n})`,
     range: { d: (date: string) => `сегодня, ${date}`, w: "7 дней", m: (month: string) => month, y: (year: string) => `${year} год` },
     paid: (n: number, sum: string) => `Оплат: ${n} · ${sum}`,
     average: (sum: string) => `Средний чек: ${sum}`,

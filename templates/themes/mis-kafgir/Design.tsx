@@ -6,7 +6,7 @@ import {InvitationShell} from "../../blocks/InvitationShell";
 import {Words,useFitWords} from "../../blocks/FitWords";
 import {MapButton} from "../../blocks/MapButton";
 import {designTexts} from "@/texts/uz-cyrl";
-const font=localFont({src:"../../../assets/fonts/Lora-Regular.ttf",variable:"--mk-font",display:"swap"});
+const font=localFont({ preload: false,src:"../../../assets/fonts/Lora-Regular.ttf",variable:"--mk-font",display:"swap"});
 const vars=designVars({primary:"#8d664c",primaryDark:"#654731",gold:"#b49a76",goldLight:"#e7d8bd",paper:"#fbf7ee",ink:"#514b40",muted:"#6c6556"},{display:"var(--mk-font)",accent:"var(--mk-font)",body:"var(--mk-font)"});
 const t=designTexts("mis-kafgir");
 

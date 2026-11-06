@@ -11,7 +11,7 @@ import {Reveal} from "../../blocks/Reveal";
 import {MapButton} from "../../blocks/MapButton";
 import {designTexts} from "@/texts/uz-cyrl";
 import styles from "./opening.module.css";
-const font=localFont({src:"../../../assets/fonts/PTSerif-Regular.ttf",variable:"--gn-font",display:"swap"});
+const font=localFont({ preload: false,src:"../../../assets/fonts/PTSerif-Regular.ttf",variable:"--gn-font",display:"swap"});
 const vars=designVars({primary:"#54746a",primaryDark:"#385449",gold:"#ae9767",goldLight:"#e5d6b6",paper:"#faf6e9",ink:"#424e43",muted:"#626e5d"},{display:"var(--gn-font)",accent:"var(--gn-font)",body:"var(--gn-font)"});
 const t=designTexts("girih-nur");
 /** An inlaid girih field contracts cell by cell; no hinges, ribbons or sliding cover panels. */

@@ -58,6 +58,11 @@
           "small": 0
         },
         {
+          "name": "11a-pay-check",
+          "overflow": false,
+          "small": 0
+        },
+        {
           "name": "11-pay",
           "overflow": false,
           "small": 0
@@ -74,7 +79,7 @@
         }
       ],
       "submits": 3,
-      "drafts": 3
+      "drafts": 4
     },
     {
       "tag": "360-uz-sunnat",
@@ -122,6 +127,11 @@
           "small": 0
         },
         {
+          "name": "11a-pay-check",
+          "overflow": false,
+          "small": 0
+        },
+        {
           "name": "11-pay",
           "overflow": false,
           "small": 0
@@ -138,7 +148,7 @@
         }
       ],
       "submits": 2,
-      "drafts": 2
+      "drafts": 3
     },
     {
       "tag": "360-uz-nahorgi",
@@ -182,6 +192,11 @@
         },
         {
           "name": "10-namuna",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "11a-pay-check",
           "overflow": false,
           "small": 0
         },
@@ -250,6 +265,11 @@
           "small": 0
         },
         {
+          "name": "11a-pay-check",
+          "overflow": false,
+          "small": 0
+        },
+        {
           "name": "11-pay",
           "overflow": false,
           "small": 0
@@ -266,7 +286,7 @@
         }
       ],
       "submits": 2,
-      "drafts": 2
+      "drafts": 3
     },
     {
       "tag": "360-ru-nikoh",
@@ -324,6 +344,11 @@
           "small": 0
         },
         {
+          "name": "11a-pay-check",
+          "overflow": false,
+          "small": 0
+        },
+        {
           "name": "11-pay",
           "overflow": false,
           "small": 0
@@ -340,7 +365,7 @@
         }
       ],
       "submits": 3,
-      "drafts": 2
+      "drafts": 4
     },
     {
       "tag": "360-ru-sunnat",
@@ -388,6 +413,11 @@
           "small": 0
         },
         {
+          "name": "11a-pay-check",
+          "overflow": false,
+          "small": 0
+        },
+        {
           "name": "11-pay",
           "overflow": false,
           "small": 0
@@ -404,7 +434,7 @@
         }
       ],
       "submits": 2,
-      "drafts": 2
+      "drafts": 3
     },
     {
       "tag": "360-ru-nahorgi",
@@ -448,6 +478,11 @@
         },
         {
           "name": "10-namuna",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "11a-pay-check",
           "overflow": false,
           "small": 0
         },
@@ -516,6 +551,11 @@
           "small": 0
         },
         {
+          "name": "11a-pay-check",
+          "overflow": false,
+          "small": 0
+        },
+        {
           "name": "11-pay",
           "overflow": false,
           "small": 0
@@ -532,7 +572,7 @@
         }
       ],
       "submits": 2,
-      "drafts": 2
+      "drafts": 3
     },
     {
       "tag": "430-uz-nikoh",
@@ -590,6 +630,11 @@
           "small": 0
         },
         {
+          "name": "11a-pay-check",
+          "overflow": false,
+          "small": 0
+        },
+        {
           "name": "11-pay",
           "overflow": false,
           "small": 0
@@ -606,7 +651,7 @@
         }
       ],
       "submits": 3,
-      "drafts": 2
+      "drafts": 4
     },
     {
       "tag": "430-uz-yubiley",
@@ -654,6 +699,11 @@
           "small": 0
         },
         {
+          "name": "11a-pay-check",
+          "overflow": false,
+          "small": 0
+        },
+        {
           "name": "11-pay",
           "overflow": false,
           "small": 0
@@ -670,7 +720,7 @@
         }
       ],
       "submits": 2,
-      "drafts": 2
+      "drafts": 3
     },
     {
       "tag": "430-ru-nikoh",
@@ -728,6 +778,11 @@
           "small": 0
         },
         {
+          "name": "11a-pay-check",
+          "overflow": false,
+          "small": 0
+        },
+        {
           "name": "11-pay",
           "overflow": false,
           "small": 0
@@ -744,7 +799,7 @@
         }
       ],
       "submits": 3,
-      "drafts": 2
+      "drafts": 4
     },
     {
       "tag": "430-ru-yubiley",
@@ -792,6 +847,11 @@
           "small": 0
         },
         {
+          "name": "11a-pay-check",
+          "overflow": false,
+          "small": 0
+        },
+        {
           "name": "11-pay",
           "overflow": false,
           "small": 0
@@ -808,7 +868,7 @@
         }
       ],
       "submits": 2,
-      "drafts": 2
+      "drafts": 3
     },
     {
       "tag": "no-telegram",

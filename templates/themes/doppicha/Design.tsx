@@ -8,7 +8,7 @@ import {Words,useFitWords} from "../../blocks/FitWords";
 import {MapButton} from "../../blocks/MapButton";
 import {designTexts} from "@/texts/uz-cyrl";
 
-const font=localFont({src:[{path:"../../../assets/fonts/Lora-Regular.ttf",style:"normal"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--dp-type",display:"swap"});
+const font=localFont({ preload: false,src:[{path:"../../../assets/fonts/Lora-Regular.ttf",style:"normal"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--dp-type",display:"swap"});
 const vars=designVars({primary:"#527565",primaryDark:"#355344",gold:"#bd9a5d",goldLight:"#ecdcba",paper:"#fff9ed",ink:"#3c4f43",muted:"#7b8270"},{display:"var(--dp-type)",accent:"var(--dp-type)",body:"var(--dp-type)"});
 const t=designTexts("doppicha");
 

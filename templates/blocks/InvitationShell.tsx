@@ -10,6 +10,8 @@ import { SoftBrandBadge, SoftBrandFooter } from "./BrandSoft";
 import { Rsvp, type RsvpLook } from "./Rsvp";
 import { LangSwitch } from "./LangSwitch";
 import { MusicHint } from "./MusicHint";
+import { PaidRefresh } from "./PaidRefresh";
+import { TapHint } from "./TapHint";
 
 /**
  * Оболочка любого дизайна: колонка шириной телефона, аудио, кнопка ▶/⏸, водяной знак «НАМУНА».
@@ -102,6 +104,8 @@ export function InvitationShell({
           <LangSwitch inv={inv} />
           {inv.opened && <MusicHint inv={inv} />}
           {inv.mode === "demo" && <Watermark />}
+          {inv.mode === "demo" && <PaidRefresh />}
+          {!inv.opened && <TapHint inv={inv} />}
         </div>
       </div>
     </MotionConfig>

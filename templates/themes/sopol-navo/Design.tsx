@@ -8,7 +8,7 @@ import {Reveal} from "../../blocks/Reveal";
 import {MapButton} from "../../blocks/MapButton";
 import {Countdown} from "../../blocks/Countdown";
 import {designTexts} from "@/texts/uz-cyrl";
-const font=localFont({src:"../../../assets/fonts/PTSerif-Regular.ttf",variable:"--sn-font",display:"swap"});
+const font=localFont({ preload: false,src:"../../../assets/fonts/PTSerif-Regular.ttf",variable:"--sn-font",display:"swap"});
 const vars=designVars({primary:"#965c43",primaryDark:"#70412d",gold:"#b49772",goldLight:"#eddbbf",paper:"#fcf5e9",ink:"#584739",muted:"#6e5b49"},{display:"var(--sn-font)",accent:"var(--sn-font)",body:"var(--sn-font)"});
 const t=designTexts("sopol-navo");
 /** Slip-decorated pottery: rounded clay cuts alternate with straight, numbered invitation sections. */
