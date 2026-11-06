@@ -9,7 +9,7 @@ import type { AppDraft, AppOrder, AppSession, SubmitResult } from "@/bot/app/ser
 import type { Lang } from "@/lib/domain";
 import { validateForm, type FieldError, type FormInput } from "@/lib/order-rules";
 import { previewData } from "@/lib/preview-data";
-import { getDesign, PRICES, type Design } from "@/templates/registry";
+import { getDesign, PRICES, thumbOf, type Design } from "@/templates/registry";
 import { appUz } from "@/texts/app-uz";
 import { appRu } from "@/texts/app-ru";
 import { appKk } from "@/texts/app-kk";
@@ -142,6 +142,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
       setLang(sess.lang);
       setFavorites(sess.favorites);
       setOrders(sess.orders);
+      bootDraft.current = sess.draft;
       setDraft(sess.draft);
       const d = sess.draft?.templateId ? getDesign(sess.draft.templateId) : undefined;
       if (d) setChip(d.occasion);
@@ -179,16 +180,38 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
   useBackButton(stack.length > 1 || !!viewer || bigPreview || help, () => (help ? setHelp(false) : bigPreview ? setBigPreview(false) : viewer ? setViewer(null) : back()));
 
   // ── Черновик: сохраняем на сервере с задержкой ──
-  const firstDraft = useRef(true);
+  // Черновик с сервера (при запуске) не отправляем обратно; всё, что клиент поменял после, — сохраняем.
+  // Закрыл приложение раньше, чем прошла задержка, — сохранение уходит сразу (keepalive), чтобы
+  // при следующем открытии сверху была карточка «Тугалланмаган таклифнома» с этими данными
+  const bootDraft = useRef<AppDraft | null>(null);
+  const unsaved = useRef<AppDraft | null>(null);
   useEffect(() => {
-    if (phase !== "ready" || !draft) return;
-    if (firstDraft.current) {
-      firstDraft.current = false;
-      return;
-    }
-    const id = setTimeout(() => api("draft", { draft }).catch(() => undefined), SAVE_DELAY);
+    if (phase !== "ready" || !draft || draft === bootDraft.current) return;
+    unsaved.current = draft;
+    const id = setTimeout(() => {
+      unsaved.current = null;
+      api("draft", { draft }).catch(() => undefined);
+    }, SAVE_DELAY);
     return () => clearTimeout(id);
   }, [draft, phase]);
+  useEffect(() => {
+    const flush = (e: Event) => {
+      const d = unsaved.current;
+      if (!d || (e.type === "visibilitychange" && document.visibilityState !== "hidden")) return;
+      unsaved.current = null;
+      try {
+        void fetch("/api/app", { method: "POST", keepalive: true, headers: { "content-type": "application/json", "x-tg-init-data": initDataOf() }, body: JSON.stringify({ action: "draft", draft: d }) }).catch(() => undefined);
+      } catch {
+        /* нет сети — черновик останется до следующего изменения */
+      }
+    };
+    document.addEventListener("visibilitychange", flush);
+    window.addEventListener("pagehide", flush);
+    return () => {
+      document.removeEventListener("visibilitychange", flush);
+      window.removeEventListener("pagehide", flush);
+    };
+  }, []);
 
   // ── Заказ (НАМУНА): создать или обновить ту же ссылку ──
   const upsertOrder = useCallback((o: AppOrder) => {
@@ -369,6 +392,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
       // Отложенное «обновить НАМУНА» отменённого черновика больше не отправляем
       if (resubmit.current) clearTimeout(resubmit.current);
       resubmit.current = null;
+      unsaved.current = null;
       setSaveStatus("");
       if (o) setOrders((l) => l.filter((x) => x.id !== o.id));
       if (!o || draft?.orderId === o.id) {
@@ -466,7 +490,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
 
   const resume =
     draft?.templateId && design && screen.name === "catalog"
-      ? { title: `${T.occasions[design.occasion]} · ${namesOf(draft) || T.catalog.continueTitle}`, onResume: () => go(draft.orderId ? { name: "summary" } : { name: "form" }), onCancel: () => cancelOrder(order ?? (draft.orderId ? ({ id: draft.orderId } as AppOrder) : null)) }
+      ? { title: `${T.occasions[design.occasion]} · ${namesOf(draft) || T.catalog.continueTitle}`, cover: thumbOf(design.cover), onResume: () => go(order ? { name: "summary" } : { name: "form" }), onCancel: () => cancelOrder(order ?? (draft.orderId ? ({ id: draft.orderId } as AppOrder) : null)) }
       : null;
 
   return (
