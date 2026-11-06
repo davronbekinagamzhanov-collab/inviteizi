@@ -39,7 +39,7 @@ describe("отмена незаконченного заказа", () => {
   it("проверил перед оплатой → шаг 4; черновик без заказа → шаг 2; пустой — нечего отменять", async () => {
     const sim = new Sim();
     const o = await namuna(sim, 91);
-    await app.confirmPay(sim.deps, user(91), o.id);
+    await app.confirmPay(sim.deps, user(91), o.id, true);
     expect(await app.cancelOrder(sim.deps, user(91), o.id)).toEqual({ ok: true });
     await app.saveDraft(sim.deps, user(92), { templateId: design.id, form: { groom: "Ali" } });
     expect(await app.cancelOrder(sim.deps, user(92), undefined)).toEqual({ ok: true });
@@ -80,7 +80,7 @@ describe("статусы после чека", () => {
   it("отказ: причина на языке клиента, «Чекни қайта юбориш» не требует повторной проверки", async () => {
     const sim = new Sim();
     const o = await namuna(sim, 96);
-    await app.confirmPay(sim.deps, user(96), o.id);
+    await app.confirmPay(sim.deps, user(96), o.id, true);
     await sim.repo.updateOrder(o.id, { status: "rejected", rejectReason: "Пул келмади" });
     await sim.repo.setLang(96, "ru");
     const [ru] = (await app.listOrders(sim.deps, user(96))).orders;
@@ -137,4 +137,27 @@ describe("отмена: ревью", () => {
     expect(await sim.repo.getOrder(o.id)).toBeNull();
     expect((await app.openSession(sim.deps, user(100))).draft).toBeNull();
   });
+});
+
+describe("п.18: шартлар", () => {
+  it("без «Шартларга розиман» реквизиты не открываются; с ним — время согласия рядом с pay_confirmed_at", async () => {
+    const sim = new Sim();
+    const o = await namuna(sim, 101);
+    expect(await app.confirmPay(sim.deps, user(101), o.id)).toEqual({ error: "terms" });
+    expect(await app.confirmPay(sim.deps, user(101), o.id, "true")).toEqual({ error: "terms" });
+    expect((await sim.repo.getOrder(o.id))!.payConfirmedAt ?? null).toBeNull();
+    const r = await app.confirmPay(sim.deps, user(101), o.id, true);
+    expect("ok" in r).toBe(true);
+    const saved = (await sim.repo.getOrder(o.id))!;
+    expect(saved.termsAcceptedAt).toEqual(saved.payConfirmedAt);
+    expect(saved.termsAcceptedAt).toBeInstanceOf(Date);
+  });
+});
+
+it("п.18, чат: в проверке перед оплатой есть ссылка на шартлар; «✅ Ҳаммаси тўғри» сохраняет время согласия", async () => {
+  const { nikohWithReceipt } = await import("../testing/paths");
+  const sim = new Sim();
+  const o = await nikohWithReceipt(sim, 102);
+  expect(sim.tg.to(102).some((m) => m.text?.includes("/terms"))).toBe(true);
+  expect((await sim.repo.getOrder(o.id))!.termsAcceptedAt).toBeInstanceOf(Date);
 });

@@ -470,7 +470,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
               )}
               {screen.name === "pay" && (() => {
                 const o = orders.find((x) => x.id === screen.orderId);
-                return o ? <Pay order={o} pay={session.pay} onToast={setToast} onDone={(night) => { setOrders((l) => l.map((x) => (x.id === o.id ? { ...x, status: "receipt_sent", canPay: false, canEdit: false } : x))); setDraft(null); reset([{ name: "catalog" }, { name: "wait", orderId: o.id, night }]); }} /> : null;
+                return o ? <Pay order={o} pay={session.pay} onToast={setToast} onTerms={() => setViewer(lang === "uz" ? "/terms" : "/terms/ru")} onDone={(night) => { setOrders((l) => l.map((x) => (x.id === o.id ? { ...x, status: "receipt_sent", canPay: false, canEdit: false } : x))); setDraft(null); reset([{ name: "catalog" }, { name: "wait", orderId: o.id, night }]); }} /> : null;
               })()}
               {screen.name === "wait" && waitOrder && <Waiting order={waitOrder} night={screen.night} onToast={setToast} onResend={() => reset([{ name: "catalog" }, { name: "orders" }, { name: "pay", orderId: waitOrder.id }])} />}
               {screen.name === "orders" && <Orders orders={orders} onEdit={editOrder} onPay={(o) => go({ name: "pay", orderId: o.id })} onStatus={(o) => go({ name: "wait", orderId: o.id, night: isQuiet(new Date()) })} onCancel={cancelOrder} onToast={setToast} />}

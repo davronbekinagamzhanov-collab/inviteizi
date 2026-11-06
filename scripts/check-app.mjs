@@ -124,6 +124,7 @@ try {
           await page.locator("[data-main-action]").click();
           await page.getByText(T.pay.checkWarn).waitFor();
           await check("11a-pay-check");
+          await page.locator('input[name="terms"]').check();
           await page.getByRole("button", { name: T.pay.checkYes }).click();
           await page.getByText(T.pay.how).waitFor();
           await check("11-pay");

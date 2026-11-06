@@ -149,7 +149,7 @@ describe("ночной ревьюер: исправления", () => {
     const form = { hosts: "Оила", groom: "Азиз", bride: "Мадина", events: [{ date: "2027-06-12", time: "18:00", venueName: "Зал", address: "Сайрам" }] };
     const r = await app.submitDraft(s.deps, u, { templateId: a.id, form });
     if (!("ok" in r)) throw new Error(JSON.stringify(r));
-    await app.confirmPay(s.deps, u, r.order.id);
+    await app.confirmPay(s.deps, u, r.order.id, true);
     const r2 = await app.submitDraft(s.deps, u, { templateId: b.id, form, orderId: r.order.id });
     if (!("ok" in r2)) throw new Error(JSON.stringify(r2));
     expect(r2.order.amount).not.toBe(r.order.amount);

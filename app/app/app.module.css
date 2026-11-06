@@ -1442,3 +1442,31 @@ textarea.input {
   gap: 8px;
   margin: 12px 0 6px;
 }
+
+/* ── «Шартларга розиман» (п.18) ── */
+.terms {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 14px 0 6px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: 0 0 0 1px var(--line);
+}
+.terms label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 44px;
+}
+.terms input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--gold-deep);
+  flex: none;
+}

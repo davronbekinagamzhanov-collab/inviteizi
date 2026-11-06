@@ -5,12 +5,12 @@ import type { AppOrder, ReceiptResult } from "@/bot/app/service";
 import { api, ApiError, MAX_FILE, shrinkImage, upload } from "./api";
 import { Section, useT } from "./shared";
 import { copyText, haptic, openLink, shareLink } from "./telegram";
-import { CheckIcon, ClockIcon, CloseIcon } from "./icons";
+import { CheckIcon, ClockIcon, CloseIcon, SpinnerIcon } from "./icons";
 import s from "../app.module.css";
 
 type PayInfo = { phone: string; name: string; card: string | null };
 
-export function Pay({ order, pay, onDone, onToast }: { order: AppOrder; pay: PayInfo; onDone: (night: boolean) => void; onToast: (t: string) => void }) {
+export function Pay({ order, pay, onDone, onToast, onTerms }: { order: AppOrder; pay: PayInfo; onDone: (night: boolean) => void; onToast: (t: string) => void; onTerms: () => void }) {
   const T = useT();
   const input = useRef<HTMLInputElement>(null);
   const [progress, setProgress] = useState<number | null>(null);
@@ -18,12 +18,17 @@ export function Pay({ order, pay, onDone, onToast }: { order: AppOrder; pay: Pay
   // Проверка перед оплатой: реквизиты — только после «✅ Ҳаммаси тўғри, тўлаймиз»
   const [confirmed, setConfirmed] = useState(order.confirmed);
   const [busy, setBusy] = useState(false);
+  const [agree, setAgree] = useState(false);
 
   async function confirm() {
     if (busy) return;
+    if (!agree) {
+      haptic.error();
+      return setError(T.pay.errors.terms);
+    }
     setBusy(true);
     try {
-      const r = await api<{ ok: true } | { error: string }>("confirmPay", { orderId: order.id });
+      const r = await api<{ ok: true } | { error: string }>("confirmPay", { orderId: order.id, terms: true });
       if ("ok" in r) {
         haptic.ok();
         setConfirmed(true);
@@ -90,8 +95,18 @@ export function Pay({ order, pay, onDone, onToast }: { order: AppOrder; pay: Pay
           <b>{T.price(order.amount)}</b>
         </div>
         <p className={s.formErr} style={{ color: "var(--ink)" }}>{T.pay.checkWarn}</p>
+        <div className={s.terms}>
+          <label>
+            <input type="checkbox" checked={agree} onChange={(e) => { haptic.select(); setAgree(e.target.checked); setError(null); }} name="terms" />
+            <span>{T.pay.termsAgree}</span>
+          </label>
+          <button type="button" className={s.textMore} onClick={onTerms}>
+            {T.pay.termsLink}
+          </button>
+        </div>
         {error && <p className={s.formErr} role="alert">{error}</p>}
-        <button type="button" className={`${s.btn} ${s.btnWide}`} onClick={confirm} disabled={busy}>
+        <button type="button" className={`${s.btn} ${s.btnWide}`} onClick={confirm} disabled={busy || !agree} aria-busy={busy}>
+          {busy ? <SpinnerIcon size={20} /> : null}
           {T.pay.checkYes}
         </button>
       </div>

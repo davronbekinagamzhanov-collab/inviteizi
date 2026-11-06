@@ -40,7 +40,7 @@ export async function POST(req: Request) {
       case "new":
         return json(await app.newDraft(deps, user));
       case "confirmPay":
-        return json(await app.confirmPay(deps, user, body.orderId));
+        return json(await app.confirmPay(deps, user, body.orderId, body.terms));
       case "orders":
         return json(await app.listOrders(deps, user));
       case "cancel":

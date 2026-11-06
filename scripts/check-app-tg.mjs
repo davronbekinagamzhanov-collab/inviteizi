@@ -193,6 +193,7 @@ try {
       await page.getByText(T.pay.checkWarn).waitFor();
       await page.waitForFunction(() => !window.__tg.main.visible);
       await step("06-pay-check");
+      await page.locator('input[name="terms"]').check();
       await page.getByRole("button", { name: T.pay.checkYes }).click();
       await page.getByText(T.pay.how).waitFor();
       await step("07-pay");

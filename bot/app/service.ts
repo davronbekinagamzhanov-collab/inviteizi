@@ -189,14 +189,16 @@ export async function openSession(deps: Deps, u: AppUser): Promise<AppSession> {
 }
 
 /** «✅ Ҳаммаси тўғри, тўлаймиз» в приложении: время подтверждения в заказе, дальше — реквизиты */
-export async function confirmPay(deps: Deps, u: AppUser, orderId: unknown) {
+export async function confirmPay(deps: Deps, u: AppUser, orderId: unknown, terms?: unknown) {
   if (typeof orderId !== "string") return { error: "notFound" as const };
+  // п.18: без «Шартларга розиман» реквизиты не показываем
+  if (terms !== true) return { error: "terms" as const };
   const o = await deps.repo.getOrder(orderId).catch(() => null);
   if (!o || o.userId !== u.id) return { error: "notFound" as const };
   if (o.status === "receipt_sent") return { error: "waiting" as const };
   if (!PAYABLE_STATUSES.includes(o.status)) return { error: "closed" as const };
   if (eventsPassed(deps, o)) return { error: "passed" as const };
-  const r = await deps.repo.transition(o.id, PAYABLE_STATUSES, "awaiting_payment", { payConfirmedAt: deps.now() });
+  const r = await deps.repo.transition(o.id, PAYABLE_STATUSES, "awaiting_payment", { payConfirmedAt: deps.now(), termsAcceptedAt: deps.now() });
   if (!r) return { error: "closed" as const };
   return { ok: true as const, order: appOrder(deps, r, (await deps.repo.getUser(u.id))?.lang ?? "uz") };
 }

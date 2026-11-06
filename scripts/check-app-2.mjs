@@ -141,6 +141,18 @@ for (const lang of ["uz", "ru"]) {
 
     // Оплата → ожидание → готово
     await page.locator("[data-main-action]").click();
+    // п.18: без «Шартларга розиман» кнопка закрыта; «Шартлар» открывает страницу условий
+    await page.getByText(T.pay.termsAgree).waitFor();
+    ok(await page.getByRole("button", { name: T.pay.checkYes }).isDisabled(), "без согласия «Ҳаммаси тўғри» закрыта");
+    await page.screenshot({ path: `${out}/${lang}-04b-terms-check.png` });
+    await page.getByRole("button", { name: T.pay.termsLink, exact: true }).click();
+    const termsFrame = page.frameLocator('[role="dialog"] iframe');
+    await termsFrame.locator("h1").waitFor();
+    ok((await termsFrame.locator("section").count()) === 5, "страница условий: 5 разделов");
+    await page.waitForTimeout(800);
+    await page.screenshot({ path: `${out}/${lang}-04c-terms.png` });
+    await page.locator('[role="dialog"] button').first().click();
+    await page.locator('input[name="terms"]').check();
     await page.getByRole("button", { name: T.pay.checkYes }).click();
     await page.getByText(T.pay.how).waitFor();
     await page.locator('input[type="file"]').setInputFiles([{ name: "chek.jpg", mimeType: "image/jpeg", buffer: photo }]);

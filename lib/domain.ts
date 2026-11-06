@@ -85,6 +85,8 @@ export type OrderRecord = {
   expiresAt: Date | null;
   /** v2: клиент нажал «✅ Ҳаммаси тўғри, тўлаймиз» (проверил НАМУНА и согласился, что после оплаты не меняется) */
   payConfirmedAt?: Date | null;
+  /** п.18: клиент отметил «Шартларга розиман» (вместе с payConfirmedAt) */
+  termsAcceptedAt?: Date | null;
 };
 
 export type NewOrder = Pick<
@@ -110,6 +112,7 @@ export type OrderPatch = Partial<
     | "adminRemindedAt"
     | "expiresAt"
     | "payConfirmedAt"
+    | "termsAcceptedAt"
   >
 >;
 
