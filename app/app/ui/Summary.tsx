@@ -6,7 +6,7 @@ import { graphemes, MAX_CUSTOM_TEXT } from "@/lib/order-rules";
 import { tPlain as inv } from "@/texts/uz-cyrl";
 import { useT } from "./shared";
 import { haptic } from "./telegram";
-import { PauseIcon, PlayIcon, SpinnerIcon } from "./icons";
+import { CheckIcon, PauseIcon, PencilIcon, PlayIcon, SpinnerIcon } from "./icons";
 import s from "../app.module.css";
 
 export type Track = { id: string; title: string; url: string };
@@ -98,7 +98,7 @@ export function Summary(p: Props) {
             <b>{T.summary.text}</b>
             <small>{p.customText ? firstLine(p.customText) : firstLine(`${chosen?.greeting ?? ""} ${chosen?.body ?? ""}`)}</small>
           </span>
-          <i className={s.editMark} aria-hidden>{open === "text" ? "✓" : T.summary.edit}</i>
+          <i className={s.editMark} aria-hidden>{open === "text" ? <CheckIcon size={20} /> : <PencilIcon size={20} />}</i>
         </button>
         {open === "text" && (
           <div className={s.itemBody}>
@@ -128,7 +128,7 @@ export function Summary(p: Props) {
             <b>{T.summary.music}</b>
             <small>{track ? track.title : T.summary.noMusic}</small>
           </span>
-          <i className={s.editMark} aria-hidden>{open === "music" ? "✓" : T.summary.edit}</i>
+          <i className={s.editMark} aria-hidden>{open === "music" ? <CheckIcon size={20} /> : <PencilIcon size={20} />}</i>
         </button>
         {open === "music" && (
           <div className={s.itemBody}>
@@ -173,7 +173,7 @@ export function Summary(p: Props) {
             <b>{T.summary.langs}</b>
             <small>{T.summary.langsValue(p.langs.map((l) => T.summary.langNames[l]).join(" · "))}</small>
           </span>
-          <i className={s.editMark} aria-hidden>{open === "langs" ? "✓" : T.summary.edit}</i>
+          <i className={s.editMark} aria-hidden>{open === "langs" ? <CheckIcon size={20} /> : <PencilIcon size={20} />}</i>
         </button>
         {open === "langs" && (
           <div className={s.itemBody}>

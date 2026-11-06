@@ -8,7 +8,7 @@ export const TODAY = "2026-11-05";
 export function mockServer(lang, base) {
   let n = 100;
   const orders = [];
-  const st = { lang, favorites: [], draft: null, calls: [] };
+  const st = { lang, favorites: [], draft: null, calls: [], orders, rolePanel: null };
   return {
     st,
     async handle(route) {
@@ -62,6 +62,17 @@ export function mockServer(lang, base) {
           return route.fulfill({ json: { ok: true } });
         case "orders":
           return route.fulfill({ json: { orders } });
+        case "cancel": {
+          const i = orders.findIndex((x) => x.id === body.orderId);
+          if (body.orderId && i < 0) return route.fulfill({ json: { error: "notFound" } });
+          if (i >= 0) orders.splice(i, 1);
+          st.draft = null;
+          return route.fulfill({ json: { ok: true } });
+        }
+        case "rolePanel":
+          return st.rolePanel ? route.fulfill({ json: st.rolePanel }) : route.fulfill({ status: 403, json: { error: "forbidden" } });
+        case "partnerPoster":
+          return route.fulfill({ json: { ok: true } });
         default:
           return route.fulfill({ status: 400, json: { error: "bad" } });
       }

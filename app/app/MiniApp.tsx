@@ -22,6 +22,7 @@ import { isQuiet } from "@/lib/quiet-hours";
 import { Orders } from "./ui/Orders";
 import { MainAction, TextsContext, Toast } from "./ui/shared";
 import { haptic, insideTelegram, setupTelegram, tg, useBackButton, useNativeMainVisible } from "./ui/telegram";
+import { BackIcon, CloseIcon, FolderIcon } from "./ui/icons";
 import s from "./app.module.css";
 
 type Screen =
@@ -401,14 +402,14 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
             <div className={s.headerRow}>
               {!insideTelegram() && stack.length > 1 && (
                 <button type="button" className={s.iconBtn} onClick={back} aria-label={T.back}>
-                  ◀
+                  <BackIcon />
                 </button>
               )}
               <span className={s.brand}>
                 Invite<b>IZI</b>
               </span>
-              <button type="button" className={s.iconBtn} onClick={() => (screen.name === "orders" ? undefined : go({ name: "orders" }))} aria-label={T.myOrders}>
-                📂
+              <button type="button" className={s.iconBtn} onClick={() => (screen.name === "orders" ? undefined : go({ name: "orders" }))} aria-label={T.myOrders} aria-pressed={screen.name === "orders"}>
+                <FolderIcon />
               </button>
               <span className={s.langs} role="group" aria-label="Тил / Язык / Тіл">
                 {(["uz", "ru", ...(session?.extraLangs?.includes("kk") ? ["kk"] : [])] as Lang[]).map((l) => (
@@ -480,6 +481,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
           <div className={s.viewer}>
             <div className={s.viewerTop}>
               <button type="button" className={s.backPill} onClick={back}>
+                <BackIcon size={18} />
                 {T.view.back}
               </button>
               <Heart on={favorites.includes(screen.id)} onToggle={() => toggleFavorite(screen.id, !favorites.includes(screen.id))} />
@@ -492,7 +494,8 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
           <div className={s.viewer} role="dialog" aria-modal="true">
             <div className={s.viewerTop}>
               <button type="button" className={s.backPill} onClick={() => setViewer(null)}>
-                ✕ {T.form.previewClose}
+                <CloseIcon size={18} />
+                {T.form.previewClose}
               </button>
             </div>
             <iframe src={viewer} title="НАМУНА" />

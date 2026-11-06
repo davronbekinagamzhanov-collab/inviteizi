@@ -72,3 +72,13 @@ export const ClockIcon = (p: { size?: number }) => (
     <path d="M12 7.4V12l3.2 2" />
   </Svg>
 );
+export const BackIcon = (p: { size?: number }) => (
+  <Svg {...p}>
+    <path d="M14.5 5.5L8 12l6.5 6.5" />
+  </Svg>
+);
+export const PencilIcon = (p: { size?: number }) => (
+  <Svg {...p}>
+    <path d="M14.8 5.6l3.6 3.6M5 19l1-4.3L15.6 5a1.6 1.6 0 0 1 2.3 0l1.1 1.1a1.6 1.6 0 0 1 0 2.3L9.3 18z" />
+  </Svg>
+);

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { ApiError, shrinkImage, upload } from "./api";
 import { useT } from "./shared";
 import { haptic } from "./telegram";
+import { CameraIcon } from "./icons";
 import s from "../app.module.css";
 
 export const MAX_PHOTOS = 3;
@@ -72,6 +73,7 @@ export function Photos({ photos, onChange, onToast }: { photos: string[]; onChan
       </div>
       {free > 0 && (
         <button type="button" className={`${s.btn} ${s.btnGhost} ${s.btnWide}`} onClick={() => input.current?.click()}>
+          <CameraIcon size={20} />
           {photos.length ? T.photos.addMore : T.photos.add}
         </button>
       )}
