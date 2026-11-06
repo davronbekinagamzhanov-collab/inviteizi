@@ -32,6 +32,14 @@
   padding: 0 16px calc(96px + env(safe-area-inset-bottom));
 }
 
+/* Своей кнопки внизу нет (её рисует Telegram или у экрана нет главного действия): лишнее место и высокий тост не нужны */
+.nativeMain .wrap {
+  padding-bottom: calc(28px + env(safe-area-inset-bottom));
+}
+.nativeMain .toast {
+  bottom: calc(20px + env(safe-area-inset-bottom));
+}
+
 /* ── Шапка ── */
 .header {
   position: sticky;

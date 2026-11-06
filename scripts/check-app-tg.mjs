@@ -127,6 +127,14 @@ try {
       if (await fallbackVisible(page)) errors.push(`${name}: fallback button visible while native MainButton is shown`);
       steps.push(name);
       if (shot) await page.screenshot({ path: `${out}/390-${lang}-${name}.png` });
+      // Обрезанный текст: элемент с текстом шире своего окна (без прокрутки по задумке)
+      const clipped = await page.evaluate(() =>
+        [...document.querySelectorAll("button, h1, h2, p, span, label, small, strong")]
+          .filter((el) => el.offsetParent && el.children.length === 0 && el.textContent?.trim() && el.scrollWidth > el.clientWidth + 1 && getComputedStyle(el).overflowX !== "auto")
+          .map((el) => el.textContent.trim().slice(0, 40)),
+      );
+      if (clipped.length) errors.push(`${name}: clipped text: ${clipped.join(" | ")}`);
+      if (process.env.SHOTS_DIR) await page.screenshot({ path: `${process.env.SHOTS_DIR}/390-${lang}-${name}.png`, fullPage: true });
     };
     try {
       if (await mainText(page)) errors.push("catalog: MainButton must be hidden");

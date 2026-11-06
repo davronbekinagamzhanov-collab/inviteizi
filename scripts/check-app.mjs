@@ -54,7 +54,7 @@ try {
         const errors = [];
         const steps = [];
         page.on("pageerror", (e) => errors.push(`pageerror: ${e.message}`));
-        page.on("console", (m) => m.type() === "error" && !/Failed to load resource.*none\.mp3|Download the React DevTools/.test(m.text()) && errors.push(`console: ${m.text()}`));
+        page.on("console", (m) => m.type() === "error" && !/Failed to load resource.*(none\.mp3|ERR_TUNNEL_CONNECTION_FAILED)|Download the React DevTools/.test(m.text()) && errors.push(`console: ${m.text()}`));
         await page.route("**/api/app**", (r) => server.handle(r));
         // telegram.org может быть закрыт сетью песочницы: та же логика, что у настоящего скрипта вне Telegram
         // (initData из #tgWebAppData, платформа unknown — приложение рисует свои кнопки)
@@ -152,7 +152,7 @@ try {
   // Без Telegram (обычный браузер): понятная подсказка, а не пустой экран
   const page = await browser.newPage({ viewport: { width: 375, height: 812 } });
   await page.goto(`${base}/app`);
-  const hint = await page.getByText(appUz.openInTelegram.split("\n")[0]).isVisible({ timeout: 15_000 }).catch(() => false);
+  const hint = await page.getByText(appUz.openInTelegram.split("\n")[0]).waitFor({ timeout: 20_000 }).then(() => true, () => false);
   report.push({ tag: "no-telegram", ok: hint });
   await page.screenshot({ path: `${out}/no-telegram.png` });
 } finally {

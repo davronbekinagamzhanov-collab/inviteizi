@@ -35,6 +35,8 @@ type Screen =
 
 type Phase = "boot" | "noTelegram" | "error" | "ready";
 const SAVE_DELAY = 700;
+/** Экраны с главной кнопкой (см. switch ниже) */
+const MAIN_SCREENS = new Set<Screen["name"]>(["view", "form", "photos", "summary", "done", "orders"]);
 const RESUBMIT_DELAY = 900;
 
 function namesOf(d: AppDraft) {
@@ -301,6 +303,9 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
   const summaryData = useMemo(() => (design && draft ? previewData(design.sample, draft.form, extras) : null), [design, draft, extras]);
   const price = order?.amount ?? (design ? PRICES[design.format] : 0);
 
+  // Своя кнопка внизу страницы видна (native MainButton не показана, а у экрана есть главное действие)
+  const ownBar = !nativeMain && phase === "ready" && !viewer && MAIN_SCREENS.has(screen.name);
+
   // ── Главная кнопка экрана ──
   let main: { text: string | null; onClick: () => void; progress?: boolean } = { text: null, onClick: () => undefined };
   if (phase === "ready") {
@@ -334,7 +339,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
 
   return (
     <TextsContext.Provider value={T}>
-      <div className={`${s.root} ${fontClass}`} lang={lang === "ru" ? "ru" : lang === "kk" ? "kk" : "uz-Cyrl"}>
+      <div className={`${s.root} ${ownBar ? "" : s.nativeMain} ${fontClass}`} lang={lang === "ru" ? "ru" : lang === "kk" ? "kk" : "uz-Cyrl"}>
         {phase === "ready" && screen.name !== "view" && (
           <header className={s.header}>
             <div className={s.headerRow}>
