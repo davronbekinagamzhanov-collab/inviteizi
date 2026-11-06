@@ -550,6 +550,7 @@ export const staff = {
     payouts: (n: number) => (n > 0 ? `💰 Выплаты (${n})` : "💰 Выплаты"),
     client: "🆕 Заказ для клиента",
     export: "📤 Выгрузка",
+    ownerApp: "🖥 Панель",
     create: "✨ Создать приглашение",
     settings: "⚙️ Настройки",
     myStats: "📊 Моя статистика",

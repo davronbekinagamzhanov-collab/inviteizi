@@ -84,7 +84,7 @@ export class MemoryRepo implements Repo {
   async panelSnapshot(): Promise<PanelSnapshot> {
     const orders = [...this.orders.values()].map((o): PanelOrder => {
       const u = this.users.get(o.userId);
-      return { id: o.id, number: o.number, userId: o.userId, username: u?.username ?? null, firstName: u?.firstName ?? null, status: o.status, occasion: o.occasion, format: o.format, templateId: o.templateId, musicKind: o.music.kind, amount: o.amount, createdAt: o.createdAt, paidAt: o.paidAt, updatedAt: o.updatedAt };
+      return { id: o.id, number: o.number, userId: o.userId, username: u?.username ?? null, firstName: u?.firstName ?? null, status: o.status, occasion: o.occasion, format: o.format, templateId: o.templateId, musicKind: o.music.kind, amount: o.amount, createdAt: o.createdAt, paidAt: o.paidAt, updatedAt: o.updatedAt, slug: o.slug, names: [o.data.groom, o.data.bride, o.data.person].filter(Boolean).join(" & ") || null };
     });
     const users = [...this.users.values()].map((u) => ({ id: u.id, createdAt: u.createdAt, source: u.source }));
     return { orders, users, partners: this.partners.map((p) => ({ ...p })), earnings: this.earnings.map((e) => ({ ...e })), payouts: this.payouts.map((p) => ({ ...p })), clientOrders: this.clientOrders.filter((x) => x.claimedBy !== null).map((x) => ({ orderId: x.orderId, ref: x.refSource })), managerPayouts: clone(this.managerPayouts), partnersReady: this.partnersReady };

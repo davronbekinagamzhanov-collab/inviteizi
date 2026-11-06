@@ -63,9 +63,18 @@ async function ownerHome(c: Ctx): Promise<Screen> {
       [{ text: S.btn.partners, data: "pn:pt" }, { text: S.btn.payouts(payouts), data: "pn:po" }],
       [{ text: S.btn.client, data: "pn:cl" }],
       [{ text: S.btn.export, data: "pn:ex" }, { text: S.btn.settings, data: "pn:set" }],
+      ...(c.deps.env.miniAppUrl ? [[{ text: S.btn.ownerApp, webApp: ownerAppUrl(c.deps.env.miniAppUrl) }]] : []),
       [createButton(c, S.btn.create)],
     ],
   };
+}
+
+/** /app → /app/owner (панель владельца в приложении; доступ проверяет сервер по initData) */
+export function ownerAppUrl(miniAppUrl: string) {
+  const u = new URL(miniAppUrl);
+  u.pathname = `${u.pathname.replace(/\/$/, "")}/owner`;
+  u.search = "";
+  return u.toString();
 }
 
 async function managerHome(c: Ctx): Promise<Screen> {

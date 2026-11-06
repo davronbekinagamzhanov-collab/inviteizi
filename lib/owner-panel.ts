@@ -23,6 +23,9 @@ export type PanelOrder = {
   createdAt: Date;
   paidAt: Date | null;
   updatedAt: Date;
+  /** Для панели в приложении: ссылка /{slug} и имена в приглашении (поиск) */
+  slug?: string | null;
+  names?: string | null;
 };
 export type PanelUser = { id: number; createdAt: Date; source: string | null };
 /** График выплат: каждый день / раз в неделю (пн) / раз в месяц (1-го) */

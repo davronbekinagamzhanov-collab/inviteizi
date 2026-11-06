@@ -457,7 +457,8 @@ export class PgRepo implements Repo {
   async panelSnapshot(): Promise<PanelSnapshot> {
     const base = await this.sql.begin("isolation level repeatable read read only", async (tx) => {
       const orders = await tx<PanelOrder[]>`select o.id, o.number, o.user_id as "userId", u.username, u.first_name as "firstName", o.status, o.occasion, o.format,
-        o.template_id as "templateId", o.music_kind as "musicKind", o.amount, o.created_at as "createdAt", o.paid_at as "paidAt", o.updated_at as "updatedAt"
+        o.template_id as "templateId", o.music_kind as "musicKind", o.amount, o.created_at as "createdAt", o.paid_at as "paidAt", o.updated_at as "updatedAt",
+        o.slug, nullif(concat_ws(' & ', o.groom, o.bride, o.person), '') as names
         from public.orders o join public.users u on u.id = o.user_id`;
       const users = await tx<PanelUser[]>`select id, created_at as "createdAt", source from public.users`;
       return { orders: [...orders], users: [...users] };
