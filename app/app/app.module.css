@@ -1060,3 +1060,55 @@ textarea.input {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ── SVG-иконки (app/app/ui/icons.tsx) ── */
+.icon {
+  display: block;
+  flex: none;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.icon .iconFill {
+  fill: currentColor;
+  stroke: none;
+}
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spin {
+    animation: breathe 1.6s ease-in-out infinite;
+  }
+}
+@keyframes breathe {
+  50% {
+    opacity: 0.45;
+  }
+}
+.play {
+  display: grid;
+  place-items: center;
+  transition: transform 0.15s var(--ease), background 0.2s var(--ease);
+}
+.play:active {
+  transform: scale(0.92);
+}
+.play[data-state="playing"] {
+  background: var(--gold-deep);
+  color: #fff8ec;
+}
+.trackErr {
+  margin: -4px 0 10px 62px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.35;
+}

@@ -6,6 +6,7 @@ import { graphemes, MAX_CUSTOM_TEXT } from "@/lib/order-rules";
 import { tPlain as inv } from "@/texts/uz-cyrl";
 import { useT } from "./shared";
 import { haptic } from "./telegram";
+import { PauseIcon, PlayIcon, SpinnerIcon } from "./icons";
 import s from "../app.module.css";
 
 export type Track = { id: string; title: string; url: string };
@@ -44,21 +45,40 @@ export function Summary(p: Props) {
   const music = p.music ?? (p.tracks[0] ? { kind: "list" as const, musicId: p.tracks[0].id } : { kind: "none" as const });
   const track = music.kind === "list" ? p.tracks.find((t) => t.id === music.musicId) : undefined;
 
-  // ▶ прослушать: одна мелодия за раз, стоп при уходе с экрана
+  // ▶ прослушать: одна мелодия за раз; пока грузится — кружок; не открылась — мягкое сообщение; стоп при уходе с экрана
   const audio = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState<string | null>(null);
+  const [loading, setLoading] = useState<string | null>(null);
+  const [failed, setFailed] = useState<string | null>(null);
   useEffect(() => () => audio.current?.pause(), []);
+  function stop() {
+    audio.current?.pause();
+    audio.current = null;
+    setPlaying(null);
+    setLoading(null);
+  }
   function toggle(t: Track) {
     haptic.tap();
-    if (playing === t.id) {
-      audio.current?.pause();
-      setPlaying(null);
-      return;
-    }
-    audio.current?.pause();
-    audio.current = new Audio(t.url);
-    audio.current.onended = () => setPlaying(null);
-    audio.current.play().then(() => setPlaying(t.id)).catch(() => setPlaying(null));
+    if (playing === t.id || loading === t.id) return stop();
+    stop();
+    setFailed(null);
+    const a = new Audio(t.url);
+    audio.current = a;
+    setLoading(t.id);
+    const fail = () => {
+      if (audio.current !== a) return;
+      stop();
+      setFailed(t.id);
+      haptic.error();
+    };
+    a.onended = () => audio.current === a && stop();
+    a.onerror = fail;
+    a.onplaying = () => {
+      if (audio.current !== a) return;
+      setLoading(null);
+      setPlaying(t.id);
+    };
+    a.play().catch(fail);
   }
 
   const toggleOpen = (k: Open) => {
@@ -114,15 +134,23 @@ export function Summary(p: Props) {
           <div className={s.itemBody}>
             {p.tracks.map((t) => (
               <div key={t.id} className={s.track}>
-                <button type="button" className={s.play} aria-label={`${T.summary.play} ${t.title}`} onClick={() => toggle(t)}>
-                  {playing === t.id ? T.summary.pause : T.summary.play}
+                <button
+                  type="button"
+                  className={s.play}
+                  data-state={loading === t.id ? "loading" : playing === t.id ? "playing" : "idle"}
+                  aria-label={`${loading === t.id ? T.summary.musicLoading : playing === t.id ? T.summary.pause : T.summary.play}: ${t.title}`}
+                  aria-busy={loading === t.id}
+                  onClick={() => toggle(t)}
+                >
+                  {loading === t.id ? <SpinnerIcon /> : playing === t.id ? <PauseIcon /> : <PlayIcon />}
                 </button>
                 <button type="button" className={s.option} aria-pressed={music.kind === "list" && music.musicId === t.id} onClick={() => { haptic.select(); p.onChange({ music: { kind: "list", musicId: t.id } }); }}>
                   {t.title}
                 </button>
               </div>
             ))}
-            <button type="button" className={s.option} aria-pressed={music.kind === "none"} onClick={() => { haptic.select(); audio.current?.pause(); setPlaying(null); p.onChange({ music: { kind: "none" } }); }}>
+            {failed && <p className={s.trackErr} role="alert">{T.summary.musicError}</p>}
+            <button type="button" className={s.option} aria-pressed={music.kind === "none"} onClick={() => { haptic.select(); stop(); p.onChange({ music: { kind: "none" } }); }}>
               {T.summary.noMusic}
             </button>
           </div>
