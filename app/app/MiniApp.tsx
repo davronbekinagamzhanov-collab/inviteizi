@@ -57,6 +57,8 @@ type Screen =
 
 type Phase = "boot" | "noTelegram" | "error" | "ready";
 const SAVE_DELAY = 700;
+/** Свой id у каждого нового черновика: сервер не воскресит отменённый черновик по запоздавшему сохранению */
+const newDraftId = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`);
 /** Экраны с главной кнопкой (см. switch ниже) */
 const MAIN_SCREENS = new Set<Screen["name"]>(["view", "form", "photos", "summary", "wait", "orders"]);
 /** Экран ожидания проверки чека спрашивает статус раз в 10 с, только пока открыт и виден */
@@ -272,7 +274,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
     if (!next) return;
     haptic.ok();
     const same = draft && design && design.occasion === next.occasion;
-    setDraft(same ? { ...draft, templateId: id } : { templateId: id, form: emptyForm(next.occasion), rsvp: true });
+    setDraft(same ? { ...draft, templateId: id } : { templateId: id, form: emptyForm(next.occasion), rsvp: true, draftId: newDraftId() });
     setErrors([]);
     reset([{ name: "catalog" }, { name: "form" }]);
   }
@@ -364,6 +366,10 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
         return false;
       }
       haptic.ok();
+      // Отложенное «обновить НАМУНА» отменённого черновика больше не отправляем
+      if (resubmit.current) clearTimeout(resubmit.current);
+      resubmit.current = null;
+      setSaveStatus("");
       if (o) setOrders((l) => l.filter((x) => x.id !== o.id));
       if (!o || draft?.orderId === o.id) {
         setDraft(null);

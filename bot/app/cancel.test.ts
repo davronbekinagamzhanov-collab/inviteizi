@@ -48,6 +48,44 @@ describe("отмена незаконченного заказа", () => {
     expect(await app.cancelOrder(sim.deps, user(92), undefined)).toEqual({ error: "notFound" });
   });
 
+  it("баг: сохранение черновика, пришедшее после отмены, не воскрешает его (и без таблицы order_cancellations)", async () => {
+    const sim = new Sim();
+    // Боевая база: миграция 20261114120000_cancellations не применена — запись об отмене падает
+    sim.repo.recordCancellation = async () => {
+      throw new Error("relation \"public.order_cancellations\" does not exist");
+    };
+    const d = { templateId: design.id, form: { groom: "Ali" }, draftId: "d-1" };
+    await app.saveDraft(sim.deps, user(95), d);
+    expect(await app.cancelOrder(sim.deps, user(95), undefined)).toEqual({ ok: true });
+    // запоздавший запрос «сохранить» того же черновика
+    expect(await app.saveDraft(sim.deps, user(95), { ...d, form: { groom: "Alisher" } })).toEqual({ error: "cancelled" });
+    expect(await app.submitDraft(sim.deps, user(95), { ...d, form })).toEqual({ error: "notFound" });
+    let s = await app.openSession(sim.deps, user(95));
+    expect(s.draft).toBeNull();
+    expect(s.orders).toHaveLength(0);
+    // новый черновик (новый id) сохраняется как обычно
+    expect(await app.saveDraft(sim.deps, user(95), { ...d, draftId: "d-2" })).toEqual({ ok: true });
+    s = await app.openSession(sim.deps, user(95));
+    expect(s.draft?.draftId).toBe("d-2");
+  });
+
+  it("баг: правка НАМУНА отменена — запоздавшие сохранение/обновление не возвращают ни черновик, ни заказ", async () => {
+    const sim = new Sim();
+    sim.repo.recordCancellation = async () => {
+      throw new Error("no table");
+    };
+    const o = await namuna(sim, 96);
+    const ed = await app.editOrder(sim.deps, user(96), o.id);
+    if (!("draft" in ed)) throw new Error("edit");
+    expect(await app.cancelOrder(sim.deps, user(96), o.id)).toEqual({ ok: true });
+    expect(await app.saveDraft(sim.deps, user(96), ed.draft)).toEqual({ error: "cancelled" });
+    expect(await app.saveDraft(sim.deps, user(96), { ...ed.draft, draftId: "other" })).toEqual({ error: "closed" });
+    expect(await app.submitDraft(sim.deps, user(96), { ...ed.draft, draftId: "other" })).toEqual({ error: "notFound" });
+    const s = await app.openSession(sim.deps, user(96));
+    expect(s.draft).toBeNull();
+    expect(s.orders).toHaveLength(0);
+  });
+
   it("атака: чужой заказ, чек на проверке, оплаченный — не отменяются и ничего не удаляют", async () => {
     const sim = new Sim();
     const removed: string[] = [];
