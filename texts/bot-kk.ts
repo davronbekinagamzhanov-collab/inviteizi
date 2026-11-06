@@ -426,6 +426,8 @@ export const kk: BotTexts = {
     statsText: (s: { period: string; scanned: number; paid: number; earned: string; paidOut: string; due: string; link: string }) =>
       `📊 Статистика · ${s.period}\n\nQR сканерледі: ${s.scanned}\nТөлем: ${s.paid}\n\nБарлығы табылды: ${s.earned}\nТөленді: ${s.paidOut}\nТөленуі керек: ${s.due}\n\nСілтемеңіз:\n${s.link}`,
     qrCaption: (name: string, link: string) => `🔳 ${name}\n${link}\n\nA4 постер (PDF және PNG) — төмендегі батырма 👇`,
+    refLink: (link: string) => `🔗 Сілтемеңіз:\n${link}\n\nБұл сілтемені WhatsApp-қа жіберуге болады — тапсырыстар да сізге есептеледі.`,
+    copyLink: "📋 Көшіру",
     posterUz: "📄 Постер · өзбекше",
     posterRu: "📄 Постер · орысша",
     posterKk: "📄 Постер · қазақша",

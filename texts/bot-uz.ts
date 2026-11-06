@@ -490,6 +490,8 @@ export const uz = {
       `📊 Статистика · ${s.period}\n\nQR сканерлади: ${s.scanned}\nТўлов: ${s.paid}\n\nЖами ишланган: ${s.earned}\nТўланган: ${s.paidOut}\nТўланиши керак: ${s.due}\n\nҲаволангиз:\n${s.link}`,
     /** QR и постер A4 (v2, часть 6). На постере — без эмодзи: шрифт постера их не рисует */
     qrCaption: (name: string, link: string) => `🔳 ${name}\n${link}\n\nПостер A4 (PDF ва PNG) — пастдаги тугма 👇`,
+    refLink: (link: string) => `🔗 Ҳаволангиз:\n${link}\n\nБу ҳаволани WhatsApp'да юборсангиз ҳам бўлади — буюртмалар сизга ёзилади.`,
+    copyLink: "📋 Нусха олиш",
     posterUz: "📄 Постер · ўзбекча",
     posterRu: "📄 Постер · русча",
     posterKk: "📄 Постер · қозоқча",

@@ -495,6 +495,9 @@ export const ru = {
     statsText: (s: { period: string; scanned: number; paid: number; earned: string; paidOut: string; due: string; link: string }) =>
       `📊 Статистика · ${s.period}\n\nСканов QR: ${s.scanned}\nОплат: ${s.paid}\n\nВсего начислено: ${s.earned}\nВыплачено: ${s.paidOut}\nК выплате: ${s.due}\n\nВаша ссылка:\n${s.link}`,
     qrCaption: (name: string, link: string) => `🔳 ${name}\n${link}\n\nПостер A4 (PDF и PNG) — кнопка ниже 👇`,
+    /** Ссылка партнёра текстом рядом с QR и постером: её можно пересылать в WhatsApp */
+    refLink: (link: string) => `🔗 Ваша ссылка:\n${link}\n\nЭту ссылку можно отправлять в WhatsApp — заказы тоже засчитаются.`,
+    copyLink: "📋 Скопировать",
     posterUz: "📄 Постер · узбекский",
     posterRu: "📄 Постер · русский",
     posterKk: "📄 Постер · казахский",

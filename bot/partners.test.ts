@@ -25,6 +25,8 @@ const start = async (s: Sim, id: number, payload = "", lang = uz.langUz) => {
 };
 const lastToast = (s: Sim) => s.tg.answers.at(-1)?.text;
 const texts = (s: Sim, id: number) => s.tg.to(id).map((m) => m.text);
+const qrOf = (s: Sim, id: number) => s.tg.to(id).filter((m) => m.type === "photo").at(-1)!;
+const docs = (s: Sim, id: number) => s.tg.to(id).filter((m) => m.type === "document");
 
 async function makeManager(s: Sim) {
   await start(s, ADMIN);
@@ -93,8 +95,8 @@ describe("создание", () => {
     const wa = (created.markup as { inline: { text: string; url?: string }[][] }).inline.flat().filter((b) => b.url?.startsWith("https://wa.me/"));
     expect(wa.map((b) => b.text)).toEqual([staff.btn.waUz, staff.btn.waRu]);
     expect(decodeURIComponent(wa[0].url!)).toContain(uz.role.joinShare("").split("\n")[0]);
-    expect(s.last(ADMIN)!.type).toBe("photo");
-    expect(s.lastText(ADMIN)).toContain(`start=p_${p.code}`);
+    expect(qrOf(s, ADMIN).text).toContain(`start=p_${p.code}`);
+    expect(s.lastText(ADMIN)).toBe(ru.role.refLink(`https://t.me/inviteizi_test_bot?start=p_${p.code}`));
     // Владельцу о своём партнёре карточку решения не шлём
     expect(texts(s, ADMIN).some((t) => t.startsWith("🤝 Новый партнёр от"))).toBe(false);
     // QR работает сразу: скан засчитывается
@@ -455,11 +457,10 @@ describe("QR и постер (часть 6)", () => {
     const s = new Sim();
     const token = await createPartner(s, ADMIN);
     const p = s.repo.partners[0];
-    const qr = s.last(ADMIN)!;
-    expect(qr.type).toBe("photo");
+    const qr = qrOf(s, ADMIN);
     expect(qr.text).toBe(ru.role.qrCaption(p.name, `https://t.me/inviteizi_test_bot?start=p_${p.code}`));
     await s.click(ADMIN, ru.role.posterUz);
-    const [pdf, png] = s.tg.to(ADMIN).slice(-2);
+    const [pdf, png] = docs(s, ADMIN).slice(-2);
     expect([pdf.type, pdf.fileName, png.fileName]).toEqual(["document", `inviteizi-${p.code}-uz.pdf`, `inviteizi-${p.code}-uz.png`]);
     expect(Buffer.from(pdf.media as Uint8Array).subarray(0, 8).toString("latin1")).toBe("%PDF-1.4");
     expect(pdf.text).toBe(ru.role.posterReady(p.name));
@@ -467,9 +468,10 @@ describe("QR и постер (часть 6)", () => {
     await join(s, token);
     await s.start(PARTNER);
     await s.click(PARTNER, uz.role.qr);
-    expect(s.lastText(PARTNER)).toBe(uz.role.qrCaption(p.name, `https://t.me/inviteizi_test_bot?start=p_${p.code}`));
+    expect(qrOf(s, PARTNER).text).toBe(uz.role.qrCaption(p.name, `https://t.me/inviteizi_test_bot?start=p_${p.code}`));
+    expect(s.lastText(PARTNER)).toBe(uz.role.refLink(`https://t.me/inviteizi_test_bot?start=p_${p.code}`));
     await s.click(PARTNER, uz.role.posterRu);
-    expect(s.tg.to(PARTNER).at(-1)!.fileName).toBe(`inviteizi-${p.code}-ru.png`);
+    expect(docs(s, PARTNER).at(-1)!.fileName).toBe(`inviteizi-${p.code}-ru.png`);
 
     await start(s, CLIENT);
     await start(s, 901);
@@ -489,7 +491,41 @@ describe("QR и постер (часть 6)", () => {
     await s.callback(MANAGER, "pq:1:ru", 1);
     expect(lastToast(s)).toBe(ru.oldButton);
     await s.click(MANAGER, ru.role.posterRu);
-    expect(s.tg.to(MANAGER).at(-1)!.fileName).toMatch(/-ru\.png$/);
+    expect(docs(s, MANAGER).at(-1)!.fileName).toMatch(/-ru\.png$/);
+  }, 30_000);
+});
+
+describe("Ссылка партнёра текстом (fix/app-polish)", () => {
+  it("рядом с QR и постером — ссылка с кнопкой «📋 Скопировать» и подсказкой про WhatsApp; заказ по ссылке засчитан партнёру", async () => {
+    const s = new Sim();
+    const token = await createPartner(s, ADMIN);
+    const p = s.repo.partners[0];
+    const link = `https://t.me/inviteizi_test_bot?start=p_${p.code}`;
+    const msg = s.last(ADMIN)!;
+    expect(msg.text).toBe(ru.role.refLink(link));
+    expect(msg.text).toContain("WhatsApp");
+    expect((msg.markup as { inline: { text: string; copy?: string }[][] }).inline.flat()).toEqual([{ text: ru.role.copyLink, copy: link }]);
+    await s.click(ADMIN, ru.role.posterUz);
+    expect(s.last(ADMIN)!.text).toBe(ru.role.refLink(link));
+
+    await join(s, token);
+    await s.start(PARTNER);
+    await s.click(PARTNER, uz.role.qr);
+    const pm = s.last(PARTNER)!;
+    expect(pm.text).toBe(uz.role.refLink(link));
+    expect((pm.markup as { inline: { text: string; copy?: string }[][] }).inline.flat()).toEqual([{ text: uz.role.copyLink, copy: link }]);
+    for (const t of [ru, uz]) {
+      expect(t.role.refLink(link).length).toBeLessThanOrEqual(TG_LIMITS.message);
+      expect(t.role.copyLink.length).toBeLessThanOrEqual(TG_LIMITS.button);
+    }
+
+    // Клиент пришёл по ссылке (из WhatsApp — тот же /start p_<код>) → оплаченный заказ засчитан партнёру
+    const o = await paidOrder(s, CLIENT, p.code);
+    expect((await s.user(CLIENT))!.source).toBe(partnerSource(p.code));
+    expect(o.number).toBeGreaterThan(0);
+    await s.start(PARTNER);
+    await s.click(PARTNER, uz.role.stats);
+    expect(s.lastText(PARTNER)).toContain(`${uz.role.statsText({ period: "", scanned: 0, paid: 1, earned: "", paidOut: "", due: "", link: "" }).split("\n").find((l) => l.startsWith("Тўлов"))}`);
   }, 30_000);
 });
 
@@ -497,7 +533,7 @@ describe("Казахский постер (дополнение к части 6)
   it("кнопка kk только при KAZAKH_ENABLED; без флага pq:…:kk не срабатывает", async () => {
     const off = new Sim();
     await createPartner(off, ADMIN);
-    expect(JSON.stringify(off.last(ADMIN)!.markup)).not.toContain(":kk");
+    expect(JSON.stringify(qrOf(off, ADMIN).markup)).not.toContain(":kk");
     const before = off.tg.messages.length;
     await off.callback(ADMIN, `pq:${off.repo.partners[0].id}:kk`, 1);
     expect(off.tg.messages.length).toBe(before);
@@ -507,7 +543,7 @@ describe("Казахский постер (дополнение к части 6)
     await createPartner(on, ADMIN);
     const p = on.repo.partners[0];
     await on.click(ADMIN, ru.role.posterKk);
-    expect(on.tg.to(ADMIN).at(-1)!.fileName).toBe(`inviteizi-${p.code}-kk.png`);
+    expect(docs(on, ADMIN).at(-1)!.fileName).toBe(`inviteizi-${p.code}-kk.png`);
   }, 30_000);
 });
 

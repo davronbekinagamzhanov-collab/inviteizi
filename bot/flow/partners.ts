@@ -136,6 +136,12 @@ export async function sendPack(c: Ctx, p: Partner) {
       ...(c.deps.env.kazakhEnabled ? [[{ text: tx.role.posterKk, data: `pq:${p.id}:kk` }]] : []),
     ]),
   });
+  await sendRefLink(c, link, tx);
+}
+
+/** Ссылка партнёра текстом + кнопка «📋 Скопировать»: отправлять в WhatsApp, заказы по ней засчитываются партнёру */
+async function sendRefLink(c: Ctx, link: string, tx: typeof texts.ru) {
+  await c.deps.tg.sendMessage(c.chatId, tx.role.refLink(link), { markup: inline([[{ text: tx.role.copyLink, copy: link }]]), noPreview: true });
 }
 
 /** pq:<id>:<язык> — постер A4: PDF для печати и PNG для телефона */
@@ -161,6 +167,7 @@ export async function sendPoster(c: Ctx, idArg: string, lang: string) {
   const file = `inviteizi-${p.code}-${lang}`;
   await c.deps.tg.sendDocument(c.chatId, pdf, { fileName: `${file}.pdf`, caption: tx.role.posterReady(p.name) });
   await c.deps.tg.sendDocument(c.chatId, png, { fileName: `${file}.png` });
+  await sendRefLink(c, await linkOf(c.deps, p), tx);
 }
 
 /** Одноразовая ссылка партнёру (7 дней) + кнопки WhatsApp на узбекском и русском */
