@@ -197,7 +197,7 @@ try {
       await page.getByText(T.pay.how).waitFor();
       await step("07-pay");
       await page.locator('input[type="file"]').setInputFiles([{ name: "chek.jpg", mimeType: "image/jpeg", buffer: photoBytes }]);
-      await page.getByText(T.pay.doneTitle).waitFor();
+      await page.getByText(T.pay.waitTitle).waitFor();
       await waitMain(page, T.myOrders);
       await step("08-done");
       await press(page, "main");
