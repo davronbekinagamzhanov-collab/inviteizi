@@ -8,7 +8,7 @@ import {PgRepo} from "./repo-pg";
 import type {Sql} from "@/lib/db";
 import {designs,PRICES} from "@/templates/registry";
 import {Sim,ADMIN} from "./testing/sim";
-import {startUz,nikohToReview} from "./testing/paths";
+import { startUz, nikohToReview, pickDesign } from "./testing/paths";
 import {uz} from "@/texts/bot-uz";
 import {pageMode,invitationData} from "@/lib/orders";
 
@@ -29,7 +29,7 @@ describe.skipIf(process.env.INVITEIZI_LOCAL_PG!=="1")("compatibility with main b
   const sim=()=>{const s=new Sim();s.deps.repo=repo;return s;};
 
   it("buy still enters the existing form when analytics_events does not exist",async()=>{
-    const s=sim();await startUz(s,720001);await s.click(720001,uz.category.nikoh);await s.click(720001,/Анимацияли/);await s.click(720001,uz.catalog.buy);
+    const s=sim();await startUz(s,720001);await s.click(720001,uz.category.nikoh);await pickDesign(s, 720001, "animated");
     expect((await repo.getUser(720001))?.step).toBe("groom");
     expect(s.lastText(720001)).toBe(uz.form.groom);
   });
@@ -62,7 +62,7 @@ describe.skipIf(process.env.INVITEIZI_LOCAL_PG!=="1")("compatibility with main b
     const s=sim();await repo.touchUser({id:720003});await repo.setLang(720003,"uz");
     const o=await repo.createOrder({userId:720003,occasion:"nikoh",format:"animated",templateId:"ganch-peshtoq",data:{occasion:"nikoh",groom:"Азиз",bride:"Мадина",hosts:"Оила",events:[]},music:{kind:"none"},amount:4321,slugBase:"compat-payment",status:"preview"});
     const before=(await repo.stats(s.clock)).revenue.total;
-    await s.callback(720003,`pay:${o.number}`,1);await s.photo(720003,"fixture-receipt");
+    await s.callback(720003,`payok:${o.number}`,1);await s.photo(720003,"fixture-receipt");
     expect((await repo.getOrder(o.id))?.status).toBe("receipt_sent");
     await s.callback(ADMIN,`ok:${o.number}`,1);await s.callback(ADMIN,`ok:${o.number}`,1);
     expect((await repo.getOrder(o.id))?.status).toBe("active");

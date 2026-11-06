@@ -38,7 +38,7 @@
 .nav button { width: 44px; height: 44px; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--c-accent) 50%, transparent); color: var(--c-accent); font-size: 24px; line-height: 1; background: transparent; }
 .nav button:disabled { opacity: .3; }
 .dots { display: flex; gap: 8px; }
-.dots i { width: 6px; height: 6px; border-radius: 50%; background: color-mix(in srgb, var(--c-ink) 25%, transparent); transition: transform .3s ease, background-color .3s ease; }
+.dots i { width: 6px; height: 6px; border-radius: 50%; background: color-mix(in srgb, var(--c-ink) 25%, transparent); transition: transform var(--m-fast) var(--m-ease), background-color var(--m-fast) var(--m-ease); }
 .dots i[data-on="true"] { background: var(--c-accent); transform: scale(1.5); }
 
 .finale { padding-top: 10px; }

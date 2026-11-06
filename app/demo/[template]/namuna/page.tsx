@@ -1,7 +1,8 @@
 import { glueData } from "@/lib/typography";
 import { notFound } from "next/navigation";
 import { demoMusicUrl } from "@/lib/music";
-import { designs, existingArt, getDesign } from "@/templates/registry";
+import { designs, getDesign } from "@/templates/registry";
+import { existingArt } from "@/templates/art";
 
 /** Каталожный образец личного демо: НАМУНА и музыка выбранного тадбира. */
 export const instant = false;

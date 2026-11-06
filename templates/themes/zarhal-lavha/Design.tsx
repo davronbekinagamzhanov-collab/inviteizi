@@ -11,6 +11,7 @@ import {MapButton} from "../../blocks/MapButton";
 import {Reveal} from "../../blocks/Reveal";
 import {Calendar} from "../../blocks/Calendar";
 import {designTexts} from "@/texts/uz-cyrl";
+import { MOTION } from "@/templates/blocks/motion";
 const font=localFont({src:[{path:"../../../assets/fonts/Lora-Regular.ttf"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--zl-font",display:"swap"});
 const vars=designVars({primary:"#89623c",primaryDark:"#634328",gold:"#b28b53",goldLight:"#ead7b6",paper:"#fcf6eb",ink:"#514332",muted:"#71614e"},{display:"var(--zl-font)",accent:"var(--zl-font)",body:"var(--zl-font)"});
 const t=designTexts("zarhal-lavha");
@@ -23,8 +24,8 @@ export default function Design({data,mode}:TemplateProps){
   return <InvitationShell inv={inv} style={vars} fontsClassName={font.variable} backdropClassName="bg-[#ded3bd]" className="bg-paper text-ink [overflow-wrap:anywhere]">
     <Content data={data} inv={inv}/>
     {!inv.opened&&<button data-open type="button" onClick={open} disabled={inv.started} aria-label={t.opening.tapToOpen} className="absolute inset-x-0 top-0 z-40 h-svh min-h-[560px] overflow-hidden text-ink" style={{perspective:1200}}>
-      {[0,1,2,3,4].map(i=><motion.div key={i} initial={false} animate={{rotateX:inv.started?(i%2?90:-90):0,opacity:inv.started?0:1}} transition={{duration:reduced?0:.76,delay:reduced?0:i*.055,ease:[.22,.65,.3,1]}} className="absolute inset-x-0 h-[20.2%] border-y border-[#c0a271]/45 bg-[#eee0c4]" style={{top:`${i*20}%`,transformOrigin:i%2?"center bottom":"center top",backfaceVisibility:"hidden",willChange:inv.started?"transform,opacity":undefined}}><div aria-hidden className="absolute inset-3 border border-[#b28b53]/40"/>{i===0||i===4?<div className="absolute inset-x-8 top-[25%]"><Filigree/></div>:null}</motion.div>)}
-      <motion.div initial={false} animate={{opacity:inv.started?0:1,y:inv.started?-12:0}} transition={{duration:reduced?0:.18}} className="pointer-events-none absolute inset-x-7 top-[31%] text-center"><p className="text-[13px] uppercase tracking-[.2em]">{t.opening.invitation}</p>{data.age!=null&&<p className="mt-6 text-[88px] leading-none text-primary">{data.age}<span className="ml-2 text-[22px] italic">{t.ageLabel}</span></p>}<p className="mt-7 text-[29px]">{t.occasionTitles[inv.occasion]}</p><p className="mt-12 text-[17px]">{t.opening.tapToOpen}</p></motion.div>
+      {[0,1,2,3,4].map(i=><motion.div key={i} initial={false} animate={{rotateX:inv.started?(i%2?90:-90):0,opacity:inv.started?0:1}} transition={{duration:reduced?0:MOTION.base,delay:reduced?0:i * MOTION.step,ease: MOTION.ease}} className="absolute inset-x-0 h-[20.2%] border-y border-[#c0a271]/45 bg-[#eee0c4]" style={{top:`${i*20}%`,transformOrigin:i%2?"center bottom":"center top",backfaceVisibility:"hidden",willChange:inv.started?"transform,opacity":undefined}}><div aria-hidden className="absolute inset-3 border border-[#b28b53]/40"/>{i===0||i===4?<div className="absolute inset-x-8 top-[25%]"><Filigree/></div>:null}</motion.div>)}
+      <motion.div initial={false} animate={{opacity:inv.started?0:1,y:inv.started?-12:0}} transition={{duration:reduced?0:MOTION.fast, ease: MOTION.ease}} className="pointer-events-none absolute inset-x-7 top-[31%] text-center"><p className="text-[13px] uppercase tracking-[.2em]">{t.opening.invitation}</p>{data.age!=null&&<p className="mt-6 text-[88px] leading-none text-primary">{data.age}<span className="ml-2 text-[22px] italic">{t.ageLabel}</span></p>}<p className="mt-7 text-[29px]">{t.occasionTitles[inv.occasion]}</p>{data.person&&<p className="mt-3 text-[24px] leading-tight [overflow-wrap:anywhere]">{data.person}</p>}<p className="mt-3 text-[16px] tracking-[.12em]">{t.date.short(inv.main.when.day,inv.main.when.monthIndex,inv.main.when.year)}</p><p className="mt-9 text-[17px]">{t.opening.tapToOpen}</p></motion.div>
     </button>}
   </InvitationShell>;
 }
@@ -47,5 +48,5 @@ const Content=memo(function Content({data,inv}:{data:InvitationData;inv:Invitati
       <Reveal className="mx-5 mt-10 border-double border-y-4 border-gold/40 px-5 py-9 text-center"><p className="text-[22px] italic leading-relaxed">{inv.blessing}</p><p className="mt-8 text-[15px] text-muted">{t.hosts.respectDeep}</p><p ref={hosts} className="mt-3 w-full leading-snug [--fit:25px]"><span className="text-[length:var(--fit)]"><Words text={data.hosts}/></span></p><p className="mt-6 text-[17px] text-primary">{t.hosts.waiting}</p></Reveal>
     </main>
   </>;
-},(a,b)=>a.data===b.data&&a.inv.mode===b.inv.mode);
+},(a,b)=>a.data===b.data&&a.inv.mode===b.inv.mode&&a.inv.lang===b.inv.lang);
 function Filigree(){return <svg data-decor aria-hidden="true" viewBox="0 0 320 100" className="mx-auto w-full max-w-[310px]" fill="none" stroke="#b28b53" strokeWidth="1.2"><path d="M12 50h45q25 0 35-20t26 0q12 22 42 20q30 2 42-20t26 0q10 20 35 20h45M38 58q25 37 53 5M282 58q-25 37-53 5M75 44q-17-31 12-28q22 6 6 28M245 44q17-31-12-28q-22 6-6 28"/><path d="M160 14q-29 28 0 44q29-16 0-44ZM160 87q-19-19 0-29q19 10 0 29Z" fill="#dfc798" fillOpacity=".45"/><path d="m132 54-8 12 12 5M188 54l8 12-12 5"/><circle cx="160" cy="50" r="5" fill="#b28b53"/></svg>;}

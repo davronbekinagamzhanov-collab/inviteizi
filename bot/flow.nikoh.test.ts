@@ -3,12 +3,10 @@ import { uz } from "@/texts/bot-uz";
 import { Sim } from "./testing/sim";
 import { buttonLabels, inlineButtons } from "./testing/fake-tg";
 import { nikohOrder, startUz } from "./testing/paths";
+import { catalogList } from "./flow/steps-order";
 import { activeDesigns } from "@/templates/registry";
 
 const BASE = "https://inviteizi.vercel.app";
-const animatedNikohCount=activeDesigns().filter(d=>d.occasion==="nikoh"&&d.format==="animated").length;
-// Листание проверяем на самом большом каталоге никоҳ (Анимацияли)
-const simpleNikoh=activeDesigns().filter(d=>d.occasion==="nikoh"&&d.format==="animated");
 
 describe("весь путь никоҳ на ўзбекском", () => {
   it("от /start insta до ссылки на НАМУНА", async () => {
@@ -16,31 +14,27 @@ describe("весь путь никоҳ на ўзбекском", () => {
     const id = 1;
     await startUz(sim, id, "insta");
 
-    // Категория → формат
+    // Категория → сразу каталог: альбом из 3 обложек + одно сообщение с ценами и кнопками
     expect(buttonLabels(sim.last(id))).toEqual(expect.arrayContaining([uz.category.nikoh, uz.category.nahorgi, uz.category.sunnat, uz.back]));
     await sim.click(id, uz.category.nikoh);
-    expect(sim.lastText(id)).toContain(uz.format.ask);
-    const fmt = buttonLabels(sim.last(id));
-    expect(fmt.some((l) => /^✨ Анимацияли — 8.000 ₸$/.test(l))).toBe(true);
-    expect(fmt.some((l) => /^📄 Оддий — 5.000 ₸$/.test(l))).toBe(true);
-    await sim.click(id, /Анимацияли/);
-
-    // Каталог: одно сообщение с фото, листаем ▶ в том же сообщении
-    const cat = sim.last(id);
-    expect(cat.type).toBe("photo");
-    expect(cat.media).toBe(`${BASE}/covers/muhr.jpg`);
-    expect(cat.text).toMatch(/^№113 · Муҳр\nАнимацияли · 8.000 ₸\n📷 Расмингизни қўйса бўлади$/);
-    expect(buttonLabels(cat)).toEqual(expect.arrayContaining(["◀", `1/${animatedNikohCount}`, "▶", uz.catalog.demo, uz.catalog.buy]));
-    expect(inlineButtons(cat).find((b) => b.text === uz.catalog.demo)).toEqual({
-      text: uz.catalog.demo,
-      url: `${BASE}/demo/muhr`, // каталог — чистое демо без надписи
-    });
+    const list = catalogList({ s: { occasion: "nikoh" } });
+    const album = sim.tg.to(id).filter((m) => m.type === "photo");
+    expect(album.map((m) => m.media)).toEqual(list.slice(0, 3).map((d) => `${BASE}/covers/${d.id}.jpg`));
+    const menu = sim.last(id);
+    expect(menu.text).toContain("1️⃣ №113 Муҳр — 8 000 ₸ · 📷");
+    expect(menu.text).not.toMatch(/Анимацияли|Варақланадиган|Оддий/);
+    expect(buttonLabels(menu)).toEqual(expect.arrayContaining(["◀", `1–3 / ${list.length}`, "▶", uz.catalog.view("1️⃣"), uz.catalog.pick("1️⃣")]));
+    expect(inlineButtons(menu).find((b) => b.text === uz.catalog.view("1️⃣"))).toEqual({ text: uz.catalog.view("1️⃣"), url: `${BASE}/demo/muhr` });
+    // ▶ — следующая страница: старый альбом и кнопки удалены, в чате только новая страница
     await sim.click(id, "▶");
-    expect(sim.last(id).id).toBe(cat.id);
-    expect(cat.media).toBe(`${BASE}/covers/ipak.jpg`);
-    expect(cat.text).toMatch(/^№114 · Ипак/);
-    expect(buttonLabels(cat)).toContain(`2/${animatedNikohCount}`);
-    await sim.click(id, uz.catalog.buy);
+    expect(sim.tg.to(id).filter((m) => m.type === "photo").map((m) => m.media)).toEqual(list.slice(3, 6).map((d) => `${BASE}/covers/${d.id}.jpg`));
+    expect(sim.tg.to(id).some((m) => m.id === menu.id)).toBe(false);
+    expect(sim.lastText(id)).toContain(`№${list[3].number} `);
+    await sim.click(id, "◀");
+    await sim.click(id, uz.catalog.pick("2️⃣"));
+    // Выбор: альбом убран, кнопки заменены строкой «✅ Танланди»
+    expect(sim.tg.to(id).filter((m) => m.type === "photo")).toEqual([]);
+    expect(sim.tg.to(id).some((m) => m.text === uz.catalog.chosen(list[1].number, "Ипак") || m.text.startsWith(`✅ Танланди: №${list[1].number} `))).toBe(true);
 
     // Анкета
     expect(sim.lastText(id)).toBe(uz.form.groom);
@@ -72,7 +66,8 @@ describe("весь путь никоҳ на ўзбекском", () => {
     expect(buttonLabels(loc)).toEqual(expect.arrayContaining([uz.event.readyVenues,uz.event.mapChoice,uz.event.linkChoice,uz.event.manualChoice,uz.event.skip,uz.back]));
     expect(JSON.stringify(loc.markup)).not.toContain("location");
     await sim.location(id, 42.3005, 69.7612);
-    expect(sim.tg.to(id).some((m) => m.text === uz.event.locationSaved && buttonLabels(m).includes(uz.menu.create))).toBe(true);
+    // клавиатура «📍 Локация» убирается (removeReply), главное меню — кнопками под сообщением /start
+    expect(sim.tg.to(id).some((m) => m.text === uz.event.locationSaved && JSON.stringify(m.markup) === JSON.stringify({ removeReply: true }))).toBe(true);
 
     // Тадбир 2: наҳорги ош в тот же день
     expect(sim.lastText(id)).toContain("1. Никоҳ базми — 14.11.2026, 18:00");
@@ -86,10 +81,15 @@ describe("весь путь никоҳ на ўзбекском", () => {
     await sim.text(id, "https://2gis.kz/shymkent/firm/70000001");
     await sim.click(id, uz.event.noMore);
 
+    // Бот сам выбрал текст, музыку и «ответы гостей» — сразу сводка «Бот танлади»
+    expect(sim.lastText(id)).toContain(uz.review.title);
+    expect(sim.lastText(id)).toContain(uz.review.textPreset(1));
+    await sim.click(id, uz.review.editText);
     // Текст: варианты из t.inviteOptions
     expect(sim.lastText(id)).toContain("Сизни фарзандларимиз Азиз ва Мадинанинг никоҳ тўйларига");
     expect(buttonLabels(sim.last(id))).toEqual(expect.arrayContaining([uz.text.pick(1), uz.text.pick(2), uz.text.pick(3), uz.text.own]));
     await sim.click(id, uz.text.pick(2));
+    await sim.click(id, uz.review.editMusic);
 
     // Музыка из списка: послушать, выбрать
     expect(sim.lastText(id)).toBe(uz.music.ask);
@@ -102,6 +102,7 @@ describe("весь путь никоҳ на ўзбекском", () => {
     await sim.click(id, uz.music.play("Ёр-ёр"));
     expect(sim.last(id).media).toMatch(/^TGAUDIO_/); // второй раз — по file_id
     await sim.click(id, uz.music.choose);
+    await sim.click(id, uz.rsvp.edit);
     await sim.click(id, uz.rsvp.no);
 
     // Сводка
@@ -183,37 +184,26 @@ describe("весь путь никоҳ на ўзбекском", () => {
     expect(sim.lastText(2)).toContain(`${BASE}/aziz-madina-2`);
   });
 
-  it("каталог листается по кругу: ◀ с первого — последний", async () => {
+  it("каталог листается по кругу: ◀ с первой страницы — последняя", async () => {
     const sim = new Sim();
     await startUz(sim, 1);
     await sim.click(1, uz.category.nikoh);
-    await sim.click(1, new RegExp(uz.format.names.animated));
-    const cat = sim.last(1);
-    expect(buttonLabels(cat)).toContain(`1/${simpleNikoh.length}`);
-    expect(cat.media).toBe(`${BASE}/covers/${simpleNikoh[0].id}.jpg`);
+    const list = catalogList({ s: { occasion: "nikoh" } });
+    const lastStart = Math.floor((list.length - 1) / 3) * 3;
     await sim.click(1, "◀");
-    expect(buttonLabels(cat)).toContain(`${simpleNikoh.length}/${simpleNikoh.length}`);
-    expect(cat.media).toBe(`${BASE}/covers/${simpleNikoh.at(-1)!.id}.jpg`);
+    expect(buttonLabels(sim.last(1))).toContain(`${lastStart + 1}–${list.length} / ${list.length}`);
+    expect(sim.lastText(1)).toContain(`№${list.at(-1)!.number} `);
     await sim.click(1, "▶");
-    expect(buttonLabels(cat)).toContain(`1/${simpleNikoh.length}`);
-    expect(cat.media).toBe(`${BASE}/covers/${simpleNikoh[0].id}.jpg`);
+    expect(buttonLabels(sim.last(1))).toContain(`1–3 / ${list.length}`);
+    expect(sim.tg.to(1).filter((m) => m.type === "photo")[0].media).toBe(`${BASE}/covers/${list[0].id}.jpg`);
   });
 
-  it("суннат показывает форматы по текущему принятому каталогу", async () => {
+  it("суннат: в каталоге все принятые дизайны тадбира, шага «формат» нет", async () => {
     const sim = new Sim();
     await startUz(sim, 1);
     await sim.click(1, uz.category.sunnat);
-    const labels = buttonLabels(sim.last(1));
-    for(const f of ["animated","scroll","simple"] as const)
-      expect(labels.some(l=>l.includes(uz.format.names[f]))).toBe(activeDesigns().some(d=>d.occasion==="sunnat"&&d.format===f));
-  });
-
-  it("ℹ️ — объяснение разницы форматов обычным сообщением", async () => {
-    const sim = new Sim();
-    await startUz(sim, 1);
-    await sim.click(1, uz.category.nikoh);
-    await sim.click(1, uz.format.info);
-    expect(sim.tg.to(1).some((m) => m.text === uz.format.infoText)).toBe(true);
-    expect(sim.lastText(1)).toContain(uz.format.ask);
+    expect((await sim.user(1))!.step).toBe("catalog");
+    const list = catalogList({ s: { occasion: "sunnat" } });
+    expect(list.map((d) => d.id).sort()).toEqual(activeDesigns().filter((d) => d.occasion === "sunnat").map((d) => d.id).sort());
   });
 });

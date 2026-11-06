@@ -55,14 +55,31 @@ describe('батч 3 (123–138): SQL только по «да» владель�
  }finally{await pg.close()}},20000);
 });
 
-describe('весь выпуск по порядку (03.11.2026): natural-four → natural-six → batch3 → hide-old-designs',()=>{
- it('в базе активны ровно дизайны каталога кода (33), каждая строка совпадает с реестром; 131 и 48 старых скрыты',async()=>{const pg=await fixture();try{
-  for(const name of ['natural-four-templates','natural-six-templates','natural-batch3-templates','hide-old-designs'])await pg.exec(await file(`supabase/release/${name}.sql`));
+describe('«Пятно» (139–141): SQL только по «да» владельца',()=>{
+ const PATNO=everAccepted().filter(d=>d.number>=139&&d.number<=141);
+ it('3 строки никоҳ 8 000 ₸ совпадают с реестром, повтор без изменений, старые строки не тронуты',async()=>{const pg=await fixture();try{
+  expect(PATNO.map(d=>d.id)).toEqual(['suvbuyoq-tuman','suvbuyoq-zumrad','suvbuyoq-upa']);
+  const before=(await pg.query('select * from public.templates order by id')).rows;
+  const sql=await file('supabase/release/patno-three-templates.sql');await pg.exec(sql);await pg.exec(sql);
+  expect((await pg.query('select * from public.templates where number not between 139 and 141 order by id')).rows).toEqual(before);
+  const rows=(await pg.query('select id,number,occasion,format,price,with_photo,cover_url,is_active from public.templates where number between 139 and 141 order by number')).rows;
+  expect(rows).toEqual(PATNO.map(d=>({id:d.id,number:d.number,occasion:'nikoh',format:'animated',price:8000,with_photo:false,cover_url:`/covers/${d.id}.webp`,is_active:true})));
+ }finally{await pg.close()}},20000);
+ it('откатывается целиком, если номер уже занят',async()=>{const pg=await fixture();try{
+  await pg.exec("insert into public.templates(id,number,occasion,format,price) values('external-140',140,'nikoh','animated',8000)");
+  await expect(pg.exec(await file('supabase/release/patno-three-templates.sql'))).rejects.toThrow(/identity\/number conflict/);await pg.exec('rollback');
+  expect((await pg.query("select id from public.templates where number between 139 and 141")).rows).toEqual([{id:'external-140'}]);
+ }finally{await pg.close()}},20000);
+});
+
+describe('весь выпуск по порядку: natural-four → natural-six → batch3 → hide-old-designs → «Пятно» (v2)',()=>{
+ it('в базе активны ровно дизайны каталога кода (36), каждая строка совпадает с реестром; 131 и 48 старых скрыты',async()=>{const pg=await fixture();try{
+  for(const name of ['natural-four-templates','natural-six-templates','natural-batch3-templates','hide-old-designs','patno-three-templates'])await pg.exec(await file(`supabase/release/${name}.sql`));
   const rows=(await pg.query<{id:string;number:number;occasion:string;format:string;price:number;is_active:boolean}>('select id,number,occasion,format,price,is_active from public.templates')).rows;
   const byId=new Map(rows.map(r=>[r.id,r]));
   // активные в базе = каталог бота и сайта
   expect(rows.filter(r=>r.is_active).map(r=>r.id).sort()).toEqual([...ACCEPTED].sort());
-  expect(ACCEPTED.size).toBe(33);
+  expect(ACCEPTED.size).toBe(36);
   // каждый дизайн, на который может ссылаться заказ, есть в базе с тем же номером, тадбиром и форматом
   for(const d of everAccepted().filter(d=>d.number>=113||ACCEPTED.has(d.id))){
    const r=byId.get(d.id);expect(r,d.id).toBeDefined();

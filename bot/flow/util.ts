@@ -6,17 +6,19 @@ import type { EventKind } from "@/lib/types";
 import { getDesign, PRICES, FORMATS, type Format, activeDesigns } from "@/templates/registry";
 import { tPlain as t } from "@/texts/uz-cyrl";
 import { uz, type BotTexts } from "@/texts/bot-uz";
-import { ru } from "@/texts/bot-ru";
+import { ru, staff } from "@/texts/bot-ru";
+import { kk } from "@/texts/bot-kk";
+import type { Role } from "@/lib/roles";
 import { demoToken } from "@/lib/demo-tracking";
 import { isEditImpossible } from "../errors";
 
-export const texts: Record<Lang, BotTexts> = { uz, ru };
+export const texts: Record<Lang, BotTexts> = { uz, ru, kk };
 export const txFor = (lang: Lang | null | undefined): BotTexts => texts[lang ?? "uz"];
 
 /** Песня клиента — до 20 МБ */
 export { MAX_MUSIC_BYTES } from "../audio-type";
-export const MAX_CUSTOM_TEXT = 600;
-export const MAX_EVENTS = 3;
+export { MAX_CUSTOM_TEXT, MAX_EVENTS, MAIN_EVENT, isCompleteEvent } from "@/lib/order-rules";
+import { MAIN_EVENT, isCompleteEvent } from "@/lib/order-rules";
 /** Статусы «уже оплачено» */
 export const PAID_STATUSES: OrderStatus[] = ["active", "archived"];
 /** Можно платить / присылать чек */
@@ -29,8 +31,37 @@ export const ib = (c: Ctx, text: string, value: string): InlineButton => ({ text
 export const backRow = (c: Ctx): InlineButton[] => [ib(c, c.tx.back, "back")];
 export const inline = (rows: InlineButton[][]): { inline: InlineButton[][] } => ({ inline: rows });
 
-export function mainMenu(tx: BotTexts): Markup {
-  return { reply: [[{ text: tx.menu.create }], [{ text: tx.menu.my }], [{ text: tx.menu.help }, { text: tx.menu.lang }]] };
+/** Убрать нижнюю клавиатуру (старое меню, «📍 Локация»). Главное меню теперь — кнопки под сообщением, см. startMenu */
+export function mainMenu(): Markup {
+  return { removeReply: true };
+}
+
+/** Главное меню: одно сообщение с кнопками. «✨ Таклифнома яратиш» — приложение (или чат, если приложение выключено) */
+export async function startMenu(c: Ctx): Promise<{ inline: InlineButton[][] }> {
+  const tx = c.tx;
+  // У владельца, менеджера и партнёра вместо клиентского меню — одна кнопка их панели
+  const role = await roleOf(c);
+  if (role === "owner" || role === "manager") return { inline: [[{ text: staff.btn.panel, data: "pn:home" }]] };
+  if (role === "partner") return { inline: [[{ text: tx.role.menu, data: "pn:home" }]] };
+  const saved = c.chatId === c.user.id ? (await c.deps.repo.listFavorites(c.user.id)).length : 0;
+  const app = c.deps.env.miniAppUrl;
+  return {
+    inline: [
+      [app ? { text: tx.menu.create, webApp: app } : { text: tx.menu.create, data: "m:create" }],
+      [{ text: tx.menu.my, data: "m:my" }],
+      [{ text: tx.menuSaved(saved), data: "favorites" }],
+      [{ text: tx.menu.lang, data: "m:lang" }, { text: tx.menu.help, data: "m:help" }],
+    ],
+  };
+}
+
+/** Роль человека в личном чате. В группе — всегда клиент: панели там не открываются */
+export async function roleOf(c: Pick<Ctx, "deps" | "user" | "chatId">): Promise<Role> {
+  if (c.chatId !== c.user.id) return "client";
+  if (await c.deps.repo.isAdmin(c.user.id)) return "owner";
+  if (await c.deps.repo.getManager(c.user.id)) return "manager";
+  if (await c.deps.repo.findPartnerForUser(c.user.id, c.user.username)) return "partner";
+  return "client";
 }
 
 export async function send(c: Ctx, text: string, markup?: Markup) {
@@ -92,12 +123,6 @@ export function designLine(tx: BotTexts, templateId: string, format: Format, amo
 
 // ── Черновик ──
 
-export const MAIN_EVENT: Record<Occasion, EventKind> = {
-  nikoh: "nikohBazm",
-  nahorgi: "nahorgi",
-  sunnat: "sunnatBazm",
-  yubiley: "yubileyBazm",
-};
 
 export function data(c: Ctx) {
   c.s.data ??= { occasion: c.s.occasion, events: [] };
@@ -121,8 +146,6 @@ export function curEvent(c: Ctx): Partial<InvitationEvent> {
   return evs[i];
 }
 
-export const isCompleteEvent = (e: Partial<InvitationEvent> | null | undefined): e is InvitationEvent =>
-  !!(e?.kind && e.date && e.time && e.venueName && e.address);
 
 /** Черновик → данные пригласительного (только законченные тадбиры) */
 export function finalData(s: Draft): InvitationData {

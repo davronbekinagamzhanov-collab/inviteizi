@@ -25,7 +25,7 @@ function markupOf(m?: Markup): InlineKeyboardMarkup | ReplyKeyboardMarkup | Repl
   if ("inline" in m) return inlineKb(m.inline);
   if ("reply" in m) {
     return {
-      keyboard: m.reply.map((row) => row.map((b) => (b.location ? { text: b.text, request_location: true } : { text: b.text }))),
+      keyboard: m.reply.map((row) => row.map((b) => (b.location ? { text: b.text, request_location: true } : b.contact ? { text: b.text, request_contact: true } : { text: b.text }))),
       resize_keyboard: true,
       is_persistent: true,
       ...(m.oneTime ? { one_time_keyboard: true } : {}),
@@ -90,13 +90,33 @@ export function createTg(api: Api, token: string): Tg {
       }
     },
     async sendPhoto(chatId, photo, opts = {}) {
-      const file = typeof photo === "string" ? photo : new InputFile(photo, "qr.png");
+      const file = typeof photo === "string" ? photo : new InputFile(photo, opts.fileName ?? "qr.png");
       const m = await api.sendPhoto(chatId, file, { ...sendExtra(opts), ...(opts.caption ? { caption: opts.caption } : {}) });
-      return { messageId: m.message_id };
+      return { messageId: m.message_id, fileId: m.photo?.at(-1)?.file_id };
     },
-    async sendDocument(chatId, fileId, opts = {}) {
-      const m = await api.sendDocument(chatId, fileId, { ...sendExtra(opts), ...(opts.caption ? { caption: opts.caption } : {}) });
-      return { messageId: m.message_id };
+    async sendDocument(chatId, doc, opts = {}) {
+      const file = typeof doc === "string" ? doc : new InputFile(doc, opts.fileName ?? "file.pdf");
+      const m = await api.sendDocument(chatId, file, { ...sendExtra(opts), ...(opts.caption ? { caption: opts.caption } : {}) });
+      return { messageId: m.message_id, fileId: m.document?.file_id };
+    },
+    async sendMediaGroup(chatId, photos) {
+      const ms = await api.sendMediaGroup(chatId, photos.map((p) => ({ type: "photo" as const, media: p.url, ...(p.caption ? { caption: p.caption } : {}) })));
+      const messageIds = ms.map((m) => m.message_id);
+      return { messageId: messageIds[0], messageIds };
+    },
+    async deleteMessage(chatId, messageId) {
+      try {
+        await api.deleteMessage(chatId, messageId);
+      } catch (e) {
+        // Уже удалено или старше 48 часов — тогда просто оставляем
+        if (!(e instanceof Error && /message to delete not found|message can't be deleted/i.test(e.message))) throw e;
+      }
+    },
+    async setMenuButton(chatId, button) {
+      await api.setChatMenuButton({
+        ...(chatId ? { chat_id: chatId } : {}),
+        menu_button: button ? { type: "web_app", text: button.text, web_app: { url: button.url } } : { type: "commands" },
+      });
     },
     async sendAudio(chatId, audio, opts = {}) {
       const m = await api.sendAudio(chatId, audio, {

@@ -53,6 +53,7 @@ function imageFile(c: Ctx): { fileId: string; size: number | null } | null {
 
 export const photoUpload: Step = {
   async ask(c) {
+    delete c.s.photoMsg;
     const p = c.tx.photo;
     const have = data(c).photos?.length ?? 0;
     const rows = have ? [[ib(c, p.done, "done"), ib(c, p.again, "again")]] : [];
@@ -65,6 +66,7 @@ export const photoUpload: Step = {
     }
     if (v === "again") {
       data(c).photos = [];
+      delete c.s.photoMsg;
       await send(c, c.tx.photo.uploadAsk, inline([backRow(c)]));
       return { stay: true };
     }
@@ -95,7 +97,18 @@ export const photoUpload: Step = {
       await send(c, p.full(PHOTO_MAX_COUNT));
       return next(c);
     }
-    await send(c, p.accepted(list.length, PHOTO_MAX_COUNT), inline([[ib(c, p.done, "done"), ib(c, p.again, "again")], backRow(c)]));
+    // Одно «живое» сообщение: «📷 Расмлар: 2 та ✅» правится, новое — только если старое уже не изменить
+    const text = p.accepted(list.length);
+    const markup = inline([[ib(c, p.done, "done"), ib(c, p.again, "again")], backRow(c)]);
+    if (c.s.photoMsg) {
+      try {
+        await c.deps.tg.editMessageText(c.chatId, c.s.photoMsg, text, { markup });
+        return { stay: true };
+      } catch {
+        // сообщение удалено или слишком старое — пришлём новое
+      }
+    }
+    c.s.photoMsg = (await send(c, text, markup)).messageId;
     return { stay: true };
   },
 };

@@ -4,6 +4,7 @@ import {everAccepted,ACCEPTED,HIDDEN_03_11,designs,getDesign,longSample,PRICES} 
 import {t} from "@/texts/uz-cyrl";
 import {Sim} from "@/bot/testing/sim";
 import {startUz,selectCatalogDesign} from "@/bot/testing/paths";
+import {catalogList,PAGE} from "@/bot/flow/steps-order";
 import {uz} from "@/texts/bot-uz";
 
 const batch=[
@@ -36,11 +37,14 @@ describe("batch four: exactly five new complete designs",()=>{
     });
     it(`${id}: existing bot catalog selects the right component and price (or hides it after 03.11)`,async()=>{
       if(!ACCEPTED.has(id)){expect(HIDDEN_03_11).toContain(id);expect(getDesign(id)).toBeDefined();return;}
-      const s=new Sim();await startUz(s,17);await s.click(17,uz.category[occasion]);await s.click(17,new RegExp(uz.format.names[format]));
+      const s=new Sim();await startUz(s,17);await s.click(17,uz.category[occasion]);
+      const list=catalogList({s:{occasion}}),i=list.findIndex(d=>d.id===id);
+      for(let k=0;k<Math.floor(i/PAGE);k++)await s.click(17,"▶");
+      expect(s.tg.to(17).filter(m=>m.type==="photo").some(m=>String(m.media).endsWith(`/covers/${id}.jpg`))).toBe(true);
+      const line=s.lastText(17).split("\n").find(l=>l.includes(`№${getDesign(id)!.number} `))!;
+      const sp=(x:string)=>x.replace(/[\u00a0\u202f]/g," ");
+      expect(sp(line)).toContain(sp(t.price(PRICES[format])));
       await selectCatalogDesign(s,17,id);
-      expect(s.last(17).media).toContain(`/covers/${id}.jpg`);
-      expect(s.lastText(17)).toContain(uz.format.names[format]);expect(s.lastText(17)).toContain(t.price(PRICES[format]));
-      await s.click(17,uz.catalog.buy);
       expect(await s.user(17)).toMatchObject({step:"person",state:{templateId:id,format,occasion}});
     });
   }

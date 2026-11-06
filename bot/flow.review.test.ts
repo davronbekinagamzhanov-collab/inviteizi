@@ -4,7 +4,7 @@ import { uz } from "@/texts/bot-uz";
 import { isMapLink } from "./parse";
 import { Sim } from "./testing/sim";
 import { buttonLabels } from "./testing/fake-tg";
-import { nikohOrder, nikohToMusic, startUz } from "./testing/paths";
+import { nikohOrder, nikohToMusic, startUz, pickDesign } from "./testing/paths";
 
 const qOf = async (sim: Sim, id: number) => Number(((await sim.user(id))?.state as { q?: number }).q ?? 0);
 
@@ -20,23 +20,24 @@ describe("находки ревью бота", () => {
     expect(sim.lastText(1)).toBe(uz.music.saveFailed);
     const u = await sim.user(1);
     expect(u?.step).toBe("musicOwn");
-    expect((u?.state as { music?: unknown }).music).toBeUndefined();
+    expect((u?.state as { music?: unknown }).music).not.toMatchObject({ kind: "own" });
   });
 
   it("I4: обложка каталога не загрузилась → каталог текстом с теми же кнопками", async () => {
     const sim = new Sim();
-    sim.tg.sendPhoto = async () => {
+    const fail = async () => {
       throw new Error("Bad Request: wrong file identifier/HTTP URL specified");
     };
+    sim.tg.sendPhoto = fail;
+    sim.tg.sendMediaGroup = fail;
     await startUz(sim, 1);
     await sim.click(1, uz.category.nikoh);
-    await sim.click(1, /Анимацияли/);
     const m = sim.last(1);
     expect(m.type).toBe("text");
     expect(m.text).toContain("№");
-    expect(buttonLabels(m)).toEqual(expect.arrayContaining([uz.catalog.demo, uz.catalog.buy]));
-    await sim.click(1, "▶"); // листание без фото тоже работает
-    expect(buttonLabels(sim.last(1))).toContain(uz.catalog.buy);
+    expect(buttonLabels(m)).toEqual(expect.arrayContaining([uz.catalog.view("1️⃣"), uz.catalog.pick("1️⃣")]));
+    await sim.click(1, "▶"); // листание без обложек тоже работает
+    expect(buttonLabels(sim.last(1))).toContain(uz.catalog.pick("1️⃣"));
   });
 
   it("M1: после «Тўлаш» номер вопроса не сбрасывается — старые кнопки не срабатывают", async () => {
@@ -44,6 +45,7 @@ describe("находки ревью бота", () => {
     await nikohOrder(sim, 1);
     const before = await qOf(sim, 1);
     await sim.click(1, /^💳 Тўлаш/);
+    await sim.click(1, /^✅ (Ҳаммаси тўғри|Всё верно|Бәрі дұрыс)/);
     expect(await qOf(sim, 1)).toBeGreaterThanOrEqual(before);
   });
 
@@ -71,8 +73,7 @@ describe("находки ревью бота", () => {
     const sim = new Sim();
     await startUz(sim, 1);
     await sim.click(1, uz.category.nikoh);
-    await sim.click(1, /Анимацияли/);
-    await sim.click(1, uz.catalog.buy);
+    await pickDesign(sim, 1, "animated");
     await sim.text(1, "Азиз");
     await sim.text(1, "Мадина");
     await sim.click(1, "Фарзандларимиз");

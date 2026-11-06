@@ -32,7 +32,8 @@ export type BotUpdate =
       performer: string | null;
     })
   | (Base & { kind: "voice"; fileId: string })
-  | (Base & { kind: "contact" })
+  /** Контакт: phone — номер, own — человек отправил свой номер (кнопка «📱 Рақамни юбориш»), а не чужую карточку */
+  | (Base & { kind: "contact"; phone: string; own: boolean })
   | (Base & { kind: "other" });
 
 export type UpdateKind = BotUpdate["kind"];
@@ -90,7 +91,7 @@ export function normalizeUpdate(u: Update): BotUpdate | null {
     };
   }
   if (m.voice) return { ...base, kind: "voice", fileId: m.voice.file_id };
-  if (m.contact) return { ...base, kind: "contact" };
+  if (m.contact) return { ...base, kind: "contact", phone: m.contact.phone_number, own: m.contact.user_id === m.from?.id };
   return { ...base, kind: "other" };
 }
 

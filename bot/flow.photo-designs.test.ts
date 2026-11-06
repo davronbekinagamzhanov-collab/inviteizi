@@ -2,8 +2,9 @@ import { describe, expect, it } from "vitest";
 import { uz } from "@/texts/bot-uz";
 import { ru } from "@/texts/bot-ru";
 import { designsFor } from "./flow/util";
+import { catalogList, PAGE } from "./flow/steps-order";
 import { Sim } from "./testing/sim";
-import { startUz } from "./testing/paths";
+import { startUz, pickDesign, setChoices } from "./testing/paths";
 
 // Настоящий реестр (без подмены): шаг фото — только у дизайнов с clientPhotos
 function photoSim() {
@@ -25,9 +26,7 @@ async function finishForm(s: Sim, id: number) {
   await s.text(id, "Сайрам, Амир Темур кўчаси 45");
   await s.text(id, uz.event.skip);
   await s.click(id, uz.event.noMore);
-  await s.click(id, uz.text.pick(1));
-  await s.click(id, uz.music.none);
-  await s.click(id, uz.rsvp.no);
+  await setChoices(s, id, { text: 1, music: "none", rsvp: false });
 }
 
 describe("пометка «с фото» и шаг фото по дизайну", () => {
@@ -37,16 +36,12 @@ describe("пометка «с фото» и шаг фото по дизайну"
   });
 
   it("дизайн без фото: после имён сразу «кем приходится», вопроса про фото нет", async () => {
-    const plain = designsFor("nikoh", "simple").find((d) => !d.clientPhotos);
+    const plain = catalogList({ s: { occasion: "nikoh" } }).find((d) => !d.clientPhotos);
     expect(plain).toBeDefined();
     const s = photoSim();
     await startUz(s, 1);
     await s.click(1, uz.category.nikoh);
-    await s.click(1, new RegExp(uz.format.names.simple));
-    // первый дизайн без фото в этом формате
-    const idx = designsFor("nikoh", "simple").indexOf(plain!);
-    for (let k = 0; k < idx; k++) await s.click(1, "▶");
-    await s.click(1, uz.catalog.buy);
+    await pickDesign(s, 1, plain!.id);
     expect((await state(s, 1)).templateId).toBe(plain!.id);
     await s.text(1, "Азиз");
     await s.text(1, "Мадина");
@@ -58,11 +53,13 @@ describe("пометка «с фото» и шаг фото по дизайну"
     const s = photoSim();
     await startUz(s, 1);
     await s.click(1, uz.category.nikoh);
-    await s.click(1, new RegExp(uz.format.names.animated));
-    const first = designsFor("nikoh", "animated")[0];
-    const shown = s.tg.to(1).map((m) => m.text).filter((x) => x.includes(`№${first.number} `));
-    expect(shown.length).toBeGreaterThan(0);
-    expect(shown.at(-1)!.includes(uz.catalog.withPhoto)).toBe(Boolean(first.clientPhotos));
+    const page = catalogList({ s: { occasion: "nikoh" } }).slice(0, PAGE);
+    expect(page.some((d) => d.clientPhotos) && page.some((d) => !d.clientPhotos)).toBe(true);
+    for (const d of page) {
+      const line = s.lastText(1).split("\n").find((x) => x.includes(`№${d.number} `));
+      expect(line, d.id).toBeDefined();
+      expect(line!.includes("📷"), d.id).toBe(Boolean(d.clientPhotos));
+    }
   });
 
   it("смена дизайна до оплаты на дизайн без фото — прежние фото не переходят", async () => {
@@ -71,8 +68,7 @@ describe("пометка «с фото» и шаг фото по дизайну"
     const s = photoSim();
     await startUz(s, 1);
     await s.click(1, uz.category.nikoh);
-    await s.click(1, new RegExp(uz.format.names.animated));
-    await s.click(1, uz.catalog.buy);
+    await pickDesign(s, 1, "animated");
     await s.text(1, "Азиз");
     await s.text(1, "Мадина");
     await s.click(1, uz.photo.yes);
@@ -82,10 +78,9 @@ describe("пометка «с фото» и шаг фото по дизайну"
     expect((await state(s, 1)).data?.photos).toHaveLength(1);
     // ✏️ Дизайн → другой формат → дизайн без фото
     await s.click(1, uz.review.editDesign);
-    await s.click(1, new RegExp(uz.format.names.simple));
-    const target = designsFor("nikoh", "simple")[0];
-    expect(target.clientPhotos).toBeFalsy();
-    await s.click(1, uz.catalog.buy);
+    const target = catalogList({ s: { occasion: "nikoh" } }).find((d) => !d.clientPhotos)!;
+    expect(target).toBeDefined();
+    await pickDesign(s, 1, target.id);
     const st = await state(s, 1);
     expect(st.templateId).toBe(target.id);
     expect(st.data?.photos ?? []).toEqual([]);
@@ -96,21 +91,20 @@ describe("пометка «с фото» и шаг фото по дизайну"
     const all = formats.flatMap((f) => designsFor("nahorgi", f));
     expect(all.length).toBeGreaterThan(0);
     for (const d of all) expect(d.clientPhotos, d.id).toBeFalsy();
-    for (const f of formats) {
-      const list = designsFor("nahorgi", f);
-      if (!list.length) continue;
-      const s = photoSim();
-      await startUz(s, 1);
-      await s.click(1, uz.category.nahorgi);
-      await s.click(1, new RegExp(uz.format.names[f]));
-      // ▶ правит то же сообщение — подпись проверяем на каждом шаге листания
-      for (const [k, d] of list.entries()) {
-        if (k > 0) await s.click(1, "▶");
-        const card = s.tg.to(1).filter((m) => m.type === "photo").at(-1)!;
-        expect(card.text, d.id).toContain(`№${d.number} `);
-        expect(card.text.includes(uz.catalog.withPhoto), d.id).toBe(false);
-      }
+    const list = catalogList({ s: { occasion: "nahorgi" } });
+    const s = photoSim();
+    await startUz(s, 1);
+    await s.click(1, uz.category.nahorgi);
+    // каждая страница каталога: ни в подписях обложек, ни в строках меню нет «📷»
+    for (let i = 0; i < list.length; i += PAGE) {
+      if (i > 0) await s.click(1, "▶");
+      expect(s.lastText(1)).toContain(`№${list[i].number} `);
+      expect(s.lastText(1)).not.toContain("📷");
+      for (const m of s.tg.to(1).filter((m) => m.type === "photo")) expect(m.text).not.toContain("📷");
     }
+    await pickDesign(s, 1);
+    await s.text(1, "Жасурбек");
+    expect((await s.user(1))!.step).not.toBe("photoAsk");
   });
 
 });

@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
+import { MOTION } from "@/templates/blocks/motion";
 
 /** Золотые градиенты для SVG дизайна. Вставляется один раз на страницу */
 export function GoldDefs() {
@@ -98,7 +99,7 @@ export function Wreath({ draw, className = "" }: { draw: boolean; className?: st
         strokeLinecap="round"
         initial={{ pathLength: 0 }}
         animate={{ pathLength: draw ? 1 : 0 }}
-        transition={{ duration: 1.6, ease: [0.4, 0, 0.2, 1] }}
+        transition={{ duration: MOTION.slow, ease: MOTION.ease }}
       />
       {left.map(([x, y, rot, outward], i) => (
         <motion.path
@@ -111,7 +112,7 @@ export function Wreath({ draw, className = "" }: { draw: boolean; className?: st
           strokeWidth={0.9}
           initial={{ opacity: 0 }}
           animate={{ opacity: draw ? 1 : 0 }}
-          transition={{ duration: 0.4, delay: draw ? 0.25 + i * 0.09 : 0 }}
+          transition={{ duration: MOTION.fast, ease: MOTION.ease, delay: draw ? 0.25 + i * MOTION.step : 0 }}
         />
       ))}
       {[118, 168, 214].map((a, i) => (
@@ -141,7 +142,7 @@ export function Wreath({ draw, className = "" }: { draw: boolean; className?: st
         strokeWidth={1.1}
         initial={{ opacity: 0 }}
         animate={{ opacity: draw ? 1 : 0 }}
-        transition={{ delay: draw ? 1.2 : 0, duration: 0.5 }}
+        transition={{ delay: draw ? 1.2 : 0, duration: MOTION.fast, ease: MOTION.ease }}
       />
     </svg>
   );

@@ -5,7 +5,8 @@ import { notFound, permanentRedirect } from "next/navigation";
 import { env } from "@/lib/env";
 import { currentSlugFor, getInvitationBySlug } from "@/lib/orders";
 import { parseWeddingDate } from "@/lib/wedding-date";
-import { existingArt, getDesign } from "@/templates/registry";
+import { getDesign } from "@/templates/registry";
+import { existingArt } from "@/templates/art";
 import { t } from "@/texts/uz-cyrl";
 import Expired from "./Expired";
 import { loadOrderDesign } from "@/templates/order-design";
@@ -61,13 +62,18 @@ async function Invitation({ params }: { params: PageProps<"/[slug]">["params"] }
     if (current) permanentRedirect(`/${current}`);
     notFound();
   }
-  if (page.mode === "expired") return <Expired />;
+  // До оплаты НАМУНА живёт 24 часа: гостю — что это неоплаченный образец, а не «тадбир ўтди»
+  if (page.mode === "expired") return <Expired texts={page.order.status === "active" || page.order.status === "archived" ? undefined : t.invitationPage.namunaExpired} />;
   const design = getDesign(page.order.templateId);
   if (!design) notFound();
 
   const { default: Design } = await loadOrderDesign(design, page.data.designVersion);
   // Фото клиента — только у дизайнов с clientPhotos (наҳорги ош — никогда): старые фото после смены дизайна не всплывают
-  const data = design.clientPhotos ? page.data : { ...page.data, photos: undefined };
+  const withPhotos = design.clientPhotos ? page.data : { ...page.data, photos: undefined };
+  // Казахский — только пока он включён (KAZAKH_ENABLED); выключили — гость видит узбекский и русский
+  const allowed = env.extraLangs();
+  const langs = withPhotos.langs?.filter((l) => allowed.includes(l));
+  const data = { ...withPhotos, langs: langs?.length ? langs : undefined };
   return <Design data={glueData(data)} mode={page.mode} art={existingArt(design)} />;
 }
 

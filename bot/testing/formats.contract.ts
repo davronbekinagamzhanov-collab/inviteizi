@@ -12,7 +12,8 @@ export function formatFlowContract(make:()=>{sim:Sim;repo:Repo},base:number){
     vi.stubEnv("ADMIN_IDS",String(ADMIN));vi.stubEnv("OWNER_TELEGRAM_ID",String(ADMIN));
     const {sim:s,repo}=make(),id=base+i;
     await nikohToReview(s,id,undefined,format);
-    expect(s.lastText(id)).toContain(uz.format.names[format]);
+    // v2: слова формата клиент не видит — только цена (и «Бот танлади» в заголовке сводки)
+    expect(s.lastText(id)).not.toContain(uz.format.names[format]);
     expect(s.lastText(id)).toContain(PRICES[format].toLocaleString("ru-RU").replace(/\u00a0/g," "));
     await s.click(id,uz.review.confirm);
     const [o]=await repo.listOrdersByUser(id);
@@ -25,7 +26,7 @@ export function formatFlowContract(make:()=>{sim:Sim;repo:Repo},base:number){
     await s.click(id,uz.review.confirm);
     expect(await repo.getOrder(o.id)).toMatchObject({format,amount:o.amount,slug:o.slug,data:{groom:"Янги исм"}});
     const before=await repo.analytics(ADMIN,"all",s.clock);
-    await s.callback(id,`pay:${o.number}`,1);await s.photo(id,"format-receipt");
+    await s.callback(id,`payok:${o.number}`,1);await s.photo(id,"format-receipt");
     expect((await repo.getOrder(o.id))?.status).toBe("receipt_sent");
     await s.callback(ADMIN,`ok:${o.number}`,1);await s.callback(ADMIN,`ok:${o.number}`,1);
     const paid=(await repo.getOrder(o.id))!;

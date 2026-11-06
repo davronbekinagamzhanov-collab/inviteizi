@@ -224,6 +224,10 @@ const demo: Record<string, DemoOverride> = {
   "qozon-tongi": { person: "Даврон", relation: "ogil", hosts: "Хўжаевлар оиласи", date: "2027-05-29" },
   "tong-varaq": { person: "Улуғбек", relation: "nabira", hosts: "Қодировлар оиласи", date: "2027-06-26" },
   "oq-maktub": { groom: "Фаррух", bride: "Мунира", hosts: "Каримовлар оиласи", date: "2027-07-10" },
+  // «Пятно» (139–141)
+  "suvbuyoq-tuman": { groom: "Шерзод", bride: "Сабина", hosts: "Раҳимовлар оиласи", sides: { groom: "Раҳимовлар оиласи", bride: "Аҳмедовлар оиласи" }, date: "2027-06-12" },
+  "suvbuyoq-zumrad": { groom: "Бекзод", bride: "Мадина", hosts: "Юсуповлар оиласи", sides: { groom: "Юсуповлар оиласи", bride: "Олимовлар оиласи" }, date: "2027-08-21" },
+  "suvbuyoq-upa": { groom: "Азизбек", bride: "Лобар", hosts: "Каримовлар оиласи", sides: { groom: "Каримовлар оиласи", bride: "Ҳасановлар оиласи" }, date: "2027-09-18" },
   "ipak-albom": { groom: "Жасур", bride: "Нилуфар", hosts: "Усмоновлар оиласи", sides: { groom: "Усмоновлар оиласи", bride: "Ҳакимовлар оиласи" }, date: "2027-08-14" },
   "suzani-medalyon": { groom: "Рустам", bride: "Зарина", hosts: "Мўминовлар оиласи", date: "2027-09-04" },
   "nur-varaq": { groom: "Элёр", bride: "Камола", hosts: "Тўхтаевлар оиласи", sides: { groom: "Тўхтаевлар оиласи", bride: "Назаровлар оиласи" }, date: "2027-09-25" },

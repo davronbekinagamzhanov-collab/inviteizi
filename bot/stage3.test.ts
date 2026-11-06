@@ -1,3 +1,5 @@
+import { staff } from "@/texts/bot-ru";
+import { price } from "./flow/util";
 import { describe, expect, it } from "vitest";
 import { handleRsvpRequest, cleanName, RSVP_IP_HOUR_LIMIT, RSVP_ORDER_LIMIT } from "@/lib/rsvp";
 import { invitationData, pageMode } from "@/lib/orders";
@@ -21,6 +23,7 @@ function rsvpRequest(body: Record<string, unknown>, ip = "1.1.1.1", origin = "ht
 async function rsvpOrder(s: Sim, id: number) {
   await nikohToMusic(s, id);
   await s.click(id, uz.music.none);
+  await s.click(id, uz.rsvp.edit);
   expect(s.lastText(id)).toBe(uz.rsvp.ask);
   await s.click(id, uz.rsvp.yes);
   await s.click(id, uz.review.confirm);
@@ -42,13 +45,14 @@ describe("RSVP", () => {
     expect(invitationData(off).rsvpSlug).toBeUndefined();
   });
 
-  it("«Назад» с вопроса возвращает к музыке, правка в сводке меняет ответ", async () => {
+  it("«Назад» с вопроса возвращает к сводке, правка в сводке меняет ответ", async () => {
     const s = new Sim();
     await nikohToMusic(s, 1);
     await s.click(1, uz.music.none);
+    await s.click(1, uz.rsvp.edit);
     await s.click(1, uz.back);
-    expect((await s.user(1))!.step).toBe("music");
-    await s.click(1, uz.music.none);
+    expect((await s.user(1))!.step).toBe("review");
+    await s.click(1, uz.rsvp.edit);
     await s.click(1, uz.rsvp.no);
     expect(s.lastText(1)).toContain(uz.rsvp.reviewOff);
     await s.click(1, uz.rsvp.edit);
@@ -60,6 +64,7 @@ describe("RSVP", () => {
     const s = new Sim();
     await nikohToMusic(s, 1);
     await s.click(1, uz.music.none);
+    await s.click(1, uz.rsvp.edit);
     await s.click(1, uz.rsvp.yes);
     await s.click(1, uz.review.editMusic);
     await s.click(1, uz.music.none);
@@ -71,7 +76,7 @@ describe("RSVP", () => {
     await prepare(s, ADMIN);
     const o = await rsvpOrder(s, 1);
     expect((await post(s, rsvpRequest(answer(o.slug)))).status).toBe(404);
-    await s.callback(1, `pay:${o.number}`, 1);
+    await s.callback(1,`payok:${o.number}`, 1);
     await s.photo(1, "receipt");
     await approve(s, o.number);
     expect((await post(s, rsvpRequest(answer(o.slug)))).status).toBe(204);
@@ -94,7 +99,7 @@ describe("RSVP", () => {
     const s = new Sim();
     await prepare(s, ADMIN);
     const o = await rsvpOrder(s, 1);
-    await s.callback(1, `pay:${o.number}`, 1);
+    await s.callback(1,`payok:${o.number}`, 1);
     await s.photo(1, "receipt");
     await approve(s, o.number);
     expect((await post(s, rsvpRequest(answer(o.slug), "1.1.1.1", "https://evil.test"))).status).toBe(400);
@@ -130,22 +135,21 @@ describe("RSVP", () => {
 });
 
 describe("Нарх ўзгармайди и тексты", () => {
-  it("на выборе тарифа и в сводке, цифры из PRICES", async () => {
+  it("в каталоге и в сводке — цена дизайна, цифры из PRICES", async () => {
     expect(PRICES).toEqual({ animated: 8000, scroll: 6000, simple: 5000 });
     for (const [tx, lang] of [[uz, uz.langUz], [ru, ru.langRu]] as const) {
       const s = new Sim();
       await prepare(s, 1, lang);
       await s.text(1, tx.menu.create);
       await s.click(1, tx.category.nikoh);
-      const note = tx.pricing.note("8.000", "6.000", "5.000").replace(/8.000 \/ 6.000 \/ 5.000/, "");
-      expect(s.lastText(1).length).toBeGreaterThan(note.length);
-      expect(s.lastText(1)).toMatch(/8.000 \/ 6.000 \/ 5.000 ₸/);
+      expect(s.lastText(1)).toMatch(/8.000 ₸/);
     }
     const s = new Sim();
     await nikohToMusic(s, 1);
     await s.click(1, uz.music.none);
+    await s.click(1, uz.rsvp.edit);
     await s.click(1, uz.rsvp.no);
-    expect(s.lastText(1)).toMatch(/8.000 \/ 6.000 \/ 5.000 ₸/);
+    expect(s.lastText(1)).toMatch(/· 8.000 ₸/);
   });
 
   it("текст музыки называет настоящую кнопку", () => {
@@ -180,7 +184,9 @@ describe("владелец и админы вне статистики", () => {
     await s.callback(ADMIN, "fav:add:oq-ot", 1);
     await s.command(ADMIN, "dashboard");
     const screen = s.last(ADMIN);
-    for (const label of [uz.panel.labels.clients, uz.panel.labels.created, uz.panel.labels.paid, uz.panel.labels.waiting]) expect(screen.text).toContain(`${label}: 0`);
+    expect(screen.text).toContain(staff.st.none);
+    await s.callback(ADMIN, "st:y:fn", screen.id);
+    expect(screen.text).toContain(staff.st.none);
     await s.callback(ADMIN, "dash:orders:all", screen.id);
     expect(screen.text).toContain(uz.panel.empty);
     await s.callback(ADMIN, "dash:music:all", screen.id);
@@ -204,8 +210,9 @@ describe("владелец и админы вне статистики", () => {
     await s.start(ADMIN);
     await s.click(ADMIN, uz.langUz);
     await s.command(ADMIN, "dashboard");
-    expect(s.lastText(ADMIN)).toContain(`${uz.panel.labels.paid}: 1`);
-    expect(s.lastText(ADMIN)).toContain(`${uz.panel.labels.created}: 1`);
+    expect(s.lastText(ADMIN)).toContain(staff.st.paid(1, price(b.amount)));
+    await s.callback(ADMIN, "st:d:fn", s.last(ADMIN).id);
+    expect(s.lastText(ADMIN)).toContain(staff.st.fnSamples(1, "100%"));
     expect((await s.repo.stats(s.clock)).orders.total).toBe(1);
   });
 
@@ -220,8 +227,8 @@ describe("владелец и админы вне статистики", () => {
     expect(s.repo.earnings).toEqual([]);
     expect(s.tg.to(50).some((m) => m.text?.includes("✅ +"))).toBe(false);
     await s.command(50, "hamkor");
-    expect(s.lastText(50)).toContain("Сканерлади: 0");
-    expect(s.lastText(50)).toContain("Буюртма бошлади: 0");
+    expect(s.lastText(50)).toContain("QR сканерлади: 0");
+    expect(s.lastText(50)).not.toContain("Буюртма бошлади");
     expect(p.id).toBe(1);
   });
 
@@ -235,9 +242,9 @@ describe("владелец и админы вне статистики", () => {
     await s.start(1, partnerSource("aaaa1111"));
     const o = await nikohWithReceipt(s, 1);
     await approve(s, o.number);
-    await s.callback(ADMIN, `dp:ok:${p.id}:2000`, 1);
+    await s.callback(ADMIN, `dp:ok:${p.id}:2000:0`, 1);
     expect(s.repo.payouts).toEqual([]);
-    await s.callback(ADMIN, `dp:ok:${p.id}:1000`, 1);
+    await s.callback(ADMIN, `dp:ok:${p.id}:1000:0`, 1);
     expect(s.repo.payouts).toHaveLength(1);
   });
 });

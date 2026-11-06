@@ -40,6 +40,16 @@ export function isHeic(bytes: Uint8Array) {
 
 /** Любое изображение → WebP, повёрнутое по EXIF, без метаданных (там бывает GPS) */
 export async function toWebp(bytes: Uint8Array): Promise<Uint8Array> {
+  return convert(bytes, (img) => img.webp({ quality: 80, effort: 4 }));
+}
+
+/** Чек из приложения → JPEG для Telegram (HEIC и WebP Telegram как фото не показывает) */
+export async function toJpeg(bytes: Uint8Array): Promise<Uint8Array> {
+  return convert(bytes, (img) => img.jpeg({ quality: 85, mozjpeg: true }));
+}
+
+type Sharp = import("sharp").Sharp;
+async function convert(bytes: Uint8Array, encode: (img: Sharp) => Sharp): Promise<Uint8Array> {
   const { default: sharp } = await import("sharp");
   let input: ReturnType<typeof sharp>;
   if (isHeic(bytes)) {
@@ -57,10 +67,7 @@ export async function toWebp(bytes: Uint8Array): Promise<Uint8Array> {
     input = sharp(bytes, { failOn: "none" }).rotate();
   }
   try {
-    const out = await input
-      .resize({ width: MAX_SIDE, height: MAX_SIDE, fit: "inside", withoutEnlargement: true })
-      .webp({ quality: 80, effort: 4 })
-      .toBuffer();
+    const out = await encode(input.resize({ width: MAX_SIDE, height: MAX_SIDE, fit: "inside", withoutEnlargement: true })).toBuffer();
     return new Uint8Array(out);
   } catch {
     throw new PhotoFormatError();

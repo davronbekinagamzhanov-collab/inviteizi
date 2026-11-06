@@ -30,6 +30,10 @@ export type InvitationEvent = {
 /** ozimiz — «ўзимизники»: тўй самих хозяев, без «фарзандимиз» */
 export type Relation = "farzand" | "ogil" | "qiz" | "nabira" | "uka" | "ona" | "ota" | "ozimiz";
 
+/** Языки приглашения кроме узбекского */
+export type ExtraLang = "ru" | "kk";
+export const EXTRA_LANGS: ExtraLang[] = ["ru", "kk"];
+
 export type InvitationData = {
   /** Explicit opt-in; absent keeps the original appearance of every existing order. */
   designVersion?: "premium-v1";
@@ -54,6 +58,12 @@ export type InvitationData = {
   textId?: string;
   /** Свой текст клиента (до 600 знаков) — заменяет готовый */
   customText?: string;
+  /** v2: языки, которые гость может выбрать кроме узбекского (узбекский есть всегда) */
+  langs?: ExtraLang[];
+  /** v2: на каком языке страница открывается по умолчанию (узбекский — если не указан). Только из выбранных */
+  mainLang?: ExtraLang;
+  /** v2: свой текст клиента на других языках (ввёл сам). Нет — гость видит узбекский свой текст */
+  customTexts?: Partial<Record<ExtraLang, string>>;
   /** Файл песни клиента. Нет — играет мелодия дизайна */
   musicUrl?: string;
   /** Клиент выбрал «без музыки» */

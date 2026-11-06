@@ -11,7 +11,7 @@ import { uz } from "@/texts/bot-uz";
 import { PRICES, getDesign, isOnSale } from "@/templates/registry";
 import { designsFor } from "./flow/util";
 import { inlineButtons } from "./testing/fake-tg";
-import { nikohOrder } from "./testing/paths";
+import { nikohOrder, pickDesign } from "./testing/paths";
 import { Sim } from "./testing/sim";
 import NotFound from "@/app/not-found";
 
@@ -23,14 +23,11 @@ type Button = { text: string; data?: string };
 const receiptButton = (sim: Sim) =>
   sim.tg.to(ID).flatMap((m) => inlineButtons(m) as Button[]).filter((b) => b.data?.startsWith("rcpt:")).at(-1)!;
 
-/** Правка заказа: другой формат, первый дизайн без фото клиента → «Сотиб олиш» → «Ҳаммаси тўғри» */
+/** Правка заказа: дизайн другого формата без фото клиента → «Шуни танлайман» → «Ҳаммаси тўғри» */
 async function switchFormat(sim: Sim, n: number, format: "simple" | "scroll") {
   await sim.callback(ID, `edit:${n}`, sim.last(ID).id);
   await sim.click(ID, uz.review.editDesign);
-  await sim.click(ID, new RegExp(uz.format.names[format]));
-  const idx = designsFor("nikoh", format).findIndex((d) => !d.clientPhotos);
-  for (let k = 0; k < idx; k++) await sim.click(ID, "▶");
-  await sim.click(ID, uz.catalog.buy);
+  await pickDesign(sim, ID, designsFor("nikoh", format).find((d) => !d.clientPhotos)!.id);
   await sim.click(ID, uz.review.confirm);
 }
 
@@ -38,13 +35,15 @@ describe("находки ревьюера", () => {
   it("1. сменили формат после «Тўлаш» — старая кнопка чека показывает реквизиты с новой суммой", async () => {
     const sim = new Sim();
     const o = await nikohOrder(sim, ID);
-    await sim.callback(ID, `pay:${o.number}`, sim.last(ID).id);
+    await sim.callback(ID,`payok:${o.number}`, sim.last(ID).id);
     const old = receiptButton(sim);
     expect(old.data).toBe(`rcpt:${o.number}:${PRICES.animated}`);
     await switchFormat(sim, o.number, "simple");
     expect((await sim.repo.getOrder(o.id))!.amount).toBe(PRICES.simple);
     await sim.callback(ID, old.data!, 1);
-    // не шаг «пришлите чек» по старой сумме, а новые реквизиты
+    // не шаг «пришлите чек» по старой сумме: цена изменилась — снова проверка, затем новые реквизиты
+    expect(sim.lastText(ID)).toContain("Тўловдан олдин текширинг");
+    await sim.click(ID, uz.pay.confirmYes);
     expect(receiptButton(sim).data).toBe(`rcpt:${o.number}:${PRICES.simple}`);
     expect(sim.lastText(ID)).not.toBe(uz.pay.receiptAsk);
     // новая кнопка уже ведёт к приёму чека
@@ -89,10 +88,10 @@ describe("находки ревьюера", () => {
   it("5. тадбир давно прошёл — «Тўлаш» и старая кнопка чека не принимают оплату", async () => {
     const sim = new Sim();
     const o = await nikohOrder(sim, ID);
-    await sim.callback(ID, `pay:${o.number}`, sim.last(ID).id);
+    await sim.callback(ID,`payok:${o.number}`, sim.last(ID).id);
     const old = receiptButton(sim);
     sim.advance(90 * 24 * 60);
-    await sim.callback(ID, `pay:${o.number}`, 1);
+    await sim.callback(ID,`payok:${o.number}`, 1);
     expect(sim.lastText(ID)).toBe(uz.pay.eventPassed);
     expect((inlineButtons(sim.last(ID)) as Button[]).some((b) => b.data?.startsWith("pay:"))).toBe(false);
     await sim.callback(ID, old.data!, 1);
@@ -109,7 +108,9 @@ describe("избранное во время правки", () => {
     await sim.callback(ID, `fav:add:${fav.id}`, 1);
     await sim.callback(ID, `edit:${o.number}`, sim.last(ID).id);
     await sim.callback(ID, `fav:choose:${fav.id}`, 1);
-    await sim.click(ID, uz.catalog.buy);
+    // открылась страница каталога с этим дизайном — остаётся нажать «Шуни танлайман»
+    expect((await sim.user(ID))!.step).toBe("catalog");
+    await pickDesign(sim, ID, fav.id);
     expect((await sim.user(ID))!.step).toBe("review");
     await sim.click(ID, uz.review.confirm);
     const orders = await sim.repo.listOrdersByUser(ID);

@@ -4,7 +4,10 @@
  * Перед запуском тексты проверяют носители языка (старшие в семье).
  */
 import type { EventKind, InvitationData, Occasion, Relation } from "@/lib/types";
-import { glueDeep } from "@/lib/typography";
+import { glueDeep, glueKkWords, glueRuWords, glueWords } from "@/lib/typography";
+import { getInviteLang, type InviteLang } from "./invite-lang";
+import { ru as ruInvite, ruHeadings } from "./invite-ru";
+import { kk as kkInvite, kkHeadings } from "./invite-kk";
 
 const months = [
   "январ",
@@ -354,6 +357,9 @@ const raw = {
     ipak: "Ипак",
     bog: "Боғ",
     "tong-dasturxon": "Тонгги дастурхон",
+    "suvbuyoq-tuman": "Мовий туман",
+    "suvbuyoq-zumrad": "Зумрад",
+    "suvbuyoq-upa": "Упа гул",
     "sunnat-muqova": "Суннат муқоваси",
     "sunnat-nasab": "Оила шажараси",
     "sahar-ipagi": "Саҳар ипаги",
@@ -623,8 +629,19 @@ const raw = {
     letter: "Мактуб",
   },
 
+  /** «Пятно» (139–141): акварельные пятна, неделя строкой, программа — линия с каплями */
+  patno: {
+    date: "Тўй санаси",
+    program: "Тўй дастури",
+    place: "Манзил",
+    wait: "Сизни интизорлик билан кутамиз",
+    weekAria: (date: string) => `Тўй ҳафтаси, тўй куни — ${date}`,
+  },
+
   watermark: "НАМУНА",
   watermarkNote: "Тўловдан сўнг бу ёзув олиб ташланади",
+  /** Первый экран дизайна без открытия: мягкая кнопка музыки */
+  musicHint: "Мусиқа",
 
   /**
    * Свои слова дизайнов (если общих не хватило). Каждый дизайнер правит ТОЛЬКО свою строку.
@@ -669,6 +686,11 @@ const raw = {
       body: "Тадбир ўтиб кетди. Ташрифингиз ва яхши тилакларингиз учун катта раҳмат!",
       brand: "InviteIZI — онлайн таклифномалар",
     },
+    /** НАМУНА (до оплаты) живёт 24 часа: дальше — не «тадбир ўтди», а честно про намуна */
+    namunaExpired: {
+      title: "Намуна муддати тугади",
+      body: "Бу — тўланмаган намуна. Эгаси уни ботда тўлагач, шу ҳаволада тўлиқ таклифнома очилади.",
+    },
     /** Нотўғри ёки эскирган ҳавола */
     notFound: {
       title: "Таклифнома топилмади",
@@ -682,7 +704,31 @@ const raw = {
 } as const;
 
 /** Без висячих «ва / билан / учун» в конце и начале строк — склейка один раз для всех дизайнов */
-export const t: typeof raw = glueDeep(raw);
+const uzTexts: typeof raw = glueDeep(raw);
+
+/**
+ * v2, часть 9: тексты на языке гостя. Русский и казахский заменяют только то, что видит гость
+ * (texts/invite-ru.ts, texts/invite-kk.ts); каталог, названия дизайнов и прочее — общие.
+ */
+const byLang = new Map<InviteLang, typeof raw>([["uz", uzTexts]]);
+export function textsFor(lang: InviteLang): typeof raw {
+  let x = byLang.get(lang);
+  if (!x) {
+    const over = lang === "ru" ? glueDeep(ruInvite, glueRuWords) : glueDeep(kkInvite, glueKkWords);
+    x = { ...uzTexts, ...over } as unknown as typeof raw;
+    byLang.set(lang, x);
+  }
+  return x;
+}
+
+/**
+ * Тексты приглашения на текущем языке страницы. «Живые»: каждое обращение `t.date…` берёт язык,
+ * который выбрал гость, — дизайны пишут `t.…` как раньше. На сервере и в боте — всегда узбекский.
+ */
+export const t: typeof raw = new Proxy(uzTexts, {
+  get: (_, key) => Reflect.get(textsFor(getInviteLang()), key),
+  has: (_, key) => key in textsFor(getInviteLang()),
+});
 /** Те же тексты без склейки — для бота (в Telegram перенос строк свой, неразрывные пробелы не нужны) */
 export const tPlain = raw;
 
@@ -768,9 +814,27 @@ const headings: Record<string, Headings> = {
 
 const allOccasions = (s: string) => ({ nikoh: s, sunnat: s, nahorgi: s, yubiley: s }) satisfies Record<Occasion, string>;
 
-/** Тексты для дизайна: общие `t` + свои заголовки этого дизайна */
+const designCache = new Map<string, Texts>();
+
+/** Тексты для дизайна: общие `t` + свои заголовки этого дизайна; язык — текущий язык страницы */
 export function designTexts(id: string): Texts {
-  const h = headings[id] ?? {};
+  return new Proxy(uzTexts as Texts, {
+    get: (_, key) => {
+      const lang = getInviteLang();
+      const k = `${id}:${lang}`;
+      let x = designCache.get(k);
+      if (!x) {
+        x = buildDesignTexts(id, lang);
+        designCache.set(k, x);
+      }
+      return Reflect.get(x, key);
+    },
+  });
+}
+
+function buildDesignTexts(id: string, lang: InviteLang): Texts {
+  const t = textsFor(lang);
+  const h = (lang === "uz" ? headings[id] : lang === "ru" ? ruHeadings[id] : kkHeadings[id]) ?? {};
   return glueDeep({
     ...t,
     countdown: { ...t.countdown, title: h.countdown ? allOccasions(h.countdown) : t.countdown.title },
@@ -780,5 +844,5 @@ export function designTexts(id: string): Texts {
     blessing: { ...t.blessing, title: h.blessing ?? t.blessing.title },
     opening: { ...t.opening, tapToOpen: h.tap ?? t.opening.tapToOpen },
     hosts: { ...t.hosts, thanks: h.thanks ?? t.hosts.thanks, waiting: h.waiting ?? t.hosts.waiting },
-  }) as unknown as Texts;
+  }, lang === "uz" ? glueWords : lang === "ru" ? glueRuWords : glueKkWords) as unknown as Texts;
 }

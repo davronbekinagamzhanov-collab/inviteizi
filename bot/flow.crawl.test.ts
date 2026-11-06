@@ -8,6 +8,7 @@ import { uz } from "@/texts/bot-uz";
 import { ru } from "@/texts/bot-ru";
 import type { Occasion } from "@/lib/domain";
 import { formatsFor } from "./flow/util";
+import { pickDesign } from "./testing/paths";
 import type { FakeMessage } from "./testing/fake-tg";
 import { inlineButtons } from "./testing/fake-tg";
 import { ADMIN, Sim } from "./testing/sim";
@@ -72,7 +73,8 @@ async function walk(lang: "uz" | "ru", occasion: Occasion, format: "animated" | 
     switch (step) {
       case "cat": await press(sim, screen, tx.category[occasion]); break;
       case "fmt": await press(sim, screen, new RegExp(tx.format.names[format])); break;
-      case "catalog": await press(sim, screen, tx.catalog.buy); break;
+      // Обход восстановил старое состояние, а альбом уже перерисован: показываем страницу заново и выбираем
+      case "catalog": await sim.text(ID, "???"); await pickDesign(sim, ID, format); break;
       case "groom": case "bride": case "person": await sim.text(ID, MAX.name); break;
       case "relation": case "cause": await sim.callback(ID, callbacks(screen)[0].data, screen.id); break;
       case "age": await sim.text(ID, "60"); break;
@@ -98,7 +100,7 @@ async function walk(lang: "uz" | "ru", occasion: Occasion, format: "animated" | 
   // После анкеты: заказ, оплата, подтверждение, меню и команды
   const [order] = (await sim.repo.listOrdersByUser(ID)).filter((o) => o.format === format && o.occasion === occasion);
   expect(order).toBeTruthy();
-  await sim.callback(ID, `pay:${order.number}`, sim.last(ID).id);
+  await sim.callback(ID,`payok:${order.number}`, sim.last(ID).id);
   await sim.photo(ID, "RECEIPT");
   await sim.start(ADMIN);
   await sim.click(ADMIN, lang === "uz" ? uz.langUz : ru.langRu);

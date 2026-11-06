@@ -1,5 +1,6 @@
 import {notFound} from 'next/navigation';
-import {getDesign,existingArt} from '@/templates/registry';
+import {getDesign} from "@/templates/registry";
+import { existingArt } from "@/templates/art";
 import {REVISED_DESIGNS,usesLegacyDesign} from '@/templates/design-version';
 import {loadOrderDesign} from '@/templates/order-design';
 import {demoMusicUrl} from '@/lib/music';

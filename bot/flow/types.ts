@@ -2,7 +2,9 @@ import type { Repo } from "../repo";
 import type { Tg } from "../tg";
 import type { BotUpdate } from "../update";
 import type { Format, InvitationData, InvitationEvent, Lang, MusicChoice, Occasion, UserRecord } from "@/lib/domain";
+import type { ExtraLang } from "@/lib/types";
 import type { BotTexts } from "@/texts/bot-uz";
+import type { PayoutSchedule } from "@/lib/owner-panel";
 
 export type BotEnv = {
   ownerUsername: string;
@@ -12,6 +14,10 @@ export type BotEnv = {
   publicBaseUrl: string;
   paymentCardNumber?: string;
   venueMapPickerUrl?: string;
+  /** https://…/app — «✨ Таклифнома яратиш» открывает приложение. Нет (MINI_APP_ENABLED=false) — заказ по чату */
+  miniAppUrl?: string | null;
+  /** KAZAKH_ENABLED=true: казахский постер и казахский язык приглашения (тексты ждут проверки носителем) */
+  kazakhEnabled?: boolean;
 };
 
 export type Deps = {
@@ -23,8 +29,12 @@ export type Deps = {
   saveMusic?: (fileId: string, userId: number) => Promise<string | undefined>;
   /** Фото клиента из Telegram → WebP в Storage (бакет photos); вернуть публичный адрес */
   savePhoto?: (fileId: string, userId: number) => Promise<string>;
+  /** Фото клиента из приложения (байты) → WebP в Storage; вернуть публичный адрес */
+  savePhotoBytes?: (bytes: Uint8Array) => Promise<string>;
   /** Удалить фото клиента из Storage (cron, через 30 дней после конца приглашения) */
   removePhotos?: (urls: string[]) => Promise<void>;
+  /** Удалить свои песни клиентов из Storage (автоочистка неоплаченных черновиков) */
+  removeMusic?: (urls: string[]) => Promise<void>;
 };
 
 /** Шаги анкеты (users.step) */
@@ -62,13 +72,22 @@ export type StepId =
   | "musicList"
   | "musicOwn"
   | "rsvp"
+  | "langs"
+  | "langText"
   | "review"
   | "evMenu"
   | "receipt"
   | "partnerName"
-  | "partnerContact"
+  | "partnerPhone"
   | "partnerRate"
-  | "partnerRateEdit";
+  | "partnerSchedule"
+  | "partnerConfirm"
+  | "partnerRateEdit"
+  | "partnerPropose"
+  | "partnerProposeSchedule"
+  | "joinLang"
+  | "joinPhone"
+  | "joinKaspi";
 
 /** Данные анкеты по ходу заполнения (тадбиры могут быть недозаполнены) */
 export type DraftData = Omit<Partial<InvitationData>, "events"> & { events?: Partial<InvitationEvent>[] };
@@ -92,11 +111,20 @@ export type Draft = {
   catIdx?: number;
   /** IDs shown with this catalog question; a changed tariff/catalog requires a fresh choice. */
   catRevision?: string;
+  /** Сообщения текущей страницы каталога (альбом + кнопки): при листании и выборе удаляются/правятся */
+  catMsgs?: number[];
+  /** Одно «живое» сообщение о принятых фото: правится, а не шлётся заново */
+  photoMsg?: number;
   /** Страница вариантов текста (по 3) */
   textPage?: number;
   data?: DraftData;
   /** Индекс тадбира, который сейчас заполняется */
   ev?: number;
+  /** v2: отзыв — после оценки ждём текст по желанию (номер заказа и звёзды) */
+  reviewFor?: string;
+  reviewStars?: number;
+  /** v2: для какого языка клиент пишет свой текст (шаг langText) */
+  langText?: ExtraLang;
   calMonth?: string;
   venuePage?: number;
   venueNameInput?: string;
@@ -106,8 +134,10 @@ export type Draft = {
   /** Заказ уже оплачен: формат (и цену) менять нельзя */
   paid?: boolean;
   /** Новый партнёр, пока его заполняют */
-  partnerDraft?: { name?: string; telegramId?: number | null; username?: string | null };
-  /** Партнёр, которому меняют ставку */
+  partnerDraft?: { name?: string; phone?: string; rate?: number; ratePercent?: number | null; schedule?: PayoutSchedule };
+  /** Номер заказа «для клиента», который человек забрал до выбора языка: показать после выбора */
+  claimed?: number;
+  /** Партнёр, которому меняют ставку (или который знакомится с ботом по ссылке join_) */
   partnerId?: number;
 };
 

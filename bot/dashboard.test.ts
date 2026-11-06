@@ -4,7 +4,8 @@ import { uz } from "@/texts/bot-uz";
 import { activeDesigns, DESIGN_STYLES } from "@/templates/registry";
 import { partnerSource } from "@/lib/owner-panel";
 import { runCron } from "./cron";
-import { newPartnerCode, parseContact } from "./flow/partners";
+import { newPartnerCode } from "./flow/partners";
+import { staff } from "@/texts/bot-ru";
 import { price } from "./flow/util";
 import { inlineButtons } from "./testing/fake-tg";
 import { nikohToMusic, nikohWithReceipt } from "./testing/paths";
@@ -46,7 +47,7 @@ describe("права на панель", () => {
 
   it("второй админ видит панель", async () => {
     const s = new Sim();
-    expect((await open(s, ADMIN2)).text).toContain(uz.panel.labels.paid);
+    expect((await open(s, ADMIN2)).text).toContain(staff.st.sections.money);
   });
 
   it("партнёр не админ: панель закрыта, /hamkor только его цифры", async () => {
@@ -62,7 +63,7 @@ describe("права на панель", () => {
     expect(s.lastText(50)).toBe(uz.dashboard.denied);
     await s.command(50, "hamkor");
     const text = s.lastText(50);
-    expect(text).toContain("Тўлади: 1");
+    expect(text).toContain("Тўлов: 1");
     expect(text).toContain("start=p_aaaa1111");
     expect(text).not.toContain("bbbb2222");
     expect(text).not.toContain("Клиент");
@@ -98,7 +99,7 @@ describe("одно сообщение", () => {
     const s = new Sim();
     await prepare(s, ADMIN, ru.langRu);
     await s.command(ADMIN, "dashboard");
-    expect(s.lastText(ADMIN)).toContain(ru.panel.labels.created);
+    expect(s.lastText(ADMIN)).toContain(staff.st.title(staff.st.range.d("1 ноября")));
   });
 });
 
@@ -110,12 +111,13 @@ describe("расчёты", () => {
     await nikohWithReceipt(s, 2);
     await nikohToMusic(s, 3);
     await s.command(ADMIN, "dashboard");
-    const text = s.lastText(ADMIN);
-    expect(text).toContain(`${uz.panel.labels.created}: 2`);
-    expect(text).toContain(`${uz.panel.labels.paid}: 1`);
-    expect(text).toMatch(new RegExp(`${uz.panel.labels.revenue}: 8.000 ₸`));
-    expect(text).toMatch(new RegExp(`${uz.panel.labels.average}: 8.000 ₸`));
-    expect(text).toContain(`${uz.panel.labels.waiting}: 1`);
+    const screen = s.last(ADMIN);
+    expect(screen.text).toContain(staff.st.paid(1, "8 000 ₸"));
+    expect(screen.text).toContain(staff.st.average("8 000 ₸"));
+    await s.callback(ADMIN, "st:d:fn", screen.id);
+    expect(screen.text).toContain(staff.st.fnSamples(2, "67%"));
+    expect(screen.text).toContain(staff.st.fnPaid(1, "50%"));
+    expect(screen.text).toContain(`${staff.n.steps.receipt_sent} 1`);
   });
 
   it("период: граница суток по Алматы, оплата считается по дате оплаты", async () => {
@@ -207,18 +209,21 @@ describe("дизайны", () => {
 describe("партнёры", () => {
   const code = "aaaa1111";
 
-  it("добавление: имя, контакт, ставка по умолчанию, ссылка и QR", async () => {
+  it("добавление: название, телефон, ставка, график → ссылка join_ и QR", async () => {
     const s = new Sim();
     await open(s);
     await s.callback(ADMIN, "dp:new", s.last(ADMIN).id);
-    expect(s.lastText(ADMIN)).toBe(uz.panel.partner.askName);
+    expect(s.lastText(ADMIN)).toBe(staff.pt.askName);
     await s.text(ADMIN, "Ойбек");
     await s.text(ADMIN, "кирил");
-    expect(s.tg.to(ADMIN).some((m) => m.text === uz.panel.partner.badContact)).toBe(true);
-    await s.text(ADMIN, "@oybek_uz");
-    await s.click(ADMIN, /1.000 ₸/);
+    expect(s.tg.to(ADMIN).some((m) => m.text === staff.pt.badPhone)).toBe(true);
+    await s.text(ADMIN, "8 701 123 45 67");
+    await s.click(ADMIN, /^1.000 ₸ фикс\.$/);
+    await s.click(ADMIN, staff.pt.schedule.weekly);
+    await s.click(ADMIN, staff.pt.create);
     const [p] = s.repo.partners;
-    expect(p).toMatchObject({ name: "Ойбек", username: "oybek_uz", telegramId: null, rate: 1000 });
+    expect(p).toMatchObject({ name: "Ойбек", phone: "+77011234567", telegramId: null, rate: 1000, schedule: "weekly", status: "active" });
+    expect(s.tg.to(ADMIN).some((m) => /start=join_[a-z0-9]{20}/.test(m.text))).toBe(true);
     expect(s.last(ADMIN).text).toContain(`https://t.me/inviteizi_test_bot?start=p_${p.code}`);
     expect((await s.user(ADMIN))!.step).toBe("idle");
   });
@@ -226,16 +231,11 @@ describe("партнёры", () => {
   it("смена ставки действует только на будущие оплаты", async () => {
     const s = new Sim();
     await open(s);
-    await s.callback(ADMIN, "dp:new", s.last(ADMIN).id);
-    await s.text(ADMIN, "Ойбек");
-    await s.text(ADMIN, "123456789");
-    await s.text(ADMIN, "много");
-    expect(s.tg.to(ADMIN).some((m) => m.text === uz.panel.partner.badRate)).toBe(true);
-    await s.text(ADMIN, "1500");
-    const [p] = s.repo.partners;
-    expect(p).toMatchObject({ telegramId: 123456789, rate: 1500 });
+    const p = await addPartner(s, code, { telegramId: 50, rate: 1500 });
     await paidOrder(s, 1, p.code);
     await s.callback(ADMIN, `dp:rate:${p.id}`, 1);
+    await s.text(ADMIN, "много");
+    expect(s.tg.to(ADMIN).some((m) => m.text === staff.pt.badRate)).toBe(true);
     await s.text(ADMIN, "2000");
     await paidOrder(s, 2, p.code);
     expect(s.repo.earnings.map((e) => e.amount)).toEqual([1500, 2000]);
@@ -263,19 +263,25 @@ describe("партнёры", () => {
     expect(s.repo.earnings).toEqual([]);
   });
 
-  it("сообщение партнёру только после подтверждения оплаты, один раз", async () => {
+  it("партнёру об оплате — один вечерний отчёт в 20:00, без имени клиента; повтор cron не дублирует", async () => {
     const s = new Sim();
     await addPartner(s, code, { telegramId: 50 });
     await prepare(s, ADMIN);
     await prepare(s, 50);
     await s.start(1, partnerSource(code));
     const o = await nikohWithReceipt(s, 1);
-    const isNotice = (m: { text?: string }) => m.text?.startsWith("Сизнинг кодингиз орқали янги буюртма тўланди ✅ +1");
-    expect(s.tg.to(50).some(isNotice)).toBe(false);
+    const before = s.tg.to(50).length;
     await s.callback(ADMIN, `ok:${o.number}`, 1);
     await s.callback(ADMIN, `ok:${o.number}`, 1);
-    expect(s.tg.to(50).filter(isNotice)).toHaveLength(1);
+    expect(s.tg.to(50)).toHaveLength(before);
     expect(s.repo.earnings).toMatchObject([{ delivered: true, amount: 1000 }]);
+    s.clock = new Date("2026-11-01T15:05:00Z"); // 20:05 в Сайраме
+    await runCron(s.deps);
+    await runCron(s.deps);
+    const evening = s.tg.to(50).slice(before);
+    expect(evening).toHaveLength(1);
+    expect(evening[0].text).toContain(`№${o.number} `);
+    expect(evening[0].text).toContain("Сизга: 1 000 ₸");
   });
 
   it("партнёр не нажимал /start: тихо пропускаем и показываем отметку", async () => {
@@ -296,9 +302,9 @@ describe("партнёры", () => {
     await prepare(s, ADMIN);
     await prepare(s, 50);
     await paidOrder(s, 1, code);
-    expect(s.tg.to(50).some((m) => m.text?.includes("✅ +1"))).toBe(true);
+    expect(s.repo.earnings).toMatchObject([{ delivered: true }]);
     await s.command(50, "hamkor");
-    expect(s.lastText(50)).toContain("Тўлади: 1");
+    expect(s.lastText(50)).toContain("Тўлов: 1");
     expect(s.repo.partners[0].telegramId).toBe(50);
   });
 
@@ -341,8 +347,8 @@ describe("партнёры", () => {
     for (const part of [`${uz.panel.partner.scanned}: 3`, `${uz.panel.partner.started}: 2`, `${uz.panel.partner.paid}: 2`]) expect(screen.text).toContain(part);
     await s.callback(ADMIN, `dp:pay:${p.id}:2000`, 1);
     expect(s.repo.payouts).toEqual([]);
-    await s.callback(ADMIN, `dp:ok:${p.id}:2000`, 1);
-    await s.callback(ADMIN, `dp:ok:${p.id}:2000`, 1);
+    await s.callback(ADMIN, `dp:ok:${p.id}:2000:0`, 1);
+    await s.callback(ADMIN, `dp:ok:${p.id}:2000:0`, 1);
     expect(s.repo.payouts).toHaveLength(1);
     expect(s.lastText(ADMIN)).toBe(uz.panel.partner.payStale);
   });
@@ -381,17 +387,14 @@ describe("партнёры", () => {
     const s = new Sim();
     await open(s);
     await s.callback(ADMIN, "dp:new", s.last(ADMIN).id);
-    await s.click(ADMIN, uz.back);
+    await s.click(ADMIN, staff.back);
     expect(s.tg.to(ADMIN).some((m) => m.text === uz.error)).toBe(false);
     expect(s.repo.partners).toEqual([]);
   });
 
-  it("коды и контакты", () => {
+  it("коды", () => {
     expect(newPartnerCode()).toMatch(/^[a-z0-9]{8}$/);
     expect(newPartnerCode()).not.toBe(newPartnerCode());
-    expect(parseContact("https://t.me/oybek_uz")).toEqual({ telegramId: null, username: "oybek_uz" });
-    expect(parseContact("987654321")).toEqual({ telegramId: 987654321, username: null });
-    expect(parseContact("имя")).toBeNull();
   });
 });
 

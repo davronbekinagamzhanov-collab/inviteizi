@@ -18,7 +18,7 @@ describe('pinned premium order revision',()=>{
   expect(o.data.designVersion).toBe('premium-v1');expect(usesLegacyDesign(id,o.data.designVersion)).toBe(false);
   await s.callback(user,`edit:${o.number}`,1);await s.click(user,uz.review.editNames);await s.text(user,'Давронбек');await s.text(user,'Нозима');await s.click(user,uz.review.confirm);
   expect((await s.repo.getOrder(o.id))?.data.designVersion).toBe('premium-v1');
-  await s.callback(user,`pay:${o.number}`,1);await s.photo(user,'fixture-receipt');await s.callback(ADMIN,`ok:${o.number}`,1);
+  await s.callback(user,`payok:${o.number}`,1);await s.photo(user,'fixture-receipt');await s.callback(ADMIN,`ok:${o.number}`,1);
   const paid=(await s.repo.getOrderBySlug(o.slug))!;expect(paid.status).toBe('active');expect(paid.amount).toBe(PRICES[d.format]);expect(invitationData(paid).designVersion).toBe('premium-v1');expect(pageMode(paid,s.clock)).toBe('full');
   await s.callback(user,`edit:${o.number}`,1);expect(s.lastText(user)).toBe(uz.order.closed);expect((await s.repo.getOrder(o.id))?.data).toEqual(paid.data);
  });
@@ -27,7 +27,7 @@ describe('pinned premium order revision',()=>{
   for(const id of revised){const d=getDesign(id)!;const o=await s.repo.createOrder({userId:960001,occasion:'nikoh',format:d.format,templateId:id,data:{...d.sample},music:{kind:'none'},amount:4321,slugBase:'historical-'+id,status:'preview'});
    await s.callback(960001,`edit:${o.number}`,1);await s.click(960001,uz.review.editNames);await s.text(960001,'Эски исм');await s.text(960001,'Нозима');await s.click(960001,uz.review.confirm);
    const edited=(await s.repo.getOrder(o.id))!;expect(edited.data.designVersion).toBeUndefined();expect(usesLegacyDesign(id,edited.data.designVersion)).toBe(true);expect(edited.amount).toBe(4321);expect(edited.slug).toBe(o.slug);
-   await s.callback(960001,`pay:${o.number}`,1);await s.photo(960001,'old-receipt');await s.callback(ADMIN,`ok:${o.number}`,1);expect((await s.repo.getOrder(o.id))?.data.designVersion).toBeUndefined();
+   await s.callback(960001,`payok:${o.number}`,1);await s.photo(960001,'old-receipt');await s.callback(ADMIN,`ok:${o.number}`,1);expect((await s.repo.getOrder(o.id))?.data.designVersion).toBeUndefined();
   }
  });
  it('pins the release epoch for other new orders too, without changing their loader',async()=>{const s=new Sim(),o=await nikohOrder(s,960002);expect(o.data.designVersion).toBe('premium-v1')});
@@ -43,11 +43,11 @@ describe('catalog promises the pinned appearance when an older unpaid order is e
  it('uses original cover/demo for a historical order and current ones for a new order',async()=>{
   const sim=new Sim();await startUz(sim,960100);const d=getDesign('kabutar-salom')!;
   const old=await sim.repo.createOrder({userId:960100,occasion:'nikoh',format:'animated',templateId:d.id,data:{...d.sample},music:{kind:'none'},amount:4321,slugBase:'old-presentation',status:'preview'});
-  await sim.callback(960100,`edit:${old.number}`,1);await sim.click(960100,uz.review.editDesign);await sim.click(960100,new RegExp(uz.format.names.animated));
-  expect(sim.last(960100).media).toContain('/covers/legacy/kabutar-salom.jpg');
+  await sim.callback(960100,`edit:${old.number}`,1);await sim.click(960100,uz.review.editDesign);
+  expect(sim.tg.to(960100).filter(m=>m.type==='photo').some(m=>String(m.media).includes('/covers/legacy/kabutar-salom.jpg'))).toBe(true);
   expect(JSON.stringify(sim.last(960100).markup)).toContain('/demo/kabutar-salom/legacy');
-  const fresh=await nikohOrder(sim,960101);await sim.callback(960101,`edit:${fresh.number}`,1);await sim.click(960101,uz.review.editDesign);await sim.click(960101,new RegExp(uz.format.names.animated));
-  expect(sim.last(960101).media).not.toContain('/covers/legacy/');
+  const fresh=await nikohOrder(sim,960101);await sim.callback(960101,`edit:${fresh.number}`,1);await sim.click(960101,uz.review.editDesign);
+  expect(sim.tg.to(960101).filter(m=>m.type==='photo').some(m=>String(m.media).includes('/covers/legacy/'))).toBe(false);
   expect(JSON.stringify(sim.last(960101).markup)).not.toContain('/legacy');
  });
 });

@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import { t } from "@/texts/uz-cyrl";
+import { MOTION } from "@/templates/blocks/motion";
 
 // right: на компьютере кнопка стоит в углу колонки шириной 430px, а не в углу экрана
 const BASE =
@@ -33,9 +34,11 @@ export function MusicButton({
       type="button"
       onClick={onToggle}
       aria-label={playing ? t.music.pause : t.music.play}
+      aria-pressed={playing}
+      data-music-button
       initial={{ opacity: 0, scale: 0.6 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: 0.3, duration: 0.4 }}
+      transition={{ delay: 0.3, duration: MOTION.fast, ease: MOTION.ease }}
       className={`${BASE} ${raised ? BOTTOM_RAISED : BOTTOM} ${className ?? DEFAULT_LOOK}`}
     >
       {playing && (
@@ -66,7 +69,7 @@ function SoftMusicButton({ playing, onToggle, className, raised }: { playing: bo
       aria-pressed={playing}
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: 0.3, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ delay: 0.3, duration: MOTION.fast, ease: MOTION.ease }}
       data-music-button
       className={`${BASE} ${raised ? BOTTOM_RAISED : BOTTOM} !h-[46px] !w-[46px] rounded-full ring-1 shadow-[0_6px_18px_-8px_rgba(40,30,20,.45)] backdrop-blur-md transition-transform duration-300 ${className ?? "bg-white/70 text-[#3a2a22] ring-black/10"}`}
     >

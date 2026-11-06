@@ -24,6 +24,7 @@ describe("музыка по тадбиру (шаг 3)", () => {
     expect(sim.tg.to(1).find(m => m.type === "audio")?.media).toBe("https://cdn.test/music/kuy.mp3");
     expect((await sim.repo.listMusic("nikoh"))[0].telegramFileId).toMatch(/^TGAUDIO_/);
     await sim.click(1, uz.music.choose);
+    await sim.click(1, uz.rsvp.edit);
     await sim.click(1, uz.rsvp.no);
     await sim.click(1, uz.review.confirm);
     expect((await sim.repo.listOrdersByUser(1))[0].music).toEqual({ kind: "list", musicId: "kuy" });
@@ -39,9 +40,11 @@ describe("музыка по тадбиру (шаг 3)", () => {
       await sim.click(1, uz.music.play("missing"));
       expect(sim.tg.to(1).some(m => m.text === uz.music.previewFailed)).toBe(true);
       expect((await sim.repo.listMusic("nikoh"))[0].telegramFileId).toBeNull();
-      expect((await sim.user(1))!.state.music).toBeUndefined();
+      // Бот выбрал мелодию сам; неудачное прослушивание выбор не меняет
+      expect((await sim.user(1))!.state.music).toEqual({ kind: "list", musicId: "missing" });
       await sim.click(1, uz.back);
       await sim.click(1, uz.music.none);
+      await sim.click(1, uz.rsvp.edit);
       await sim.click(1, uz.rsvp.no);
       await sim.click(1, uz.review.confirm);
       expect((await sim.repo.listOrdersByUser(1))[0].music).toEqual({ kind: "none" });
@@ -58,7 +61,7 @@ describe("музыка по тадбиру (шаг 3)", () => {
       await sim.audio(1, "FILE", 1000);
       if (sim.lastText(1) === uz.rsvp.ask) await sim.click(1, uz.rsvp.no);
       expect(sim.tg.to(1).some(m => m.text === uz.music.saveFailed)).toBe(true);
-      expect((await sim.user(1))!.state.music).toBeUndefined();
+      expect((await sim.user(1))!.state.music).not.toMatchObject({ kind: "own" });
       expect((await sim.repo.listOrdersByUser(1))).toHaveLength(0);
       // A retry with working storage still follows the original path.
       sim.deps.saveMusic = async () => "https://cdn.test/music/own/retry.mp3";

@@ -17,8 +17,29 @@ import type {
 import type { Occasion } from "@/lib/types";
 import type { Analytics, Period, EventKind } from "@/lib/analytics";
 import type { BotErrorEntry } from "./errors";
-import type { PanelSnapshot, Partner } from "@/lib/owner-panel";
+import type { ManagerPayout, PanelSnapshot, Partner, PayoutSchedule } from "@/lib/owner-panel";
+import type { InlineButton } from "./tg";
 import type { RsvpInput, RsvpRecord } from "@/lib/rsvp";
+import type { ClaimStatus, InviteKind, InviteUse, Manager } from "@/lib/roles";
+
+export type NewPartner = {
+  code: string;
+  name: string;
+  telegramId: number | null;
+  username: string | null;
+  rate: number;
+  /** Процент от оплаты (null — фиксированная rate) */
+  ratePercent?: number | null;
+  managedBy?: number | null;
+  phone?: string | null;
+  schedule?: PayoutSchedule;
+  status?: "pending" | "active";
+  ownerNotifiedAt?: Date | null;
+};
+export type PartnerPatch = Partial<Pick<Partner, "phone" | "kaspi" | "schedule" | "ownerNotifiedAt" | "sleepNotifiedAt">>;
+
+/** Исходящее сообщение бота с ключом (v2, часть 7): один ключ — одно сообщение */
+export type Notice = { key: string; chatId: number; text: string; markup?: { inline: InlineButton[][] } | null; dueAt: Date };
 
 export interface Repo {
   /** Журнал ошибок бота: entry уже очищен от личных данных */
@@ -99,10 +120,21 @@ export interface Repo {
   rsvpDigestDue(dayStart: Date): Promise<{ id: string; number: number; userId: number; since: Date | null }[]>;
   /** Ставит метку сводки; false — сегодня её уже забрал другой запуск */
   claimRsvpDigest(orderId: string, dayStart: Date, now: Date): Promise<boolean>;
-  createPartner(p: { code: string; name: string; telegramId: number | null; username: string | null; rate: number }): Promise<Partner>;
+  /** Новый партнёр. status pending — создал менеджер, ждёт ✅ владельца; ownerNotifiedAt — владельцу уже сообщили */
+  createPartner(p: NewPartner): Promise<Partner>;
   getPartner(id: number): Promise<Partner | null>;
-  setPartnerRate(id: number, rate: number): Promise<void>;
-  /** Партнёр этого человека: по id или по username (id тогда запоминается). Нет таблицы или партнёра — null */
+  setPartnerRate(id: number, rate: number, ratePercent?: number | null): Promise<void>;
+  /** Телефон, Kaspi, график, метки уведомлений */
+  updatePartner(id: number, patch: PartnerPatch): Promise<void>;
+  /** Ссылка join_: привязать Telegram, если партнёр ни к кому другому не привязан и не отклонён. null — нельзя */
+  bindPartner(id: number, userId: number, username: string | null): Promise<Partner | null>;
+  /** pending → active / rejected ровно один раз; false — уже решено (двойное нажатие) */
+  decidePartner(id: number, status: "active" | "rejected"): Promise<boolean>;
+  /** Менеджер предлагает ставку и график: ждут ✅ владельца (метка «сообщили» сбрасывается) */
+  proposePartnerTerms(id: number, rate: number, schedule: PayoutSchedule, ratePercent?: number | null): Promise<void>;
+  /** ✅ — ставка и график из предложения, ❌ — предложение убирается. null — предложения уже нет */
+  settlePartnerProposal(id: number, accept: boolean): Promise<Partner | null>;
+  /** Партнёр этого человека: по id или по username (id тогда запоминается). Отклонённый не считается. Нет таблицы или партнёра — null */
   findPartnerForUser(userId: number, username: string | null): Promise<Partner | null>;
   findUserByUsername(username: string): Promise<UserRecord | null>;
   /**
@@ -115,4 +147,48 @@ export interface Repo {
   recordPartnerPayout(partnerId: number, expected: number, createdBy: number): Promise<boolean>;
   /** Оплаченные заказы пришедших от партнёра клиентов без начисления */
   uncreditedPartnerOrders(): Promise<{ id: string; userId: number }[]>;
+
+  // ── Роли (v2): менеджеры, одноразовые ссылки, заказы «для клиента». Таблиц ещё нет — пусто / none ──
+  /** Все менеджеры, и снятые тоже (active = false) */
+  listManagers(): Promise<Manager[]>;
+  /** Активный менеджер или null */
+  getManager(id: number): Promise<Manager | null>;
+  /** Назначить (снятого — вернуть) */
+  addManager(m: { telegramId: number; code: string; username: string | null; firstName: string | null; invitedBy: number }): Promise<Manager>;
+  /** false — уже снят или не был менеджером */
+  removeManager(id: number, now: Date): Promise<boolean>;
+  createInvite(i: { tokenHash: string; kind: InviteKind; createdBy: number; expiresAt: Date; partnerId?: number | null }): Promise<void>;
+  /** Атомарно: ссылка срабатывает один раз и только до expiresAt */
+  useInvite(tokenHash: string, kind: InviteKind, userId: number, now: Date): Promise<InviteUse>;
+  /** Неоплаченный заказ сотрудника → ссылка для клиента (повтор заменяет ссылку, пока клиент не забрал) */
+  issueClientOrder(o: { orderId: string; createdBy: number; tokenHash: string; refSource: string | null }): Promise<void>;
+  /** Клиент забирает заказ: заказ переходит к нему (user_id), один раз */
+  claimClientOrder(tokenHash: string, clientId: number, now: Date): Promise<{ status: ClaimStatus; order?: OrderRecord }>;
+  /** Забранный клиентом заказ «для клиента»: кому засчитать (m_<код> менеджера; ref null — напрямую). null — обычный заказ */
+  clientOrderRef(orderId: string): Promise<{ ref: string | null } | null>;
+
+  // ── Уведомления и выплаты менеджерам (v2, часть 7). Таблиц ещё нет — queueNotice false, списки пустые ──
+  /** Поставить сообщение в очередь; false — сообщение с таким ключом уже было */
+  queueNotice(n: Notice): Promise<boolean>;
+  /** Забрать одно сообщение к отправке (sent_at = now). false — его уже забрали */
+  claimNotice(key: string, now: Date): Promise<boolean>;
+  /** Забрать все созревшие (due_at ≤ now) неотправленные сообщения, не больше limit */
+  claimDueNotices(now: Date, limit: number): Promise<Notice[]>;
+  /** Выплата менеджеру за месяц: один раз; false — уже выплачено */
+  recordManagerPayout(p: Omit<ManagerPayout, "createdAt"> & { createdBy: number }): Promise<boolean>;
+  /** Средняя оценка отзывов за промежуток (orderIds — только эти заказы; null — все). Нет таблицы — null */
+  reviewSummary?(from: Date, to: Date, orderIds: string[] | null): Promise<{ avg: number; count: number } | null>;
+
+  // ── Часть 10: напоминания, отзывы, автоочистка ──
+  setNudge(id: number, patch: { count?: number; off?: boolean }): Promise<void>;
+  /** stars — поставить/сменить оценку; text — добавить текст к уже поставленной оценке (false — оценки нет) */
+  saveReview(r: { orderId: string; userId: number; stars?: number; text?: string }): Promise<boolean>;
+  /** Удалить неоплаченные заказы, созданные до before, если клиент не заходил в бот с before. Возвращает их файлы */
+  deleteStaleDrafts(before: Date): Promise<{ photos: string[]; music: string | null }[]>;
+  /** Ошибки бота с since: сколько и самая частая причина. Нет доступа/таблицы — null */
+  errorSummary(since: Date): Promise<{ count: number; top: string } | null>;
+  /** Было ли отправлено сообщение с ключом, начинающимся на prefix, после since */
+  noticeSentSince(prefix: string, since: Date): Promise<boolean>;
+  /** Черновики анкеты (users.state) клиентов, не заходивших с before: id и состояние */
+  staleDraftStates(before: Date): Promise<{ id: number; state: Record<string, unknown> }[]>;
 }

@@ -15,8 +15,8 @@ import { glueWords } from "@/lib/typography";
 import { monthGrid, type WeddingDate } from "@/lib/wedding-date";
 import s from "./natural.module.css";
 
-/** Буквы, которых нет в Great Vibes */
-const MISSING_IN_SCRIPT = /[қғҳҚҒҲ]/;
+/** Буквы, которых нет в Great Vibes (узбекские и казахские) */
+const MISSING_IN_SCRIPT = /[қғҳәңөұүһіҚҒҲӘҢӨҰҮҺІ]/;
 export const scriptFamily = (text: string) =>
   MISSING_IN_SCRIPT.test(text) ? "var(--n-script-alt)" : "var(--n-script)";
 
@@ -31,8 +31,38 @@ export function Script({
   style?: CSSProperties;
 }) {
   const alt = MISSING_IN_SCRIPT.test(text);
+  // Длинное слово (русское «Программа» вместо «Дастур») не вылезает за край: шрифт уменьшается до ширины колонки
+  const ref = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const fit = () => {
+      el.style.fontSize = "";
+      const box = el.parentElement?.getBoundingClientRect();
+      if (!box) return;
+      // запас: у рукописных букв «хвосты» выходят за рамку слова
+      const limit = Math.min(box.width, window.innerWidth - 16) * 0.86;
+      let size = parseFloat(getComputedStyle(el).fontSize);
+      const over = () => {
+        // Ширина самого текста (блок может быть растянут на всю строку)
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        const r = range.getBoundingClientRect();
+        return r.width > limit || r.left < 12 || r.right > window.innerWidth - 12;
+      };
+      for (let i = 0; i < 12 && over() && size > 14; i++) {
+        size *= 0.92;
+        el.style.fontSize = `${size}px`;
+      }
+    };
+    fit();
+    document.fonts?.ready.then(fit).catch(() => undefined);
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
+  }, [text]);
   return (
     <span
+      ref={ref}
       className={`${s.script} ${alt ? s.scriptAlt : ""} ${className}`}
       style={{ fontFamily: scriptFamily(text), ...style }}
     >

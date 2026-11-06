@@ -42,7 +42,7 @@
 
 /* точки справа */
 .dots { position: fixed; z-index: 30; top: 50%; right: max(10px, calc(50vw - 215px + 10px)); translate: 0 -50%; display: grid; gap: 9px; }
-.dots span { width: 6px; height: 6px; border-radius: 50%; background: color-mix(in srgb, var(--c-ink) 25%, transparent); transition: transform .4s ease, background-color .4s ease; }
+.dots span { width: 6px; height: 6px; border-radius: 50%; background: color-mix(in srgb, var(--c-ink) 25%, transparent); transition: transform var(--m-fast) var(--m-ease), background-color var(--m-fast) var(--m-ease); }
 .dots span[data-on="true"] { background: var(--c-accent); transform: scale(1.5); }
 
 .finale { min-height: 60svh; scroll-snap-align: start; padding-top: 30px; }

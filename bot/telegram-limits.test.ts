@@ -1,7 +1,8 @@
 /** Все тексты бота и данные кнопок укладываются в лимиты Telegram на обоих языках */
 import { describe, expect, it } from "vitest";
 import { uz } from "@/texts/bot-uz";
-import { ru } from "@/texts/bot-ru";
+import { ru, staff } from "@/texts/bot-ru";
+import { kk } from "@/texts/bot-kk";
 import { activeDesigns } from "@/templates/registry";
 import { TG_LIMITS } from "./testing/fake-tg";
 
@@ -25,7 +26,13 @@ function strings(node: unknown, path: string, out: [string, string][] = []): [st
 
 const worstCard = { n: 99999, amount: "10 000 ₸", format: "Варақланадиган", design: `№100 ${LONG}`, names: `${LONG} ва ${LONG}`, date: "31.12.2027 23:59", client: `@${"u".repeat(32)} (id 9999999999)`, url: LONG_URL };
 
-describe.each([["uz", uz], ["ru", ru]] as const)("лимиты Telegram: %s", (_, tx) => {
+describe("лимиты Telegram: панели владельца и менеджера (staff, ru)", () => {
+  it("любой текст помещается в сообщение", () => {
+    for (const [path, text] of strings(staff, "staff")) expect(text.length, path).toBeLessThanOrEqual(TG_LIMITS.message);
+  });
+});
+
+describe.each([["uz", uz], ["ru", ru], ["kk", kk]] as const)("лимиты Telegram: %s", (_, tx) => {
   it("любой текст помещается в сообщение", () => {
     for (const [path, text] of strings(tx, "tx")) expect(text.length, path).toBeLessThanOrEqual(TG_LIMITS.message);
   });

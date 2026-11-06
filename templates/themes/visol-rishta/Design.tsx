@@ -47,5 +47,5 @@ const Content=memo(function Content({data,inv}:{data:InvitationData;inv:Invitati
       <Reveal className="px-7 pt-10 text-center"><p className="text-[24px] italic leading-[1.8]">{inv.blessing}</p><p className="mt-9 text-[15px] text-muted">{t.hosts.respectDeep}</p><p ref={hosts} className="mt-3 w-full leading-snug [--fit:26px]"><span className="text-[length:var(--fit)]"><Words text={data.hosts}/></span></p><p className="mt-6 text-[18px] italic text-primary">{t.hosts.waiting}</p></Reveal>
     </main>
   </>;
-},(a,b)=>a.data===b.data&&a.inv.mode===b.inv.mode);
+},(a,b)=>a.data===b.data&&a.inv.mode===b.inv.mode&&a.inv.lang===b.inv.lang);
 function Knot(){return <svg data-decor aria-hidden="true" viewBox="0 0 300 130" className="mx-auto w-full max-w-[300px]" fill="none"><path d="M18 111Q96 105 145 67M282 111Q204 105 155 67" stroke="#b69aa4" strokeWidth="9"/><path d="M146 64Q65-20 54 37q-4 48 92 27ZM154 64q81-84 92-27q4 48-92 27Z" stroke="#b69aa4" strokeWidth="11"/><path d="M143 53q11-9 17 2l-2 23q-9 7-16-3Z" fill="#a58a96"/><path d="M63 36q4-30 68 18M237 36q-4-30-68 18M32 110q69-12 99-35M268 110q-69-12-99-35" stroke="#dec7cd" strokeWidth="2"/><path d="M18 121h48M234 121h48" stroke="#b29a77" strokeWidth=".8"/></svg>;}

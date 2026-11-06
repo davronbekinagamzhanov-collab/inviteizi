@@ -20,6 +20,8 @@ const post = (s: Sim, r: Request) => handleRsvpRequest(r, { repo: s.repo, secret
 async function toRsvpStep(s: Sim, id: number) {
   await nikohToMusic(s, id);
   await s.click(id, uz.music.none);
+  // v2: бот сам включил ответы; к вопросу — через ✏️ в сводке
+  await s.click(id, uz.rsvp.edit);
   expect(s.lastText(id)).toBe(uz.rsvp.ask);
 }
 
@@ -28,7 +30,7 @@ async function paidOrder(s: Sim, id: number) {
   await s.click(id, uz.rsvp.yes);
   await s.click(id, uz.review.confirm);
   const o = (await s.repo.listOrdersByStatus(["preview", "awaiting_payment"])).find((x) => x.userId === id)!;
-  await s.callback(id, `pay:${o.number}`, 1);
+  await s.callback(id,`payok:${o.number}`, 1);
   await s.photo(id, "receipt");
   await s.callback(ADMIN, `ok:${o.number}`, 1);
   return (await s.repo.getOrder(o.id))!;
@@ -75,8 +77,8 @@ describe("этап 3.1: понятные ответы гостей", () => {
   it("после оплаты в сообщении есть кнопка ответов, и она открывает список", async () => {
     const s = new Sim();
     const o = await paidOrder(s, 1);
-    const thanks = s.tg.to(1).filter((m) => m.text === uz.pay.thanks).at(-1)!;
-    expect(buttonLabels(thanks)).toEqual([uz.rsvp.answers, uz.pay.newOrder]);
+    const thanks = s.tg.to(1).filter((m) => m.text === uz.pay.paidPack(`https://inviteizi.vercel.app/${o.slug}`)).at(-1)!;
+    expect(buttonLabels(thanks)).toEqual([uz.pay.shareButton, uz.rsvp.answers, uz.pay.newOrder]);
     await s.click(1, uz.rsvp.answers);
     expect(s.lastText(1)).toBe(uz.rsvp.empty);
     expect(o.data.rsvp).toBe(true);

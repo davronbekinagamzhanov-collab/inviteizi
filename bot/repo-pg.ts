@@ -1,12 +1,13 @@
 import { RSVP_IP_HOUR_LIMIT, RSVP_ORDER_LIMIT, type RsvpInput, type RsvpRecord } from "@/lib/rsvp";
-import type { PanelOrder, PanelSnapshot, Partner, PartnerEarning, PartnerPayout, PanelUser } from "@/lib/owner-panel";
+import { earningFor, type ManagerPayout, type PanelOrder, type PanelSnapshot, type Partner, type PartnerEarning, type PartnerPayout, type PanelUser, type PayoutSchedule } from "@/lib/owner-panel";
 import type { BotErrorEntry } from "./errors";
+import type { ClaimStatus, InviteKind, InviteUse, Manager } from "@/lib/roles";
 /**
  * Repo на Postgres (Supabase) через lib/db.ts (роль inviteizi_server).
  * Поведение — как у bot/repo-memory.ts (общий набор тестов bot/repo.contract.ts).
  * Таблицы: supabase/migrations/*_schema.sql.
  */
-import type { Repo } from "./repo";
+import type { NewPartner, Notice, PartnerPatch, Repo } from "./repo";
 import type {
   InvitationData,
   InvitationEvent,
@@ -20,7 +21,7 @@ import type {
   Stats,
   UserRecord,
 } from "@/lib/domain";
-import type { EventKind, Occasion, Relation } from "@/lib/types";
+import { EXTRA_LANGS, type EventKind, type ExtraLang, type Occasion, type Relation } from "@/lib/types";
 import { db, type Sql, type Tx } from "@/lib/db";
 import { env } from "@/lib/env";
 import { isReservedSlug } from "@/lib/slug";
@@ -44,6 +45,8 @@ type UserRow = {
   source: string | null;
   created_at: Date;
   last_seen_at: Date;
+  nudge_count?: number | null;
+  nudge_off?: boolean | null;
 };
 
 type EventJson = {
@@ -95,7 +98,12 @@ type OrderRow = {
   rsvp: boolean | null;
   /** Нет колонки до миграции client_photos — тогда undefined */
   photos?: string[] | null;
+  /** v2: нет колонок до миграции invite_langs — тогда undefined */
+  langs?: string[] | null;
+  custom_text_i18n?: Partial<Record<ExtraLang, string>> | null;
   admin_reminded_at: Date | null;
+  /** v2: нет колонки до миграции pay_confirm — тогда undefined */
+  pay_confirmed_at?: Date | null;
   expires_at: Date | null;
   events: EventJson[];
 };
@@ -124,6 +132,8 @@ function toUser(r: UserRow): UserRecord {
     source: r.source,
     createdAt: r.created_at,
     lastSeenAt: r.last_seen_at,
+    nudgeCount: r.nudge_count ?? 0,
+    nudgeOff: r.nudge_off ?? false,
   };
 }
 
@@ -158,6 +168,13 @@ function toData(r: OrderRow): InvitationData {
   put(d, "customText", r.custom_text);
   put(d, "rsvp", r.rsvp);
   if (r.photos?.length) d.photos = r.photos;
+  const extra = EXTRA_LANGS.filter((l) => r.langs?.includes(l));
+  if (extra.length) d.langs = extra;
+  // Главный язык страницы — первый в списке
+  const main = r.langs?.[0];
+  if (main && main !== "uz" && extra.includes(main as ExtraLang)) d.mainLang = main as ExtraLang;
+  const own = Object.fromEntries(EXTRA_LANGS.flatMap((l) => (typeof r.custom_text_i18n?.[l] === "string" && r.custom_text_i18n[l] ? [[l, r.custom_text_i18n[l]]] : [])));
+  if (Object.keys(own).length) d.customTexts = own;
   return d;
 }
 
@@ -193,6 +210,7 @@ function toOrder(r: OrderRow): OrderRecord {
     paidAt: r.paid_at,
     paymentRemindedAt: r.payment_reminded_at,
     adminRemindedAt: r.admin_reminded_at,
+    payConfirmedAt: r.pay_confirmed_at ?? null,
     expiresAt: r.expires_at,
   };
 }
@@ -210,7 +228,14 @@ function toMusicRecord(r: MusicRow): MusicRecord {
   };
 }
 
-type Columns = Record<string, string | number | boolean | Date | string[] | null>;
+type Columns = Record<string, string | number | boolean | Date | string[] | Partial<Record<ExtraLang, string>> | null>;
+
+/** Колонка orders.langs: главный язык первым, узбекский всегда есть */
+function langsColumn(langs: ExtraLang[], main?: ExtraLang) {
+  const extra = EXTRA_LANGS.filter((l) => langs.includes(l));
+  const first = main && extra.includes(main) ? main : "uz";
+  return [first, ...["uz", ...extra].filter((l) => l !== first)];
+}
 
 function dataColumns(d: InvitationData): Columns {
   return {
@@ -230,6 +255,9 @@ function dataColumns(d: InvitationData): Columns {
     rsvp: d.rsvp ?? null,
     // Колонка photos появляется миграцией client_photos: заказы без фото её не трогают
     ...(d.photos !== undefined && { photos: d.photos.length ? d.photos : null }),
+    // v2: колонки языков появляются миграцией invite_langs — заказы без языков их не трогают
+    ...(d.langs !== undefined && { langs: langsColumn(d.langs, d.mainLang) }),
+    ...(d.customTexts !== undefined && { custom_text_i18n: Object.keys(d.customTexts).length ? d.customTexts : null }),
   };
 }
 
@@ -267,6 +295,7 @@ function patchColumns(p: OrderPatch): Columns {
   if (p.paidAt !== undefined) c.paid_at = p.paidAt;
   if (p.paymentRemindedAt !== undefined) c.payment_reminded_at = p.paymentRemindedAt;
   if (p.adminRemindedAt !== undefined) c.admin_reminded_at = p.adminRemindedAt;
+  if (p.payConfirmedAt !== undefined) c.pay_confirmed_at = p.payConfirmedAt;
   if (p.expiresAt !== undefined) c.expires_at = p.expiresAt;
   // updated_at всё равно ставит триггер; так в update всегда есть хотя бы одна колонка
   c.updated_at = new Date();
@@ -316,9 +345,14 @@ const isUniqueSlugViolation = (e: unknown) =>
   typeof e === "object" && e !== null && (e as { code?: string }).code === "23505" &&
   String((e as { constraint_name?: string }).constraint_name ?? "").includes("slug");
 
-const PARTNER_COLUMNS = `id, code, name, telegram_id as "telegramId", username, rate, created_at as "createdAt"`;
+const PARTNER_COLUMNS = `id, code, name, telegram_id as "telegramId", username, rate, created_at as "createdAt", managed_by as "managedBy",
+  phone, kaspi, schedule, status, proposed_rate as "proposedRate", proposed_schedule as "proposedSchedule",
+  owner_notified_at as "ownerNotifiedAt", sleep_notified_at as "sleepNotifiedAt", rate_percent as "ratePercent", proposed_rate_percent as "proposedRatePercent"`;
+const PARTNER_PATCH: Record<keyof PartnerPatch, string> = { phone: "phone", kaspi: "kaspi", schedule: "schedule", ownerNotifiedAt: "owner_notified_at", sleepNotifiedAt: "sleep_notified_at" };
+const MANAGER_COLUMNS = `telegram_id as "telegramId", code, username, first_name as "firstName", invited_by as "invitedBy", active, created_at as "createdAt", removed_at as "removedAt"`;
 /** Миграция партнёров ещё не применена */
 const isMissingTable = (e: unknown) => (e as { code?: string } | null)?.code === "42P01";
+const isMissingColumn = (e: unknown) => (e as { code?: string } | null)?.code === "42703";
 
 export class PgRepo implements Repo {
   async isOwner(id: number) { return env.ownerId() === id; }
@@ -372,7 +406,9 @@ export class PgRepo implements Repo {
   }
 
   async staffIds() {
-    return [...new Set([...(await this.listAdminIds()), ...(env.ownerId() ? [env.ownerId() as number] : [])])];
+    // Менеджеры (и снятые): их собственные заказы и клики — не продажи
+    const managers = (await this.listManagers()).map((m) => m.telegramId);
+    return [...new Set([...(await this.listAdminIds()), ...(env.ownerId() ? [env.ownerId() as number] : []), ...managers])];
   }
 
   async saveRsvp(input: RsvpInput) {
@@ -429,16 +465,164 @@ export class PgRepo implements Repo {
       const partners = await this.sql<Partner[]>`select ${this.sql.unsafe(PARTNER_COLUMNS)} from public.partners order by id`;
       const earnings = await this.sql<PartnerEarning[]>`select order_id as "orderId", partner_id as "partnerId", amount, delivered, created_at as "createdAt" from public.partner_earnings`;
       const payouts = await this.sql<PartnerPayout[]>`select partner_id as "partnerId", amount, created_at as "createdAt" from public.partner_payouts`;
-      return { ...base, partners: [...partners], earnings: [...earnings], payouts: [...payouts], partnersReady: true };
+      return { ...base, partners: [...partners], earnings: [...earnings], payouts: [...payouts], ...(await this.v2Snapshot()), partnersReady: true };
     } catch (e) {
       if (!isMissingTable(e)) throw e;
       return { ...base, partners: [], earnings: [], payouts: [], partnersReady: false };
     }
   }
 
-  async createPartner(p: { code: string; name: string; telegramId: number | null; username: string | null; rate: number }) {
-    const [r] = await this.sql<Partner[]>`insert into public.partners(code,name,telegram_id,username,rate)
-      values(${p.code},${p.name},${p.telegramId},${p.username},${p.rate}) returning ${this.sql.unsafe(PARTNER_COLUMNS)}`;
+  /** Заказы «для клиента» и выплаты менеджерам; до миграций v2 — пусто */
+  private async v2Snapshot() {
+    const clientOrders = await this.sql<{ orderId: string; ref: string | null }[]>`select order_id as "orderId", ref_source as ref from public.client_orders where claimed_by is not null`.catch((e) => {
+      if (isMissingTable(e)) return [];
+      throw e;
+    });
+    const managerPayouts = await this.sql<ManagerPayout[]>`select manager_id as "managerId", month, amount, orders, created_at as "createdAt" from public.manager_payouts`.catch((e) => {
+      if (isMissingTable(e)) return [];
+      throw e;
+    });
+    return { clientOrders: [...clientOrders], managerPayouts: [...managerPayouts] };
+  }
+
+  // ── Уведомления и выплаты менеджерам (v2, часть 7) ──
+  async queueNotice(n: Notice) {
+    try {
+      const rows = await this.sql`insert into public.bot_notices(key, chat_id, body, due_at)
+        values(${n.key}, ${n.chatId}, ${this.sql.json({ text: n.text, markup: n.markup ?? null })}, ${n.dueAt})
+        on conflict (key) do nothing returning key`;
+      return rows.length > 0;
+    } catch (e) {
+      if (isMissingTable(e)) return false;
+      throw e;
+    }
+  }
+
+  async claimNotice(key: string, now: Date) {
+    try {
+      const rows = await this.sql`update public.bot_notices set sent_at = ${now} where key = ${key} and sent_at is null returning key`;
+      return rows.length > 0;
+    } catch (e) {
+      if (isMissingTable(e)) return false;
+      throw e;
+    }
+  }
+
+  async claimDueNotices(now: Date, limit: number) {
+    try {
+      const rows = await this.sql<{ key: string; chatId: number; body: { text: string; markup: Notice["markup"] }; dueAt: Date }[]>`
+        update public.bot_notices set sent_at = ${now}
+        where key in (select key from public.bot_notices where sent_at is null and due_at <= ${now} order by due_at limit ${limit} for update skip locked)
+        returning key, chat_id as "chatId", body, due_at as "dueAt"`;
+      return rows.map((r) => ({ key: r.key, chatId: r.chatId, text: r.body.text, markup: r.body.markup, dueAt: r.dueAt }));
+    } catch (e) {
+      if (isMissingTable(e)) return [];
+      throw e;
+    }
+  }
+
+  // ── Часть 10: напоминания, отзывы, очистка ──
+  async setNudge(id: number, patch: { count?: number; off?: boolean }) {
+    const row: Record<string, number | boolean> = {};
+    if (patch.count !== undefined) row.nudge_count = Math.min(4, Math.max(0, patch.count));
+    if (patch.off !== undefined) row.nudge_off = patch.off;
+    if (!Object.keys(row).length) return;
+    try {
+      await this.sql`update public.users set ${this.sql(row, Object.keys(row))} where id = ${id}`;
+    } catch (e) {
+      if (!isMissingColumn(e)) throw e;
+    }
+  }
+
+  async saveReview(r: { orderId: string; userId: number; stars?: number; text?: string }) {
+    try {
+      if (r.stars !== undefined) {
+        await this.sql`insert into public.order_reviews(order_id, user_id, stars) values(${r.orderId}, ${r.userId}, ${r.stars})
+          on conflict (order_id) do update set stars = excluded.stars, updated_at = now()`;
+      }
+      if (r.text !== undefined) {
+        const rows = await this.sql`update public.order_reviews set text = ${r.text}, updated_at = now() where order_id = ${r.orderId} and user_id = ${r.userId} returning order_id`;
+        return rows.length > 0;
+      }
+      return true;
+    } catch (e) {
+      if (isMissingTable(e)) return false;
+      throw e;
+    }
+  }
+
+  async reviewSummary(from: Date, to: Date, orderIds: string[] | null) {
+    try {
+      const ids = orderIds ? this.sql.array(orderIds) : null;
+      const [r] = await this.sql<{ avg: number | null; count: number }[]>`select avg(stars)::float8 as avg, count(*)::int as count from public.order_reviews
+        where created_at >= ${from} and created_at < ${to} and (${ids}::uuid[] is null or order_id = any(${ids}::uuid[]))`;
+      return r.count ? { avg: r.avg ?? 0, count: r.count } : null;
+    } catch (e) {
+      if (isMissingTable(e)) return null;
+      throw e;
+    }
+  }
+
+  async errorSummary(since: Date) {
+    try {
+      const rows = await this.sql<{ reason: string; n: number }[]>`select error_name || coalesce(' ' || error_code, '') || ': ' || left(message, 80) as reason, count(*)::int as n
+        from public.bot_errors where created_at >= ${since} group by 1 order by 2 desc limit 1`;
+      const [{ count }] = await this.sql<{ count: number }[]>`select count(*)::int as count from public.bot_errors where created_at >= ${since}`;
+      return { count, top: rows[0]?.reason ?? "" };
+    } catch (e) {
+      const code = (e as { code?: string } | null)?.code;
+      if (code === "42501" || isMissingTable(e)) return null;
+      throw e;
+    }
+  }
+
+  async noticeSentSince(prefix: string, since: Date) {
+    try {
+      const rows = await this.sql`select 1 from public.bot_notices where key like ${prefix + "%"} and sent_at >= ${since} limit 1`;
+      return rows.length > 0;
+    } catch (e) {
+      if (isMissingTable(e)) return false;
+      throw e;
+    }
+  }
+
+  async staleDraftStates(before: Date) {
+    const rows = await this.sql<{ id: number; state: Record<string, unknown> }[]>`select id, state from public.users
+      where last_seen_at < ${before} and (state ? 'data' or state ? 'music') limit 500`;
+    return [...rows];
+  }
+
+  async deleteStaleDrafts(before: Date) {
+    return this.sql.begin(async (tx) => {
+      // Только неоплаченные: оплаченные заказы, оплаты и выплаты не удаляются никогда
+      const rows = await tx<{ id: string; photos: string[] | null; music_url: string | null; music_kind: string }[]>`
+        select id, photos, music_url, music_kind from public.orders
+        where status in ('draft', 'preview', 'awaiting_payment', 'rejected') and paid_at is null and created_at < ${before}
+          and not exists (select 1 from public.users u where u.id = orders.user_id and u.last_seen_at >= ${before})
+          and not exists (select 1 from public.partner_earnings e where e.order_id = orders.id)
+        for update`;
+      if (!rows.length) return [];
+      const ids = tx.array(rows.map((r) => r.id));
+      // Заказ «для клиента», который клиент так и не забрал, уходит вместе с заказом; забранный — остаётся
+      await tx`delete from public.client_orders where order_id = any(${ids}::uuid[]) and claimed_by is null`;
+      const gone = await tx<{ id: string }[]>`delete from public.orders o where o.id = any(${ids}::uuid[])
+        and not exists (select 1 from public.client_orders c where c.order_id = o.id) returning o.id`;
+      const deleted = new Set(gone.map((g) => g.id));
+      return rows.filter((r) => deleted.has(r.id)).map((r) => ({ photos: r.photos ?? [], music: r.music_kind === "own" ? r.music_url : null }));
+    });
+  }
+
+  async recordManagerPayout(p: Omit<ManagerPayout, "createdAt"> & { createdBy: number }) {
+    if (p.amount <= 0) return false;
+    const rows = await this.sql`insert into public.manager_payouts(manager_id, month, amount, orders, created_by)
+      values(${p.managerId}, ${p.month}, ${p.amount}, ${p.orders}, ${p.createdBy}) on conflict do nothing returning month`;
+    return rows.length > 0;
+  }
+
+  async createPartner(p: NewPartner) {
+    const [r] = await this.sql<Partner[]>`insert into public.partners(code,name,telegram_id,username,rate,rate_percent,managed_by,phone,schedule,status,owner_notified_at)
+      values(${p.code},${p.name},${p.telegramId},${p.username},${p.rate},${p.ratePercent ?? null},${p.managedBy ?? null},${p.phone ?? null},${p.schedule ?? "weekly"},${p.status ?? "active"},${p.ownerNotifiedAt ?? null})
+      returning ${this.sql.unsafe(PARTNER_COLUMNS)}`;
     return r;
   }
 
@@ -448,17 +632,52 @@ export class PgRepo implements Repo {
     return r ?? null;
   }
 
-  async setPartnerRate(id: number, rate: number) {
-    await this.sql`update public.partners set rate = ${rate} where id = ${id}`;
+  async setPartnerRate(id: number, rate: number, ratePercent: number | null = null) {
+    await this.sql`update public.partners set rate = ${rate}, rate_percent = ${ratePercent} where id = ${id}`;
+  }
+
+  async updatePartner(id: number, patch: PartnerPatch) {
+    const row = Object.fromEntries(Object.entries(patch).map(([k, v]) => [PARTNER_PATCH[k as keyof PartnerPatch], v]));
+    const cols = Object.keys(row);
+    if (!cols.length || !Number.isSafeInteger(id)) return;
+    await this.sql`update public.partners set ${this.sql(row, cols)} where id = ${id}`;
+  }
+
+  async bindPartner(id: number, userId: number, username: string | null) {
+    // Один человек — один действующий партнёр; чужую привязку ссылка не перезаписывает
+    const [r] = await this.sql<Partner[]>`update public.partners set telegram_id = ${userId}, username = ${username}
+      where id = ${id} and status <> 'rejected' and (telegram_id is null or telegram_id = ${userId})
+        and not exists (select 1 from public.partners x where x.id <> ${id} and x.telegram_id = ${userId} and x.status <> 'rejected')
+      returning ${this.sql.unsafe(PARTNER_COLUMNS)}`;
+    return r ?? null;
+  }
+
+  async decidePartner(id: number, status: "active" | "rejected") {
+    const rows = await this.sql`update public.partners set status = ${status} where id = ${id} and status = 'pending' returning id`;
+    return rows.length > 0;
+  }
+
+  async proposePartnerTerms(id: number, rate: number, schedule: PayoutSchedule, ratePercent: number | null = null) {
+    await this.sql`update public.partners set proposed_rate = ${rate}, proposed_rate_percent = ${ratePercent}, proposed_schedule = ${schedule}, owner_notified_at = null where id = ${id}`;
+  }
+
+  async settlePartnerProposal(id: number, accept: boolean) {
+    // Одно обновление: двойное нажатие не применит предложение дважды
+    const [r] = accept
+      ? await this.sql<Partner[]>`update public.partners set rate = proposed_rate, rate_percent = proposed_rate_percent, schedule = proposed_schedule, proposed_rate = null, proposed_rate_percent = null, proposed_schedule = null
+          where id = ${id} and proposed_rate is not null returning ${this.sql.unsafe(PARTNER_COLUMNS)}`
+      : await this.sql<Partner[]>`update public.partners set proposed_rate = null, proposed_rate_percent = null, proposed_schedule = null
+          where id = ${id} and proposed_rate is not null returning ${this.sql.unsafe(PARTNER_COLUMNS)}`;
+    return r ?? null;
   }
 
   async findPartnerForUser(userId: number, username: string | null) {
     try {
-      const [byId] = await this.sql<Partner[]>`select ${this.sql.unsafe(PARTNER_COLUMNS)} from public.partners where telegram_id = ${userId} order by id limit 1`;
+      const [byId] = await this.sql<Partner[]>`select ${this.sql.unsafe(PARTNER_COLUMNS)} from public.partners where telegram_id = ${userId} and status <> 'rejected' order by id limit 1`;
       if (byId) return byId;
       if (!username) return null;
       const [bound] = await this.sql<Partner[]>`update public.partners set telegram_id = ${userId}
-        where id = (select id from public.partners where telegram_id is null and lower(username) = lower(${username}) order by id limit 1)
+        where id = (select id from public.partners where telegram_id is null and status <> 'rejected' and lower(username) = lower(${username}) order by id limit 1)
         returning ${this.sql.unsafe(PARTNER_COLUMNS)}`;
       return bound ?? null;
     } catch (e) {
@@ -473,12 +692,15 @@ export class PgRepo implements Repo {
   }
 
   async creditPartnerOrder(orderId: string, clientId: number, code: string) {
-    const [partner] = await this.sql<Partner[]>`select ${this.sql.unsafe(PARTNER_COLUMNS)} from public.partners p where code = ${code}
+    const [partner] = await this.sql<Partner[]>`select ${this.sql.unsafe(PARTNER_COLUMNS)} from public.partners p where code = ${code} and p.status <> 'rejected'
       and p.telegram_id is distinct from ${clientId}
       and not exists (select 1 from public.users u where u.id = ${clientId} and p.username is not null and lower(u.username) = lower(p.username))`;
     if (!partner) return null;
+    // Процент — от фактически оплаченной суммы заказа (округление до целых тенге)
+    const [order] = await this.sql<{ amount: number }[]>`select amount from public.orders where id = ${orderId}`;
+    const amount = earningFor(partner, order?.amount ?? 0);
     const [row] = await this.sql<{ amount: number }[]>`insert into public.partner_earnings(order_id,partner_id,amount)
-      values(${orderId},${partner.id},${partner.rate}) on conflict (order_id) do nothing returning amount`;
+      values(${orderId},${partner.id},${amount}) on conflict (order_id) do nothing returning amount`;
     return row ? { partner, amount: row.amount } : null;
   }
 
@@ -490,7 +712,7 @@ export class PgRepo implements Repo {
     const staff = this.sql.array((await this.staffIds()).map(String));
     return this.sql.begin(async (tx) => {
       // Блокировка партнёра: две одновременные выплаты идут по очереди
-      const [p] = await tx`select id from public.partners where id = ${partnerId} for update`;
+      const [p] = await tx`select id from public.partners where id = ${partnerId} and status = 'active' for update`;
       if (!p || expected <= 0) return false;
       const [{ due }] = await tx<{ due: number }[]>`select
         (select coalesce(sum(e.amount),0) from public.partner_earnings e join public.orders o on o.id = e.order_id
@@ -500,6 +722,100 @@ export class PgRepo implements Repo {
       await tx`insert into public.partner_payouts(partner_id,amount,created_by) values(${partnerId},${expected},${createdBy})`;
       return true;
     });
+  }
+
+  // ── Роли (v2) ──
+  async listManagers() {
+    try {
+      return [...(await this.sql<Manager[]>`select ${this.sql.unsafe(MANAGER_COLUMNS)} from public.managers order by created_at`)];
+    } catch (e) {
+      if (isMissingTable(e)) return [];
+      throw e;
+    }
+  }
+
+  async getManager(id: number) {
+    if (!Number.isSafeInteger(id)) return null;
+    try {
+      const [r] = await this.sql<Manager[]>`select ${this.sql.unsafe(MANAGER_COLUMNS)} from public.managers where telegram_id = ${id} and active`;
+      return r ?? null;
+    } catch (e) {
+      if (isMissingTable(e)) return null;
+      throw e;
+    }
+  }
+
+  async addManager(m: { telegramId: number; code: string; username: string | null; firstName: string | null; invitedBy: number }) {
+    const [r] = await this.sql<Manager[]>`insert into public.managers(telegram_id,code,username,first_name,invited_by)
+      values(${m.telegramId},${m.code},${m.username},${m.firstName},${m.invitedBy})
+      on conflict (telegram_id) do update set active = true, removed_at = null, username = excluded.username, first_name = excluded.first_name, invited_by = excluded.invited_by
+      returning ${this.sql.unsafe(MANAGER_COLUMNS)}`;
+    return r;
+  }
+
+  async removeManager(id: number, now: Date) {
+    const rows = await this.sql`update public.managers set active = false, removed_at = ${now} where telegram_id = ${id} and active returning telegram_id`;
+    return rows.length > 0;
+  }
+
+  async createInvite(i: { tokenHash: string; kind: InviteKind; createdBy: number; expiresAt: Date; partnerId?: number | null }) {
+    await this.sql`insert into public.staff_invites(token_hash,kind,created_by,partner_id,expires_at)
+      values(${i.tokenHash},${i.kind},${i.createdBy},${i.partnerId ?? null},${i.expiresAt})`;
+  }
+
+  async useInvite(tokenHash: string, kind: InviteKind, userId: number, now: Date): Promise<InviteUse> {
+    try {
+      // Одно обновление: два одновременных нажатия не используют ссылку дважды
+      const [r] = await this.sql<{ createdBy: number; partnerId: number | null }[]>`update public.staff_invites set used_by = ${userId}, used_at = ${now}
+        where token_hash = ${tokenHash} and kind = ${kind} and used_by is null and expires_at > ${now}
+        returning created_by as "createdBy", partner_id as "partnerId"`;
+      if (r) return { status: "ok", createdBy: Number(r.createdBy), partnerId: r.partnerId === null ? null : Number(r.partnerId) };
+      const [old] = await this.sql<{ used: boolean }[]>`select used_by is not null as used from public.staff_invites where token_hash = ${tokenHash} and kind = ${kind}`;
+      return { status: !old ? "none" : old.used ? "used" : "expired" };
+    } catch (e) {
+      if (isMissingTable(e)) return { status: "none" };
+      throw e;
+    }
+  }
+
+  async issueClientOrder(o: { orderId: string; createdBy: number; tokenHash: string; refSource: string | null }) {
+    await this.sql`insert into public.client_orders(order_id,created_by,token_hash,ref_source)
+      values(${o.orderId},${o.createdBy},${o.tokenHash},${o.refSource})
+      on conflict (order_id) do update set token_hash = excluded.token_hash, ref_source = excluded.ref_source, created_by = excluded.created_by
+      where public.client_orders.claimed_by is null`;
+  }
+
+  async claimClientOrder(tokenHash: string, clientId: number, now: Date): Promise<{ status: ClaimStatus; order?: OrderRecord }> {
+    try {
+      return await this.sql.begin(async (tx) => {
+        const [co] = await tx<{ orderId: string; createdBy: number; claimedBy: number | null }[]>`select order_id as "orderId", created_by as "createdBy", claimed_by as "claimedBy"
+          from public.client_orders where token_hash = ${tokenHash} for update`;
+        if (!co) return { status: "none" as const };
+        const claimedBy = co.claimedBy === null ? null : Number(co.claimedBy);
+        if (claimedBy === clientId) return { status: "mine" as const, order: (await loadOrder(tx, co.orderId)) ?? undefined };
+        if (claimedBy !== null) return { status: "used" as const };
+        if (Number(co.createdBy) === clientId) return { status: "creator" as const, order: (await loadOrder(tx, co.orderId)) ?? undefined };
+        const moved = await tx`update public.orders set user_id = ${clientId}, updated_at = ${now}
+          where id = ${co.orderId} and user_id = ${co.createdBy} and status in ('draft','preview','awaiting_payment','rejected') returning id`;
+        if (!moved.length) return { status: "closed" as const };
+        await tx`update public.client_orders set claimed_by = ${clientId}, claimed_at = ${now} where order_id = ${co.orderId}`;
+        return { status: "claimed" as const, order: (await loadOrder(tx, co.orderId)) ?? undefined };
+      });
+    } catch (e) {
+      if (isMissingTable(e)) return { status: "none" };
+      throw e;
+    }
+  }
+
+  async clientOrderRef(orderId: string) {
+    if (!UUID.test(orderId)) return null;
+    try {
+      const [r] = await this.sql<{ ref: string | null }[]>`select ref_source as ref from public.client_orders where order_id = ${orderId} and claimed_by is not null`;
+      return r ? { ref: r.ref } : null;
+    } catch (e) {
+      if (isMissingTable(e)) return null;
+      throw e;
+    }
   }
 
   async uncreditedPartnerOrders() {
@@ -706,9 +1022,24 @@ export class PgRepo implements Repo {
   }
 
   /** update … where id = $1 [and status = any($2)] returning — атомарно, вместе с тадбирами */
-  private update(id: string, from: OrderStatus[] | null, patch: OrderPatch) {
+  /**
+   * Колонки v2 появляются миграциями (pay_confirm, invite_langs). Если миграцию ещё не применили (42703),
+   * повторяем без этих колонок: оплата и правка не встают, теряется только новая отметка.
+   */
+  private async update(id: string, from: OrderStatus[] | null, patch: OrderPatch) {
+    try {
+      return await this.updateOnce(id, from, patch, false);
+    } catch (e) {
+      if (!isMissingColumn(e)) throw e;
+      console.warn("orders: миграция v2 не применена — сохраняю без новых колонок");
+      return this.updateOnce(id, from, patch, true);
+    }
+  }
+
+  private updateOnce(id: string, from: OrderStatus[] | null, patch: OrderPatch, legacy: boolean) {
     return this.sql.begin(async (tx) => {
       const cols = patchColumns(patch);
+      if (legacy) for (const k of ["pay_confirmed_at", "langs", "custom_text_i18n"]) delete cols[k];
       const rows = from
         ? await tx`update public.orders set ${tx(cols)}
                    where id = ${id} and status = any(${tx.array(from)}::text[]) returning id`

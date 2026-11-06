@@ -2,12 +2,13 @@ import { CURRENT_DESIGN_VERSION } from "@/templates/design-version";
 import { rsvpTotals } from "@/lib/rsvp";
 /** Заказ: создание/сохранение, оплата Kaspi, чек, решение админа, «мои приглашения», смена ссылки */
 import QRCode from "qrcode";
-import type { Ctx, Deps, Result, Step } from "./types";
+import type { Ctx, Deps, Draft, Result, Step } from "./types";
 import type { Lang, OrderRecord } from "@/lib/domain";
 import type { InlineButton } from "../tg";
 import { PRICES } from "@/templates/registry";
 import { tPlain as t } from "@/texts/uz-cyrl";
 import { uz } from "@/texts/bot-uz";
+import { staff } from "@/texts/bot-ru";
 import { slugify } from "@/lib/slug";
 import {
   backRow,
@@ -18,6 +19,7 @@ import {
   inline,
   isCompleteEvent,
   mainMenu,
+  startMenu,
   namesOf,
   ownerUrl,
   PAID_STATUSES,
@@ -26,11 +28,16 @@ import {
   price,
   send,
   txFor,
+  texts,
 } from "./util";
 import { getDesign, isOnSale } from "@/templates/registry";
 import { rememberUpdate } from "../update";
 import { recordBotError, toEntry } from "../errors";
+import { paidNotices } from "./notify";
+import { pageMode } from "@/lib/orders";
+import { isQuiet } from "@/lib/quiet-hours";
 import { creditPartnerSafely } from "./partners";
+import { isSeller } from "./panel";
 import { kzToday } from "../calendar";
 
 /** Последний тадбир уже прошёл (по времени Казахстана): платить за такую ссылку бессмысленно — она сразу заглушка */
@@ -59,35 +66,44 @@ async function sendAfterCommit(c: Ctx, chatId: number, text: string, opts?: Para
 
 // ── Создание / сохранение из сводки ──
 
-function orderButtons(c: Ctx, o: OrderRecord): InlineButton[][] {
+/** seller — владелец или менеджер: может отдать неоплаченный заказ клиенту (cl:<n>) */
+export function orderButtons(c: Ctx, o: OrderRecord, seller: boolean): InlineButton[][] {
   const rows: InlineButton[][] = [];
   if (PAYABLE_STATUSES.includes(o.status)) rows.push([{ text: c.tx.order.pay(price(o.amount)), data: `pay:${o.number}` }]);
   rows.push([{ text: c.tx.order.edit, data: `edit:${o.number}` }]);
+  if (seller && PAYABLE_STATUSES.includes(o.status)) rows.push([{ text: staff.btn.toClient, data: `cl:${o.number}` }]);
   return rows;
 }
 
-export async function confirmDraft(c: Ctx): Promise<Result> {
-  const s = c.s;
+/** Итог сохранения черновика в заказ — одинаковый для чата и приложения */
+export type UpsertOutcome =
+  | { kind: "created" | "updated"; order: OrderRecord }
+  | { kind: "incomplete" | "notFound" | "formatLocked" | "catalogChanged" | "race" }
+  | { kind: "closed" | "waiting" };
+
+/**
+ * Черновик → заказ (НАМУНА). Есть orderId — правка неоплаченного заказа (та же ссылка), иначе новый заказ.
+ * Новый заказ создаётся атомарно вместе с «занятием» вопроса expectedQ: двойное нажатие не создаст второй.
+ */
+export async function upsertDraftOrder(deps: Deps, userId: number, s: Draft, expectedQ: number, handledUpdates?: number[]): Promise<UpsertOutcome> {
   const data = finalData(s);
-  if (!s.templateId || !s.format || !data.events.length || !(s.data?.events ?? []).every(isCompleteEvent)) return null;
+  if (!s.templateId || !s.format || !data.events.length || !(s.data?.events ?? []).every(isCompleteEvent)) return { kind: "incomplete" };
   const music = s.music ?? { kind: "none" as const };
-  const repo = c.deps.repo;
+  const repo = deps.repo;
 
   if (s.orderId) {
     const old = await repo.getOrder(s.orderId);
-    if (!old || old.userId !== c.user.id) return { hint: c.tx.order.notFound };
+    if (!old || old.userId !== userId) return { kind: "notFound" };
     // The status guard belongs in the UPDATE, not only in the earlier read.
-    if (!PAYABLE_STATUSES.includes(old.status)) {
-      await send(c, old.status === "receipt_sent" ? c.tx.pay.waiting : c.tx.order.closed);
-      return { done: true };
-    }
+    if (!PAYABLE_STATUSES.includes(old.status)) return { kind: old.status === "receipt_sent" ? "waiting" : "closed" };
     // До оплаты можно сменить и дизайн, и формат (решение владельца 03.11.2026): новый формат — новая цена.
     // Тот же дизайн и формат — прежняя согласованная сумма (даже если каталог потом переклассифицировал дизайн).
-    const selected=getDesign(s.templateId);
-    const unchanged=s.templateId===old.templateId&&s.format===old.format;
-    if(!unchanged&&(!selected||!isOnSale(selected.id)||selected.format!==s.format||selected.occasion!==old.occasion)){
-      s.format=old.format;s.templateId=old.templateId;
-      return {hint:c.tx.order.formatLocked};
+    const selected = getDesign(s.templateId);
+    const unchanged = s.templateId === old.templateId && s.format === old.format;
+    if (!unchanged && (!selected || !isOnSale(selected.id) || selected.format !== s.format || selected.occasion !== old.occasion)) {
+      s.format = old.format;
+      s.templateId = old.templateId;
+      return { kind: "formatLocked" };
     }
     const preservedData = { ...data };
     delete preservedData.designVersion;
@@ -97,40 +113,67 @@ export async function confirmDraft(c: Ctx): Promise<Result> {
       music,
       templateId: s.templateId,
       // Тот же формат — согласованная сумма (каталог её не меняет); другой формат — цена этого формата
-      format: s.format, amount: s.format === old.format ? old.amount : PRICES[s.format],
+      format: s.format,
+      amount: s.format === old.format ? old.amount : PRICES[s.format],
+      // Заказ изменили — перед оплатой клиент снова проверяет его
+      ...(old.payConfirmedAt ? { payConfirmedAt: null } : {}),
     });
     if (!o) {
       const current = await repo.getOrder(old.id);
-      await send(c, current?.status === "receipt_sent" ? c.tx.pay.waiting : c.tx.order.closed);
-      return { done: true };
+      return { kind: current?.status === "receipt_sent" ? "waiting" : "closed" };
     }
-    await send(c, c.tx.order.updated(pageUrl(c, o.slug)), inline(orderButtons(c, o)));
-    return { done: true };
+    return { kind: "updated", order: o };
   }
 
-  const selected=getDesign(s.templateId);
+  const selected = getDesign(s.templateId);
   // Старый черновик мог запомнить дизайн, который потом сняли с каталога: купить его уже нельзя
-  if(!selected||!isOnSale(selected.id)||selected.format!==s.format||selected.occasion!==data.occasion){
-    s.ret="review";
-    await send(c,c.tx.order.catalogChanged);
-    return {to:"fmt"};
-  }
+  if (!selected || !isOnSale(selected.id) || selected.format !== s.format || selected.occasion !== data.occasion) return { kind: "catalogChanged" };
   const slugBase = data.occasion === "nikoh" ? slugify(data.groom ?? "", data.bride ?? "") : slugify(data.person ?? "");
-  const o = await repo.createOrderFromDraft({
-    userId: c.user.id,
-    occasion: data.occasion,
-    format: s.format,
-    templateId: s.templateId,
-    data: { ...data, designVersion: CURRENT_DESIGN_VERSION },
-    music,
-    amount: PRICES[s.format],
-    status: "preview",
-    slugBase,
-  }, c.q0, c.u.updateId === undefined ? undefined : rememberUpdate(c.user.state.handledUpdates,c.u.updateId));
-  if (!o) return { ignore: true };
-  await sendAfterCommit(c, c.chatId, c.tx.order.created(pageUrl(c, o.slug)), { markup: inline(orderButtons(c, o)) });
-  // Repo already finished this draft in the same transaction. Do not overwrite a newer dialog.
-  return { ignore: true };
+  const o = await repo.createOrderFromDraft(
+    {
+      userId,
+      occasion: data.occasion,
+      format: s.format,
+      templateId: s.templateId,
+      data: { ...data, designVersion: CURRENT_DESIGN_VERSION },
+      music,
+      amount: PRICES[s.format],
+      status: "preview",
+      slugBase,
+    },
+    expectedQ,
+    handledUpdates,
+  );
+  return o ? { kind: "created", order: o } : { kind: "race" };
+}
+
+export async function confirmDraft(c: Ctx): Promise<Result> {
+  const r = await upsertDraftOrder(c.deps, c.user.id, c.s, c.q0, c.u.updateId === undefined ? undefined : rememberUpdate(c.user.state.handledUpdates, c.u.updateId));
+  switch (r.kind) {
+    case "incomplete":
+      return null;
+    case "notFound":
+      return { hint: c.tx.order.notFound };
+    case "formatLocked":
+      return { hint: c.tx.order.formatLocked };
+    case "waiting":
+    case "closed":
+      await send(c, r.kind === "waiting" ? c.tx.pay.waiting : c.tx.order.closed);
+      return { done: true };
+    case "catalogChanged":
+      c.s.ret = "review";
+      await send(c, c.tx.order.catalogChanged);
+      return { to: "fmt" };
+    case "race":
+      return { ignore: true };
+    case "updated":
+      await send(c, c.tx.order.updated(pageUrl(c, r.order.slug)), inline(orderButtons(c, r.order, await isSeller(c))));
+      return { done: true };
+    case "created":
+      await sendAfterCommit(c, c.chatId, c.tx.order.created(pageUrl(c, r.order.slug)), { markup: inline(orderButtons(c, r.order, await isSeller(c))) });
+      // Repo already finished this draft in the same transaction. Do not overwrite a newer dialog.
+      return { ignore: true };
+  }
 }
 
 // ── Свои заказы ──
@@ -169,7 +212,30 @@ export async function editOrder(c: Ctx, n: number): Promise<Result> {
 }
 
 /** «Тўлаш»: реквизиты Kaspi, статус awaiting_payment, ждём чек */
-export async function payOrder(c: Ctx, n: number): Promise<Result> {
+/** Короткая сводка заказа для проверки перед оплатой: имена, дата, время, место */
+export function checkLines(o: OrderRecord, lang: Lang = "uz") {
+  const tx = txFor(lang);
+  const names = o.data.occasion === "nikoh" ? `${o.data.groom ?? ""} ${lang === "ru" ? "и" : lang === "kk" ? "және" : "ва"} ${o.data.bride ?? ""}` : (o.data.person ?? "");
+  const many = o.data.events.length > 1;
+  return [
+    names,
+    ...o.data.events.map((e) => `📅 ${many ? `${tx.event.kinds[e.kind]}: ` : ""}${fmtDate(e.date)}, ${e.time} · ${e.venueName}`),
+    `💳 ${price(o.amount)}`,
+  ].join("\n");
+}
+
+/**
+ * «💳 Тўлаш»: сначала проверка (имена, дата, место, НАМУНА и предупреждение, что после оплаты не меняется
+ * и деньги не возвращаются). Реквизиты — только после «✅ Ҳаммаси тўғри, тўлаймиз» (confirmed), время записывается.
+ */
+/** Отметка содержания заказа для кнопки «✅ …тўлаймиз»: заказ поменяли после проверки — кнопка устарела */
+export const checkStamp = (o: OrderRecord) => {
+  let h = 0;
+  for (const ch of JSON.stringify([o.templateId, o.amount, o.data.groom, o.data.bride, o.data.person, o.data.events])) h = (h * 31 + ch.charCodeAt(0)) | 0;
+  return (h >>> 0).toString(36);
+};
+
+export async function payOrder(c: Ctx, n: number, confirmed = false, stamp?: string): Promise<Result> {
   const o = await ownOrder(c, n);
   if (!o) {
     await send(c, c.tx.order.notFound);
@@ -184,10 +250,21 @@ export async function payOrder(c: Ctx, n: number): Promise<Result> {
     return { done: true };
   }
   if (eventsPassed(c, o)) {
-    await send(c, c.tx.pay.eventPassed, inline(orderButtons(c, o).filter((r) => !r.some((b) => "data" in b && b.data.startsWith("pay:")))));
+    await send(c, c.tx.pay.eventPassed, inline(orderButtons(c, o, false).filter((r) => !r.some((b) => "data" in b && b.data.startsWith("pay:")))));
     return { done: true };
   }
-  await c.deps.repo.transition(o.id, PAYABLE_STATUSES, "awaiting_payment");
+  // Старая кнопка (заказ изменили или сменилась цена после проверки) — показываем проверку заново
+  if (confirmed && stamp !== undefined && stamp !== `${o.amount}:${checkStamp(o)}`) confirmed = false;
+  if (!confirmed) {
+    await send(
+      c,
+      // НАМУНА живёт 24 часа: если уже закрыта — не даём мёртвую ссылку
+      c.tx.pay.check(checkLines(o, c.lang), pageMode(o, c.deps.now()) === "expired" ? null : pageUrl(c, o.slug)),
+      inline([[{ text: c.tx.pay.confirmYes, data: `payok:${o.number}:${o.amount}:${checkStamp(o)}` }], [{ text: c.tx.order.edit, data: `edit:${o.number}` }]]),
+    );
+    return { stay: true };
+  }
+  await c.deps.repo.transition(o.id, PAYABLE_STATUSES, "awaiting_payment", { payConfirmedAt: c.deps.now() });
   const env = c.deps.env;
   const card=env.paymentCardNumber?.trim();
   const paymentRows:InlineButton[][]=[[{text:c.tx.pay.copy,copy:env.kaspiPhone.replace(/[^\d+]/g,"")}]];
@@ -220,7 +297,7 @@ export async function askReceipt(c: Ctx, n: number, shownAmount?: number): Promi
     return { done: true };
   }
   if (eventsPassed(c, o)) {
-    await send(c, c.tx.pay.eventPassed, inline(orderButtons(c, o).filter((r) => !r.some((b) => "data" in b && b.data.startsWith("pay:")))));
+    await send(c, c.tx.pay.eventPassed, inline(orderButtons(c, o, false).filter((r) => !r.some((b) => "data" in b && b.data.startsWith("pay:")))));
     return { done: true };
   }
   // Клиент видел реквизиты с другой суммой (цена сменилась) — показываем актуальные
@@ -258,7 +335,7 @@ export const receipt: Step = {
       console.error("notifyAdmins", e instanceof Error ? e.name : "Error");
       await recordBotError(c.deps, toEntry(e, c.u, c.step, "ack"));
     }
-    await sendAfterCommit(c, c.chatId, c.tx.pay.receiptGot, { markup: mainMenu(c.tx) });
+    await sendAfterCommit(c, c.chatId, isQuiet(c.deps.now()) ? c.tx.pay.receiptGotNight : c.tx.pay.receiptGot, { markup: mainMenu() });
     return { done: true };
   },
 };
@@ -290,17 +367,21 @@ export const decisionButtons = (tx: ReturnType<typeof txFor>, n: number): Inline
 ];
 
 /** Чек + карточка заказа + кнопки решения — каждому админу */
-export async function notifyAdmins(deps: Deps, o: OrderRecord, prefix = "") {
+/** Чек заказа одному админу: фото/файл с карточкой и кнопками решения */
+export async function sendReceiptTo(deps: Deps, adminId: number, o: OrderRecord, prefix = "") {
   const client = await deps.repo.getUser(o.userId);
+  const lang = await langOf(deps, adminId);
+  const caption = prefix + adminCard(deps, o, lang, client);
+  const opts = { caption, markup: inline(decisionButtons(txFor(lang), o.number)) };
+  if (o.receipt?.kind === "document") await deps.tg.sendDocument(adminId, o.receipt.fileId, opts);
+  else if (o.receipt) await deps.tg.sendPhoto(adminId, o.receipt.fileId, opts);
+  else await deps.tg.sendMessage(adminId, caption, { markup: opts.markup });
+}
+
+export async function notifyAdmins(deps: Deps, o: OrderRecord, prefix = "") {
   for (const adminId of await deps.repo.listAdminIds()) {
-    const lang = await langOf(deps, adminId);
-    const tx = txFor(lang);
-    const caption = prefix + adminCard(deps, o, lang, client);
-    const opts = { caption, markup: inline(decisionButtons(tx, o.number)) };
     try {
-      if (o.receipt?.kind === "document") await deps.tg.sendDocument(adminId, o.receipt.fileId, opts);
-      else if (o.receipt) await deps.tg.sendPhoto(adminId, o.receipt.fileId, opts);
-      else await deps.tg.sendMessage(adminId, caption, { markup: opts.markup });
+      await sendReceiptTo(deps, adminId, o, prefix);
     } catch (e) {
       // Админ мог не запускать бота — остальным всё равно отправляем
       console.error("notifyAdmins", e instanceof Error ? e.name : "Error");
@@ -321,16 +402,22 @@ async function already(c: Ctx) {
 }
 
 /** Текст для гостей (всегда ўзбекча) */
+const RU_CAUSE: Record<string, string> = { nikoh: "по случаю свадьбы", sunnat: "по случаю суннат-тоя", yubiley: "по случаю юбилея" };
+const KK_CAUSE: Record<string, string> = { nikoh: "үйлену тойына", sunnat: "сүндет тойына", yubiley: "мерейтойына" };
+
 export function guestShareText(o: OrderRecord, url: string) {
   const d = o.data;
-  const g = uz.guest;
+  // Гостям — на главном языке приглашения (по умолчанию узбекский)
+  const main = d.mainLang && d.langs?.includes(d.mainLang) ? d.mainLang : "uz";
+  const g = texts[main].guest;
+  const cause = main === "kk" ? KK_CAUSE[d.cause ?? "nikoh"] : main === "ru" ? RU_CAUSE[d.cause ?? "nikoh"] : t.occasionTitles[d.cause ?? "nikoh"].toLowerCase();
   const what =
     d.occasion === "nikoh"
       ? g.nikoh(d.groom ?? "", d.bride ?? "")
       : d.occasion === "sunnat"
         ? g.sunnat(d.person ?? "")
         : d.occasion === "nahorgi"
-          ? g.nahorgi(d.person ?? "", t.occasionTitles[d.cause ?? "nikoh"].toLowerCase())
+          ? g.nahorgi(d.person ?? "", cause)
           : g.yubiley(d.person ?? "");
   const first = d.events[0];
   return g.share(what, first ? `${fmtDate(first.date)}, ${first.time}` : "", url);
@@ -346,34 +433,30 @@ async function sendLinkPack(deps: Deps, o: OrderRecord, afterPayment: boolean) {
   const tx = txFor(await langOf(deps, client));
   const url = `${deps.env.publicBaseUrl}/${o.slug}`;
   const tg = deps.tg;
-  const attempt = async (what: string, fn: () => Promise<unknown>) => {
-    try {
-      await fn();
-      return true;
-    } catch (e) {
-      console.error("клиенту не отправлено:", what, e instanceof Error ? e.name : "Error");
-      return false;
-    }
-  };
-  const linkSent = await attempt("ссылка", () => tg.sendMessage(client, tx.pay.paid(url), { markup: mainMenu(tx) }));
-  await attempt("QR", async () => {
-    const png = await QRCode.toBuffer(url, { width: 600, margin: 2 });
-    await tg.sendPhoto(client, new Uint8Array(png), { caption: tx.pay.qrCaption });
-  });
-  await attempt("пояснение", () => tg.sendMessage(client, tx.pay.shareIntro));
+  // ОДНО сообщение: QR-картинка, под ней ссылка, как разослать гостям и спасибо; кнопки — гостям, ответы, новый заказ
   const share = guestShareText(o, url);
   const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(share.replace(url, "").trim())}`;
-  const shareSent = await attempt("текст для гостей", () =>
-    tg.sendMessage(client, share, { markup: inline([[{ text: tx.pay.shareButton, url: shareUrl }]]) }),
-  );
-  if (afterPayment) {
-    await attempt("спасибо", () =>
-      tg.sendMessage(client, tx.pay.thanks, {
-        markup: inline([...(o.data.rsvp ? [[{ text: tx.rsvp.answers, data: `rsvp:${o.number}` }]] : []), [{ text: tx.pay.newOrder, data: "new" }]]),
-      }),
-    );
+  const caption = afterPayment ? tx.pay.paidPack(url) : tx.pay.linkPack(url);
+  const markup = inline([
+    [{ text: tx.pay.shareButton, url: shareUrl }],
+    ...(o.data.rsvp ? [[{ text: tx.rsvp.answers, data: `rsvp:${o.number}` }]] : []),
+    ...(afterPayment ? [[{ text: tx.pay.newOrder, data: "new" }]] : []),
+  ]);
+  try {
+    const png = await QRCode.toBuffer(url, { width: 600, margin: 2 });
+    await tg.sendPhoto(client, new Uint8Array(png), { caption, markup });
+    return { linkSent: true, shareSent: true };
+  } catch (e) {
+    console.error("клиенту не отправлено: QR", e instanceof Error ? e.name : "Error");
   }
-  return { linkSent, shareSent };
+  // QR не ушёл — то же самое текстом (ссылка и кнопки важнее картинки)
+  try {
+    await tg.sendMessage(client, caption, { markup });
+    return { linkSent: true, shareSent: true };
+  } catch (e) {
+    console.error("клиенту не отправлено: ссылка", e instanceof Error ? e.name : "Error");
+    return { linkSent: false, shareSent: false };
+  }
 }
 
 /** «🔗 Ҳавола» в «Менинг таклифномаларим»: оплаченному — ссылка, QR и текст заново; неоплаченному — ссылка НАМУНА */
@@ -419,7 +502,13 @@ export async function approve(c: Ctx, n: number) {
 
   await creditPartnerSafely(c, o);
   const { linkSent, shareSent } = await sendLinkPack(c.deps, o, true);
-  await sendAfterCommit(c, c.chatId, linkSent && shareSent ? c.tx.admin.approved(n) : c.tx.admin.approvedFailed(n));
+  // «💳 №134 · 8 000 ₸ · дизайн · кто привёл» — к ответу подтвердившего; другим админам и менеджеру — отдельно
+  const paidLine = await paidNotices(c.deps, o, c.user.id).catch(async (e) => {
+    await recordBotError(c.deps, toEntry(e, c.u, c.step, "ack"));
+    return "";
+  });
+  const done = linkSent && shareSent ? c.tx.admin.approved(n) : c.tx.admin.approvedFailed(n);
+  await sendAfterCommit(c, c.chatId, paidLine ? `${done}\n${paidLine}` : done);
 }
 
 const REASONS = ["money", "sum", "other"] as const;
@@ -455,9 +544,10 @@ const MY_LIMIT = 10;
 export async function myOrders(c: Ctx) {
   const list = (await c.deps.repo.listOrdersByUser(c.user.id)).slice(0, MY_LIMIT);
   if (!list.length) {
-    await send(c, c.tx.my.empty, mainMenu(c.tx));
+    await send(c, c.tx.my.empty, await startMenu(c));
     return;
   }
+  const seller = await isSeller(c);
   for (const o of list) {
     // До оплаты — всё можно менять; чек на проверке — ждём; ссылка выдана — заказ закрыт
     const rows: InlineButton[][] = [];
@@ -466,6 +556,7 @@ export async function myOrders(c: Ctx) {
         { text: c.tx.order.edit, data: `edit:${o.number}` },
         { text: c.tx.order.pay(price(o.amount)), data: `pay:${o.number}` },
       ]);
+      if (seller) rows.push([{ text: staff.btn.toClient, data: `cl:${o.number}` }]);
     }
     const last: InlineButton[] = o.status === "active" ? [{ text: c.tx.my.link, data: `link:${o.number}` }] : [];
     if (o.status === "active" && o.data.rsvp) rows.push([{ text: c.tx.rsvp.answers, data: `rsvp:${o.number}` }]);

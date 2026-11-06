@@ -1,9 +1,9 @@
 .cover{position:absolute;inset:0 0 auto;width:100%;height:100svh;min-height:560px;z-index:40;overflow:hidden;color:#674b58}
-.paper{position:absolute;inset:0;background:#eee3e5;transition:opacity .8s .15s;will-change:opacity}
-.flight{position:absolute;left:50%;top:32%;width:255px;transform:translateX(-50%);transition:transform 1.15s cubic-bezier(.4,0,.25,1),opacity .9s .2s;will-change:transform,opacity}
-.wing{transform-box:fill-box;transform-origin:40% 90%;transform:rotate(34deg);transition:transform .45s;will-change:transform}
-.label{position:absolute;inset:12% 6% auto;transition:opacity .2s}
-.prompt{position:absolute;inset:auto 6% 18%;font-size:17px;transition:opacity .2s}
+.paper{position:absolute;inset:0;background:#eee3e5;transition:opacity var(--m-base) var(--m-ease) .15s;will-change:opacity}
+.flight{position:absolute;left:50%;top:32%;width:255px;transform:translateX(-50%);transition:transform var(--m-slow) var(--m-ease),opacity var(--m-base) var(--m-ease) .2s;will-change:transform,opacity}
+.wing{transform-box:fill-box;transform-origin:40% 90%;transform:rotate(34deg);transition:transform var(--m-fast) var(--m-ease);will-change:transform}
+.label{position:absolute;inset:12% 6% auto;transition:opacity var(--m-fast) var(--m-ease)}
+.prompt{position:absolute;inset:auto 6% 18%;font-size:17px;transition:opacity var(--m-fast) var(--m-ease)}
 .cover[data-started=true] .flight{transform:translate(110%,-150%) rotate(-24deg) scale(.65);opacity:0}
 .cover[data-started=true] .wing{transform:rotate(-17deg)}
 .cover[data-started=true] .paper,.cover[data-started=true] .label,.cover[data-started=true] .prompt{opacity:0}

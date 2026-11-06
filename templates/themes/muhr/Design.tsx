@@ -303,6 +303,11 @@ export default function Muhr({ data, mode }: TemplateProps) {
                 <i />
                 {mono[1]}
               </span>
+              {/* Первый экран: чей тўй и когда — видно ещё до открытия */}
+              <span className={s.flapNames}>
+                {data.groom} {t.cover.and} {data.bride}
+              </span>
+              <span className={s.flapDate}>{t.date.short(inv.main.when.day, inv.main.when.monthIndex, inv.main.when.year)}</span>
             </span>
           </span>
           {/* Печать трескается на две половинки */}

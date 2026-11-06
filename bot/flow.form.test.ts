@@ -3,7 +3,7 @@ import { uz } from "@/texts/bot-uz";
 import { ru } from "@/texts/bot-ru";
 import { Sim } from "./testing/sim";
 import { buttonLabels, inlineButtons } from "./testing/fake-tg";
-import { startRu, startUz } from "./testing/paths";
+import { startRu, startUz, pickDesign, setChoices } from "./testing/paths";
 
 const BASE = "https://inviteizi.vercel.app";
 
@@ -14,9 +14,10 @@ describe("весь путь наҳорги ош на русском", () => {
     await startRu(sim, id, "qr_sayram");
     expect((await sim.user(id))?.source).toBe("qr_sayram");
     await sim.click(id, ru.category.nahorgi);
-    await sim.click(id, /С прокруткой/);
-    expect(sim.last(id).text).toMatch(/^№116 · Тонгги дастурхон\nС прокруткой · 6.000 ₸$/); // наҳорги ош — без фото клиента (решение владельца 03.11): строки «📷» нет
-    await sim.click(id, ru.catalog.buy);
+    // наҳорги ош — без фото клиента (решение владельца 03.11): строки «📷» в каталоге нет
+    expect(sim.lastText(id)).not.toContain("📷");
+    await pickDesign(sim, id, "tong-dasturxon");
+    expect(sim.tg.to(id).some((m) => m.text === ru.catalog.chosen(116, "Тонгги дастурхон"))).toBe(true);
 
     expect(sim.lastText(id)).toBe(ru.form.personNahorgi);
     await sim.text(id, "Жасурбек");
@@ -50,7 +51,9 @@ describe("весь путь наҳорги ош на русском", () => {
     await sim.text(id, "Сайрам, Амир Темур кўчаси 45");
     await sim.text(id, ru.event.skip);
 
-    // Добавить больше нечего — сразу текст (варианты на узбекском)
+    // Добавить больше нечего — сразу сводка «Бот выбрал»; текст меняем через ✏️ (варианты на узбекском)
+    expect(sim.lastText(id)).toContain(ru.review.title);
+    await sim.click(id, ru.review.editText);
     expect(sim.lastText(id)).toContain("Сизни ўғлимиз Жасурбекнинг никоҳ тўйи муносабати билан");
     expect(buttonLabels(sim.last(id))).toEqual(expect.arrayContaining([ru.text.pick(1), ru.text.pick(2), ru.text.own]));
     await sim.click(id, ru.text.own);
@@ -60,6 +63,7 @@ describe("весь путь наҳорги ош на русском", () => {
     expect(sim.lastText(id)).toBe(ru.text.ownAsk);
     const own = "Азиз меҳмонлар! Ўғлимиз Жасурбекнинг тўйи муносабати билан наҳорги ошга марҳамат.";
     await sim.text(id, own);
+    await sim.click(id, ru.review.editMusic);
 
     // Своя песня: название текстом — нельзя, > 20 МБ — нельзя
     expect(sim.lastText(id)).toBe(ru.music.ask);
@@ -72,7 +76,6 @@ describe("весь путь наҳорги ош на русском", () => {
     await sim.voice(id);
     expect(sim.tg.to(id).at(-2)?.text).toBe(ru.music.sendFile);
     await sim.audio(id, "SONG1", 5 * 1024 * 1024, "Тўй муборак");
-    await sim.click(id, ru.rsvp.no);
     expect(sim.savedMusic).toEqual(["SONG1"]);
 
     expect(sim.lastText(id)).toContain(ru.review.title);
@@ -99,8 +102,7 @@ describe("суннат с двумя мальчиками", () => {
     const id = 3;
     await startUz(sim, id);
     await sim.click(id, uz.category.sunnat);
-    await sim.click(id, /Оддий/);
-    await sim.click(id, uz.catalog.buy);
+    await pickDesign(sim, id, "simple");
     expect(sim.lastText(id)).toBe(uz.form.personSunnat);
     await sim.text(id, "Абдураҳмонжон ва Абдуллоҳжон");
     expect(sim.lastText(id)).toBe(uz.form.relationPerson("Абдураҳмонжон ва Абдуллоҳжон"));
@@ -114,10 +116,10 @@ describe("суннат с двумя мальчиками", () => {
     await sim.text(id, uz.event.skip);
     expect(buttonLabels(sim.last(id))).toEqual(expect.arrayContaining([uz.event.addNahorgi, uz.event.noMore]));
     await sim.click(id, uz.event.noMore);
+    await sim.click(id, uz.review.editText);
     expect(sim.lastText(id)).toContain("Сизни ўғилларимиз Абдураҳмонжон ва Абдуллоҳжоннинг суннат тўйига");
     await sim.click(id, uz.text.pick(1));
-    await sim.click(id, uz.music.none);
-    await sim.click(id, uz.rsvp.no);
+    await setChoices(sim, id, { text: 1, music: "none", rsvp: false });
     expect(sim.lastText(id)).toContain(uz.review.person("Абдураҳмонжон ва Абдуллоҳжон"));
     await sim.click(id, uz.review.confirm);
     const [o] = await sim.repo.listOrdersByUser(id);
@@ -140,8 +142,7 @@ describe("«Назад» на каждом шаге анкеты", () => {
     // [ответ, вопрос до ответа]
     const plan: [() => Promise<void>, string][] = [
       [() => sim.click(id, uz.category.nikoh), uz.category.ask],
-      [() => sim.click(id, /Анимацияли/), uz.format.ask],
-      [() => sim.click(id, uz.catalog.buy), "№113 · Муҳр\nАнимацияли · 8 000 ₸"],
+      [async () => void (await pickDesign(sim, id, "muhr")), "№113 Муҳр"],
       [() => sim.text(id, "Азиз"), uz.form.groom],
       [() => sim.text(id, "Мадина"), uz.form.bride],
       [() => sim.click(id, "Ўзимизники"), uz.form.relationNikoh],
@@ -160,10 +161,6 @@ describe("«Назад» на каждом шаге анкеты", () => {
       [() => sim.text(id, "Сайрам, Юсуф Сарёмий 17"), uz.event.address],
       [() => sim.text(id, uz.event.skip), uz.event.location],
       [() => sim.click(id, uz.event.noMore), ""],
-      [() => sim.click(id, uz.text.pick(1)), ""],
-      [() => sim.click(id, uz.music.fromList), uz.music.ask],
-      [() => sim.click(id, uz.music.choose), uz.music.listAsk],
-      [() => sim.click(id, uz.rsvp.no), uz.rsvp.ask],
     ];
     for (const [answer, question] of plan) {
       const before = sim.lastText(id).replace(/[\u00a0\u202f]/g, " ");
@@ -175,13 +172,8 @@ describe("«Назад» на каждом шаге анкеты", () => {
       await answer();
       expect(sim.lastText(id)).toBe(next);
     }
-    // Сводка → «Назад» → музыка
+    // Бот сам выбрал текст, музыку и ответы — сразу сводка
     expect(sim.lastText(id)).toContain(uz.review.title);
-    await sim.click(id, uz.back);
-    expect(sim.lastText(id)).toBe(uz.rsvp.ask);
-    await sim.click(id, uz.back);
-    expect(sim.lastText(id)).toBe(uz.music.listAsk);
-    await sim.click(id, uz.music.choose);
     await sim.click(id, uz.review.confirm);
     const [o] = await sim.repo.listOrdersByUser(id);
     expect(o.data.events).toHaveLength(2);
@@ -204,8 +196,7 @@ describe("«Назад» на каждом шаге анкеты", () => {
     const id = 6;
     await startUz(sim, id);
     await sim.click(id, uz.category.nikoh);
-    await sim.click(id, /Анимацияли/);
-    await sim.click(id, uz.catalog.buy);
+    await pickDesign(sim, id, "animated");
     await sim.text(id, "Азиз");
     await sim.text(id, "Мадина");
     await sim.click(id, "Фарзандларимиз");
@@ -220,9 +211,7 @@ describe("«Назад» на каждом шаге анкеты", () => {
     expect(sim.lastText(id)).toBe(uz.event.date("Келин салом"));
     await sim.click(id, uz.back);
     await sim.click(id, uz.event.noMore);
-    await sim.click(id, uz.text.pick(1));
-    await sim.click(id, uz.music.none);
-    await sim.click(id, uz.rsvp.no);
+    await setChoices(sim, id, { text: 1, music: "none", rsvp: false });
     expect(buttonLabels(sim.last(id)).filter((l) => l.startsWith("✏️ 2."))).toEqual([]);
     await sim.click(id, uz.review.confirm);
     const [o] = await sim.repo.listOrdersByUser(id);
@@ -234,8 +223,7 @@ describe("непонятный ввод и проверки", () => {
   async function toRelation(sim: Sim, id: number) {
     await startUz(sim, id);
     await sim.click(id, uz.category.nikoh);
-    await sim.click(id, /Анимацияли/);
-    await sim.click(id, uz.catalog.buy);
+    await pickDesign(sim, id, "animated");
     await sim.text(id, "Азиз");
     await sim.text(id, "Мадина");
   }
@@ -253,8 +241,7 @@ describe("непонятный ввод и проверки", () => {
     const sim = new Sim();
     await startUz(sim, 8);
     await sim.click(8, uz.category.nikoh);
-    await sim.click(8, /Анимацияли/);
-    await sim.click(8, uz.catalog.buy);
+    await pickDesign(sim, 8, "animated");
     await sim.sticker(8);
     expect(sim.tg.to(8).at(-2)?.text).toBe(uz.sendText);
     expect(sim.lastText(8)).toBe(uz.form.groom);
@@ -266,8 +253,7 @@ describe("непонятный ввод и проверки", () => {
     const sim = new Sim();
     await startUz(sim, 9);
     await sim.click(9, uz.category.nikoh);
-    await sim.click(9, /Анимацияли/);
-    await sim.click(9, uz.catalog.buy);
+    await pickDesign(sim, 9, "animated");
     await sim.text(9, "А".repeat(41));
     expect(sim.tg.to(9).at(-2)?.text).toBe(uz.tooLong(40));
     expect(sim.lastText(9)).toBe(uz.form.groom);
@@ -323,7 +309,7 @@ describe("непонятный ввод и проверки", () => {
     expect(((await sim.user(12))?.state as { data: { events: { date: string }[] } }).data.events[0].date).toBe("2026-12-31");
   });
 
-  it("3 тадбира максимум: после третьего сразу текст", async () => {
+  it("3 тадбира максимум: после третьего сразу сводка «Бот танлади»", async () => {
     const sim = new Sim();
     const id = 13;
     await toRelation(sim, id);
@@ -347,7 +333,7 @@ describe("непонятный ввод и проверки", () => {
     await sim.click(id, "09:00");
     await event();
     expect(sim.tg.to(id).at(-2)?.text).toBe(uz.event.maxReached);
-    expect((await sim.user(id))?.step).toBe("text");
+    expect((await sim.user(id))?.step).toBe("review");
     const st = (await sim.user(id))?.state as { data: { events: unknown[] } };
     expect(st.data.events).toHaveLength(3);
   });

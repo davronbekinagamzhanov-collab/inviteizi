@@ -1,8 +1,8 @@
 .cover{position:absolute;inset:0 0 auto;z-index:40;width:100%;height:100svh;min-height:560px;overflow:hidden;color:#385449}
-.ground{position:absolute;inset:0;background:#e5e6d6;transition:opacity .35s;will-change:opacity}
+.ground{position:absolute;inset:0;background:#e5e6d6;transition:opacity var(--m-fast) var(--m-ease);will-change:opacity}
 .field{position:absolute;inset:0;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(4,1fr);gap:2px}
-.tile{display:flex;align-items:center;background:#f4edda;padding:5px;transition:transform .7s cubic-bezier(.3,0,.2,1),opacity .7s;will-change:transform,opacity}
-.label{position:absolute;inset:29% 7% auto;padding:28px 12px;background:#faf6e9;border:1px solid #ae9767;transition:opacity .15s}
+.tile{display:flex;align-items:center;background:#f4edda;padding:5px;transition:transform var(--m-fast) var(--m-ease),opacity var(--m-fast) var(--m-ease);will-change:transform,opacity}
+.label{position:absolute;inset:29% 7% auto;padding:28px 12px;background:#faf6e9;border:1px solid #ae9767;transition:opacity var(--m-fast) var(--m-ease)}
 .cover[data-started=true] .tile{transform:scale(.02);opacity:0}
 .cover[data-started=true] .ground,.cover[data-started=true] .label{opacity:0}
 @media(prefers-reduced-motion:reduce){.tile,.label,.ground{transition:none}}

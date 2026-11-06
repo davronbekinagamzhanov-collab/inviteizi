@@ -3,7 +3,7 @@ import { uz } from "@/texts/bot-uz";
 import { ru } from "@/texts/bot-ru";
 import { runCron } from "./cron";
 import { Sim } from "./testing/sim";
-import { startUz } from "./testing/paths";
+import { startUz, pickDesign, setChoices } from "./testing/paths";
 import { PhotoFormatError, PhotoTooBigError } from "./own-photo";
 
 // Дизайн, выбранный первым в каталоге никоҳ, считаем «с фото клиента»
@@ -29,8 +29,7 @@ function photoSim() {
 async function toPhotoAsk(s: Sim, id: number) {
   await startUz(s, id);
   await s.click(id, uz.category.nikoh);
-  await s.click(id, new RegExp(uz.format.names.animated));
-  await s.click(id, uz.catalog.buy);
+  await pickDesign(s, id, "animated");
   await s.text(id, "Азиз");
   await s.text(id, "Мадина");
   expect(s.lastText(id)).toBe(uz.photo.ask);
@@ -46,9 +45,7 @@ async function finishForm(s: Sim, id: number) {
   await s.text(id, "Сайрам, Амир Темур кўчаси 45");
   await s.text(id, uz.event.skip);
   await s.click(id, uz.event.noMore);
-  await s.click(id, uz.text.pick(1));
-  await s.click(id, uz.music.none);
-  await s.click(id, uz.rsvp.no);
+  await setChoices(s, id, { text: 1, music: "none", rsvp: false });
 }
 
 describe("фото клиента в боте", () => {
@@ -84,7 +81,7 @@ describe("фото клиента в боте", () => {
     await s.click(1, uz.photo.yes);
     expect(s.lastText(1)).toBe(uz.photo.uploadAsk);
     await s.photo(1, "P1");
-    expect(s.lastText(1)).toBe(uz.photo.accepted(1, 3));
+    expect(s.lastText(1)).toBe(uz.photo.accepted(1));
     await s.document(1, "P2", "image/heic", "IMG_0001.HEIC");
     await s.document(1, "P3", "application/octet-stream", "photo.jpg");
     expect(saved).toEqual(["P1", "P2", "P3"]);
@@ -140,8 +137,7 @@ describe("фото клиента в боте", () => {
     const s = new Sim();
     await startUz(s, 1);
     await s.click(1, uz.category.nikoh);
-    await s.click(1, new RegExp(uz.format.names.animated));
-    await s.click(1, uz.catalog.buy);
+    await pickDesign(s, 1, "animated");
     await s.text(1, "Азиз");
     await s.text(1, "Мадина");
     expect((await s.user(1))!.step).toBe("relation");
@@ -156,6 +152,8 @@ describe("фото клиента в боте", () => {
     await finishForm(s, 1);
     await s.click(1, uz.review.confirm);
     const [o] = await s.repo.listOrdersByUser(1);
+    // Оплаченный заказ (неоплаченный через 30 дней удаляет автоочистка — это проверяет bot/care.test.ts)
+    await s.repo.updateOrder(o.id, { status: "active", paidAt: s.clock });
     // Тадбир 14 ноября → ссылка до 14 декабря → фото до 13 января
     s.clock = new Date("2027-01-10T00:00:00Z");
     expect((await runCron(s.deps)).photosRemoved).toBe(0);

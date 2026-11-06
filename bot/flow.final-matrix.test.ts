@@ -8,9 +8,10 @@
 import { describe, expect, it } from "vitest";
 import { uz } from "@/texts/bot-uz";
 import { ru } from "@/texts/bot-ru";
-import type { Format, Occasion } from "@/lib/domain";
+import type { Occasion } from "@/lib/domain";
 import { PRICES, getDesign, everAccepted, ACCEPTED } from "@/templates/registry";
-import { designsFor, formatsFor } from "./flow/util";
+import { catalogList, PAGE } from "./flow/steps-order";
+import { pickDesign } from "./testing/paths";
 import type { FakeMessage } from "./testing/fake-tg";
 import { inlineButtons } from "./testing/fake-tg";
 import { ADMIN, Sim } from "./testing/sim";
@@ -22,7 +23,6 @@ type Lang = "uz" | "ru";
 type Button = { text: string; data?: string; url?: string };
 
 const buttons = (m: FakeMessage | undefined) => inlineButtons(m) as Button[];
-const card = (sim: Sim) => sim.tg.to(ID).filter((m) => m.type === "photo").at(-1)!;
 
 function photoSim() {
   const s = new Sim();
@@ -37,31 +37,38 @@ async function press(sim: Sim, label: string | RegExp) {
   if (!b) throw new Error(`Нет кнопки ${String(label)} на экране: ${screen.text.slice(0, 120)}`);
   await sim.callback(ID, b.data!, screen.id);
 }
-const has = (sim: Sim, label: string | RegExp) =>
-  buttons(sim.last(ID)).some((x) => x.data && (typeof label === "string" ? x.text === label : label.test(x.text)));
 
-/** Каталог: ▶ по всем дизайнам и по кругу, ◀ обратно, «👁 Намуна» — ссылка на демо этого дизайна */
-async function browse(sim: Sim, occasion: Occasion, format: Format) {
-  const list = designsFor(occasion, format);
-  expect(list.length, `${occasion}/${format}`).toBeGreaterThan(0);
+/** Каталог: альбом по 3 обложки, ▶ по всем страницам и по кругу, ◀ обратно; «N️⃣ 👁» — демо этого дизайна */
+async function browse(sim: Sim, occasion: Occasion, pick: "photo" | "plain") {
+  const list = catalogList({ s: { occasion } });
+  expect(list.length, occasion).toBeGreaterThan(0);
+  const pages = Math.ceil(list.length / PAGE);
   const at = (k: number) => {
-    const d = list[((k % list.length) + list.length) % list.length];
-    const c = card(sim);
-    expect(c.text, `${occasion}/${format} #${k}`).toContain(`№${d.number} `);
-    const demo = buttons(c).find((b) => b.url);
-    expect(demo?.url, d.id).toMatch(new RegExp(`/demo/${d.id}(\\?|$)`));
-    expect(c.text.includes(uz.catalog.withPhoto) || c.text.includes(ru.catalog.withPhoto), d.id).toBe(Boolean(d.clientPhotos));
+    const start = (((k % pages) + pages) % pages) * PAGE;
+    const menu = sim.last(ID);
+    const albums = sim.tg.to(ID).filter((m) => m.type === "photo");
+    const shown = list.slice(start, start + PAGE);
+    for (const [n, d] of shown.entries()) {
+      expect(menu.text, `${occasion} стр.${k}`).toContain(`№${d.number} `);
+      expect(menu.text.split("\n").find((l) => l.includes(`№${d.number} `))!.includes("📷"), d.id).toBe(Boolean(d.clientPhotos));
+      const demo = buttons(menu).filter((b) => b.url)[n];
+      expect(demo?.url, d.id).toMatch(new RegExp(`/demo/${d.id}(\\?|#|$)`));
+      expect(albums.some((m) => m.media === `${BASE}/covers/${d.id}.jpg`), d.id).toBe(true);
+    }
+    // Прошлая страница удалена: в чате только обложки текущей
+    expect(albums.length, "одна страница каталога в чате").toBe(shown.length);
   };
   at(0);
-  for (let k = 1; k <= list.length; k++) { await press(sim, "▶"); at(k); }
-  for (let k = list.length - 1; k >= 0; k--) { await press(sim, "◀"); at(k); }
-  // Выбираем дизайн с фото клиента, если он есть в этом формате: так проходим и шаг фото
-  const target = Math.max(0, list.findIndex((d) => d.clientPhotos));
-  for (let k = 0; k < target; k++) await press(sim, "▶");
-  return list[target];
+  if (pages > 1) {
+    for (let k = 1; k <= pages; k++) { await press(sim, "▶"); at(k); }
+    for (let k = pages - 1; k >= 0; k--) { await press(sim, "◀"); at(k); }
+  }
+  const target = (pick === "photo" ? list.find((d) => d.clientPhotos) : undefined) ?? list.find((d) => !d.clientPhotos) ?? list[0];
+  await pickDesign(sim, ID, target.id);
+  return target;
 }
 
-async function walk(lang: Lang, occasion: Occasion, format: Format) {
+async function walk(lang: Lang, occasion: Occasion, pick: "photo" | "plain" = "photo") {
   const tx = lang === "uz" ? uz : ru;
   const sim = photoSim();
   await sim.start(ID);
@@ -71,14 +78,14 @@ async function walk(lang: Lang, occasion: Occasion, format: Format) {
   let design = undefined as ReturnType<typeof getDesign>;
   let sawPhoto = false;
   let events = 0;
+  let edited = false;
 
   for (let guard = 0; guard < 80; guard++) {
     const { step } = (await sim.user(ID))!;
     if (step === "idle") break;
     switch (step) {
       case "cat": await press(sim, tx.category[occasion]); break;
-      case "fmt": await press(sim, new RegExp(tx.format.names[format])); break;
-      case "catalog": design = await browse(sim, occasion, format); await press(sim, tx.catalog.buy); break;
+      case "catalog": design = await browse(sim, occasion, pick); break;
       case "groom": await sim.text(ID, "Муҳаммадюсуф"); break;
       case "bride": await sim.text(ID, "Мадинабону"); break;
       case "person": await sim.text(ID, "Абдурасулбек"); break;
@@ -101,6 +108,10 @@ async function walk(lang: Lang, occasion: Occasion, format: Format) {
         if (lang === "uz") {
           await sim.photo(ID, "P1");
           await sim.document(ID, "P2", "image/heic", "IMG_0001.HEIC");
+          // Одно живое сообщение «📷 Расмлар: 2 та ✅», а не новое на каждое фото
+          const live = sim.tg.to(ID).filter((m) => m.text.startsWith("📷 Расмлар: "));
+          expect(live).toHaveLength(1);
+          expect(live[0].text).toBe(tx.photo.accepted(2));
           await sim.photo(ID, "P3"); // третье — дальше само
         } else {
           const mark = sim.mark();
@@ -111,30 +122,30 @@ async function walk(lang: Lang, occasion: Occasion, format: Format) {
           await press(sim, tx.photo.done);
         }
         break;
-      case "text":
-        if (lang === "uz") await press(sim, tx.text.pick(1));
-        else { await press(sim, tx.text.own); await sim.text(ID, "Азиз меҳмонлар! Сизни тўйимизга чақирамиз."); }
-        break;
-      case "music":
-        if (lang === "uz" && has(sim, tx.music.fromList)) {
-          await press(sim, tx.music.fromList);
-          await press(sim, /^▶️ /);
-          await sim.click(ID, tx.music.choose); // «✅» — под карточкой песни
-        } else if (lang === "ru") {
+      case "review":
+        // «Бот танлади»: текст №1, первая мелодия, ответы включены. ru меняет всё через ✏️
+        if (lang === "ru" && !edited) {
+          edited = true;
+          expect(sim.lastText(ID)).toContain(tx.review.title);
+          await press(sim, tx.review.editText);
+          await press(sim, tx.text.own);
+          await sim.text(ID, "Азиз меҳмонлар! Сизни тўйимизга чақирамиз.");
+          await press(sim, tx.review.editMusic);
           await press(sim, tx.music.own);
           await sim.audio(ID, "OWN_SONG", 3_000_000);
-        } else await press(sim, tx.music.none);
+          await press(sim, tx.rsvp.edit);
+          await press(sim, tx.rsvp.no);
+          break;
+        }
+        await press(sim, tx.review.confirm);
         break;
-      case "rsvp": await press(sim, lang === "uz" ? tx.rsvp.yes : tx.rsvp.no); break;
-      case "review": await press(sim, tx.review.confirm); break;
-      default: throw new Error(`Путь ${lang}/${occasion}/${format} остановился на шаге ${step}: ${sim.lastText(ID).slice(0, 120)}`);
+      default: throw new Error(`Путь ${lang}/${occasion} остановился на шаге ${step}: ${sim.lastText(ID).slice(0, 120)}`);
     }
   }
   expect((await sim.user(ID))!.step).toBe("idle");
   expect(sawPhoto, "шаг фото только у clientPhotos-дизайнов").toBe(Boolean(design!.clientPhotos));
   const [o] = await sim.repo.listOrdersByUser(ID);
-  expect(o).toMatchObject({ status: "preview", occasion, format, templateId: design!.id, amount: PRICES[format] });
-  // никоҳ — до 3 тадбиров; у остальных бот предлагает 2 вида (основной + наҳорги ош / базм)
+  expect(o).toMatchObject({ status: "preview", occasion, format: design!.format, templateId: design!.id, amount: PRICES[design!.format] });
   expect(o.data.events).toHaveLength(events);
   expect(events).toBe(lang === "ru" ? 1 : occasion === "nikoh" ? 3 : 2);
   expect(o.data.photos ?? []).toHaveLength(design!.clientPhotos ? (lang === "uz" ? 3 : 1) : 0);
@@ -146,43 +157,36 @@ async function walk(lang: Lang, occasion: Occasion, format: Format) {
   return { sim, o, tx };
 }
 
-const cases = (["uz", "ru"] as const).flatMap((lang) =>
-  OCCASIONS.flatMap((occasion) => formatsFor(occasion).map((format) => [lang, occasion, format] as const)),
-);
+const cases = (["uz", "ru"] as const).flatMap((lang) => OCCASIONS.flatMap((occasion) => (["photo", "plain"] as const).map((pick) => [lang, occasion, pick] as const)));
 
-describe("финальная матрица: тадбир × формат × язык до личной НАМУНА", () => {
-  it("все 4 тадбира × 3 формата есть в боте", () => {
-    for (const occasion of OCCASIONS) expect(formatsFor(occasion).sort(), occasion).toEqual(["animated", "scroll", "simple"]);
+describe("финальная матрица: тадбир × язык × дизайн (с фото / без) до личной НАМУНА", () => {
+  it("в каждом тадбире есть дизайны всех трёх цен", () => {
+    for (const occasion of OCCASIONS) expect([...new Set(catalogList({ s: { occasion } }).map((d) => d.format))].sort(), occasion).toEqual(["animated", "scroll", "simple"]);
   });
-  it.each(cases)("%s · %s · %s", async (lang, occasion, format) => {
-    await walk(lang, occasion, format);
+  it.each(cases)("%s · %s · %s", async (lang, occasion, pick) => {
+    await walk(lang, occasion, pick);
   });
 });
 
 describe("правки до оплаты — та же ссылка НАМУНА", () => {
-  it("дизайн без фото → с фото: шаг фото появляется; с фото → без фото: фото убираются; формат меняет цену", async () => {
-    const { sim, o, tx } = await walk("uz", "nikoh", "simple");
+  it("дизайн с фото → без фото: фото убираются, цена — нового дизайна; без фото → с фото: шаг фото появляется", async () => {
+    const { sim, o, tx } = await walk("uz", "nikoh", "photo");
     expect(getDesign(o.templateId)!.clientPhotos).toBe(true);
     expect(o.data.photos).toHaveLength(3);
-    // → Анимацияли, дизайн без фото
+    const list = catalogList({ s: { occasion: "nikoh" } });
+    const plain = list.find((d) => !d.clientPhotos && d.format !== o.format)!;
     await press(sim, tx.order.edit);
     await press(sim, tx.review.editDesign);
-    await press(sim, new RegExp(tx.format.names.animated));
-    const plain = designsFor("nikoh", "animated").findIndex((d) => !d.clientPhotos);
-    for (let k = 0; k < plain; k++) await press(sim, "▶");
-    await press(sim, tx.catalog.buy);
+    await pickDesign(sim, ID, plain.id);
     await press(sim, tx.review.confirm);
     let now = (await sim.repo.getOrder(o.id))!;
-    expect(now).toMatchObject({ slug: o.slug, format: "animated", amount: PRICES.animated, templateId: designsFor("nikoh", "animated")[plain].id });
+    expect(now).toMatchObject({ slug: o.slug, format: plain.format, amount: PRICES[plain.format], templateId: plain.id });
     expect(now.data.photos ?? []).toEqual([]);
     expect(sim.lastText(ID)).toContain(`${BASE}/${o.slug}`);
-    // → Оддий, дизайн с фото: после выбора бот спрашивает фото
+    const withPhoto = list.find((d) => d.clientPhotos && d.id !== o.templateId)!;
     await press(sim, tx.order.edit);
     await press(sim, tx.review.editDesign);
-    await press(sim, new RegExp(tx.format.names.simple));
-    const withPhoto = designsFor("nikoh", "simple").findIndex((d) => d.clientPhotos);
-    for (let k = 0; k < withPhoto; k++) await press(sim, "▶");
-    await press(sim, tx.catalog.buy);
+    await pickDesign(sim, ID, withPhoto.id);
     expect(sim.lastText(ID)).toBe(tx.photo.ask);
     await press(sim, tx.photo.yes);
     await sim.photo(ID, "NEW1");
@@ -190,12 +194,12 @@ describe("правки до оплаты — та же ссылка НАМУНА
     expect((await sim.user(ID))!.step).toBe("review");
     await press(sim, tx.review.confirm);
     now = (await sim.repo.getOrder(o.id))!;
-    expect(now).toMatchObject({ slug: o.slug, format: "simple", amount: PRICES.simple });
+    expect(now).toMatchObject({ slug: o.slug, format: withPhoto.format, amount: PRICES[withPhoto.format], templateId: withPhoto.id });
     expect(now.data.photos).toHaveLength(1);
   });
 
   it("имена, дата, текст, музыка — сохраняются в тот же заказ, ссылка та же", async () => {
-    const { sim, o, tx } = await walk("uz", "sunnat", "scroll");
+    const { sim, o, tx } = await walk("uz", "sunnat", "plain");
     await press(sim, tx.order.edit);
     await press(sim, tx.review.editNames);
     await sim.text(ID, "Жасурбек");
@@ -220,8 +224,8 @@ describe("правки до оплаты — та же ссылка НАМУНА
 
 describe("оплата и закрытие правок", () => {
   it("чек → ✅ админа → ссылка; после этого правок нет, только «🆕 Янги таклифнома»", async () => {
-    const { sim, o, tx } = await walk("ru", "yubiley", "animated");
-    await sim.callback(ID, `pay:${o.number}`, sim.last(ID).id);
+    const { sim, o, tx } = await walk("ru", "yubiley", "plain");
+    await sim.callback(ID,`payok:${o.number}`, sim.last(ID).id);
     await sim.photo(ID, "RECEIPT");
     await sim.photo(ID, "RECEIPT2"); // второй чек — не второй заказ
     expect((await sim.repo.listOrdersByUser(ID))).toHaveLength(1);
@@ -239,12 +243,12 @@ describe("оплата и закрытие правок", () => {
 
 describe("скрытые дизайны", () => {
   it("в каталоге бота их нет, но код и номер на месте (старые оплаченные ссылки открываются)", () => {
-    const shown = new Set(OCCASIONS.flatMap((oc) => formatsFor(oc).flatMap((f) => designsFor(oc, f).map((d) => d.id))));
+    const shown = new Set(OCCASIONS.flatMap((oc) => catalogList({ s: { occasion: oc } }).map((d) => d.id)));
     for (const d of everAccepted()) {
       expect(shown.has(d.id), d.id).toBe(ACCEPTED.has(d.id));
       expect(getDesign(d.id)?.load, d.id).toBeTypeOf("function");
     }
     expect(shown.has("islimi-varaq")).toBe(false);
-    expect(shown.size).toBe(33);
+    expect(shown.size).toBe(36); // 33 + три «Пятна» (v2)
   });
 });

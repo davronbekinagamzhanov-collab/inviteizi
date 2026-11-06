@@ -1,0 +1,71 @@
+# Ежедневный бэкап базы InviteIZI (Supabase, PostgreSQL 17).
+# Раз в сутки pg_dump схемы public (с правами GRANT и политиками RLS) → файл .dump → артефакт GitHub, 14 дней (бесплатно).
+# Репозиторий приватный: артефакты видят только участники репозитория.
+# Строка подключения — ТОЛЬКО из секрета репозитория DB_BACKUP_URL (Settings → Secrets → Actions).
+# Нет секрета — шаг пишет предупреждение и завершается без ошибки (пока владелец его не добавит).
+# Как восстановить — docs/release/checklist-v2.md, раздел «Бэкап».
+name: db-backup
+
+on:
+  schedule:
+    - cron: "17 21 * * *" # 02:17 по Алматы — ночью, когда заказов почти нет
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: db-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Проверить секрет
+        id: secret
+        env:
+          DB_BACKUP_URL: ${{ secrets.DB_BACKUP_URL }}
+        run: |
+          if [ -z "$DB_BACKUP_URL" ]; then
+            echo "::warning::Секрет DB_BACKUP_URL не задан — бэкап пропущен. Инструкция: docs/release/checklist-v2.md"
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Установить pg_dump 17 (как версия базы)
+        if: steps.secret.outputs.ready == 'true'
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list > /dev/null
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client-17
+          /usr/lib/postgresql/17/bin/pg_dump --version
+
+      - name: Снять бэкап
+        if: steps.secret.outputs.ready == 'true'
+        env:
+          DB_BACKUP_URL: ${{ secrets.DB_BACKUP_URL }}
+          PGCONNECT_TIMEOUT: "30"
+        run: |
+          set -euo pipefail
+          file="inviteizi-$(date -u +%Y-%m-%d).dump"
+          /usr/lib/postgresql/17/bin/pg_dump "$DB_BACKUP_URL" \
+            --format=custom --compress=9 --no-owner \
+            --schema=public --file="$file"
+          # Проверка: архив читается и в нём есть таблица заказов
+          /usr/lib/postgresql/17/bin/pg_restore --list "$file" | grep -q "TABLE public orders"
+          ls -lh "$file"
+          echo "FILE=$file" >> "$GITHUB_ENV"
+
+      - name: Сохранить на 14 дней
+        if: steps.secret.outputs.ready == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.FILE }}
+          path: ${{ env.FILE }}
+          retention-days: 14
+          if-no-files-found: error

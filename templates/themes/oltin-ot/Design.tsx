@@ -1,5 +1,6 @@
 "use client";
 
+import { MOTION } from "@/templates/blocks/motion";
 import { motion } from "motion/react";
 import { Fragment, type ReactNode } from "react";
 import { designTexts } from "@/texts/uz-cyrl";
@@ -110,7 +111,7 @@ export default function Design({ data, mode }: TemplateProps) {
             <span aria-hidden className="gold-fill absolute top-3 bottom-10 left-[39px] w-px opacity-80" />
             {inv.program.map((ev, i) => (
               <li key={i} className="relative pb-11 pl-[52px] last:pb-2">
-                <Reveal delay={i * 0.06}>
+                <Reveal delay={i * MOTION.step}>
                   <ProgramItem event={ev} />
                 </Reveal>
               </li>

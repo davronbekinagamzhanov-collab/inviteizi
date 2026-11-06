@@ -8,6 +8,8 @@ import { Watermark } from "./Watermark";
 import { BrandBadge, BrandFooter, type PhotoCredit } from "./Brand";
 import { SoftBrandBadge, SoftBrandFooter } from "./BrandSoft";
 import { Rsvp, type RsvpLook } from "./Rsvp";
+import { LangSwitch } from "./LangSwitch";
+import { MusicHint } from "./MusicHint";
 
 /**
  * Оболочка любого дизайна: колонка шириной телефона, аудио, кнопка ▶/⏸, водяной знак «НАМУНА».
@@ -64,7 +66,7 @@ export function InvitationShell({
   return (
     // reducedMotion="user": если в телефоне отключены анимации, не мучаем гостя
     <MotionConfig reducedMotion="user">
-      <div style={style} className={`min-h-svh ${fontsClassName} ${backdropClassName}`}>
+      <div style={inv.langReady ? style : { ...style, visibility: "hidden" }} className={`min-h-svh ${fontsClassName} ${backdropClassName}`}>
         <div
           data-opened={inv.opened}
           className={`relative mx-auto min-h-svh w-full max-w-[430px] overflow-x-clip font-body ${className ?? ""}`}
@@ -96,6 +98,9 @@ export function InvitationShell({
             ) : (
               <BrandBadge raised={inv.mode === "demo"} />
             ))}
+          {/* v2: язык гостя и кнопка музыки на первом экране дизайнов без заставки */}
+          <LangSwitch inv={inv} />
+          {inv.opened && <MusicHint inv={inv} />}
           {inv.mode === "demo" && <Watermark />}
         </div>
       </div>

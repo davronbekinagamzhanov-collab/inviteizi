@@ -3,7 +3,7 @@ import { uz } from "@/texts/bot-uz";
 import { ru } from "@/texts/bot-ru";
 import { normalizeUpdate, type BotUpdate } from "./update";
 import { buttonLabels, FakeTg } from "./testing/fake-tg";
-import { nikohToMusic, startRu, startUz } from "./testing/paths";
+import { nikohToMusic, startRu, startUz, pickDesign, setChoices } from "./testing/paths";
 import { Sim } from "./testing/sim";
 
 /** Сайрам: 31.10.2026 23:00 */
@@ -12,8 +12,7 @@ const LATE = "2026-10-31T18:00:00Z";
 async function toDate(sim: Sim, id = 1) {
   await startUz(sim, id);
   await sim.click(id, uz.category.nikoh);
-  await sim.click(id, /Анимацияли/);
-  await sim.click(id, uz.catalog.buy);
+  await pickDesign(sim, id, "animated");
   await sim.text(id, "Азиз");
   await sim.text(id, "Мадина");
   await sim.click(id, "Фарзандларимиз");
@@ -21,18 +20,15 @@ async function toDate(sim: Sim, id = 1) {
   await sim.click(id, uz.form.sideNo);
 }
 
-describe("кнопка «Фарқи нимада»", () => {
-  it.each([["uz", uz, startUz], ["ru", ru, startRu]] as const)("%s: обычное сообщение о трёх тарифах, кнопки тарифов снова внизу", async (_, tx, start) => {
+describe("шага «формат» больше нет (v2)", () => {
+  it.each([["uz", uz, startUz], ["ru", ru, startRu]] as const)("%s: после тадбира сразу каталог, кнопок тарифов и «Фарқи нимада» нет", async (_, tx, start) => {
     const sim = new Sim();
     await start(sim, 1);
     await sim.click(1, tx.category.nikoh);
-    await sim.click(1, tx.format.info);
-    const texts = sim.tg.to(1).map((m) => m.text);
-    expect(texts).toContain(tx.format.infoText);
-    for (const name of Object.values(tx.format.names)) expect(tx.format.infoText).toContain(name);
-    expect(texts).not.toContain(tx.error);
-    expect(sim.lastText(1)).toContain(tx.format.ask);
-    expect(buttonLabels(sim.last(1)).some((l) => l.includes(tx.format.names.animated))).toBe(true);
+    expect((await sim.user(1))!.step).toBe("catalog");
+    const labels = buttonLabels(sim.last(1));
+    expect(labels).not.toContain(tx.format.info);
+    for (const name of Object.values(tx.format.names)) expect(labels.some((l) => l.includes(name))).toBe(false);
   });
 });
 
@@ -122,9 +118,7 @@ describe("время в прошлом при дате «сегодня»", () =
     await sim.text(1, "Сайрам");
     await sim.click(1, uz.event.skip);
     await sim.click(1, uz.event.noMore);
-    await sim.click(1, uz.text.pick(1));
-    await sim.click(1, uz.music.none);
-    await sim.click(1, uz.rsvp.no);
+    await setChoices(sim, 1, { text: 1, music: "none", rsvp: false });
     await sim.click(1, /^✏️ 1\./);
     await sim.click(1, uz.review.evDate);
     await sim.click(1, "◀");
@@ -151,7 +145,6 @@ describe("пересланная песня", () => {
     await nikohToMusic(sim, 1);
     await sim.click(1, uz.music.own);
     await sim.send(forwarded({ audio: { file_id: "FWD", file_unique_id: "u", duration: 180, title: "Ёр-ёр", performer: "Ҳофиз" } }));
-    await sim.click(1, uz.rsvp.no);
     expect(sim.savedMusic).toEqual(["FWD"]);
     expect(sim.tg.to(1).some((m) => m.text === uz.music.saved)).toBe(true);
     await sim.click(1, uz.review.confirm);

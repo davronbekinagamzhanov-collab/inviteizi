@@ -4,27 +4,50 @@
  */
 import type { BotUpdate } from "../update";
 import type { Ctx, Deps, Draft, Result, Step, StepId } from "./types";
-import { cat, catalog, fmt } from "./steps-order";
+import { cat, catalog, dropCatalog, fmt } from "./steps-order";
 import { age, bride, cause, groom, hosts, person, relation, sideAsk, sideBride } from "./steps-form";
 import { photoAsk, photoUpload } from "./steps-photo";
 import { evPlaces, evVenueName, evMap, evLink, evAddress, evDate, evLoc, evSameDay, evTime, evTimeCustom, evVenue, more } from "./steps-event";
-import { evMenu, music, musicList, musicOwn, review, rsvp, text, textOwn } from "./steps-final";
+import { evMenu, langs, langText, music, musicList, musicOwn, review, rsvp, text, textOwn } from "./steps-final";
 import { approve, askReceipt, askRejectReason, editOrder, myOrders, payOrder, receipt, reject, resendLink, rsvpAnswers } from "./orders";
 import { cmdFind, cmdOrders, cmdStats } from "./admin";
-import { mainMenu, send, texts, txFor } from "./util";
+import { mainMenu, ownerUrl, roleOf, send, startMenu, texts, txFor } from "./util";
 import type { Lang } from "@/lib/domain";
 import { dashboard } from "./dashboard";
-import { partnerAction, partnerContact, partnerName, partnerRate, partnerRateEdit, partnerStats } from "./partners";
+import {
+  acceptPartnerInvite,
+  joinKaspi,
+  joinLang,
+  joinPhone,
+  partnerAction,
+  partnerConfirm,
+  partnerName,
+  partnerPhone,
+  partnerPropose,
+  partnerProposeSchedule,
+  partnerRate,
+  partnerRateEdit,
+  partnerSchedule,
+  partnerStats,
+  ptAction,
+  sendPoster,
+} from "./partners";
 import { favorites, favoriteAction } from "./favorites";
 import { activeDesigns } from "@/templates/registry";
-import { designsFor } from "./util";
+import { catalogList, pageOf } from "./steps-order";
 import { rememberUpdate } from "../update";
 import { classifyError, isUnreachable, recordBotError, toEntry } from "../errors";
 import { beginAttempt } from "./delivery";
+import { acceptManager, claimOrder, panelAction, roleHome, showClaimed, toClient } from "./panel";
+import { parseStartToken } from "@/lib/roles";
+import { gotPayout, payManagerAction, payPartnerAction } from "./notify";
+import { partnerStatsAction, statsAction } from "./stats";
+import { rate, reviewText, skipReviewText, stopNudges } from "./care";
+import { exportAction } from "./export";
 
 const idle: Step = {
   async ask(c) {
-    await send(c, c.tx.idle, mainMenu(c.tx));
+    await send(c, c.tx.idle, await startMenu(c));
   },
 };
 
@@ -58,13 +81,22 @@ export const steps: Record<StepId, Step> = {
   musicList,
   musicOwn,
   rsvp,
+  langs,
+  langText,
   review,
   evMenu,
   receipt,
   partnerName,
-  partnerContact,
+  partnerPhone,
   partnerRate,
+  partnerSchedule,
+  partnerConfirm,
   partnerRateEdit,
+  partnerPropose,
+  partnerProposeSchedule,
+  joinLang,
+  joinPhone,
+  joinKaspi,
 };
 
 const BACK_LIMIT = 60;
@@ -85,7 +117,8 @@ export async function handle(baseDeps: Deps, u: BotUpdate): Promise<boolean> {
       id: u.from.id,
       username: u.from.username,
       firstName: u.from.firstName,
-      source: isStart && u.args ? u.args.slice(0, 64) : null,
+      // Одноразовые ссылки (mgr_, join_, o_) — не источник клиента и не должны лежать в базе
+      source: isStart && u.args && !parseStartToken(u.args) ? u.args.slice(0, 64) : null,
     });
     if (u.updateId !== undefined && rememberUpdate(user.state.handledUpdates).includes(u.updateId)) {
       attempt.finish();
@@ -175,7 +208,8 @@ async function apply(c: Ctx, r: Result) {
 
 async function goBack(c: Ctx) {
   delete c.s.venueNameInput;
-  if (steps[c.step].replyKeyboard) await send(c, c.tx.ok, mainMenu(c.tx));
+  if (c.step === "catalog") await dropCatalog(c);
+  if (steps[c.step].replyKeyboard) await send(c, c.tx.ok, mainMenu());
   const prev = c.s.back?.pop();
   if (!prev) {
     c.step = "idle";
@@ -199,41 +233,74 @@ async function reask(c: Ctx) {
 
 async function askLang(c: Ctx) {
   const tx = texts.uz;
-  await send(c, tx.chooseLang, { inline: [[{ text: tx.langUz, data: "lang:uz" }, { text: tx.langRu, data: "lang:ru" }]] });
+  // Казахский — только при KAZAKH_ENABLED (тексты ждут проверки носителем)
+  const kk = Boolean(c.deps.env.kazakhEnabled);
+  const row = [{ text: tx.langUz, data: "lang:uz" }, { text: tx.langRu, data: "lang:ru" }, ...(kk ? [{ text: tx.langKk, data: "lang:kk" }] : [])];
+  await send(c, kk ? tx.chooseLang3 : tx.chooseLang, { inline: [row] });
 }
 
 async function chooseLang(c: Ctx, lang: string) {
-  if (lang !== "uz" && lang !== "ru") return;
+  if (lang !== "uz" && lang !== "ru" && !(lang === "kk" && c.deps.env.kazakhEnabled)) return;
   const first = !c.user.lang;
   c.lang = lang as Lang;
   c.tx = texts[c.lang];
   // Сначала сообщение, потом запись: при повторе после сбоя клиент всё равно получит приветствие
+  await setAppButton(c);
   if (first) {
-    await send(c, c.tx.welcome(c.user.firstName), mainMenu(c.tx));
+    const claimed = c.s.claimed ? await c.deps.repo.getOrderByNumber(c.s.claimed) : null;
+    if (claimed) await showClaimed(c, claimed);
+    else if (!(await roleHome(c, true))) await send(c, c.tx.welcome(c.user.firstName), await startMenu(c));
     await c.deps.repo.setLang(c.user.id, lang);
+    if (c.s.claimed) {
+      c.s = { q: c.s.q };
+      await save(c);
+    }
     return;
   }
   await c.deps.repo.setLang(c.user.id, lang);
-  await send(c, c.tx.langSaved, mainMenu(c.tx));
-  await reask(c);
+  if (c.step === "idle") await send(c, c.tx.langSaved, await startMenu(c));
+  else {
+    await send(c, c.tx.langSaved);
+    await reask(c);
+  }
+}
+
+/** Кнопка меню Telegram у поля ввода: «✨ Очиш» открывает приложение (на языке клиента) */
+async function setAppButton(c: Ctx) {
+  if (c.chatId !== c.user.id) return;
+  const url = c.deps.env.miniAppUrl;
+  await c.deps.tg.setMenuButton(c.chatId, url ? { text: c.tx.menuButton, url } : null).catch((e) => console.warn("menu button", e instanceof Error ? e.name : "Error"));
+}
+
+/** Убрать старую нижнюю клавиатуру незаметно: служебное сообщение сразу удаляется */
+async function dropReplyKeyboard(c: Ctx) {
+  try {
+    const m = await c.deps.tg.sendMessage(c.chatId, c.tx.ok, { markup: mainMenu() });
+    await c.deps.tg.deleteMessage(c.chatId, m.messageId);
+  } catch (e) {
+    console.warn("reply keyboard", e instanceof Error ? e.name : "Error");
+  }
 }
 
 async function welcome(c: Ctx) {
+  await dropCatalog(c);
   c.step = "idle";
   c.s = { q: c.s.q };
+  await dropReplyKeyboard(c);
+  await setAppButton(c);
   // Запись последней: записанный update повторно не обрабатывается, и приветствие бы потерялось
-  await send(c, c.tx.welcome(c.user.firstName), mainMenu(c.tx));
+  if (!(await roleHome(c))) await send(c, c.tx.welcome(c.user.firstName), await startMenu(c));
   await save(c);
 }
 
 async function help(c: Ctx) {
-  await send(c, c.tx.help, { inline: [[{ text: c.tx.contact, url: `https://t.me/${c.deps.env.ownerUsername.replace(/^@/, "")}` }]] });
+  await send(c, c.tx.help, { inline: [[{ text: c.tx.contact, url: ownerUrl(c) }]] });
 }
 
 type MenuKey = keyof (typeof texts)["uz"]["menu"];
 function menuKey(text: string): MenuKey | null {
   for (const tx of Object.values(texts)) {
-    for (const [k, label] of Object.entries(tx.menu)) if (label === text) return k as MenuKey;
+    for (const labels of [tx.menu, tx.menuLegacy]) for (const [k, label] of Object.entries(labels)) if (label === text) return k as MenuKey;
   }
   return null;
 }
@@ -256,7 +323,7 @@ async function menu(c: Ctx, key: MenuKey) {
 
 async function unknown(c: Ctx) {
   if (c.step === "idle") {
-    await send(c, `${c.tx.unknown} ${c.tx.idle}`, mainMenu(c.tx));
+    await send(c, `${c.tx.unknown} ${c.tx.idle}`, await startMenu(c));
     return;
   }
   await send(c, c.tx.unknown);
@@ -271,16 +338,37 @@ async function route(c: Ctx) {
   if (u.kind === "callback") {
     const d = u.data;
     if (d.startsWith("lang:")) return chooseLang(c, d.slice(5));
-    // Решение по чеку — даже если админ ещё не выбрал язык
-    if (!c.user.lang && !/^(ok|no|nr):/.test(d)) return askLang(c);
+    // Решение по чеку — даже если админ ещё не выбрал язык; партнёр по ссылке выбирает язык своим шагом
+    if (!c.user.lang && !/^(ok|no|nr):/.test(d) && c.step !== "joinLang") return askLang(c);
     return onCallback(c, d);
   }
 
   if (u.kind === "command" && u.command === "start") {
+    const token = parseStartToken(u.args);
+    if (token?.kind === "mgr") {
+      await acceptManager(c, token.token);
+      if (!c.user.lang) return askLang(c);
+      return welcome(c);
+    }
+    if (token?.kind === "join") {
+      const r = await acceptPartnerInvite(c, token.token);
+      if (r !== "home" && r !== "failed") return apply(c, r);
+      if (!c.user.lang) return askLang(c);
+      return welcome(c);
+    }
+    if (token?.kind === "o") {
+      const r = await claimOrder(c, token.token);
+      if (r === "askLang") {
+        await save(c);
+        return askLang(c);
+      }
+      return;
+    }
     if (!c.user.lang) return askLang(c);
     return welcome(c);
   }
-  if (!c.user.lang) return askLang(c);
+  // Партнёр по ссылке ещё не выбрал язык: повторить его вопрос (на двух языках), а не общий
+  if (!c.user.lang) return c.step === "joinLang" ? ask(c) : askLang(c);
 
   if (u.kind === "command") return onCommand(c, u.command, u.args);
 
@@ -289,6 +377,9 @@ async function route(c: Ctx) {
     if (key) return menu(c, key);
     if (isBackLabel(u.text.trim()) && c.step !== "idle") return goBack(c);
   }
+
+  // Отзыв: первое сообщение после оценки — его текст (анкету не трогает)
+  if (u.kind === "text" && c.s.reviewFor && (await reviewText(c))) return save(c);
 
   const step = steps[c.step];
   if (c.step === "idle" || !step.onMessage) {
@@ -301,6 +392,8 @@ async function route(c: Ctx) {
 async function onCommand(c: Ctx, command: string, args: string) {
   if (command === "favorites") return favorites(c);
   if (command === "dashboard") {
+    // v2: /dashboard владельца — новая «📊 Статистика»; остальным — прежний отказ
+    if (c.chatId === c.user.id && (await roleOf(c)) === "owner") return statsAction(c, "st", "d", "money");
     const r = await dashboard(c);
     return r ? apply(c, r) : undefined;
   }
@@ -335,16 +428,77 @@ async function toast(c: Ctx, text: string) {
   c.answered = true;
 }
 
+/**
+ * Нажали старую кнопку. Двойное нажатие (кнопка прошлого вопроса) — только всплывашка.
+ * Совсем старая — у того сообщения убираем кнопки и пишем «Бу тугма эскирган 👇» + меню или текущий вопрос.
+ */
+async function stale(c: Ctx, n?: number) {
+  if (n !== undefined && c.step !== "idle" && n === (c.s.q ?? 0) - 1) return toast(c, c.tx.oldButton);
+  await toast(c, c.tx.oldButton);
+  await c.deps.tg.editMessageReplyMarkup(c.chatId, c.u.messageId, null).catch(() => undefined);
+  if (c.step === "idle") return void (await send(c, c.tx.oldButton, await startMenu(c)));
+  await send(c, c.tx.oldButton);
+  await ask(c);
+}
+
 async function onCallback(c: Ctx, d: string) {
   if (d === "favorites") return favorites(c);
+  if (d.startsWith("m:")) {
+    const key = d.slice(2);
+    if (key === "create" || key === "my" || key === "help" || key === "lang") return menu(c, key);
+    return stale(c);
+  }
+  if (d.startsWith("pn:")) {
+    const [, action, arg = ""] = d.split(":");
+    const r = await panelAction(c, action, arg);
+    return r ? apply(c, r) : undefined;
+  }
+  if (d.startsWith("pa:")) {
+    const [, action, id = "", x = "", extra = ""] = d.split(":");
+    const r = await ptAction(c, action, id, x, extra);
+    return r ? apply(c, r) : undefined;
+  }
+  if (d.startsWith("st:") || d.startsWith("sm:")) {
+    const [prefix, p = "", sec = ""] = d.split(":");
+    return statsAction(c, prefix as "st" | "sm", p, sec);
+  }
+  if (d.startsWith("sp:")) return partnerStatsAction(c, d.slice(3));
+  if (d.startsWith("ex:")) return exportAction(c, d.slice(3));
+  if (d.startsWith("po:")) {
+    const [, id = "", amount = "", version = ""] = d.split(":");
+    return payPartnerAction(c, id, amount, version);
+  }
+  if (d.startsWith("mp:")) {
+    const [, id = "", month = "", amount = ""] = d.split(":");
+    return payManagerAction(c, id, month, amount);
+  }
+  if (d === "pg") return gotPayout(c);
+  if (d === "care:stop") return stopNudges(c);
+  if (d.startsWith("rv:")) {
+    const [, n = "", x = ""] = d.split(":");
+    if (x === "skip") {
+      await skipReviewText(c);
+      return save(c);
+    }
+    await rate(c, n, x);
+    return save(c);
+  }
+  if (d.startsWith("pq:")) {
+    const [, id = "", lang = ""] = d.split(":");
+    return sendPoster(c, id, lang);
+  }
+  if (d.startsWith("cl:")) {
+    const r = await toClient(c, Number(d.slice(3)));
+    return r ? apply(c, r) : undefined;
+  }
   if (d.startsWith("dash:")) {
     const [, view, period, a, b] = d.split(":");
     const r = await dashboard(c, view, period, a, b);
     return r ? apply(c, r) : undefined;
   }
   if (d.startsWith("dp:")) {
-    const [, action, id, amount] = d.split(":");
-    const r = await partnerAction(c, action, id, amount);
+    const [, action, id, amount, version = ""] = d.split(":");
+    const r = await partnerAction(c, action, id, amount, version);
     return r ? apply(c, r) : undefined;
   }
   if (d.startsWith("fav:")) {
@@ -353,10 +507,10 @@ async function onCallback(c: Ctx, d: string) {
     if (c.chatId !== c.user.id || !(await c.deps.repo.listFavorites(c.user.id)).includes(id)) return;
     const design = activeDesigns().find(d => d.id === id);
     if (!design) return;
-    const catIdx = designsFor(design.occasion, design.format).findIndex(d => d.id === id);
+    const catIdx = pageOf(catalogList({ s: { occasion: design.occasion } }), id);
     // Идёт правка заказа или заполнение анкеты того же тадбира: меняем дизайн в ней, а не начинаем новый заказ
     if (c.s.data && c.s.occasion === design.occasion && !c.s.paid) {
-      c.s = { ...c.s, format: design.format, catIdx, ret: c.s.ret ?? (c.s.orderId ? "review" : undefined), back: [] };
+      c.s = { ...c.s, catIdx, ret: c.s.ret ?? (c.s.orderId ? "review" : undefined), back: [] };
       c.step = "catalog";
       return ask(c);
     }
@@ -370,6 +524,10 @@ async function onCallback(c: Ctx, d: string) {
       return;
     case "pay":
       return apply(c, await payOrder(c, n));
+    case "payok": {
+      const [, , amount, mark] = d.split(":");
+      return apply(c, await payOrder(c, n, true, amount !== undefined ? `${amount}:${mark ?? ""}` : undefined));
+    }
     case "rcpt":
       return apply(c, await askReceipt(c, n, b === undefined ? undefined : Number(b)));
     case "edit":
@@ -390,13 +548,13 @@ async function onCallback(c: Ctx, d: string) {
       return reject(c, n, b ?? "");
     case "a": {
       const value = d.split(":").slice(2).join(":");
-      if (n !== (c.s.q ?? 0) || c.step === "idle") return toast(c, c.tx.oldButton);
+      if (n !== (c.s.q ?? 0) || c.step === "idle") return stale(c, n);
       if (value === "x") return;
       if (value === "back") return goBack(c);
       const step = steps[c.step];
-      if (!step.onButton) return toast(c, c.tx.oldButton);
+      if (!step.onButton) return stale(c, n);
       return apply(c, await step.onButton(c, value));
     }
   }
-  return toast(c, c.tx.oldButton);
+  return stale(c);
 }

@@ -25,15 +25,51 @@ export type PanelOrder = {
   updatedAt: Date;
 };
 export type PanelUser = { id: number; createdAt: Date; source: string | null };
-export type Partner = { id: number; code: string; name: string; telegramId: number | null; username: string | null; rate: number; createdAt: Date };
+/** График выплат: каждый день / раз в неделю (пн) / раз в месяц (1-го) */
+export type PayoutSchedule = "daily" | "weekly" | "monthly";
+export const SCHEDULES: PayoutSchedule[] = ["daily", "weekly", "monthly"];
+/** pending — создал менеджер, ждёт ✅ владельца (QR работает, оплаты считаются, выплаты нет); rejected — отклонён */
+export type PartnerStatus = "pending" | "active" | "rejected";
+export type Partner = {
+  id: number;
+  code: string;
+  name: string;
+  telegramId: number | null;
+  username: string | null;
+  rate: number;
+  /** v2: ставка в процентах от оплаченной суммы (null — фиксированная rate ₸) */
+  ratePercent?: number | null;
+  createdAt: Date;
+  /** Менеджер, который привёл; null — партнёр владельца */
+  managedBy: number | null;
+  /** +77011234567 */
+  phone: string | null;
+  /** Куда переводить: телефон Kaspi или номер карты */
+  kaspi: string | null;
+  schedule: PayoutSchedule;
+  status: PartnerStatus;
+  /** Предложение менеджера (ставка + график), ждёт ✅ владельца; null — нет */
+  proposedRate: number | null;
+  proposedSchedule: PayoutSchedule | null;
+  proposedRatePercent?: number | null;
+  /** null — владельцу о новом партнёре / предложении ещё не сообщили */
+  ownerNotifiedAt: Date | null;
+  sleepNotifiedAt: Date | null;
+};
 export type PartnerEarning = { orderId: string; partnerId: number; amount: number; delivered: boolean; createdAt: Date };
 export type PartnerPayout = { partnerId: number; amount: number; createdAt: Date };
+/** month — «2026-11» по Алматы */
+export type ManagerPayout = { managerId: number; month: string; amount: number; orders: number; createdAt: Date };
 export type PanelSnapshot = {
   orders: PanelOrder[];
   users: PanelUser[];
   partners: Partner[];
   earnings: PartnerEarning[];
   payouts: PartnerPayout[];
+  /** Заказы «для клиента», которые клиент забрал: кому засчитать (m_<код менеджера>; null — напрямую) */
+  clientOrders?: { orderId: string; ref: string | null }[];
+  /** Выплаты менеджерам за месяц */
+  managerPayouts?: ManagerPayout[];
   /** false — миграция партнёров ещё не применена */
   partnersReady: boolean;
 };
@@ -150,12 +186,20 @@ export type PartnerRow = {
   earned: number;
   paidOut: number;
   due: number;
+  /** Начислено, но партнёр ещё не подтверждён владельцем: к выплате станет после ✅ */
+  onHold: number;
+  /** Последний скан (первый вход по коду); null — сканов не было */
+  lastScanAt: Date | null;
   /** Сколько сообщений об оплате не дошло (партнёр не нажимал /start) */
   undelivered: number;
 };
 
 export function partnerRows(s: PanelSnapshot, period: Period, now: Date): PartnerRow[] {
-  const inside = within(period, now);
+  return partnerRowsWithin(s, within(period, now));
+}
+
+/** То же за любой промежуток: inside(дата) — попадает ли событие в период */
+export function partnerRowsWithin(s: PanelSnapshot, inside: (d: Date) => boolean): PartnerRow[] {
   return s.partners.map((partner) => {
     const source = partnerSource(partner.code);
     const users = s.users.filter((u) => u.source === source);
@@ -170,8 +214,14 @@ export function partnerRows(s: PanelSnapshot, period: Period, now: Date): Partne
       paid: earnings.filter((e) => inside(e.createdAt)).length,
       earned,
       paidOut,
-      due: earned - paidOut,
+      due: partner.status === "active" ? earned - paidOut : 0,
+      onHold: partner.status === "pending" ? earned - paidOut : 0,
+      lastScanAt: users.reduce<Date | null>((d, u) => (!d || u.createdAt > d ? u.createdAt : d), null),
       undelivered: earnings.filter((e) => !e.delivered).length,
     };
   });
 }
+
+/** Начисление партнёру за оплату: процент от фактически оплаченной суммы (до целых тенге) или фиксированная ставка */
+export const earningFor = (p: Pick<Partner, "rate" | "ratePercent">, paidAmount: number) =>
+  p.ratePercent != null ? Math.round((paidAmount * p.ratePercent) / 100) : p.rate;

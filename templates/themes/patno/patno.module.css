@@ -1,0 +1,96 @@
+/* «Пятно»: белая бумага, акварельные пятна под каждой секцией, антиква капсом, тонкое золото.
+   Движение — общая система (--m-ease, --m-*): пятна только масштаб+прозрачность, без фильтров. */
+.backdrop { background: color-mix(in srgb, var(--p-paper) 88%, var(--p-wash)); }
+.page {
+  --serif: var(--n-serif), "Cormorant Garamond", Georgia, serif;
+  background: var(--p-paper);
+  color: var(--p-ink);
+  font-family: var(--p-text), Georgia, serif;
+  font-size: 17px;
+  line-height: 1.6;
+  text-align: center;
+  padding-bottom: 12px;
+}
+.music { background: color-mix(in srgb, var(--p-paper) 88%, transparent); color: var(--p-ink); box-shadow: 0 8px 22px -12px color-mix(in srgb, var(--p-ink) 60%, transparent); }
+
+.wash { position: absolute; z-index: 0; pointer-events: none; user-select: none; display: block; max-width: none; }
+.page section { position: relative; isolation: isolate; }
+.page section > :not(.wash) { position: relative; z-index: 1; }
+
+/* ── 1. Обложка ── */
+.hero { min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 56px 22px 64px; overflow: hidden; }
+.heroWash { left: 50%; top: 50%; width: 150%; translate: -50% -52%; animation: spread 1.6s var(--m-ease) both; }
+@keyframes spread { from { opacity: 0; transform: scale(.92); } to { opacity: 1; transform: none; } }
+.kicker { margin: 0 0 26px; font-size: 13px; letter-spacing: .48em; text-transform: uppercase; color: var(--p-muted); padding-left: .48em; }
+.names {
+  margin: 0; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  font-family: var(--serif); font-weight: 500; text-transform: uppercase; letter-spacing: .08em; line-height: 1.02;
+  font-size: clamp(28px, calc(min(100vw, 430px) * .98 / var(--len)), 58px);
+  overflow-wrap: anywhere;
+}
+.amp { font-style: italic; text-transform: none; letter-spacing: 0; font-weight: 400; color: var(--p-gold); font-size: .9em; line-height: 1.15; }
+.rule { display: block; width: 64px; height: 1px; margin: 26px auto 22px; background: var(--p-gold); opacity: .8; }
+.big { margin: 0; display: flex; align-items: baseline; gap: 10px; font-family: var(--serif); font-weight: 400; font-size: 46px; line-height: 1; letter-spacing: .02em; font-variant-numeric: lining-nums; }
+.big i { font-style: normal; color: var(--p-gold); font-size: 28px; }
+.when { margin: 14px 0 0; font-size: 16px; letter-spacing: .06em; color: var(--p-muted); }
+
+/* ── заголовки секций: мелкая разрядка ── */
+.title { margin: 0 0 18px; font-family: var(--p-text); font-weight: 400; font-size: 13px; letter-spacing: .42em; padding-left: .42em; text-transform: uppercase; color: var(--p-muted); }
+.title::after { content: ""; display: block; width: 40px; height: 1px; margin: 12px auto 0; background: var(--p-gold); opacity: .7; }
+
+/* ── 2. Текст ── */
+.letter { padding: 54px 30px 60px; }
+.letterWash { left: -18%; top: 50%; width: 120%; translate: 0 -50%; opacity: .9; }
+.greeting { margin: 0 0 12px; font-family: var(--serif); font-weight: 500; font-size: 26px; line-height: 1.2; }
+.body { margin: 0; font-size: 18px; line-height: 1.65; text-wrap: pretty; }
+
+/* ── 3. Неделя ── */
+.calendar { padding: 46px 18px 54px; }
+.calendarWash { left: 50%; top: 52%; width: 118%; translate: -50% -50%; }
+.month { margin: 0 0 20px; font-family: var(--serif); font-size: 24px; }
+.week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; max-width: 360px; margin: 0 auto; }
+.day { display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 0; }
+.day small { font-size: 13px; letter-spacing: .06em; color: var(--p-muted); }
+.day b { font-family: var(--serif); font-weight: 500; font-size: 22px; line-height: 44px; height: 46px; }
+.today small { color: var(--p-ink); font-weight: 700; }
+
+/* ── капля ── */
+.drop { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+.drop svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.drop path { fill: color-mix(in srgb, var(--p-wash) 72%, #fff); stroke: color-mix(in srgb, var(--p-wash) 80%, var(--p-ink)); stroke-opacity: .35; stroke-width: 1; }
+.drop b { position: absolute; left: 0; right: 0; top: 42%; }
+.dayDrop { width: 40px; height: 48px; margin-top: -2px; }
+.dayDrop b { font-family: var(--serif); font-weight: 600; font-size: 21px; line-height: 1; height: auto; color: var(--p-ink); }
+
+/* ── 4. Программа: линия с каплями ── */
+.program { padding: 50px 24px 46px; }
+.programWash { left: 50%; top: 56%; height: 92%; width: auto; translate: -50% -50%; opacity: .85; }
+.line { list-style: none; margin: 0 auto; padding: 4px 0 0; max-width: 330px; position: relative; text-align: left; }
+.line::before { content: ""; position: absolute; left: 13px; top: 18px; bottom: 26px; width: 1px; background: var(--p-gold); opacity: .55; }
+.line li { position: relative; padding: 0 0 26px 48px; }
+.line li:last-child { padding-bottom: 0; }
+.lineDrop { position: absolute; left: 3px; top: 2px; width: 21px; height: 26px; }
+.time { margin: 0; font-family: var(--serif); font-size: 28px; font-weight: 500; line-height: 1.1; }
+.event { margin: 2px 0 0; font-size: 18px; font-weight: 700; line-height: 1.3; }
+.eventMeta { margin: 2px 0 0; font-size: 16px; color: var(--p-muted); line-height: 1.45; }
+
+/* ── 5. Адрес: карточка с акварельным краем ── */
+.places { padding: 46px 18px 30px; }
+.card { position: relative; isolation: isolate; margin: 0 auto 18px; max-width: 380px; padding: 52px 50px 50px; }
+.cardWash { inset: -6% -4%; width: 108%; height: 112%; z-index: -1; }
+.cardWashAlt { transform: scale(-1, -1); } /* второй адрес — то же пятно, повёрнутое: не повторяется */
+.card h3 { margin: 0; font-family: var(--serif); font-weight: 600; font-size: 25px; line-height: 1.2; }
+.card p { margin: 6px 0 16px; font-size: 16px; line-height: 1.5; }
+.map { display: inline-flex; align-items: center; gap: 8px; min-height: 46px; padding: 10px 22px; border-radius: 999px; background: var(--p-ink); color: var(--p-paper); font-size: 16px; text-decoration: none; box-shadow: 0 10px 22px -14px var(--p-ink); }
+
+/* ── 6. Финал ── */
+.finale { padding: 74px 26px 70px; overflow: hidden; }
+.finaleWash { left: 50%; top: 50%; width: 140%; translate: -50% -50%; }
+.respect { margin: 0; font-size: 16px; letter-spacing: .06em; color: var(--p-muted); }
+.hosts { margin: 6px 0 0; font-family: var(--serif); font-size: 25px; font-weight: 500; line-height: 1.25; }
+.sides { margin: 10px 0 0; display: flex; flex-direction: column; gap: 2px; font-size: 16px; color: var(--p-muted); }
+.sides b { color: var(--p-ink); font-weight: 700; }
+.finaleNames { margin: 30px 0 0; font-size: clamp(24px, calc(min(100vw, 430px) * .86 / var(--len)), 46px); }
+.wait { margin: 26px 0 0; font-family: var(--serif); font-style: italic; font-size: 22px; line-height: 1.35; }
+
+@media (prefers-reduced-motion: reduce) { .heroWash { animation: none; } }

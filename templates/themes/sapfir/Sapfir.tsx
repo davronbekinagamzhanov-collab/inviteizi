@@ -9,8 +9,8 @@ import { InvitationShell } from "../../blocks/InvitationShell";
 import { MapButton } from "../../blocks/MapButton";
 import { melody } from "./melody";
 import { VELVET_BOTTOM, VELVET_TOP, fontClasses, vars } from "./style";
+import { MOTION } from "@/templates/blocks/motion";
 
-const EASE = [0.22, 1, 0.36, 1] as const;
 const FRAME_S = 1.2; // рамка прорисовывается за 1,2 с
 
 // Тонкий шум — фактура бархата
@@ -34,7 +34,7 @@ export default function Sapfir({ data, mode }: TemplateProps) {
     // текст виден с первого кадра (правило 03.11), рамка рисуется вокруг уже читаемых имён
     initial: { opacity: 0.72, y: 6 },
     animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.6, delay: i * 0.05, ease: EASE },
+    transition: { duration: MOTION.fast, delay: i * MOTION.step, ease: MOTION.ease },
   });
 
   return (
@@ -119,6 +119,8 @@ export default function Sapfir({ data, mode }: TemplateProps) {
               <button
                 type="button"
                 onClick={inv.toggleMusic}
+                data-music-button
+                aria-pressed={inv.playing}
                 aria-label={inv.playing ? t.music.pause : t.music.play}
                 className="relative flex h-12 w-12 items-center justify-center rounded-full text-[#F3D58A] ring-1 ring-[#F3D58A]/70 transition active:scale-90"
               >
@@ -175,7 +177,7 @@ function Frame() {
       style={{ originX: origin === "left" ? 0 : origin === "right" ? 1 : 0.5, originY: origin === "top" ? 0 : origin === "bottom" ? 1 : 0.5 }}
       initial={axis === "x" ? { scaleX: 0 } : { scaleY: 0 }}
       animate={axis === "x" ? { scaleX: 1 } : { scaleY: 1 }}
-      transition={{ duration: FRAME_S, delay, ease: [0.45, 0, 0.2, 1] }}
+      transition={{ duration: FRAME_S, delay, ease: MOTION.ease }}
     />
   );
 
@@ -226,7 +228,7 @@ function Corner({ className }: { className: string }) {
           strokeLinecap="round"
           initial={{ pathLength: 0, opacity: 0 }}
           animate={{ pathLength: 1, opacity: 1 }}
-          transition={{ duration: FRAME_S, delay: i * 0.05, ease: [0.45, 0, 0.2, 1] }}
+          transition={{ duration: FRAME_S, delay: i * MOTION.step, ease: MOTION.ease }}
         />
       ))}
     </svg>
@@ -241,7 +243,7 @@ function TopCrest() {
       className="absolute -top-[9px] left-1/2 h-[18px] w-[54px] -translate-x-1/2"
       initial={{ opacity: 0, scale: 0.6 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: FRAME_S * 0.8, duration: 0.6 }}
+      transition={{ delay: FRAME_S * 0.8, duration: MOTION.fast, ease: MOTION.ease }}
     >
       <path d="M30 2 L38 10 L30 18 L22 10 Z" fill="none" stroke="url(#sf-gold)" strokeWidth="1.3" />
       <path d="M30 6 L34 10 L30 14 L26 10 Z" fill="url(#sf-gold)" />
@@ -260,7 +262,7 @@ function Rosette() {
       className="pointer-events-none absolute top-[30%] left-1/2 h-[340px] w-[340px] -translate-x-1/2 -translate-y-1/2"
       initial={{ opacity: 0, rotate: -8 }}
       animate={{ opacity: 0.11, rotate: 0 }}
-      transition={{ duration: 2.4, delay: FRAME_S * 0.6, ease: EASE }}
+      transition={{ duration: 2.4, delay: FRAME_S * 0.6, ease: MOTION.ease }}
     >
       {petals.map((a) => (
         <path

@@ -5,7 +5,7 @@ import { classifyError, recordBotError, redact, toEntry } from "./errors";
 import { createTg } from "./telegram";
 import { handleWebhookRequest } from "./webhook";
 import { Sim } from "./testing/sim";
-import { nikohToMusic, startUz } from "./testing/paths";
+import { nikohToText, startUz, pickDesign } from "./testing/paths";
 import type { BotUpdate } from "./update";
 
 const SECRET = "s3cr3t";
@@ -88,7 +88,7 @@ describe("webhook: 503 только когда повтор поможет", () 
   it("вопрос ушёл, но база не записала шаг: повтор не дублирует сообщение", async () => {
     const sim = new Sim(); const log = quiet();
     try {
-      await startUz(sim, 1); await sim.click(1, uz.category.nikoh); await sim.click(1, /Анимацияли/); await sim.click(1, uz.catalog.buy);
+      await startUz(sim, 1); await sim.click(1, uz.category.nikoh); await pickDesign(sim, 1, "animated");
       const before = sim.tg.to(1).length;
       vi.spyOn(sim.repo, "saveStep").mockRejectedValueOnce(Object.assign(new Error("db"), { code: "CONNECTION_CLOSED" }));
       expect((await post(sim, textUpdate(101, "Азиз"))).status).toBe(503);
@@ -170,8 +170,7 @@ describe("устаревшие сообщения и кнопки", () => {
 
   it("«Бошқа вариантлар» на удалённом сообщении: новый экран вместо «хатолик»", async () => {
     const sim = new Sim();
-    await nikohToMusic(sim, 1);
-    await sim.click(1, uz.back);
+    await nikohToText(sim, 1);
     const before = sim.tg.to(1).length;
     vi.spyOn(sim.tg, "editMessageText").mockRejectedValueOnce(apiError(400, "Bad Request: message to edit not found"));
     await sim.click(1, uz.text.more);

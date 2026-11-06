@@ -7,7 +7,7 @@ import type { Format } from "@/templates/registry";
 
 // Format derives from the single catalog: animated / scroll / simple.
 export type { Format };
-export type Lang = "uz" | "ru";
+export type Lang = "uz" | "ru" | "kk";
 
 /** Статусы заказа (CLAUDE.md): draft → preview → awaiting_payment → receipt_sent → active → archived (+ rejected) */
 export type OrderStatus =
@@ -38,6 +38,9 @@ export type UserRecord = {
   source: string | null;
   createdAt: Date;
   lastSeenAt: Date;
+  /** v2: напоминаний «не купившим» уже отправлено (0–4); nudgeOff — «🔕 Бошқа юборманг» или бот заблокирован */
+  nudgeCount?: number;
+  nudgeOff?: boolean;
 };
 
 export type MusicRecord = {
@@ -80,6 +83,8 @@ export type OrderRecord = {
   adminRemindedAt: Date | null;
   /** После этой даты ссылка показывает заглушку (последний тадбир + 30 дней) */
   expiresAt: Date | null;
+  /** v2: клиент нажал «✅ Ҳаммаси тўғри, тўлаймиз» (проверил НАМУНА и согласился, что после оплаты не меняется) */
+  payConfirmedAt?: Date | null;
 };
 
 export type NewOrder = Pick<
@@ -104,6 +109,7 @@ export type OrderPatch = Partial<
     | "paymentRemindedAt"
     | "adminRemindedAt"
     | "expiresAt"
+    | "payConfirmedAt"
   >
 >;
 

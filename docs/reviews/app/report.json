@@ -1,0 +1,818 @@
+{
+  "scope": "Local /app with mocked /api/app; no database, no Telegram",
+  "passed": true,
+  "report": [
+    {
+      "tag": "360-uz-nikoh",
+      "ok": true,
+      "errors": [],
+      "steps": [
+        {
+          "name": "01-catalog",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "02-view",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "03-form",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "04-form-errors",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "05-form-filled",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "06-photos",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "07-photos-1",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "08-summary",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "09-summary-text",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "10-namuna",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "11-pay",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "12-done",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "13-orders",
+          "overflow": false,
+          "small": 0
+        }
+      ],
+      "submits": 3,
+      "drafts": 3
+    },
+    {
+      "tag": "360-uz-sunnat",
+      "ok": true,
+      "errors": [],
+      "steps": [
+        {
+          "name": "01-catalog",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "02-view",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "03-form",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "04-form-errors",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "05-form-filled",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "08-summary",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "09-summary-text",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "10-namuna",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "11-pay",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "12-done",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "13-orders",
+          "overflow": false,
+          "small": 0
+        }
+      ],
+      "submits": 2,
+      "drafts": 2
+    },
+    {
+      "tag": "360-uz-nahorgi",
+      "ok": true,
+      "errors": [],
+      "steps": [
+        {
+          "name": "01-catalog",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "02-view",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "03-form",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "04-form-errors",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "05-form-filled",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "08-summary",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "09-summary-text",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "10-namuna",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "11-pay",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "12-done",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "13-orders",
+          "overflow": false,
+          "small": 0
+        }
+      ],
+      "submits": 2,
+      "drafts": 3
+    },
+    {
+      "tag": "360-uz-yubiley",
+      "ok": true,
+      "errors": [],
+      "steps": [
+        {
+          "name": "01-catalog",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "02-view",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "03-form",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "04-form-errors",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "05-form-filled",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "08-summary",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "09-summary-text",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "10-namuna",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "11-pay",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "12-done",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "13-orders",
+          "overflow": false,
+          "small": 0
+        }
+      ],
+      "submits": 2,
+      "drafts": 2
+    },
+    {
+      "tag": "360-ru-nikoh",
+      "ok": true,
+      "errors": [],
+      "steps": [
+        {
+          "name": "01-catalog",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "02-view",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "03-form",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "04-form-errors",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "05-form-filled",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "06-photos",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "07-photos-1",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "08-summary",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "09-summary-text",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "10-namuna",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "11-pay",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "12-done",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "13-orders",
+          "overflow": false,
+          "small": 0
+        }
+      ],
+      "submits": 3,
+      "drafts": 2
+    },
+    {
+      "tag": "360-ru-sunnat",
+      "ok": true,
+      "errors": [],
+      "steps": [
+        {
+          "name": "01-catalog",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "02-view",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "03-form",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "04-form-errors",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "05-form-filled",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "08-summary",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "09-summary-text",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "10-namuna",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "11-pay",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "12-done",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "13-orders",
+          "overflow": false,
+          "small": 0
+        }
+      ],
+      "submits": 2,
+      "drafts": 2
+    },
+    {
+      "tag": "360-ru-nahorgi",
+      "ok": true,
+      "errors": [],
+      "steps": [
+        {
+          "name": "01-catalog",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "02-view",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "03-form",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "04-form-errors",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "05-form-filled",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "08-summary",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "09-summary-text",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "10-namuna",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "11-pay",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "12-done",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "13-orders",
+          "overflow": false,
+          "small": 0
+        }
+      ],
+      "submits": 2,
+      "drafts": 3
+    },
+    {
+      "tag": "360-ru-yubiley",
+      "ok": true,
+      "errors": [],
+      "steps": [
+        {
+          "name": "01-catalog",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "02-view",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "03-form",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "04-form-errors",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "05-form-filled",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "08-summary",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "09-summary-text",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "10-namuna",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "11-pay",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "12-done",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "13-orders",
+          "overflow": false,
+          "small": 0
+        }
+      ],
+      "submits": 2,
+      "drafts": 2
+    },
+    {
+      "tag": "430-uz-nikoh",
+      "ok": true,
+      "errors": [],
+      "steps": [
+        {
+          "name": "01-catalog",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "02-view",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "03-form",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "04-form-errors",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "05-form-filled",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "06-photos",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "07-photos-1",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "08-summary",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "09-summary-text",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "10-namuna",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "11-pay",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "12-done",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "13-orders",
+          "overflow": false,
+          "small": 0
+        }
+      ],
+      "submits": 3,
+      "drafts": 2
+    },
+    {
+      "tag": "430-uz-yubiley",
+      "ok": true,
+      "errors": [],
+      "steps": [
+        {
+          "name": "01-catalog",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "02-view",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "03-form",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "04-form-errors",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "05-form-filled",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "08-summary",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "09-summary-text",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "10-namuna",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "11-pay",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "12-done",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "13-orders",
+          "overflow": false,
+          "small": 0
+        }
+      ],
+      "submits": 2,
+      "drafts": 2
+    },
+    {
+      "tag": "430-ru-nikoh",
+      "ok": true,
+      "errors": [],
+      "steps": [
+        {
+          "name": "01-catalog",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "02-view",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "03-form",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "04-form-errors",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "05-form-filled",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "06-photos",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "07-photos-1",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "08-summary",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "09-summary-text",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "10-namuna",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "11-pay",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "12-done",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "13-orders",
+          "overflow": false,
+          "small": 0
+        }
+      ],
+      "submits": 3,
+      "drafts": 2
+    },
+    {
+      "tag": "430-ru-yubiley",
+      "ok": true,
+      "errors": [],
+      "steps": [
+        {
+          "name": "01-catalog",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "02-view",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "03-form",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "04-form-errors",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "05-form-filled",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "08-summary",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "09-summary-text",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "10-namuna",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "11-pay",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "12-done",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "13-orders",
+          "overflow": false,
+          "small": 0
+        }
+      ],
+      "submits": 2,
+      "drafts": 2
+    },
+    {
+      "tag": "no-telegram",
+      "ok": true
+    }
+  ]
+}

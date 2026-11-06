@@ -5,6 +5,7 @@
  * Открытие ≈2,3 с: сургуч тает → клапан откидывается → письмо выезжает → страница.
  * Цвет конверта — переменные --e-*, чтобы позже выпустить 2–3 цвета отдельными позициями каталога.
  */
+import { parseWeddingDate } from "@/lib/wedding-date";
 import { designVars, type TemplateProps } from "../types";
 import { t } from "@/texts/uz-cyrl";
 import { Script } from "../natural/kit";
@@ -31,6 +32,14 @@ const vars = {
 
 const WAX =
   "M50 4c7 0 10 4 16 5s11 0 15 5 2 10 5 15 8 9 8 16-5 10-6 16 1 11-3 16-10 5-15 8-9 8-16 8-10-5-16-6-11 1-16-3-5-10-8-15-8-9-8-16 5-10 6-16-1-11 3-16 10-5 15-8 9-8 16-8z";
+
+/** «14.11.2026» — дата первого тадбира для конверта */
+function firstDate(d: TemplateProps["data"]) {
+  const e = d.events[0];
+  if (!e) return "";
+  const w = parseWeddingDate(e.date, e.time);
+  return t.date.short(w.day, w.monthIndex, w.year);
+}
 
 export default function MuhrliMaktub({ data, mode }: TemplateProps) {
   const a = initial(data.groom);
@@ -81,6 +90,8 @@ export default function MuhrliMaktub({ data, mode }: TemplateProps) {
                   <Script text={data.groom ?? ""} className={s.flapScript} />
                   <span className={s.flapAnd}>{t.natural.and}</span>
                   <Script text={data.bride ?? ""} className={s.flapScript} />
+                  {/* Дата видна до открытия конверта */}
+                  <span className={s.flapDate}>{firstDate(data)}</span>
                 </span>
               </span>
             </span>

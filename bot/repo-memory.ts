@@ -1,6 +1,8 @@
 import { RSVP_IP_HOUR_LIMIT, RSVP_ORDER_LIMIT, type RsvpInput, type RsvpRecord } from "@/lib/rsvp";
-import type { PanelOrder, PanelSnapshot, Partner, PartnerEarning, PartnerPayout } from "@/lib/owner-panel";
+import { earningFor, type ManagerPayout, type PanelOrder, type PanelSnapshot, type Partner, type PartnerEarning, type PartnerPayout, type PayoutSchedule } from "@/lib/owner-panel";
+import type { NewPartner, Notice, PartnerPatch } from "./repo";
 import type { BotErrorEntry } from "./errors";
+import type { ClaimStatus, InviteKind, InviteUse, Manager } from "@/lib/roles";
 /**
  * Repo в памяти — для тестов бота. Поведение то же, что у bot/repo-pg.ts (см. bot/repo.contract.ts).
  * Записи отдаются копиями (как из базы): изменить их снаружи нельзя.
@@ -45,7 +47,8 @@ export class MemoryRepo implements Repo {
   partnersReady = true;
   rsvp: (RsvpInput & { createdAt: Date; updatedAt: Date })[] = [];
   async staffIds() {
-    return [...new Set([...this.adminIds, ...(this.ownerId ? [this.ownerId] : [])])];
+    // Менеджеры (и снятые): их собственные заказы и клики — не продажи
+    return [...new Set([...this.adminIds, ...(this.ownerId ? [this.ownerId] : []), ...this.managers.map((m) => m.telegramId)])];
   }
   async saveRsvp(input: RsvpInput) {
     const now = this.now();
@@ -84,10 +87,108 @@ export class MemoryRepo implements Repo {
       return { id: o.id, number: o.number, userId: o.userId, username: u?.username ?? null, firstName: u?.firstName ?? null, status: o.status, occasion: o.occasion, format: o.format, templateId: o.templateId, musicKind: o.music.kind, amount: o.amount, createdAt: o.createdAt, paidAt: o.paidAt, updatedAt: o.updatedAt };
     });
     const users = [...this.users.values()].map((u) => ({ id: u.id, createdAt: u.createdAt, source: u.source }));
-    return { orders, users, partners: this.partners.map((p) => ({ ...p })), earnings: this.earnings.map((e) => ({ ...e })), payouts: this.payouts.map((p) => ({ ...p })), partnersReady: this.partnersReady };
+    return { orders, users, partners: this.partners.map((p) => ({ ...p })), earnings: this.earnings.map((e) => ({ ...e })), payouts: this.payouts.map((p) => ({ ...p })), clientOrders: this.clientOrders.filter((x) => x.claimedBy !== null).map((x) => ({ orderId: x.orderId, ref: x.refSource })), managerPayouts: clone(this.managerPayouts), partnersReady: this.partnersReady };
   }
-  async createPartner(p: { code: string; name: string; telegramId: number | null; username: string | null; rate: number }) {
-    const partner: Partner = { ...p, id: this.partners.length + 1, createdAt: this.now() };
+  // ── Уведомления и выплаты менеджерам (v2, часть 7) ──
+  notices = new Map<string, Notice & { sentAt: Date | null }>();
+  managerPayouts: ManagerPayout[] = [];
+  async queueNotice(n: Notice) {
+    if (this.notices.has(n.key)) return false;
+    this.notices.set(n.key, { ...clone(n), sentAt: null });
+    return true;
+  }
+  async claimNotice(key: string, now: Date) {
+    const n = this.notices.get(key);
+    if (!n || n.sentAt) return false;
+    n.sentAt = now;
+    return true;
+  }
+  async claimDueNotices(now: Date, limit: number) {
+    const due = [...this.notices.values()].filter((n) => !n.sentAt && +n.dueAt <= +now).sort((a, b) => +a.dueAt - +b.dueAt).slice(0, limit);
+    for (const n of due) n.sentAt = now;
+    return due.map(({ sentAt, ...n }) => (void sentAt, clone(n)));
+  }
+  // ── Часть 10 ──
+  reviews: { orderId: string; userId: number; stars: number; text: string | null; createdAt: Date }[] = [];
+  async setNudge(id: number, patch: { count?: number; off?: boolean }) {
+    const u = this.users.get(id);
+    if (!u) return;
+    if (patch.count !== undefined) u.nudgeCount = Math.min(4, Math.max(0, patch.count));
+    if (patch.off !== undefined) u.nudgeOff = patch.off;
+  }
+  async saveReview(r: { orderId: string; userId: number; stars?: number; text?: string }) {
+    let rec = this.reviews.find((x) => x.orderId === r.orderId);
+    if (r.stars !== undefined) {
+      if (rec) rec.stars = r.stars;
+      else this.reviews.push((rec = { orderId: r.orderId, userId: r.userId, stars: r.stars, text: null, createdAt: this.now() }));
+    }
+    if (r.text !== undefined) {
+      if (!rec || rec.userId !== r.userId) return false;
+      rec.text = r.text;
+    }
+    return true;
+  }
+  async reviewSummary(from: Date, to: Date, orderIds: string[] | null) {
+    const list = this.reviews.filter((r) => +r.createdAt >= +from && +r.createdAt < +to && (!orderIds || orderIds.includes(r.orderId)));
+    return list.length ? { avg: list.reduce((n, r) => n + r.stars, 0) / list.length, count: list.length } : null;
+  }
+  async errorSummary(since: Date) {
+    const list = this.botErrors.filter((e) => +(e as { at?: Date }).at! >= +since);
+    const counts = new Map<string, number>();
+    for (const e of list) {
+      const k = `${e.errorName}${e.errorCode ? ` ${e.errorCode}` : ""}: ${e.message.slice(0, 80)}`;
+      counts.set(k, (counts.get(k) ?? 0) + 1);
+    }
+    const top = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "";
+    return { count: list.length, top };
+  }
+  async noticeSentSince(prefix: string, since: Date) {
+    return [...this.notices.values()].some((n) => n.key.startsWith(prefix) && n.sentAt && +n.sentAt >= +since);
+  }
+  async staleDraftStates(before: Date) {
+    return [...this.users.values()].filter((u) => +u.lastSeenAt < +before && u.state && Object.keys(u.state).some((k) => k === "data" || k === "music")).map((u) => ({ id: u.id, state: clone(u.state) }));
+  }
+  async deleteStaleDrafts(before: Date) {
+    const out: { photos: string[]; music: string | null }[] = [];
+    for (const o of [...this.orders.values()]) {
+      if (!["draft", "preview", "awaiting_payment", "rejected"].includes(o.status) || o.paidAt || +o.createdAt >= +before) continue;
+      if (+(this.users.get(o.userId)?.lastSeenAt ?? 0) >= +before) continue;
+      if (this.earnings.some((e) => e.orderId === o.id)) continue;
+      const co = this.clientOrders.find((x) => x.orderId === o.id);
+      if (co?.claimedBy) continue;
+      if (co) this.clientOrders.splice(this.clientOrders.indexOf(co), 1);
+      this.orders.delete(o.id);
+      out.push({ photos: o.data.photos ?? [], music: o.music.kind === "own" ? (o.music.url ?? null) : null });
+    }
+    return out;
+  }
+
+  async recordManagerPayout(p: Omit<ManagerPayout, "createdAt"> & { createdBy: number }) {
+    if (p.amount <= 0 || this.managerPayouts.some((x) => x.managerId === p.managerId && x.month === p.month)) return false;
+    this.managerPayouts.push({ managerId: p.managerId, month: p.month, amount: p.amount, orders: p.orders, createdAt: this.now() });
+    return true;
+  }
+  async createPartner(p: NewPartner) {
+    const partner: Partner = {
+      code: p.code,
+      name: p.name,
+      telegramId: p.telegramId,
+      username: p.username,
+      rate: p.rate,
+      ratePercent: p.ratePercent ?? null,
+      proposedRatePercent: null,
+      managedBy: p.managedBy ?? null,
+      phone: p.phone ?? null,
+      kaspi: null,
+      schedule: p.schedule ?? "weekly",
+      status: p.status ?? "active",
+      proposedRate: null,
+      proposedSchedule: null,
+      ownerNotifiedAt: p.ownerNotifiedAt ?? null,
+      sleepNotifiedAt: null,
+      id: this.partners.length + 1,
+      createdAt: this.now(),
+    };
     this.partners.push(partner);
     return { ...partner };
   }
@@ -95,14 +196,43 @@ export class MemoryRepo implements Repo {
     const p = this.partners.find((x) => x.id === id);
     return p ? { ...p } : null;
   }
-  async setPartnerRate(id: number, rate: number) {
+  async setPartnerRate(id: number, rate: number, ratePercent: number | null = null) {
     const p = this.partners.find((x) => x.id === id);
-    if (p) p.rate = rate;
+    if (p) Object.assign(p, { rate, ratePercent });
+  }
+  async updatePartner(id: number, patch: PartnerPatch) {
+    const p = this.partners.find((x) => x.id === id);
+    if (p) Object.assign(p, patch);
+  }
+  async bindPartner(id: number, userId: number, username: string | null) {
+    const p = this.partners.find((x) => x.id === id);
+    if (!p || p.status === "rejected" || (p.telegramId !== null && p.telegramId !== userId)) return null;
+    if (this.partners.some((x) => x.id !== id && x.telegramId === userId && x.status !== "rejected")) return null;
+    Object.assign(p, { telegramId: userId, username });
+    return { ...p };
+  }
+  async decidePartner(id: number, status: "active" | "rejected") {
+    const p = this.partners.find((x) => x.id === id);
+    if (!p || p.status !== "pending") return false;
+    p.status = status;
+    return true;
+  }
+  async proposePartnerTerms(id: number, rate: number, schedule: PayoutSchedule, ratePercent: number | null = null) {
+    const p = this.partners.find((x) => x.id === id);
+    if (p) Object.assign(p, { proposedRate: rate, proposedRatePercent: ratePercent, proposedSchedule: schedule, ownerNotifiedAt: null });
+  }
+  async settlePartnerProposal(id: number, accept: boolean) {
+    const p = this.partners.find((x) => x.id === id);
+    if (!p || p.proposedRate === null || p.proposedSchedule === null) return null;
+    if (accept) Object.assign(p, { rate: p.proposedRate, ratePercent: p.proposedRatePercent ?? null, schedule: p.proposedSchedule });
+    Object.assign(p, { proposedRate: null, proposedRatePercent: null, proposedSchedule: null });
+    return { ...p };
   }
   async findPartnerForUser(userId: number, username: string | null) {
     if (!this.partnersReady) return null;
     const name = username?.toLowerCase();
-    const p = this.partners.find((x) => x.telegramId === userId) ?? this.partners.find((x) => x.telegramId === null && !!name && x.username?.toLowerCase() === name);
+    const live = this.partners.filter((x) => x.status !== "rejected");
+    const p = live.find((x) => x.telegramId === userId) ?? live.find((x) => x.telegramId === null && !!name && x.username?.toLowerCase() === name);
     if (!p) return null;
     p.telegramId = userId;
     return { ...p };
@@ -113,11 +243,13 @@ export class MemoryRepo implements Repo {
   }
   async creditPartnerOrder(orderId: string, clientId: number, code: string) {
     const partner = this.partners.find((p) => p.code === code);
-    if (!partner || partner.telegramId === clientId || this.earnings.some((e) => e.orderId === orderId)) return null;
+    if (!partner || partner.status === "rejected" || partner.telegramId === clientId || this.earnings.some((e) => e.orderId === orderId)) return null;
     const client = this.users.get(clientId);
     if (client?.username && client.username.toLowerCase() === partner.username?.toLowerCase()) return null;
-    this.earnings.push({ orderId, partnerId: partner.id, amount: partner.rate, delivered: false, createdAt: this.now() });
-    return { partner: { ...partner }, amount: partner.rate };
+    // Процент — от фактически оплаченной суммы заказа
+    const amount = earningFor(partner, this.orders.get(orderId)?.amount ?? 0);
+    this.earnings.push({ orderId, partnerId: partner.id, amount, delivered: false, createdAt: this.now() });
+    return { partner: { ...partner }, amount };
   }
   async markEarningDelivered(orderId: string) {
     const e = this.earnings.find((x) => x.orderId === orderId);
@@ -126,6 +258,7 @@ export class MemoryRepo implements Repo {
   async recordPartnerPayout(partnerId: number, expected: number, createdBy: number) {
     void createdBy;
     const staff = await this.staffIds();
+    if (this.partners.find((p) => p.id === partnerId)?.status !== "active") return false;
     const earned = this.earnings.filter((e) => e.partnerId === partnerId && !staff.includes(this.orders.get(e.orderId)?.userId ?? 0)).reduce((n, e) => n + e.amount, 0);
     const paid = this.payouts.filter((p) => p.partnerId === partnerId).reduce((n, p) => n + p.amount, 0);
     if (expected <= 0 || earned - paid !== expected) return false;
@@ -139,9 +272,68 @@ export class MemoryRepo implements Repo {
       .filter((o) => (o.status === "active" || o.status === "archived") && !credited.has(o.id) && codes.has(this.users.get(o.userId)?.source ?? ""))
       .map((o) => ({ id: o.id, userId: o.userId }));
   }
+  // ── Роли (v2) ──
+  managers: Manager[] = [];
+  invites: { tokenHash: string; kind: InviteKind; createdBy: number; partnerId: number | null; expiresAt: Date; usedBy: number | null }[] = [];
+  clientOrders: { orderId: string; createdBy: number; tokenHash: string; refSource: string | null; claimedBy: number | null }[] = [];
+  async listManagers() {
+    return clone(this.managers);
+  }
+  async getManager(id: number) {
+    const m = this.managers.find((x) => x.telegramId === id && x.active);
+    return m ? clone(m) : null;
+  }
+  async addManager(m: { telegramId: number; code: string; username: string | null; firstName: string | null; invitedBy: number }) {
+    const old = this.managers.find((x) => x.telegramId === m.telegramId);
+    if (old) Object.assign(old, { active: true, removedAt: null, username: m.username, firstName: m.firstName, invitedBy: m.invitedBy });
+    else this.managers.push({ ...m, active: true, createdAt: this.now() });
+    return clone(this.managers.find((x) => x.telegramId === m.telegramId)!);
+  }
+  async removeManager(id: number, now?: Date) {
+    const m = this.managers.find((x) => x.telegramId === id && x.active);
+    if (!m) return false;
+    m.active = false;
+    m.removedAt = now ?? this.now();
+    return true;
+  }
+  async createInvite(i: { tokenHash: string; kind: InviteKind; createdBy: number; expiresAt: Date; partnerId?: number | null }) {
+    this.invites.push({ ...i, partnerId: i.partnerId ?? null, usedBy: null });
+  }
+  async useInvite(tokenHash: string, kind: InviteKind, userId: number, now: Date): Promise<InviteUse> {
+    const i = this.invites.find((x) => x.tokenHash === tokenHash && x.kind === kind);
+    if (!i) return { status: "none" };
+    if (i.usedBy !== null) return { status: "used" };
+    if (+i.expiresAt <= +now) return { status: "expired" };
+    i.usedBy = userId;
+    return { status: "ok", createdBy: i.createdBy, partnerId: i.partnerId };
+  }
+  async issueClientOrder(o: { orderId: string; createdBy: number; tokenHash: string; refSource: string | null }) {
+    const old = this.clientOrders.find((x) => x.orderId === o.orderId);
+    if (old?.claimedBy) return;
+    if (old) Object.assign(old, o);
+    else this.clientOrders.push({ ...o, claimedBy: null });
+  }
+  async claimClientOrder(tokenHash: string, clientId: number): Promise<{ status: ClaimStatus; order?: OrderRecord }> {
+    const co = this.clientOrders.find((x) => x.tokenHash === tokenHash);
+    const order = co ? this.orders.get(co.orderId) : undefined;
+    if (!co || !order) return { status: "none" };
+    if (co.claimedBy === clientId) return { status: "mine", order: clone(order) };
+    if (co.claimedBy !== null) return { status: "used" };
+    if (co.createdBy === clientId) return { status: "creator", order: clone(order) };
+    if (!["draft", "preview", "awaiting_payment", "rejected"].includes(order.status) || order.userId !== co.createdBy) return { status: "closed" };
+    co.claimedBy = clientId;
+    order.userId = clientId;
+    order.updatedAt = this.now();
+    return { status: "claimed", order: clone(order) };
+  }
+  async clientOrderRef(orderId: string) {
+    const co = this.clientOrders.find((x) => x.orderId === orderId && x.claimedBy !== null);
+    return co ? { ref: co.refSource } : null;
+  }
   botErrors: BotErrorEntry[] = [];
   async logBotError(entry: BotErrorEntry) {
-    this.botErrors.push(entry);
+    // Время записи — как created_at в базе (для сигнала «≥3 ошибок за час»)
+    this.botErrors.push({ ...entry, at: this.now() } as BotErrorEntry);
   }
   private favorites = new Map<number, Map<string,number>>();
   private analyticsEvents = new Map<string, MetricEvent>();
@@ -217,6 +409,8 @@ export class MemoryRepo implements Repo {
           source: u.source ?? null,
           createdAt: now,
           lastSeenAt: now,
+          nudgeCount: 0,
+          nudgeOff: false,
         };
     this.users.set(u.id, rec);
     return clone(rec);
@@ -300,6 +494,7 @@ export class MemoryRepo implements Repo {
       paymentRemindedAt: null,
       adminRemindedAt: null,
       expiresAt: null,
+      payConfirmedAt: null,
     };
     this.orders.set(rec.id, rec);
     return clone(rec);

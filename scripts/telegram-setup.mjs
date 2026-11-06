@@ -1,11 +1,15 @@
 // Подключение бота к сайту: webhook и профиль бота на ўзбекском (по умолчанию) и русском.
 // Запуск: node --env-file=.env.local scripts/telegram-setup.mjs [--check]
 //   --check — только показать состояние webhook (без изменений).
+//   --menu — только кнопка меню «✨ Очиш» (Mini App) для всех чатов.
 // Токен и секрет берутся из .env.local и на экран не выводятся.
 import "./ts-hooks.mjs";
 
 const { uz } = await import("../texts/bot-uz.ts");
 const { ru } = await import("../texts/bot-ru.ts");
+const { kk } = await import("../texts/bot-kk.ts");
+// Казахский профиль и команды — только при KAZAKH_ENABLED=true
+const KK = (process.env.KAZAKH_ENABLED ?? "").toLowerCase() === "true" ? [["kk", kk]] : [];
 
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const SECRET = process.env.TELEGRAM_WEBHOOK_SECRET;
@@ -26,11 +30,20 @@ async function api(method, body = {}) {
 const me = await api("getMe");
 console.log(`Бот: @${me.username}`);
 
+// --menu — только кнопка меню у поля ввода для всех чатов (v2): «✨ Очиш» открывает приложение /app.
+//          При MINI_APP_ENABLED=false — обычная кнопка «Меню» (команды). Webhook и профиль не меняются.
+if (process.argv.includes("--menu")) {
+  const on = (process.env.MINI_APP_ENABLED ?? "").toLowerCase() !== "false";
+  await api("setChatMenuButton", on ? { menu_button: { type: "web_app", text: uz.menuButton, web_app: { url: `${BASE}/app` } } } : { menu_button: { type: "commands" } });
+  console.log(on ? `Кнопка меню: «${uz.menuButton}» → ${BASE}/app` : "Кнопка меню: команды (приложение выключено)");
+  process.exit(0);
+}
+
 // --commands — только меню команд: у всех клиентов и у ADMIN_IDS (webhook и профиль не меняются)
 // --admin-commands — то же только для ADMIN_IDS
 const allCommands = process.argv.includes("--commands");
 if (allCommands) {
-  for (const [lang, tx] of [["uz", uz], ["ru", ru], ["", uz]]) {
+  for (const [lang, tx] of [["uz", uz], ["ru", ru], ...KK, ["", uz]]) {
     await api("setMyCommands", {
       commands: Object.entries(tx.profile.commands).map(([command, description]) => ({ command, description })),
       ...(lang ? { language_code: lang } : {}),
@@ -63,7 +76,7 @@ if (!process.argv.includes("--check")) {
     drop_pending_updates: true,
   });
 
-  for (const [lang, tx] of [["", uz], ["uz", uz], ["ru", ru]]) {
+  for (const [lang, tx] of [["", uz], ["uz", uz], ["ru", ru], ...KK]) {
     const language_code = lang || undefined;
     await api("setMyName", { name: tx.profile.name, language_code });
     await api("setMyShortDescription", { short_description: tx.profile.short, language_code });

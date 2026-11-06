@@ -16,6 +16,7 @@ import { Envelope } from "./Envelope";
 import { Divider, EmbossedPaper, GoldDefs, RingsIcon, SunriseIcon, Wreath } from "./decor";
 import { melody } from "./melody";
 import { PAPER, PEARL, fontClasses, vars } from "./style";
+import { MOTION } from "@/templates/blocks/motion";
 
 /**
  * №1 «Олтин монограмма» — никоҳ тўйи, Анимацияли.
@@ -97,7 +98,7 @@ export default function OltinMonogramma({ data, mode }: TemplateProps) {
           <Section title={t.venue.programTitle}>
             <div className="space-y-5">
               {inv.events.map((ev, i) => (
-                <Reveal key={i} delay={i * 0.08}>
+                <Reveal key={i} delay={i * MOTION.step}>
                   <EventCard event={ev} icon={ev.kind === "nahorgi" ? SunriseIcon : RingsIcon} />
                 </Reveal>
               ))}
@@ -140,7 +141,7 @@ function Cover({ inv, initials }: { inv: Inv; initials: [string, string] }) {
   const show = (delay: number) => ({
     initial: { opacity: 0, y: 14 },
     animate: on ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 },
-    transition: { duration: 0.9, delay: on ? delay : 0, ease: [0.22, 1, 0.36, 1] as const },
+    transition: { duration: MOTION.base, delay: on ? delay : 0, ease: MOTION.ease },
   });
 
   return (
@@ -155,7 +156,7 @@ function Cover({ inv, initials }: { inv: Inv; initials: [string, string] }) {
           className="absolute inset-0 flex items-center justify-center"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={on ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
-          transition={{ duration: 1.1, delay: on ? 0.35 : 0, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: MOTION.slow, delay: on ? 0.35 : 0, ease: MOTION.ease }}
         >
           <span className="gold-text gold-shine font-display text-[clamp(64px,min(25vw,13svh),108px)] leading-none font-semibold">
             {initials[0]}

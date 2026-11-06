@@ -60,6 +60,6 @@
 .pic { display: block; width: 100%; height: 100%; object-fit: cover; filter: var(--n-photo-filter, saturate(.9) sepia(.06) contrast(1.02)); }
 
 /* Мягкое «досветление» первого экрана: текст виден сразу (opacity ≥ .72), только transform+opacity */
-.soft { animation: b3Soft .6s cubic-bezier(.22, 1, .36, 1) both; }
+.soft { animation: b3Soft var(--m-fast) var(--m-ease) both; }
 @keyframes b3Soft { from { opacity: .72; transform: translate3d(0, 8px, 0); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .soft { animation: none; } }
