@@ -146,8 +146,15 @@ export function Pay({ order, pay, onDone, onToast, onTerms }: { order: AppOrder;
         </div>
       </Section>
       {error && <p className={s.formErr} role="alert">{error}</p>}
-      <button type="button" className={`${s.btn} ${s.btnWide}`} onClick={() => input.current?.click()} disabled={progress !== null}>
-        {progress !== null ? `${T.pay.sending} ${Math.round(progress * 100)}%` : T.pay.upload}
+      <button type="button" className={`${s.btn} ${s.btnWide}`} onClick={() => input.current?.click()} disabled={progress !== null} aria-busy={progress !== null}>
+        {progress !== null ? (
+          <>
+            <SpinnerIcon size={20} />
+            {`${T.pay.sending} ${Math.round(progress * 100)}%`}
+          </>
+        ) : (
+          T.pay.upload
+        )}
       </button>
       <p className={s.status}>{T.pay.uploadHint}</p>
       <input ref={input} type="file" accept="image/*,application/pdf" hidden onChange={(e) => send(e.target.files?.[0])} />

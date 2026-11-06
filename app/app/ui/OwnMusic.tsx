@@ -77,7 +77,7 @@ export function OwnMusic({ onDone }: { onDone: (url: string, title: string) => v
         )}
       </button>
       {st.phase === "uploading" && (
-        <span className={s.progress} aria-hidden>
+        <span className={s.upBar} aria-hidden>
           <i style={{ width: `${st.pct}%` }} />
         </span>
       )}

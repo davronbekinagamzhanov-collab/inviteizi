@@ -112,6 +112,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
   const [otherTracks, setOtherTracks] = useState<Track[]>([]);
   const [toast, setToast] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [photosBusy, setPhotosBusy] = useState(0);
   const [saveStatus, setSaveStatus] = useState("");
   const [viewer, setViewer] = useState<string | null>(null);
   const [bigOpen, setBigPreview] = useState(false);
@@ -304,7 +305,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
   }
 
   async function toSummary() {
-    if (!draft) return;
+    if (!draft || busy || photosBusy) return;
     setBusy(true);
     await submit(draft);
     setBusy(false);
@@ -322,6 +323,8 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
   }
 
   async function editOrder(o: AppOrder) {
+    if (busy) return;
+    setBusy(true);
     try {
       const r = await api<{ draft?: AppDraft; error?: string }>("edit", { orderId: o.id });
       if (!r.draft) return setToast(T.orders.closedEdit);
@@ -332,15 +335,20 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
       reset([{ name: "catalog" }, { name: "form" }]);
     } catch {
       setToast(T.serverError);
+    } finally {
+      setBusy(false);
     }
   }
 
   async function newOne() {
+    if (busy) return;
+    setBusy(true);
     try {
       await api("new");
     } catch {
       /* черновик просто начнём заново на телефоне */
     }
+    setBusy(false);
     setDraft(null);
     setErrors([]);
     reset([{ name: "catalog" }]);
@@ -435,7 +443,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
         main = { text: T.form.next, onClick: formNext, progress: busy };
         break;
       case "photos":
-        main = { text: draft?.photos?.length ? T.photos.next : T.photos.skip, onClick: toSummary, progress: busy };
+        main = { text: draft?.photos?.length ? T.photos.next : T.photos.skip, onClick: toSummary, progress: busy || photosBusy > 0 };
         break;
       case "summary":
         main = { text: T.summary.pay(price), onClick: toPay, progress: busy };
@@ -444,7 +452,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
         main = waitOrder?.status === "rejected" ? { text: null, onClick: () => undefined } : { text: T.myOrders, onClick: () => reset([{ name: "catalog" }, { name: "orders" }]) };
         break;
       case "orders":
-        main = { text: T.orders.newOne, onClick: newOne };
+        main = { text: T.orders.newOne, onClick: newOne, progress: busy };
         break;
     }
   }
@@ -508,7 +516,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
                 <Form key={design.id} design={design} form={draft.form ?? emptyForm(design.occasion)} extras={extras} today={session.today} errors={errors} onChange={changeForm} big={bigPreview} onBig={setBigPreview} onText={(t) => patchDraft(t)} />
               )}
               {screen.name === "photos" && draft && (
-                <Photos photos={draft.photos ?? []} onChange={(photos) => patchDraft({ photos })} onToast={setToast} />
+                <Photos photos={draft.photos ?? []} onChange={(photos) => patchDraft({ photos })} onToast={setToast} onPending={setPhotosBusy} />
               )}
               {screen.name === "summary" && draft && summaryData && (
                 <Summary
@@ -537,7 +545,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
                 return o ? <Pay order={o} pay={session.pay} onToast={setToast} onTerms={() => setViewer(lang === "uz" ? "/terms" : "/terms/ru")} onDone={(night) => { setOrders((l) => l.map((x) => (x.id === o.id ? { ...x, status: "receipt_sent", canPay: false, canEdit: false } : x))); setDraft(null); reset([{ name: "catalog" }, { name: "wait", orderId: o.id, night }]); }} /> : null;
               })()}
               {screen.name === "wait" && waitOrder && <Waiting order={waitOrder} night={screen.night} onToast={setToast} onResend={() => reset([{ name: "catalog" }, { name: "orders" }, { name: "pay", orderId: waitOrder.id }])} />}
-              {screen.name === "orders" && <Orders orders={orders} onEdit={editOrder} onPay={(o) => go({ name: "pay", orderId: o.id })} onStatus={(o) => go({ name: "wait", orderId: o.id, night: isQuiet(new Date()) })} onCancel={cancelOrder} onToast={setToast} />}
+              {screen.name === "orders" && <Orders orders={orders} onEdit={editOrder} onPay={(o) => go({ name: "pay", orderId: o.id })} onStatus={(o) => go({ name: "wait", orderId: o.id, night: isQuiet(new Date()) })} onCancel={cancelOrder} onToast={setToast} busy={busy} />}
             </>
           )}
         </main>

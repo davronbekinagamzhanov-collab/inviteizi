@@ -7,7 +7,7 @@ import type { AppOrder } from "@/bot/app/service";
 import { getDesign, thumbOf } from "@/templates/registry";
 import { fmtDate } from "./format";
 import { useT } from "./shared";
-import { CheckIcon, ClockIcon, CloseIcon } from "./icons";
+import { CheckIcon, ClockIcon, CloseIcon, SpinnerIcon } from "./icons";
 import { CancelButton } from "./Cancel";
 import { copyText, haptic, openLink, shareLink } from "./telegram";
 import s from "../app.module.css";
@@ -19,6 +19,8 @@ type Props = {
   onStatus: (o: AppOrder) => void;
   onCancel: (o: AppOrder) => Promise<boolean>;
   onToast: (t: string) => void;
+  /** Идёт «Ўзгартириш» / «Янги»: кнопки закрыты от двойного нажатия */
+  busy?: boolean;
 };
 
 /** Статус простыми словами: Қоралама / Текширилмоқда / Тайёр / Рад этилди (+ срок истёк) */
@@ -33,7 +35,8 @@ function StatusBadge({ o }: { o: AppOrder }) {
   );
 }
 
-export function Orders({ orders, onEdit, onPay, onStatus, onCancel, onToast }: Props) {
+export function Orders({ orders, onEdit, onPay, onStatus, onCancel, onToast, busy = false }: Props) {
+  const [editing, setEditing] = useState<string | null>(null);
   const T = useT();
   const [qr, setQr] = useState<{ id: string; src: string } | null>(null);
 
@@ -77,7 +80,8 @@ export function Orders({ orders, onEdit, onPay, onStatus, onCancel, onToast }: P
                 </button>
               )}
               {o.canEdit && (
-                <button type="button" className={`${s.btn} ${s.btnGhost} ${s.btnSmall}`} onClick={() => onEdit(o)}>
+                <button type="button" className={`${s.btn} ${s.btnGhost} ${s.btnSmall}`} disabled={busy} aria-busy={busy && editing === o.id} onClick={() => { setEditing(o.id); onEdit(o); }}>
+                  {busy && editing === o.id ? <SpinnerIcon size={18} /> : null}
                   {T.orders.edit}
                 </button>
               )}

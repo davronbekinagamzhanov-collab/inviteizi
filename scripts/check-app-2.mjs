@@ -123,7 +123,16 @@ for (const lang of ["uz", "ru"]) {
     await page.locator('input[name="date0"]').fill("2026-12-05");
     await page.locator(`[aria-label="${T.form.venue}"] button`).first().click();
     await page.locator("[data-main-action]").click();
-    // Фото (если у дизайна есть) — пропускаем
+    // Фото (если у дизайна есть): п.22 — пока грузится, виден процент, «Давом этиш» закрыта
+    await page.waitForTimeout(1500);
+    if (await page.locator('input[type="file"][accept="image/*"]').count()) {
+      await page.route("**/api/app/upload?kind=photo**", async (r) => { await new Promise((x) => setTimeout(x, 2000)); return server.handle(r); });
+      await page.locator('input[type="file"][accept="image/*"]').setInputFiles([{ name: "a.jpg", mimeType: "image/jpeg", buffer: photo }]);
+      await page.locator('[aria-busy="true"]').filter({ hasText: "%" }).first().waitFor({ timeout: 5000 });
+      ok(await page.locator("[data-main-action]").isDisabled(), "фото грузится: процент виден, «Давом этиш» закрыта");
+      await page.locator('[aria-busy="true"]').filter({ hasText: "%" }).first().waitFor({ state: "detached", timeout: 15_000 });
+      await page.locator("[data-main-action]").click();
+    }
     for (let i = 0; i < 3 && !(await page.getByText(T.summary.title).isVisible()); i++) {
       await page.waitForTimeout(1200);
       if ((await page.locator("[data-main-action]").textContent()) === T.photos.skip) await page.locator("[data-main-action]").click();

@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, type ReactNode } from "react";
 import type { AppTexts } from "@/texts/app-uz";
 import { useMainButton, useNativeMainVisible } from "./telegram";
+import { SpinnerIcon } from "./icons";
 import s from "../app.module.css";
 
 export const TextsContext = createContext<AppTexts | null>(null);
@@ -32,7 +33,7 @@ export function MainAction({ text, onClick, active = true, progress = false }: {
   return (
     <div className={s.mainBar}>
       <button type="button" className={s.btn} onClick={onClick} disabled={!active || progress} data-main-action>
-        {progress ? "…" : text}
+        {progress ? <SpinnerIcon size={22} /> : text}
       </button>
     </div>
   );
