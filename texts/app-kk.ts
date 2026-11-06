@@ -48,7 +48,7 @@ export const appKk: AppTexts = {
     title: "Деректер",
     lead: "Жазғаныңыз жоғарыдағы шақыруда бірден көрінеді",
     preview: "Шақыруыңыз",
-    previewOpen: "🔍 Үлкейтіп көру",
+    previewOpen: "Ашу",
     previewClose: "Жабу",
     groom: "Күйеудің есімі",
     bride: "Қалыңдықтың есімі",

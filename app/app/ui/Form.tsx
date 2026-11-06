@@ -36,9 +36,12 @@ type Props = {
   today: string;
   errors: FieldError[];
   onChange: (f: FormInput) => void;
+  /** Превью на весь экран (состояние у MiniApp: native-кнопки и «назад» его закрывают) */
+  big: boolean;
+  onBig: (open: boolean) => void;
 };
 
-export function Form({ design, form, extras, today, errors, onChange }: Props) {
+export function Form({ design, form, extras, today, errors, onChange, big, onBig }: Props) {
   const T = useT();
   const occ = design.occasion;
   const f = fieldsFor(occ);
@@ -67,7 +70,7 @@ export function Form({ design, form, extras, today, errors, onChange }: Props) {
     <div className={s.screen}>
       <h1 className={s.title}>{T.form.title}</h1>
       <p className={s.lead}>{T.form.lead}</p>
-      <PreviewCard templateId={design.id} data={data} />
+      <PreviewCard templateId={design.id} data={data} big={big} onBig={onBig} />
       {errors.length > 0 && <p className={s.formErr}>{T.form.errors.fix}</p>}
 
       <Section>

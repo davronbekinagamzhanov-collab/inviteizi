@@ -63,6 +63,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
   const [busy, setBusy] = useState(false);
   const [saveStatus, setSaveStatus] = useState("");
   const [viewer, setViewer] = useState<string | null>(null);
+  const [bigPreview, setBigPreview] = useState(false);
   const screen = stack[stack.length - 1];
   const nativeMain = useNativeMainVisible();
   const design: Design | undefined = draft?.templateId ? getDesign(draft.templateId) : undefined;
@@ -110,7 +111,11 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
     setStack(list);
     window.scrollTo({ top: 0 });
   }, []);
-  useBackButton(stack.length > 1 || !!viewer, () => (viewer ? setViewer(null) : back()));
+  useBackButton(stack.length > 1 || !!viewer || bigPreview, () => (bigPreview ? setBigPreview(false) : viewer ? setViewer(null) : back()));
+  // Ушли с анкеты — большое превью закрыто
+  useEffect(() => {
+    if (screen.name !== "form") setBigPreview(false);
+  }, [screen.name]);
 
   // ── Черновик: сохраняем на сервере с задержкой ──
   const firstDraft = useRef(true);
@@ -355,7 +360,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
   const price = order?.amount ?? (design ? PRICES[design.format] : 0);
 
   // Своя кнопка внизу страницы видна (native MainButton не показана, а у экрана есть главное действие)
-  const ownBar = !nativeMain && phase === "ready" && !viewer && MAIN_SCREENS.has(screen.name);
+  const ownBar = !nativeMain && phase === "ready" && !viewer && !bigPreview && MAIN_SCREENS.has(screen.name);
 
   // ── Главная кнопка экрана ──
   let main: { text: string | null; onClick: () => void; progress?: boolean } = { text: null, onClick: () => undefined };
@@ -381,7 +386,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
         break;
     }
   }
-  if (viewer) main = { text: null, onClick: () => undefined };
+  if (viewer || bigPreview) main = { text: null, onClick: () => undefined };
 
   const resume =
     draft?.templateId && design && screen.name === "catalog"
@@ -390,7 +395,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
 
   return (
     <TextsContext.Provider value={T}>
-      <div className={`${s.root} ${ownBar ? "" : s.nativeMain} ${fontClass}`} lang={lang === "ru" ? "ru" : lang === "kk" ? "kk" : "uz-Cyrl"}>
+      <div data-app-root className={`${s.root} ${ownBar ? "" : s.nativeMain} ${fontClass}`} lang={lang === "ru" ? "ru" : lang === "kk" ? "kk" : "uz-Cyrl"}>
         {phase === "ready" && screen.name !== "view" && (
           <header className={s.header}>
             <div className={s.headerRow}>
@@ -435,7 +440,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
                 <Catalog chip={chip} onChip={(c) => { haptic.select(); setChip(c); }} favorites={favorites} onFavorite={toggleFavorite} onOpen={(d) => go({ name: "view", id: d.id })} resume={resume} />
               )}
               {screen.name === "form" && design && draft && (
-                <Form key={design.id} design={design} form={draft.form ?? emptyForm(design.occasion)} extras={extras} today={session.today} errors={errors} onChange={changeForm} />
+                <Form key={design.id} design={design} form={draft.form ?? emptyForm(design.occasion)} extras={extras} today={session.today} errors={errors} onChange={changeForm} big={bigPreview} onBig={setBigPreview} />
               )}
               {screen.name === "photos" && draft && (
                 <Photos photos={draft.photos ?? []} onChange={(photos) => patchDraft({ photos })} onToast={setToast} />

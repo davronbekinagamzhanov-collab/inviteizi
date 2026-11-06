@@ -454,16 +454,21 @@
 }
 .previewOpen {
   position: absolute;
-  left: 8px;
   right: 8px;
-  bottom: 8px;
-  min-height: 44px;
-  border-radius: 12px;
+  top: 8px;
+  min-height: 40px;
+  padding: 0 14px 0 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
   border: 0;
   background: rgba(255, 250, 242, 0.95);
+  box-shadow: 0 6px 16px -8px rgba(59, 42, 30, 0.6), 0 0 0 1px var(--line);
+  backdrop-filter: blur(6px);
   font: inherit;
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--ink);
   cursor: pointer;
 }
@@ -1247,4 +1252,16 @@ textarea.input {
 .resume .btnQuiet {
   min-height: 44px;
   padding: 0 6px;
+}
+
+.backPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+.viewerTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
 }

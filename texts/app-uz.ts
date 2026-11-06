@@ -48,7 +48,7 @@ export const appUz = {
     title: "Маълумотлар",
     lead: "Ёзганингиз юқоридаги таклифномада дарров кўринади",
     preview: "Таклифномангиз",
-    previewOpen: "🔍 Катта қилиб кўриш",
+    previewOpen: "Очиш",
     previewClose: "Ёпиш",
     groom: "Куёв исми",
     bride: "Келин исми",

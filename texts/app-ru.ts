@@ -44,7 +44,7 @@ export const appRu: AppTexts = {
     title: "Данные",
     lead: "Всё, что вы пишете, сразу видно в приглашении сверху",
     preview: "Ваше приглашение",
-    previewOpen: "🔍 Открыть крупно",
+    previewOpen: "Развернуть",
     previewClose: "Закрыть",
     groom: "Имя жениха",
     bride: "Имя невесты",
