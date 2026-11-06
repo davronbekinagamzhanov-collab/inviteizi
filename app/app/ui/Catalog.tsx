@@ -2,7 +2,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import type { Occasion } from "@/lib/types";
-import { activeDesigns, PRICES, type Design } from "@/templates/registry";
+import { activeDesigns, PRICES, thumbOf, type Design } from "@/templates/registry";
 import { t as inv } from "@/texts/uz-cyrl";
 import { useT } from "./shared";
 import { haptic } from "./telegram";
@@ -100,7 +100,7 @@ export function Catalog(props: {
           {list.map((d, i) => (
             <li key={d.id} className={s.tile} style={{ animationDelay: `${Math.min(i, 8) * 90}ms` }}>
               <button type="button" className={s.cover} onClick={() => props.onOpen(d)} aria-label={inv.designs[d.id]} data-design={d.id}>
-                <Image src={d.cover} alt="" fill sizes="(max-width: 480px) 50vw, 240px" priority={i < 4} />
+                <Image src={thumbOf(d.cover)} alt="" fill sizes="(max-width: 480px) 50vw, 240px" priority={i < 4} />
                 <span className={s.pricePill} {...bind(T.catalog.tipPrice[d.format])}>
                   {T.price(PRICES[d.format])}
                 </span>

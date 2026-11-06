@@ -44,6 +44,8 @@ export type Design = {
 };
 
 const cover = (id: string) => `/covers/${id}.webp`;
+/** Миниатюра обложки 480 px для каталога (готовый WebP, scripts/make-cover-thumbs.mjs) */
+export const thumbOf = (cover: string) => cover.replace("/covers/", "/covers/thumb/");
 
 type RawDesign = Omit<Design, "style">;
 

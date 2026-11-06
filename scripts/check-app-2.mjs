@@ -148,7 +148,7 @@ for (const lang of ["uz", "ru"]) {
     await page.screenshot({ path: `${out}/${lang}-05-wait.png` });
     const o = server.st.orders[0];
     Object.assign(o, { status: "active", paid: true, rejectReason: null });
-    await page.getByText(T.pay.readyTitle).waitFor({ timeout: 12_000 });
+    await page.getByText(T.pay.readyTitle).waitFor({ timeout: 16_000 });
     ok(await page.getByText(o.url.replace(/^https?:\/\//, "")).isVisible(), "экран «Тайёр»: ссылка крупно (сам обновился)");
     await page.screenshot({ path: `${out}/${lang}-06-ready.png` });
 

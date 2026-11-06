@@ -39,8 +39,8 @@ type Phase = "boot" | "noTelegram" | "error" | "ready";
 const SAVE_DELAY = 700;
 /** Экраны с главной кнопкой (см. switch ниже) */
 const MAIN_SCREENS = new Set<Screen["name"]>(["view", "form", "photos", "summary", "wait", "orders"]);
-/** Экран ожидания проверки чека спрашивает статус так часто, пока открыт */
-const POLL_MS = 7000;
+/** Экран ожидания проверки чека спрашивает статус раз в 10 с, только пока открыт и виден */
+const POLL_MS = 10_000;
 const RESUBMIT_DELAY = 900;
 
 function namesOf(d: AppDraft) {

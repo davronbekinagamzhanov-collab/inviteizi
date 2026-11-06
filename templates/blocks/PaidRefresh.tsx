@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
 
-const EVERY_MS = 15_000;
+const EVERY_MS = 20_000;
 const STOP_AFTER_MS = 30 * 60_000;
 
 /**

@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import QRCode from "qrcode";
 import type { AppOrder } from "@/bot/app/service";
-import { getDesign } from "@/templates/registry";
+import { getDesign, thumbOf } from "@/templates/registry";
 import { fmtDate } from "./format";
 import { useT } from "./shared";
 import { CheckIcon, ClockIcon, CloseIcon, TrashIcon } from "./icons";
@@ -79,7 +79,7 @@ export function Orders({ orders, onEdit, onPay, onStatus, onCancel, onToast }: P
         const cover = getDesign(o.templateId)?.cover;
         return (
           <article key={o.id} className={s.order} style={{ animationDelay: `${Math.min(i, 6) * 90}ms` }}>
-            {cover ? <Image className={s.orderCover} src={cover} alt="" width={76} height={135} /> : <span className={s.orderCover} />}
+            {cover ? <Image className={s.orderCover} src={thumbOf(cover)} alt="" width={76} height={135} /> : <span className={s.orderCover} />}
             <div style={{ minWidth: 0 }}>
               <p className={s.orderMeta}>
                 {T.orders.number(o.number)} · {T.price(o.amount)}
