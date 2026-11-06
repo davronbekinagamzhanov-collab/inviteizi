@@ -55,6 +55,13 @@ export const appKk: AppTexts = {
   },
 
   form: {
+    textTitle: "Шақыру мәтіні",
+    textFull: "Толық көру",
+    textShort: "Жию",
+    textOther: (i: number, n: number) => `Басқа нұсқа · ${i}/${n}`,
+    textOwn: "Өз мәтінім",
+    textPresets: "Дайын мәтіндер",
+    textHint: "Осы мәтін шақыруда тұрады. Өзгертсеңіз, жоғарыдағы үлгіде бірден көрінеді.",
     title: "Деректер",
     lead: "Жазғаныңыз жоғарыдағы шақыруда бірден көрінеді",
     preview: "Шақыруыңыз",

@@ -64,8 +64,10 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
   const [busy, setBusy] = useState(false);
   const [saveStatus, setSaveStatus] = useState("");
   const [viewer, setViewer] = useState<string | null>(null);
-  const [bigPreview, setBigPreview] = useState(false);
+  const [bigOpen, setBigPreview] = useState(false);
   const screen = stack[stack.length - 1];
+  // Большое превью живёт только на анкете: ушли с неё — закрыто
+  const bigPreview = bigOpen && screen.name === "form";
   const nativeMain = useNativeMainVisible();
   const design: Design | undefined = draft?.templateId ? getDesign(draft.templateId) : undefined;
   const order = orders.find((o) => o.id === draft?.orderId) ?? null;
@@ -101,22 +103,21 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
 
   // ── Навигация ──
   const go = useCallback((sc: Screen) => {
+    setBigPreview(false);
     setStack((st) => [...st, sc]);
     window.scrollTo({ top: 0 });
   }, []);
   const back = useCallback(() => {
+    setBigPreview(false);
     setStack((st) => (st.length > 1 ? st.slice(0, -1) : st));
     window.scrollTo({ top: 0 });
   }, []);
   const reset = useCallback((list: Screen[]) => {
+    setBigPreview(false);
     setStack(list);
     window.scrollTo({ top: 0 });
   }, []);
   useBackButton(stack.length > 1 || !!viewer || bigPreview, () => (bigPreview ? setBigPreview(false) : viewer ? setViewer(null) : back()));
-  // Ушли с анкеты — большое превью закрыто
-  useEffect(() => {
-    if (screen.name !== "form") setBigPreview(false);
-  }, [screen.name]);
 
   // ── Черновик: сохраняем на сервере с задержкой ──
   const firstDraft = useRef(true);
@@ -441,7 +442,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
                 <Catalog chip={chip} onChip={(c) => { haptic.select(); setChip(c); }} favorites={favorites} onFavorite={toggleFavorite} onOpen={(d) => go({ name: "view", id: d.id })} resume={resume} />
               )}
               {screen.name === "form" && design && draft && (
-                <Form key={design.id} design={design} form={draft.form ?? emptyForm(design.occasion)} extras={extras} today={session.today} errors={errors} onChange={changeForm} big={bigPreview} onBig={setBigPreview} />
+                <Form key={design.id} design={design} form={draft.form ?? emptyForm(design.occasion)} extras={extras} today={session.today} errors={errors} onChange={changeForm} big={bigPreview} onBig={setBigPreview} onText={(t) => patchDraft(t)} />
               )}
               {screen.name === "photos" && draft && (
                 <Photos photos={draft.photos ?? []} onChange={(photos) => patchDraft({ photos })} onToast={setToast} />

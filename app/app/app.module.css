@@ -1395,3 +1395,50 @@ textarea.input {
   grid-column: 2;
   grid-row: 1 / span 2;
 }
+
+/* ── «Таклифнома матни» в анкете (ui/TextChoice.tsx) ── */
+.textBlock {
+  background: var(--card);
+  border-radius: var(--r);
+  padding: 16px;
+  margin: 0 0 14px;
+  box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--gold) 45%, transparent);
+}
+.textCard {
+  padding: 14px 14px 6px;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 0 0 1px var(--line);
+  text-align: center;
+}
+.textCard p {
+  margin: 0;
+  font-family: var(--font-brand), Georgia, serif;
+  font-size: 17px;
+  line-height: 1.55;
+  white-space: pre-line;
+  animation: fade 0.35s var(--ease) both;
+}
+.textClamp {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+}
+.textMore {
+  min-height: 40px;
+  border: 0;
+  background: none;
+  color: var(--gold-deep);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.textActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 6px;
+}

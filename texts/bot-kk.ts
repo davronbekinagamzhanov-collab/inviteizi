@@ -257,7 +257,7 @@ export const kk: BotTexts = {
       `${i}. ${kind}\n   ${date}, ${time}\n   ${venue}\n   ${address}\n   ${map}`,
     hasMap: "🗺 Карта: бар",
     noMap: "🗺 Карта: жоқ",
-    textPreset: (i: number) => `Мәтін: ${i}-нұсқа`,
+    textPreset: (i: number, s?: string) => `Мәтін: ${i}-нұсқа${s ? `\n«${s}»` : ""}`,
     textOwn: (s: string) => `Мәтін: өз мәтініңіз («${s}…»)`,
     musicList: (s: string) => `Музыка: ${s}`,
     musicOwn: (s: string) => `Музыка: өз әніңіз (${s})`,

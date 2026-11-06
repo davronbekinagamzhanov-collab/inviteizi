@@ -11,6 +11,7 @@ import { previewData, type PreviewExtras } from "@/lib/preview-data";
 import { VENUES } from "@/bot/venues";
 import { Field, Section, useT } from "./shared";
 import { PreviewCard } from "./Preview";
+import { TextChoice } from "./TextChoice";
 import { haptic } from "./telegram";
 import s from "../app.module.css";
 
@@ -39,9 +40,11 @@ type Props = {
   /** Превью на весь экран (состояние у MiniApp: native-кнопки и «назад» его закрывают) */
   big: boolean;
   onBig: (open: boolean) => void;
+  /** п.16: текст приглашения прямо в анкете (те же поля, что у итога) */
+  onText: (p: { textId?: string; customText?: string }) => void;
 };
 
-export function Form({ design, form, extras, today, errors, onChange, big, onBig }: Props) {
+export function Form({ design, form, extras, today, errors, onChange, big, onBig, onText }: Props) {
   const T = useT();
   const occ = design.occasion;
   const f = fieldsFor(occ);
@@ -125,6 +128,8 @@ export function Form({ design, form, extras, today, errors, onChange, big, onBig
           </Field>
         )}
       </Section>
+
+      <TextChoice data={data} textId={extras.textId} customText={extras.customText} onChange={onText} />
 
       {events.map((e, i) => {
         const kind = (i === 0 ? MAIN_EVENT[occ] : e.kind) as EventKind;

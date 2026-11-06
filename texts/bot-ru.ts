@@ -267,7 +267,7 @@ export const ru = {
       `${i}. ${kind}\n   ${date}, ${time}\n   ${venue}\n   ${address}\n   ${map}`,
     hasMap: "🗺 Карта: есть",
     noMap: "🗺 Карта: нет",
-    textPreset: (i: number) => `Текст: вариант ${i}`,
+    textPreset: (i: number, s?: string) => `Текст: вариант ${i}${s ? `\n«${s}»` : ""}`,
     textOwn: (s: string) => `Текст: свой («${s}…»)`,
     musicList: (s: string) => `Музыка: ${s}`,
     musicOwn: (s: string) => `Музыка: ваша песня (${s})`,

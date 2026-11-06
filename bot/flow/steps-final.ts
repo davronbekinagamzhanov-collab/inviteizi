@@ -289,6 +289,8 @@ async function musicLine(c: Ctx) {
   return c.tx.review.musicNone;
 }
 
+const SNIPPET = 140;
+
 async function summary(c: Ctx) {
   const r = c.tx.review;
   const d = finalData(c.s);
@@ -320,8 +322,11 @@ async function summary(c: Ctx) {
   lines.push("");
   if (d.customText) lines.push(r.textOwn([...d.customText].slice(0, 40).join("")));
   else {
-    const i = t.inviteOptions(d).findIndex((o) => o.id === d.textId);
-    lines.push(r.textPreset(Math.max(i, 0) + 1));
+    // Клиент видит начало того же текста, что будет в НАМУНА и в оплаченном приглашении
+    const list = t.inviteOptions(d);
+    const i = Math.max(list.findIndex((o) => o.id === d.textId), 0);
+    const words = `${list[i]?.greeting ?? ""} ${list[i]?.body ?? ""}`.replace(/\s+/g, " ").trim();
+    lines.push(r.textPreset(i + 1, words.length > SNIPPET ? `${[...words].slice(0, SNIPPET).join("").replace(/\s\S*$/, "")}…` : words));
   }
   lines.push(await musicLine(c));
   lines.push(d.rsvp ? c.tx.rsvp.reviewOn : c.tx.rsvp.reviewOff);

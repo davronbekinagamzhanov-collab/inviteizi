@@ -84,9 +84,8 @@ function PreviewFrame({ templateId, data, scale }: { templateId: string; data: I
 function BigPreview({ templateId, data, onClose }: { templateId: string; data: InvitationData; onClose: () => void }) {
   const T = useT();
   const ref = useFeed(templateId, data);
-  const [root, setRoot] = useState<Element | null>(null);
-  useEffect(() => setRoot(document.querySelector("[data-app-root]") ?? document.body), []);
-  if (!root) return null;
+  // Рисуется только после нажатия «Очиш» (в браузере), поэтому document уже есть
+  const root = document.querySelector("[data-app-root]") ?? document.body;
   return createPortal(
     <div className={s.viewer} role="dialog" aria-modal="true" aria-label={T.form.preview} data-big-preview>
       <div className={s.viewerTop}>

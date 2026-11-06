@@ -254,7 +254,7 @@ export const uz = {
       `${i}. ${kind}\n   ${date}, ${time}\n   ${venue}\n   ${address}\n   ${map}`,
     hasMap: "🗺 Харита: бор",
     noMap: "🗺 Харита: йўқ",
-    textPreset: (i: number) => `Матн: ${i}-вариант`,
+    textPreset: (i: number, s?: string) => `Матн: ${i}-вариант${s ? `\n«${s}»` : ""}`,
     textOwn: (s: string) => `Матн: ўз матнингиз («${s}…»)`,
     musicList: (s: string) => `Мусиқа: ${s}`,
     musicOwn: (s: string) => `Мусиқа: ўз қўшиғингиз (${s})`,

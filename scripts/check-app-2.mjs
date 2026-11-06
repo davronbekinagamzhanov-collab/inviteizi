@@ -99,6 +99,16 @@ for (const lang of ["uz", "ru"]) {
     await big.getByRole("button", { name: T.form.previewClose }).click();
     ok(!(await big.count()) && (await page.locator("[data-preview-card] iframe").count()) === 1, "закрылось, маленькое вернулось");
 
+    // п.16: «Таклифнома матни» в анкете — «Бошқа вариант» листает, выбор доходит до итога
+    const textBox = page.locator("[data-text-choice]");
+    const id0 = await textBox.locator("[data-text-id]").getAttribute("data-text-id");
+    await textBox.getByRole("button", { name: new RegExp(T.form.textOther(2, 9).split(" · ")[0]) }).click();
+    const id1 = await textBox.locator("[data-text-id]").getAttribute("data-text-id");
+    ok(id0 !== id1, `«Бошқа вариант»: ${id0} → ${id1}`);
+    const chosenText = (await textBox.locator("[data-text-id] p").textContent()).replace(/\s+/g, " ").trim();
+    await textBox.scrollIntoViewIfNeeded();
+    await page.screenshot({ path: `${out}/${lang}-02b-text.png` });
+
     // Анкета → фото? → итог
     await page.locator('input[name="groom"]').fill("Азиз");
     await page.locator('input[name="bride"]').fill("Мадина");
@@ -112,6 +122,8 @@ for (const lang of ["uz", "ru"]) {
       if ((await page.locator("[data-main-action]").textContent()) === T.photos.skip) await page.locator("[data-main-action]").click();
     }
     await page.getByText(T.summary.title).waitFor();
+    const summaryText = (await page.getByRole("button", { name: new RegExp(T.summary.text) }).locator("small").textContent()).replace(/\s+/g, " ").trim();
+    ok(chosenText.startsWith(summaryText.slice(0, 40)) || summaryText.startsWith(chosenText.slice(0, 40)), "текст в итоге = выбранному в анкете");
     // Музыка: ▶ → кружок → (файл песочницы не грузится) мягкая ошибка
     await page.getByRole("button", { name: new RegExp(T.summary.music) }).click();
     const play = page.locator("[data-state]").filter({ has: page.locator("svg") }).first();

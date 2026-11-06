@@ -92,3 +92,26 @@ describe("статусы после чека", () => {
     expect([ok.status, ok.paid, ok.rejectReason]).toEqual(["active", true, null]);
   });
 });
+
+describe("п.16: текст приглашения", () => {
+  it("вариант, выбранный в анкете, = в НАМУНА = в оплаченном приглашении (и в итоге «Бот танлади»)", async () => {
+    const { tPlain } = await import("@/texts/uz-cyrl");
+    const { invitationData } = await import("@/lib/orders");
+    const sim = new Sim();
+    const options = tPlain.inviteOptions({ ...form, occasion: "nikoh" } as never);
+    const pick = options[2] ?? options.at(-1)!;
+    await app.saveDraft(sim.deps, user(97), { templateId: design.id, form, textId: pick.id });
+    expect((await app.openSession(sim.deps, user(97))).draft?.textId).toBe(pick.id);
+    const r = await app.submitDraft(sim.deps, user(97), { templateId: design.id, form, textId: pick.id });
+    if (!("ok" in r)) throw new Error(JSON.stringify(r));
+    const namuna = (await sim.repo.getOrder(r.order.id))!;
+    expect(tPlain.invite(invitationData(namuna)).body).toBe(pick.body);
+    await sim.repo.updateOrder(r.order.id, { status: "active", paidAt: sim.clock });
+    const paid = (await sim.repo.getOrder(r.order.id))!;
+    expect(tPlain.invite(invitationData(paid))).toMatchObject({ greeting: pick.greeting, body: pick.body });
+    // Свой текст из анкеты — тот же в заказе
+    const own = await app.submitDraft(sim.deps, user(98), { templateId: design.id, form, customText: "Азиз меҳмонлар, тўйимизга марҳамат!" });
+    if (!("ok" in own)) throw new Error("own");
+    expect(tPlain.invite(invitationData((await sim.repo.getOrder(own.order.id))!)).body).toBe("Азиз меҳмонлар, тўйимизга марҳамат!");
+  });
+});
