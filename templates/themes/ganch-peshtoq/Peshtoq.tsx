@@ -192,8 +192,9 @@ function Screen({ side, w, h, on, initial }: { side: "left" | "right"; w: number
       <svg aria-hidden viewBox={`0 0 ${w} ${h}`} className={`absolute inset-0 h-full w-full ${left ? "" : "-scale-x-100"}`}>
         {/* тёплая подложка: сквозь отверстия видна тень проёма, а не то, что за решёткой */}
         <rect width={w} height={h} fill="url(#gp-behind)" />
-        <g filter="url(#gp-relief)">
-          <rect width={w} height={h} fill={PLASTER} mask="url(#gp-lattice)" />
+        {/* решётка с готовым рельефом (картинка-плитка вместо фильтра: створки двигаются без пересчёта) */}
+        <g>
+          <rect width={w} height={h} fill="url(#gp-lattice-r)" />
           <path d={ring} fill={SURFACE} fillRule="evenodd" />
           {/* перекладины рамы над и под медальоном */}
           <rect x={s} y={my - 60} width={w - s} height={6} fill={SURFACE} />

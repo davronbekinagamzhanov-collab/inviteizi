@@ -14,7 +14,7 @@ import { staff } from "@/texts/bot-ru";
 import type { InlineButton } from "../tg";
 import { fmtPhone, panelData } from "./partners";
 import { designName, editOrSend, inline, roleOf, texts } from "./util";
-import type { Ctx } from "./types";
+import type { Ctx, Deps } from "./types";
 
 const S = staff.st;
 type Screen = { text: string; rows: InlineButton[][] };
@@ -199,6 +199,13 @@ export function exportSheets(s: PanelSnapshot, managers: Manager[], f: Filter, n
   return { label: r.label, file: r.file, sheets: [{ name: "Оплаты", rows: payments }, { name: "Выплаты", rows: payouts }, { name: "Долги", rows: debts }] };
 }
 
+/** Скачать выгрузку в чат (бот и «📤 Excel» в панели приложения). Права проверяет вызывающий */
+export async function sendExport(deps: Deps, chatId: number, per = "m0", partner = "0", manager = "0") {
+  const f = parse([per, partner, manager]);
+  const x = exportSheets(await panelData(deps), await deps.repo.listManagers(), f, deps.now());
+  await deps.tg.sendDocument(chatId, buildXlsx(x.sheets), { fileName: `inviteizi-${x.file}.xlsx`, caption: S.exReady(x.label) });
+}
+
 /** ex:… — экраны и скачивание */
 export async function exportAction(c: Ctx, arg: string) {
   if ((await roleOf(c)) !== "owner" || c.chatId !== c.user.id) {
@@ -209,9 +216,7 @@ export async function exportAction(c: Ctx, arg: string) {
     return;
   }
   if (arg.startsWith("dl:")) {
-    const f = parse(arg.slice(3).split(":"));
-    const x = exportSheets(await panelData(c.deps), await c.deps.repo.listManagers(), f, c.deps.now());
-    await c.deps.tg.sendDocument(c.chatId, buildXlsx(x.sheets), { fileName: `inviteizi-${x.file}.xlsx`, caption: S.exReady(x.label) });
+    await sendExport(c.deps, c.chatId, ...(arg.slice(3).split(":") as [string?, string?, string?]));
     if (c.u.kind === "callback") {
       await c.deps.tg.answerCallbackQuery(c.u.callbackId, { text: "📥" });
       c.answered = true;

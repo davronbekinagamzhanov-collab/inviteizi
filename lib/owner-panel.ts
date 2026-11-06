@@ -23,6 +23,9 @@ export type PanelOrder = {
   createdAt: Date;
   paidAt: Date | null;
   updatedAt: Date;
+  /** Для панели в приложении: ссылка /{slug} и имена в приглашении (поиск) */
+  slug?: string | null;
+  names?: string | null;
 };
 export type PanelUser = { id: number; createdAt: Date; source: string | null };
 /** График выплат: каждый день / раз в неделю (пн) / раз в месяц (1-го) */
@@ -78,10 +81,12 @@ export type PanelSnapshot = {
 export function withoutStaff(s: PanelSnapshot, staff: number[]): PanelSnapshot {
   const ids = new Set(staff);
   const staffOrders = new Set(s.orders.filter((o) => ids.has(o.userId)).map((o) => o.id));
+  // Партнёр, открывший свою join_/p_-ссылку, — не новый клиент (отчёт 20:00, статистика, сканы)
+  const partnerUsers = new Set(s.partners.map((p) => p.telegramId).filter((x): x is number => typeof x === "number"));
   return {
     ...s,
     orders: s.orders.filter((o) => !staffOrders.has(o.id)),
-    users: s.users.filter((u) => !ids.has(u.id)),
+    users: s.users.filter((u) => !ids.has(u.id) && !partnerUsers.has(u.id)),
     earnings: s.earnings.filter((e) => !staffOrders.has(e.orderId)),
   };
 }

@@ -352,7 +352,7 @@ export async function listOrders(deps: Deps, u: AppUser) {
 
 export const RECEIPT_MAX_BYTES = 10 * 1024 * 1024;
 export type ReceiptFile = { bytes: Uint8Array; mime: string; name: string };
-export type ReceiptResult = { ok: true; night: boolean } | { error: "notFound" | "closed" | "waiting" | "passed" | "format" | "tooBig" | "send" };
+export type ReceiptResult = { ok: true; night: boolean } | { error: "notFound" | "closed" | "waiting" | "passed" | "format" | "tooBig" | "send" | "notConfirmed" };
 
 /** Картинка → JPEG (Telegram показывает её как фото), PDF — документом */
 export async function receiptPayload(f: ReceiptFile): Promise<{ kind: "photo" | "document"; bytes: Uint8Array; name: string } | null> {
@@ -375,6 +375,8 @@ export async function submitReceipt(deps: Deps, u: AppUser, orderId: unknown, f:
   if (o.status === "receipt_sent") return { error: "waiting" };
   if (!PAYABLE_STATUSES.includes(o.status)) return { error: "closed" };
   if (eventsPassed(deps, o)) return { error: "passed" };
+  // Чек — только после «✅ Ҳаммаси тўғри» (pay_confirmed_at): без него нет доказательства, что клиент видел предупреждение
+  if (!o.payConfirmedAt) return { error: "notConfirmed" };
   const payload = await receiptPayload(f);
   if (!payload) return { error: "format" };
 

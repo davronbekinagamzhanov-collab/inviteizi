@@ -387,9 +387,10 @@ export class PgRepo implements Repo {
       const events = await tx<MetricEvent[]>`select kind, user_id as "userId", target, created_at as "createdAt" from public.analytics_events`;
       const [config] = await tx<{ started_at: Date }[]>`select started_at from public.analytics_config where singleton`;
       const music = await tx<{ id: string; titleRu: string; titleUz: string }[]>`select id, title_ru as "titleRu", title_uz as "titleUz" from public.music`;
-      return { orders: [...orders], users: [...users], events: [...events], since: config.started_at, music: [...music] } satisfies AnalyticsInput;
+      const partners = await tx<{ id: string }[]>`select telegram_id::text as id from public.partners where telegram_id is not null`;
+      return { input: { orders: [...orders], users: [...users], events: [...events], since: config.started_at, music: [...music] } satisfies AnalyticsInput, partnerIds: partners.map((p) => Number(p.id)) };
     });
-    return summarize(withoutStaffAnalytics(input, await this.staffIds()), period, now, customers && owner);
+    return summarize(withoutStaffAnalytics(input.input, await this.staffIds(), input.partnerIds), period, now, customers && owner);
   }
 
   async listFavorites(userId: number) {
@@ -456,7 +457,8 @@ export class PgRepo implements Repo {
   async panelSnapshot(): Promise<PanelSnapshot> {
     const base = await this.sql.begin("isolation level repeatable read read only", async (tx) => {
       const orders = await tx<PanelOrder[]>`select o.id, o.number, o.user_id as "userId", u.username, u.first_name as "firstName", o.status, o.occasion, o.format,
-        o.template_id as "templateId", o.music_kind as "musicKind", o.amount, o.created_at as "createdAt", o.paid_at as "paidAt", o.updated_at as "updatedAt"
+        o.template_id as "templateId", o.music_kind as "musicKind", o.amount, o.created_at as "createdAt", o.paid_at as "paidAt", o.updated_at as "updatedAt",
+        o.slug, nullif(concat_ws(' & ', o.groom, o.bride, o.person), '') as names
         from public.orders o join public.users u on u.id = o.user_id`;
       const users = await tx<PanelUser[]>`select id, created_at as "createdAt", source from public.users`;
       return { orders: [...orders], users: [...users] };

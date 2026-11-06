@@ -3,7 +3,7 @@
  * Telegram WebApp (telegram-web-app.js): initData, MainButton, BackButton, вибро, ссылки.
  * Вне Telegram (проверка в браузере) native-кнопок нет — приложение рисует свои внизу страницы.
  */
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef, useSyncExternalStore } from "react";
 
 type Btn = {
   setParams(p: { text?: string; color?: string; text_color?: string; is_active?: boolean; is_visible?: boolean; has_shine_effect?: boolean }): void;
@@ -13,6 +13,8 @@ type Btn = {
   hideProgress(): void;
   show(): void;
   hide(): void;
+  enable?(): void;
+  isVisible?: boolean;
 };
 
 export type WebApp = {
@@ -53,9 +55,45 @@ export const MILK = "#f7efe3";
 export const INK = "#3b2a1e";
 export const GOLD = "#a8772a";
 
+/*
+ * Готовность Telegram. telegram-web-app.js грузится ПОСЛЕ страницы (afterInteractive), а кнопки приложения
+ * монтируются сразу. Раньше подписка MainButton.onClick делалась один раз при монтировании — когда
+ * window.Telegram ещё не было — и не повторялась: кнопка потом показывалась (setParams), но нажатие
+ * ни к чему не было привязано. Теперь подписка ждёт этого сигнала.
+ */
+let ready = false;
+const readyListeners = new Set<() => void>();
+const subscribeReady = (f: () => void) => {
+  readyListeners.add(f);
+  return () => {
+    readyListeners.delete(f);
+  };
+};
+export const useTelegramReady = () => useSyncExternalStore(subscribeReady, () => ready, () => false);
+
+/** Видна ли native MainButton (иначе приложение рисует свою кнопку внизу страницы) */
+let nativeMain = false;
+const nativeListeners = new Set<() => void>();
+function setNativeMain(v: boolean) {
+  if (nativeMain === v) return;
+  nativeMain = v;
+  nativeListeners.forEach((f) => f());
+}
+const subscribeNative = (f: () => void) => {
+  nativeListeners.add(f);
+  return () => {
+    nativeListeners.delete(f);
+  };
+};
+export const useNativeMainVisible = () => useSyncExternalStore(subscribeNative, () => nativeMain, () => false);
+
 export function setupTelegram() {
   const w = tg();
   if (!w) return;
+  if (!ready) {
+    ready = true;
+    readyListeners.forEach((f) => f());
+  }
   w.ready();
   w.expand();
   w.disableVerticalSwipes?.();
@@ -72,50 +110,80 @@ export const haptic = {
   select: () => tg()?.HapticFeedback?.selectionChanged(),
 };
 
-/** Главная кнопка Telegram. text=null — скрыть. Обработчик всегда свежий (без повторной подписки) */
+/** Одно нажатие — одно действие (iOS иногда шлёт событие дважды); на новом экране защита сбрасывается */
+const TAP_GUARD_MS = 300;
+
+/**
+ * Главная кнопка Telegram. text=null — скрыть. Подписка — после загрузки telegram-web-app.js (ready),
+ * обработчик всегда свежий (ref), снимается при размонтировании.
+ */
 export function useMainButton(text: string | null, onClick: () => void, opts: { active?: boolean; progress?: boolean } = {}) {
   const cb = useRef(onClick);
+  const last = useRef(0);
+  const isReady = useTelegramReady();
   useEffect(() => {
     cb.current = onClick;
   });
   useEffect(() => {
     const w = tg();
-    if (!w || !insideTelegram()) return;
-    const handler = () => cb.current();
+    if (!isReady || !w || !insideTelegram()) return;
+    const handler = () => {
+      const now = Date.now();
+      if (now - last.current < TAP_GUARD_MS) return;
+      last.current = now;
+      cb.current();
+    };
     w.MainButton.onClick(handler);
     return () => w.MainButton.offClick(handler);
-  }, []);
-  useEffect(() => {
+  }, [isReady]);
+  // До отрисовки: своя кнопка не мелькает на экране, где видна native
+  useLayoutEffect(() => {
     const w = tg();
-    if (!w || !insideTelegram()) return;
+    if (!isReady || !w || !insideTelegram()) return;
     if (!text) {
+      w.MainButton.hideProgress();
       w.MainButton.hide();
+      setNativeMain(false);
       return;
     }
-    w.MainButton.setParams({ text, color: GOLD, text_color: "#ffffff", is_active: opts.active !== false, is_visible: true });
+    last.current = 0; // новое действие экрана — защита от двойного нажатия начинается заново
+    const active = opts.active !== false;
+    w.MainButton.setParams({ text, color: GOLD, text_color: "#ffffff", is_active: active, is_visible: true });
+    if (active) w.MainButton.enable?.();
+    w.MainButton.show();
     if (opts.progress) w.MainButton.showProgress(false);
     else w.MainButton.hideProgress();
-  }, [text, opts.active, opts.progress]);
+    // isVisible выставляет сам telegram-web-app.js; если его нет или false — показываем свою кнопку
+    setNativeMain(w.MainButton.isVisible !== false);
+  }, [isReady, text, opts.active, opts.progress]);
+  useEffect(
+    () => () => {
+      tg()?.MainButton?.hide();
+      setNativeMain(false);
+    },
+    [],
+  );
 }
 
 export function useBackButton(visible: boolean, onBack: () => void) {
   const cb = useRef(onBack);
+  const isReady = useTelegramReady();
   useEffect(() => {
     cb.current = onBack;
   });
   useEffect(() => {
     const w = tg();
-    if (!w || !insideTelegram()) return;
+    if (!isReady || !w || !insideTelegram()) return;
     const handler = () => cb.current();
     w.BackButton.onClick(handler);
     return () => w.BackButton.offClick(handler);
-  }, []);
+  }, [isReady]);
   useEffect(() => {
     const w = tg();
-    if (!w || !insideTelegram()) return;
+    if (!isReady || !w || !insideTelegram()) return;
     if (visible) w.BackButton.show();
     else w.BackButton.hide();
-  }, [visible]);
+  }, [isReady, visible]);
 }
 
 export function openLink(url: string) {

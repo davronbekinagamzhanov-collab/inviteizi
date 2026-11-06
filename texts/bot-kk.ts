@@ -426,6 +426,8 @@ export const kk: BotTexts = {
     statsText: (s: { period: string; scanned: number; paid: number; earned: string; paidOut: string; due: string; link: string }) =>
       `📊 Статистика · ${s.period}\n\nQR сканерледі: ${s.scanned}\nТөлем: ${s.paid}\n\nБарлығы табылды: ${s.earned}\nТөленді: ${s.paidOut}\nТөленуі керек: ${s.due}\n\nСілтемеңіз:\n${s.link}`,
     qrCaption: (name: string, link: string) => `🔳 ${name}\n${link}\n\nA4 постер (PDF және PNG) — төмендегі батырма 👇`,
+    refLink: (link: string) => `🔗 Сілтемеңіз:\n${link}\n\nБұл сілтемені WhatsApp-қа жіберуге болады — тапсырыстар да сізге есептеледі.`,
+    copyLink: "📋 Көшіру",
     posterUz: "📄 Постер · өзбекше",
     posterRu: "📄 Постер · орысша",
     posterKk: "📄 Постер · қазақша",
@@ -440,8 +442,8 @@ export const kk: BotTexts = {
     claimUsed: "Бұл сілтеме бұрын қолданылған. Сұрағыңыз болса — 📞 Байланыс.",
     claimClosed: "Бұл тапсырыс бұрын төленген немесе жабылған.",
     claimNone: "Сілтеме қате немесе ескірген.",
-    clientShare: (s: { url: string; amount: string; phone: string; name: string; bot: string }) =>
-      `Ассалаумағалейкум! 🌸\nШақыруыңыз дайын (ҮЛГІ):\n${s.url}\n\nБағасы: ${s.amount}\nKaspi: ${s.phone} (${s.name})\n\nТөлегеннен кейін чекті осы ботқа жіберіңіз:\n${s.bot}`,
+    clientShare: (s: { url: string; amount: string; bot: string }) =>
+      `Ассалаумағалейкум! 🌸\nШақыруыңыз дайын (ҮЛГІ) — алдымен қараңыз:\n${s.url}\n\n⚠️ Төлегеннен кейін өзгертуге болмайды, ақша қайтарылмайды.\n\nБағасы: ${s.amount}\nБәрі дұрыс болса, тапсырысты ботта ашып, «✅ Бәрі дұрыс, төлейміз» батырмасын басыңыз — төлем деректері сонда шығады:\n${s.bot}`,
   },
 
   my: {

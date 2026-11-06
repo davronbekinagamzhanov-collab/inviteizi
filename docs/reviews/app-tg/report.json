@@ -1,0 +1,63 @@
+{
+  "scope": "Local /app inside emulated Telegram WebApp (iOS); mocked /api/app",
+  "design": "muhr",
+  "passed": true,
+  "report": [
+    {
+      "tag": "native-390-uz",
+      "ok": true,
+      "errors": [],
+      "steps": [
+        "01-catalog",
+        "02-view",
+        "03-form",
+        "04-photos",
+        "05-summary",
+        "06-pay-check",
+        "07-pay",
+        "08-done",
+        "09-orders",
+        "10-saved"
+      ],
+      "submits": 4
+    },
+    {
+      "tag": "native-390-ru",
+      "ok": true,
+      "errors": [],
+      "steps": [
+        "01-catalog",
+        "02-view",
+        "03-form",
+        "04-photos",
+        "05-summary",
+        "06-pay-check",
+        "07-pay",
+        "08-done",
+        "09-orders",
+        "10-saved"
+      ],
+      "submits": 4
+    },
+    {
+      "tag": "fallback-390",
+      "ok": true,
+      "errors": []
+    },
+    {
+      "tag": "view-360",
+      "ok": true,
+      "errors": []
+    },
+    {
+      "tag": "view-390",
+      "ok": true,
+      "errors": []
+    },
+    {
+      "tag": "view-430",
+      "ok": true,
+      "errors": []
+    }
+  ]
+}

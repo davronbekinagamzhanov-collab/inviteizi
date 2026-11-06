@@ -1,0 +1,16 @@
+{
+  "scope": "Local /app/owner, mocked /api/app",
+  "passed": true,
+  "report": [
+    {
+      "tag": "admin-390",
+      "ok": true,
+      "errors": []
+    },
+    {
+      "tag": "non-admin-390",
+      "ok": true,
+      "errors": []
+    }
+  ]
+}
