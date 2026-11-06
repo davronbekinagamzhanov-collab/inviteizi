@@ -35,6 +35,8 @@ type Props = {
   status: string;
   onChange: (patch: { textId?: string; customText?: string; music?: Props["music"]; rsvp?: boolean; langs?: ExtraLang[]; customTexts?: Partial<Record<ExtraLang, string>>; mainLang?: ExtraLang }) => void;
   onNamuna: () => void;
+  /** «✏️ Маълумотларни ўзгартириш»: анкета (имена, дата, время, место) поверх итога */
+  onEdit: () => void;
 };
 
 const firstLine = (s: string) => s.replace(/\s+/g, " ").trim();
@@ -98,6 +100,9 @@ export function Summary(p: Props) {
     <div className={s.screen}>
       <h1 className={s.title}>{T.summary.title}</h1>
       <p className={s.lead}>{T.summary.lead}</p>
+      <button type="button" className={`${s.btn} ${s.btnGhost} ${s.btnWide} ${s.btnEdit}`} onClick={p.onEdit} data-edit-data>
+        {T.form.editData}
+      </button>
 
       <div className={s.item}>
         <button type="button" className={s.itemHead} onClick={() => toggleOpen("text")} aria-expanded={open === "text"}>

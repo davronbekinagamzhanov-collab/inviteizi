@@ -53,7 +53,7 @@ export function Catalog(props: {
   favorites: string[];
   onFavorite: (id: string, on: boolean) => void;
   onOpen: (d: Design) => void;
-  resume: { title: string; onResume: () => void; onCancel: () => Promise<boolean> } | null;
+  resume: { title: string; cover: string; onResume: () => void; onCancel: () => Promise<boolean> } | null;
 }) {
   const T = useT();
   const all = activeDesigns();
@@ -70,16 +70,21 @@ export function Catalog(props: {
       </div>
       <p className={s.lead}>{T.catalog.lead}</p>
       {props.resume && (
-        <div className={s.resume}>
+        <section className={s.resume} aria-label={T.catalog.continueTitle} data-resume>
+          <span className={s.resumeThumb}>
+            <Image src={props.resume.cover} alt="" fill sizes="56px" />
+          </span>
           <p>
             <small>{T.catalog.continueTitle}</small>
             <strong>{props.resume.title}</strong>
           </p>
-          <button type="button" className={`${s.btn} ${s.btnSmall}`} onClick={props.resume.onResume}>
-            {T.catalog.continueAction}
-          </button>
-          <CancelButton onCancel={props.resume.onCancel} />
-        </div>
+          <div className={s.resumeActions}>
+            <button type="button" className={`${s.btn} ${s.btnSmall}`} onClick={props.resume.onResume}>
+              {T.catalog.continueAction}
+            </button>
+            <CancelButton onCancel={props.resume.onCancel} />
+          </div>
+        </section>
       )}
       <nav className={s.chips} aria-label={T.catalog.title}>
         {OCCASIONS.map((o) => (

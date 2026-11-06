@@ -100,6 +100,10 @@ export type BackEntry = { step: StepId; ev?: number; ret?: "review" };
 /** Черновик заказа и положение в диалоге (users.state) */
 export type Draft = {
   handledUpdates?: number[];
+  /** Черновик приложения: свой id (новый при выборе дизайна) */
+  draftId?: string;
+  /** id черновика, который клиент отменил: его запоздалые сохранения сервер не принимает */
+  cancelled?: string;
   /** Номер вопроса: кнопки старых вопросов не срабатывают */
   q?: number;
   back?: BackEntry[];

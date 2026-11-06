@@ -9,7 +9,7 @@ import type { AppDraft, AppOrder, AppSession, SubmitResult } from "@/bot/app/ser
 import type { Lang } from "@/lib/domain";
 import { validateForm, type FieldError, type FormInput } from "@/lib/order-rules";
 import { previewData } from "@/lib/preview-data";
-import { getDesign, PRICES, type Design } from "@/templates/registry";
+import { getDesign, PRICES, thumbOf, type Design } from "@/templates/registry";
 import { appUz } from "@/texts/app-uz";
 import { appRu } from "@/texts/app-ru";
 import { appKk } from "@/texts/app-kk";
@@ -48,15 +48,19 @@ function Loading() {
 type Screen =
   | { name: "catalog" }
   | { name: "view"; id: string }
-  | { name: "form" }
+  /** ret — правка из итога/проверки: «Сақлаш ва қайтиш» возвращает туда же */
+  | { name: "form"; ret?: boolean }
   | { name: "photos" }
   | { name: "summary" }
-  | { name: "pay"; orderId: string }
+  /** check — проверка перед оплатой, pay — реквизиты и чек (назад с реквизитов → проверка) */
+  | { name: "pay"; orderId: string; step: "check" | "pay" }
   | { name: "wait"; orderId: string; night: boolean }
   | { name: "orders" };
 
 type Phase = "boot" | "noTelegram" | "error" | "ready";
 const SAVE_DELAY = 700;
+/** Свой id у каждого нового черновика: сервер не воскресит отменённый черновик по запоздавшему сохранению */
+const newDraftId = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`);
 /** Экраны с главной кнопкой (см. switch ниже) */
 const MAIN_SCREENS = new Set<Screen["name"]>(["view", "form", "photos", "summary", "wait", "orders"]);
 /** Экран ожидания проверки чека спрашивает статус раз в 10 с, только пока открыт и виден */
@@ -140,6 +144,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
       setLang(sess.lang);
       setFavorites(sess.favorites);
       setOrders(sess.orders);
+      bootDraft.current = sess.draft;
       setDraft(sess.draft);
       const d = sess.draft?.templateId ? getDesign(sess.draft.templateId) : undefined;
       if (d) setChip(d.occasion);
@@ -161,14 +166,22 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
   // ── Навигация ──
   const go = useCallback((sc: Screen) => {
     setBigPreview(false);
-    setStack((st) => [...st, sc]);
+    // Двойное нажатие не кладёт тот же экран в историю дважды (иначе «назад» нужно жать два раза)
+    setStack((st) => (JSON.stringify(st[st.length - 1]) === JSON.stringify(sc) ? st : [...st, sc]));
     window.scrollTo({ top: 0 });
   }, []);
+  // Правка из итога/проверки: «назад» без «Сақлаш» возвращает данные как были (итог = НАМУНА)
+  const editSnapshot = useRef<AppDraft | null>(null);
   const back = useCallback(() => {
     setBigPreview(false);
+    if (screen.name === "form" && screen.ret && editSnapshot.current) {
+      setDraft(editSnapshot.current);
+      setErrors([]);
+      editSnapshot.current = null;
+    }
     setStack((st) => (st.length > 1 ? st.slice(0, -1) : st));
     window.scrollTo({ top: 0 });
-  }, []);
+  }, [screen]);
   const reset = useCallback((list: Screen[]) => {
     setBigPreview(false);
     setStack(list);
@@ -177,16 +190,38 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
   useBackButton(stack.length > 1 || !!viewer || bigPreview || help, () => (help ? setHelp(false) : bigPreview ? setBigPreview(false) : viewer ? setViewer(null) : back()));
 
   // ── Черновик: сохраняем на сервере с задержкой ──
-  const firstDraft = useRef(true);
+  // Черновик с сервера (при запуске) не отправляем обратно; всё, что клиент поменял после, — сохраняем.
+  // Закрыл приложение раньше, чем прошла задержка, — сохранение уходит сразу (keepalive), чтобы
+  // при следующем открытии сверху была карточка «Тугалланмаган таклифнома» с этими данными
+  const bootDraft = useRef<AppDraft | null>(null);
+  const unsaved = useRef<AppDraft | null>(null);
   useEffect(() => {
-    if (phase !== "ready" || !draft) return;
-    if (firstDraft.current) {
-      firstDraft.current = false;
-      return;
-    }
-    const id = setTimeout(() => api("draft", { draft }).catch(() => undefined), SAVE_DELAY);
+    if (phase !== "ready" || !draft || draft === bootDraft.current) return;
+    unsaved.current = draft;
+    const id = setTimeout(() => {
+      unsaved.current = null;
+      api("draft", { draft }).catch(() => undefined);
+    }, SAVE_DELAY);
     return () => clearTimeout(id);
   }, [draft, phase]);
+  useEffect(() => {
+    const flush = (e: Event) => {
+      const d = unsaved.current;
+      if (!d || (e.type === "visibilitychange" && document.visibilityState !== "hidden")) return;
+      unsaved.current = null;
+      try {
+        void fetch("/api/app", { method: "POST", keepalive: true, headers: { "content-type": "application/json", "x-tg-init-data": initDataOf() }, body: JSON.stringify({ action: "draft", draft: d }) }).catch(() => undefined);
+      } catch {
+        /* нет сети — черновик останется до следующего изменения */
+      }
+    };
+    document.addEventListener("visibilitychange", flush);
+    window.addEventListener("pagehide", flush);
+    return () => {
+      document.removeEventListener("visibilitychange", flush);
+      window.removeEventListener("pagehide", flush);
+    };
+  }, []);
 
   // ── Заказ (НАМУНА): создать или обновить ту же ссылку ──
   const upsertOrder = useCallback((o: AppOrder) => {
@@ -206,7 +241,8 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
         if (r.error === "fields") {
           setErrors(r.fields);
           haptic.error();
-          reset([{ name: "catalog" }, { name: "form" }]);
+          // Остаёмся на анкете или открываем её поверх (назад — туда, откуда пришли)
+          setStack((st) => (st[st.length - 1].name === "form" ? st : [...st, { name: "form", ret: true }]));
           setToast(T.form.errors.fix);
           return null;
         }
@@ -272,9 +308,10 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
     if (!next) return;
     haptic.ok();
     const same = draft && design && design.occasion === next.occasion;
-    setDraft(same ? { ...draft, templateId: id } : { templateId: id, form: emptyForm(next.occasion), rsvp: true });
+    setDraft(same ? { ...draft, templateId: id } : { templateId: id, form: emptyForm(next.occasion), rsvp: true, draftId: newDraftId() });
     setErrors([]);
-    reset([{ name: "catalog" }, { name: "form" }]);
+    // Назад с анкеты — к просмотру дизайна
+    go({ name: "form" });
   }
 
   // После первой попытки ошибки пересчитываются на ходу: исправил — красное сразу уходит
@@ -301,6 +338,11 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
     setBusy(false);
     if (!o) return;
     haptic.ok();
+    // Правка из итога/проверки: НАМУНА обновлена (та же ссылка) — возвращаемся туда
+    if (screen.name === "form" && screen.ret) {
+      editSnapshot.current = null;
+      return back();
+    }
     go(design.clientPhotos ? { name: "photos" } : { name: "summary" });
   }
 
@@ -319,7 +361,30 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
     await pending.current;
     const o = await submit(draft);
     setBusy(false);
-    if (o) go({ name: "pay", orderId: o.id });
+    if (o) go({ name: "pay", orderId: o.id, step: "check" });
+  }
+
+  /** «✏️ Маълумотларни ўзгартириш» на итоге и на проверке перед оплатой: анкета с текущими данными поверх */
+  async function editData(o?: AppOrder) {
+    if (busy) return;
+    haptic.tap();
+    if (!o || draft?.orderId === o.id) {
+      editSnapshot.current = draft;
+      return go({ name: "form", ret: true });
+    }
+    setBusy(true);
+    try {
+      const r = await api<{ draft?: AppDraft; error?: string }>("edit", { orderId: o.id });
+      if (!r.draft) return setToast(T.orders.closedEdit);
+      setDraft(r.draft);
+      setErrors([]);
+      editSnapshot.current = r.draft;
+      go({ name: "form", ret: true });
+    } catch {
+      setToast(T.serverError);
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function editOrder(o: AppOrder) {
@@ -332,7 +397,8 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
       setErrors([]);
       const d = getDesign(r.draft.templateId ?? "");
       if (d) setChip(d.occasion);
-      reset([{ name: "catalog" }, { name: "form" }]);
+      // Назад с анкеты — в «Менинг таклифномаларим»
+      go({ name: "form" });
     } catch {
       setToast(T.serverError);
     } finally {
@@ -364,7 +430,14 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
         return false;
       }
       haptic.ok();
+      // Отложенное «обновить НАМУНА» отменённого черновика больше не отправляем
+      if (resubmit.current) clearTimeout(resubmit.current);
+      resubmit.current = null;
+      unsaved.current = null;
+      setSaveStatus("");
       if (o) setOrders((l) => l.filter((x) => x.id !== o.id));
+      // Плашка без заказа, а сервер отменил и привязанный заказ — список «Менинг таклифномаларим» сверяем сразу
+      else void refreshOrders();
       if (!o || draft?.orderId === o.id) {
         setDraft(null);
         setErrors([]);
@@ -440,7 +513,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
         main = { text: T.view.choose, onClick: () => choose(screen.id) };
         break;
       case "form":
-        main = { text: T.form.next, onClick: formNext, progress: busy };
+        main = { text: screen.ret ? T.form.saveBack : T.form.next, onClick: formNext, progress: busy };
         break;
       case "photos":
         main = { text: draft?.photos?.length ? T.photos.next : T.photos.skip, onClick: toSummary, progress: busy || photosBusy > 0 };
@@ -460,7 +533,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
 
   const resume =
     draft?.templateId && design && screen.name === "catalog"
-      ? { title: `${T.occasions[design.occasion]} · ${namesOf(draft) || T.catalog.continueTitle}`, onResume: () => go(draft.orderId ? { name: "summary" } : { name: "form" }), onCancel: () => cancelOrder(order ?? (draft.orderId ? ({ id: draft.orderId } as AppOrder) : null)) }
+      ? { title: `${T.occasions[design.occasion]} · ${namesOf(draft) || T.catalog.continueTitle}`, cover: thumbOf(design.cover), onResume: () => go(order ? { name: "summary" } : { name: "form" }), onCancel: () => cancelOrder(order ?? (draft.orderId ? ({ id: draft.orderId } as AppOrder) : null)) }
       : null;
 
   return (
@@ -538,14 +611,15 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
                   status={saveStatus}
                   onChange={(patch) => patchDraft(patch, true)}
                   onNamuna={() => order && setViewer(order.url)}
+                  onEdit={() => editData()}
                 />
               )}
               {screen.name === "pay" && (() => {
                 const o = orders.find((x) => x.id === screen.orderId);
-                return o ? <Pay order={o} pay={session.pay} onToast={setToast} onTerms={() => setViewer(lang === "uz" ? "/terms" : "/terms/ru")} onDone={(night) => { setOrders((l) => l.map((x) => (x.id === o.id ? { ...x, status: "receipt_sent", canPay: false, canEdit: false } : x))); setDraft(null); reset([{ name: "catalog" }, { name: "wait", orderId: o.id, night }]); }} /> : null;
+                return o ? <Pay key={screen.step} order={o} step={screen.step} onConfirmed={(c) => { setOrders((l) => l.map((x) => (x.id === c.id ? c : x))); go({ name: "pay", orderId: o.id, step: "pay" }); }} onEdit={editData} busy={busy} pay={session.pay} onToast={setToast} onTerms={() => setViewer(lang === "uz" ? "/terms" : "/terms/ru")} onDone={(night) => { setOrders((l) => l.map((x) => (x.id === o.id ? { ...x, status: "receipt_sent", canPay: false, canEdit: false } : x))); setDraft(null); reset([{ name: "catalog" }, { name: "wait", orderId: o.id, night }]); }} /> : null;
               })()}
-              {screen.name === "wait" && waitOrder && <Waiting order={waitOrder} night={screen.night} onToast={setToast} onResend={() => reset([{ name: "catalog" }, { name: "orders" }, { name: "pay", orderId: waitOrder.id }])} />}
-              {screen.name === "orders" && <Orders orders={orders} onEdit={editOrder} onPay={(o) => go({ name: "pay", orderId: o.id })} onStatus={(o) => go({ name: "wait", orderId: o.id, night: isQuiet(new Date()) })} onCancel={cancelOrder} onToast={setToast} busy={busy} />}
+              {screen.name === "wait" && waitOrder && <Waiting order={waitOrder} night={screen.night} onToast={setToast} onResend={() => reset([{ name: "catalog" }, { name: "orders" }, { name: "pay", orderId: waitOrder.id, step: waitOrder.confirmed ? "pay" : "check" }])} />}
+              {screen.name === "orders" && <Orders orders={orders} onEdit={editOrder} onPay={(o) => go({ name: "pay", orderId: o.id, step: o.confirmed ? "pay" : "check" })} onStatus={(o) => go({ name: "wait", orderId: o.id, night: isQuiet(new Date()) })} onCancel={cancelOrder} onToast={setToast} busy={busy} />}
             </>
           )}
         </main>

@@ -3,6 +3,7 @@
  * Каждая функция получает уже проверенного пользователя (initData — lib/tg-init-data.ts) и Deps.
  * Черновик лежит в users.state (как у чата): закрыл приложение — открыл — продолжает; в чате тоже виден.
  */
+import { randomUUID } from "node:crypto";
 import type { Deps, Draft } from "../flow/types";
 import type { Lang, MusicChoice, MusicRecord, OrderRecord, OrderStatus } from "@/lib/domain";
 import { EXTRA_LANGS, type ExtraLang, type InvitationData } from "@/lib/types";
@@ -36,6 +37,8 @@ export type AppDraft = {
   mainLang?: ExtraLang;
   /** Правка неоплаченного заказа: та же ссылка */
   orderId?: string;
+  /** id черновика: после «Бекор қилиш» запоздалые сохранения этого черновика не принимаются */
+  draftId?: string;
 };
 
 export type AppOrder = {
@@ -142,8 +145,15 @@ function draftOf(s: Draft): AppDraft | null {
     customTexts: d.customTexts,
     mainLang: d.mainLang,
     orderId: s.orderId,
+    draftId: s.draftId,
   };
 }
+
+/** Черновик без id (старый, из чата) отменяется и узнаётся по этой метке */
+const LEGACY_DRAFT = "legacy";
+const draftKey = (id: unknown) => (typeof id === "string" && id ? id.slice(0, 64) : LEGACY_DRAFT);
+/** Этот черновик клиент уже отменил (запрос сохранения пришёл позже отмены) */
+const isCancelledDraft = (prev: Draft | undefined, d: AppDraft) => !!prev?.cancelled && prev.cancelled === draftKey(d.draftId);
 
 /** Языки, которые клиент может добавить сейчас */
 export const allowedLangs = (deps: Deps): ExtraLang[] => (deps.env.kazakhEnabled ? ["ru", "kk"] : ["ru"]);
@@ -276,6 +286,7 @@ function toDraft(deps: Deps, prev: Draft, d: AppDraft, data: Partial<InvitationD
   return {
     q: prev.q,
     handledUpdates: prev.handledUpdates,
+    draftId: typeof d.draftId === "string" && d.draftId ? d.draftId.slice(0, 64) : undefined,
     occasion: design?.occasion ?? prev.occasion,
     format: design?.format ?? prev.format,
     templateId: design?.id ?? prev.templateId,
@@ -305,6 +316,13 @@ export async function saveDraft(deps: Deps, u: AppUser, d: AppDraft) {
   if (!d || typeof d !== "object" || JSON.stringify(d).length > MAX_DRAFT_JSON) return { error: "bad" as const };
   const user = (await deps.repo.getUser(u.id)) ?? (await deps.repo.touchUser({ id: u.id, username: u.username, firstName: u.firstName }));
   const prev = user.state as Draft;
+  // Гонка: сохранение ушло до «Бекор қилиш», а дошло после — черновик не воскрешаем
+  if (isCancelledDraft(prev, d)) return { error: "cancelled" as const };
+  // Черновик правки заказа, которого уже нет (отменён) или он закрыт, — не сохраняем
+  if (typeof d.orderId === "string") {
+    const o = await deps.repo.getOrder(d.orderId).catch(() => null);
+    if (!o || o.userId !== u.id || !PAYABLE_STATUSES.includes(o.status)) return { error: "closed" as const };
+  }
   const form = (d.form ?? {}) as FormInput;
   const draft = toDraft(deps, prev, d, { ...form, events: (form.events ?? []).slice(0, 3) } as Partial<InvitationData>);
   // Чат видит черновик как свой: на «review» его можно сразу подтвердить, номер вопроса сдвигается — старые кнопки чата не сработают
@@ -335,6 +353,7 @@ export async function submitDraft(deps: Deps, u: AppUser, d: AppDraft): Promise<
   }
   const user = (await deps.repo.getUser(u.id)) ?? (await deps.repo.touchUser({ id: u.id, username: u.username, firstName: u.firstName }));
   const prev = user.state as Draft;
+  if (isCancelledDraft(prev, d)) return { error: "notFound" };
   const draft = toDraft(deps, prev, d, v.data);
   // Мелодия только из списка этого тадбира; несуществующая (или чужого тадбира) — первая по умолчанию
   // Мелодия — из нашего списка (своего тадбира или «Бошқа мусиқалар»); несуществующая — первая мелодия тадбира
@@ -357,7 +376,7 @@ export async function submitDraft(deps: Deps, u: AppUser, d: AppDraft): Promise<
         // Черновик правки остаётся привязан к заказу: следующее «Сақлаш» обновит ту же ссылку
         await deps.repo.saveStep(u.id, "idle", { ...draft, q: q + 1 } as Record<string, unknown>);
       } else {
-        await deps.repo.saveStep(u.id, "idle", { q: q + 2, templateId: draft.templateId, occasion: draft.occasion, format: draft.format, orderId: r.order.id, music: draft.music, data: draft.data } as Record<string, unknown>);
+        await deps.repo.saveStep(u.id, "idle", { q: q + 2, draftId: draft.draftId, templateId: draft.templateId, occasion: draft.occasion, format: draft.format, orderId: r.order.id, music: draft.music, data: draft.data } as Record<string, unknown>);
       }
       return { ok: true, order: appOrder(deps, r.order, user.lang ?? "uz"), created: r.kind === "created" };
     }
@@ -383,7 +402,7 @@ export async function editOrder(deps: Deps, u: AppUser, orderId: unknown): Promi
   if (!PAYABLE_STATUSES.includes(o.status)) return { error: "closed" };
   const user = await deps.repo.getUser(u.id);
   const prev = (user?.state ?? {}) as Draft;
-  const draft: Draft = { q: (prev.q ?? 0) + 1, occasion: o.occasion, format: o.format, templateId: o.templateId, orderId: o.id, music: o.music, data: { ...o.data } };
+  const draft: Draft = { q: (prev.q ?? 0) + 1, draftId: randomUUID(), occasion: o.occasion, format: o.format, templateId: o.templateId, orderId: o.id, music: o.music, data: { ...o.data } };
   await deps.repo.saveStep(u.id, "idle", draft as Record<string, unknown>);
   return { draft: draftOf(draft)! };
 }
@@ -425,12 +444,14 @@ export async function cancelOrder(deps: Deps, u: AppUser, orderId: unknown): Pro
   // Новый черновик клиента (ещё без заказа) при отмене старого заказа не трогаем
   if (!order || st.orderId === order.id) {
     removed.push({ photos: st.data?.photos ?? [], music: st.music?.kind === "own" ? (st.music.url ?? null) : null });
-    await deps.repo.saveStep(u.id, "idle", { q: (st.q ?? 0) + 1 });
+    // Метка отмены: запоздавшие «сохранить черновик» этого черновика сервер отклонит
+    await deps.repo.saveStep(u.id, "idle", { q: (st.q ?? 0) + 1, cancelled: draftKey(st.draftId) });
   }
   const design = getDesign(order?.templateId ?? st.templateId ?? "");
   await deps.repo
     .recordCancellation({ step, occasion: design?.occasion ?? null, format: design?.format ?? null, templateId: design?.id ?? null })
-    .catch((e) => console.error("cancel record", e instanceof Error ? e.name : "Error"));
+    // Нет таблицы order_cancellations (миграция не применена) — отмена всё равно прошла, запись пропускаем
+    .catch((e) => console.warn("cancel record skipped", e instanceof Error ? e.name : "Error"));
   await removeUnusedMedia(deps, removed).catch((e) => console.error("cancel media", e instanceof Error ? e.name : "Error"));
   return { ok: true };
 }
