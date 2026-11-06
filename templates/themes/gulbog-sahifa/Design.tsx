@@ -10,7 +10,7 @@ import {Countdown} from "../../blocks/Countdown";
 import {PhotoBackdrop} from "../../blocks/PhotoBackdrop";
 import {Reveal} from "../../blocks/Reveal";
 import {designTexts} from "@/texts/uz-cyrl";
-const font=localFont({src:[{path:"../../../assets/fonts/Lora-Regular.ttf",style:"normal"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--gs-font",display:"swap"});
+const font=localFont({ preload: false,src:[{path:"../../../assets/fonts/Lora-Regular.ttf",style:"normal"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--gs-font",display:"swap"});
 const vars=designVars({primary:"#9b695d",primaryDark:"#785347",gold:"#bd9d6e",goldLight:"#edd8b6",paper:"#fff8ed",ink:"#594e43",muted:"#948675"},{display:"var(--gs-font)",accent:"var(--gs-font)",body:"var(--gs-font)"});
 const t=designTexts("gulbog-sahifa");
 

@@ -6,7 +6,7 @@ import {InvitationShell} from "../../blocks/InvitationShell";
 import {Words,useFitWords} from "../../blocks/FitWords";
 import {MapButton} from "../../blocks/MapButton";
 import {designTexts} from "@/texts/uz-cyrl";
-const font=localFont({src:[{path:"../../../assets/fonts/Lora-Regular.ttf",style:"normal"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--ms-font",display:"swap"});
+const font=localFont({ preload: false,src:[{path:"../../../assets/fonts/Lora-Regular.ttf",style:"normal"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--ms-font",display:"swap"});
 const vars=designVars({primary:"#8c6d67",primaryDark:"#66514e",gold:"#b3a085",goldLight:"#e7d7bc",paper:"#fcf7f0",ink:"#574b48",muted:"#93857d"},{display:"var(--ms-font)",accent:"var(--ms-font)",body:"var(--ms-font)"});
 const t=designTexts("marvarid-satr");
 

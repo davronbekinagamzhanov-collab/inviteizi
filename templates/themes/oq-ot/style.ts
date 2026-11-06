@@ -2,7 +2,7 @@
 import localFont from "next/font/local";
 import { designVars } from "../types";
 
-const display = localFont({
+const display = localFont({ preload: false,
   variable: "--oo-display",
   src: [
     { path: "../../../assets/fonts/Lora-Regular.ttf", weight: "400 700", style: "normal" },
@@ -11,7 +11,7 @@ const display = localFont({
   display: "swap",
 });
 
-const body = localFont({src:[{path:"../../../assets/fonts/google/alegreyasans/AlegreyaSans-Regular.woff2",weight:"400",style:"normal"},{path:"../../../assets/fonts/google/alegreyasans/AlegreyaSans-Italic.woff2",weight:"400",style:"italic"},{path:"../../../assets/fonts/google/alegreyasans/AlegreyaSans-Medium.woff2",weight:"500",style:"normal"},{path:"../../../assets/fonts/google/alegreyasans/AlegreyaSans-MediumItalic.woff2",weight:"500",style:"italic"},{path:"../../../assets/fonts/google/alegreyasans/AlegreyaSans-Bold.woff2",weight:"700",style:"normal"},{path:"../../../assets/fonts/google/alegreyasans/AlegreyaSans-BoldItalic.woff2",weight:"700",style:"italic"}],display:"swap",variable:"--oo-body"});
+const body = localFont({ preload: false,src:[{path:"../../../assets/fonts/google/alegreyasans/AlegreyaSans-Regular.woff2",weight:"400",style:"normal"},{path:"../../../assets/fonts/google/alegreyasans/AlegreyaSans-Italic.woff2",weight:"400",style:"italic"},{path:"../../../assets/fonts/google/alegreyasans/AlegreyaSans-Medium.woff2",weight:"500",style:"normal"},{path:"../../../assets/fonts/google/alegreyasans/AlegreyaSans-MediumItalic.woff2",weight:"500",style:"italic"},{path:"../../../assets/fonts/google/alegreyasans/AlegreyaSans-Bold.woff2",weight:"700",style:"normal"},{path:"../../../assets/fonts/google/alegreyasans/AlegreyaSans-BoldItalic.woff2",weight:"700",style:"italic"}],display:"swap",variable:"--oo-body"});
 
 export const fontClasses = `${display.variable} ${body.variable}`;
 

@@ -15,8 +15,8 @@ import { Countdown } from "../../blocks/Countdown";
 import { MapButton } from "../../blocks/MapButton";
 import { designTexts } from "@/texts/uz-cyrl";
 
-const display=localFont({src:[{path:"../../../assets/fonts/google/notoserif/NotoSerif[wdth,wght].woff2",weight:"100.0 900.0",style:"normal"},{path:"../../../assets/fonts/google/notoserif/NotoSerif-Italic[wdth,wght].woff2",weight:"100.0 900.0",style:"italic"}],display:"swap",variable:"--sk-display"});
-const body=localFont({src:[{path:"../../../assets/fonts/google/notosans/NotoSans[wdth,wght].woff2",weight:"100.0 900.0",style:"normal"}],display:"swap",variable:"--sk-body"});
+const display=localFont({ preload: false,src:[{path:"../../../assets/fonts/google/notoserif/NotoSerif[wdth,wght].woff2",weight:"100.0 900.0",style:"normal"},{path:"../../../assets/fonts/google/notoserif/NotoSerif-Italic[wdth,wght].woff2",weight:"100.0 900.0",style:"italic"}],display:"swap",variable:"--sk-display"});
+const body=localFont({ preload: false,src:[{path:"../../../assets/fonts/google/notosans/NotoSans[wdth,wght].woff2",weight:"100.0 900.0",style:"normal"}],display:"swap",variable:"--sk-body"});
 const vars=designVars({primary:"#466e72",primaryDark:"#315157",gold:"#b09966",goldLight:"#e5d6b3",paper:"#faf5e9",ink:"#3e4d4d",muted:"#7e8881",accent:"#b1bcb4"},{display:"var(--sk-display)",accent:"var(--sk-display)",body:"var(--sk-body)"});
 const t=designTexts("samarqand-kitob");
 

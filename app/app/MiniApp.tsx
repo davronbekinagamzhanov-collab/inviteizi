@@ -4,6 +4,7 @@
  * Черновик сохраняется на сервере (закрыл — открыл — продолжает), заказ — тот же, что видит чат.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import type { AppDraft, AppOrder, AppSession, SubmitResult } from "@/bot/app/service";
 import type { Lang } from "@/lib/domain";
 import { validateForm, type FieldError, type FormInput } from "@/lib/order-rules";
@@ -14,17 +15,35 @@ import { appRu } from "@/texts/app-ru";
 import { appKk } from "@/texts/app-kk";
 import { api, ApiError } from "./ui/api";
 import { Catalog, Heart, type Chip } from "./ui/Catalog";
-import { emptyForm, Form } from "./ui/Form";
-import { Photos } from "./ui/Photos";
-import { Summary, type Track } from "./ui/Summary";
-import { Pay, Waiting } from "./ui/Pay";
+import { emptyForm } from "./ui/form-defaults";
+
+import type { Track } from "./ui/Summary";
+
 import { isQuiet } from "@/lib/quiet-hours";
-import { Orders } from "./ui/Orders";
+
 import { MainAction, TextsContext, Toast } from "./ui/shared";
-import { haptic, insideTelegram, setupTelegram, tg, useBackButton, useNativeMainVisible } from "./ui/telegram";
+import { haptic, initDataOf, insideTelegram, setupTelegram, tg, useBackButton, useNativeMainVisible } from "./ui/telegram";
 import { BackIcon, CloseIcon, FolderIcon, HelpIcon } from "./ui/icons";
-import { Help } from "./ui/Help";
+
+import { Boot } from "./ui/Boot";
 import s from "./app.module.css";
+
+// Первый экран — только каталог; остальные экраны догружаются, когда понадобятся (медленный интернет)
+const Form = dynamic(() => import("./ui/Form").then((m) => m.Form), { loading: Loading });
+const Photos = dynamic(() => import("./ui/Photos").then((m) => m.Photos), { loading: Loading });
+const Summary = dynamic(() => import("./ui/Summary").then((m) => m.Summary), { loading: Loading });
+const Pay = dynamic(() => import("./ui/Pay").then((m) => m.Pay), { loading: Loading });
+const Waiting = dynamic(() => import("./ui/Pay").then((m) => m.Waiting), { loading: Loading });
+const Orders = dynamic(() => import("./ui/Orders").then((m) => m.Orders), { loading: Loading });
+const Help = dynamic(() => import("./ui/Help").then((m) => m.Help));
+
+function Loading() {
+  return (
+    <div className={s.center} aria-busy="true">
+      <span className={s.bootBar} />
+    </div>
+  );
+}
 
 type Screen =
   | { name: "catalog" }
@@ -49,8 +68,37 @@ function namesOf(d: AppDraft) {
   return [f.groom, f.bride].filter(Boolean).join(" & ") || f.person || "";
 }
 
+/** Скрипт Telegram пришёл позже первого экрана — настраиваем его, как только появится */
+function waitTelegram() {
+  const id = setInterval(() => {
+    if (!tg()) return;
+    clearInterval(id);
+    setupTelegram();
+  }, 250);
+  setTimeout(() => clearInterval(id), 60_000);
+}
+
+function guessLang(): Lang {
+  try {
+    const user = JSON.parse(new URLSearchParams(initDataOf()).get("user") ?? "{}") as { language_code?: string };
+    return user.language_code?.startsWith("ru") ? "ru" : "uz";
+  } catch {
+    return "uz";
+  }
+}
+
+/** Через 8 с загрузки — «Интернет секин, кутинг…» и «Қайта уриниш» */
+const SLOW_MS = 8000;
+
 export default function MiniApp({ fontClass }: { fontClass: string }) {
   const [phase, setPhase] = useState<Phase>("boot");
+  const [slow, setSlow] = useState(false);
+  const [offline, setOffline] = useState(false);
+  useEffect(() => {
+    if (phase !== "boot") return;
+    const id = setTimeout(() => setSlow(true), SLOW_MS);
+    return () => clearTimeout(id);
+  }, [phase]);
   const [session, setSession] = useState<AppSession | null>(null);
   const [lang, setLang] = useState<Lang>("uz");
   const T = lang === "ru" ? appRu : lang === "kk" ? appKk : appUz;
@@ -76,10 +124,14 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
 
   // ── Запуск ──
   const boot = useCallback(async () => {
-    // Скрипт Telegram грузится после страницы: ждём до 10 с (медленный интернет)
-    for (let i = 0; i < 100 && !tg(); i++) await new Promise((r) => setTimeout(r, 100));
+    // Подпись Telegram есть в адресе — сразу идём на сервер; скрипт Telegram догрузится сам (кнопки, вибро).
+    // Без подписи в адресе ждём скрипт до 10 с (старые клиенты)
+    if (!initDataOf()) for (let i = 0; i < 100 && !tg(); i++) await new Promise((r) => setTimeout(r, 100));
     setupTelegram();
-    if (!tg()?.initData) return setPhase("noTelegram");
+    if (!tg()) waitTelegram();
+    if (!initDataOf()) return setPhase("noTelegram");
+    // До ответа сервера — язык Telegram (экран загрузки уже на нём)
+    setLang(guessLang());
     try {
       const sess = await api<AppSession>("session");
       setSession(sess);
@@ -95,6 +147,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
       else if (want && getDesign(want)) setStack([{ name: "catalog" }, { name: "view", id: want }]);
       setPhase("ready");
     } catch (e) {
+      setOffline(e instanceof ApiError && e.code === "offline");
       setPhase(e instanceof ApiError && e.code === "auth" ? "noTelegram" : "error");
     }
   }, []);
@@ -429,13 +482,13 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
         )}
 
         <main className={s.wrap}>
-          {phase === "boot" && <p className={s.center}>{T.loading}</p>}
+          {phase === "boot" && <Boot slow={slow} onRetry={() => window.location.reload()} />}
           {phase === "noTelegram" && <p className={s.center}>{T.openInTelegram}</p>}
           {phase === "error" && (
             <div className={s.center}>
               <div>
-                <p>{T.serverError}</p>
-                <button type="button" className={s.btn} onClick={() => { setPhase("boot"); boot(); }}>
+                <p>{offline ? T.offline : T.serverError}</p>
+                <button type="button" className={s.btn} onClick={() => { setSlow(false); setPhase("boot"); boot(); }}>
                   {T.retry}
                 </button>
               </div>

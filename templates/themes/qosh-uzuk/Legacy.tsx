@@ -12,7 +12,7 @@ import {MapButton} from "../../blocks/MapButton";
 import {Calendar} from "../../blocks/Calendar";
 import {designTexts} from "@/texts/uz-cyrl";
 import styles from "./opening.module.css";
-const font=localFont({src:"../../../assets/fonts/PTSerif-Regular.ttf",variable:"--qu-font",display:"swap"});
+const font=localFont({ preload: false,src:"../../../assets/fonts/PTSerif-Regular.ttf",variable:"--qu-font",display:"swap"});
 const vars=designVars({primary:"#805a31",primaryDark:"#5f4123",gold:"#b08c51",goldLight:"#ead7af",paper:"#fcf6e9",ink:"#554631",muted:"#736149"},{display:"var(--qu-font)",accent:"var(--qu-font)",body:"var(--qu-font)"});
 const t=designTexts("qosh-uzuk");
 export default function Design({data,mode}:TemplateProps){

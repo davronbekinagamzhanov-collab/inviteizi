@@ -11,7 +11,7 @@ import {Countdown} from "../../blocks/Countdown";
 import {Reveal} from "../../blocks/Reveal";
 import {designTexts} from "@/texts/uz-cyrl";
 
-const font=localFont({src:[{path:"../../../assets/fonts/Lora-Regular.ttf",style:"normal"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--ud-type",display:"swap"});
+const font=localFont({ preload: false,src:[{path:"../../../assets/fonts/Lora-Regular.ttf",style:"normal"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--ud-type",display:"swap"});
 const vars=designVars({primary:"#8b674f",primaryDark:"#634a38",gold:"#b69a65",goldLight:"#ead7b2",paper:"#fcf7ec",ink:"#544b3e",muted:"#89836e"},{display:"var(--ud-type)",accent:"var(--ud-type)",body:"var(--ud-type)"});
 const t=designTexts("umr-daraxti");
 

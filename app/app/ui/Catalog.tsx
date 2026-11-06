@@ -6,7 +6,7 @@ import { activeDesigns, PRICES, thumbOf, type Design } from "@/templates/registr
 import { t as inv } from "@/texts/uz-cyrl";
 import { useT } from "./shared";
 import { haptic } from "./telegram";
-import { CancelButton } from "./Orders";
+import { CancelButton } from "./Cancel";
 import { useHoldTips, type HoldProps } from "./hold";
 import { CameraIcon, CloseIcon, InfoIcon } from "./icons";
 import type { Format } from "@/lib/domain";

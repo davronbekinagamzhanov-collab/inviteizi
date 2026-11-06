@@ -12,7 +12,7 @@ import {MapButton} from "../../blocks/MapButton";
 import {Calendar} from "../../blocks/Calendar";
 import {designTexts} from "@/texts/uz-cyrl";
 import styles from "./opening.module.css";
-const font=localFont({src:[{path:"../../../assets/fonts/Lora-Regular.ttf"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--skl-font",display:"swap"});
+const font=localFont({ preload: false,src:[{path:"../../../assets/fonts/Lora-Regular.ttf"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--skl-font",display:"swap"});
 const vars=designVars({primary:"#795545",primaryDark:"#593e32",gold:"#b18e71",goldLight:"#e7ceb6",paper:"#fcf5ec",ink:"#56473d",muted:"#715e54"},{display:"var(--skl-font)",accent:"var(--skl-font)",body:"var(--skl-font)"});
 const t=designTexts("saodat-kaliti");
 export default function Design({data,mode}:TemplateProps){

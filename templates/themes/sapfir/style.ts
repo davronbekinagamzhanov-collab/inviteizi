@@ -3,9 +3,9 @@ import localFont from "next/font/local";
 import { designVars } from "../types";
 
 // Playfair Display без cyrillic-ext (нет қ ғ ҳ), поэтому новая версия семейства — Playfair
-const display = localFont({src:[{path:"../../../assets/fonts/google/playfair/Playfair[opsz,wdth,wght].woff2",weight:"300.0 900.0",style:"normal"},{path:"../../../assets/fonts/google/playfair/Playfair-Italic[opsz,wdth,wght].woff2",weight:"300.0 900.0",style:"italic"}],display:"swap",variable:"--sf-display"});
+const display = localFont({ preload: false,src:[{path:"../../../assets/fonts/google/playfair/Playfair[opsz,wdth,wght].woff2",weight:"300.0 900.0",style:"normal"},{path:"../../../assets/fonts/google/playfair/Playfair-Italic[opsz,wdth,wght].woff2",weight:"300.0 900.0",style:"italic"}],display:"swap",variable:"--sf-display"});
 
-const body = localFont({
+const body = localFont({ preload: false,
   variable: "--sf-body",
   src: [
     { path: "../../../assets/fonts/Lora-Regular.ttf", weight: "400 700", style: "normal" },

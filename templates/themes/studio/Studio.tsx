@@ -14,7 +14,7 @@ import {Words,useFitWords} from '../../blocks/FitWords';
 import {designTexts} from '@/texts/uz-cyrl';
 import {monogram} from '../premium/monogram';
 import s from './studio.module.css';
-const serif=localFont({src:[{path:'../../../assets/fonts/Lora-Regular.ttf',weight:'400 700'},{path:'../../../assets/fonts/Lora-Italic.ttf',weight:'400 700',style:'italic'}],variable:'--studio-serif',display:'swap'});
+const serif=localFont({ preload: false,src:[{path:'../../../assets/fonts/Lora-Regular.ttf',weight:'400 700'},{path:'../../../assets/fonts/Lora-Italic.ttf',weight:'400 700',style:'italic'}],variable:'--studio-serif',display:'swap'});
 const vars=designVars({primary:'#6c604a',primaryDark:'#3f4439',gold:'#aa9164',goldLight:'#dfd1b6',paper:'#f8f4e9',ink:'#353c34',muted:'#6e7267'},{display:'var(--studio-serif)',accent:'var(--studio-serif)',body:'var(--studio-serif)'});
 export type StudioId='ipak-romol'|'rishton-koshin'|'marvarid-satr'|'dutor-navosi'|'kumush-taroq'|'sunnat-muqova'|'sunnat-nasab'|'sahar-ipagi'|'sahar-maktubi'|'umr-sahifalari'|'ehtirom-kartasi';
 const looks:Record<StudioId,string>={'ipak-romol':'editorial','rishton-koshin':'heritage','marvarid-satr':'blossom','dutor-navosi':'voices','kumush-taroq':'ceremony','sunnat-muqova':'sash','sunnat-nasab':'lineage','sahar-ipagi':'dawn','sahar-maktubi':'morning','umr-sahifalari':'chapters','ehtirom-kartasi':'honour'};

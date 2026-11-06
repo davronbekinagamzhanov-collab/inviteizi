@@ -1485,3 +1485,60 @@ textarea.input {
   color: var(--gold-deep);
   font-weight: 700;
 }
+
+/* ── Первый экран загрузки (ui/Boot.tsx) ── */
+.boot {
+  min-height: 70svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  text-align: center;
+}
+.bootLogo {
+  margin: 0;
+  font-family: var(--font-brand), Georgia, serif;
+  font-size: 40px;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+.bootLogo b {
+  color: var(--gold);
+  font-weight: 600;
+}
+.bootBar {
+  position: relative;
+  width: 120px;
+  height: 3px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--gold-soft);
+}
+.bootBar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  border-radius: 3px;
+  background: var(--gold);
+  animation: bootSlide 1.2s var(--ease) infinite;
+}
+@keyframes bootSlide {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bootBar::after {
+    animation: breathe 1.6s ease-in-out infinite;
+  }
+}
+.bootText {
+  margin: 0;
+  color: var(--muted);
+  font-size: 16px;
+}

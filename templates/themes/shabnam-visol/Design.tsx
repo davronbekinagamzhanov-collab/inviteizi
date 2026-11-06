@@ -12,7 +12,7 @@ import {Reveal} from "../../blocks/Reveal";
 import {Countdown} from "../../blocks/Countdown";
 import {designTexts} from "@/texts/uz-cyrl";
 import styles from "./opening.module.css";
-const font=localFont({src:[{path:"../../../assets/fonts/Lora-Regular.ttf"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--sv-font",display:"swap"});
+const font=localFont({ preload: false,src:[{path:"../../../assets/fonts/Lora-Regular.ttf"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--sv-font",display:"swap"});
 const vars=designVars({primary:"#466966",primaryDark:"#365b5b",gold:"#a89a78",goldLight:"#e0d9bf",paper:"#f7f8f0",ink:"#455653",muted:"#56675f"},{display:"var(--sv-font)",accent:"var(--sv-font)",body:"var(--sv-font)"});
 const t=designTexts("shabnam-visol");
 /** A dew drop falls onto water; three finite ripples spread as the translucent ground clears. */

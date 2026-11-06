@@ -12,7 +12,7 @@ import {Reveal} from "../../blocks/Reveal";
 import {Calendar} from "../../blocks/Calendar";
 import {designTexts} from "@/texts/uz-cyrl";
 import styles from "./opening.module.css";
-const font=localFont({src:"../../../assets/fonts/PTSerif-Regular.ttf",variable:"--vs-font",display:"swap"});
+const font=localFont({ preload: false,src:"../../../assets/fonts/PTSerif-Regular.ttf",variable:"--vs-font",display:"swap"});
 const vars=designVars({primary:"#6b603d",primaryDark:"#584d30",gold:"#af9863",goldLight:"#e5d7ad",paper:"#faf6e9",ink:"#504c3a",muted:"#6c6750"},{display:"var(--vs-font)",accent:"var(--vs-font)",body:"var(--vs-font)"});
 const t=designTexts("visol-soati");
 /** The hands of a brass dial set themselves to the submitted event time, then reveal the invitation. */

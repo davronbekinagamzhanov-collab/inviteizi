@@ -12,7 +12,7 @@ import {MapButton} from "../../blocks/MapButton";
 import {Calendar} from "../../blocks/Calendar";
 import {designTexts} from "@/texts/uz-cyrl";
 import styles from "./opening.module.css";
-const font=localFont({src:[{path:"../../../assets/fonts/Lora-Regular.ttf"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--sd-font",display:"swap"});
+const font=localFont({ preload: false,src:[{path:"../../../assets/fonts/Lora-Regular.ttf"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--sd-font",display:"swap"});
 const vars=designVars({primary:"#78594e",primaryDark:"#5d4238",gold:"#b3976d",goldLight:"#e9d8bc",paper:"#fcf7ee",ink:"#56463e",muted:"#726353"},{display:"var(--sd-font)",accent:"var(--sd-font)",body:"var(--sd-font)"});
 const t=designTexts("siyoh-duo");
 /** A finite pen-drawn arabesque, then ink becoming translucent over the invitation. No moving shutters. */

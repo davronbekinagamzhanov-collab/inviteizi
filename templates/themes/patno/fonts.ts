@@ -1,7 +1,7 @@
 import localFont from "next/font/local";
 
 /** «Пятно»: текст — Gentium Book Plus (ў қ ғ ҳ есть); имена — Cormorant Garamond капсом из natural/fonts (--n-serif) */
-export const gentium = localFont({
+export const gentium = localFont({ preload: false,
   src: [
     { path: "../../../assets/fonts/google/gentiumbookplus/GentiumBookPlus-Regular.woff2", style: "normal", weight: "400" },
     { path: "../../../assets/fonts/google/gentiumbookplus/GentiumBookPlus-Italic.woff2", style: "italic", weight: "400" },

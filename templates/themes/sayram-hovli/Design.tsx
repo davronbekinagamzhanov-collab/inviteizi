@@ -11,7 +11,7 @@ import {Countdown} from "../../blocks/Countdown";
 import {Reveal} from "../../blocks/Reveal";
 import {designTexts} from "@/texts/uz-cyrl";
 
-const font=localFont({src:[{path:"../../../assets/fonts/Lora-Regular.ttf",style:"normal"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--sh-type",display:"swap"});
+const font=localFont({ preload: false,src:[{path:"../../../assets/fonts/Lora-Regular.ttf",style:"normal"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--sh-type",display:"swap"});
 const vars=designVars({primary:"#58786d",primaryDark:"#35594f",gold:"#bb976e",goldLight:"#e3cba9",paper:"#fbf8ee",ink:"#3e5049",muted:"#7d8980"},{display:"var(--sh-type)",accent:"var(--sh-type)",body:"var(--sh-type)"});
 const t=designTexts("sayram-hovli");
 

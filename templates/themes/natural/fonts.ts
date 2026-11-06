@@ -1,7 +1,7 @@
 import localFont from "next/font/local";
 
 /** Строгие заголовки и имена: Cormorant Garamond (ў қ ғ ҳ есть) */
-export const serif = localFont({
+export const serif = localFont({ preload: false,
   src: [
     { path: "../../../assets/fonts/google/cormorantgaramond/CormorantGaramond[wght].woff2", style: "normal", weight: "300 700" },
     { path: "../../../assets/fonts/google/cormorantgaramond/CormorantGaramond-Italic[wght].woff2", style: "italic", weight: "300 700" },
@@ -11,7 +11,7 @@ export const serif = localFont({
 });
 
 /** Текст для чтения (пожилым гостям тоже): Lora */
-export const text = localFont({
+export const text = localFont({ preload: false,
   src: [
     { path: "../../../assets/fonts/Lora-Regular.ttf", style: "normal", weight: "400 700" },
     { path: "../../../assets/fonts/Lora-Italic.ttf", style: "italic", weight: "400 700" },
@@ -21,14 +21,14 @@ export const text = localFont({
 });
 
 /** Рукописные акценты: Great Vibes (нет қ ғ ҳ) */
-export const script = localFont({
+export const script = localFont({ preload: false,
   src: "../../../assets/fonts/google/greatvibes/GreatVibes-Regular.woff2",
   display: "swap",
   variable: "--n-script",
 });
 
 /** Запасной рукописный с полным узбекским алфавитом: Bad Script */
-export const scriptAlt = localFont({
+export const scriptAlt = localFont({ preload: false,
   src: "../../../assets/fonts/google/badscript/BadScript-Regular.woff2",
   display: "swap",
   variable: "--n-script-alt",

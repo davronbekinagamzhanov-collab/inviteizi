@@ -46,6 +46,21 @@ declare global {
 
 export const tg = (): WebApp | undefined => (typeof window === "undefined" ? undefined : window.Telegram?.WebApp);
 
+/**
+ * Подписанные данные Telegram приходят и в адресе (#tgWebAppData=…). Читаем их сразу при загрузке модуля:
+ * приложение не ждёт telegram-web-app.js (на медленном интернете он грузится секунды, а бывает — не грузится).
+ * Сервер всё равно проверяет подпись.
+ */
+const hashInitData = (() => {
+  if (typeof window === "undefined") return "";
+  try {
+    return new URLSearchParams(window.location.hash.slice(1)).get("tgWebAppData") ?? "";
+  } catch {
+    return "";
+  }
+})();
+export const initDataOf = () => tg()?.initData || hashInitData;
+
 /** Внутри Telegram (есть подписанные данные и native-кнопки) */
 export const insideTelegram = () => {
   const w = tg();

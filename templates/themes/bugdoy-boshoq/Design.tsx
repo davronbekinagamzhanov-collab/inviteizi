@@ -6,7 +6,7 @@ import {InvitationShell} from "../../blocks/InvitationShell";
 import {Words,useFitWords} from "../../blocks/FitWords";
 import {MapButton} from "../../blocks/MapButton";
 import {designTexts} from "@/texts/uz-cyrl";
-const font=localFont({src:"../../../assets/fonts/PTSerif-Regular.ttf",variable:"--bb-font",display:"swap"});
+const font=localFont({ preload: false,src:"../../../assets/fonts/PTSerif-Regular.ttf",variable:"--bb-font",display:"swap"});
 const vars=designVars({primary:"#8b7444",primaryDark:"#665632",gold:"#baa578",goldLight:"#e9d9b4",paper:"#fcf8eb",ink:"#59513d",muted:"#89836a"},{display:"var(--bb-font)",accent:"var(--bb-font)",body:"var(--bb-font)"});
 const t=designTexts("bugdoy-boshoq");
 

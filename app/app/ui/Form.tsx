@@ -13,23 +13,11 @@ import { Field, Section, useT } from "./shared";
 import { PreviewCard } from "./Preview";
 import { TextChoice } from "./TextChoice";
 import { haptic } from "./telegram";
+import { DEFAULT_TIME } from "./form-defaults";
+export { emptyForm } from "./form-defaults";
 import s from "../app.module.css";
 
 /** Вместо пустого «--:--» — обычное время тадбира (клиент поменяет одним касанием) */
-const DEFAULT_TIME: Record<EventKind, string> = {
-  nikohBazm: "18:00",
-  nahorgi: "06:00",
-  sunnatBazm: "18:00",
-  yubileyBazm: "18:00",
-  kelinSalom: "09:00",
-  nikohMarosim: "14:00",
-};
-
-export function emptyForm(occasion: Occasion): FormInput {
-  const kind = MAIN_EVENT[occasion];
-  return { occasion, relation: RELATIONS[occasion][0], events: [{ kind, time: DEFAULT_TIME[kind] }] } as FormInput;
-}
-
 type Props = {
   design: Design;
   form: FormInput;

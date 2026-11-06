@@ -12,7 +12,7 @@ import {Words,useFitWords} from '../../blocks/FitWords';
 import {designTexts} from '@/texts/uz-cyrl';
 import {monogram} from './monogram';
 import s from './premium.module.css';
-const font=localFont({src:[{path:'../../../assets/fonts/Lora-Regular.ttf'},{path:'../../../assets/fonts/Lora-Italic.ttf',style:'italic'}],display:'swap',variable:'--premium-serif'});
+const font=localFont({ preload: false,src:[{path:'../../../assets/fonts/Lora-Regular.ttf'},{path:'../../../assets/fonts/Lora-Italic.ttf',style:'italic'}],display:'swap',variable:'--premium-serif'});
 export type Concept='kabutar-salom'|'yelpigich-ziynat'|'samarqand-kitob'|'qosh-uzuk'|'saodat-kaliti';
 const concepts: Record<Concept,string>={'kabutar-salom':'botanical','yelpigich-ziynat':'folio','samarqand-kitob':'portal','qosh-uzuk':'rings','saodat-kaliti':'envelope'};
 const vars=designVars({primary:'#6c674a',primaryDark:'#424433',gold:'#a28a57',goldLight:'#e2d7bc',paper:'#f9f5ec',ink:'#333a32',muted:'#6a6c60'},{display:'var(--premium-serif)',accent:'var(--premium-serif)',body:'var(--premium-serif)'});

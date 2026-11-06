@@ -15,8 +15,8 @@ import { Countdown } from "../../blocks/Countdown";
 import { MapButton } from "../../blocks/MapButton";
 import { designTexts } from "@/texts/uz-cyrl";
 
-const display=localFont({src:[{path:"../../../assets/fonts/google/vollkorn/Vollkorn[wght].woff2",weight:"400.0 900.0",style:"normal"},{path:"../../../assets/fonts/google/vollkorn/Vollkorn-Italic[wght].woff2",weight:"400.0 900.0",style:"italic"}],display:"swap",variable:"--nm-display"});
-const body=localFont({src:[{path:"../../../assets/fonts/google/ptserif/PT_Serif-Web-Regular.woff2",weight:"400",style:"normal"}],display:"swap",variable:"--nm-body"});
+const display=localFont({ preload: false,src:[{path:"../../../assets/fonts/google/vollkorn/Vollkorn[wght].woff2",weight:"400.0 900.0",style:"normal"},{path:"../../../assets/fonts/google/vollkorn/Vollkorn-Italic[wght].woff2",weight:"400.0 900.0",style:"italic"}],display:"swap",variable:"--nm-display"});
+const body=localFont({ preload: false,src:[{path:"../../../assets/fonts/google/ptserif/PT_Serif-Web-Regular.woff2",weight:"400",style:"normal"}],display:"swap",variable:"--nm-body"});
 const vars=designVars({primary:"#94683e",primaryDark:"#65492f",gold:"#b68b51",goldLight:"#e9d4a8",paper:"#fcf5e6",ink:"#564632",muted:"#8d795f",accent:"#b37f54"},{display:"var(--nm-display)",accent:"var(--nm-display)",body:"var(--nm-body)"});
 const t=designTexts("non-muhr");
 

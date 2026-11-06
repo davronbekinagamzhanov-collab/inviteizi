@@ -13,8 +13,8 @@ import { Countdown } from "../../blocks/Countdown";
 import { MapButton } from "../../blocks/MapButton";
 import { designTexts,photoAttributions } from "@/texts/uz-cyrl";
 
-const display=localFont({src:[{path:"../../../assets/fonts/google/alegreya/Alegreya[wght].woff2",weight:"400.0 900.0",style:"normal"},{path:"../../../assets/fonts/google/alegreya/Alegreya-Italic[wght].woff2",weight:"400.0 900.0",style:"italic"}],display:"swap",variable:"--tc-display"});
-const body=localFont({src:[{path:"../../../assets/fonts/google/ptsans/PT_Sans-Web-Regular.woff2",weight:"400",style:"normal"}],display:"swap",variable:"--tc-body"});
+const display=localFont({ preload: false,src:[{path:"../../../assets/fonts/google/alegreya/Alegreya[wght].woff2",weight:"400.0 900.0",style:"normal"},{path:"../../../assets/fonts/google/alegreya/Alegreya-Italic[wght].woff2",weight:"400.0 900.0",style:"italic"}],display:"swap",variable:"--tc-display"});
+const body=localFont({ preload: false,src:[{path:"../../../assets/fonts/google/ptsans/PT_Sans-Web-Regular.woff2",weight:"400",style:"normal"}],display:"swap",variable:"--tc-body"});
 const vars=designVars({primary:"#455f85",primaryDark:"#2e4669",gold:"#b6a068",goldLight:"#e3d7b0",paper:"#faf8ed",ink:"#414d5b",muted:"#7c8790",accent:"#a8b9c5"},{display:"var(--tc-display)",accent:"var(--tc-display)",body:"var(--tc-body)"});
 const t=designTexts("tonggi-choy"); const credit=photoAttributions["tonggi-choy"]!;
 

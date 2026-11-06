@@ -8,7 +8,7 @@ import {MapButton} from "../../blocks/MapButton";
 import {Reveal} from "../../blocks/Reveal";
 import {Countdown} from "../../blocks/Countdown";
 import {designTexts} from "@/texts/uz-cyrl";
-const font=localFont({src:[{path:"../../../assets/fonts/Lora-Regular.ttf"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--kt-font",display:"swap"});
+const font=localFont({ preload: false,src:[{path:"../../../assets/fonts/Lora-Regular.ttf"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--kt-font",display:"swap"});
 const vars=designVars({primary:"#56636c",primaryDark:"#46515a",gold:"#a1a7a2",goldLight:"#e0e1d9",paper:"#f8f7f0",ink:"#474f55",muted:"#626970"},{display:"var(--kt-font)",accent:"var(--kt-font)",body:"var(--kt-font)"});
 const t=designTexts("kumush-taroq");
 /** An engraved silver bridal comb. Pearl-like pins and oval engraving lines, no gem/velvet recolour. */

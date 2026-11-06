@@ -1,6 +1,6 @@
 "use client";
 /** Запросы приложения: в каждом — initData (сервер проверяет подпись). Фото сжимает телефон до отправки */
-import { tg } from "./telegram";
+import { initDataOf } from "./telegram";
 
 export class ApiError extends Error {
   constructor(public code: string, public status = 0) {
@@ -8,19 +8,26 @@ export class ApiError extends Error {
   }
 }
 
-const initData = () => tg()?.initData ?? "";
+const initData = initDataOf;
+/** Запрос не висит вечно: 25 с — и честная ошибка с «Қайта уриниш» */
+const TIMEOUT_MS = 25_000;
 
 export async function api<T>(action: string, body: Record<string, unknown> = {}): Promise<T> {
   let res: Response;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
   try {
     res = await fetch("/api/app", {
       method: "POST",
       headers: { "content-type": "application/json", "x-tg-init-data": initData() },
       body: JSON.stringify({ action, ...body }),
       cache: "no-store",
+      signal: ctrl.signal,
     });
   } catch {
     throw new ApiError("offline");
+  } finally {
+    clearTimeout(timer);
   }
   const data = (await res.json().catch(() => ({ error: "server" }))) as T & { error?: string };
   if (res.status === 401) throw new ApiError("auth", 401);

@@ -12,8 +12,8 @@ import { Countdown } from "../../blocks/Countdown";
 import { MapButton } from "../../blocks/MapButton";
 import { designTexts } from "@/texts/uz-cyrl";
 
-const display=localFont({src:[{path:"../../../assets/fonts/google/cormorantgaramond/CormorantGaramond[wght].woff2",weight:"300.0 700.0",style:"normal"},{path:"../../../assets/fonts/google/cormorantgaramond/CormorantGaramond-Italic[wght].woff2",weight:"300.0 700.0",style:"italic"}],display:"swap",variable:"--sb-display"});
-const body=localFont({src:[{path:"../../../assets/fonts/google/ptserif/PT_Serif-Web-Regular.woff2",weight:"400",style:"normal"}],display:"swap",variable:"--sb-body"});
+const display=localFont({ preload: false,src:[{path:"../../../assets/fonts/google/cormorantgaramond/CormorantGaramond[wght].woff2",weight:"300.0 700.0",style:"normal"},{path:"../../../assets/fonts/google/cormorantgaramond/CormorantGaramond-Italic[wght].woff2",weight:"300.0 700.0",style:"italic"}],display:"swap",variable:"--sb-display"});
+const body=localFont({ preload: false,src:[{path:"../../../assets/fonts/google/ptserif/PT_Serif-Web-Regular.woff2",weight:"400",style:"normal"}],display:"swap",variable:"--sb-body"});
 const vars=designVars({primary:"#315c4f",primaryDark:"#26483e",gold:"#b39a64",goldLight:"#eadbb6",paper:"#faf5e9",ink:"#344b41",muted:"#798274",accent:"#beae85"},{display:"var(--sb-display)",accent:"var(--sb-display)",body:"var(--sb-body)"});
 const t=designTexts("shohona-baxmal");
 

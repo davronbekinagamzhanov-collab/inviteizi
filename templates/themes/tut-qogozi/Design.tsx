@@ -8,7 +8,7 @@ import {Reveal} from "../../blocks/Reveal";
 import {MapButton} from "../../blocks/MapButton";
 import {Calendar} from "../../blocks/Calendar";
 import {designTexts} from "@/texts/uz-cyrl";
-const font=localFont({src:"../../../assets/fonts/PTSerif-Regular.ttf",variable:"--tq-font",display:"swap"});
+const font=localFont({ preload: false,src:"../../../assets/fonts/PTSerif-Regular.ttf",variable:"--tq-font",display:"swap"});
 const vars=designVars({primary:"#6b5b3c",primaryDark:"#4e422c",gold:"#aa9975",goldLight:"#e4d6b5",paper:"#fbf7ed",ink:"#514a39",muted:"#6c624c"},{display:"var(--tq-font)",accent:"var(--tq-font)",body:"var(--tq-font)"});
 const t=designTexts("tut-qogozi");
 /** Deckled mulberry paper, quiet fibres and inset text. An artisan sheet, not an opening book. */

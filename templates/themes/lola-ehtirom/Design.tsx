@@ -10,7 +10,7 @@ import {Countdown} from "../../blocks/Countdown";
 import {PhotoBackdrop} from "../../blocks/PhotoBackdrop";
 import {Reveal} from "../../blocks/Reveal";
 import {designTexts} from "@/texts/uz-cyrl";
-const font=localFont({src:[{path:"../../../assets/fonts/Lora-Regular.ttf",style:"normal"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--le-font",display:"swap"});
+const font=localFont({ preload: false,src:[{path:"../../../assets/fonts/Lora-Regular.ttf",style:"normal"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--le-font",display:"swap"});
 const vars=designVars({primary:"#846b81",primaryDark:"#635260",gold:"#b3a071",goldLight:"#e5d7b8",paper:"#fcf7ef",ink:"#594f56",muted:"#93878e"},{display:"var(--le-font)",accent:"var(--le-font)",body:"var(--le-font)"});
 const t=designTexts("lola-ehtirom");
 

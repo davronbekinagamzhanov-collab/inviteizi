@@ -8,7 +8,7 @@ import {MapButton} from "../../blocks/MapButton";
 import {Reveal} from "../../blocks/Reveal";
 import {Calendar} from "../../blocks/Calendar";
 import {designTexts} from "@/texts/uz-cyrl";
-const font=localFont({src:[{path:"../../../assets/fonts/Lora-Regular.ttf"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--ms-font",display:"swap"});
+const font=localFont({ preload: false,src:[{path:"../../../assets/fonts/Lora-Regular.ttf"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--ms-font",display:"swap"});
 const vars=designVars({primary:"#59654d",primaryDark:"#48523e",gold:"#a38d68",goldLight:"#e7d7b9",paper:"#f9f5e9",ink:"#4b5042",muted:"#636a57"},{display:"var(--ms-font)",accent:"var(--ms-font)",body:"var(--ms-font)"});
 const t=designTexts("minor-satr");
 /** A quiet brick tower and a long architectural register. No opening gate or portal. */
