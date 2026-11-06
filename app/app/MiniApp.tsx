@@ -166,14 +166,22 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
   // ── Навигация ──
   const go = useCallback((sc: Screen) => {
     setBigPreview(false);
-    setStack((st) => [...st, sc]);
+    // Двойное нажатие не кладёт тот же экран в историю дважды (иначе «назад» нужно жать два раза)
+    setStack((st) => (JSON.stringify(st[st.length - 1]) === JSON.stringify(sc) ? st : [...st, sc]));
     window.scrollTo({ top: 0 });
   }, []);
+  // Правка из итога/проверки: «назад» без «Сақлаш» возвращает данные как были (итог = НАМУНА)
+  const editSnapshot = useRef<AppDraft | null>(null);
   const back = useCallback(() => {
     setBigPreview(false);
+    if (screen.name === "form" && screen.ret && editSnapshot.current) {
+      setDraft(editSnapshot.current);
+      setErrors([]);
+      editSnapshot.current = null;
+    }
     setStack((st) => (st.length > 1 ? st.slice(0, -1) : st));
     window.scrollTo({ top: 0 });
-  }, []);
+  }, [screen]);
   const reset = useCallback((list: Screen[]) => {
     setBigPreview(false);
     setStack(list);
@@ -331,7 +339,10 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
     if (!o) return;
     haptic.ok();
     // Правка из итога/проверки: НАМУНА обновлена (та же ссылка) — возвращаемся туда
-    if (screen.name === "form" && screen.ret) return back();
+    if (screen.name === "form" && screen.ret) {
+      editSnapshot.current = null;
+      return back();
+    }
     go(design.clientPhotos ? { name: "photos" } : { name: "summary" });
   }
 
@@ -357,13 +368,17 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
   async function editData(o?: AppOrder) {
     if (busy) return;
     haptic.tap();
-    if (!o || draft?.orderId === o.id) return go({ name: "form", ret: true });
+    if (!o || draft?.orderId === o.id) {
+      editSnapshot.current = draft;
+      return go({ name: "form", ret: true });
+    }
     setBusy(true);
     try {
       const r = await api<{ draft?: AppDraft; error?: string }>("edit", { orderId: o.id });
       if (!r.draft) return setToast(T.orders.closedEdit);
       setDraft(r.draft);
       setErrors([]);
+      editSnapshot.current = r.draft;
       go({ name: "form", ret: true });
     } catch {
       setToast(T.serverError);
