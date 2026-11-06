@@ -10,7 +10,7 @@ import { managerName } from "@/lib/roles";
 import { activeDesigns } from "@/templates/registry";
 import { staff } from "@/texts/bot-ru";
 import type { Deps } from "../flow/types";
-import { panelData, SLEEP_AFTER_MS } from "../flow/partners";
+import { panelData, panelDataWithStaff, SLEEP_AFTER_MS, staffOrdersWithin } from "../flow/partners";
 import { rangeOf } from "../flow/stats";
 import { sendExport } from "../flow/export";
 import { designName } from "../flow/util";
@@ -46,6 +46,8 @@ export type OwnerOrder = {
 export type OwnerPanel = {
   period: OwnerPeriod;
   label: string;
+  /** Тестовые заказы сотрудников за период: в цифры не идут, строкой под карточками */
+  testOrders: number;
   cards: { paid: number; revenue: number; namuna: number; conversion: number | null; makers: number; payers: number; due: number };
   orders: OwnerOrder[];
   ordersTotal: number;
@@ -79,8 +81,9 @@ export async function ownerPanel(deps: Deps, userId: number, periodArg: unknown)
   const now = deps.now();
   const r = rangeOf(period, now);
   const inside = (d: Date) => +d >= +r.from && +d < +r.to;
-  const s = await panelData(deps);
+  const { s, staffOrders } = await panelDataWithStaff(deps);
   const managers = await deps.repo.listManagers();
+  const testOrders = staffOrdersWithin(staffOrders, r.from, r.to);
 
   const paid = s.orders.filter((o) => isPaid(o) && inside(paidAt(o)));
   const created = s.orders.filter((o) => inside(o.createdAt));
@@ -119,6 +122,7 @@ export async function ownerPanel(deps: Deps, userId: number, periodArg: unknown)
   return {
     period,
     label: r.label,
+    testOrders,
     cards: {
       paid: paid.length,
       revenue: paid.reduce((n, o) => n + o.amount, 0),

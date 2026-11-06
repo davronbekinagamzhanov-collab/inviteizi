@@ -599,6 +599,7 @@ export const staff = {
     sections: { money: "💰 Деньги", pt: "🤝 Партнёры", ds: "🎨 Дизайны", fn: "📉 Где уходят" } as Record<string, string>,
     title: (range: string) => `📊 Статистика · ${range}`,
     titleNet: (range: string) => `📊 Моя сеть · ${range}`,
+    staffExcluded: (n: number) => `ℹ️ Тестовые заказы админов не учитываются (${n})`,
     range: { d: (date: string) => `сегодня, ${date}`, w: "7 дней", m: (month: string) => month, y: (year: string) => `${year} год` },
     paid: (n: number, sum: string) => `Оплат: ${n} · ${sum}`,
     average: (sum: string) => `Средний чек: ${sum}`,

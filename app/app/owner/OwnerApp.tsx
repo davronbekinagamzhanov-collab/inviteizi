@@ -160,6 +160,7 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
             <strong>{money(c.due)}</strong>
           </div>
         </section>
+        {data.testOrders > 0 && <p className={s.hint} data-test-orders>Тестовые заказы админов не учитываются ({data.testOrders})</p>}
 
         <nav className={s.tabs} role="tablist" aria-label="Разделы">
           {TABS.map((t) => (

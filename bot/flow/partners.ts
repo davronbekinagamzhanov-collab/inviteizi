@@ -185,6 +185,17 @@ async function joinLink(c: Ctx, p: Partner) {
 /** Снимок для всех цифр панели и /hamkor: без владельца и админов */
 export const panelData = async (deps: Deps) => withoutStaff(await deps.repo.panelSnapshot(), await deps.repo.staffIds());
 
+/** Тот же снимок + заказы сотрудников (владелец, админы, менеджеры) отдельно: в цифры не идут, но владельцу видно, сколько их */
+export async function panelDataWithStaff(deps: Deps) {
+  const raw = await deps.repo.panelSnapshot();
+  const staff = new Set(await deps.repo.staffIds());
+  return { s: withoutStaff(raw, [...staff]), staffOrders: raw.orders.filter((o) => staff.has(o.userId)) };
+}
+
+/** Тестовые заказы сотрудников за период (созданы или оплачены в нём) */
+export const staffOrdersWithin = (orders: { createdAt: Date; paidAt: Date | null }[], from: Date, to: Date) =>
+  orders.filter((o) => [o.createdAt, o.paidAt].some((d) => d && +d >= +from && +d < +to)).length;
+
 // ── Экраны панели-отчёта (/dashboard, язык владельца) ──
 
 const statLine = (c: Ctx, r: PartnerRow) => {

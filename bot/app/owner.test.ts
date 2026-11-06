@@ -93,3 +93,20 @@ describe("панель владельца: цифры = статистика б�
     expect(r.orders.find((o) => o.names === "Жасур & Нигора")).toMatchObject({ paid: false, partner: null });
   }, 30_000);
 });
+
+describe("тестовые заказы админов", () => {
+  it("не входят в цифры, но владелец видит строку «не учитываются (N)» — в боте и в приложении", async () => {
+    const { s } = await dataset();
+    const before = await ownerPanel(s.deps, ADMIN, "d");
+    if ("error" in before) throw new Error("forbidden");
+    expect(before.testOrders).toBe(0);
+    const own = await nikohWithReceipt(s, ADMIN, ["Тест", "Тестова"]);
+    await s.callback(ADMIN, `ok:${own.number}`, 1);
+    const after = await ownerPanel(s.deps, ADMIN, "d");
+    if ("error" in after) throw new Error("forbidden");
+    expect(after.cards).toEqual(before.cards);
+    expect(after.testOrders).toBe(1);
+    const bot = await statsScreen({ deps: s.deps, user: { id: ADMIN } } as never, "owner", "d", "money");
+    expect(bot.text).toContain(S.staffExcluded(1));
+  });
+});
