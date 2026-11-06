@@ -10,21 +10,33 @@ import s from "../app.module.css";
 export const OCCASIONS: Occasion[] = ["nikoh", "nahorgi", "sunnat", "yubiley"];
 export type Chip = Occasion | "saved";
 
-export function Heart({ on, onToggle }: { on: boolean; onToggle: () => void }) {
+const HEART_PATH = "M12 20.5s-7.5-4.6-9.3-9.4C1.5 7.9 3.6 4.5 7 4.5c2.1 0 3.6 1.2 5 3 1.4-1.8 2.9-3 5-3 3.4 0 5.5 3.4 4.3 6.6-1.8 4.8-9.3 9.4-9.3 9.4z";
+
+/** Иконка сердца: контур — не сохранено, залита акцентным цветом — сохранено */
+export function HeartIcon({ on, size = 22 }: { on: boolean; size?: number }) {
+  return (
+    <svg className={`${s.heartIcon} ${on ? s.heartIconOn : ""}`} width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d={HEART_PATH} />
+    </svg>
+  );
+}
+
+export function Heart({ on, onToggle, className }: { on: boolean; onToggle: () => void; className?: string }) {
   const T = useT();
   return (
     <button
       type="button"
-      className={`${s.heart} ${on ? s.heartOn : ""}`}
+      className={`${s.heart} ${on ? s.heartOn : ""} ${className ?? ""}`}
       aria-pressed={on}
       aria-label={on ? T.catalog.unsave : T.catalog.save}
+      data-heart
       onClick={(e) => {
         e.stopPropagation();
         haptic.tap();
         onToggle();
       }}
     >
-      {on ? "❤️" : "🤍"}
+      <HeartIcon on={on} />
     </button>
   );
 }
@@ -61,7 +73,8 @@ export function Catalog(props: {
             {T.occasions[o]}
           </button>
         ))}
-        <button type="button" className={s.chip} aria-pressed={props.chip === "saved"} onClick={() => props.onChip("saved")}>
+        <button type="button" className={`${s.chip} ${s.chipIcon}`} aria-pressed={props.chip === "saved"} onClick={() => props.onChip("saved")}>
+          <HeartIcon on={props.chip === "saved" || props.favorites.length > 0} size={18} />
           {T.savedChip}
           {props.favorites.length ? ` ${props.favorites.length}` : ""}
         </button>
