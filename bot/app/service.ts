@@ -16,6 +16,7 @@ import { adminCard, checkLines, decisionButtons, upsertDraftOrder, type UpsertOu
 import { validateForm, type FieldError, type FormInput, cleanOwnText, graphemes, MAX_CUSTOM_TEXT } from "@/lib/order-rules";
 import { isQuiet } from "@/lib/quiet-hours";
 import { PHOTO_MAX_COUNT } from "../own-photo";
+import { removeUnusedMedia } from "../flow/care";
 
 /** Черновик, как его хранит и присылает приложение */
 export type AppDraft = {
@@ -52,6 +53,8 @@ export type AppOrder = {
   canEdit: boolean;
   canPay: boolean;
   paid: boolean;
+  /** Чек не принят: причина на языке клиента */
+  rejectReason: string | null;
   createdAt: string;
 };
 
@@ -97,12 +100,21 @@ export function appOrder(deps: Deps, o: OrderRecord, lang: Lang = "uz"): AppOrde
     check: checkLines(o, lang),
     namunaOpen: pageMode(o, deps.now()) !== "expired",
     // Подтверждение действует для текущей суммы (сменили дизайн/цену — проверить снова)
-    confirmed: Boolean(o.payConfirmedAt) && o.status === "awaiting_payment",
+    confirmed: Boolean(o.payConfirmedAt) && (o.status === "awaiting_payment" || o.status === "rejected"),
     canEdit: PAYABLE_STATUSES.includes(o.status),
     canPay: PAYABLE_STATUSES.includes(o.status) && !eventsPassed(deps, o),
     paid: PAID_STATUSES.includes(o.status),
+    rejectReason: o.status === "rejected" ? reasonIn(o.rejectReason, lang) : null,
     createdAt: o.createdAt.toISOString(),
   };
+}
+
+/** Причина отказа хранится по-узбекски (как видит админ) — клиенту на его языке */
+function reasonIn(reason: string | null | undefined, lang: Lang): string | null {
+  if (!reason) return null;
+  const uzReasons = txFor("uz").admin.reasons;
+  const code = Object.keys(uzReasons).find((k) => uzReasons[k] === reason);
+  return code ? (txFor(lang).admin.reasons[code] ?? reason) : reason;
 }
 
 function eventsPassed(deps: Deps, o: OrderRecord) {
@@ -334,6 +346,49 @@ export async function editOrder(deps: Deps, u: AppUser, orderId: unknown): Promi
   const draft: Draft = { q: (prev.q ?? 0) + 1, occasion: o.occasion, format: o.format, templateId: o.templateId, orderId: o.id, music: o.music, data: { ...o.data } };
   await deps.repo.saveStep(u.id, "idle", draft as Record<string, unknown>);
   return { draft: draftOf(draft)! };
+}
+
+/** Шаг, на котором клиент ушёл: 1 дизайн · 2 анкета · 3 НАМУНА · 4 проверил перед оплатой · 5 чек не приняли */
+function cancelStep(o: OrderRecord | null, d: Draft): number {
+  if (o) return o.status === "rejected" ? 5 : o.payConfirmedAt ? 4 : 3;
+  const f = (d.data ?? {}) as Partial<InvitationData>;
+  return f.groom || f.bride || f.person || f.events?.length ? 2 : 1;
+}
+
+/**
+ * «Бекор қилиш»: незаконченный заказ (или черновик без заказа) удаляется вместе с именами, текстами,
+ * фото и своей песней; остаётся только обезличенная запись «отменён на шаге N». Чужой, оплаченный
+ * или с чеком на проверке — нельзя.
+ */
+export async function cancelOrder(deps: Deps, u: AppUser, orderId: unknown): Promise<{ ok: true } | { error: "notFound" | "closed" | "waiting" }> {
+  const user = await deps.repo.getUser(u.id);
+  const st = (user?.state ?? {}) as Draft;
+  let order: OrderRecord | null = null;
+  if (orderId !== undefined && orderId !== null) {
+    if (typeof orderId !== "string") return { error: "notFound" };
+    order = await deps.repo.getOrder(orderId).catch(() => null);
+    if (!order || order.userId !== u.id) return { error: "notFound" };
+    if (order.status === "receipt_sent") return { error: "waiting" };
+    if (!PAYABLE_STATUSES.includes(order.status)) return { error: "closed" };
+  } else if (!st.templateId && !st.data) return { error: "notFound" };
+  const step = cancelStep(order, st);
+  const removed: { photos: string[]; music: string | null }[] = [];
+  if (order) {
+    const r = await deps.repo.cancelOrder(order.id, u.id);
+    if (!r) return { error: "closed" };
+    removed.push(r);
+  }
+  // Черновик в users.state (если он об этом заказе или без заказа) — тоже стираем
+  if (!order || !st.orderId || st.orderId === order.id) {
+    removed.push({ photos: st.data?.photos ?? [], music: st.music?.kind === "own" ? (st.music.url ?? null) : null });
+    await deps.repo.saveStep(u.id, "idle", { q: (st.q ?? 0) + 1 });
+  }
+  const design = getDesign(order?.templateId ?? st.templateId ?? "");
+  await deps.repo
+    .recordCancellation({ step, occasion: design?.occasion ?? null, format: design?.format ?? null, templateId: design?.id ?? null })
+    .catch((e) => console.error("cancel record", e instanceof Error ? e.name : "Error"));
+  await removeUnusedMedia(deps, removed).catch((e) => console.error("cancel media", e instanceof Error ? e.name : "Error"));
+  return { ok: true };
 }
 
 /** Начать новое приглашение: черновик очищается (заказы остаются) */

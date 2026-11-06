@@ -4,7 +4,8 @@ import { useRef, useState } from "react";
 import type { AppOrder, ReceiptResult } from "@/bot/app/service";
 import { api, ApiError, MAX_FILE, shrinkImage, upload } from "./api";
 import { Section, useT } from "./shared";
-import { copyText, haptic } from "./telegram";
+import { copyText, haptic, openLink, shareLink } from "./telegram";
+import { CheckIcon, ClockIcon, CloseIcon } from "./icons";
 import s from "../app.module.css";
 
 type PayInfo = { phone: string; name: string; card: string | null };
@@ -139,14 +140,64 @@ export function Pay({ order, pay, onDone, onToast }: { order: AppOrder; pay: Pay
   );
 }
 
-export function Done({ night }: { night: boolean }) {
+/**
+ * После чека: «Тўловингиз текширилмоқда» (экран сам спрашивает статус — MiniApp),
+ * подтвердили — «Таклифномангиз тайёр!» с крупной ссылкой; отказ — причина и «Чекни қайта юбориш».
+ */
+export function Waiting({ order, night, onResend, onToast }: { order: AppOrder; night: boolean; onResend: () => void; onToast: (t: string) => void }) {
   const T = useT();
+  if (order.status === "active") {
+    return (
+      <div className={s.done} data-state="ready">
+        <div className={`${s.doneMark} ${s.doneOk}`} aria-hidden>
+          <CheckIcon size={44} />
+        </div>
+        <h1 className={s.title}>{T.pay.readyTitle}</h1>
+        <p>{T.pay.readyLead}</p>
+        <a className={s.readyLink} href={order.url} target="_blank" rel="noopener" onClick={(e) => { e.preventDefault(); openLink(order.url); }}>
+          {order.url.replace(/^https?:\/\//, "")}
+        </a>
+        <div className={s.doneActions}>
+          <button type="button" className={`${s.btn} ${s.btnWide}`} onClick={() => shareLink(order.url, T.orders.shareText)}>
+            {T.pay.readyShare}
+          </button>
+          <button type="button" className={`${s.btn} ${s.btnGhost} ${s.btnWide}`} onClick={async () => { if (await copyText(order.url)) { haptic.ok(); onToast(T.orders.copied); } }}>
+            {T.pay.readyCopy}
+          </button>
+        </div>
+      </div>
+    );
+  }
+  if (order.status === "rejected") {
+    return (
+      <div className={s.done} data-state="rejected">
+        <div className={`${s.doneMark} ${s.doneErr}`} aria-hidden>
+          <CloseIcon size={40} />
+        </div>
+        <h1 className={s.title}>{T.pay.rejectedTitle}</h1>
+        {order.rejectReason && (
+          <p>
+            {T.pay.rejectedReason}: <b>{order.rejectReason}</b>
+          </p>
+        )}
+        <div className={s.doneActions}>
+          <button type="button" className={`${s.btn} ${s.btnWide}`} onClick={onResend}>
+            {T.pay.resend}
+          </button>
+        </div>
+      </div>
+    );
+  }
   return (
-    <div className={s.done}>
-      <div className={s.doneMark} aria-hidden>✅</div>
-      <h1 className={s.title}>{T.pay.doneTitle}</h1>
-      <p>{night ? T.pay.doneNight : T.pay.doneDay}</p>
-      <p style={{ color: "var(--muted)", fontSize: 16 }}>{T.pay.doneWhere}</p>
+    <div className={s.done} data-state="waiting" aria-busy="true">
+      <div className={s.waitRing} aria-hidden>
+        <ClockIcon size={34} />
+      </div>
+      <h1 className={s.title}>{T.pay.waitTitle}</h1>
+      <p>{night ? T.pay.waitNight : T.pay.waitDay}</p>
+      <p className={s.waitNumber}>
+        {T.pay.waitNumber} №{order.number} · {T.price(order.amount)}
+      </p>
     </div>
   );
 }

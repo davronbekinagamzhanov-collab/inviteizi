@@ -17,7 +17,8 @@ import { Catalog, Heart, type Chip } from "./ui/Catalog";
 import { emptyForm, Form } from "./ui/Form";
 import { Photos } from "./ui/Photos";
 import { Summary, type Track } from "./ui/Summary";
-import { Done, Pay } from "./ui/Pay";
+import { Pay, Waiting } from "./ui/Pay";
+import { isQuiet } from "@/lib/quiet-hours";
 import { Orders } from "./ui/Orders";
 import { MainAction, TextsContext, Toast } from "./ui/shared";
 import { haptic, insideTelegram, setupTelegram, tg, useBackButton, useNativeMainVisible } from "./ui/telegram";
@@ -30,13 +31,15 @@ type Screen =
   | { name: "photos" }
   | { name: "summary" }
   | { name: "pay"; orderId: string }
-  | { name: "done"; night: boolean }
+  | { name: "wait"; orderId: string; night: boolean }
   | { name: "orders" };
 
 type Phase = "boot" | "noTelegram" | "error" | "ready";
 const SAVE_DELAY = 700;
 /** Экраны с главной кнопкой (см. switch ниже) */
-const MAIN_SCREENS = new Set<Screen["name"]>(["view", "form", "photos", "summary", "done", "orders"]);
+const MAIN_SCREENS = new Set<Screen["name"]>(["view", "form", "photos", "summary", "wait", "orders"]);
+/** Экран ожидания проверки чека спрашивает статус так часто, пока открыт */
+const POLL_MS = 7000;
 const RESUBMIT_DELAY = 900;
 
 function namesOf(d: AppDraft) {
@@ -280,12 +283,60 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
     reset([{ name: "catalog" }]);
   }
 
+  /** «Бекор қилиш»: заказ (или черновик без заказа) удаляется на сервере с личными данными */
+  async function cancelOrder(o: AppOrder | null): Promise<boolean> {
+    try {
+      const r = await api<{ ok?: true; error?: string }>("cancel", o ? { orderId: o.id } : {});
+      if (!r.ok) {
+        setToast(r.error === "waiting" ? T.pay.errors.waiting : T.orders.closedEdit);
+        if (o) refreshOrders();
+        return false;
+      }
+      haptic.ok();
+      if (o) setOrders((l) => l.filter((x) => x.id !== o.id));
+      if (!o || draft?.orderId === o.id) {
+        setDraft(null);
+        setErrors([]);
+      }
+      setToast(T.orders.cancelled);
+      return true;
+    } catch (e) {
+      setToast(e instanceof ApiError && e.code === "offline" ? T.offline : T.serverError);
+      return false;
+    }
+  }
+
   async function changeLang(l: Lang) {
     if (l === lang) return;
     haptic.select();
     setLang(l);
     api("lang", { lang: l }).catch(() => undefined);
   }
+
+  // Ожидание чека и «Мои»: статус с сервера — раз в 7 с на экране ожидания и при каждом возвращении в приложение
+  const refreshOrders = useCallback(async () => {
+    if (document.visibilityState !== "visible") return;
+    try {
+      const r = await api<{ orders?: AppOrder[] }>("orders");
+      if (r.orders) setOrders(r.orders);
+    } catch {
+      /* нет сети — спросим в следующий раз */
+    }
+  }, []);
+  useEffect(() => {
+    if (phase !== "ready" || (screen.name !== "wait" && screen.name !== "orders")) return;
+    const id = screen.name === "wait" ? setInterval(refreshOrders, POLL_MS) : undefined;
+    document.addEventListener("visibilitychange", refreshOrders);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener("visibilitychange", refreshOrders);
+    };
+  }, [phase, screen.name, refreshOrders]);
+  const waitOrder = screen.name === "wait" ? orders.find((o) => o.id === screen.orderId) : undefined;
+  useEffect(() => {
+    if (waitOrder?.status === "active") haptic.ok();
+    else if (waitOrder?.status === "rejected") haptic.error();
+  }, [waitOrder?.status]);
 
   // Мелодии тадбира — когда дошли до итога
   useEffect(() => {
@@ -322,8 +373,8 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
       case "summary":
         main = { text: T.summary.pay(price), onClick: toPay, progress: busy };
         break;
-      case "done":
-        main = { text: T.myOrders, onClick: () => reset([{ name: "catalog" }, { name: "orders" }]) };
+      case "wait":
+        main = waitOrder?.status === "rejected" ? { text: null, onClick: () => undefined } : { text: T.myOrders, onClick: () => reset([{ name: "catalog" }, { name: "orders" }]) };
         break;
       case "orders":
         main = { text: T.orders.newOne, onClick: newOne };
@@ -334,7 +385,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
 
   const resume =
     draft?.templateId && design && screen.name === "catalog"
-      ? { title: `${T.occasions[design.occasion]} · ${namesOf(draft) || T.catalog.continueTitle}`, onResume: () => go(draft.orderId ? { name: "summary" } : { name: "form" }) }
+      ? { title: `${T.occasions[design.occasion]} · ${namesOf(draft) || T.catalog.continueTitle}`, onResume: () => go(draft.orderId ? { name: "summary" } : { name: "form" }), onCancel: () => cancelOrder(order) }
       : null;
 
   return (
@@ -412,10 +463,10 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
               )}
               {screen.name === "pay" && (() => {
                 const o = orders.find((x) => x.id === screen.orderId);
-                return o ? <Pay order={o} pay={session.pay} onToast={setToast} onDone={(night) => { setOrders((l) => l.map((x) => (x.id === o.id ? { ...x, status: "receipt_sent", canPay: false, canEdit: false } : x))); setDraft(null); reset([{ name: "catalog" }, { name: "done", night }]); }} /> : null;
+                return o ? <Pay order={o} pay={session.pay} onToast={setToast} onDone={(night) => { setOrders((l) => l.map((x) => (x.id === o.id ? { ...x, status: "receipt_sent", canPay: false, canEdit: false } : x))); setDraft(null); reset([{ name: "catalog" }, { name: "wait", orderId: o.id, night }]); }} /> : null;
               })()}
-              {screen.name === "done" && <Done night={screen.night} />}
-              {screen.name === "orders" && <Orders orders={orders} onEdit={editOrder} onPay={(o) => go({ name: "pay", orderId: o.id })} onToast={setToast} />}
+              {screen.name === "wait" && waitOrder && <Waiting order={waitOrder} night={screen.night} onToast={setToast} onResend={() => reset([{ name: "catalog" }, { name: "orders" }, { name: "pay", orderId: waitOrder.id }])} />}
+              {screen.name === "orders" && <Orders orders={orders} onEdit={editOrder} onPay={(o) => go({ name: "pay", orderId: o.id })} onStatus={(o) => go({ name: "wait", orderId: o.id, night: isQuiet(new Date()) })} onCancel={cancelOrder} onToast={setToast} />}
             </>
           )}
         </main>

@@ -1112,3 +1112,139 @@ textarea.input {
   font-size: 14px;
   line-height: 1.35;
 }
+
+/* ── Ожидание проверки / готово / отказ (ui/Pay.tsx Waiting) ── */
+.doneOk {
+  color: var(--ok);
+}
+.doneErr {
+  background: #f6e2dc;
+  color: var(--err);
+}
+.waitRing {
+  position: relative;
+  width: 112px;
+  height: 112px;
+  margin: 0 auto 22px;
+  display: grid;
+  place-items: center;
+  color: var(--gold-deep);
+  border-radius: 999px;
+  background: var(--gold-soft);
+}
+.waitRing::before {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  border-radius: 999px;
+  border: 3px solid transparent;
+  border-top-color: var(--gold);
+  border-right-color: var(--gold);
+  animation: spin 1.3s linear infinite;
+}
+.waitRing::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  box-shadow: 0 0 0 0 rgba(168, 119, 42, 0.35);
+  animation: halo 2.4s var(--ease) infinite;
+}
+@keyframes halo {
+  70%,
+  100% {
+    box-shadow: 0 0 0 22px rgba(168, 119, 42, 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .waitRing::before {
+    animation: breathe 1.8s ease-in-out infinite;
+  }
+  .waitRing::after {
+    animation: none;
+  }
+}
+.waitNumber {
+  color: var(--muted);
+  font-size: 15px !important;
+  margin-top: 18px !important;
+}
+.readyLink {
+  display: block;
+  margin: 14px auto 6px;
+  padding: 16px 14px;
+  border-radius: var(--r);
+  background: var(--card);
+  box-shadow: 0 0 0 1px var(--line);
+  color: var(--gold-deep);
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.3;
+  word-break: break-all;
+  text-decoration: none;
+}
+.doneActions {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+.doneActions .btn {
+  margin: 0;
+}
+
+/* ── Статусы заказов и отмена ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.badge[data-kind="ok"] {
+  background: #e5f0e3;
+  color: var(--ok);
+}
+.badge[data-kind="wait"] {
+  background: #fbefd6;
+  color: #8a5d1c;
+}
+.badge[data-kind="err"] {
+  background: #f6e2dc;
+  color: var(--err);
+}
+.badge[data-kind="off"] {
+  background: #ece6dd;
+  color: var(--muted);
+}
+.btnQuiet {
+  color: var(--muted);
+  box-shadow: none;
+  background: transparent;
+}
+.btnDanger {
+  background: var(--err);
+  color: #fff;
+}
+.confirm {
+  flex: 1 1 100%;
+  padding: 12px;
+  border-radius: 14px;
+  background: #fbf1ec;
+  box-shadow: 0 0 0 1px rgba(176, 54, 44, 0.22);
+  animation: fade 0.3s var(--ease) both;
+}
+.confirm p {
+  margin: 0 0 10px;
+  font-size: 15px;
+  line-height: 1.4;
+}
+.confirm > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.resume {
+  flex-wrap: wrap;
+}
+.resume .btnQuiet {
+  min-height: 44px;
+  padding: 0 6px;
+}

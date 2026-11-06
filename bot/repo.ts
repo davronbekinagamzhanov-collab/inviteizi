@@ -185,6 +185,10 @@ export interface Repo {
   saveReview(r: { orderId: string; userId: number; stars?: number; text?: string }): Promise<boolean>;
   /** Удалить неоплаченные заказы, созданные до before, если клиент не заходил в бот с before. Возвращает их файлы */
   deleteStaleDrafts(before: Date): Promise<{ photos: string[]; music: string | null }[]>;
+  /** Клиент отменил свой неоплаченный заказ: удалить заказ целиком. Чужой, оплаченный, чек на проверке — null */
+  cancelOrder(orderId: string, userId: number): Promise<{ photos: string[]; music: string | null } | null>;
+  /** Обезличенная запись об отмене (шаг 1–5, тадбир/формат/дизайн) — для «Где уходят» */
+  recordCancellation(c: { step: number; occasion?: string | null; format?: string | null; templateId?: string | null }): Promise<void>;
   /** Ошибки бота с since: сколько и самая частая причина. Нет доступа/таблицы — null */
   errorSummary(since: Date): Promise<{ count: number; top: string } | null>;
   /** Было ли отправлено сообщение с ключом, начинающимся на prefix, после since */

@@ -5,6 +5,7 @@ import { activeDesigns, PRICES, type Design } from "@/templates/registry";
 import { t as inv } from "@/texts/uz-cyrl";
 import { useT } from "./shared";
 import { haptic } from "./telegram";
+import { CancelButton } from "./Orders";
 import s from "../app.module.css";
 
 export const OCCASIONS: Occasion[] = ["nikoh", "nahorgi", "sunnat", "yubiley"];
@@ -47,7 +48,7 @@ export function Catalog(props: {
   favorites: string[];
   onFavorite: (id: string, on: boolean) => void;
   onOpen: (d: Design) => void;
-  resume: { title: string; onResume: () => void } | null;
+  resume: { title: string; onResume: () => void; onCancel: () => Promise<boolean> } | null;
 }) {
   const T = useT();
   const all = activeDesigns();
@@ -65,6 +66,7 @@ export function Catalog(props: {
           <button type="button" className={`${s.btn} ${s.btnSmall}`} onClick={props.resume.onResume}>
             {T.catalog.continueAction}
           </button>
+          <CancelButton onCancel={props.resume.onCancel} />
         </div>
       )}
       <nav className={s.chips} aria-label={T.catalog.title}>

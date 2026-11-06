@@ -614,6 +614,26 @@ export class PgRepo implements Repo {
     });
   }
 
+  async cancelOrder(orderId: string, userId: number) {
+    if (!/^[0-9a-f-]{36}$/i.test(orderId)) return null;
+    return this.sql.begin(async (tx) => {
+      const [r] = await tx<{ id: string; photos: string[] | null; music_url: string | null; music_kind: string }[]>`
+        select id, photos, music_url, music_kind from public.orders
+        where id = ${orderId} and user_id = ${userId} and status in ('draft', 'preview', 'awaiting_payment', 'rejected') and paid_at is null
+          and not exists (select 1 from public.partner_earnings e where e.order_id = orders.id)
+        for update`;
+      if (!r) return null;
+      await tx`delete from public.client_orders where order_id = ${r.id}`;
+      await tx`delete from public.orders where id = ${r.id}`;
+      return { photos: r.photos ?? [], music: r.music_kind === "own" ? r.music_url : null };
+    });
+  }
+
+  async recordCancellation(c: { step: number; occasion?: string | null; format?: string | null; templateId?: string | null }) {
+    await this.sql`insert into public.order_cancellations(step, occasion, format, template_id)
+      values(${Math.min(5, Math.max(1, Math.round(c.step)))}, ${c.occasion ?? null}, ${c.format ?? null}, ${c.templateId ?? null})`;
+  }
+
   async recordManagerPayout(p: Omit<ManagerPayout, "createdAt"> & { createdBy: number }) {
     if (p.amount <= 0) return false;
     const rows = await this.sql`insert into public.manager_payouts(manager_id, month, amount, orders, created_by)

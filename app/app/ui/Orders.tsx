@@ -7,10 +7,61 @@ import type { AppOrder } from "@/bot/app/service";
 import { getDesign } from "@/templates/registry";
 import { fmtDate } from "./format";
 import { useT } from "./shared";
+import { CheckIcon, ClockIcon, CloseIcon, TrashIcon } from "./icons";
 import { copyText, haptic, openLink, shareLink } from "./telegram";
 import s from "../app.module.css";
 
-export function Orders({ orders, onEdit, onPay, onToast }: { orders: AppOrder[]; onEdit: (o: AppOrder) => void; onPay: (o: AppOrder) => void; onToast: (t: string) => void }) {
+type Props = {
+  orders: AppOrder[];
+  onEdit: (o: AppOrder) => void;
+  onPay: (o: AppOrder) => void;
+  onStatus: (o: AppOrder) => void;
+  onCancel: (o: AppOrder) => Promise<boolean>;
+  onToast: (t: string) => void;
+};
+
+/** Статус простыми словами: Қоралама / Текширилмоқда / Тайёр / Рад этилди (+ срок истёк) */
+function StatusBadge({ o }: { o: AppOrder }) {
+  const T = useT();
+  const kind = o.status === "active" ? "ok" : o.status === "receipt_sent" ? "wait" : o.status === "rejected" ? "err" : o.status === "archived" ? "off" : "draft";
+  return (
+    <span className={s.badge} data-kind={kind}>
+      {kind === "ok" ? <CheckIcon size={15} /> : kind === "wait" ? <ClockIcon size={15} /> : kind === "err" ? <CloseIcon size={15} /> : null}
+      {T.orders.statuses[o.status]}
+    </span>
+  );
+}
+
+/** «Бекор қилиш» с подтверждением «Аниқми?» прямо в карточке */
+export function CancelButton({ onCancel }: { onCancel: () => Promise<boolean> }) {
+  const T = useT();
+  const [ask, setAsk] = useState(false);
+  const [busy, setBusy] = useState(false);
+  if (!ask)
+    return (
+      <button type="button" className={`${s.btn} ${s.btnGhost} ${s.btnSmall} ${s.btnQuiet}`} onClick={() => { haptic.tap(); setAsk(true); }}>
+        <TrashIcon size={18} />
+        {T.orders.cancel}
+      </button>
+    );
+  return (
+    <div className={s.confirm} role="alertdialog" aria-label={T.orders.cancelAsk}>
+      <p>
+        <b>{T.orders.cancelAsk}</b> {T.orders.cancelHint}
+      </p>
+      <div>
+        <button type="button" className={`${s.btn} ${s.btnSmall} ${s.btnDanger}`} disabled={busy} onClick={async () => { setBusy(true); const ok = await onCancel(); setBusy(false); if (!ok) setAsk(false); }}>
+          {T.orders.cancelYes}
+        </button>
+        <button type="button" className={`${s.btn} ${s.btnGhost} ${s.btnSmall}`} disabled={busy} onClick={() => setAsk(false)}>
+          {T.orders.cancelNo}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export function Orders({ orders, onEdit, onPay, onStatus, onCancel, onToast }: Props) {
   const T = useT();
   const [qr, setQr] = useState<{ id: string; src: string } | null>(null);
 
@@ -35,12 +86,17 @@ export function Orders({ orders, onEdit, onPay, onToast }: { orders: AppOrder[];
               </p>
               <p className={s.orderTitle}>{o.title}</p>
               {o.date && <p className={s.orderMeta}>{fmtDate(o.date)}</p>}
-              <span className={`${s.badge} ${o.paid ? s.badgeOk : ""}`}>{T.orders.statuses[o.status]}</span>
+              <StatusBadge o={o} />
             </div>
             <div className={s.orderActions}>
               {o.status !== "archived" && (
                 <button type="button" className={`${s.btn} ${s.btnGhost} ${s.btnSmall}`} onClick={() => openLink(o.url)}>
                   {T.orders.open}
+                </button>
+              )}
+              {(o.status === "receipt_sent" || o.status === "rejected") && (
+                <button type="button" className={`${s.btn} ${o.status === "receipt_sent" ? "" : s.btnGhost} ${s.btnSmall}`} onClick={() => onStatus(o)}>
+                  {T.pay.status}
                 </button>
               )}
               {o.canPay && (
@@ -66,6 +122,7 @@ export function Orders({ orders, onEdit, onPay, onToast }: { orders: AppOrder[];
                   </button>
                 </>
               )}
+              {o.canEdit && <CancelButton onCancel={() => onCancel(o)} />}
             </div>
             {qr?.id === o.id && (
               <div className={s.qr}>

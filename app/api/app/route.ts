@@ -42,6 +42,8 @@ export async function POST(req: Request) {
         return json(await app.confirmPay(deps, user, body.orderId));
       case "orders":
         return json(await app.listOrders(deps, user));
+      case "cancel":
+        return json(await app.cancelOrder(deps, user, body.orderId));
       // Панель владельца: только ADMIN_IDS, остальным 403
       case "owner": {
         const r = await ownerPanel(deps, user.id, body.period);
