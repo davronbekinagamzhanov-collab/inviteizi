@@ -105,11 +105,18 @@ export async function rolePanel(deps: Deps, u: AppUser, periodArg: unknown): Pro
   };
 }
 
+const POSTER_COOLDOWN_MS = 60_000;
+const posterAt = new Map<number, number>();
+
 /** «Постер» в панели партнёра: PDF + PNG + ссылка приходят в чат с ботом */
 export async function partnerPoster(deps: Deps, u: AppUser, langArg: unknown) {
   if (await deps.repo.isAdmin(u.id)) return { error: "forbidden" as const };
   const p = await deps.repo.findPartnerForUser(u.id, u.username ?? null);
   if (!p || p.status === "rejected") return { error: "forbidden" as const };
+  // Постер тяжёлый (PNG + PDF) и шлёт 3 сообщения: не чаще раза в минуту на партнёра
+  const now = +deps.now();
+  if (now - (posterAt.get(p.id) ?? 0) < POSTER_COOLDOWN_MS) return { error: "tooOften" as const };
+  posterAt.set(p.id, now);
   const lang = langArg === "ru" ? "ru" : langArg === "kk" && deps.env.kazakhEnabled ? "kk" : "uz";
   const userLang = (await deps.repo.getUser(u.id))?.lang ?? "uz";
   await sendPosterTo(deps, u.id, p, lang, allTexts[userLang]);

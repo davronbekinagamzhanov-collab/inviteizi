@@ -206,8 +206,8 @@ function Partner({ d, T, onNote }: { d: PartnerPanel; T: typeof appUz.partnerPan
     try {
       await api("partnerPoster", { lang: l });
       onNote(T.posterSent);
-    } catch {
-      onNote(T.error);
+    } catch (e) {
+      onNote(e instanceof ApiError && e.code === "tooOften" ? T.posterWait : T.error);
     } finally {
       setBusy(null);
     }

@@ -364,6 +364,8 @@ export async function cancelOrder(deps: Deps, u: AppUser, orderId: unknown): Pro
   const user = await deps.repo.getUser(u.id);
   const st = (user?.state ?? {}) as Draft;
   let order: OrderRecord | null = null;
+  // Плашка черновика без orderId, а черновик привязан к заказу — отменяем этот заказ
+  if ((orderId === undefined || orderId === null) && st.orderId) orderId = st.orderId;
   if (orderId !== undefined && orderId !== null) {
     if (typeof orderId !== "string") return { error: "notFound" };
     order = await deps.repo.getOrder(orderId).catch(() => null);
@@ -379,7 +381,9 @@ export async function cancelOrder(deps: Deps, u: AppUser, orderId: unknown): Pro
     removed.push(r);
   }
   // Черновик в users.state (если он об этом заказе или без заказа) — тоже стираем
-  if (!order || !st.orderId || st.orderId === order.id) {
+  // Черновик стираем, только если это он: отменяют его самого или заказ, к которому он привязан.
+  // Новый черновик клиента (ещё без заказа) при отмене старого заказа не трогаем
+  if (!order || st.orderId === order.id) {
     removed.push({ photos: st.data?.photos ?? [], music: st.music?.kind === "own" ? (st.music.url ?? null) : null });
     await deps.repo.saveStep(u.id, "idle", { q: (st.q ?? 0) + 1 });
   }

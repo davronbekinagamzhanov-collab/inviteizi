@@ -90,3 +90,17 @@ describe("панель менеджера и партнёра: доступ", ()
     }
   });
 });
+
+describe("панели: ревью", () => {
+  it("постер не чаще раза в минуту; отклонённый партнёр и снятый менеджер — forbidden", async () => {
+    const { s, other } = await world();
+    expect(await partnerPoster(s.deps, user(OTHER_PARTNER), "uz")).toEqual({ ok: true });
+    expect(await partnerPoster(s.deps, user(OTHER_PARTNER), "uz")).toEqual({ error: "tooOften" });
+    void other;
+    const rej = await s.repo.createPartner({ code: "rejectd1", name: "Отклонён", telegramId: 902, username: null, rate: 1000, status: "pending" });
+    expect(await s.repo.decidePartner(rej.id, "rejected")).toBe(true);
+    expect(await rolePanel(s.deps, user(902), "m")).toEqual({ error: "forbidden" });
+    await s.repo.removeManager(MANAGER, s.clock);
+    expect(await rolePanel(s.deps, user(MANAGER), "m")).toEqual({ error: "forbidden" });
+  });
+});

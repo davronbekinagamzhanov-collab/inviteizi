@@ -115,3 +115,26 @@ describe("п.16: текст приглашения", () => {
     expect(tPlain.invite(invitationData((await sim.repo.getOrder(own.order.id))!)).body).toBe("Азиз меҳмонлар, тўйимизга марҳамат!");
   });
 });
+
+describe("отмена: ревью", () => {
+  it("отмена старого заказа не трогает новый черновик (имена, фото)", async () => {
+    const sim = new Sim();
+    const removed: string[] = [];
+    sim.deps.removePhotos = async (urls) => void removed.push(...urls);
+    const old = await namuna(sim, 99);
+    await app.newDraft(sim.deps, user(99));
+    const fresh = `https://abcd.supabase.co/storage/v1/object/public/photos/client/${"b".repeat(64)}.webp`;
+    await app.saveDraft(sim.deps, user(99), { templateId: design.id, form, photos: [fresh] });
+    expect(await app.cancelOrder(sim.deps, user(99), old.id)).toEqual({ ok: true });
+    expect((await app.openSession(sim.deps, user(99))).draft?.photos).toEqual([fresh]);
+    expect(removed).not.toContain(fresh);
+  });
+
+  it("плашка черновика без orderId, а черновик привязан к заказу — удаляется и заказ", async () => {
+    const sim = new Sim();
+    const o = await namuna(sim, 100);
+    expect(await app.cancelOrder(sim.deps, user(100), undefined)).toEqual({ ok: true });
+    expect(await sim.repo.getOrder(o.id)).toBeNull();
+    expect((await app.openSession(sim.deps, user(100))).draft).toBeNull();
+  });
+});

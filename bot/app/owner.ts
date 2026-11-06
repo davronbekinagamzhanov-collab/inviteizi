@@ -10,7 +10,7 @@ import { managerName } from "@/lib/roles";
 import { activeDesigns } from "@/templates/registry";
 import { staff } from "@/texts/bot-ru";
 import type { Deps } from "../flow/types";
-import { panelData, panelDataWithStaff, SLEEP_AFTER_MS, staffOrdersWithin } from "../flow/partners";
+import { panelDataWithStaff, SLEEP_AFTER_MS, staffOrdersWithin } from "../flow/partners";
 import { rangeOf } from "../flow/stats";
 import { sendExport } from "../flow/export";
 import { designName } from "../flow/util";

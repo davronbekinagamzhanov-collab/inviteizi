@@ -57,7 +57,7 @@ export async function POST(req: Request) {
       }
       case "partnerPoster": {
         const r = await partnerPoster(deps, user, body.lang);
-        return "error" in r ? json(r, 403) : json(r);
+        return "error" in r ? json(r, r.error === "tooOften" ? 429 : 403) : json(r);
       }
       case "ownerExport": {
         const r = await ownerExport(deps, user.id, body.period);
