@@ -395,6 +395,8 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
       unsaved.current = null;
       setSaveStatus("");
       if (o) setOrders((l) => l.filter((x) => x.id !== o.id));
+      // Плашка без заказа, а сервер отменил и привязанный заказ — список «Менинг таклифномаларим» сверяем сразу
+      else void refreshOrders();
       if (!o || draft?.orderId === o.id) {
         setDraft(null);
         setErrors([]);

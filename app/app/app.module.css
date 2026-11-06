@@ -1248,6 +1248,12 @@ textarea.input {
   box-shadow: none;
   background: transparent;
 }
+.btnTrash {
+  flex: 0 0 auto;
+  width: 48px;
+  padding: 0;
+  justify-content: center;
+}
 .btnDanger {
   background: var(--err);
   color: #fff;
