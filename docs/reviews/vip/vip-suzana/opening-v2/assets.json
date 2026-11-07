@@ -1,0 +1,17 @@
+{
+  "source": "image_gen, generated for the opening-only revision, 2026-11-07",
+  "files": [
+    {
+      "file": "opening-envelope.webp",
+      "bytes": 161642,
+      "sha256": "d015079ad3324256c8b576037ceda5be24299f6c3eb0a9b4f5e0a75b67a18d4f"
+    },
+    {
+      "file": "opening-paper.webp",
+      "bytes": 28890,
+      "sha256": "8bd92e14f857b9df68de7ef55386688b4e5abbd3d99723507b664dbdfd7fecac"
+    }
+  ],
+  "existingSealUnchanged": true,
+  "existingBodyPhotographsUnchanged": true
+}
