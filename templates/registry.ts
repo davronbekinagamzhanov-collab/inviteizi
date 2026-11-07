@@ -64,6 +64,7 @@ function design(
 
 const rawDesigns: RawDesign[] = [
   // Private VIP previews: deliberately absent from ACCEPTED and catalogue order.
+  design("vip-osmon", 143, "nikoh", "animated", true, () => import("./themes/vip-osmon/Design")),
   design("vip-tilla-muhr", 142, "nikoh", "animated", true, () => import("./themes/vip-tilla-muhr/Design")),
   // ── Пилоты ──
   {
@@ -223,7 +224,7 @@ const STYLE_OF: Record<DesignStyle, string[]> = {
   floral: ["bordo-guldasta", "lola-bodom", "tonggi-piyola", "muhrli-maktub", "gul-doira", "girih-barg", "umr-sahifalari","pion-guldasta", "ipak-romol", "paxta-gul", "visol-rishta", "kabutar-salom", "umr-daraxti", "rayhon-sahari", "siyoh-duo", "shabnam-visol", "uzum-hovli"],
   national: ["doppi-kitob", "ganch-darvoza", "islimi-varaq", "sunnat-muqova", "sunnat-nasab","ganch-peshtoq", "rishton-koshin", "oq-ot", "sayram-hovli", "doppicha", "adras-nishon", "suzani-yol", "sopol-navo", "girih-nur", "dutor-navosi", "minor-satr", "kumush-taroq", "mis-kafgir", "oq-chinni", "tonggi-qozon", "yelpigich-ziynat"],
   dark: ["sapfir", "shohona-baxmal"],
-  photo: ["lola-medalyon", "suzani-medalyon", "visol-hikoya", "qozon-tongi", "xotira-albom", "ipak-albom", "non-albom", "nur-varaq", "muhr", "ipak", "bog", "tong-dasturxon", "tandir-nuri", "atirgul", "dasturxon", "bodom-guli", "samarqand-kitob", "tonggi-choy", "gulbog-sahifa", "lola-ehtirom", "anor-bogi"],
+  photo: ["vip-osmon", "lola-medalyon", "suzani-medalyon", "visol-hikoya", "qozon-tongi", "xotira-albom", "ipak-albom", "non-albom", "nur-varaq", "muhr", "ipak", "bog", "tong-dasturxon", "tandir-nuri", "atirgul", "dasturxon", "bodom-guli", "samarqand-kitob", "tonggi-choy", "gulbog-sahifa", "lola-ehtirom", "anor-bogi"],
 };
 
 function styleOf(id: string): DesignStyle {

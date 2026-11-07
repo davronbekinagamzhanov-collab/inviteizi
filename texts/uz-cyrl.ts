@@ -617,6 +617,7 @@ const raw = {
   /** VIP invitations: private demo-only collection. */
   vip: {
     privateLetter: "Сиз учун махсус таклифнома",
+    forever: "Бир умр бирга",
     openMe: "Мени очинг",
     withLove: "Меҳр ва эҳтиром билан",
     retry: "Сурат юкланмади. Қайта босинг",
