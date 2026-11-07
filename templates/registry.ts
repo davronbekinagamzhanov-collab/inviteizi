@@ -64,9 +64,9 @@ function design(
 
 const rawDesigns: RawDesign[] = [
   // Private VIP previews: deliberately absent from ACCEPTED and catalogue order.
-  design("vip-suzana", 144, "nikoh", "animated", true, () => import("./themes/vip-suzana/Design")),
-  design("vip-osmon", 143, "nikoh", "animated", true, () => import("./themes/vip-osmon/Design")),
-  design("vip-tilla-muhr", 142, "nikoh", "animated", true, () => import("./themes/vip-tilla-muhr/Design")),
+  design("vip-suzana", 144, "nikoh", "animated", true, () => import("./themes/vip-suzana/Design"), { clientPhotos: true }),
+  design("vip-osmon", 143, "nikoh", "animated", true, () => import("./themes/vip-osmon/Design"), { clientPhotos: true }),
+  design("vip-tilla-muhr", 142, "nikoh", "animated", true, () => import("./themes/vip-tilla-muhr/Design"), { clientPhotos: true }),
   // ── Пилоты ──
   {
     id: "oltin-monogramma",
