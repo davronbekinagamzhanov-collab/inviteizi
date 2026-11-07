@@ -67,7 +67,7 @@ export function Envelope({ inv, id, lining }: { inv: Invitation; id: string; lin
       <span className={s.letter} aria-hidden="true"><img src={`${base}/hero.webp`} alt="" width="1170" height="1755" /><span className={s.letterNames}>{inv.data.groom}<i>{t.natural.and}</i>{inv.data.bride}</span></span>
       <span className={s.pocket} />
       <span className={s.foldLeft} /><span className={s.foldRight} />
-      <span className={s.flap}><span className={s.flapFront} /><span className={s.flapBack} /></span>
+      <span data-vip-flap className={s.flap}><span className={s.flapFront} /><span className={s.flapBack} /></span>
       <span className={s.coverCaption}>
         <span className={s.eyebrow}>{t.vip.privateLetter}</span>
         <span className={s.monogram}>{initials}</span>

@@ -1,7 +1,7 @@
 {
   "id": "vip-tilla-muhr",
   "origin": "http://localhost:3001",
-  "capturedAt": "2026-11-07T11:48:19.316Z",
+  "capturedAt": "2026-11-07T12:06:23.111Z",
   "browser": "156.0.8078.79",
   "engine": "Chromium (not a physical iPhone)",
   "viewports": [
@@ -62,14 +62,14 @@
     "frames": 152,
     "durationMs": 2583.2,
     "fps": 58.45,
-    "p95FrameMs": 16.8,
+    "p95FrameMs": 16.7,
     "framesOver33ms": 1
   },
   "program4x": {
     "frames": 181,
-    "durationMs": 3016.6,
-    "fps": 59.67,
-    "p95FrameMs": 16.8,
+    "durationMs": 2999.9,
+    "fps": 60,
+    "p95FrameMs": 16.7,
     "framesOver33ms": 0
   },
   "consoleErrors": [],
