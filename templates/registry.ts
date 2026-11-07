@@ -63,6 +63,8 @@ function design(
 }
 
 const rawDesigns: RawDesign[] = [
+  // Private VIP previews: deliberately absent from ACCEPTED and catalogue order.
+  design("vip-tilla-muhr", 142, "nikoh", "animated", true, () => import("./themes/vip-tilla-muhr/Design")),
   // ── Пилоты ──
   {
     id: "oltin-monogramma",
@@ -217,7 +219,7 @@ const rawDesigns: RawDesign[] = [
 
 const STYLE_OF: Record<DesignStyle, string[]> = {
   milk: ["suvbuyoq-tuman", "suvbuyoq-zumrad", "suvbuyoq-upa", "umr-kitobi", "tong-varaq", "hurmat-maktub", "oq-maktub", "choy-maktub", "sahar-ipagi", "sahar-maktubi", "ehtirom-kartasi","zarhal-eshik", "atlas-tolqin", "non-muhr", "marvarid-satr", "bugdoy-boshoq", "shirin-tilak", "visol-soati", "tut-qogozi"],
-  gold: ["oltin-monogramma", "oltin-ot", "zarhal-lavha", "qosh-uzuk", "zarvaraq", "saodat-kaliti"],
+  gold: ["vip-tilla-muhr", "oltin-monogramma", "oltin-ot", "zarhal-lavha", "qosh-uzuk", "zarvaraq", "saodat-kaliti"],
   floral: ["bordo-guldasta", "lola-bodom", "tonggi-piyola", "muhrli-maktub", "gul-doira", "girih-barg", "umr-sahifalari","pion-guldasta", "ipak-romol", "paxta-gul", "visol-rishta", "kabutar-salom", "umr-daraxti", "rayhon-sahari", "siyoh-duo", "shabnam-visol", "uzum-hovli"],
   national: ["doppi-kitob", "ganch-darvoza", "islimi-varaq", "sunnat-muqova", "sunnat-nasab","ganch-peshtoq", "rishton-koshin", "oq-ot", "sayram-hovli", "doppicha", "adras-nishon", "suzani-yol", "sopol-navo", "girih-nur", "dutor-navosi", "minor-satr", "kumush-taroq", "mis-kafgir", "oq-chinni", "tonggi-qozon", "yelpigich-ziynat"],
   dark: ["sapfir", "shohona-baxmal"],
