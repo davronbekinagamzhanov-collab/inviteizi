@@ -63,16 +63,16 @@ export function Envelope({ inv, id }: { inv: Invitation; id: string }) {
 
     const ease = [0.22, 0.61, 0.24, 1] as const;
     setPhase("crack");
-    await animate("[data-vip-wax]", { scale: [1, 0.955, 1] }, { duration: 0.16, ease: "easeInOut" });
+    await animate("[data-vip-wax]", { scale: [1, 0.955, 1] }, { duration: 0.2, ease: "easeInOut" });
     if (!alive.current) return;
     setPhase("opening");
     await Promise.all([
-      animate("[data-vip-envelope-upper]", { y: "-77dvh", rotateX: 8 }, { duration: 1.05, ease }),
-      animate("[data-vip-envelope-lower]", { y: "42dvh", rotateX: -6 }, { duration: 1.05, ease }),
-      animate("[data-vip-cover-ink]", { y: "-77dvh", opacity: 0 }, { duration: 0.85, ease }),
-      animate("[data-vip-footer-ink]", { y: "42dvh", opacity: 0 }, { duration: 0.8, ease }),
-      animate("[data-vip-seal-half=upper]", { y: -145, rotate: -5, opacity: 0 }, { duration: 0.5, ease }),
-      animate("[data-vip-seal-half=lower]", { y: 145, rotate: 5, opacity: 0 }, { duration: 0.5, ease }),
+      animate("[data-vip-envelope-upper]", { y: "-77dvh", rotateX: 8 }, { duration: 1.4, ease }),
+      animate("[data-vip-envelope-lower]", { y: "42dvh", rotateX: -6 }, { duration: 1.4, ease }),
+      animate("[data-vip-cover-ink]", { y: "-77dvh", opacity: 0 }, { duration: 1.15, ease }),
+      animate("[data-vip-footer-ink]", { y: "42dvh", opacity: 0 }, { duration: 1.1, ease }),
+      animate("[data-vip-seal-half=upper]", { y: -145, rotate: -5, opacity: 0 }, { duration: 0.65, ease }),
+      animate("[data-vip-seal-half=lower]", { y: 145, rotate: 5, opacity: 0 }, { duration: 0.65, ease }),
     ]);
     if (alive.current) inv.finishOpening();
   }

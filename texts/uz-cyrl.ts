@@ -331,6 +331,10 @@ const raw = {
 
   /** Названия дизайнов каталога */
   designs: {
+    "vip-marvarid": "Марварид",
+    "vip-bogi-visol": "Боғи висол",
+    "vip-oq-tulpor": "Оқ тулпор",
+    "vip-umr-ziyosi": "Умр зиёси",
     "gul-doira": "Гул доира",
     "girih-barg": "Гиреҳ барг",
     "muhrli-maktub": "Муҳрли мактуб",

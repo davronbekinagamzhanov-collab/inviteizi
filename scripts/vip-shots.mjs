@@ -9,7 +9,7 @@ import assert from 'node:assert/strict';
 const origin=new URL(process.env.VIP_ORIGIN??'http://localhost:3000').origin;
 assert.ok(origin.startsWith('https://')||process.env.VIP_ALLOW_LOCAL==='1','Use the actual HTTPS Preview; local checks require VIP_ALLOW_LOCAL=1');
 const ids=process.argv.slice(2).filter(x=>!x.startsWith('--'));
-if(!ids.length)ids.push('vip-tilla-muhr','vip-osmon','vip-suzana');
+if(!ids.length)ids.push('vip-tilla-muhr','vip-osmon','vip-suzana','vip-marvarid','vip-bogi-visol','vip-oq-tulpor','vip-umr-ziyosi');
 const output=resolve(process.env.VIP_REPORT_DIR??'work/vip-live');await mkdir(output,{recursive:true});
 const caPath=process.env.NODE_EXTRA_CA_CERTS;
 const pin=caPath?createHash('sha256').update(new X509Certificate(readFileSync(caPath)).publicKey.export({type:'spki',format:'der'})).digest('base64'):null;
@@ -28,13 +28,15 @@ try{
    const context=await browser.newContext({viewport:{width,height},deviceScaleFactor:1,isMobile:true,hasTouch:true,locale:'uz-UZ',storageState});
    const p=await context.newPage();const errors=[];p.on('pageerror',e=>errors.push(e.message));p.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
    const response=await p.goto(pageResult.url,{waitUntil:'networkidle'});assert.equal(response.status(),200);
-   await p.locator('[data-vip-opening="split-v3"][data-ready=true]').waitFor();await p.evaluate(()=>document.fonts.ready);
+   const atelier=['vip-marvarid','vip-bogi-visol','vip-oq-tulpor','vip-umr-ziyosi'].includes(id);
+   const cover=p.locator('[data-vip-envelope],[data-atelier-opening]');
+   await p.locator('[data-vip-envelope][data-ready=true],[data-atelier-opening][data-ready=true]').waitFor();await p.evaluate(()=>document.fonts.ready);
    assert.equal(await p.locator('[data-vip-sheet]').count(),0);
    if(width===390)await p.screenshot({path:`${output}/${id}-closed.png`});
-   const started=Date.now();await p.locator('[data-open]').click();await p.locator('[data-vip-envelope]').waitFor({state:'detached'});const openingMs=Date.now()-started;assert.ok(openingMs<2400,`${id}: opening took ${openingMs}ms`);
-   assert.equal(await p.locator('[data-vip-layout="three-photos"]').count(),1);
+   const started=Date.now();if(width===390)await p.locator('[data-open]').dblclick({delay:65});else await p.locator('[data-open]').click();await cover.waitFor({state:'detached'});const openingMs=Date.now()-started;assert.ok(openingMs<2900,`${id}: opening took ${openingMs}ms`);
+   assert.equal(await p.locator(atelier?'[data-vip-layout^="atelier-"]':'[data-vip-layout="three-photos"]').count(),1);
    const overflow=await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth);assert.equal(overflow,false);
-   const photoSlots=await p.locator('[data-vip-photo-slot]').evaluateAll(images=>images.map(img=>+img.dataset.vipPhotoSlot));assert.deepEqual(photoSlots,[1,2]);
+   const photoSlots=await p.locator('[data-vip-photo-slot]').evaluateAll(images=>images.map(img=>+img.dataset.vipPhotoSlot));assert.deepEqual(photoSlots,id==='vip-oq-tulpor'?[1]:atelier?[1,2,3]:[1,2]);
    assert.equal(await p.locator('[data-vip-section=program] img,[data-vip-section=venue] img').count(),0);
    assert.equal(await p.locator('img[src*="hall-"],img[src*="vip-suzana/hero.webp"]').count(),0);
    await p.locator('[data-vip-section=date]').scrollIntoViewIfNeeded();await p.waitForTimeout(850);const marked=p.locator('[data-vip-section=date] [aria-current=date]');assert.equal(await marked.count(),1);assert.match(await marked.innerText(),/^\d{1,2}$/);
@@ -52,6 +54,13 @@ try{
    if(width===390)await p.screenshot({path:`${output}/${id}-opened.png`});
    assert.deepEqual(errors,[]);pageResult.sizes.push({width,height,openingMs,noHorizontalOverflow:true,photoSlots,calendar:true,musicPauseAndResume:true,maps,popupUrl,oneLanguageControl:true,consoleErrors:errors});await context.close();
   }
+  const reduced=await browser.newContext({viewport:{width:390,height:844},reducedMotion:'reduce',storageState});
+  const rp=await reduced.newPage();await rp.goto(pageResult.url,{waitUntil:'networkidle'});
+  await rp.locator('[data-vip-envelope][data-ready=true],[data-atelier-opening][data-ready=true]').waitFor();
+  await rp.locator('[data-open]').focus();const rt=Date.now();await rp.keyboard.press('Enter');
+  await rp.locator('[data-open]').waitFor({state:'detached'});assert.ok(Date.now()-rt<1000);
+  assert.equal(await rp.locator('[data-opened=true]').count(),1);await reduced.close();
+  pageResult.reducedMotionAndKeyboard=true;
   report.pages.push(pageResult);console.log(JSON.stringify(pageResult));
  }
  report.status='PASS';
