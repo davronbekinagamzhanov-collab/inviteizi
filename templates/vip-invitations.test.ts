@@ -16,7 +16,7 @@ for(const id of ids)describe(id,()=>{
  });
  it("keeps default photography restrained and never uses a venue as a couple photograph",()=>{
   const result=vipPhotos({},id);
-  expect(result.filter(Boolean)).toHaveLength(2);expect(result[2]).toBeUndefined();
+  expect(result.filter(Boolean)).toHaveLength(3);expect(result[2]).toBeDefined();
   expect(result[0].src).not.toContain('vip-suzana/hero');
  });
  it("renders each uploaded photograph once, a short split cover, and data-driven map links",async()=>{
@@ -24,7 +24,7 @@ for(const id of ids)describe(id,()=>{
   const html=renderToStaticMarkup(createElement(Design,{data:{...design.sample,photos,noMusic:true},mode:"full"}));
   expect((html.match(/data-vip-photo-slot=/g)??[])).toHaveLength(3);
   photos.forEach(src=>expect(html).toContain(`src="${src}"`));
-  expect(html).toContain('data-vip-opening="split-v3"');
+  expect(html).toContain('data-vip-opening="hinged-v4"');
   expect(html).not.toMatch(/data-vip-sheet|hall-[12]\.webp|\/glasses\.webp|\/table\.webp|\/music\.webp/);
   expect(html).toContain('https://2gis.kz/geo/');
   expect(html).toContain('aria-current="date"');

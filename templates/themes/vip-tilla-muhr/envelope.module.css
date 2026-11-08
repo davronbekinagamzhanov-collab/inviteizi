@@ -12,3 +12,16 @@
 .envelope[data-phase=opening] :is(.upper,.lower,.sealUpper,.sealLower){will-change:transform,opacity}
 @media(max-width:370px){.coverCaption{inset-inline:22px;top:max(6.5%,calc(env(safe-area-inset-top) + 12px))}.monogram{font-size:57px;margin:16px 0 12px}.coverNames{font-size:28px}.coverMeta{font-size:10px}.openLabel{font-size:22px}}
 @media(prefers-reduced-motion:reduce){.envelope *{animation:none!important;transition:none!important}}
+
+.upperGroup{position:absolute;inset:0;z-index:3;transform-style:preserve-3d;pointer-events:none}
+.upper{clip-path:inset(0 0 63.7%)}
+.lower{z-index:1;clip-path:inset(36.3% 0 0);transform-origin:50% 100%}
+.innerLining{position:absolute;inset:0;background:var(--envelope-lining) center/250px;clip-path:polygon(0 36.3%,100% 36.3%,100% 44%,54% 67.5%,50% 68.2%,46% 67.5%,0 44%);box-shadow:inset 0 20px 35px #37240d22}
+.hinge{position:absolute;inset:0;transform-origin:50% 36.3%;transform-style:preserve-3d;filter:drop-shadow(0 5px 4px #392b192b)}
+.flapFront,.flapBack{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;clip-path:polygon(0 36.3%,100% 36.3%,100% 44%,54% 67.5%,50% 68.2%,46% 67.5%,0 44%)}
+.flapFront{background:var(--vip-envelope-photo) center/100% 100%}
+.flapBack{background:var(--envelope-lining) center/250px;transform:rotateX(180deg);transform-origin:50% 36.3%}
+.coverCaption{z-index:4}.seal{z-index:5}.openLabel,.coverFooter{z-index:5}
+.envelope[data-phase=opening] .hinge{will-change:transform}
+
+.hinge{filter:none}.flapFront{box-shadow:inset 0 2px 1px #fff8}

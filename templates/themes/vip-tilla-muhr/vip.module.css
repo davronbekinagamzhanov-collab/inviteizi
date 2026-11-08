@@ -23,3 +23,5 @@
 .programNumber{display:grid;place-items:center;width:42px;height:42px;margin:0 auto 14px;border:1px solid var(--vip-line);border-radius:50%;font-family:var(--vip-display),serif;font-size:18px;color:var(--c-gold)}
 .venueCard{padding:28px 14px;border:1px solid var(--vip-line);border-radius:24px}
 .page [data-client-photo=true]{object-position:50% 50%}
+
+.closingPhoto{width:72%;max-width:280px;height:300px;border-radius:150px 150px 4px 4px}.venueCard{border:0;border-radius:0;border-top:1px solid var(--vip-line);padding:35px 14px;background:none}.greetingCard{box-shadow:0 10px 25px #59452e0a}

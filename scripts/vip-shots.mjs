@@ -36,7 +36,7 @@ try{
    const started=Date.now();if(width===390)await p.locator('[data-open]').dblclick({delay:65});else await p.locator('[data-open]').click();await cover.waitFor({state:'detached'});const openingMs=Date.now()-started;assert.ok(openingMs<2900,`${id}: opening took ${openingMs}ms`);
    assert.equal(await p.locator(atelier?'[data-vip-layout^="atelier-"]':'[data-vip-layout="three-photos"]').count(),1);
    const overflow=await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth);assert.equal(overflow,false);
-   const photoSlots=await p.locator('[data-vip-photo-slot]').evaluateAll(images=>images.map(img=>+img.dataset.vipPhotoSlot));assert.deepEqual(photoSlots,id==='vip-oq-tulpor'?[1]:atelier?[1,2,3]:[1,2]);
+   const photoSlots=await p.locator('[data-vip-photo-slot]').evaluateAll(images=>images.map(img=>+img.dataset.vipPhotoSlot));assert.deepEqual(photoSlots,id==='vip-oq-tulpor'?[1]:atelier?[1,2,3]:[1,2,3]);
    assert.equal(await p.locator('[data-vip-section=program] img,[data-vip-section=venue] img').count(),0);
    assert.equal(await p.locator('img[src*="hall-"],img[src*="vip-suzana/hero.webp"]').count(),0);
    await p.locator('[data-vip-section=date]').scrollIntoViewIfNeeded();await p.waitForTimeout(850);const marked=p.locator('[data-vip-section=date] [aria-current=date]');assert.equal(await marked.count(),1);assert.match(await marked.innerText(),/^\d{1,2}$/);

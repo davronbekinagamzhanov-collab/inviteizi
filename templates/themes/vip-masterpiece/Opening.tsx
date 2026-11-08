@@ -13,12 +13,12 @@ export function Opening({inv,id}:{inv:Invitation;id:MasterpieceId}){
  useEffect(()=>{alive.current=true;ready.current=preload();void ready.current.then(()=>{if(alive.current)scope.current?.setAttribute("data-ready","true");}).catch(()=>{});return()=>{alive.current=false;};},[preload,scope]);
  async function open(){if(busy.current)return;busy.current=true;inv.start();setStatus("loading");try{await(ready.current??preload());}catch{busy.current=false;ready.current=null;if(alive.current)setStatus("error");return;}if(!alive.current)return;if(reduced){inv.finishOpening();return;}setPhase("opening");setStatus("idle");const ease=[.45,0,.18,1] as const;
  await Promise.all(kind==="silk"?[
-  animate("[data-cover-left]",{y:"-100dvh",x:"-12%",rotate:-8},{duration:1.55,ease}),
-  animate("[data-cover-right]",{y:"100dvh",x:"12%",rotate:8},{duration:1.55,delay:.04,ease}),
+  animate("[data-cover-left]",{y:"-100dvh",x:"-12%",rotate:-8,rotateY:-12,rotateX:9},{duration:1.55,ease}),
+  animate("[data-cover-right]",{y:"100dvh",x:"12%",rotate:8,rotateY:12,rotateX:-9},{duration:1.55,delay:.04,ease}),
   animate("[data-cover-ink]",{opacity:0},{duration:.35,ease:"easeOut"}),
  ]:[
-  animate("[data-cover-left]",{x:"-62%",rotateY:-55},{duration:1.7,ease}),
-  animate("[data-cover-right]",{x:"62%",rotateY:55},{duration:1.7,delay:.04,ease}),
+  animate("[data-cover-left]",{x:"-62%",rotateY:-72},{duration:1.7,ease}),
+  animate("[data-cover-right]",{x:"62%",rotateY:72},{duration:1.7,delay:.04,ease}),
   animate("[data-cover-ink]",{opacity:0},{duration:.35,ease:"easeOut"}),
  ]);if(alive.current)inv.finishOpening();}
  if(inv.opened)return null;const mono=initials(inv.data),w=reception(inv).when;

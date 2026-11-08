@@ -19,3 +19,26 @@
 .rosetteEdge{position:absolute;inset:0;width:100%;height:100%;fill:none;stroke:#d3bd8b;stroke-width:.0017;pointer-events:none}
 
 .silk .calendarScene .datePaper{margin-top:-35px}
+
+/* Sculpted silk and carved paper: the address is part of the scene, not a card. */
+.photoPlane{position:relative;width:100%;height:100%}
+.datePaper,.venue{isolation:isolate;background:none!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+.surface{position:absolute;inset:0;z-index:-1;width:100%;height:100%;overflow:visible;pointer-events:none;filter:drop-shadow(0 13px 15px #583e2014)}
+.surfaceBase{fill:#fbf3e7}.surfaceTexture{opacity:.24}.surfaceLine{fill:none;stroke:var(--c-gold);stroke-width:.8;vector-effect:non-scaling-stroke;stroke-dasharray:1;stroke-dashoffset:0}
+.surfaceGanch{display:none}.ganch .surfaceSilk{display:none}.ganch .surfaceGanch{display:block}.ganch .surfaceTexture{opacity:.16}
+.datePaper{padding:80px 34px 70px!important;margin-inline:18px}.silk .datePaper{margin-top:-50px!important}
+.venues{padding-inline:22px}.venue{position:relative;padding:54px 33px 61px!important;margin:40px 0 0!important;color:var(--c-ink)}
+.venueOrdinal{display:block;font-family:var(--master-display),serif;font-size:21px;font-style:italic;color:var(--c-gold);margin-bottom:20px}
+.venue h3{font-size:35px;letter-spacing:-.025em;line-height:1.16;margin-top:20px}.venue>p:not(.eyebrow){font-size:13px}
+.mapButton{position:relative;display:inline-flex;flex-direction:column;justify-content:center;align-items:center;width:128px;height:128px;border-radius:50%;border:1px solid var(--c-gold);margin:27px auto 0;padding:19px 14px;gap:7px!important;line-height:1.5;font-size:11px!important;background:color-mix(in srgb,var(--c-paper) 70%,transparent);box-shadow:inset 0 1px 3px #fff9,0 5px 13px #73513512}
+.mapButton:before{content:"";position:absolute;inset:6px;border:1px solid var(--line);border-radius:50%;pointer-events:none}.mapButton svg{width:21px;height:21px;flex-shrink:0}.mapButton:active{transform:scale(.97)}
+.venue[data-reveal=animate] .surfaceLine{animation:traceSurface 1.5s .1s ease both}@keyframes traceSurface{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+.silk .secondFrame>.image{border:0;outline:0;border-radius:48% 52% 43% 57% / 34% 41% 59% 66%;transform:rotate(-4deg);box-shadow:0 16px 24px #67472b20}.silk .threadLoop{width:90px;height:150px;right:-17px;top:50%;border-color:#b9966b99}
+.silkNames .names{font-weight:400}.ganch .names{font-style:italic;letter-spacing:-.02em}.ganch .names i{font-style:normal}
+.ganch .ceremony{background:none;color:#f3e7cf;box-shadow:none;border-radius:0;margin:0;padding:35px 0 10px}
+.ganch .calendarScene{padding-inline:15px}.ganch .datePaper{margin:0;padding:75px 35px 70px!important;color:var(--c-ink)}
+.ganch .venues{padding:35px 22px 45px}.ganch .venue{margin-top:35px!important}.ganch .venue .mapButton{background:#234841;color:#f7ead2;border-color:#b69a67;box-shadow:inset 0 2px 5px #112e2877,0 6px 12px #163a3129}.ganch .venue .mapButton:before{border-color:#b69a6780}
+.ganch .venues>div:first-child>.eyebrow{color:#d3bf94}.ganch .venues>div:first-child h2{color:#f4e8d1}
+.ganch .letterInk{border-radius:45% 45% 8% 8% / 75px 75px 35px 35px;padding-bottom:75px}.ganch .programThread>svg{stroke:#d2b781}.programme li p{font-size:12px}.programme h3{font-size:12px}
+@media(max-width:370px){.venue{padding-inline:28px!important}.venue h3{font-size:30px}.datePaper{padding-inline:26px!important}.ganch .datePaper{padding-inline:28px!important}.mapButton{width:116px;height:116px;font-size:10px!important}}
+@media(prefers-reduced-motion:reduce){.photoPlane{transform:none!important}.surfaceLine{animation:none!important}}

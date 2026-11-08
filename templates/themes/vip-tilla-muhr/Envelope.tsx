@@ -3,7 +3,7 @@
 /* eslint-disable @next/next/no-img-element -- Local materials are decoded before the short opening. */
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useAnimate, useReducedMotion } from "motion/react";
-import { t } from "@/texts/uz-cyrl";
+import { t, luxuryWeddingCopy as copy } from "@/texts/uz-cyrl";
 import type { Invitation } from "../../blocks/useInvitation";
 import { OpeningCaption } from "../../blocks/OpeningCaption";
 import { vipPhotos } from "./photos";
@@ -27,7 +27,7 @@ export function Envelope({ inv, id }: { inv: Invitation; id: string }) {
     const decode = async (src: string) => { const img = new Image(); img.src = src; await img.decode(); };
     const photos = vipPhotos(inv.data, id).slice(0, 2);
     return Promise.all([
-      ...["seal", "opening-envelope"].map(name => decode(`${base}/${name}.webp`)),
+      ...["seal", "opening-envelope", id === "vip-suzana" ? "lining" : "opening-lining"].map(name => decode(`${base}/${name}.webp`)),
       ...photos.map(async photo => {
         if (!photo) return;
         try { await decode(photo.src); } catch { await decode(photo.fallback); }
@@ -61,18 +61,19 @@ export function Envelope({ inv, id }: { inv: Invitation; id: string }) {
     setLoading(false);
     if (reduced) { inv.finishOpening(); return; }
 
-    const ease = [0.22, 0.61, 0.24, 1] as const;
+    const ease = [0.42, 0, 0.18, 1] as const;
     setPhase("crack");
     await animate("[data-vip-wax]", { scale: [1, 0.955, 1] }, { duration: 0.2, ease: "easeInOut" });
     if (!alive.current) return;
     setPhase("opening");
     await Promise.all([
-      animate("[data-vip-envelope-upper]", { y: "-77dvh", rotateX: 8 }, { duration: 1.4, ease }),
-      animate("[data-vip-envelope-lower]", { y: "42dvh", rotateX: -6 }, { duration: 1.4, ease }),
-      animate("[data-vip-cover-ink]", { y: "-77dvh", opacity: 0 }, { duration: 1.15, ease }),
-      animate("[data-vip-footer-ink]", { y: "42dvh", opacity: 0 }, { duration: 1.1, ease }),
-      animate("[data-vip-seal-half=upper]", { y: -145, rotate: -5, opacity: 0 }, { duration: 0.65, ease }),
-      animate("[data-vip-seal-half=lower]", { y: 145, rotate: 5, opacity: 0 }, { duration: 0.65, ease }),
+      animate("[data-envelope-hinge]", { rotateX: -154 }, { duration: .72, ease }),
+      animate("[data-vip-envelope-upper]", { y: "-74dvh", rotateX: 7 }, { duration: 1.05, delay: .3, ease }),
+      animate("[data-vip-envelope-lower]", { y: "65dvh", rotateX: -9 }, { duration: 1.05, delay: .3, ease }),
+      animate("[data-vip-cover-ink]", { opacity: 0 }, { duration: .25, ease: "easeOut" }),
+      animate("[data-vip-footer-ink]", { opacity: 0 }, { duration: .3, ease: "easeOut" }),
+      animate("[data-vip-seal-half=upper]", { y: -65, rotate: -14, opacity: 0 }, { duration: .5, ease }),
+      animate("[data-vip-seal-half=lower]", { y: 85, rotate: 12, opacity: 0 }, { duration: .55, ease }),
     ]);
     if (alive.current) inv.finishOpening();
   }
@@ -80,14 +81,14 @@ export function Envelope({ inv, id }: { inv: Invitation; id: string }) {
   if (inv.opened) return null;
   const initials = [inv.data.groom?.charAt(0), inv.data.bride?.charAt(0)].join(" · ");
   return <button
-    ref={scope} type="button" data-open data-vip-envelope data-vip-opening="split-v3" data-phase={phase}
+    ref={scope} type="button" data-open data-vip-envelope data-vip-opening="hinged-v4" data-phase={phase}
     aria-label={t.opening.tapToOpen} onClick={open} className={s.envelope}
-    style={{ "--vip-envelope-photo": `url(${base}/opening-envelope.webp)` } as CSSProperties}
+    style={{ "--vip-envelope-photo": `url(${base}/opening-envelope.webp)`, "--envelope-lining": `url(${base}/${id === "vip-suzana" ? "lining" : "opening-lining"}.webp)` } as CSSProperties}
   >
-    <span data-vip-envelope-upper className={s.upper} />
-    <span data-vip-envelope-lower className={s.lower} />
+    <span data-vip-envelope-lower className={s.lower}><span className={s.innerLining}/></span>
+    <span data-vip-envelope-upper className={s.upperGroup}><span className={s.upper}/><span data-envelope-hinge className={s.hinge}><span className={s.flapFront}/><span className={s.flapBack}/></span></span>
     <span data-vip-cover-ink className={s.coverCaption}>
-      <span className={s.eyebrow}>{t.vip.privateLetter}</span>
+      <span className={s.eyebrow}>{copy(inv.lang).invitation}</span>
       <span className={s.monogram}>{initials}</span>
       <OpeningCaption inv={inv} nameClassName={s.coverNames} metaClassName={s.coverMeta} />
     </span>
@@ -96,7 +97,7 @@ export function Envelope({ inv, id }: { inv: Invitation; id: string }) {
         <img src={`${base}/seal.webp`} alt="" width={480} height={480} /><span>{initials}</span>
       </span>)}
     </span></span>
-    <span data-vip-footer-ink className={s.openLabel} role="status">{error ? t.vip.retry : loading ? t.vip.loading : t.vip.openMe}</span>
-    <span data-vip-footer-ink className={s.coverFooter}>{t.vip.withLove}</span>
+    <span data-vip-footer-ink className={s.openLabel} role="status">{error ? copy(inv.lang).retry : loading ? copy(inv.lang).loading : copy(inv.lang).open}</span>
+    <span data-vip-footer-ink className={s.coverFooter}>{copy(inv.lang).love}</span>
   </button>;
 }
