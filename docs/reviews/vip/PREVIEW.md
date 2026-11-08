@@ -2,6 +2,10 @@
 
 Рабочая ветка: `feature/vip-invitations`, PR #13. Production-ветка `main`, бот, база и заказы не затрагиваются.
 
+## Новые свадебные Signature VIP
+
+`/demo/vip-visol-nuri` и `/demo/vip-zarrin-ahd`: [фотосерии, разные открытия и архитектуры](./signature.md). Проверяются отдельным `scripts/vip-signature-qa.mjs`; прежние семь VIP не меняются. Процесс публикации через API владельца ниже остаётся тем же.
+
 ## Новые варианты atelier
 
 Добавлены `/demo/vip-marvarid`, `/demo/vip-bogi-visol`, `/demo/vip-oq-tulpor`, `/demo/vip-umr-ziyosi`. [Разные структуры, встроенные и клиентские фото, проверки](./atelier.md). Новые движения — 1,65 с; у прежних трёх движение `split-v3` немного замедлено до 1,4 с. Все семь остаются приватными демо.
