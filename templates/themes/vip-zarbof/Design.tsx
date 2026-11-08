@@ -1,0 +1,11 @@
+"use client";
+import {useId,type ReactNode} from "react";
+import type {TemplateProps} from "../types";
+import {useInvitation} from "../../blocks/useInvitation";
+import {t,luxuryWeddingCopy as copy} from "@/texts/uz-cyrl";
+import {Shell,Mono,Names,ScenePhoto,DateLine,Scroll,Letter,Programme,Calendar,Venues,Flourish} from "../vip-masterpiece/Parts";
+import {Opening} from "../vip-masterpiece/Opening";
+import s from "../vip-masterpiece/masterpiece.module.css";
+const id="vip-zarbof";
+function Rosette({children}:{children:ReactNode}){const key=useId().replaceAll(":","");const points=Array.from({length:160},(_,i)=>{const a=i/160*Math.PI*2,r=.44+.035*Math.cos(8*a);return `${i?"L":"M"}${.5+Math.cos(a)*r} ${.5+Math.sin(a)*r}`;}).join(" ")+"Z";return <div className={s.rosette}><svg width="0" height="0" aria-hidden="true"><defs><clipPath id={key} clipPathUnits="objectBoundingBox"><path d={points}/></clipPath></defs></svg><div className={s.rosetteMaterial} style={{clipPath:`url(#${key})`}}/><div className={s.rosettePhoto} style={{clipPath:`url(#${key})`}}>{children}</div><svg className={s.rosetteEdge} viewBox="0 0 1 1" preserveAspectRatio="none" aria-hidden="true"><path d={points}/></svg></div>;}
+export default function Design({data,mode}:TemplateProps){const inv=useInvitation(data,mode,{initialLanguage:"uz"});return <Shell inv={inv} id={id}><Opening inv={inv} id={id}/><div inert={!inv.opened} aria-hidden={!inv.opened} data-master-layout="ganch"><header data-vip-section="hero" className={s.grandHero}><div className={s.grandTop} data-master-ink><span className={s.eyebrow}>{t.occasionTitles.nikoh}</span><Mono inv={inv}/></div><div className={s.grandArt}><Rosette><ScenePhoto inv={inv} id={id} slot={1} eager/></Rosette></div><div className={s.grandNames} data-master-ink><Names inv={inv}/><DateLine inv={inv}/></div><Scroll inv={inv}/></header><main><div className={s.ceremony}><Calendar inv={inv}/><Venues inv={inv}/></div><Letter inv={inv} id={id}/><Programme inv={inv}/><section data-vip-section="memory" className={s.grandMemory}><ScenePhoto inv={inv} id={id} slot={3}/><div className={s.memoryWords}><Flourish/><p data-photo-caption>{copy(inv.lang).forever}</p></div></section></main></div></Shell>;}

@@ -331,6 +331,8 @@ const raw = {
 
   /** Названия дизайнов каталога */
   designs: {
+    "vip-ipak-ziyosi": "Ипак зиёси",
+    "vip-zarbof": "Зарбоф",
     "vip-visol-nuri": "Висол нури",
     "vip-zarrin-ahd": "Заррин аҳд",
     "vip-marvarid": "Марварид",
@@ -869,3 +871,11 @@ function buildDesignTexts(id: string, lang: InviteLang): Texts {
     hosts: { ...t.hosts, thanks: h.thanks ?? t.hosts.thanks, waiting: h.waiting ?? t.hosts.waiting },
   }, lang === "uz" ? glueWords : lang === "ru" ? glueRuWords : glueKkWords) as unknown as Texts;
 }
+
+/** New bespoke wedding experiences: all raster assets are text-free. */
+const masterpieceCopy={
+ uz:{invitation:"Никоҳ тўйига таклифнома",open:"Таклифномани очинг",loading:"Таклифнома тайёрланмоқда…",retry:"Қайта очиш учун босинг",love:"Меҳр ва эҳтиром билан",forever:"Икки қалб. Бир тақдир.",day:"Қалбимиздаги қутлуғ кун",arrival:"Дийдорлашув манзили",scroll:"Таклифномани варақланг"},
+ ru:{invitation:"Приглашение на свадьбу",open:"Открыть приглашение",loading:"Готовим приглашение…",retry:"Нажмите, чтобы попробовать снова",love:"С любовью и уважением",forever:"Два сердца. Одна судьба.",day:"День, который останется в сердце",arrival:"Место нашей встречи",scroll:"Листайте приглашение"},
+ kk:{invitation:"Үйлену тойына шақыру",open:"Шақыруды ашу",loading:"Шақыру дайындалуда…",retry:"Қайталау үшін басыңыз",love:"Махаббатпен және құрметпен",forever:"Екі жүрек. Бір тағдыр.",day:"Жүректегі ерекше күн",arrival:"Кездесу орны",scroll:"Шақыруды парақтаңыз"},
+};
+export function luxuryWeddingCopy(lang:string){return masterpieceCopy[lang==="ru"?"ru":lang==="kk"?"kk":"uz"];}
