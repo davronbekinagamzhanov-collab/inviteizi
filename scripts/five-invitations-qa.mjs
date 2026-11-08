@@ -61,6 +61,21 @@ try{
   await rp.locator('[data-open]').waitFor({state:'detached'});assert.ok(Date.now()-rt<1000);
   assert.equal(await rp.locator('[data-opened=true]').count(),1);await reduced.close();
   pageResult.reducedMotionAndKeyboard=true;
+  if(id==='vip-tilla-muhr'||id==='vip-osmon'||id==='vip-suzana'){
+   const hingeContext=await browser.newContext({viewport:{width:390,height:844},storageState});const hp=await hingeContext.newPage();
+   await hp.goto(pageResult.url,{waitUntil:'networkidle'});await hp.locator('[data-open][data-ready=true]').waitFor();await hp.locator('[data-open]').click();
+   await hp.waitForFunction(()=>{const h=document.querySelector('[data-envelope-hinge]');return h&&new DOMMatrix(getComputedStyle(h).transform).m22<-.4;});
+   const tipIsAboveHinge=await hp.evaluate(()=>{
+    document.getAnimations().forEach(a=>a.pause());
+    const h=document.querySelector('[data-envelope-hinge]'),back=h.lastElementChild;
+    const matrix=el=>{const s=getComputedStyle(el),o=s.transformOrigin.split(' ').map(parseFloat);return new DOMMatrix().translate(o[0],o[1]).multiply(new DOMMatrix(s.transform)).translate(-o[0],-o[1]);};
+    const tip=[...getComputedStyle(back).clipPath.matchAll(/([\d.]+)%\s+([\d.]+)%/g)].find(p=>+p[1]===50);
+    const point=matrix(h).multiply(matrix(back)).transformPoint({x:back.offsetWidth/2,y:back.offsetHeight*(+tip[2])/100});
+    const pivotY=parseFloat(getComputedStyle(h).transformOrigin.split(' ')[1]);
+    return point.y<pivotY-5&&point.z>5&&getComputedStyle(h.parentElement).transformStyle==='flat'&&getComputedStyle(back).backfaceVisibility==='visible';
+   });assert.equal(tipIsAboveHinge,true,'The patterned back must follow the flap above its hinge');
+   await hp.screenshot({path:`${output}/${id}-flap-back.png`});await hingeContext.close();pageResult.flapBackAboveHinge=true;
+  }
   const framesContext=await browser.newContext({viewport:{width:390,height:844},storageState});
   const fp=await framesContext.newPage();await fp.goto(pageResult.url,{waitUntil:'networkidle'});
   await fp.locator('[data-master-opening][data-ready=true],[data-vip-envelope][data-ready=true]').waitFor();

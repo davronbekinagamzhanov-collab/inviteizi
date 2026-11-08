@@ -67,7 +67,8 @@ export function Envelope({ inv, id }: { inv: Invitation; id: string }) {
     if (!alive.current) return;
     setPhase("opening");
     await Promise.all([
-      animate("[data-envelope-hinge]", { rotateX: -154 }, { duration: .72, ease }),
+      animate("[data-envelope-hinge]", { rotateX: 154 }, { duration: .72, ease }),
+      animate("[data-envelope-front]", { opacity: 0 }, { duration: .1, delay: .28, ease: "linear" }),
       animate("[data-vip-envelope-upper]", { y: "-74dvh", rotateX: 7 }, { duration: 1.05, delay: .3, ease }),
       animate("[data-vip-envelope-lower]", { y: "65dvh", rotateX: -9 }, { duration: 1.05, delay: .3, ease }),
       animate("[data-vip-cover-ink]", { opacity: 0 }, { duration: .25, ease: "easeOut" }),
@@ -86,7 +87,7 @@ export function Envelope({ inv, id }: { inv: Invitation; id: string }) {
     style={{ "--vip-envelope-photo": `url(${base}/opening-envelope.webp)`, "--envelope-lining": `url(${base}/${id === "vip-suzana" ? "lining" : "opening-lining"}.webp)` } as CSSProperties}
   >
     <span data-vip-envelope-lower className={s.lower}><span className={s.innerLining}/></span>
-    <span data-vip-envelope-upper className={s.upperGroup}><span className={s.upper}/><span data-envelope-hinge className={s.hinge}><span className={s.flapFront}/><span className={s.flapBack}/></span></span>
+    <span data-vip-envelope-upper className={s.upperGroup}><span className={s.upper}/><span data-envelope-hinge className={s.hinge}><span data-envelope-front className={s.flapFront}/><span className={s.flapBack}/></span></span>
     <span data-vip-cover-ink className={s.coverCaption}>
       <span className={s.eyebrow}>{copy(inv.lang).invitation}</span>
       <span className={s.monogram}>{initials}</span>
