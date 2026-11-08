@@ -25,9 +25,10 @@ try{
   const pageResult={id,url:`${origin}/demo/${id}`,sizes:[]};
   for(const width of [320,360,390,430]){
    const height=width===390?844:width===430?932:740;
-   const context=await browser.newContext({viewport:{width,height},deviceScaleFactor:1,isMobile:true,hasTouch:true,locale:'uz-UZ',storageState});
+   const context=await browser.newContext({viewport:{width,height},deviceScaleFactor:1,isMobile:true,hasTouch:true,locale:'ru-RU',storageState});
+   await context.addInitScript(()=>localStorage.setItem('inviteizi:lang','ru'));
    const p=await context.newPage();const errors=[];p.on('pageerror',e=>errors.push(e.message));p.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
-   const response=await p.goto(pageResult.url,{waitUntil:'networkidle'});assert.equal(response.status(),200);
+   const response=await p.goto(pageResult.url,{waitUntil:'networkidle'});assert.equal(response.status(),200);await p.waitForFunction(()=>document.documentElement.lang==='uz');
    const cover=p.locator('[data-signature-opening]');
    await p.locator('[data-signature-opening][data-ready=true]').waitFor();await p.evaluate(()=>document.fonts.ready);
    assert.equal(await p.locator('[data-vip-sheet]').count(),0);
@@ -48,7 +49,7 @@ try{
     await p.screenshot({path:`${output}/${id}-venue.png`});const popupPromise=context.waitForEvent('page');await p.locator('[data-vip-section=venue] a,[data-vip-section=program] a').first().click();const popup=await popupPromise;await popup.waitForURL(url=>url.hostname.includes('2gis'),{waitUntil:'commit',timeout:15000});popupUrl=popup.url();await popup.close();
    }
    await p.locator('[data-vip-section=closing]').scrollIntoViewIfNeeded();await p.waitForTimeout(850);await p.evaluate(()=>scrollTo(0,0));await p.waitForTimeout(500);
-   await lang.getByRole('button',{name:'Русский',exact:true}).click();assert.equal(await lang.getByRole('button',{name:'Русский',exact:true}).getAttribute('aria-pressed'),'true');await lang.getByRole('button',{name:'Ўзбекча',exact:true}).click();
+   await lang.getByRole('button',{name:'Русский',exact:true}).click();assert.equal(await lang.getByRole('button',{name:'Русский',exact:true}).getAttribute('aria-pressed'),'true');assert.equal(await p.locator('[data-vip-section=memory]').getByText('Вместе на всю жизнь',{exact:true}).count(),1);assert.equal(await p.locator('[data-vip-section=memory]').getByText('Бир умр бирга',{exact:true}).count(),0);await lang.getByRole('button',{name:'Ўзбекча',exact:true}).click();assert.equal(await p.locator('[data-vip-section=memory]').getByText('Бир умр бирга',{exact:true}).count(),1);
    for(const img of await p.locator('[data-vip-photo-slot]').all())assert.equal(await img.evaluate(el=>el.complete&&el.naturalWidth>0),true);
    if(width===390)await p.screenshot({path:`${output}/${id}-opened.png`});
    assert.deepEqual(errors,[]);pageResult.sizes.push({width,height,openingMs,noHorizontalOverflow:true,photoSlots,calendar:true,musicPauseAndResume:true,maps,popupUrl,oneLanguageControl:true,consoleErrors:errors});await context.close();

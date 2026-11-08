@@ -7,6 +7,7 @@ import type {Invitation} from "../../blocks/useInvitation";
 import {signature,signaturePhotos,weddingEvent,type SignatureId} from "./model";
 import {Monogram} from "./Parts";
 import s from "./signature.module.css";
+import {weddingCopy} from "./copy";
 
 /** Two material-specific openings: drawn silk curtains and a heavy hinged paper cover. */
 export function SignatureOpening({inv,id}:{inv:Invitation;id:SignatureId}){
@@ -49,7 +50,7 @@ export function SignatureOpening({inv,id}:{inv:Invitation;id:SignatureId}){
   }
   if(inv.opened)return null;
   const when=weddingEvent(inv).when;
-  const ink=<><span className={s.coverEyebrow}>{t.vip.privateLetter}</span><span className={s.coverIdentity}><Monogram data={inv.data}/><span className={s.coverNames}>{inv.data.groom}<i>{t.natural.and}</i>{inv.data.bride}</span><span className={s.coverDate}>{t.date.long(when.day,when.monthIndex,when.year)}</span></span><span className={s.coverPrompt} role="status">{status==="error"?t.vip.retry:status==="loading"?t.vip.loading:t.vip.openMe}<span>↓</span></span><span className={s.coverFoot}>{t.vip.withLove}</span></>;
+  const ink=<><span className={s.coverEyebrow}>{weddingCopy(inv.lang).privateLetter}</span><span className={s.coverIdentity}><Monogram data={inv.data}/><span className={s.coverNames}>{inv.data.groom}<i>{t.natural.and}</i>{inv.data.bride}</span><span className={s.coverDate}>{t.date.long(when.day,when.monthIndex,when.year)}</span></span><span className={s.coverPrompt} role="status">{status==="error"?weddingCopy(inv.lang).retry:status==="loading"?weddingCopy(inv.lang).loading:weddingCopy(inv.lang).openMe}<span>↓</span></span><span className={s.coverFoot}>{weddingCopy(inv.lang).withLove}</span></>;
   return <button ref={scope} type="button" data-open data-signature-opening={config.kind} data-phase={phase} aria-label={t.opening.tapToOpen} aria-busy={status==="loading"} onClick={open} className={`${s.opening} ${s[config.kind]}`} style={{"--cover-material":`url(${material})`} as CSSProperties}>
     {config.kind==="cinema"?<><span data-curtain="left" className={s.curtainLeft}/><span data-curtain="right" className={s.curtainRight}/><span data-cover-ink className={s.coverInk}>{ink}</span></>:<span data-paper-cover className={s.paperCover}><span data-paper-ink className={s.coverInk}>{ink}</span></span>}
   </button>;

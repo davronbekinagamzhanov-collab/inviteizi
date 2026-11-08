@@ -2,9 +2,9 @@
 
 Рабочая ветка: `feature/vip-invitations`, PR #13. Production-ветка `main`, бот, база и заказы не затрагиваются.
 
-## Новые свадебные Signature VIP
+## Обычные свадебные варианты Висол нури / Заррин аҳд
 
-`/demo/vip-visol-nuri` и `/demo/vip-zarrin-ahd`: [фотосерии, разные открытия и архитектуры](./signature.md). Проверяются отдельным `scripts/vip-signature-qa.mjs`; прежние семь VIP не меняются. Процесс публикации через API владельца ниже остаётся тем же.
+`/demo/vip-visol-nuri` и `/demo/vip-zarrin-ahd`: [обычные свадебные варианты и исправления переводов](./ordinary-weddings.md). Проверяются отдельным `scripts/vip-signature-qa.mjs`; прежние семь VIP не меняются. Процесс публикации через API владельца ниже остаётся тем же.
 
 ## Новые варианты atelier
 

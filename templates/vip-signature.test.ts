@@ -52,3 +52,11 @@ for(const id of signatureIds)describe(id,()=>{
   expect(html.replaceAll(' ',' ')).toContain(data.customText);
  });
 });
+
+// Photo captions are translated DOM content, not baked into the three assets.
+it("translates every wedding caption including the third photo",async()=>{
+ const {weddingCopy}=await import("./themes/vip-signature/copy");
+ expect(Object.keys(weddingCopy("uz"))).toEqual(Object.keys(weddingCopy("ru")));
+ expect(weddingCopy("ru").forever).toBe("Вместе на всю жизнь");
+ expect(weddingCopy("uz").forever).toBe("Бир умр бирга");
+});
