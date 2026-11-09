@@ -23,3 +23,5 @@
 @media(max-width:370px){.heroMonogram{right:36px;font-size:90px}.openInk{inset:7.5% 22px 14%}.openMonogram{font-size:120px;margin-top:12px}.openDedication{font-size:25px;margin-top:29px}.openNames{margin-top:13px}.openDate{margin-top:10px}.openHosts{margin-top:11px}.knot{margin-top:12px;height:46px}.countNumber{font-size:38px}.countLabel{font-size:8px}.story .dateScene{padding-top:70px}}
 
 .letterWords p,.address,.hosts,.openHosts strong,.destination h3{overflow-wrap:anywhere}
+/* Prepare the three decoded silk layers before the first gesture, avoiding cold raster work during opening. */
+@media(prefers-reduced-motion:no-preference){.opening[data-ready=true] :is(.veilNear,.veilFar,.gauze){will-change:transform}}
