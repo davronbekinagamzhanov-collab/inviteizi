@@ -63,6 +63,11 @@ function design(
 }
 
 const rawDesigns: RawDesign[] = [
+  // Four ordinary, unlisted review previews. ACCEPTED, catalogue order and prices stay unchanged.
+  design("sahar-sabosi", 153, "nahorgi", "animated", false, () => import("./themes/sahar-sabosi/Design"), { art:"/art/celebrations/sahar-sabosi.svg" }),
+  design("subhi-safo", 154, "nahorgi", "animated", false, () => import("./themes/subhi-safo/Design"), { art:"/art/celebrations/subhi-safo.svg" }),
+  design("mehr-fasli", 155, "yubiley", "animated", false, () => import("./themes/mehr-fasli/Design"), { art:"/art/celebrations/mehr-fasli.svg" }),
+  design("qutlug-nihol", 156, "sunnat", "animated", false, () => import("./themes/qutlug-nihol/Design"), { art:"/art/celebrations/qutlug-nihol.svg" }),
   // Private VIP previews: deliberately absent from ACCEPTED and catalogue order.
   design("vip-ipak-ziyosi", 151, "nikoh", "animated", true, () => import("./themes/vip-ipak-ziyosi/Design"), { clientPhotos: true }),
   design("vip-zarbof", 152, "nikoh", "animated", true, () => import("./themes/vip-zarbof/Design"), { clientPhotos: false }),
@@ -228,10 +233,10 @@ const rawDesigns: RawDesign[] = [
 ];
 
 const STYLE_OF: Record<DesignStyle, string[]> = {
-  milk: ["vip-marvarid", "suvbuyoq-tuman", "suvbuyoq-zumrad", "suvbuyoq-upa", "umr-kitobi", "tong-varaq", "hurmat-maktub", "oq-maktub", "choy-maktub", "sahar-ipagi", "sahar-maktubi", "ehtirom-kartasi","zarhal-eshik", "atlas-tolqin", "non-muhr", "marvarid-satr", "bugdoy-boshoq", "shirin-tilak", "visol-soati", "tut-qogozi"],
+  milk: ["subhi-safo","vip-marvarid", "suvbuyoq-tuman", "suvbuyoq-zumrad", "suvbuyoq-upa", "umr-kitobi", "tong-varaq", "hurmat-maktub", "oq-maktub", "choy-maktub", "sahar-ipagi", "sahar-maktubi", "ehtirom-kartasi","zarhal-eshik", "atlas-tolqin", "non-muhr", "marvarid-satr", "bugdoy-boshoq", "shirin-tilak", "visol-soati", "tut-qogozi"],
   gold: ["vip-zarrin-ahd", "vip-tilla-muhr", "oltin-monogramma", "oltin-ot", "zarhal-lavha", "qosh-uzuk", "zarvaraq", "saodat-kaliti"],
-  floral: ["vip-umr-ziyosi", "bordo-guldasta", "lola-bodom", "tonggi-piyola", "muhrli-maktub", "gul-doira", "girih-barg", "umr-sahifalari","pion-guldasta", "ipak-romol", "paxta-gul", "visol-rishta", "kabutar-salom", "umr-daraxti", "rayhon-sahari", "siyoh-duo", "shabnam-visol", "uzum-hovli"],
-  national: ["vip-zarbof", "vip-oq-tulpor", "vip-suzana", "doppi-kitob", "ganch-darvoza", "islimi-varaq", "sunnat-muqova", "sunnat-nasab","ganch-peshtoq", "rishton-koshin", "oq-ot", "sayram-hovli", "doppicha", "adras-nishon", "suzani-yol", "sopol-navo", "girih-nur", "dutor-navosi", "minor-satr", "kumush-taroq", "mis-kafgir", "oq-chinni", "tonggi-qozon", "yelpigich-ziynat"],
+  floral: ["sahar-sabosi", "mehr-fasli","vip-umr-ziyosi", "bordo-guldasta", "lola-bodom", "tonggi-piyola", "muhrli-maktub", "gul-doira", "girih-barg", "umr-sahifalari","pion-guldasta", "ipak-romol", "paxta-gul", "visol-rishta", "kabutar-salom", "umr-daraxti", "rayhon-sahari", "siyoh-duo", "shabnam-visol", "uzum-hovli"],
+  national: ["qutlug-nihol","vip-zarbof", "vip-oq-tulpor", "vip-suzana", "doppi-kitob", "ganch-darvoza", "islimi-varaq", "sunnat-muqova", "sunnat-nasab","ganch-peshtoq", "rishton-koshin", "oq-ot", "sayram-hovli", "doppicha", "adras-nishon", "suzani-yol", "sopol-navo", "girih-nur", "dutor-navosi", "minor-satr", "kumush-taroq", "mis-kafgir", "oq-chinni", "tonggi-qozon", "yelpigich-ziynat"],
   dark: ["sapfir", "shohona-baxmal"],
   photo: ["vip-ipak-ziyosi", "vip-visol-nuri", "vip-bogi-visol", "vip-osmon", "lola-medalyon", "suzani-medalyon", "visol-hikoya", "qozon-tongi", "xotira-albom", "ipak-albom", "non-albom", "nur-varaq", "muhr", "ipak", "bog", "tong-dasturxon", "tandir-nuri", "atirgul", "dasturxon", "bodom-guli", "samarqand-kitob", "tonggi-choy", "gulbog-sahifa", "lola-ehtirom", "anor-bogi"],
 };

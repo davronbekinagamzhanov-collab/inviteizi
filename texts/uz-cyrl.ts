@@ -331,6 +331,10 @@ const raw = {
 
   /** Названия дизайнов каталога */
   designs: {
+    "sahar-sabosi": "Саҳар сабоси",
+    "subhi-safo": "Субҳи сафо",
+    "mehr-fasli": "Меҳр фасли",
+    "qutlug-nihol": "Қутлуғ ниҳол",
     "vip-ipak-ziyosi": "Ипак зиёси",
     "vip-zarbof": "Зарбоф",
     "vip-visol-nuri": "Висол нури",
@@ -879,3 +883,11 @@ const masterpieceCopy={
  kk:{invitation:"Үйлену тойына шақыру",open:"Шақыруды ашу",loading:"Шақыру дайындалуда…",retry:"Қайталау үшін басыңыз",love:"Махаббатпен және құрметпен",forever:"Екі жүрек. Бір тағдыр.",day:"Жүректегі ерекше күн",arrival:"Кездесу орны",scroll:"Шақыруды парақтаңыз"},
 };
 export function luxuryWeddingCopy(lang:string){return masterpieceCopy[lang==="ru"?"ru":lang==="kk"?"kk":"uz"];}
+
+/** Copy scoped to the four unlisted ordinary celebration previews. Art contains no lettering. */
+const celebrationWords={
+ uz:{invitation:"Таклифнома",open:"Таклифномани очинг",loading:"Таклифнома тайёрланмоқда…",retry:"Қайта очиш учун босинг",respect:"Меҳр ва эҳтиром билан",meeting:"Дийдорлашув манзили",morning:"Саҳарги дийдорга марҳамат",family:"Қадрдонлар даврасида",joy:"Оиламиз қувончига шерик бўлинг",scroll:"Таклифномани варақланг","sahar-sabosi":"Саҳар сабоси","subhi-safo":"Субҳи сафо","mehr-fasli":"Меҳр фасли","qutlug-nihol":"Қутлуғ ниҳол"},
+ ru:{invitation:"Приглашение",open:"Открыть приглашение",loading:"Готовим приглашение…",retry:"Нажмите, чтобы попробовать снова",respect:"С теплом и уважением",meeting:"Место нашей встречи",morning:"Приглашаем на утреннюю встречу",family:"В кругу родных и близких",joy:"Разделите радость нашей семьи",scroll:"Листайте приглашение","sahar-sabosi":"Дыхание утра","subhi-safo":"Светлое утро","mehr-fasli":"Пора тепла","qutlug-nihol":"Благословенный росток"},
+ kk:{invitation:"Шақыру",open:"Шақыруды ашу",loading:"Шақыру дайындалуда…",retry:"Қайталау үшін басыңыз",respect:"Ізгі ниетпен және құрметпен",meeting:"Кездесу орны",morning:"Таңғы кездесуге шақырамыз",family:"Жақындар ортасында",joy:"Отбасымыздың қуанышын бөлісіңіз",scroll:"Шақыруды парақтаңыз","sahar-sabosi":"Таң самалы","subhi-safo":"Нұрлы таң","mehr-fasli":"Мейірім мезгілі","qutlug-nihol":"Құтты көшет"},
+};
+export function celebrationCopy(lang:string){return celebrationWords[lang==="ru"?"ru":lang==="kk"?"kk":"uz"];}
