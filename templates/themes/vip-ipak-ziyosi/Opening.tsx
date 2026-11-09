@@ -4,9 +4,12 @@ import {t,luxuryWeddingCopy as copy} from "@/texts/uz-cyrl";
 import type {Invitation} from "../../blocks/useInvitation";
 import {initials,photos,reception} from "../vip-masterpiece/model";
 import {useCeremony} from "../vip-masterpiece/useCeremony";
+import {Words,useFitWords} from "../../blocks/FitWords";
+import {SilkStitch} from "./Embroidery";
 import s from "./silk.module.css";
 export function SilkOpening({inv}:{inv:Invitation}){
  const [scope,animate]=useAnimate<HTMLButtonElement>(),photo=photos(inv.data,"vip-ipak-ziyosi")[0],gate=useCeremony(inv,["/vip/vip-ipak-ziyosi/ceremony-silk.webp","/vip/vip-ipak-ziyosi/ceremony-2.webp",{src:photo.src,fallback:photo.fallback}]);
+ const count=`${inv.data.groom??""} ${inv.data.bride??""}`.trim().split(/\s+/).length,namesRef=useFitWords<HTMLSpanElement>(count>4?23:30);
  if(inv.opened)return null;const [a,b]=initials(inv.data),w=reception(inv).when;
  async function unfold(){const ease=[.42,0,.16,1] as const;await Promise.all([
   animate("[data-silk-knot]",{scale:.75,rotate:24,opacity:0},{duration:.38,ease:"easeInOut"}),
@@ -16,8 +19,8 @@ export function SilkOpening({inv}:{inv:Invitation}){
   animate("[data-silk-ink]",{opacity:0,y:-10},{duration:.38,ease:"easeOut"}),
  ]);}
  return <button ref={scope} className={s.opening} type="button" data-open data-master-opening="silk-ceremony-v2" data-ready={gate.ready||undefined} data-phase={gate.opening?"opening":"idle"} aria-busy={gate.status==="loading"} aria-label={copy(inv.lang).open} onClick={()=>void gate.open(unfold)}>
-  <span data-silk-gauze className={s.gauze}/><span data-silk-far className={s.veilFar}/><span data-silk-near className={s.veilNear}/><span data-silk-knot className={s.knot} aria-hidden="true"><i/><i/></span>
-  <span data-silk-ink className={s.openInk}><span className={s.eyebrow}>{copy(inv.lang).invitation}</span><span className={s.openMonogram} aria-label={`${a} ${b}`}>{a}<i>{b}</i></span><span className={s.openNames}>{inv.data.groom}<i>{t.natural.and}</i>{inv.data.bride}</span><span className={s.openDate}>{t.date.long(w.day,w.monthIndex,w.year)}</span></span>
-  <span data-silk-ink className={s.openPrompt} role="status">{gate.status==="error"?copy(inv.lang).retry:gate.status==="loading"?copy(inv.lang).loading:copy(inv.lang).open}<i>↗</i></span>
+  <span data-silk-gauze className={s.gauze}/><span data-silk-far className={s.veilFar}><SilkStitch still className={s.veilEmbroidery}/></span><span data-silk-near className={s.veilNear}/>
+  <span data-silk-ink className={s.openInk}><span className={s.eyebrow}>{copy(inv.lang).invitation}</span><span data-silk-knot className={s.knot}><SilkStitch still/></span><span className={s.openMonogram} aria-label={`${a} ${b}`}>{a}<i>{b}</i></span><span data-opening-dedication className={s.openDedication}>{copy(inv.lang).forever}</span><span data-opening-names ref={namesRef} className={s.openNames}><Words text={inv.data.groom??""}/><i>{t.natural.and}</i><Words text={inv.data.bride??""}/></span><span className={s.openDate}>{t.date.long(w.day,w.monthIndex,w.year)}</span><span data-opening-hosts className={s.openHosts}>{copy(inv.lang).love}<strong>{inv.data.hosts}</strong></span></span>
+  <span data-silk-ink data-opening-prompt className={s.openPrompt} role="status">{gate.status==="error"?copy(inv.lang).retry:gate.status==="loading"?copy(inv.lang).loading:copy(inv.lang).open}<i>↗</i></span>
  </button>;
 }
