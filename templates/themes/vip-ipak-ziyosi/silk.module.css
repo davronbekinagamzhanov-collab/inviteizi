@@ -16,3 +16,4 @@
 
 .names{font-size:var(--fit,76px)}.names>span:last-child{margin-left:0;text-align:right}
 .page :global([data-lang-switch]){position:absolute;top:max(12px,env(safe-area-inset-top));right:12px}
+.gauze{background:url('/vip/vip-ipak-ziyosi/ceremony-silk.webp') center/cover;opacity:.62;border-radius:50% 50% 0 0/90px 120px 0 0;mask-image:linear-gradient(180deg,transparent,#000 14%,#000);-webkit-mask-image:linear-gradient(180deg,transparent,#000 14%,#000)}
