@@ -10,9 +10,9 @@ import {longSamples} from "@/lib/samples";
 import type {InvitationData} from "@/lib/types";
 vi.mock("next/font/local",()=>({default:()=>({variable:"font-test"})}));
 const own=["https://example.com/own-1.webp","https://example.com/own-2.webp","https://example.com/own-3.webp","https://example.com/ignored.webp"];
-describe("11-template future bot/order compatibility",()=>{
+describe("9-template future bot/order compatibility",()=>{
  it("preserves accepted catalogue/price contracts and keeps every new identity unlisted",()=>{
-  expect(cohort).toHaveLength(11);expect(new Set(cohort.map(x=>x.id)).size).toBe(11);expect(activeDesigns()).toHaveLength(36);expect(PRICES).toEqual({animated:8000,scroll:6000,simple:5000});
+  expect(cohort).toHaveLength(9);expect(new Set(cohort.map(x=>x.id)).size).toBe(9);expect(activeDesigns()).toHaveLength(36);expect(PRICES).toEqual({animated:8000,scroll:6000,simple:5000});
   for(const row of cohort){const d=getDesign(row.id)!;expect(d.occasion).toBe(row.occasion);expect(d.format).toBe(row.format);expect(Boolean(d.clientPhotos)).toBe(row.clientPhotos);expect(ACCEPTED.has(d.id)).toBe(false);expect(Object.values(CATALOG_ORDER).flat()).not.toContain(d.id);}
  });
  it("provides every web, Telegram JPEG, thumbnail and private-data-free OG asset before future activation",()=>{

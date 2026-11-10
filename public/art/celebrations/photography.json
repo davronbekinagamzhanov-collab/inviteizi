@@ -28,35 +28,5 @@
     "containsPeople": false,
     "textFree": true,
     "processing": "WebP compression; review covers resized from the same original; no compositing or drawn scenes."
-  },
-  {
-    "id": "mehr-fasli",
-    "kind": "AI-generated photorealistic image",
-    "generator": "image_gen",
-    "sourceFile": "exec-95d8c35b-804b-4fc2-9eb9-734d9bdb3157.png",
-    "sourceSha256": "084e5d73a5bd071b220728118776fa6aa564b50ebe545a8d37683300ace518e2",
-    "width": 941,
-    "height": 1672,
-    "path": "/art/celebrations/mehr-fasli-hero.webp",
-    "sha256": "eb044406496f15f778b7726692eb8a5d10c1c3825b357a6a9504af27b6319cf1",
-    "bytes": 204946,
-    "containsPeople": false,
-    "textFree": true,
-    "processing": "WebP compression; review covers resized from the same original; no compositing or drawn scenes."
-  },
-  {
-    "id": "qutlug-nihol",
-    "kind": "AI-generated photorealistic image",
-    "generator": "image_gen",
-    "sourceFile": "exec-f1fd0154-f32c-40e8-bebd-c8b0fffcecba.png",
-    "sourceSha256": "b7b399d65e7023b730c800afe6d4354563f542f944bc6b834b7d74ae7c6c34cf",
-    "width": 941,
-    "height": 1672,
-    "path": "/art/celebrations/qutlug-nihol-hero.webp",
-    "sha256": "2122d3c73ae76fb74e1863059075b86b2862ef16edf94b4cdb0ef3067021c292",
-    "bytes": 201866,
-    "containsPeople": false,
-    "textFree": true,
-    "processing": "WebP compression; review covers resized from the same original; no compositing or drawn scenes."
   }
 ]

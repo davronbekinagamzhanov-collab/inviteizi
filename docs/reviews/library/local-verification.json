@@ -148,5 +148,8 @@
   "limits": [
     "Synthetic local order data and existing public image fixtures; no Telegram or production storage writes",
     "Expected 404 of the deliberately missing local photo is filtered by its exact URL; fallback loading is asserted."
-  ]
+  ],
+  "historical": true,
+  "sourceCommit": "5b52282ee5c622b8a7ca94e11691db482eaca7ba",
+  "note": "Historical 11-template baseline. The owner subsequently removed mehr-fasli/qutlug-nihol and changed the two morning entry modes. Current cohort: manifest.json (9)."
 }
