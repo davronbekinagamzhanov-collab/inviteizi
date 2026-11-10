@@ -64,22 +64,22 @@ function design(
 
 const rawDesigns: RawDesign[] = [
   // Four ordinary, unlisted review previews. ACCEPTED, catalogue order and prices stay unchanged.
-  design("sahar-sabosi", 153, "nahorgi", "animated", false, () => import("./themes/sahar-sabosi/Design"), { art:"/art/celebrations/sahar-sabosi.svg" }),
-  design("subhi-safo", 154, "nahorgi", "animated", false, () => import("./themes/subhi-safo/Design"), { art:"/art/celebrations/subhi-safo.svg" }),
-  design("mehr-fasli", 155, "yubiley", "animated", false, () => import("./themes/mehr-fasli/Design"), { art:"/art/celebrations/mehr-fasli.svg" }),
-  design("qutlug-nihol", 156, "sunnat", "animated", false, () => import("./themes/qutlug-nihol/Design"), { art:"/art/celebrations/qutlug-nihol.svg" }),
+  design("sahar-sabosi", 153, "nahorgi", "animated", true, () => import("./themes/sahar-sabosi/Design"), { clientPhotos:false, art:"/art/celebrations/sahar-sabosi-hero.webp" }),
+  design("subhi-safo", 154, "nahorgi", "scroll", true, () => import("./themes/subhi-safo/Design"), { clientPhotos:false, art:"/art/celebrations/subhi-safo-hero.webp" }),
+  design("mehr-fasli", 155, "yubiley", "animated", true, () => import("./themes/mehr-fasli/Design"), { clientPhotos:false, art:"/art/celebrations/mehr-fasli-hero.webp" }),
+  design("qutlug-nihol", 156, "sunnat", "animated", true, () => import("./themes/qutlug-nihol/Design"), { clientPhotos:false, art:"/art/celebrations/qutlug-nihol-hero.webp" }),
   // Private VIP previews: deliberately absent from ACCEPTED and catalogue order.
-  design("vip-ipak-ziyosi", 151, "nikoh", "animated", true, () => import("./themes/vip-ipak-ziyosi/Design"), { clientPhotos: true }),
-  design("vip-zarbof", 152, "nikoh", "animated", true, () => import("./themes/vip-zarbof/Design"), { clientPhotos: false }),
-  design("vip-visol-nuri", 149, "nikoh", "animated", true, () => import("./themes/vip-visol-nuri/Design"), { clientPhotos: true }),
-  design("vip-zarrin-ahd", 150, "nikoh", "animated", true, () => import("./themes/vip-zarrin-ahd/Design"), { clientPhotos: true }),
+  design("vip-ipak-ziyosi", 151, "nikoh", "animated", true, () => import("./themes/vip-ipak-ziyosi/Design"), { clientPhotos: true, art:"/vip/vip-ipak-ziyosi/ceremony-1.webp" }),
+  design("vip-zarbof", 152, "nikoh", "animated", true, () => import("./themes/vip-zarbof/Design"), { clientPhotos: false, art:"/vip/vip-zarbof/1.webp" }),
+  design("vip-visol-nuri", 149, "nikoh", "animated", true, () => import("./themes/vip-visol-nuri/Design"), { clientPhotos: true, art:"/vip/vip-visol-nuri/1.webp" }),
+  design("vip-zarrin-ahd", 150, "nikoh", "animated", true, () => import("./themes/vip-zarrin-ahd/Design"), { clientPhotos: true, art:"/vip/vip-zarrin-ahd/1.webp" }),
   design("vip-marvarid", 145, "nikoh", "animated", true, () => import("./themes/vip-marvarid/Design"), { clientPhotos: true }),
   design("vip-bogi-visol", 146, "nikoh", "animated", true, () => import("./themes/vip-bogi-visol/Design"), { clientPhotos: true }),
   design("vip-oq-tulpor", 147, "sunnat", "animated", true, () => import("./themes/vip-oq-tulpor/Design"), { clientPhotos: false }),
   design("vip-umr-ziyosi", 148, "yubiley", "animated", true, () => import("./themes/vip-umr-ziyosi/Design"), { clientPhotos: true }),
-  design("vip-suzana", 144, "nikoh", "animated", true, () => import("./themes/vip-suzana/Design"), { clientPhotos: true }),
-  design("vip-osmon", 143, "nikoh", "animated", true, () => import("./themes/vip-osmon/Design"), { clientPhotos: true }),
-  design("vip-tilla-muhr", 142, "nikoh", "animated", true, () => import("./themes/vip-tilla-muhr/Design"), { clientPhotos: true }),
+  design("vip-suzana", 144, "nikoh", "animated", true, () => import("./themes/vip-suzana/Design"), { clientPhotos: true, art:"/vip/vip-ipak-ziyosi/2.webp" }),
+  design("vip-osmon", 143, "nikoh", "animated", true, () => import("./themes/vip-osmon/Design"), { clientPhotos: true, art:"/vip/vip-osmon/hero.webp" }),
+  design("vip-tilla-muhr", 142, "nikoh", "animated", true, () => import("./themes/vip-tilla-muhr/Design"), { clientPhotos: true, art:"/vip/vip-tilla-muhr/hero.webp" }),
   // ── Пилоты ──
   {
     id: "oltin-monogramma",

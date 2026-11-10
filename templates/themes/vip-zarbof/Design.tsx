@@ -1,6 +1,7 @@
 "use client";
+import {useMotionPreference} from "../vip-masterpiece/useMotionPreference";
 import type {ReactNode} from "react";
-import {motion,useReducedMotion} from "motion/react";
+import {motion} from "motion/react";
 import {t,luxuryWeddingCopy as copy} from "@/texts/uz-cyrl";
 import {monthGrid} from "@/lib/wedding-date";
 import type {TemplateProps} from "../types";
@@ -17,7 +18,7 @@ import {GrandOpening} from "./Opening";
 import {fonts} from "./fonts";
 import s from "./grand.module.css";
 const palette={primary:"#30373a",primaryDark:"#202629",gold:"#9d8059",goldLight:"#d8c8ac",paper:"#eee9de",ink:"#30373a",muted:"#757267"};
-function Rise({children,className=""}:{children:ReactNode;className?:string}){const reduce=useReducedMotion();return <motion.div className={className} initial={{opacity:.7,clipPath:reduce?"inset(0px)":"inset(0px 0px 35px)"}} whileInView={{opacity:1,clipPath:"inset(0px)"}} viewport={{once:true,margin:"0px 0px 100px"}} transition={{duration:reduce?0:1.05,ease:[.3,.6,.2,1]}}>{children}</motion.div>;}
+function Rise({children,className=""}:{children:ReactNode;className?:string}){const reduce=useMotionPreference();return <motion.div className={className} initial={{opacity:.7,clipPath:reduce?"inset(0px)":"inset(0px 0px 35px)"}} whileInView={{opacity:1,clipPath:"inset(0px)"}} viewport={{once:true,margin:"0px 0px 100px"}} transition={{duration:reduce?0:1.05,ease:[.3,.6,.2,1]}}>{children}</motion.div>;}
 function Colonnade({className=""}:{className?:string}){return <svg className={`${s.colonnade} ${className}`} viewBox="0 0 430 700" preserveAspectRatio="none" aria-hidden="true"><circle cx="215" cy="176" r="153"/><circle cx="215" cy="176" r="143"/><path d="M-20 60L48 25V560L-20 602M450 60L382 25V560L450 602M12 53V574M27 43V567M418 53V574M403 43V567"/><path className={s.floor} d="M-40 580H470M-40 602H470M-40 630H470M-40 666H470M-40 710H470"/></svg>;}
 function GrandNames({inv}:{inv:Invitation}){const count=`${inv.data.groom??""} ${inv.data.bride??""}`.trim().split(/\s+/).length,ref=useFitWords<HTMLHeadingElement>(count>4?33:49);return <h1 ref={ref} className={s.names}><Words text={inv.data.groom??""}/><i>{t.natural.and}</i><Words text={inv.data.bride??""}/></h1>;}
 function GrandPhoto({inv,slot,className="",eager=false}:{inv:Invitation;slot:1|2|3;className?:string;eager?:boolean}){return <div className={`${s.photograph} ${className}`}><VipImage photo={photos(inv.data,"vip-zarbof")[slot-1]} eager={eager}/></div>;}

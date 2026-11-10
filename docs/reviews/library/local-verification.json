@@ -1,0 +1,152 @@
+{
+  "status": "PASS",
+  "scope": "Local synthetic orders, not production",
+  "mobileWidths": [
+    320,
+    360,
+    375,
+    390,
+    430
+  ],
+  "templates": 11,
+  "mobileCases": 55,
+  "pastLeapDay": true,
+  "pages": [
+    {
+      "id": "vip-tilla-muhr",
+      "mobileCases": 5,
+      "clientPhotos": true,
+      "demo": {
+        "watermark": true,
+        "localRsvp": true,
+        "posts": 0,
+        "music": true
+      },
+      "consoleErrors": 0
+    },
+    {
+      "id": "vip-osmon",
+      "mobileCases": 5,
+      "clientPhotos": true,
+      "demo": {
+        "watermark": true,
+        "localRsvp": true,
+        "posts": 0,
+        "music": true
+      },
+      "consoleErrors": 0
+    },
+    {
+      "id": "vip-suzana",
+      "mobileCases": 5,
+      "clientPhotos": true,
+      "demo": {
+        "watermark": true,
+        "localRsvp": true,
+        "posts": 0,
+        "music": true
+      },
+      "consoleErrors": 0
+    },
+    {
+      "id": "vip-visol-nuri",
+      "mobileCases": 5,
+      "clientPhotos": true,
+      "demo": {
+        "watermark": true,
+        "localRsvp": true,
+        "posts": 0,
+        "music": true
+      },
+      "consoleErrors": 0
+    },
+    {
+      "id": "vip-zarrin-ahd",
+      "mobileCases": 5,
+      "clientPhotos": true,
+      "demo": {
+        "watermark": true,
+        "localRsvp": true,
+        "posts": 0,
+        "music": true
+      },
+      "consoleErrors": 0
+    },
+    {
+      "id": "vip-ipak-ziyosi",
+      "mobileCases": 5,
+      "clientPhotos": true,
+      "demo": {
+        "watermark": true,
+        "localRsvp": true,
+        "posts": 0,
+        "music": true
+      },
+      "consoleErrors": 0
+    },
+    {
+      "id": "vip-zarbof",
+      "mobileCases": 5,
+      "clientPhotos": false,
+      "demo": {
+        "watermark": true,
+        "localRsvp": true,
+        "posts": 0,
+        "music": true
+      },
+      "consoleErrors": 0
+    },
+    {
+      "id": "sahar-sabosi",
+      "mobileCases": 5,
+      "clientPhotos": false,
+      "demo": {
+        "watermark": true,
+        "localRsvp": true,
+        "posts": 0,
+        "music": true
+      },
+      "consoleErrors": 0
+    },
+    {
+      "id": "subhi-safo",
+      "mobileCases": 5,
+      "clientPhotos": false,
+      "demo": {
+        "watermark": true,
+        "localRsvp": true,
+        "posts": 0,
+        "music": true
+      },
+      "consoleErrors": 0
+    },
+    {
+      "id": "mehr-fasli",
+      "mobileCases": 5,
+      "clientPhotos": false,
+      "demo": {
+        "watermark": true,
+        "localRsvp": true,
+        "posts": 0,
+        "music": true
+      },
+      "consoleErrors": 0
+    },
+    {
+      "id": "qutlug-nihol",
+      "mobileCases": 5,
+      "clientPhotos": false,
+      "demo": {
+        "watermark": true,
+        "localRsvp": true,
+        "posts": 0,
+        "music": true
+      },
+      "consoleErrors": 0
+    }
+  ],
+  "limits": [
+    "Synthetic local order data and existing public image fixtures; no Telegram or production storage writes",
+    "Expected 404 of the deliberately missing local photo is filtered by its exact URL; fallback loading is asserted."
+  ]
+}

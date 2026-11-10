@@ -1,0 +1,13 @@
+[
+ {"id":"vip-tilla-muhr","name":"Тилла муҳр","occasion":"nikoh","format":"animated","clientPhotos":true},
+ {"id":"vip-osmon","name":"Осмон","occasion":"nikoh","format":"animated","clientPhotos":true},
+ {"id":"vip-suzana","name":"Сўзана","occasion":"nikoh","format":"animated","clientPhotos":true},
+ {"id":"vip-visol-nuri","name":"Висол нури","occasion":"nikoh","format":"animated","clientPhotos":true},
+ {"id":"vip-zarrin-ahd","name":"Заррин аҳд","occasion":"nikoh","format":"animated","clientPhotos":true},
+ {"id":"vip-ipak-ziyosi","name":"Ипак зиёси","occasion":"nikoh","format":"animated","clientPhotos":true},
+ {"id":"vip-zarbof","name":"Зарбоф","occasion":"nikoh","format":"animated","clientPhotos":false},
+ {"id":"sahar-sabosi","name":"Саҳар сабоси","occasion":"nahorgi","format":"animated","clientPhotos":false},
+ {"id":"subhi-safo","name":"Субҳи сафо","occasion":"nahorgi","format":"scroll","clientPhotos":false},
+ {"id":"mehr-fasli","name":"Меҳр фасли","occasion":"yubiley","format":"animated","clientPhotos":false},
+ {"id":"qutlug-nihol","name":"Қутлуғ ниҳол","occasion":"sunnat","format":"animated","clientPhotos":false}
+]

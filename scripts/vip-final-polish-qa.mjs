@@ -14,11 +14,11 @@ const output=resolve(process.env.VIP_REPORT_DIR??'work/vip-live');await mkdir(ou
 const caPath=process.env.NODE_EXTRA_CA_CERTS;
 const pin=caPath?createHash('sha256').update(new X509Certificate(readFileSync(caPath)).publicKey.export({type:'spki',format:'der'})).digest('base64'):null;
 const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH??'/usr/bin/chromium',headless:true,args:['--no-sandbox',...(pin?[`--ignore-certificate-errors-spki-list=${pin}`]:[])]});
-let storageState;
+let storageState,access;
 const report={origin,commit:process.env.VIP_COMMIT_SHA??null,deployment:process.env.VIP_DEPLOYMENT_ID??null,browser:browser.version(),checkedAt:new Date().toISOString(),pages:[],limits:['Chromium mobile emulation; no physical iPhone/Safari','2GIS application launch on a real phone is not emulated','No production orders, database writes or live RSVP submissions']};
 try{
  if(process.env.VIP_ACCESS_FILE){
-  const access=JSON.parse(readFileSync(process.env.VIP_ACCESS_FILE,'utf8'));assert.equal(new URL(access.url).origin,origin);
+  access=JSON.parse(readFileSync(process.env.VIP_ACCESS_FILE,'utf8'));assert.equal(new URL(access.url).origin,origin);
   const auth=await browser.newContext();const p=await auth.newPage();await p.goto(access.url,{waitUntil:'networkidle'});assert.equal(new URL(p.url()).origin,origin);storageState=await auth.storageState();await auth.close();
  }
  for(const id of ids){
@@ -30,7 +30,7 @@ try{
    const p=await context.newPage();const errors=[];p.on('pageerror',e=>errors.push(e.message));p.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
    const response=await p.goto(pageResult.url,{waitUntil:'networkidle'});assert.equal(response.status(),200);await p.waitForFunction(()=>document.documentElement.lang==='uz');
    const vip=id==='vip-ipak-ziyosi'||id==='vip-zarbof';const cover=p.locator('[data-master-opening],[data-vip-envelope],[data-signature-opening]');
-   await p.locator('[data-master-opening][data-ready=true],[data-vip-envelope][data-ready=true],[data-signature-opening][data-ready=true]').waitFor();await p.evaluate(()=>document.fonts.ready);
+   await p.locator('[data-master-opening][data-ready=true],[data-vip-envelope][data-ready=true],[data-signature-opening][data-ready=true]').waitFor();await p.evaluate(()=>document.fonts.ready);const closedLang=p.locator('[data-lang-switch]'),closedLabel=await p.locator('[data-open]').getAttribute('aria-label');assert.equal(await closedLang.count(),1);await closedLang.getByRole('button',{name:'Русский',exact:true}).click();await p.waitForFunction(()=>document.documentElement.lang==='ru');assert.notEqual(await p.locator('[data-open]').getAttribute('aria-label'),closedLabel);await closedLang.getByRole('button',{name:'Ўзбекча',exact:true}).click();await p.waitForFunction(()=>document.documentElement.lang==='uz');assert.equal(await p.locator('[data-open]').getAttribute('aria-label'),closedLabel);
    assert.equal(await p.locator('[data-vip-sheet]').count(),0);
    if(width===390)await p.screenshot({path:`${output}/${id}-closed.png`});
    // Measure the animation from the actual browser gesture, excluding Playwright actionability/polling latency.
@@ -76,6 +76,7 @@ try{
   await fp.locator('[data-open]').click();const frameStart=Date.now();const frames=[];
   for(const at of [150,500,950,1400]){const delay=at-(Date.now()-frameStart);if(delay>0)await fp.waitForTimeout(delay);frames.push(Date.now()-frameStart);await fp.screenshot({path:`${output}/${id}-opening-${at}.png`});}
   await fp.locator('[data-open]').waitFor({state:'detached'});await framesContext.close();pageResult.openingFramesMs=frames;
+  if(access){const fresh=await browser.newContext({viewport:{width:390,height:844},locale:'ru-RU'}),p=await fresh.newPage(),errors=[];p.on('pageerror',e=>errors.push(e.message));p.on('console',m=>{if(m.type()==='error')errors.push(m.text());});const url=new URL(access.url);url.pathname='/demo/'+id;const response=await p.goto(url.href,{waitUntil:'networkidle'});assert.equal(response.status(),200);assert.equal(new URL(p.url()).origin,origin);await p.locator('[data-open][data-ready=true]').waitFor();assert.equal(await p.evaluate(()=>document.documentElement.lang),'uz');await p.locator('[data-open]').click();await p.locator('[data-open]').waitFor({state:'detached'});assert.deepEqual(errors,[]);pageResult.freshShareLink=true;await fresh.close();}
   report.pages.push(pageResult);console.log(JSON.stringify(pageResult));
  }
  report.status='PASS';
