@@ -1,0 +1,17 @@
+{
+  "generator": "image_gen",
+  "slots": [
+    {
+      "slot": 1,
+      "prompt": "Create a single horizontal 3:2 photorealistic detail photograph from the SAME restrained Uzbek wedding stationery editorial: palette warm ivory cotton paper, natural flax linen, muted dusty rose/madder and sage hand-embroidered Uzbek suzani, champagne thread. Macro composition of a small folded edge of delicate suzani with tiny hand-stitched pomegranate blossoms and a blank thick ivory cotton invitation card resting partly on it. One modest sprig of white almond blossom at the side, real natural materials. Soft morning window light from left, gentle true shadows, imperfect embroidery stitches and paper fibres. Airy intimate wedding atmosphere, tasteful expensive printed invitation, authentic textile, coherent quiet palette, no unrelated props. No people, faces, hands, lettering, symbols resembling text, numbers, monograms, logos, watermarks, digital illustration, CGI or glossy plastic. Actual photographic appearance."
+    },
+    {
+      "slot": 2,
+      "prompt": "Create a single horizontal 3:2 photorealistic fine-art wedding stationery photograph for a contemporary Uzbek nikoh invitation. Exquisite actual hand-embroidered Uzbek suzani on natural ivory linen, finely stitched small pomegranate blossom and curling leaf motifs in muted dusty rose, faded madder, sage and soft champagne thread. A folded corner of this textile gently surrounds a completely blank, thick ivory cotton wedding invitation sheet. Morning window light from left, tactile irregular hand stitches, visible paper fibres, natural tiny imperfections, soft shadows. Intimate editorial luxury wedding print aesthetic, refined restrained Uzbek cultural character, no ornate royal styling. The image is about linen embroidery and wedding paper, composition fills frame elegantly, no random objects. Center remains pale and quiet, embroidery occupies side edges with graceful material folds, suitable for an oval crop. No people, faces, hands, writing, letters, calligraphy, monograms, numbers, logos, watermarks, computer graphics, vector art, 3D rendering, glitter, dramatic gradients. Photograph, not illustration."
+    },
+    {
+      "slot": 3,
+      "prompt": "Final edit: remove all wedding rings; retain embroidered linen and warm morning light. Replace rings with a blank folded cotton wedding stationery folio wrapped in narrow matte ivory silk band, no ornate bow. No lettering, people or extra objects."
+    }
+  ]
+}
