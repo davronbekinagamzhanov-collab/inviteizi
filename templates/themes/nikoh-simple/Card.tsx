@@ -4,10 +4,11 @@ import {useInvitation} from "../../blocks/useInvitation";
 import {B3Shell,Names,Pic,usePhotos,palette,type Stock} from "../b3/kit";
 import {t} from "@/texts/uz-cyrl";
 import {melody} from "../oq-ot/melody";
+import {melody as textileMelody} from "../oltin-monogramma/melody";
 import s from "./card.module.css";
 const stock:Stock[]=[{kind:"unsplash",slot:"b3-suzani",w:700},{kind:"unsplash",slot:"w-peony-garden",w:300},{kind:"unsplash",slot:"x-roses-vase",w:300}];
 export function WeddingCard({data,mode,textile=false}:TemplateProps&{textile?:boolean}){
- const inv=useInvitation(data,mode,{opening:false,melody,initialLanguage:"uz"});
+ const inv=useInvitation(data,mode,{opening:false,melody:textile?textileMelody:melody,initialLanguage:"uz"});
  const photos=usePhotos(textile?data:{...data,photos:undefined},textile?stock:[]);
  const ink=textile?"#58332f":"#293c34",accent=textile?"#9b6150":"#657b65",paper=textile?"#efe4d4":"#ebe9df";
  const skin={vars:palette({paper,ink,accent,soft:"#e5ded0",line:"#c8b69b",card:"#fffaf0"}),pageColor:paper,backdrop:"bg-[#e6e2d8]",music:"",rsvp:{paper:"#fffaf0",ink,line:"#c8b69b",soft:paper,accent,radius:"8px",buttonRadius:"50%"}};
