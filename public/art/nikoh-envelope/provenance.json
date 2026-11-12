@@ -1,0 +1,92 @@
+[
+  {
+    "path": "public/art/nikoh-envelope/muhr-paper.webp",
+    "source": "exec-e51fb93f-9780-48b0-bd22-9849e78bfa2b.png",
+    "sourceSha256": "1a32da67888ed3748b9f433c2265bfa7c0318e8bc9401e0d4bbcd8bca4a61bf7",
+    "sha256": "f75977f445930f26521db6a64eb90bc1e847cb1548c01540d39cd529cd30508e",
+    "bytes": 106012,
+    "tool": "image_gen",
+    "type": "generated photorealistic image"
+  },
+  {
+    "path": "public/art/nikoh-envelope/muhr-wax.webp",
+    "source": "exec-1e1ab73e-b24e-4359-9442-8fcc3a8efd51.png",
+    "sourceSha256": "b1c536798d1516e1da0d39d71f4f0827992ab791c3e9a5d0620bc21c41681fee",
+    "sha256": "3741efefc2a25dc17240970500e39a94f40182cb97062e2a5a4a370f8cb26759",
+    "bytes": 26374,
+    "tool": "image_gen",
+    "type": "generated photorealistic image"
+  },
+  {
+    "path": "public/art/nikoh-envelope/muhr-1.webp",
+    "source": "exec-c2d101fa-dd91-4ec5-bdec-1c62a73e21e6.png",
+    "sourceSha256": "8f06f1e8669fe07607937f5da528aa9c78c03922b8bdea8b820c6939427c66d0",
+    "sha256": "43a6f57fddc79f9917ab3d207861ad5d30972124befc585f1b0bf9ec6a819643",
+    "bytes": 234418,
+    "tool": "image_gen",
+    "type": "generated photorealistic image"
+  },
+  {
+    "path": "public/art/nikoh-envelope/muhr-2.webp",
+    "source": "exec-e87ad1fb-c45e-48fb-92aa-e234522c8546.png",
+    "sourceSha256": "ae219e341001c7ada1d8722c2152e62c37832ec3898b5f7a3b35305a60441e2a",
+    "sha256": "9646334fc8f3cace72046d96dd84ea2b23124ba700b9a0f8ee3bebc49ad6e5c1",
+    "bytes": 35798,
+    "tool": "image_gen",
+    "type": "generated photorealistic image"
+  },
+  {
+    "path": "public/art/nikoh-envelope/muhr-3.webp",
+    "source": "exec-22feb2be-5cef-4d21-adda-d1a3274fcfa0.png",
+    "sourceSha256": "e559948608f660c91474b77050255f6847a74c12e127cb033b84dddd77f7ab42",
+    "sha256": "f49127c65b115cb60598e6b16318ede769c6bb0dd08bcb291ba6ad144982b7b2",
+    "bytes": 108336,
+    "tool": "image_gen",
+    "type": "generated photorealistic image"
+  },
+  {
+    "path": "public/art/nikoh-envelope/ipak-1.webp",
+    "source": "exec-356fbb6b-655a-4534-9635-a7020a7d563a.png",
+    "sourceSha256": "7538c6d352cad72a53888af1c3ca45a5a1ddab4d31e7683fb77aaba9a0960ed3",
+    "sha256": "eb1292c99def243f0f4ee2fa21efb6967a1e3ab8b58fa9cce0cc5dc69f95bba3",
+    "bytes": 167386,
+    "tool": "image_gen",
+    "type": "generated photorealistic image"
+  },
+  {
+    "path": "public/art/nikoh-envelope/ipak-2.webp",
+    "source": "exec-dd1b00e6-b97c-414f-9240-5c0595af86c3.png",
+    "sourceSha256": "0eb81f7603545ea45228c5f51fa7a7958379b67a52f9ab1b7b17066b1970597a",
+    "sha256": "e3e761858a647d664ac0c8dba68233b6fc0376e65e572de00dda45f271ec954d",
+    "bytes": 76354,
+    "tool": "image_gen",
+    "type": "generated photorealistic image"
+  },
+  {
+    "path": "public/art/nikoh-envelope/ipak-3.webp",
+    "source": "exec-27cd8d83-d5f0-48e4-9141-5534e93a5130.png",
+    "sourceSha256": "3bc4400a89ac66caed3142305f413a183b9f55038be05ce97b414c2280f3b018",
+    "sha256": "17dbe09897f0ff2c610841940bcd52b256d44fe9aa7e3e7784a010fdfe696dce",
+    "bytes": 195180,
+    "tool": "image_gen",
+    "type": "generated photorealistic image"
+  },
+  {
+    "path": "public/art/nikoh-envelope/maktub-cover.webp",
+    "source": "exec-d2d7ae3f-8edd-4867-9d7b-da2adf30832a.png",
+    "sourceSha256": "541429d09ba87bf534b498aa9bc8975d97d97d9006a9c40ca57be1d9f8be0e30",
+    "sha256": "6ae783a66fc8964b0e0496912262fc489c841b7a656ab38a0d0bcca8345696cb",
+    "bytes": 111968,
+    "tool": "image_gen",
+    "type": "generated photorealistic image"
+  },
+  {
+    "path": "public/art/nikoh-envelope/maktub-garden.webp",
+    "source": "exec-b9cd0b3f-e398-4ef4-88b1-2f5c0eb68ccd.png",
+    "sourceSha256": "4289af235931f33fa8f616f3002e31deb9d0bd34d8aafbdd6e829881c17e3ea6",
+    "sha256": "eee6008987b91323e02ebe2384ea38e58073a0d28af5f043f51055ac2c4485bd",
+    "bytes": 239522,
+    "tool": "image_gen",
+    "type": "generated photorealistic image"
+  }
+]

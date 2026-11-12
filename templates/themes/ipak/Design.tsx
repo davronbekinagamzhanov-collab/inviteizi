@@ -1,11 +1,11 @@
 "use client";
 /**
- * «Ипак» — никоҳ, Анимацияли. Первый экран — живой шёлк (видео без звука) и кнопка ▶.
+ * «Ипак» — никоҳ, Анимацияли. Первый экран — чёткая свадебная фотография, без autoplay-видео.
  * Дальше бежевая журнальная вёрстка: имена разворотом, фото в скруглённых рамках со смещением,
  * тонкие цифры таймера, каждое событие — своя «страница» с крупным временем.
- * Порядок: шёлк → имена → фото → приветствие → таймер → тадбирлар → «Сана» → «Манзил» → семьи → ответы → подпись.
+ * Порядок: свадебная обложка → имена → фото → приветствие → таймер → тадбирлар → «Сана» → «Манзил» → семьи → ответы → подпись.
  */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useReducedMotion } from "motion/react";
 import { designVars, type TemplateProps } from "../types";
 import { useInvitation } from "../../blocks/useInvitation";
@@ -25,8 +25,9 @@ import {
   Script,
   tidy,
 } from "../natural/kit";
-import { creditsOf, shots, stock, venues } from "../natural/common";
-import { localCredit, localPhoto } from "../natural/photos";
+import { venues } from "../natural/common";
+import { weddingShots } from "../nikoh-envelope/photos";
+import { WeddingOpening } from "../nikoh-envelope/Opening";
 import { melody } from "./melody";
 import s from "./ipak.module.css";
 
@@ -53,22 +54,10 @@ export default function Ipak({ data, mode }: TemplateProps) {
   const open = () => {
     if (inv.started) return;
     inv.start();
-    timer.current = setTimeout(inv.finishOpening, reduced ? 0 : 1100);
+    timer.current = setTimeout(inv.finishOpening, reduced ? 0 : 1650);
   };
 
-  const photos = shots(data, [
-    { kind: "unsplash", slot: "x-earrings", w: 760, h: 1000 },
-    { kind: "unsplash", slot: "ipak-bouquet", w: 520, h: 650 },
-    { kind: "unsplash", slot: "ipak-hands", w: 400, h: 400 },
-  ]);
-  const silk = stock({
-    kind: "unsplash",
-    slot: "ipak-silk",
-    w: 860,
-    h: 640,
-  });
-  const video = localPhoto("ipak-silk-video");
-  const [videoOn, setVideoOn] = useState(false);
+  const photos = weddingShots(data,"ipak");
   const w = inv.main.when;
   const groom = useFitWords<HTMLSpanElement>(54);
   const bride = useFitWords<HTMLSpanElement>(54);
@@ -95,23 +84,11 @@ export default function Ipak({ data, mode }: TemplateProps) {
         radius: "26px",
         buttonRadius: "999px",
       }}
-      credits={[
-        ...creditsOf([...photos, silk]),
-        localCredit("ipak-silk-video"),
-      ]}
+      credits={[]}
       creditClassName="text-[#3b322b]/60"
       epilogue={
         <Rise>
           <footer className={s.sign}>
-            {photos[2].client && (
-              <Photo
-                src={photos[2].src}
-                client
-                shape="circle"
-                ratio="1 / 1"
-                className={s.signPhoto}
-              />
-            )}
             <Script text={t.natural.come} className={s.signScript} />
             <p className={s.signLead}>{t.hosts.respectDeep}</p>
             <p className={s.signHosts}>{data.hosts}</p>
@@ -192,7 +169,7 @@ export default function Ipak({ data, mode }: TemplateProps) {
             </div>
           </Rise>
         ))}
-        <Photo src={silk.src} shape="arch" ratio="4 / 5" className={s.silk} />
+        <Photo src={photos[2].src} client={photos[2].client} shape="round" ratio="4 / 5" className={s.silk} />
       </section>
 
       <Divider className={s.divider} />
@@ -233,52 +210,8 @@ export default function Ipak({ data, mode }: TemplateProps) {
         </section>
       )}
 
-      {!inv.opened && (
-        // Нажимается вся заставка (подсказка «экранга босинг»); кнопка ▶ — для клавиатуры и чтеца
-        <div className={s.opening} data-started={inv.started} onClick={open}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={video.poster} alt="" aria-hidden className={s.video} />
-          <video
-            className={`${s.video} ${s.videoFade} ${videoOn ? s.videoOn : ""}`}
-            onPlaying={() => setVideoOn(true)}
-            src={video.src}
-            poster={video.poster}
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="auto"
-            aria-hidden
-          />
-          <div className={s.veil} />
-          <div className={s.openText}>
-            <p className={s.openNames}>
-              <span>{data.groom}</span>
-              <Script text={t.natural.and} className={s.openAnd} />
-              <span>{data.bride}</span>
-            </p>
-            <p className={s.openDate}>
-              {t.date.long(w.day, w.monthIndex, w.year)}
-            </p>
-          </div>
-          <button
-            type="button"
-            data-open
-            onClick={(e) => {
-              e.stopPropagation();
-              open();
-            }}
-            disabled={inv.started}
-            aria-label={t.natural.playHint}
-            className={s.play}
-          >
-            <svg viewBox="0 0 24 24" aria-hidden>
-              <path d="M8 5.5v13l10.5-6.5z" fill="currentColor" />
-            </svg>
-          </button>
-          <Script text={t.natural.open} className={s.openWord} />
-        </div>
-      )}
+      {!inv.opened && <WeddingOpening kind="ipak" data={data} date={t.date.long(w.day,w.monthIndex,w.year)} started={inv.started} onOpen={open}/>}
+
     </InvitationShell>
   );
 }

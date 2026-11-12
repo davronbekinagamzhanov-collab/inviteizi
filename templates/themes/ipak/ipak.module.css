@@ -1,20 +1,6 @@
 /* «Ипак»: бежевый журнал. Один тёплый цвет (мокко) на бумаге, крупный шрифт, много воздуха */
 .page { background: var(--n-paper); color: var(--n-ink); font-family: var(--n-text); }
 
-/* ── Шёлк ── */
-.opening { position: fixed; inset: 0; z-index: 50; margin: 0 auto; max-width: 430px; width: 100%; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 12svh; color: #fbf8f3; transition: transform var(--m-base) var(--m-ease), opacity var(--m-fast) var(--m-ease) .5s; }
-.opening[data-started="true"] { transform: translateY(-100%); opacity: 0; }
-.video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.veil { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(40,32,26,.1) 30%, rgba(40,32,26,.55)); }
-.openText { position: absolute; top: 14svh; left: 0; right: 0; text-align: center; padding: 0 24px; }
-.openNames { display: flex; flex-direction: column; align-items: center; font-family: var(--n-serif); font-size: 34px; font-weight: 500; text-transform: uppercase; letter-spacing: .14em; line-height: 1.1; overflow-wrap: anywhere; }
-.openAnd { font-size: 46px; text-transform: none; letter-spacing: 0; margin: 2px 0 6px; }
-.openDate { margin-top: 18px; font-family: var(--n-serif); font-size: 16px; letter-spacing: .24em; text-transform: uppercase; }
-.play { position: relative; width: 74px; height: 74px; border-radius: 50%; border: 1px solid rgba(251,248,243,.85); color: #fbf8f3; display: flex; align-items: center; justify-content: center; background: rgba(251,248,243,.08); cursor: pointer; }
-.play svg { width: 26px; height: 26px; margin-left: 4px; }
-.openWord { position: relative; margin-top: 12px; font-size: 40px; }
-@media (prefers-reduced-motion: reduce) { .opening { transition: none; } }
-
 /* ── Имена разворотом ── */
 .spread { position: relative; padding: 56px 56px 20px 24px; }
 .vertical { position: absolute; right: 14px; top: 58px; writing-mode: vertical-rl; font-family: var(--n-serif); font-size: 13px; letter-spacing: .3em; text-transform: uppercase; color: var(--n-accent); }
@@ -83,17 +69,6 @@
 
 /* ── v2: плавный шёлк, круглые формы, медальон ── */
 .page { --n-photo-filter: sepia(.08) saturate(.9) brightness(1.02); }
-.videoFade { opacity: 0; transition: opacity var(--m-slow) var(--m-ease); }
-.videoOn { opacity: 1; }
-.openText > *, .play, .openWord { animation: silkIn var(--m-slow) var(--m-ease) both; }
-.openText > :nth-child(2) { animation-delay: .25s; }
-.play { animation-delay: .5s; }
-.openWord { animation-delay: .65s; }
-@keyframes silkIn { from { opacity: 0; transform: translate3d(0, 14px, 0); } to { opacity: 1; transform: none; } }
-.play { transition: transform .3s cubic-bezier(.22,1,.36,1), background-color .3s ease; box-shadow: 0 8px 24px -10px rgba(0,0,0,.45); backdrop-filter: blur(6px); }
-.play:active { transform: scale(.94); }
-@media (prefers-reduced-motion: reduce) { .openText > *, .play, .openWord { animation: none; } .videoFade { transition: none; } }
-
 .photoSmall { border: 0; outline: 6px solid var(--n-paper); }
 .medal { position: absolute; left: 30px; top: 410px; width: 108px; background: var(--n-paper); color: var(--n-accent); box-shadow: 0 10px 26px -16px rgba(59,50,43,.5); }
 .medalDay { display: block; font-family: var(--n-serif); font-size: 44px; font-weight: 300; line-height: .9; color: var(--n-ink); font-variant-numeric: lining-nums; }
@@ -112,3 +87,7 @@
 .map { background: transparent; color: #3b322b; border: 1px solid #3b322b; }
 /* v3: заголовок письма не заходит под кнопку музыки (справа 16px + 46px) */
 .letter h2 { padding-right: 56px; text-wrap: balance; }
+
+/* Coherent wedding photography; responsive editorial spread. */
+.page{--n-photo-filter:none}.photos{height:calc(min(100vw,430px)*1.38)}.photoSmall{top:calc(min(100vw,430px)*.65)}.medal{top:calc(min(100vw,430px)*1.06)}.silk{margin:24px 24px 0}.sign{padding-top:40px}.letter{padding-left:38px}.spread{padding-top:70px}.names{font-style:italic;text-transform:none;letter-spacing:0}
+@media(max-width:350px){.countNum{font-size:48px}.event{grid-template-columns:1fr;gap:12px}.eventAlt .eventTime{order:0}.eventTime{font-size:64px}.sides p{flex-direction:column;align-items:flex-start;text-align:left}}
