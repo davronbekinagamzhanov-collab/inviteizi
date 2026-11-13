@@ -20,3 +20,15 @@ for(const id of ids)it(`${id}: three unique artworks, no unsupported client phot
 for(const id of ids)it(`${id}: actual existing paid-slug route still renders full invitation`,async()=>{paid.id=id;const shell=InvitationPage({params:Promise.resolve({slug:"fixture-envelope-paid"}),searchParams:Promise.resolve({})}) as unknown as {props:{children:{type:(p:unknown)=>Promise<ReactElement>;props:unknown}}};const body=await shell.props.children.type(shell.props.children.props),html=renderToStaticMarkup(body);expect(html).not.toContain("data-watermark");expect(html.includes("data-open=")).toBe(!id.startsWith("suvbuyoq"));expect(html.length).toBeGreaterThan(1000);});
 
 it("formats and prices follow the registry without changing PRICES",async()=>{const {PRICES}=await import('./registry');for(const id of ids)expect(getDesign(id)!.format).toBe(id.startsWith('suvbuyoq')?'scroll':'animated');expect(PRICES).toEqual({animated:8000,scroll:6000,simple:5000});});
+
+// Preserve the owner's distinct reading paths, rather than allowing one shared section order to return.
+for(const [id,order] of [
+ ["gul-doira",["calendar","program","map"]],
+ ["suvbuyoq-zumrad",["program","map","calendar"]],
+ ["suvbuyoq-upa",["map","program","calendar"]],
+] as const)it(`${id}: keeps its own guest reading order`,async()=>{
+ const d=getDesign(id)!,{default:Design}=await d.load();
+ const html=renderToStaticMarkup(createElement(Design,{data:{...d.sample,noMusic:true},mode:"full"}));
+ const positions={calendar:html.indexOf('role="img"'),program:html.indexOf('data-event='),map:html.search(/<a[^>]*href="[^"]*2gis/)};
+ const actual=order.map(key=>positions[key]);expect(actual.every(n=>n>=0)).toBe(true);expect(actual).toEqual([...actual].sort((a,b)=>a-b));
+});
