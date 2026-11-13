@@ -209,9 +209,9 @@ const rawDesigns: RawDesign[] = [
   design("suzani-medalyon", 129, "nikoh", "simple", false, () => import("./themes/suzani-medalyon/Design"), { clientPhotos: true }),
   design("lola-medalyon", 136, "sunnat", "simple", false, () => import("./themes/lola-medalyon/Design"), { clientPhotos: true }),
   // «Пятно» (v2, 05.11.2026): акварельное пятно на белой бумаге, структура templates/themes/patno
-  design("suvbuyoq-tuman", 139, "nikoh", "animated", false, () => import("./themes/suvbuyoq-tuman/Design")),
-  design("suvbuyoq-zumrad", 140, "nikoh", "animated", false, () => import("./themes/suvbuyoq-zumrad/Design")),
-  design("suvbuyoq-upa", 141, "nikoh", "animated", false, () => import("./themes/suvbuyoq-upa/Design")),
+  design("suvbuyoq-tuman", 139, "nikoh", "scroll", false, () => import("./themes/suvbuyoq-tuman/Design")),
+  design("suvbuyoq-zumrad", 140, "nikoh", "scroll", false, () => import("./themes/suvbuyoq-zumrad/Design")),
+  design("suvbuyoq-upa", 141, "nikoh", "scroll", false, () => import("./themes/suvbuyoq-upa/Design")),
 
 ];
 

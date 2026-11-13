@@ -49,6 +49,19 @@ describe("three invitation formats",()=>{
     expect(metrics.formats.find(f=>f.id==="simple")?.revenue).toBe(6543);
     expect(metrics.formats.some(f=>f.id==="scroll")).toBe(false);
   });
+  it.each(["suvbuyoq-tuman","suvbuyoq-zumrad","suvbuyoq-upa"])("%s: saved Animated quote survives Scroll reclassification",async id=>{
+    const s=new Sim(),o=await nikohOrder(s,3);
+    await s.repo.updateOrder(o.id,{format:"animated",templateId:id,amount:8000});
+    expect(getDesign(id)?.format).toBe("scroll");
+    await s.callback(3,`edit:${o.number}`,1);expect(s.lastText(3)).toContain("8 000 ₸");
+    await s.click(3,uz.review.editNames);await s.text(3,"Эски тариф");await s.text(3,"Мадина");await s.click(3,uz.review.confirm);
+    await s.callback(3,`payok:${o.number}`,1);expect(s.lastText(3)).toContain("8 000 ₸");
+    await s.photo(3,"old-quote");await s.callback(ADMIN,`ok:${o.number}`,1);
+    expect(await s.repo.getOrder(o.id)).toMatchObject({format:"animated",amount:8000,slug:o.slug,status:"active"});
+    const metrics=await s.repo.analytics(ADMIN,"all",s.clock);
+    expect(metrics.formats.find(f=>f.id==="animated")?.revenue).toBe(8000);
+    expect(metrics.formats.some(f=>f.id==="scroll")).toBe(false);
+  });
   it("черновик, застрявший на старом шаге «формат», после обновления сразу видит каталог",async()=>{
     const s=new Sim();await startUz(s,4);
     await s.repo.saveStep(4,"fmt",{q:50,occasion:"nahorgi",catIdx:0});
