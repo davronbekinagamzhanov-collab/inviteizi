@@ -1,0 +1,42 @@
+[
+  {
+    "id": "folio",
+    "source": "/workspace/generated_images/exec-5c85390f-5dc3-4fd6-a7a8-7467ba1f4669.png",
+    "path": "/art/sunnat-collection/folio.webp",
+    "tool": "image_gen",
+    "kind": "AI-generated photographic-looking artwork, not documentary photography",
+    "sha256": "e59aa5964d1d170ecda528db7c67af22d9c7bb5083c687fb6d44d1c00546e552"
+  },
+  {
+    "id": "zarhal-duo",
+    "source": "/workspace/generated_images/exec-80dfecc3-2e9b-4875-8ef9-9e41f055ad2d.png",
+    "path": "/art/sunnat-collection/zarhal-duo.webp",
+    "tool": "image_gen",
+    "kind": "AI-generated photographic-looking artwork, not documentary photography",
+    "sha256": "9ecebad64b1afcf582a58493629e6a23aeb085e31f6727e054fa083fc76e556f"
+  },
+  {
+    "id": "moviy-ayvon",
+    "source": "/workspace/generated_images/exec-1d039234-6a9a-46e4-8b9a-480d1aa6db88.png",
+    "path": "/art/sunnat-collection/moviy-ayvon.webp",
+    "tool": "image_gen",
+    "kind": "AI-generated photographic-looking artwork, not documentary photography",
+    "sha256": "c31412f67da9a42a223ff12dfe28badf7b7d920383e26f1976a69aa5223641c3"
+  },
+  {
+    "id": "tulpor-quvonchi",
+    "source": "/workspace/generated_images/exec-20cb1dba-ad5c-445d-8608-e12eb8d7824a.png",
+    "path": "/art/sunnat-collection/tulpor-quvonchi.webp",
+    "tool": "image_gen",
+    "kind": "AI-generated photographic-looking artwork, not documentary photography",
+    "sha256": "ab82a0acc54f74ee3c714ab99808790f37bb99a4db5107620eb291d54b7cf3f4"
+  },
+  {
+    "id": "kashta-tilagi",
+    "source": "/workspace/generated_images/exec-b0f024f1-b572-4988-82eb-bf862e88c142.png",
+    "path": "/art/sunnat-collection/kashta-tilagi.webp",
+    "tool": "image_gen",
+    "kind": "AI-generated photographic-looking artwork, not documentary photography",
+    "sha256": "e0fd5f30620cb374c582d72db433cadb6d2fd048da3abe2c29dcb371041bcb44"
+  }
+]
