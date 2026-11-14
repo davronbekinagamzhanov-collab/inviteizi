@@ -63,6 +63,9 @@ function design(
 }
 
 const rawDesigns: RawDesign[] = [
+  // Jubilee candidates: new IDs stay unlisted until separate owner-approved activation.
+  design("umr-durdonasi",163,"yubiley","animated",true,()=>import("./themes/umr-durdonasi/Design"),{clientPhotos:true,art:"/art/yubiley-collection/umr-durdonasi.webp"}),
+  design("qadr-surati",164,"yubiley","simple",true,()=>import("./themes/qadr-surati/Design"),{clientPhotos:true,art:"/art/yubiley-collection/qadr-surati.webp"}),
   // Unlisted sunnat collection, pending artistic acceptance.
   design("zarhal-duo",159,"sunnat","animated",true,()=>import("./themes/zarhal-duo/Design"),{clientPhotos:false,art:"/art/sunnat-collection/zarhal-duo.webp"}),
   design("moviy-ayvon",160,"sunnat","scroll",true,()=>import("./themes/moviy-ayvon/Design"),{clientPhotos:false,art:"/art/sunnat-collection/moviy-ayvon.webp"}),
@@ -171,7 +174,7 @@ const rawDesigns: RawDesign[] = [
   design("doppicha", 78, "sunnat", "simple", false, () => import("./themes/doppicha/Design")),
   design("sayram-hovli", 79, "sunnat", "scroll", false, () => import("./themes/sayram-hovli/Design")),
   design("zarvaraq", 80, "yubiley", "simple", false, () => import("./themes/zarvaraq/Design")),
-  design("umr-daraxti", 81, "yubiley", "scroll", false, () => import("./themes/umr-daraxti/Design")),
+  design("umr-daraxti", 81, "yubiley", "scroll", true, () => import("./themes/umr-daraxti/Design"),{clientPhotos:false,art:"/art/yubiley-collection/umr-daraxti.webp"}),
   design("marvarid-satr", 82, "nikoh", "simple", true, () => import("./themes/marvarid-satr/Design"), {art:"/art/bodom-guli.webp"}),
   design("gulbog-sahifa", 83, "nikoh", "scroll", true, () => import("./themes/gulbog-sahifa/Design"), {art:"/art/gulbog-sahifa.webp"}),
   design("suzani-yol", 84, "nikoh", "scroll", false, () => import("./themes/suzani-yol/Design")),
@@ -215,7 +218,7 @@ const rawDesigns: RawDesign[] = [
   design("muhrli-maktub", 119, "nikoh", "animated", false, () => import("./themes/muhrli-maktub/Design")),
   design("tonggi-piyola", 120, "nahorgi", "animated", false, () => import("./themes/tonggi-piyola/Design")),
   design("lola-bodom", 121, "sunnat", "animated", false, () => import("./themes/lola-bodom/Design")),
-  design("bordo-guldasta", 122, "yubiley", "simple", false, () => import("./themes/bordo-guldasta/Design")),
+  design("bordo-guldasta", 122, "yubiley", "simple", true, () => import("./themes/bordo-guldasta/Design"),{clientPhotos:false,art:"/art/yubiley-collection/bordo-guldasta.webp"}),
   // Батч 3 (123–138): структуры S1–S7, docs/design/batch3.md
   design("choy-maktub", 123, "nahorgi", "simple", false, () => import("./themes/choy-maktub/Design")),
   design("oq-maktub", 127, "nikoh", "simple", false, () => import("./themes/oq-maktub/Design")),
@@ -243,10 +246,10 @@ const rawDesigns: RawDesign[] = [
 const STYLE_OF: Record<DesignStyle, string[]> = {
   milk: ["subhi-safo","vip-marvarid", "suvbuyoq-tuman", "suvbuyoq-zumrad", "suvbuyoq-upa", "umr-kitobi", "tong-varaq", "hurmat-maktub", "oq-maktub", "choy-maktub", "sahar-ipagi", "sahar-maktubi", "ehtirom-kartasi","zarhal-eshik", "atlas-tolqin", "non-muhr", "marvarid-satr", "bugdoy-boshoq", "shirin-tilak", "visol-soati", "tut-qogozi"],
   gold: ["vip-zarrin-ahd", "vip-tilla-muhr", "oltin-monogramma", "oltin-ot", "zarhal-lavha", "qosh-uzuk", "zarvaraq", "saodat-kaliti"],
-  floral: ["sahar-sabosi", "vip-umr-ziyosi", "bordo-guldasta", "lola-bodom", "tonggi-piyola", "muhrli-maktub", "gul-doira", "girih-barg", "umr-sahifalari","pion-guldasta", "ipak-romol", "paxta-gul", "visol-rishta", "kabutar-salom", "umr-daraxti", "rayhon-sahari", "siyoh-duo", "shabnam-visol", "uzum-hovli"],
+  floral: ["umr-durdonasi", "sahar-sabosi", "vip-umr-ziyosi", "bordo-guldasta", "lola-bodom", "tonggi-piyola", "muhrli-maktub", "gul-doira", "girih-barg", "umr-sahifalari","pion-guldasta", "ipak-romol", "paxta-gul", "visol-rishta", "kabutar-salom", "umr-daraxti", "rayhon-sahari", "siyoh-duo", "shabnam-visol", "uzum-hovli"],
   national: ["zarhal-duo","moviy-ayvon","kashta-tilagi","tong-naqshi","vip-zarbof", "vip-oq-tulpor", "vip-suzana", "doppi-kitob", "ganch-darvoza", "islimi-varaq", "sunnat-muqova", "sunnat-nasab","ganch-peshtoq", "rishton-koshin", "oq-ot", "sayram-hovli", "doppicha", "adras-nishon", "suzani-yol", "sopol-navo", "girih-nur", "dutor-navosi", "minor-satr", "kumush-taroq", "mis-kafgir", "oq-chinni", "tonggi-qozon", "yelpigich-ziynat"],
   dark: ["sapfir", "shohona-baxmal"],
-  photo: ["tulpor-quvonchi","bog-nasimi","vip-ipak-ziyosi", "vip-visol-nuri", "vip-bogi-visol", "vip-osmon", "lola-medalyon", "suzani-medalyon", "visol-hikoya", "qozon-tongi", "xotira-albom", "ipak-albom", "non-albom", "nur-varaq", "muhr", "ipak", "bog", "tong-dasturxon", "tandir-nuri", "atirgul", "dasturxon", "bodom-guli", "samarqand-kitob", "tonggi-choy", "gulbog-sahifa", "lola-ehtirom", "anor-bogi"],
+  photo: ["qadr-surati", "tulpor-quvonchi","bog-nasimi","vip-ipak-ziyosi", "vip-visol-nuri", "vip-bogi-visol", "vip-osmon", "lola-medalyon", "suzani-medalyon", "visol-hikoya", "qozon-tongi", "xotira-albom", "ipak-albom", "non-albom", "nur-varaq", "muhr", "ipak", "bog", "tong-dasturxon", "tandir-nuri", "atirgul", "dasturxon", "bodom-guli", "samarqand-kitob", "tonggi-choy", "gulbog-sahifa", "lola-ehtirom", "anor-bogi"],
 };
 
 function styleOf(id: string): DesignStyle {
