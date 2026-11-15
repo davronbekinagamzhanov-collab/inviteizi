@@ -333,6 +333,8 @@ const raw = {
   designs: {
     "zarhal-duo":"Зарҳал дуо",
     "moviy-ayvon":"Мовий айвон",
+    "umr-durdonasi":"Умр дурдонаси",
+    "qadr-surati":"Қадр сурати",
     "tulpor-quvonchi":"Тулпор қувончи",
     "kashta-tilagi":"Кашта тилаги",
     "bog-nasimi": "Боғ насими",
