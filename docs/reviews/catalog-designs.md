@@ -17,24 +17,22 @@
 (`is_active` = в продаже, `price` = цена формата, `sort` = порядок каталога). Тест
 `supabase/natural-release.test.ts` проверяет это на изолированной PostgreSQL.
 
-Тесты больше не завязаны на число дизайнов: они сверяются с `ON_SALE`. Исключение — правила порядка в
-`templates/catalog-order.test.ts` (прежние решения владельца: первым в каждом тадбире дизайн за 8 000 ₸,
-в никоҳ первые — №113 «Муҳр» и №114 «Ипак», в юбилее первые «Умр дарахти» и «Бордо гулдаста»). Если новый порядок
-их меняет — эти правила обновляются вместе со списком.
+Тесты не завязаны на число дизайнов: они сверяются с `ON_SALE`. Порядок, заданный владельцем 15.11.2026,
+закреплён в `templates/catalog-order.test.ts` — при новом порядке тест обновляется вместе со списком.
 
 Все 107 дизайнов готовы к включению технически: у каждого есть название, обложка каталога, миниатюра,
 JPG для бота и OG-превью ссылки (проверяет `templates/catalog.test.ts`).
 
-**Сейчас ничего нового не включено** — в продаже прежние 33. Список и порядок задаёт владелец.
+**15.11.2026 владелец включил все 21 новый дизайн** — в продаже 54. Новые стоят первыми в своём тадбире, прежние ниже в прежнем порядке.
 
 ## Сводка: в продаже / всего
 
 | Тадбир | Simple: в продаже / всего | Scroll: в продаже / всего | Animated: в продаже / всего |
 |---|---|---|---|
-| Никоҳ | 4 / 8 | 5 / 16 | 6 / 31 |
-| Суннат | 2 / 5 | 2 / 5 | 2 / 7 |
-| Наҳорги ош | 2 / 8 | 2 / 6 | 2 / 8 |
-| Юбилей | 2 / 5 | 2 / 4 | 2 / 4 |
+| Никоҳ | 4 / 8 | 5 / 16 | 15 / 31 |
+| Суннат | 4 / 5 | 3 / 5 | 4 / 7 |
+| Наҳорги ош | 4 / 8 | 3 / 6 | 3 / 8 |
+| Юбилей | 3 / 5 | 2 / 4 | 4 / 4 |
 
 Колонки таблицы: «Картина в дизайне» — встроенная фотография/иллюстрация дизайна; «Фото клиента» — бот предлагает
 клиенту загрузить свои фото (1–3). «Откуда» — в каком PR дизайн появился. Ссылки «демо» ведут на Preview ветки.
@@ -129,24 +127,24 @@ JPG для бота и OG-превью ссылки (проверяет `templat
 | 139 | `suvbuyoq-tuman` | Мовий туман | Никоҳ | Scroll | 6 000 ₸ | нет | нет | ✅ в продаже | до PR | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/suvbuyoq-tuman) |
 | 140 | `suvbuyoq-zumrad` | Зумрад | Никоҳ | Scroll | 6 000 ₸ | нет | нет | ✅ в продаже | до PR | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/suvbuyoq-zumrad) |
 | 141 | `suvbuyoq-upa` | Упа гул | Никоҳ | Scroll | 6 000 ₸ | нет | нет | ✅ в продаже | до PR | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/suvbuyoq-upa) |
-| 142 | `vip-tilla-muhr` | Тилла муҳр (VIP) | Никоҳ | Animated | 8 000 ₸ | да | да | новый, не в продаже | PR #13 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/vip-tilla-muhr) |
-| 143 | `vip-osmon` | Осмон (VIP) | Никоҳ | Animated | 8 000 ₸ | да | да | новый, не в продаже | PR #13 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/vip-osmon) |
-| 144 | `vip-suzana` | Сўзана (VIP) | Никоҳ | Animated | 8 000 ₸ | да | да | новый, не в продаже | PR #13 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/vip-suzana) |
-| 145 | `vip-marvarid` | Марварид (VIP) | Никоҳ | Animated | 8 000 ₸ | да | да | новый, не в продаже | PR #13 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/vip-marvarid) |
-| 146 | `vip-bogi-visol` | Боғи висол (VIP) | Никоҳ | Animated | 8 000 ₸ | да | да | новый, не в продаже | PR #13 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/vip-bogi-visol) |
-| 147 | `vip-oq-tulpor` | Оқ тулпор (VIP) | Суннат | Animated | 8 000 ₸ | да | нет | новый, не в продаже | PR #13 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/vip-oq-tulpor) |
-| 148 | `vip-umr-ziyosi` | Умр зиёси (VIP) | Юбилей | Animated | 8 000 ₸ | да | да | новый, не в продаже | PR #13 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/vip-umr-ziyosi) |
-| 149 | `vip-visol-nuri` | Висол нури (VIP) | Никоҳ | Animated | 8 000 ₸ | да | да | новый, не в продаже | PR #13 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/vip-visol-nuri) |
-| 150 | `vip-zarrin-ahd` | Заррин аҳд (VIP) | Никоҳ | Animated | 8 000 ₸ | да | да | новый, не в продаже | PR #13 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/vip-zarrin-ahd) |
-| 151 | `vip-ipak-ziyosi` | Ипак зиёси (VIP) | Никоҳ | Animated | 8 000 ₸ | да | да | новый, не в продаже | PR #13 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/vip-ipak-ziyosi) |
-| 152 | `vip-zarbof` | Зарбоф (VIP) | Никоҳ | Animated | 8 000 ₸ | да | нет | новый, не в продаже | PR #13 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/vip-zarbof) |
-| 153 | `sahar-sabosi` | Саҳар сабоси | Наҳорги ош | Animated | 8 000 ₸ | да | нет | новый, не в продаже | PR #13 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/sahar-sabosi) |
-| 154 | `subhi-safo` | Субҳи сафо | Наҳорги ош | Scroll | 6 000 ₸ | да | нет | новый, не в продаже | PR #13 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/subhi-safo) |
-| 157 | `bog-nasimi` | Боғ насими | Наҳорги ош | Simple | 5 000 ₸ | да | да | новый, не в продаже | PR #17 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/bog-nasimi) |
-| 158 | `tong-naqshi` | Тонг нақши | Наҳорги ош | Simple | 5 000 ₸ | да | нет | новый, не в продаже | PR #17 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/tong-naqshi) |
-| 159 | `zarhal-duo` | Зарҳал дуо | Суннат | Animated | 8 000 ₸ | да | нет | новый, не в продаже | PR #18 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/zarhal-duo) |
-| 160 | `moviy-ayvon` | Мовий айвон | Суннат | Scroll | 6 000 ₸ | да | нет | новый, не в продаже | PR #18 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/moviy-ayvon) |
-| 161 | `tulpor-quvonchi` | Тулпор қувончи | Суннат | Simple | 5 000 ₸ | да | да | новый, не в продаже | PR #18 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/tulpor-quvonchi) |
-| 162 | `kashta-tilagi` | Кашта тилаги | Суннат | Simple | 5 000 ₸ | да | нет | новый, не в продаже | PR #18 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/kashta-tilagi) |
-| 163 | `umr-durdonasi` | Умр дурдонаси | Юбилей | Animated | 8 000 ₸ | да | да | новый, не в продаже | PR #19 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/umr-durdonasi) |
-| 164 | `qadr-surati` | Қадр сурати | Юбилей | Simple | 5 000 ₸ | да | да | новый, не в продаже | PR #19 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/qadr-surati) |
+| 142 | `vip-tilla-muhr` | Тилла муҳр (VIP) | Никоҳ | Animated | 8 000 ₸ | да | да | ✅ в продаже | PR #13 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/vip-tilla-muhr) |
+| 143 | `vip-osmon` | Осмон (VIP) | Никоҳ | Animated | 8 000 ₸ | да | да | ✅ в продаже | PR #13 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/vip-osmon) |
+| 144 | `vip-suzana` | Сўзана (VIP) | Никоҳ | Animated | 8 000 ₸ | да | да | ✅ в продаже | PR #13 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/vip-suzana) |
+| 145 | `vip-marvarid` | Марварид (VIP) | Никоҳ | Animated | 8 000 ₸ | да | да | ✅ в продаже | PR #13 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/vip-marvarid) |
+| 146 | `vip-bogi-visol` | Боғи висол (VIP) | Никоҳ | Animated | 8 000 ₸ | да | да | ✅ в продаже | PR #13 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/vip-bogi-visol) |
+| 147 | `vip-oq-tulpor` | Оқ тулпор (VIP) | Суннат | Animated | 8 000 ₸ | да | нет | ✅ в продаже | PR #13 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/vip-oq-tulpor) |
+| 148 | `vip-umr-ziyosi` | Умр зиёси (VIP) | Юбилей | Animated | 8 000 ₸ | да | да | ✅ в продаже | PR #13 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/vip-umr-ziyosi) |
+| 149 | `vip-visol-nuri` | Висол нури (VIP) | Никоҳ | Animated | 8 000 ₸ | да | да | ✅ в продаже | PR #13 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/vip-visol-nuri) |
+| 150 | `vip-zarrin-ahd` | Заррин аҳд (VIP) | Никоҳ | Animated | 8 000 ₸ | да | да | ✅ в продаже | PR #13 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/vip-zarrin-ahd) |
+| 151 | `vip-ipak-ziyosi` | Ипак зиёси (VIP) | Никоҳ | Animated | 8 000 ₸ | да | да | ✅ в продаже | PR #13 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/vip-ipak-ziyosi) |
+| 152 | `vip-zarbof` | Зарбоф (VIP) | Никоҳ | Animated | 8 000 ₸ | да | нет | ✅ в продаже | PR #13 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/vip-zarbof) |
+| 153 | `sahar-sabosi` | Саҳар сабоси | Наҳорги ош | Animated | 8 000 ₸ | да | нет | ✅ в продаже | PR #13 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/sahar-sabosi) |
+| 154 | `subhi-safo` | Субҳи сафо | Наҳорги ош | Scroll | 6 000 ₸ | да | нет | ✅ в продаже | PR #13 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/subhi-safo) |
+| 157 | `bog-nasimi` | Боғ насими | Наҳорги ош | Simple | 5 000 ₸ | да | да | ✅ в продаже | PR #17 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/bog-nasimi) |
+| 158 | `tong-naqshi` | Тонг нақши | Наҳорги ош | Simple | 5 000 ₸ | да | нет | ✅ в продаже | PR #17 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/tong-naqshi) |
+| 159 | `zarhal-duo` | Зарҳал дуо | Суннат | Animated | 8 000 ₸ | да | нет | ✅ в продаже | PR #18 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/zarhal-duo) |
+| 160 | `moviy-ayvon` | Мовий айвон | Суннат | Scroll | 6 000 ₸ | да | нет | ✅ в продаже | PR #18 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/moviy-ayvon) |
+| 161 | `tulpor-quvonchi` | Тулпор қувончи | Суннат | Simple | 5 000 ₸ | да | да | ✅ в продаже | PR #18 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/tulpor-quvonchi) |
+| 162 | `kashta-tilagi` | Кашта тилаги | Суннат | Simple | 5 000 ₸ | да | нет | ✅ в продаже | PR #18 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/kashta-tilagi) |
+| 163 | `umr-durdonasi` | Умр дурдонаси | Юбилей | Animated | 8 000 ₸ | да | да | ✅ в продаже | PR #19 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/umr-durdonasi) |
+| 164 | `qadr-surati` | Қадр сурати | Юбилей | Simple | 5 000 ₸ | да | да | ✅ в продаже | PR #19 | [демо](https://inviteizi-git-release-integration-1-scanizi.vercel.app/demo/qadr-surati) |

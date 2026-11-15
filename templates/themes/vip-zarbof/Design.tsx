@@ -1,33 +1,300 @@
 "use client";
-import {useMotionPreference} from "../vip-masterpiece/useMotionPreference";
-import type {ReactNode} from "react";
-import {motion} from "motion/react";
-import {t,luxuryWeddingCopy as copy} from "@/texts/uz-cyrl";
-import {monthGrid} from "@/lib/wedding-date";
-import type {TemplateProps} from "../types";
-import {designVars} from "../types";
-import {InvitationShell} from "../../blocks/InvitationShell";
-import {useInvitation,type Invitation} from "../../blocks/useInvitation";
-import {MapButton} from "../../blocks/MapButton";
-import {Words,useFitWords} from "../../blocks/FitWords";
-import {VipImage} from "../vip-tilla-muhr/VipImage";
-import {photos,initials,reception} from "../vip-masterpiece/model";
-import {Countdown} from "../../blocks/Countdown";
-import {GanchSprig,CeremonialCloth} from "./Ornament";
-import {GrandOpening} from "./Opening";
-import {fonts} from "./fonts";
+import { FamilySides } from "../../blocks/FamilySides";
+import { useMotionPreference } from "../vip-masterpiece/useMotionPreference";
+import type { ReactNode } from "react";
+import { motion } from "motion/react";
+import { t, luxuryWeddingCopy as copy } from "@/texts/uz-cyrl";
+import { monthGrid } from "@/lib/wedding-date";
+import type { TemplateProps } from "../types";
+import { designVars } from "../types";
+import { InvitationShell } from "../../blocks/InvitationShell";
+import { useInvitation, type Invitation } from "../../blocks/useInvitation";
+import { MapButton } from "../../blocks/MapButton";
+import { Words, useFitWords } from "../../blocks/FitWords";
+import { VipImage } from "../vip-tilla-muhr/VipImage";
+import { photos, initials, reception } from "../vip-masterpiece/model";
+import { Countdown } from "../../blocks/Countdown";
+import { GanchSprig, CeremonialCloth } from "./Ornament";
+import { GrandOpening } from "./Opening";
+import { fonts } from "./fonts";
 import s from "./grand.module.css";
-const palette={primary:"#30373a",primaryDark:"#202629",gold:"#9d8059",goldLight:"#d8c8ac",paper:"#eee9de",ink:"#30373a",muted:"#757267"};
-function Rise({children,className=""}:{children:ReactNode;className?:string}){const reduce=useMotionPreference();return <motion.div className={className} initial={{opacity:.7,clipPath:reduce?"inset(0px)":"inset(0px 0px 35px)"}} whileInView={{opacity:1,clipPath:"inset(0px)"}} viewport={{once:true,margin:"0px 0px 100px"}} transition={{duration:reduce?0:1.05,ease:[.3,.6,.2,1]}}>{children}</motion.div>;}
-function Colonnade({className=""}:{className?:string}){return <svg className={`${s.colonnade} ${className}`} viewBox="0 0 430 700" preserveAspectRatio="none" aria-hidden="true"><circle cx="215" cy="176" r="153"/><circle cx="215" cy="176" r="143"/><path d="M-20 60L48 25V560L-20 602M450 60L382 25V560L450 602M12 53V574M27 43V567M418 53V574M403 43V567"/><path className={s.floor} d="M-40 580H470M-40 602H470M-40 630H470M-40 666H470M-40 710H470"/></svg>;}
-function GrandNames({inv}:{inv:Invitation}){const count=`${inv.data.groom??""} ${inv.data.bride??""}`.trim().split(/\s+/).length,ref=useFitWords<HTMLHeadingElement>(count>4?33:49);return <h1 ref={ref} className={s.names}><Words text={inv.data.groom??""}/><i>{t.natural.and}</i><Words text={inv.data.bride??""}/></h1>;}
-function GrandPhoto({inv,slot,className="",eager=false}:{inv:Invitation;slot:1|2|3;className?:string;eager?:boolean}){return <div className={`${s.photograph} ${className}`}><VipImage photo={photos(inv.data,"vip-zarbof")[slot-1]} eager={eager}/></div>;}
-function GrandProgramme({inv}:{inv:Invitation}){return <section data-vip-section="program" className={s.programme}><Rise><span className={s.eyebrow}>{copy(inv.lang).day}</span><h2>{t.venue.programTitle}</h2><GanchSprig className={s.programSprig}/></Rise><ol>{inv.program.map((ev,i)=><li key={`${ev.kind}-${i}`}><Rise className={s.programStep}><GanchSprig className={s.stepSprig}/><span className={s.stepIndex} aria-hidden="true">{String(i+1).padStart(2,"0")}</span><time dateTime={`${ev.date}T${ev.time}`}>{ev.time}</time><div><h3>{ev.title}</h3><p>{t.date.long(ev.when.day,ev.when.monthIndex,ev.when.year)}</p><p>{ev.venueName}</p></div></Rise></li>)}</ol></section>;}
-function GrandCalendar({inv}:{inv:Invitation}){const w=reception(inv).when;return <section data-vip-section="date" data-wedding-calendar="embroidered-cloth" className={s.calendarScene}><Rise><div className={s.weddingCloth}><CeremonialCloth/><GanchSprig className={s.calendarSprig}/><span className={s.eyebrow}>{copy(inv.lang).day}</span><div className={s.weddingDate}><span className={s.calendarDay}>{w.day}</span><p>{t.date.monthYear(w.monthIndex,w.year)}</p></div><div data-calendar-grid className={s.calendar} aria-label={t.natural.calendarAria(t.date.long(w.day,w.monthIndex,w.year))}>{t.weekdaysShort.map(d=><span className={s.weekday} key={d}>{d}</span>)}{monthGrid(w.year,w.monthIndex).flat().map((d,i)=><span key={i} className={s.day} aria-current={d===w.day?"date":undefined}>{d}</span>)}</div><GanchSprig className={s.calendarTail}/></div></Rise><div data-vip-countdown data-target-at={w.startsAt.toISOString()} className={s.countdown}><p className={s.countTitle}>{t.countdown.title[inv.occasion]}</p><Countdown startsAt={w.startsAt} look={{grid:s.countGrid,today:s.countToday,renderUnit:u=><div className={s.countUnit}><span data-count-value data-unit={u.key} className={s.countNumber}>{u.value}</span><span data-count-label className={s.countLabel}>{u.label}</span></div>}}/></div></section>;}
+const palette = {
+  primary: "#30373a",
+  primaryDark: "#202629",
+  gold: "#9d8059",
+  goldLight: "#d8c8ac",
+  paper: "#eee9de",
+  ink: "#30373a",
+  muted: "#757267",
+};
+function Rise({ children, className = "" }: { children: ReactNode; className?: string }) {
+  const reduce = useMotionPreference();
+  return (
+    <motion.div
+      className={className}
+      initial={{ opacity: 0.7, clipPath: reduce ? "inset(0px)" : "inset(0px 0px 35px)" }}
+      whileInView={{ opacity: 1, clipPath: "inset(0px)" }}
+      viewport={{ once: true, margin: "0px 0px 100px" }}
+      transition={{ duration: reduce ? 0 : 1.05, ease: [0.3, 0.6, 0.2, 1] }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+function Colonnade({ className = "" }: { className?: string }) {
+  return (
+    <svg className={`${s.colonnade} ${className}`} viewBox="0 0 430 700" preserveAspectRatio="none" aria-hidden="true">
+      <circle cx="215" cy="176" r="153" />
+      <circle cx="215" cy="176" r="143" />
+      <path d="M-20 60L48 25V560L-20 602M450 60L382 25V560L450 602M12 53V574M27 43V567M418 53V574M403 43V567" />
+      <path className={s.floor} d="M-40 580H470M-40 602H470M-40 630H470M-40 666H470M-40 710H470" />
+    </svg>
+  );
+}
+function GrandNames({ inv }: { inv: Invitation }) {
+  const count = `${inv.data.groom ?? ""} ${inv.data.bride ?? ""}`.trim().split(/\s+/).length,
+    ref = useFitWords<HTMLHeadingElement>(count > 4 ? 33 : 49);
+  return (
+    <h1 ref={ref} className={s.names}>
+      <Words text={inv.data.groom ?? ""} />
+      <i>{t.natural.and}</i>
+      <Words text={inv.data.bride ?? ""} />
+    </h1>
+  );
+}
+function GrandPhoto({
+  inv,
+  slot,
+  className = "",
+  eager = false,
+}: {
+  inv: Invitation;
+  slot: 1 | 2 | 3;
+  className?: string;
+  eager?: boolean;
+}) {
+  return (
+    <div className={`${s.photograph} ${className}`}>
+      <VipImage photo={photos(inv.data, "vip-zarbof")[slot - 1]} eager={eager} />
+    </div>
+  );
+}
+function GrandProgramme({ inv }: { inv: Invitation }) {
+  return (
+    <section data-vip-section="program" className={s.programme}>
+      <Rise>
+        <span className={s.eyebrow}>{copy(inv.lang).day}</span>
+        <h2>{t.venue.programTitle}</h2>
+        <GanchSprig className={s.programSprig} />
+      </Rise>
+      <ol>
+        {inv.program.map((ev, i) => (
+          <li key={`${ev.kind}-${i}`}>
+            <Rise className={s.programStep}>
+              <GanchSprig className={s.stepSprig} />
+              <span className={s.stepIndex} aria-hidden="true">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <time dateTime={`${ev.date}T${ev.time}`}>{ev.time}</time>
+              <div>
+                <h3>{ev.title}</h3>
+                <p>{t.date.long(ev.when.day, ev.when.monthIndex, ev.when.year)}</p>
+                <p>{ev.venueName}</p>
+              </div>
+            </Rise>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+function GrandCalendar({ inv }: { inv: Invitation }) {
+  const w = reception(inv).when;
+  return (
+    <section data-vip-section="date" data-wedding-calendar="embroidered-cloth" className={s.calendarScene}>
+      <Rise>
+        <div className={s.weddingCloth}>
+          <CeremonialCloth />
+          <GanchSprig className={s.calendarSprig} />
+          <span className={s.eyebrow}>{copy(inv.lang).day}</span>
+          <div className={s.weddingDate}>
+            <span className={s.calendarDay}>{w.day}</span>
+            <p>{t.date.monthYear(w.monthIndex, w.year)}</p>
+          </div>
+          <div
+            data-calendar-grid
+            className={s.calendar}
+            aria-label={t.natural.calendarAria(t.date.long(w.day, w.monthIndex, w.year))}
+          >
+            {t.weekdaysShort.map((d) => (
+              <span className={s.weekday} key={d}>
+                {d}
+              </span>
+            ))}
+            {monthGrid(w.year, w.monthIndex)
+              .flat()
+              .map((d, i) => (
+                <span key={i} className={s.day} aria-current={d === w.day ? "date" : undefined}>
+                  {d}
+                </span>
+              ))}
+          </div>
+          <GanchSprig className={s.calendarTail} />
+        </div>
+      </Rise>
+      <div data-vip-countdown data-target-at={w.startsAt.toISOString()} className={s.countdown}>
+        <p className={s.countTitle}>{t.countdown.title[inv.occasion]}</p>
+        <Countdown
+          startsAt={w.startsAt}
+          look={{
+            grid: s.countGrid,
+            today: s.countToday,
+            renderUnit: (u) => (
+              <div className={s.countUnit}>
+                <span data-count-value data-unit={u.key} className={s.countNumber}>
+                  {u.value}
+                </span>
+                <span data-count-label className={s.countLabel}>
+                  {u.label}
+                </span>
+              </div>
+            ),
+          }}
+        />
+      </div>
+    </section>
+  );
+}
 
-function GrandVenues({inv}:{inv:Invitation}){return <section data-vip-section="venue" className={s.venues}><Rise className={s.venueTitle}><span className={s.eyebrow}>{copy(inv.lang).arrival}</span><h2>{t.natural.place}</h2><GanchSprig className={s.venueSprig}/></Rise>{inv.program.map((ev,i)=><article className={s.location} key={`${ev.kind}-${i}`}><Rise><GanchSprig className={s.placeSprig}/><span className={s.placeOrdinal} aria-hidden="true">{String(i+1).padStart(2,"0")}</span><p className={s.eyebrow}>{ev.title} · {ev.time}</p><h3>{ev.venueName}</h3><p className={s.address}>{ev.address}</p><MapButton href={ev.mapHref} className={s.mapButton} iconClassName="text-current"/></Rise><svg className={s.locationLines} viewBox="0 0 320 80" aria-hidden="true"><path d="M0 22C70 69 130 8 194 30S275 74 320 31M0 30C73 77 128 16 192 38S273 82 320 39"/></svg></article>)}</section>;}
-function GrandFinale({inv}:{inv:Invitation}){const [a,b]=initials(inv.data),w=reception(inv).when;return <section data-vip-section="closing" inert={!inv.opened} aria-hidden={!inv.opened} className={s.finale}><Rise><span className={s.eyebrow}>{copy(inv.lang).love}</span><h2>{t.hosts.waiting}</h2><p>{inv.blessing}</p><div className={s.finalCrest} data-latin-monogram aria-label={`${a} ${b}`}><span>{a}</span><i>{w.day}<small>{String(w.monthIndex+1).padStart(2,"0")}</small></i><span>{b}</span></div><GanchSprig className={s.finalSprig}/><p className={s.hosts}>{inv.data.hosts}</p></Rise></section>;}
-export default function Design({data,mode}:TemplateProps){const inv=useInvitation(data,mode,{initialLanguage:"uz"}),[a,b]=initials(inv.data),ev=reception(inv);return <InvitationShell inv={inv} style={designVars(palette,{display:"var(--grand-display)",accent:"var(--grand-display)",body:"var(--grand-text)"})} fontsClassName={fonts} className={s.page} backdropClassName="bg-[#d2cbbf]" pageColor={palette.paper} musicVariant="soft" brandVariant="soft" rsvpLook={{paper:palette.paper,ink:palette.ink,accent:palette.gold,line:palette.gold,soft:palette.goldLight,radius:"0px",buttonRadius:"0px"}} epilogue={<GrandFinale inv={inv}/>}> {!inv.opened&&<GrandOpening inv={inv}/>}<div data-master-layout="grand-architecture-v2" inert={!inv.opened} aria-hidden={!inv.opened}>
- <header data-vip-section="hero" className={s.hero}><Colonnade/><span className={`${s.eyebrow} ${s.heroKicker}`}>{copy(inv.lang).invitation}</span><div className={s.heroCrest} data-latin-monogram aria-label={`${a} ${b}`}><span>{a}</span><span>{b}</span></div><div className={s.heroNames}><GrandNames inv={inv}/><p className={s.heroDate}>{t.date.long(ev.when.day,ev.when.monthIndex,ev.when.year)}<span> · {ev.time}</span></p></div><GrandPhoto inv={inv} slot={1} eager className={s.heroStillLife}/><span className={s.scroll}>{copy(inv.lang).scroll}<i>↓</i></span></header>
- <main><GrandProgramme inv={inv}/><GrandCalendar inv={inv}/><GrandVenues inv={inv}/><section data-vip-section="greeting" className={s.letter}><GrandPhoto inv={inv} slot={2} className={s.letterStillLife}/><Rise className={s.letterWords}><GanchSprig className={s.letterSprig}/><span className={s.eyebrow}>{copy(inv.lang).love}</span><h2>{inv.text.greeting}</h2><p>{inv.text.body}</p><p className={s.hosts}>{inv.data.hosts}</p></Rise></section><section data-vip-section="memory" className={s.memory}><GrandPhoto inv={inv} slot={3}/><Rise className={s.memoryWords}><span className={s.eyebrow}>{copy(inv.lang).invitation}</span><p data-photo-caption>{copy(inv.lang).forever}</p></Rise></section></main>
- </div></InvitationShell>;}
+function GrandVenues({ inv }: { inv: Invitation }) {
+  return (
+    <section data-vip-section="venue" className={s.venues}>
+      <Rise className={s.venueTitle}>
+        <span className={s.eyebrow}>{copy(inv.lang).arrival}</span>
+        <h2>{t.natural.place}</h2>
+        <GanchSprig className={s.venueSprig} />
+      </Rise>
+      {inv.program.map((ev, i) => (
+        <article className={s.location} key={`${ev.kind}-${i}`}>
+          <Rise>
+            <GanchSprig className={s.placeSprig} />
+            <span className={s.placeOrdinal} aria-hidden="true">
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            <p className={s.eyebrow}>
+              {ev.title} · {ev.time}
+            </p>
+            <h3>{ev.venueName}</h3>
+            <p className={s.address}>{ev.address}</p>
+            <MapButton href={ev.mapHref} className={s.mapButton} iconClassName="text-current" />
+          </Rise>
+          <svg className={s.locationLines} viewBox="0 0 320 80" aria-hidden="true">
+            <path d="M0 22C70 69 130 8 194 30S275 74 320 31M0 30C73 77 128 16 192 38S273 82 320 39" />
+          </svg>
+        </article>
+      ))}
+    </section>
+  );
+}
+function GrandFinale({ inv }: { inv: Invitation }) {
+  const [a, b] = initials(inv.data),
+    w = reception(inv).when;
+  return (
+    <section data-vip-section="closing" inert={!inv.opened} aria-hidden={!inv.opened} className={s.finale}>
+      <Rise>
+        <span className={s.eyebrow}>{copy(inv.lang).love}</span>
+        <h2>{t.hosts.waiting}</h2>
+        <p>{inv.blessing}</p>
+        <div className={s.finalCrest} data-latin-monogram aria-label={`${a} ${b}`}>
+          <span>{a}</span>
+          <i>
+            {w.day}
+            <small>{String(w.monthIndex + 1).padStart(2, "0")}</small>
+          </i>
+          <span>{b}</span>
+        </div>
+        <GanchSprig className={s.finalSprig} />
+        <p className={s.hosts}>{inv.data.hosts}</p>
+      </Rise>
+    </section>
+  );
+}
+export default function Design({ data, mode }: TemplateProps) {
+  const inv = useInvitation(data, mode, { initialLanguage: "uz" }),
+    [a, b] = initials(inv.data),
+    ev = reception(inv);
+  return (
+    <InvitationShell
+      inv={inv}
+      style={designVars(palette, {
+        display: "var(--grand-display)",
+        accent: "var(--grand-display)",
+        body: "var(--grand-text)",
+      })}
+      fontsClassName={fonts}
+      className={s.page}
+      backdropClassName="bg-[#d2cbbf]"
+      pageColor={palette.paper}
+      musicVariant="soft"
+      brandVariant="soft"
+      rsvpLook={{
+        paper: palette.paper,
+        ink: palette.ink,
+        accent: palette.gold,
+        line: palette.gold,
+        soft: palette.goldLight,
+        radius: "0px",
+        buttonRadius: "0px",
+      }}
+      epilogue={<GrandFinale inv={inv} />}
+    >
+      {" "}
+      {!inv.opened && <GrandOpening inv={inv} />}
+      <div data-master-layout="grand-architecture-v2" inert={!inv.opened} aria-hidden={!inv.opened}>
+        <header data-vip-section="hero" className={s.hero}>
+          <Colonnade />
+          <span className={`${s.eyebrow} ${s.heroKicker}`}>{copy(inv.lang).invitation}</span>
+          <div className={s.heroCrest} data-latin-monogram aria-label={`${a} ${b}`}>
+            <span>{a}</span>
+            <span>{b}</span>
+          </div>
+          <div className={s.heroNames}>
+            <GrandNames inv={inv} />
+            <p className={s.heroDate}>
+              {t.date.long(ev.when.day, ev.when.monthIndex, ev.when.year)}
+              <span> · {ev.time}</span>
+            </p>
+          </div>
+          <GrandPhoto inv={inv} slot={1} eager className={s.heroStillLife} />
+          <span className={s.scroll}>
+            {copy(inv.lang).scroll}
+            <i>↓</i>
+          </span>
+        </header>
+        <main>
+          <GrandProgramme inv={inv} />
+          <GrandCalendar inv={inv} />
+          <GrandVenues inv={inv} />
+          <section data-vip-section="greeting" className={s.letter}>
+            <GrandPhoto inv={inv} slot={2} className={s.letterStillLife} />
+            <Rise className={s.letterWords}>
+              <GanchSprig className={s.letterSprig} />
+              <span className={s.eyebrow}>{copy(inv.lang).love}</span>
+              <h2>{inv.text.greeting}</h2>
+              <p>{inv.text.body}</p>
+              <p className={s.hosts}>{inv.data.hosts}</p>
+              <FamilySides inv={inv} />
+            </Rise>
+          </section>
+          <section data-vip-section="memory" className={s.memory}>
+            <GrandPhoto inv={inv} slot={3} />
+            <Rise className={s.memoryWords}>
+              <span className={s.eyebrow}>{copy(inv.lang).invitation}</span>
+              <p data-photo-caption>{copy(inv.lang).forever}</p>
+            </Rise>
+          </section>
+        </main>
+      </div>
+    </InvitationShell>
+  );
+}

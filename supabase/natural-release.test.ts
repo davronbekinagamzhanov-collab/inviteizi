@@ -241,7 +241,8 @@ describe("весь выпуск по порядку: natural-four → natural-si
       ).rows;
       const byId = new Map(rows.map((r) => [r.id, r]));
       // каждый дизайн, на который может ссылаться заказ, есть в базе с тем же номером и тадбиром
-      for (const d of everAccepted().filter((d) => d.number >= 113 || ACCEPTED.has(d.id))) {
+      // номера после 141 появляются в базе только через db:seed-templates (следующий тест)
+      for (const d of everAccepted().filter((d) => d.number <= 141 && (d.number >= 113 || ACCEPTED.has(d.id)))) {
         const r = byId.get(d.id);
         expect(r, d.id).toBeDefined();
         expect({ number: r!.number, occasion: r!.occasion }, d.id).toEqual({ number: d.number, occasion: d.occasion });

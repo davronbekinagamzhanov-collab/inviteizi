@@ -26,7 +26,8 @@ describe("catalog acceptance integrity", () => {
     expect(nums.filter((n) => n < 123)).toEqual(base);
     const b3 = nums.filter((n) => n >= 123 && n <= 138);
     expect(b3.length).toBeLessThanOrEqual(16);
-    expect(nums.filter((n) => n > 138)).toEqual([139, 140, 141]); // «Пятно» (v2)
+    // «Пятно» (v2) 139–141 и новые дизайны после 141 — всё, что после батча 3, берётся из витрины
+    expect(nums.filter((n) => n > 138)).toEqual(expect.arrayContaining([139, 140, 141]));
     expect(new Set(nums).size).toBe(nums.length);
     expect(HIDDEN_03_11).toHaveLength(48);
     expect(HIDDEN_BATCH3).toEqual(["islimi-varaq"]);

@@ -13,8 +13,17 @@ import type { Occasion } from "@/lib/types";
  * Список включаемых дизайнов и порядок задаёт владелец. Таблица всех дизайнов: docs/reviews/catalog-designs.md.
  */
 export const ON_SALE: Record<Occasion, readonly string[]> = {
-  // Никоҳ: 113, 114 и сильнейший 8 000 первыми, места 5–7 — «Пятна» (139–141)
+  // 15.11.2026 (владелец): сначала 9 VIP, затем прежние в прежнем порядке
   nikoh: [
+    "vip-zarrin-ahd",
+    "vip-marvarid",
+    "vip-zarbof",
+    "vip-bogi-visol",
+    "vip-ipak-ziyosi",
+    "vip-visol-nuri",
+    "vip-tilla-muhr",
+    "vip-osmon",
+    "vip-suzana",
     "muhr",
     "ipak",
     "gul-doira",
@@ -31,10 +40,43 @@ export const ON_SALE: Record<Occasion, readonly string[]> = {
     "oltin-monogramma",
     "sapfir",
   ],
-  sunnat: ["ganch-darvoza", "bog", "lola-medalyon", "lola-bodom", "doppi-kitob", "doppicha"],
-  nahorgi: ["qozon-tongi", "tong-dasturxon", "non-albom", "tonggi-piyola", "tong-varaq", "choy-maktub"],
-  // 06.11: два последних подняты наверх по просьбе владельца
-  yubiley: ["umr-daraxti", "bordo-guldasta", "zarhal-lavha", "umr-kitobi", "hurmat-maktub", "pion-guldasta"],
+  sunnat: [
+    "vip-oq-tulpor",
+    "zarhal-duo",
+    "moviy-ayvon",
+    "tulpor-quvonchi",
+    "kashta-tilagi",
+    "ganch-darvoza",
+    "bog",
+    "lola-medalyon",
+    "lola-bodom",
+    "doppi-kitob",
+    "doppicha",
+  ],
+  nahorgi: [
+    "sahar-sabosi",
+    "subhi-safo",
+    "bog-nasimi",
+    "tong-naqshi",
+    "qozon-tongi",
+    "tong-dasturxon",
+    "non-albom",
+    "tonggi-piyola",
+    "tong-varaq",
+    "choy-maktub",
+  ],
+  // 15.11.2026: новые первыми; дальше прежние (06.11 два последних подняты наверх)
+  yubiley: [
+    "vip-umr-ziyosi",
+    "umr-durdonasi",
+    "qadr-surati",
+    "umr-daraxti",
+    "bordo-guldasta",
+    "zarhal-lavha",
+    "umr-kitobi",
+    "hurmat-maktub",
+    "pion-guldasta",
+  ],
 };
 
 /** Все id в продаже по порядку показа */

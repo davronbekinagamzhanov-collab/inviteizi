@@ -48,7 +48,13 @@ export function catalogList(c: Pick<Ctx, "s">): Design[] {
 }
 
 /** Начало страницы, на которой стоит дизайн */
-export const pageOf = (list: Design[], id: string | undefined) => Math.floor(Math.max(0, list.findIndex((d) => d.id === id)) / PAGE) * PAGE;
+export const pageOf = (list: Design[], id: string | undefined) =>
+  Math.floor(
+    Math.max(
+      0,
+      list.findIndex((d) => d.id === id),
+    ) / PAGE,
+  ) * PAGE;
 
 /** Убрать альбом и кнопки прошлой страницы каталога (листание, «Назад», /start) */
 export async function dropCatalog(c: Ctx, keep?: number) {
@@ -79,7 +85,10 @@ async function render(c: Ctx) {
   await dropCatalog(c);
   const t = c.tx.catalog;
   const ids: number[] = [];
-  const photos = p.items.map(({ d, mark, legacy }) => ({ url: coverUrl(c, d.id, legacy), caption: `${mark} №${d.number} · ${price(PRICES[d.format])}` }));
+  const photos = p.items.map(({ d, mark, legacy }) => ({
+    url: coverUrl(c, d.id, legacy),
+    caption: `${mark} №${d.number} · ${price(PRICES[d.format])}`,
+  }));
   try {
     if (photos.length > 1) ids.push(...(await c.deps.tg.sendMediaGroup(c.chatId, photos)).messageIds);
     else ids.push((await c.deps.tg.sendPhoto(c.chatId, photos[0].url, { caption: photos[0].caption })).messageId);
@@ -87,13 +96,23 @@ async function render(c: Ctx) {
     // Обложку Telegram не скачал — каталог только текстом, клиент не застревает
     console.error("каталог: обложки", p.items.map((i) => i.d.id).join(","), e instanceof Error ? e.name : "Error");
   }
-  const lines = p.items.map(({ d, mark }) => t.line(mark, d.number, designName(d.id), price(PRICES[d.format]), Boolean(d.clientPhotos)));
+  const lines = p.items.map(({ d, mark }) =>
+    t.line(mark, d.number, designName(d.id), price(PRICES[d.format]), Boolean(d.clientPhotos)),
+  );
   const credits = p.items.flatMap(({ d }) => {
     const a = photoAttributions[d.id];
     return a ? [t.photoCredit(a.author, a.license, a.source)] : [];
   });
-  const rows: InlineButton[][] = p.items.map(({ d, mark, legacy }) => [{ text: t.view(mark), url: demoUrl(c, d.id, legacy) }, ib(c, t.pick(mark), `p:${d.id}`)]);
-  if (p.list.length > PAGE) rows.push([ib(c, "◀", "prev"), ib(c, t.range(p.start + 1, Math.min(p.start + PAGE, p.list.length), p.list.length), "x"), ib(c, "▶", "next")]);
+  const rows: InlineButton[][] = p.items.map(({ d, mark, legacy }) => [
+    { text: t.view(mark), url: demoUrl(c, d.id, legacy) },
+    ib(c, t.pick(mark), `p:${d.id}`),
+  ]);
+  if (p.list.length > PAGE)
+    rows.push([
+      ib(c, "◀", "prev"),
+      ib(c, t.range(p.start + 1, Math.min(p.start + PAGE, p.list.length), p.list.length), "x"),
+      ib(c, "▶", "next"),
+    ]);
   rows.push(backRow(c));
   const text = [t.pageTitle, "", ...lines, ...(credits.length ? ["", ...credits] : [])].join("\n");
   ids.push((await send(c, text, inline(rows))).messageId);
@@ -119,7 +138,10 @@ export const catalog: Step = {
       return { stay: true };
     }
     if (value === "prev" || value === "next") {
-      c.s.catIdx = (c.s.catIdx ?? 0) + (value === "next" ? PAGE : -PAGE);
+      // По кругу по страницам: с первой «◀» — на последнюю, даже если она неполная (11 дизайнов = 3+3+3+2)
+      const pages = Math.max(1, Math.ceil(list.length / PAGE));
+      const page = Math.floor(Math.max(0, c.s.catIdx ?? 0) / PAGE) + (value === "next" ? 1 : -1);
+      c.s.catIdx = (((page % pages) + pages) % pages) * PAGE;
       await render(c);
       return { stay: true };
     }
@@ -129,7 +151,10 @@ export const catalog: Step = {
     // Кнопки этой страницы → строка «✅ Танланди: №12 Мухр», альбом убираем
     const menuId = c.s.catMsgs?.at(-1);
     await dropCatalog(c, menuId);
-    if (menuId) await c.deps.tg.editMessageText(c.chatId, menuId, c.tx.catalog.chosen(d.number, designName(d.id))).catch(() => undefined);
+    if (menuId)
+      await c.deps.tg
+        .editMessageText(c.chatId, menuId, c.tx.catalog.chosen(d.number, designName(d.id)))
+        .catch(() => undefined);
     c.s.templateId = d.id;
     c.s.format = d.format;
     c.s.catIdx = pageOf(list, d.id);

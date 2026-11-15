@@ -46,8 +46,9 @@ it("stages four distinct identities, correct prices and photo contracts without 
     expect(d.occasion).toBe("nahorgi");
     expect(d.format).toBe(["animated", "scroll", "simple", "simple"][i]);
     expect(Boolean(d.clientPhotos)).toBe(id === "bog-nasimi");
-    expect(isOnSale(id)).toBe(false);
-    expect(Object.values(CATALOG_ORDER).flat()).not.toContain(id);
+    // 15.11.2026: включены в продажу владельцем — сверяемся с витриной
+    expect(isOnSale(id)).toBe(ON_SALE_IDS.includes(id));
+    expect(Object.values(CATALOG_ORDER).flat().includes(id)).toBe(ON_SALE_IDS.includes(id));
     for (const file of [
       `public${d.art}`,
       `public${d.cover}`,

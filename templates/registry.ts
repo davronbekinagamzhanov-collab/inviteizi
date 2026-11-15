@@ -141,19 +141,23 @@ const rawDesigns: RawDesign[] = [
   }),
   design("vip-marvarid", 145, "nikoh", "animated", true, () => import("./themes/vip-marvarid/Design"), {
     clientPhotos: true,
+    art: "/vip/vip-marvarid/hero.webp",
   }),
   design("vip-bogi-visol", 146, "nikoh", "animated", true, () => import("./themes/vip-bogi-visol/Design"), {
     clientPhotos: true,
+    art: "/vip/vip-bogi-visol/hero.webp",
   }),
   design("vip-oq-tulpor", 147, "sunnat", "animated", true, () => import("./themes/vip-oq-tulpor/Design"), {
     clientPhotos: false,
+    art: "/vip/vip-oq-tulpor/hero.webp",
   }),
   design("vip-umr-ziyosi", 148, "yubiley", "animated", true, () => import("./themes/vip-umr-ziyosi/Design"), {
     clientPhotos: true,
+    art: "/vip/vip-umr-ziyosi/hero.webp",
   }),
   design("vip-suzana", 144, "nikoh", "animated", true, () => import("./themes/vip-suzana/Design"), {
     clientPhotos: true,
-    art: "/vip/vip-ipak-ziyosi/2.webp",
+    art: "/vip/vip-suzana/hero.webp",
   }),
   design("vip-osmon", 143, "nikoh", "animated", true, () => import("./themes/vip-osmon/Design"), {
     clientPhotos: true,

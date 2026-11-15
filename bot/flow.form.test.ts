@@ -4,6 +4,7 @@ import { ru } from "@/texts/bot-ru";
 import { Sim } from "./testing/sim";
 import { buttonLabels, inlineButtons } from "./testing/fake-tg";
 import { startRu, startUz, pickDesign, setChoices } from "./testing/paths";
+import { catalogList } from "./flow/steps-order";
 
 const BASE = "https://inviteizi.vercel.app";
 
@@ -14,8 +15,9 @@ describe("весь путь наҳорги ош на русском", () => {
     await startRu(sim, id, "qr_sayram");
     expect((await sim.user(id))?.source).toBe("qr_sayram");
     await sim.click(id, ru.category.nahorgi);
-    // наҳорги ош — без фото клиента (решение владельца 03.11): строки «📷» в каталоге нет
-    expect(sim.lastText(id)).not.toContain("📷");
+    // «📷» на первой странице — только если там есть дизайн с фото клиента (с 15.11 — «Боғ насими»)
+    const firstPage = catalogList({ s: { occasion: "nahorgi" } }).slice(0, 3);
+    expect(sim.lastText(id).includes("📷")).toBe(firstPage.some((d) => d.clientPhotos));
     await pickDesign(sim, id, "tong-dasturxon");
     expect(sim.tg.to(id).some((m) => m.text === ru.catalog.chosen(116, "Тонгги дастурхон"))).toBe(true);
 
@@ -34,7 +36,9 @@ describe("весь путь наҳорги ош на русском", () => {
     // Тадбир 1 — наҳорги ош: время утром
     expect(sim.lastText(id)).toBe(ru.event.date("Наҳорги ош (утренний плов)"));
     await sim.click(id, "21");
-    expect(buttonLabels(sim.last(id))).toEqual(expect.arrayContaining(["05:00", "05:30", "06:00", "06:30", "07:00", ru.event.timeOther]));
+    expect(buttonLabels(sim.last(id))).toEqual(
+      expect.arrayContaining(["05:00", "05:30", "06:00", "06:30", "07:00", ru.event.timeOther]),
+    );
     await sim.click(id, "06:00");
     await sim.text(id, "Раҳимовлар хонадони");
     await sim.text(id, "Сайрам, Юсуф Сарёмий кўчаси 17");
@@ -84,14 +88,31 @@ describe("весь путь наҳорги ош на русском", () => {
     await sim.click(id, ru.review.confirm);
 
     const [o] = await sim.repo.listOrdersByUser(id);
-    expect(o).toMatchObject({ slug: "jasurbek", status: "preview", occasion: "nahorgi", templateId: "tong-dasturxon", amount: 6_000 });
-    expect(o.data).toMatchObject({ person: "Жасурбек", relation: "ogil", cause: "nikoh", hosts: "Раҳимовлар оиласи", customText: own });
+    expect(o).toMatchObject({
+      slug: "jasurbek",
+      status: "preview",
+      occasion: "nahorgi",
+      templateId: "tong-dasturxon",
+      amount: 6_000,
+    });
+    expect(o.data).toMatchObject({
+      person: "Жасурбек",
+      relation: "ogil",
+      cause: "nikoh",
+      hosts: "Раҳимовлар оиласи",
+      customText: own,
+    });
     expect(o.data.textId).toBeUndefined();
     expect(o.data.events.map((e) => [e.kind, e.date, e.time])).toEqual([
       ["nahorgi", "2026-11-21", "06:00"],
       ["nikohBazm", "2026-11-22", "18:00"],
     ]);
-    expect(o.music).toEqual({ kind: "own", fileId: "SONG1", url: "https://cdn.test/music/own/SONG1.mp3", title: "Тўй муборак" });
+    expect(o.music).toEqual({
+      kind: "own",
+      fileId: "SONG1",
+      url: "https://cdn.test/music/own/SONG1.mp3",
+      title: "Тўй муборак",
+    });
     expect(sim.lastText(id)).toBe(ru.order.created(`${BASE}/jasurbek`));
   });
 });
@@ -124,7 +145,12 @@ describe("суннат с двумя мальчиками", () => {
     await sim.click(id, uz.review.confirm);
     const [o] = await sim.repo.listOrdersByUser(id);
     expect(o.slug).toBe("abdurahmonjon-va-abdullohjon");
-    expect(o.data).toMatchObject({ occasion: "sunnat", person: "Абдураҳмонжон ва Абдуллоҳжон", relation: "ogil", textId: "classic" });
+    expect(o.data).toMatchObject({
+      occasion: "sunnat",
+      person: "Абдураҳмонжон ва Абдуллоҳжон",
+      relation: "ogil",
+      textId: "classic",
+    });
     expect(o.music).toEqual({ kind: "none" });
   });
 });
@@ -139,10 +165,12 @@ describe("«Назад» на каждом шаге анкеты", () => {
       if (m.markup && "reply" in m.markup) await sim.text(id, uz.back);
       else await sim.click(id, uz.back);
     };
+    // первый дизайн каталога никоҳ (порядок задаёт владелец в templates/catalog.ts)
+    const firstNikoh = catalogList({ s: { occasion: "nikoh" } })[0];
     // [ответ, вопрос до ответа]
     const plan: [() => Promise<void>, string][] = [
       [() => sim.click(id, uz.category.nikoh), uz.category.ask],
-      [async () => void (await pickDesign(sim, id, "muhr")), "№113 Муҳр"],
+      [async () => void (await pickDesign(sim, id)), `№${firstNikoh.number} `],
       [() => sim.text(id, "Азиз"), uz.form.groom],
       [() => sim.text(id, "Мадина"), uz.form.bride],
       [() => sim.click(id, "Ўзимизники"), uz.form.relationNikoh],
@@ -180,7 +208,7 @@ describe("«Назад» на каждом шаге анкеты", () => {
     expect(o.data.events[0]).toMatchObject({ kind: "nikohBazm", time: "18:30", location: { lat: 42.3, lng: 69.76 } });
     expect(o.data.events[1]).toMatchObject({ kind: "nahorgi", time: "06:00", date: "2026-11-14" });
     expect(o.data.relation).toBe("ozimiz");
-    expect(o.templateId).toBe("muhr");
+    expect(o.templateId).toBe(firstNikoh.id);
   });
 
   it("«Назад» с первого вопроса — в меню; «Назад» с локации возвращает меню-клавиатуру", async () => {
@@ -306,7 +334,9 @@ describe("непонятный ввод и проверки", () => {
     expect(sim.last(12).id).toBe(cal.id);
     expect(buttonLabels(cal)).toContain("декабр 2026");
     await sim.click(12, "31");
-    expect(((await sim.user(12))?.state as { data: { events: { date: string }[] } }).data.events[0].date).toBe("2026-12-31");
+    expect(((await sim.user(12))?.state as { data: { events: { date: string }[] } }).data.events[0].date).toBe(
+      "2026-12-31",
+    );
   });
 
   it("3 тадбира максимум: после третьего сразу сводка «Бот танлади»", async () => {
