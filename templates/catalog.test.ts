@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { ON_SALE, ON_SALE_IDS } from "./catalog";
 import { templateRows } from "./catalog-rows";
-import { ACCEPTED, activeDesigns, CATALOG_ORDER, designs, getDesign, isOnSale, PRICES } from "./registry";
+import { existsSync } from "node:fs";
+import { ACCEPTED, activeDesigns, CATALOG_ORDER, designs, getDesign, isOnSale, PRICES, thumbOf } from "./registry";
 import { t } from "@/texts/uz-cyrl";
 
 // Витрина — единственный источник «что продаётся и в каком порядке». Числа не зашиты: всё сверяется с ней.
@@ -23,6 +24,19 @@ describe("витрина templates/catalog.ts", () => {
     expect(CATALOG_ORDER).toBe(ON_SALE);
     expect(activeDesigns().map((d) => d.id)).toEqual([...ON_SALE_IDS]);
     for (const d of designs) expect(isOnSale(d.id), d.id).toBe(ON_SALE_IDS.includes(d.id));
+  });
+
+  it("у каждого дизайна реестра есть название (его можно включить в витрину без пустой кнопки)", () => {
+    expect(designs.filter((d) => !t.designs[d.id]).map((d) => d.id)).toEqual([]);
+  });
+
+  it("у каждого дизайна реестра есть обложка каталога (webp, миниатюра), JPG для бота и OG-превью ссылки", () => {
+    const missing = designs.flatMap((d) =>
+      [d.cover, thumbOf(d.cover), `/covers/${d.id}.jpg`, `/og/${d.id}.jpg`]
+        .filter((f) => !existsSync(`public${f}`))
+        .map((f) => `${d.id}: ${f}`),
+    );
+    expect(missing).toEqual([]);
   });
 
   it("скрытый с замечаниями anor-bogi не в продаже", () => {
