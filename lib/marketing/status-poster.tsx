@@ -144,78 +144,76 @@ export async function statusPoster(order: OrderRecord, url: string, lang: "uz" |
         ? photoAttributions[design.id]!.author + " · " + photoAttributions[design.id]!.source
         : null);
   const response = new ImageResponse(
-    (
-      <div
-        style={{
-          display: "flex",
-          width: "100%",
-          height: "100%",
-          background: colors[0],
-          color: colors[1],
-          fontFamily: "Status",
-          flexDirection: "column",
-          alignItems: "center",
-          padding: 60,
-        }}
-      >
-        {image && (
-          <div
-            style={{
-              display: "flex",
-              width: "100%",
-              height: 620,
-              overflow: "hidden",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <img alt="" src={image} width={960} height={680} />
-          </div>
-        )}
+    <div
+      style={{
+        display: "flex",
+        width: "100%",
+        height: "100%",
+        background: colors[0],
+        color: colors[1],
+        fontFamily: "Status",
+        flexDirection: "column",
+        alignItems: "center",
+        padding: 60,
+      }}
+    >
+      {image && (
         <div
           style={{
             display: "flex",
-            flex: 1,
-            flexDirection: "column",
+            width: "100%",
+            height: 620,
+            overflow: "hidden",
             alignItems: "center",
             justifyContent: "center",
-            width: "100%",
-            padding: "35px 10px",
           }}
         >
-          <div style={{ display: "flex", fontSize: 27, letterSpacing: 3 }}>{fields.title}</div>
-          {fields.age && <div style={{ display: "flex", fontSize: 42, marginTop: 18 }}>{fields.age}</div>}
-          <div
-            style={{
-              display: "flex",
-              fontSize: fields.names.length > 80 ? 48 : fields.names.length > 45 ? 62 : 86,
-              fontStyle: "italic",
-              lineHeight: 1.18,
-              textAlign: "center",
-              marginTop: 38,
-              maxWidth: 920,
-              flexWrap: "wrap",
-              justifyContent: "center",
-            }}
-          >
-            {fields.names}
-          </div>
-          <div style={{ display: "flex", fontSize: 31, marginTop: 38, textAlign: "center" }}>{fields.date}</div>
+          <img alt="" src={image} width={960} height={680} />
         </div>
-        <div style={{ display: "flex", width: 160, borderTop: `1px solid ${colors[1]}66`, marginBottom: 38 }} />
-        <div style={{ display: "flex", padding: 12, background: "#fff", borderRadius: 6 }}>
-          <img alt="" src={qr} width={280} height={280} />
+      )}
+      <div
+        style={{
+          display: "flex",
+          flex: 1,
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "100%",
+          padding: "35px 10px",
+        }}
+      >
+        <div style={{ display: "flex", fontSize: 27, letterSpacing: 3 }}>{fields.title}</div>
+        {fields.age && <div style={{ display: "flex", fontSize: 42, marginTop: 18 }}>{fields.age}</div>}
+        <div
+          style={{
+            display: "flex",
+            fontSize: fields.names.length > 80 ? 48 : fields.names.length > 45 ? 62 : 86,
+            fontStyle: "italic",
+            lineHeight: 1.18,
+            textAlign: "center",
+            marginTop: 38,
+            maxWidth: 920,
+            flexWrap: "wrap",
+            justifyContent: "center",
+          }}
+        >
+          {fields.names}
         </div>
-        <div style={{ display: "flex", fontSize: 22, marginTop: 24 }}>InviteIZI</div>
-        {credit && (
-          <div
-            style={{ display: "flex", fontSize: 13, marginTop: 12, maxWidth: 940, textAlign: "center", opacity: 0.65 }}
-          >
-            {reportText(credit)}
-          </div>
-        )}
+        <div style={{ display: "flex", fontSize: 31, marginTop: 38, textAlign: "center" }}>{fields.date}</div>
       </div>
-    ),
+      <div style={{ display: "flex", width: 160, borderTop: `1px solid ${colors[1]}66`, marginBottom: 38 }} />
+      <div style={{ display: "flex", padding: 12, background: "#fff", borderRadius: 6 }}>
+        <img alt="" src={qr} width={280} height={280} />
+      </div>
+      <div style={{ display: "flex", fontSize: 22, marginTop: 24 }}>InviteIZI</div>
+      {credit && (
+        <div
+          style={{ display: "flex", fontSize: 13, marginTop: 12, maxWidth: 940, textAlign: "center", opacity: 0.65 }}
+        >
+          {reportText(credit)}
+        </div>
+      )}
+    </div>,
     {
       width: 1080,
       height: 1920,

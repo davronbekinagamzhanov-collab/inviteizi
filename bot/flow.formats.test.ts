@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { t } from "@/texts/uz-cyrl";
-import { FORMATS, PRICES } from "@/templates/registry";
+import { FORMATS, PRICES, getDesign } from "@/templates/registry";
+import { ON_SALE } from "@/templates/catalog";
 import { designsFor, formatsFor } from "./flow/util";
 import { OCCASIONS } from "./flow/steps-order";
 
@@ -26,11 +27,26 @@ describe("форматы бота × тадбирлар (реальный кат
     }
   });
 
-  it("таблица тадбир × формат (сколько дизайнов, сколько с фото) — снимок каталога", () => {
-    const table = Object.fromEntries(
-      OCCASIONS.map((o) => [o, Object.fromEntries(FORMATS.map((f) => { const l = designsFor(o, f); return [f, `${l.length}/${l.filter((d) => d.clientPhotos).length}📷`]; }))]),
+  it("таблица тадбир × формат совпадает с витриной templates/catalog.ts (сколько дизайнов, сколько с фото клиента)", () => {
+    const cell = (list: { clientPhotos?: boolean }[]) =>
+      `${list.length}/${list.filter((d) => d.clientPhotos).length}📷`;
+    const bot = Object.fromEntries(
+      OCCASIONS.map((o) => [o, Object.fromEntries(FORMATS.map((f) => [f, cell(designsFor(o, f))]))]),
     );
-    expect(table).toMatchSnapshot();
+    const catalog = Object.fromEntries(
+      OCCASIONS.map((o) => {
+        const listed = ON_SALE[o].map((id) => getDesign(id)!);
+        return [o, Object.fromEntries(FORMATS.map((f) => [f, cell(listed.filter((d) => d.format === f))]))];
+      }),
+    );
+    expect(bot).toEqual(catalog);
+    // порядок внутри формата = порядок витрины
+    for (const o of OCCASIONS) {
+      for (const f of FORMATS) {
+        const expected = ON_SALE[o].filter((id) => getDesign(id)!.format === f);
+        expect(designsFor(o, f).map((d) => d.id)).toEqual(expected);
+      }
+    }
     expect(Object.keys(PRICES).sort()).toEqual([...FORMATS].sort());
   });
 });

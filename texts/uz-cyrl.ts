@@ -323,12 +323,12 @@ const raw = {
 
   /** Названия дизайнов каталога */
   designs: {
-    "zarhal-duo":"Зарҳал дуо",
-    "moviy-ayvon":"Мовий айвон",
-    "umr-durdonasi":"Умр дурдонаси",
-    "qadr-surati":"Қадр сурати",
-    "tulpor-quvonchi":"Тулпор қувончи",
-    "kashta-tilagi":"Кашта тилаги",
+    "zarhal-duo": "Зарҳал дуо",
+    "moviy-ayvon": "Мовий айвон",
+    "umr-durdonasi": "Умр дурдонаси",
+    "qadr-surati": "Қадр сурати",
+    "tulpor-quvonchi": "Тулпор қувончи",
+    "kashta-tilagi": "Кашта тилаги",
     "bog-nasimi": "Боғ насими",
     "tong-naqshi": "Тонг нақши",
     "sahar-sabosi": "Саҳар сабоси",
@@ -916,17 +916,93 @@ function buildDesignTexts(id: string, lang: InviteLang): Texts {
 }
 
 /** New bespoke wedding experiences: all raster assets are text-free. */
-const masterpieceCopy={
- uz:{invitation:"Никоҳ тўйига таклифнома",open:"Таклифномани очинг",loading:"Таклифнома тайёрланмоқда…",retry:"Қайта очиш учун босинг",love:"Меҳр ва эҳтиром билан",forever:"Икки қалб. Бир тақдир.",day:"Қалбимиздаги қутлуғ кун",arrival:"Дийдорлашув манзили",scroll:"Таклифномани варақланг"},
- ru:{invitation:"Приглашение на свадьбу",open:"Открыть приглашение",loading:"Готовим приглашение…",retry:"Нажмите, чтобы попробовать снова",love:"С любовью и уважением",forever:"Два сердца. Одна судьба.",day:"День, который останется в сердце",arrival:"Место нашей встречи",scroll:"Листайте приглашение"},
- kk:{invitation:"Үйлену тойына шақыру",open:"Шақыруды ашу",loading:"Шақыру дайындалуда…",retry:"Қайталау үшін басыңыз",love:"Махаббатпен және құрметпен",forever:"Екі жүрек. Бір тағдыр.",day:"Жүректегі ерекше күн",arrival:"Кездесу орны",scroll:"Шақыруды парақтаңыз"},
+const masterpieceCopy = {
+  uz: {
+    invitation: "Никоҳ тўйига таклифнома",
+    open: "Таклифномани очинг",
+    loading: "Таклифнома тайёрланмоқда…",
+    retry: "Қайта очиш учун босинг",
+    love: "Меҳр ва эҳтиром билан",
+    forever: "Икки қалб. Бир тақдир.",
+    day: "Қалбимиздаги қутлуғ кун",
+    arrival: "Дийдорлашув манзили",
+    scroll: "Таклифномани варақланг",
+  },
+  ru: {
+    invitation: "Приглашение на свадьбу",
+    open: "Открыть приглашение",
+    loading: "Готовим приглашение…",
+    retry: "Нажмите, чтобы попробовать снова",
+    love: "С любовью и уважением",
+    forever: "Два сердца. Одна судьба.",
+    day: "День, который останется в сердце",
+    arrival: "Место нашей встречи",
+    scroll: "Листайте приглашение",
+  },
+  kk: {
+    invitation: "Үйлену тойына шақыру",
+    open: "Шақыруды ашу",
+    loading: "Шақыру дайындалуда…",
+    retry: "Қайталау үшін басыңыз",
+    love: "Махаббатпен және құрметпен",
+    forever: "Екі жүрек. Бір тағдыр.",
+    day: "Жүректегі ерекше күн",
+    arrival: "Кездесу орны",
+    scroll: "Шақыруды парақтаңыз",
+  },
 };
-export function luxuryWeddingCopy(lang:string){return masterpieceCopy[lang==="ru"?"ru":lang==="kk"?"kk":"uz"];}
+export function luxuryWeddingCopy(lang: string) {
+  return masterpieceCopy[lang === "ru" ? "ru" : lang === "kk" ? "kk" : "uz"];
+}
 
 /** Copy scoped to the two unlisted morning previews. Art contains no lettering. */
-const celebrationWords={
- uz:{touch:"Таклифномани очиш учун экранга тегинг",invitation:"Таклифнома",open:"Таклифномани очинг",loading:"Таклифнома тайёрланмоқда…",retry:"Қайта очиш учун босинг",respect:"Меҳр ва эҳтиром билан",meeting:"Дийдорлашув манзили",morning:"Саҳарги дийдорга марҳамат",family:"Қадрдонлар даврасида",joy:"Оиламиз қувончига шерик бўлинг",scroll:"Таклифномани варақланг","sahar-sabosi":"Саҳар сабоси","subhi-safo":"Субҳи сафо"},
- ru:{touch:"Коснитесь экрана, чтобы открыть приглашение",invitation:"Приглашение",open:"Открыть приглашение",loading:"Готовим приглашение…",retry:"Нажмите, чтобы попробовать снова",respect:"С теплом и уважением",meeting:"Место нашей встречи",morning:"Приглашаем на утреннюю встречу",family:"В кругу родных и близких",joy:"Разделите радость нашей семьи",scroll:"Листайте приглашение","sahar-sabosi":"Дыхание утра","subhi-safo":"Светлое утро"},
- kk:{touch:"Шақыруды ашу үшін экранды түртіңіз",invitation:"Шақыру",open:"Шақыруды ашу",loading:"Шақыру дайындалуда…",retry:"Қайталау үшін басыңыз",respect:"Ізгі ниетпен және құрметпен",meeting:"Кездесу орны",morning:"Таңғы кездесуге шақырамыз",family:"Жақындар ортасында",joy:"Отбасымыздың қуанышын бөлісіңіз",scroll:"Шақыруды парақтаңыз","sahar-sabosi":"Таң самалы","subhi-safo":"Нұрлы таң"},
+const celebrationWords = {
+  uz: {
+    touch: "Таклифномани очиш учун экранга тегинг",
+    invitation: "Таклифнома",
+    open: "Таклифномани очинг",
+    loading: "Таклифнома тайёрланмоқда…",
+    retry: "Қайта очиш учун босинг",
+    respect: "Меҳр ва эҳтиром билан",
+    meeting: "Дийдорлашув манзили",
+    morning: "Саҳарги дийдорга марҳамат",
+    family: "Қадрдонлар даврасида",
+    joy: "Оиламиз қувончига шерик бўлинг",
+    scroll: "Таклифномани варақланг",
+    "sahar-sabosi": "Саҳар сабоси",
+    "subhi-safo": "Субҳи сафо",
+  },
+  ru: {
+    touch: "Коснитесь экрана, чтобы открыть приглашение",
+    invitation: "Приглашение",
+    open: "Открыть приглашение",
+    loading: "Готовим приглашение…",
+    retry: "Нажмите, чтобы попробовать снова",
+    respect: "С теплом и уважением",
+    meeting: "Место нашей встречи",
+    morning: "Приглашаем на утреннюю встречу",
+    family: "В кругу родных и близких",
+    joy: "Разделите радость нашей семьи",
+    scroll: "Листайте приглашение",
+    "sahar-sabosi": "Дыхание утра",
+    "subhi-safo": "Светлое утро",
+  },
+  kk: {
+    touch: "Шақыруды ашу үшін экранды түртіңіз",
+    invitation: "Шақыру",
+    open: "Шақыруды ашу",
+    loading: "Шақыру дайындалуда…",
+    retry: "Қайталау үшін басыңыз",
+    respect: "Ізгі ниетпен және құрметпен",
+    meeting: "Кездесу орны",
+    morning: "Таңғы кездесуге шақырамыз",
+    family: "Жақындар ортасында",
+    joy: "Отбасымыздың қуанышын бөлісіңіз",
+    scroll: "Шақыруды парақтаңыз",
+    "sahar-sabosi": "Таң самалы",
+    "subhi-safo": "Нұрлы таң",
+  },
 };
-export function celebrationCopy(lang:string){return celebrationWords[lang==="ru"?"ru":lang==="kk"?"kk":"uz"];}
+export function celebrationCopy(lang: string) {
+  return celebrationWords[lang === "ru" ? "ru" : lang === "kk" ? "kk" : "uz"];
+}
