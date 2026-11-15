@@ -1,0 +1,29 @@
+[
+  {
+    "id": "sahar-envelope",
+    "source": "/workspace/generated_images/exec-bed4d46a-08d6-4a58-af66-a0c76bf36905.png",
+    "path": "/art/nahorgi-collection/sahar-envelope.webp",
+    "kind": "AI-generated photographic-looking material; not documentary photography",
+    "tool": "image_gen",
+    "sha256": "d01721ac3ac78be8c85b9b3a7b40be36414b192dabf52dcba5821e1c9eb77e2c",
+    "bytes": 134716
+  },
+  {
+    "id": "bog-nasimi",
+    "source": "/workspace/generated_images/exec-353a40fa-d0c7-433c-8cac-c00bd7adfb81.png",
+    "path": "/art/nahorgi-collection/bog-nasimi.webp",
+    "kind": "AI-generated photographic-looking material; not documentary photography",
+    "tool": "image_gen",
+    "sha256": "eaba5f37d4ecbe3ee48a9016c21d9d6b7f433ce7072a9a892c2789624a7ecd6b",
+    "bytes": 203966
+  },
+  {
+    "id": "tong-naqshi",
+    "source": "/workspace/generated_images/exec-257fb605-f839-4e4e-98df-a44958062336.png",
+    "path": "/art/nahorgi-collection/tong-naqshi.webp",
+    "kind": "AI-generated photographic-looking material; not documentary photography",
+    "tool": "image_gen",
+    "sha256": "db34f74c6627106dc97ebf38d4b8be3b3af328c4d9d9b63159c1160976fceace",
+    "bytes": 424416
+  }
+]

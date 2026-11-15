@@ -10,7 +10,7 @@ import type {InvitationData} from "@/lib/types";
 import {longSamples} from "@/lib/samples";
 import {parseWeddingDate} from "@/lib/wedding-date";
 vi.mock("next/font/local",()=>({default:()=>({variable:"font-test"})}));
-const expected={"sahar-sabosi":["hero","venue","letter","date","closing"],"subhi-safo":["hero","date","letter","venue","closing"]};
+const expected={"sahar-sabosi":["hero","letter","venue","date","closing"],"subhi-safo":["hero","letter","date","venue","closing"]};
 describe("two ordinary morning previews with different entry modes",()=>{
  it("does not activate, price or replace a working catalogue entry",()=>{
   expect(activeDesigns()).toHaveLength(36);expect(PRICES).toEqual({animated:8000,scroll:6000,simple:5000});
@@ -27,7 +27,7 @@ describe("two ordinary morning previews with different entry modes",()=>{
  for(const id of celebrationIds){
   it(`${id}: retains its own composition, occasion data and accurate map links`,async()=>{
    const d=getDesign(id)!,{default:Design}=await d.load(),html=renderToStaticMarkup(createElement(Design,{data:{...d.sample,noMusic:true},mode:"full"}));
-   expect([...html.matchAll(/data-section="([^"]+)"/g)].map(x=>x[1])).toEqual(expected[id]);if(id==="sahar-sabosi"){expect(html).toContain(`data-celebration-opening="${id}"`);expect(html).toContain('data-opening-version="courtyard-doors-v3"');expect(html).toContain('data-opening-leaf="left"');expect(html).toContain('data-opening-leaf="right"');const cover=html.match(/<button[^>]*data-celebration-opening=[\s\S]*?<\/button>/)![0];expect(cover).not.toMatch(/<svg|↗|↓/);expect(cover).toContain(celebrationCopy("uz").touch);}else{expect(html).not.toContain("data-celebration-opening");expect(html).not.toContain("data-open=");expect(html).toContain('data-entry-mode="direct"');expect(html).toContain('data-opened="true"');expect(html).not.toContain('inert=""');}expect(html).toContain(`src="${artOf(id)}"`);expect(html).not.toMatch(/src="[^"]*\.svg"|data-gate-left|data-gate-right/);expect(html).toContain(d.sample.person);expect(html).not.toMatch(/undefined|dress.code|data-vip-photo-slot/);
+   expect([...html.matchAll(/data-section="([^"]+)"/g)].map(x=>x[1])).toEqual(expected[id]);if(id==="sahar-sabosi"){expect(html).toContain(`data-celebration-opening="${id}"`);expect(html).toContain('data-opening-version="cotton-paper-v4"');expect(html).toContain('data-paper-flap="true"');expect(html).toContain('data-paper-pocket="true"');const cover=html.match(/<button[^>]*data-celebration-opening=[\s\S]*?<\/button>/)![0];expect(cover).not.toMatch(/<svg|↗|↓/);expect(cover).toContain(celebrationCopy("uz").touch);}else{expect(html).not.toContain("data-celebration-opening");expect(html).not.toContain("data-open=");expect(html).toContain('data-entry-mode="direct"');expect(html).toContain('data-opened="true"');expect(html).not.toContain('inert=""');}expect(html).toContain(`src="${artOf(id)}"`);expect(html).not.toMatch(/src="[^"]*\.svg"|data-gate-left|data-gate-right/);expect(html).toContain(d.sample.person);expect(html).not.toMatch(/undefined|dress.code|data-vip-photo-slot/);
    expect((html.match(/href="https:\/\/2gis.kz/g)??[])).toHaveLength(d.sample.events.length);expect(html).toContain('aria-current="date"');
    const event=d.sample.events.find(e=>e.kind==="nahorgi")??d.sample.events[0];expect(html).toContain(`data-target-at="${parseWeddingDate(event.date,event.time).startsAt.toISOString()}"`);
   });
