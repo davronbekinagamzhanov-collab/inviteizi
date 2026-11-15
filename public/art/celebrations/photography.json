@@ -1,0 +1,32 @@
+[
+  {
+    "id": "sahar-sabosi",
+    "kind": "AI-generated photorealistic image",
+    "generator": "image_gen",
+    "sourceFile": "exec-4c9cab45-abcf-4234-afd0-de92550946b7.png",
+    "sourceSha256": "09af8faaad5413d7ab22cdb07f1379c9ea6ec0250bb8826e58d7b0b09eaf8277",
+    "width": 941,
+    "height": 1672,
+    "path": "/art/celebrations/sahar-sabosi-hero.webp",
+    "sha256": "d124544c8f82bc9eee47c8d33de916e5b0b374a000a63ca9730c4394bf9ed7c7",
+    "bytes": 283276,
+    "containsPeople": false,
+    "textFree": true,
+    "processing": "WebP compression; review covers resized from the same original; no compositing or drawn scenes."
+  },
+  {
+    "id": "subhi-safo",
+    "kind": "AI-generated photorealistic image",
+    "generator": "image_gen",
+    "sourceFile": "exec-5ce64d59-a155-4780-8000-c6a2d12cc096.png",
+    "sourceSha256": "97976a99fcea3bdbeab597d84083533ff1ced428adc0ef2abaf42cffaa144aec",
+    "width": 941,
+    "height": 1672,
+    "path": "/art/celebrations/subhi-safo-hero.webp",
+    "sha256": "e61414cb00ccb8efe4f4d8d76f952357129e3248013381a0726ecacfb2a729ea",
+    "bytes": 186012,
+    "containsPeople": false,
+    "textFree": true,
+    "processing": "WebP compression; review covers resized from the same original; no compositing or drawn scenes."
+  }
+]

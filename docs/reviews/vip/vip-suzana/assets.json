@@ -1,0 +1,89 @@
+{
+  "source": "Generated with image_gen for the user request on 2026-11-07; no third-party stock photography.",
+  "files": [
+    {
+      "file": "flap.webp",
+      "width": 1024,
+      "height": 1013,
+      "bytes": 22376,
+      "sha256": "e69fe593b6723da99d2357c2859145d198056f04410556dca43b3cfa42038318"
+    },
+    {
+      "file": "flowers.webp",
+      "width": 780,
+      "height": 772,
+      "bytes": 48144,
+      "sha256": "c23053242222bc5ca7773646a5b07443d98bcc4eb81c69ed5ae5229cb4efb2f9"
+    },
+    {
+      "file": "glasses.webp",
+      "width": 780,
+      "height": 772,
+      "bytes": 52338,
+      "sha256": "29a4945602d7dde79c0e717cccf6a4f36ac72116d876a7dd6b676ef4b8d3cb0b"
+    },
+    {
+      "file": "hall-1.webp",
+      "width": 780,
+      "height": 772,
+      "bytes": 67154,
+      "sha256": "fe5b0dd5732ee9b012bbd04f307ce840fb0ea3249b4ddbf9774761db5d06d0fc"
+    },
+    {
+      "file": "hall-2.webp",
+      "width": 780,
+      "height": 772,
+      "bytes": 82838,
+      "sha256": "2039b61888ebcbf4c52a8ad6aeffdda19aaf0c340da17ea4fec48756b8bd3329"
+    },
+    {
+      "file": "hero.webp",
+      "width": 1170,
+      "height": 1755,
+      "bytes": 241904,
+      "sha256": "8e8729150a3cbceec37c59a1853ae28540de4a2087c8fc9a97439ad0869f9532"
+    },
+    {
+      "file": "lining.webp",
+      "width": 780,
+      "height": 772,
+      "bytes": 108146,
+      "sha256": "2cde7aad62d8252215de2ea3ceee213d287245ddb0f03a455e9337a2816c65a3"
+    },
+    {
+      "file": "music.webp",
+      "width": 780,
+      "height": 772,
+      "bytes": 63438,
+      "sha256": "646a7f3b314d37556271250ab4af2a1440888a8e71744b58b36ac2138a11552c"
+    },
+    {
+      "file": "paper.webp",
+      "width": 1024,
+      "height": 1013,
+      "bytes": 22376,
+      "sha256": "e69fe593b6723da99d2357c2859145d198056f04410556dca43b3cfa42038318"
+    },
+    {
+      "file": "rings.webp",
+      "width": 780,
+      "height": 772,
+      "bytes": 59768,
+      "sha256": "d67f276090465c38de188b11ec3378ebdb7d33bd3b78df047eab39696f83f13e"
+    },
+    {
+      "file": "seal.webp",
+      "width": 480,
+      "height": 494,
+      "bytes": 58464,
+      "sha256": "8cde79d5b8e4cf968a46bba79c051f50d0a3fbbe885f77ee1e9b8bd29c136896"
+    },
+    {
+      "file": "table.webp",
+      "width": 780,
+      "height": 772,
+      "bytes": 57546,
+      "sha256": "e360e79c6c457088b1f7f7c5b6672fa6502a9deee21f443f0c68c12b4b1a18dd"
+    }
+  ]
+}

@@ -331,6 +331,16 @@ const raw = {
 
   /** Названия дизайнов каталога */
   designs: {
+    "sahar-sabosi": "Саҳар сабоси",
+    "subhi-safo": "Субҳи сафо",
+    "vip-ipak-ziyosi": "Ипак зиёси",
+    "vip-zarbof": "Зарбоф",
+    "vip-visol-nuri": "Висол нури",
+    "vip-zarrin-ahd": "Заррин аҳд",
+    "vip-marvarid": "Марварид",
+    "vip-bogi-visol": "Боғи висол",
+    "vip-oq-tulpor": "Оқ тулпор",
+    "vip-umr-ziyosi": "Умр зиёси",
     "gul-doira": "Гул доира",
     "girih-barg": "Гиреҳ барг",
     "muhrli-maktub": "Муҳрли мактуб",
@@ -614,6 +624,21 @@ const raw = {
     calendarAria: (date: string) => `Тадбир куни: ${date}`,
   },
 
+  /** VIP invitations: private demo-only collection. */
+  vip: {
+    privateLetter: "Сиз учун махсус таклифнома",
+    forever: "Бир умр бирга",
+    openMe: "Мени очинг",
+    withLove: "Меҳр ва эҳтиром билан",
+    retry: "Сурат юкланмади. Қайта босинг",
+    loading: "Таклифнома тайёрланмоқда…",
+    saveDate: "Қалбимиздаги энг гўзал кун",
+    ourDay: "Бир кун — бир умрлик хотира",
+    together: "Дийдорлашув манзили",
+    scroll: "Ҳикоямизни варақланг",
+    venueMood: "Безак учун сурат · ҳақиқий зал сурати эмас",
+  },
+
   /** Цветочные дизайны «Гулли рамка» (117–122) */
   /** Батч 3: подсказки листания */
   b3: {
@@ -848,3 +873,19 @@ function buildDesignTexts(id: string, lang: InviteLang): Texts {
     hosts: { ...t.hosts, thanks: h.thanks ?? t.hosts.thanks, waiting: h.waiting ?? t.hosts.waiting },
   }, lang === "uz" ? glueWords : lang === "ru" ? glueRuWords : glueKkWords) as unknown as Texts;
 }
+
+/** New bespoke wedding experiences: all raster assets are text-free. */
+const masterpieceCopy={
+ uz:{invitation:"Никоҳ тўйига таклифнома",open:"Таклифномани очинг",loading:"Таклифнома тайёрланмоқда…",retry:"Қайта очиш учун босинг",love:"Меҳр ва эҳтиром билан",forever:"Икки қалб. Бир тақдир.",day:"Қалбимиздаги қутлуғ кун",arrival:"Дийдорлашув манзили",scroll:"Таклифномани варақланг"},
+ ru:{invitation:"Приглашение на свадьбу",open:"Открыть приглашение",loading:"Готовим приглашение…",retry:"Нажмите, чтобы попробовать снова",love:"С любовью и уважением",forever:"Два сердца. Одна судьба.",day:"День, который останется в сердце",arrival:"Место нашей встречи",scroll:"Листайте приглашение"},
+ kk:{invitation:"Үйлену тойына шақыру",open:"Шақыруды ашу",loading:"Шақыру дайындалуда…",retry:"Қайталау үшін басыңыз",love:"Махаббатпен және құрметпен",forever:"Екі жүрек. Бір тағдыр.",day:"Жүректегі ерекше күн",arrival:"Кездесу орны",scroll:"Шақыруды парақтаңыз"},
+};
+export function luxuryWeddingCopy(lang:string){return masterpieceCopy[lang==="ru"?"ru":lang==="kk"?"kk":"uz"];}
+
+/** Copy scoped to the two unlisted morning previews. Art contains no lettering. */
+const celebrationWords={
+ uz:{touch:"Таклифномани очиш учун экранга тегинг",invitation:"Таклифнома",open:"Таклифномани очинг",loading:"Таклифнома тайёрланмоқда…",retry:"Қайта очиш учун босинг",respect:"Меҳр ва эҳтиром билан",meeting:"Дийдорлашув манзили",morning:"Саҳарги дийдорга марҳамат",family:"Қадрдонлар даврасида",joy:"Оиламиз қувончига шерик бўлинг",scroll:"Таклифномани варақланг","sahar-sabosi":"Саҳар сабоси","subhi-safo":"Субҳи сафо"},
+ ru:{touch:"Коснитесь экрана, чтобы открыть приглашение",invitation:"Приглашение",open:"Открыть приглашение",loading:"Готовим приглашение…",retry:"Нажмите, чтобы попробовать снова",respect:"С теплом и уважением",meeting:"Место нашей встречи",morning:"Приглашаем на утреннюю встречу",family:"В кругу родных и близких",joy:"Разделите радость нашей семьи",scroll:"Листайте приглашение","sahar-sabosi":"Дыхание утра","subhi-safo":"Светлое утро"},
+ kk:{touch:"Шақыруды ашу үшін экранды түртіңіз",invitation:"Шақыру",open:"Шақыруды ашу",loading:"Шақыру дайындалуда…",retry:"Қайталау үшін басыңыз",respect:"Ізгі ниетпен және құрметпен",meeting:"Кездесу орны",morning:"Таңғы кездесуге шақырамыз",family:"Жақындар ортасында",joy:"Отбасымыздың қуанышын бөлісіңіз",scroll:"Шақыруды парақтаңыз","sahar-sabosi":"Таң самалы","subhi-safo":"Нұрлы таң"},
+};
+export function celebrationCopy(lang:string){return celebrationWords[lang==="ru"?"ru":lang==="kk"?"kk":"uz"];}

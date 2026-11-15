@@ -1,0 +1,10 @@
+"use client";
+import {useMotionPreference} from "../vip-masterpiece/useMotionPreference";
+import {motion} from "motion/react";
+import s from "./grand.module.css";
+// Original bilateral islimi drawing: paired stems, almond leaves and a central bud.
+const branch="M120 80C94 80 79 60 55 57C37 54 20 59 11 68M111 78C93 60 108 37 120 31M78 66C62 68 48 50 51 35C66 36 80 49 78 66ZM53 57C35 53 27 37 31 27C47 30 57 41 53 57ZM103 71C84 67 80 48 88 37C102 46 110 58 103 71Z";
+const bud="M120 44C95 27 104 8 120 5C136 8 145 27 120 44ZM120 34C114 25 114 17 120 12C126 17 126 25 120 34ZM104 80Q120 67 136 80";
+export function GanchSprig({className="",still=false}:{className?:string;still?:boolean}){const reduced=useMotionPreference(),draw=!still&&!reduced;const line=(d:string)=><motion.path d={d} pathLength={1} initial={{pathLength:draw?.24:1}} whileInView={{pathLength:1}} viewport={{once:true}} transition={{duration:draw?1.15:0,ease:"easeOut"}}/>;return <svg className={`${s.ganchSprig} ${className}`} viewBox="0 0 240 96" fill="none" aria-hidden="true"><g className={s.carvingLight} transform="translate(0 1.2)"><path d={branch}/><path d={branch} transform="translate(240 0) scale(-1 1)"/><path d={bud}/></g><g className={s.carvingInk}>{line(branch)}<g transform="translate(240 0) scale(-1 1)">{line(branch)}</g>{line(bud)}</g></svg>;}
+const CLOTH="M180 12C162 31 143 38 110 31C64 22 35 54 29 99L26 454C35 477 64 474 78 492C92 511 105 525 132 525Q158 527 180 548Q202 527 228 525C255 525 268 511 282 492C296 474 325 477 334 454L331 99C325 54 296 22 250 31C217 38 198 31 180 12Z";
+export function CeremonialCloth(){return <svg className={s.ceremonialCloth} viewBox="0 0 360 560" preserveAspectRatio="none" aria-hidden="true"><path d={CLOTH} className={s.clothGround}/><path d={CLOTH} className={s.clothRelief}/><path d={CLOTH} className={s.clothSeam} transform="translate(10 13) scale(.944 .95)"/><path d="M43 108Q63 91 76 109M284 109Q297 91 317 108M43 421Q66 445 58 459M317 421Q294 445 302 459" className={s.clothSeam}/></svg>;}
