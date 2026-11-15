@@ -44,7 +44,7 @@ describe('батч 3 (123–138): SQL только по «да» владель�
   const sql=await file('supabase/release/natural-batch3-templates.sql');await pg.exec(sql);await pg.exec(sql);
   expect((await pg.query('select * from public.templates where number not between 123 and 138 order by id')).rows).toEqual(before);
   const rows=(await pg.query('select id,number,occasion,format,price,with_photo,cover_url,is_active from public.templates where number between 123 and 138 order by number')).rows;
-  expect(rows).toEqual([...BATCH3].sort((a,b)=>a.number-b.number).map(d=>({id:d.id,number:d.number,occasion:d.occasion,format:d.format,price:PRICE[d.format],with_photo:d.withPhoto,cover_url:`/covers/${d.id}.webp`,is_active:ACCEPTED.has(d.id)})));
+  expect(rows).toEqual([...BATCH3].sort((a,b)=>a.number-b.number).map(d=>({id:d.id,number:d.number,occasion:d.occasion,format:d.format,price:PRICE[d.format],with_photo:d.withPhoto,cover_url:`/covers/${d.id}.webp`,is_active:ACCEPTED.has(d.id)||["shohona-baxmal","ganch-peshtoq","visol-hikoya"].includes(d.id)})));
   expect((rows as {number:number;is_active:boolean}[]).find(r=>r.number===131)?.is_active).toBe(false);
  }finally{await pg.close()}},20000);
 
@@ -78,8 +78,8 @@ describe('весь выпуск по порядку: natural-four → natural-si
   const rows=(await pg.query<{id:string;number:number;occasion:string;format:string;price:number;is_active:boolean}>('select id,number,occasion,format,price,is_active from public.templates')).rows;
   const byId=new Map(rows.map(r=>[r.id,r]));
   // активные в базе = каталог бота и сайта
-  expect(rows.filter(r=>r.is_active).map(r=>r.id).sort()).toEqual([...ACCEPTED].sort());
-  expect(ACCEPTED.size).toBe(36);
+  expect(rows.filter(r=>r.is_active).map(r=>r.id).sort()).toEqual([...ACCEPTED,"shohona-baxmal","ganch-peshtoq","visol-hikoya"].sort());
+  expect(ACCEPTED.size).toBe(33);
   // каждый дизайн, на который может ссылаться заказ, есть в базе с тем же номером, тадбиром и форматом
   for(const d of everAccepted().filter(d=>d.number>=113||ACCEPTED.has(d.id))){
    const r=byId.get(d.id);expect(r,d.id).toBeDefined();

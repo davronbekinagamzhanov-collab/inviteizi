@@ -10,6 +10,7 @@ import { SynthPlayer, type Score } from "./synth";
 import { glueData, glueWords } from "@/lib/typography";
 
 type Options = {
+  initialLanguage?: "uz";
   /** Мелодия дизайна (играет, если клиент не прислал свою песню) */
   melody?: Score;
   /** false — дизайн без заставки (Оддий): приглашение открыто сразу */
@@ -54,11 +55,11 @@ export function useInvitation(raw: InvitationData, mode: InvitationMode, opts: O
       // приватный режим: язык не помним
     }
     const url = new URLSearchParams(window.location.search).get("lang");
-    const next = pickLang(langsKey.split(",") as InviteLang[], url, saved, navigator.languages?.length ? navigator.languages : [navigator.language], main);
+    const next = opts.initialLanguage ? pickLang(langsKey.split(",") as InviteLang[], url, null, [], opts.initialLanguage) : pickLang(langsKey.split(",") as InviteLang[], url, saved, navigator.languages?.length ? navigator.languages : [navigator.language], main);
     // eslint-disable-next-line react-hooks/set-state-in-effect -- язык телефона известен только в браузере
     setLang(next);
     setLangReady(true);
-  }, [langsKey, main]);
+  }, [langsKey, main, opts.initialLanguage]);
   useEffect(() => {
     document.documentElement.lang = lang;
   }, [lang]);

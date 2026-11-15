@@ -238,7 +238,7 @@ export const designs: Design[] = rawDesigns.map((d) => ({ ...d, style: styleOf(d
  */
 export const ACCEPTED = new Set([
   // 1, 23, 61, 70, 113, 114 — никоҳ
-  "oltin-monogramma", "sapfir", "ganch-peshtoq", "shohona-baxmal", "muhr", "ipak",
+  "oltin-monogramma", "sapfir",   "muhr", "ipak",
   // 78, 115 — суннат
   "doppicha", "bog",
   // 116 — наҳорги ош
@@ -248,7 +248,7 @@ export const ACCEPTED = new Set([
   // 117–122 — «Гулли рамка» (03.11.2026): никоҳ ×3, наҳорги ош, суннат, юбилей
   "gul-doira", "girih-barg", "muhrli-maktub", "tonggi-piyola", "lola-bodom", "bordo-guldasta",
   // 123–138 — батч 3
-   "choy-maktub", "oq-maktub", "hurmat-maktub", "tong-varaq", "nur-varaq", "non-albom", "ipak-albom", "xotira-albom", "qozon-tongi", "visol-hikoya", "ganch-darvoza", "doppi-kitob", "umr-kitobi", "suzani-medalyon", "lola-medalyon",
+   "choy-maktub", "oq-maktub", "hurmat-maktub", "tong-varaq", "nur-varaq", "non-albom", "ipak-albom", "xotira-albom", "qozon-tongi",  "ganch-darvoza", "doppi-kitob", "umr-kitobi", "suzani-medalyon", "lola-medalyon",
   // 139–141 — «Пятно» (v2): никоҳ, места 5–7 в каталоге
   "suvbuyoq-tuman", "suvbuyoq-zumrad", "suvbuyoq-upa",
   // Скрыты по решению владельца 03.11.2026 (код и строки в БД остаются — оплаченные ссылки работают),
@@ -282,7 +282,7 @@ export const CATALOG_ORDER: Record<Occasion, readonly string[]> = {
     "muhr", "ipak", "gul-doira", "suzani-medalyon",
     "suvbuyoq-tuman", "suvbuyoq-zumrad", "suvbuyoq-upa",
     "nur-varaq", "girih-barg", "oq-maktub", "xotira-albom", "muhrli-maktub", "ipak-albom",
-    "shohona-baxmal", "oltin-monogramma", "sapfir", "ganch-peshtoq", "visol-hikoya",
+     "oltin-monogramma", "sapfir",
   ],
   sunnat: ["ganch-darvoza", "bog", "lola-medalyon", "lola-bodom", "doppi-kitob", "doppicha"],
   nahorgi: ["qozon-tongi", "tong-dasturxon", "non-albom", "tonggi-piyola", "tong-varaq", "choy-maktub"],
@@ -298,7 +298,8 @@ export function catalogPosition(d: Pick<Design,"id"|"number">) {
 /** Все когда-либо принятые (каталог + скрытые 03.11): код живой, заказы на них открываются */
 /** Сняты из каталога после критика батча 3 (03.11.2026): 131 «Ислими варақ». Код и строка в БД остаются */
 export const HIDDEN_BATCH3: readonly string[] = ["islimi-varaq"];
-export const everAccepted = () => designs.filter((d) => ACCEPTED.has(d.id) || HIDDEN_03_11.includes(d.id) || HIDDEN_BATCH3.includes(d.id));
+export const HIDDEN_NIKOH_POLISH = ["shohona-baxmal","ganch-peshtoq","visol-hikoya"] as const;
+export const everAccepted = () => designs.filter((d) => HIDDEN_NIKOH_POLISH.some(id=>id===d.id) || ACCEPTED.has(d.id) || HIDDEN_03_11.includes(d.id) || HIDDEN_BATCH3.includes(d.id));
 export const activeDesigns = () => designs.filter((d) => ACCEPTED.has(d.id)).sort((a,b)=>catalogPosition(a)-catalogPosition(b));
 
 export function getDesign(id: string) {
