@@ -1,15 +1,31 @@
-
 import localFont from "next/font/local";
 import { designVars } from "../types";
 
 // Playfair Display без cyrillic-ext (нет қ ғ ҳ), поэтому новая версия семейства — Playfair
-const display = localFont({ preload: false,src:[{path:"../../../assets/fonts/google/playfair/Playfair[opsz,wdth,wght].woff2",weight:"300.0 900.0",style:"normal"},{path:"../../../assets/fonts/google/playfair/Playfair-Italic[opsz,wdth,wght].woff2",weight:"300.0 900.0",style:"italic"}],display:"swap",variable:"--sf-display"});
+const display = localFont({
+  preload: false,
+  src: [
+    {
+      path: "../../../assets/fonts/web/google/playfair/Playfair[opsz,wdth,wght].woff2",
+      weight: "300.0 900.0",
+      style: "normal",
+    },
+    {
+      path: "../../../assets/fonts/web/google/playfair/Playfair-Italic[opsz,wdth,wght].woff2",
+      weight: "300.0 900.0",
+      style: "italic",
+    },
+  ],
+  display: "swap",
+  variable: "--sf-display",
+});
 
-const body = localFont({ preload: false,
+const body = localFont({
+  preload: false,
   variable: "--sf-body",
   src: [
-    { path: "../../../assets/fonts/Lora-Regular.ttf", weight: "400 700", style: "normal" },
-    { path: "../../../assets/fonts/Lora-Italic.ttf", weight: "400 700", style: "italic" },
+    { path: "../../../assets/fonts/web/Lora-Regular.woff2", weight: "400 700", style: "normal" },
+    { path: "../../../assets/fonts/web/Lora-Italic.woff2", weight: "400 700", style: "italic" },
   ],
   display: "swap",
 });

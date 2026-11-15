@@ -5,10 +5,42 @@ import { designVars } from "../types";
 // cyrillic-ext — в нём ў қ ғ ҳ
 // Libertinus Serif, курсив — каллиграфичный «почерк пером» для имён и заголовков.
 // (По каталогу был Great Vibes, но в нём нет ў қ ғ ҳ — проверено скриптом.)
-const display = localFont({ preload: false,src:[{path:"../../../assets/fonts/google/libertinusserif/LibertinusSerif-Italic.woff2",weight:"400",style:"italic"},{path:"../../../assets/fonts/google/libertinusserif/LibertinusSerif-SemiBoldItalic.woff2",weight:"600",style:"italic"}],display:"swap",variable:"--ab-display"});
+const display = localFont({
+  preload: false,
+  src: [
+    {
+      path: "../../../assets/fonts/web/google/libertinusserif/LibertinusSerif-Italic.woff2",
+      weight: "400",
+      style: "italic",
+    },
+    {
+      path: "../../../assets/fonts/web/google/libertinusserif/LibertinusSerif-SemiBoldItalic.woff2",
+      weight: "600",
+      style: "italic",
+    },
+  ],
+  display: "swap",
+  variable: "--ab-display",
+});
 
 // EB Garamond — книжная антиква для текста: спокойная, «полиграфическая»
-const body = localFont({ preload: false,src:[{path:"../../../assets/fonts/google/ebgaramond/EBGaramond[wght].woff2",weight:"400.0 800.0",style:"normal"},{path:"../../../assets/fonts/google/ebgaramond/EBGaramond-Italic[wght].woff2",weight:"400.0 800.0",style:"italic"}],display:"swap",variable:"--ab-body"});
+const body = localFont({
+  preload: false,
+  src: [
+    {
+      path: "../../../assets/fonts/web/google/ebgaramond/EBGaramond[wght].woff2",
+      weight: "400.0 800.0",
+      style: "normal",
+    },
+    {
+      path: "../../../assets/fonts/web/google/ebgaramond/EBGaramond-Italic[wght].woff2",
+      weight: "400.0 800.0",
+      style: "italic",
+    },
+  ],
+  display: "swap",
+  variable: "--ab-body",
+});
 
 export const fontClasses = `${display.variable} ${body.variable}`;
 

@@ -397,7 +397,7 @@ export const ru = {
   },
   music: { play: "Включить музыку", pause: "Выключить музыку" },
   brand: {
-    badge: "InviteIZI · за 5 минут",
+    badge: "InviteIZI",
     badgeLabel: "Открыть бот InviteIZI",
     footer: "Создано в InviteIZI",
     footerLink: "Создайте своё приглашение",

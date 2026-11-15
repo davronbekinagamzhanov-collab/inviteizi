@@ -390,7 +390,7 @@ export const kk = {
   },
   music: { play: "Музыканы қосу", pause: "Музыканы өшіру" },
   brand: {
-    badge: "InviteIZI · 5 минутта",
+    badge: "InviteIZI",
     badgeLabel: "InviteIZI ботын ашу",
     footer: "InviteIZI-де жасалды",
     footerLink: "Өз шақыруыңызды жасаңыз",

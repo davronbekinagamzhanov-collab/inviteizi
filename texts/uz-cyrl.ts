@@ -584,7 +584,7 @@ const raw = {
   },
 
   brand: {
-    badge: "InviteIZI · 5 дақиқада",
+    badge: "InviteIZI",
     badgeLabel: "InviteIZI ботини очиш",
     footer: "InviteIZI билан яратилди",
     footerLink: "Ўз таклифномангизни яратинг",

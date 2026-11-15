@@ -1,0 +1,866 @@
+[
+  {
+    "id": "vip-zarrin-ahd",
+    "number": 150,
+    "ok": true,
+    "footerBg": [
+      245,
+      238,
+      225,
+      1
+    ],
+    "footerInk": "rgb(86, 43, 41)",
+    "footerLinkContrast": 10.26,
+    "footerCaptionContrast": 10.26,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "vip-marvarid",
+    "number": 145,
+    "ok": true,
+    "footerBg": [
+      247,
+      243,
+      236,
+      1
+    ],
+    "footerInk": "rgb(73, 66, 57)",
+    "footerLinkContrast": 8.95,
+    "footerCaptionContrast": 8.95,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "vip-zarbof",
+    "number": 152,
+    "ok": true,
+    "footerBg": [
+      238,
+      233,
+      222,
+      1
+    ],
+    "footerInk": "rgb(48, 55, 58)",
+    "footerLinkContrast": 10.01,
+    "footerCaptionContrast": 10.01,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "vip-bogi-visol",
+    "number": 146,
+    "ok": true,
+    "footerBg": [
+      243,
+      240,
+      229,
+      1
+    ],
+    "footerInk": "rgb(41, 62, 50)",
+    "footerLinkContrast": 10.06,
+    "footerCaptionContrast": 10.06,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "vip-ipak-ziyosi",
+    "number": 151,
+    "ok": true,
+    "footerBg": [
+      247,
+      240,
+      232,
+      1
+    ],
+    "footerInk": "rgb(73, 54, 47)",
+    "footerLinkContrast": 10.03,
+    "footerCaptionContrast": 10.03,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "vip-visol-nuri",
+    "number": 149,
+    "ok": true,
+    "footerBg": [
+      248,
+      244,
+      238,
+      1
+    ],
+    "footerInk": "rgb(72, 64, 51)",
+    "footerLinkContrast": 9.32,
+    "footerCaptionContrast": 9.32,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "vip-tilla-muhr",
+    "number": 142,
+    "ok": true,
+    "footerBg": [
+      246,
+      240,
+      230,
+      1
+    ],
+    "footerInk": "rgb(55, 52, 46)",
+    "footerLinkContrast": 10.94,
+    "footerCaptionContrast": 10.94,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "vip-osmon",
+    "number": 143,
+    "ok": true,
+    "footerBg": [
+      247,
+      250,
+      252,
+      1
+    ],
+    "footerInk": "rgb(35, 62, 83)",
+    "footerLinkContrast": 10.63,
+    "footerCaptionContrast": 10.63,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "vip-suzana",
+    "number": 144,
+    "ok": true,
+    "footerBg": [
+      248,
+      242,
+      232,
+      1
+    ],
+    "footerInk": "rgb(74, 41, 49)",
+    "footerLinkContrast": 11.41,
+    "footerCaptionContrast": 11.41,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "muhr",
+    "number": 113,
+    "ok": true,
+    "footerBg": [
+      243,
+      244,
+      242,
+      1
+    ],
+    "footerInk": "rgb(44, 59, 73)",
+    "footerLinkContrast": 10.41,
+    "footerCaptionContrast": 10.41,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "ipak",
+    "number": 114,
+    "ok": true,
+    "footerBg": [
+      239,
+      232,
+      222,
+      1
+    ],
+    "footerInk": "rgb(59, 50, 43)",
+    "footerLinkContrast": 10.3,
+    "footerCaptionContrast": 10.3,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "gul-doira",
+    "number": 117,
+    "ok": true,
+    "footerBg": [
+      252,
+      248,
+      240,
+      1
+    ],
+    "footerInk": "rgb(103, 72, 63)",
+    "footerLinkContrast": 7.7,
+    "footerCaptionContrast": 7.7,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "suzani-medalyon",
+    "number": 129,
+    "ok": true,
+    "footerBg": [
+      239,
+      228,
+      212,
+      1
+    ],
+    "footerInk": "rgb(88, 51, 47)",
+    "footerLinkContrast": 8.66,
+    "footerCaptionContrast": 8.66,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "suvbuyoq-tuman",
+    "number": 139,
+    "ok": true,
+    "footerBg": [
+      252,
+      249,
+      242,
+      1
+    ],
+    "footerInk": "rgb(53, 81, 107)",
+    "footerLinkContrast": 7.86,
+    "footerCaptionContrast": 7.86,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "suvbuyoq-zumrad",
+    "number": 140,
+    "ok": true,
+    "footerBg": [
+      251,
+      248,
+      237,
+      1
+    ],
+    "footerInk": "rgb(33, 75, 59)",
+    "footerLinkContrast": 9.25,
+    "footerCaptionContrast": 9.25,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "suvbuyoq-upa",
+    "number": 141,
+    "ok": true,
+    "footerBg": [
+      253,
+      247,
+      241,
+      1
+    ],
+    "footerInk": "rgb(120, 77, 86)",
+    "footerLinkContrast": 6.6,
+    "footerCaptionContrast": 6.6,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "nur-varaq",
+    "number": 130,
+    "ok": true,
+    "footerBg": [
+      247,
+      241,
+      238,
+      1
+    ],
+    "footerInk": "rgb(46, 35, 38)",
+    "footerLinkContrast": 13.56,
+    "footerCaptionContrast": 13.56,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "girih-barg",
+    "number": 118,
+    "ok": true,
+    "footerBg": [
+      252,
+      249,
+      242,
+      1
+    ],
+    "footerInk": "rgb(52, 74, 60)",
+    "footerLinkContrast": 9.12,
+    "footerCaptionContrast": 9.12,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "oq-maktub",
+    "number": 127,
+    "ok": true,
+    "footerBg": [
+      235,
+      233,
+      223,
+      1
+    ],
+    "footerInk": "rgb(41, 60, 52)",
+    "footerLinkContrast": 9.64,
+    "footerCaptionContrast": 9.64,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "xotira-albom",
+    "number": 132,
+    "ok": true,
+    "footerBg": [
+      236,
+      238,
+      234,
+      1
+    ],
+    "footerInk": "rgb(31, 42, 53)",
+    "footerLinkContrast": 12.48,
+    "footerCaptionContrast": 12.48,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "muhrli-maktub",
+    "number": 119,
+    "ok": true,
+    "footerBg": [
+      251,
+      246,
+      243,
+      1
+    ],
+    "footerInk": "rgb(75, 59, 58)",
+    "footerLinkContrast": 9.86,
+    "footerCaptionContrast": 9.86,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "ipak-albom",
+    "number": 128,
+    "ok": true,
+    "footerBg": [
+      247,
+      243,
+      235,
+      1
+    ],
+    "footerInk": "rgb(44, 45, 34)",
+    "footerLinkContrast": 12.6,
+    "footerCaptionContrast": 12.6,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "oltin-monogramma",
+    "number": 1,
+    "ok": true,
+    "footerBg": [
+      248,
+      243,
+      234,
+      1
+    ],
+    "footerInk": "rgb(59, 42, 30)",
+    "footerLinkContrast": 12.37,
+    "footerCaptionContrast": 12.37,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "sapfir",
+    "number": 23,
+    "ok": true,
+    "footerBg": [
+      11,
+      18,
+      48,
+      1
+    ],
+    "footerInk": "rgb(244, 235, 214)",
+    "footerLinkContrast": 15.48,
+    "footerCaptionContrast": 15.48,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "vip-oq-tulpor",
+    "number": 147,
+    "ok": true,
+    "footerBg": [
+      248,
+      244,
+      233,
+      1
+    ],
+    "footerInk": "rgb(52, 76, 62)",
+    "footerLinkContrast": 8.49,
+    "footerCaptionContrast": 8.49,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "zarhal-duo",
+    "number": 159,
+    "ok": true,
+    "footerBg": [
+      251,
+      247,
+      237,
+      1
+    ],
+    "footerInk": "rgb(53, 77, 63)",
+    "footerLinkContrast": 8.59,
+    "footerCaptionContrast": 8.59,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "moviy-ayvon",
+    "number": 160,
+    "ok": true,
+    "footerBg": [
+      248,
+      246,
+      237,
+      1
+    ],
+    "footerInk": "rgb(52, 91, 110)",
+    "footerLinkContrast": 6.76,
+    "footerCaptionContrast": 6.76,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "tulpor-quvonchi",
+    "number": 161,
+    "ok": true,
+    "footerBg": [
+      252,
+      247,
+      236,
+      1
+    ],
+    "footerInk": "rgb(103, 77, 59)",
+    "footerLinkContrast": 7.28,
+    "footerCaptionContrast": 7.28,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "kashta-tilagi",
+    "number": 162,
+    "ok": true,
+    "footerBg": [
+      249,
+      245,
+      233,
+      1
+    ],
+    "footerInk": "rgb(53, 74, 105)",
+    "footerLinkContrast": 8.25,
+    "footerCaptionContrast": 8.25,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "ganch-darvoza",
+    "number": 134,
+    "ok": true,
+    "footerBg": [
+      244,
+      240,
+      232,
+      1
+    ],
+    "footerInk": "rgb(41, 35, 28)",
+    "footerLinkContrast": 13.67,
+    "footerCaptionContrast": 13.67,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "bog",
+    "number": 115,
+    "ok": true,
+    "footerBg": [
+      246,
+      247,
+      243,
+      1
+    ],
+    "footerInk": "rgb(47, 61, 54)",
+    "footerLinkContrast": 10.6,
+    "footerCaptionContrast": 10.6,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "lola-medalyon",
+    "number": 136,
+    "ok": true,
+    "footerBg": [
+      242,
+      243,
+      236,
+      1
+    ],
+    "footerInk": "rgb(34, 40, 31)",
+    "footerLinkContrast": 13.52,
+    "footerCaptionContrast": 13.52,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "lola-bodom",
+    "number": 121,
+    "ok": true,
+    "footerBg": [
+      246,
+      248,
+      244,
+      1
+    ],
+    "footerInk": "rgb(46, 61, 52)",
+    "footerLinkContrast": 10.72,
+    "footerCaptionContrast": 10.72,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "doppi-kitob",
+    "number": 135,
+    "ok": true,
+    "footerBg": [
+      238,
+      240,
+      242,
+      1
+    ],
+    "footerInk": "rgb(30, 34, 48)",
+    "footerLinkContrast": 13.86,
+    "footerCaptionContrast": 13.86,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "doppicha",
+    "number": 78,
+    "ok": true,
+    "footerBg": [
+      255,
+      249,
+      237,
+      1
+    ],
+    "footerInk": "rgb(60, 79, 67)",
+    "footerLinkContrast": 8.37,
+    "footerCaptionContrast": 8.37,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "sahar-sabosi",
+    "number": 153,
+    "ok": true,
+    "footerBg": [
+      250,
+      247,
+      238,
+      1
+    ],
+    "footerInk": "rgb(60, 81, 59)",
+    "footerLinkContrast": 8.06,
+    "footerCaptionContrast": 8.06,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "subhi-safo",
+    "number": 154,
+    "ok": true,
+    "footerBg": [
+      250,
+      246,
+      237,
+      1
+    ],
+    "footerInk": "rgb(49, 87, 102)",
+    "footerLinkContrast": 7.25,
+    "footerCaptionContrast": 7.25,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "bog-nasimi",
+    "number": 157,
+    "ok": true,
+    "footerBg": [
+      251,
+      248,
+      238,
+      1
+    ],
+    "footerInk": "rgb(67, 94, 68)",
+    "footerLinkContrast": 6.76,
+    "footerCaptionContrast": 6.76,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "tong-naqshi",
+    "number": 158,
+    "ok": true,
+    "footerBg": [
+      248,
+      243,
+      233,
+      1
+    ],
+    "footerInk": "rgb(41, 72, 92)",
+    "footerLinkContrast": 8.73,
+    "footerCaptionContrast": 8.73,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "qozon-tongi",
+    "number": 125,
+    "ok": true,
+    "footerBg": [
+      242,
+      237,
+      230,
+      1
+    ],
+    "footerInk": "rgb(37, 31, 27)",
+    "footerLinkContrast": 13.97,
+    "footerCaptionContrast": 13.97,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "tong-dasturxon",
+    "number": 116,
+    "ok": true,
+    "footerBg": [
+      245,
+      237,
+      225,
+      1
+    ],
+    "footerInk": "rgb(58, 42, 34)",
+    "footerLinkContrast": 11.79,
+    "footerCaptionContrast": 11.79,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "non-albom",
+    "number": 124,
+    "ok": true,
+    "footerBg": [
+      241,
+      232,
+      216,
+      1
+    ],
+    "footerInk": "rgb(51, 38, 27)",
+    "footerLinkContrast": 12.05,
+    "footerCaptionContrast": 12.05,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "tonggi-piyola",
+    "number": 120,
+    "ok": true,
+    "footerBg": [
+      250,
+      244,
+      234,
+      1
+    ],
+    "footerInk": "rgb(61, 49, 40)",
+    "footerLinkContrast": 11.5,
+    "footerCaptionContrast": 11.5,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "tong-varaq",
+    "number": 126,
+    "ok": true,
+    "footerBg": [
+      238,
+      241,
+      243,
+      1
+    ],
+    "footerInk": "rgb(35, 48, 58)",
+    "footerLinkContrast": 11.9,
+    "footerCaptionContrast": 11.9,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "choy-maktub",
+    "number": 123,
+    "ok": true,
+    "footerBg": [
+      243,
+      236,
+      224,
+      1
+    ],
+    "footerInk": "rgb(51, 41, 31)",
+    "footerLinkContrast": 12.1,
+    "footerCaptionContrast": 12.1,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "vip-umr-ziyosi",
+    "number": 148,
+    "ok": true,
+    "footerBg": [
+      247,
+      239,
+      229,
+      1
+    ],
+    "footerInk": "rgb(84, 62, 54)",
+    "footerLinkContrast": 8.7,
+    "footerCaptionContrast": 8.7,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "umr-durdonasi",
+    "number": 163,
+    "ok": true,
+    "footerBg": [
+      251,
+      246,
+      237,
+      1
+    ],
+    "footerInk": "rgb(104, 81, 60)",
+    "footerLinkContrast": 6.89,
+    "footerCaptionContrast": 6.89,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "qadr-surati",
+    "number": 164,
+    "ok": true,
+    "footerBg": [
+      244,
+      243,
+      235,
+      1
+    ],
+    "footerInk": "rgb(53, 79, 99)",
+    "footerLinkContrast": 7.7,
+    "footerCaptionContrast": 7.7,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "umr-daraxti",
+    "number": 81,
+    "ok": true,
+    "footerBg": [
+      250,
+      246,
+      235,
+      1
+    ],
+    "footerInk": "rgb(78, 89, 69)",
+    "footerLinkContrast": 6.85,
+    "footerCaptionContrast": 6.85,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "bordo-guldasta",
+    "number": 122,
+    "ok": true,
+    "footerBg": [
+      247,
+      239,
+      228,
+      1
+    ],
+    "footerInk": "rgb(105, 41, 57)",
+    "footerLinkContrast": 9.32,
+    "footerCaptionContrast": 9.32,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "zarhal-lavha",
+    "number": 87,
+    "ok": true,
+    "footerBg": [
+      252,
+      246,
+      235,
+      1
+    ],
+    "footerInk": "rgb(81, 67, 50)",
+    "footerLinkContrast": 8.88,
+    "footerCaptionContrast": 8.88,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "umr-kitobi",
+    "number": 137,
+    "ok": true,
+    "footerBg": [
+      239,
+      229,
+      211,
+      1
+    ],
+    "footerInk": "rgb(43, 33, 23)",
+    "footerLinkContrast": 12.62,
+    "footerCaptionContrast": 12.62,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "hurmat-maktub",
+    "number": 138,
+    "ok": true,
+    "footerBg": [
+      236,
+      228,
+      214,
+      1
+    ],
+    "footerInk": "rgb(31, 43, 46)",
+    "footerLinkContrast": 11.53,
+    "footerCaptionContrast": 11.53,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  },
+  {
+    "id": "pion-guldasta",
+    "number": 51,
+    "ok": true,
+    "footerBg": [
+      255,
+      248,
+      242,
+      1
+    ],
+    "footerInk": "rgb(74, 42, 46)",
+    "footerLinkContrast": 12.01,
+    "footerCaptionContrast": 12.01,
+    "badgeText": "✦InviteIZI",
+    "badgeContrast": null
+  }
+]

@@ -1,27 +1,169 @@
 "use client";
 import localFont from "next/font/local";
-import {designVars,type TemplateProps} from "../types";
-import {useInvitation} from "../../blocks/useInvitation";
-import {InvitationShell} from "../../blocks/InvitationShell";
-import {Words,useFitWords} from "../../blocks/FitWords";
-import {MapButton} from "../../blocks/MapButton";
-import {Reveal} from "../../blocks/Reveal";
-import {Countdown} from "../../blocks/Countdown";
-import {designTexts} from "@/texts/uz-cyrl";
-const font=localFont({ preload: false,src:[{path:"../../../assets/fonts/Lora-Regular.ttf"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--kt-font",display:"swap"});
-const vars=designVars({primary:"#56636c",primaryDark:"#46515a",gold:"#a1a7a2",goldLight:"#e0e1d9",paper:"#f8f7f0",ink:"#474f55",muted:"#626970"},{display:"var(--kt-font)",accent:"var(--kt-font)",body:"var(--kt-font)"});
-const t=designTexts("kumush-taroq");
+import { designVars, type TemplateProps } from "../types";
+import { useInvitation } from "../../blocks/useInvitation";
+import { InvitationShell } from "../../blocks/InvitationShell";
+import { Words, useFitWords } from "../../blocks/FitWords";
+import { MapButton } from "../../blocks/MapButton";
+import { Reveal } from "../../blocks/Reveal";
+import { Countdown } from "../../blocks/Countdown";
+import { designTexts } from "@/texts/uz-cyrl";
+const font = localFont({
+  preload: false,
+  src: [
+    { path: "../../../assets/fonts/web/Lora-Regular.woff2" },
+    { path: "../../../assets/fonts/web/Lora-Italic.woff2", style: "italic" },
+  ],
+  variable: "--kt-font",
+  display: "swap",
+});
+const vars = designVars(
+  {
+    primary: "#56636c",
+    primaryDark: "#46515a",
+    gold: "#a1a7a2",
+    goldLight: "#e0e1d9",
+    paper: "#f8f7f0",
+    ink: "#474f55",
+    muted: "#626970",
+  },
+  { display: "var(--kt-font)", accent: "var(--kt-font)", body: "var(--kt-font)" },
+);
+const t = designTexts("kumush-taroq");
 /** An engraved silver bridal comb. Pearl-like pins and oval engraving lines, no gem/velvet recolour. */
-export default function Design({data,mode}:TemplateProps){
-  const inv=useInvitation(data,mode,{opening:false}),names=useFitWords<HTMLHeadingElement>(45),hosts=useFitWords<HTMLParagraphElement>(25),groom=useFitWords<HTMLParagraphElement>(24),bride=useFitWords<HTMLParagraphElement>(24);
-  return <InvitationShell inv={inv} style={vars} fontsClassName={font.variable} backdropClassName="bg-[#dde1e0]" className="bg-paper text-ink [overflow-wrap:anywhere]">
-    <header className="px-7 pt-8 pb-10 text-center"><p className="text-[12px] uppercase tracking-[.2em] text-muted">{t.opening.invitation}</p><Comb/><h1 ref={names} className="mt-6 w-full leading-tight [--fit:45px]"><span className="block text-[length:var(--fit)] italic"><Words text={data.groom??""}/></span><span className="my-4 block text-[22px] text-muted">{t.cover.andWord}</span><span className="block text-[length:var(--fit)] italic"><Words text={data.bride??""}/></span></h1><p className="mt-7 text-[20px] text-primary">{t.occasionTitles[inv.occasion]}</p></header>
-    <main className="pb-24"><Reveal className="mx-5 rounded-[90px_90px_4px_4px] border-double border-4 border-gold/40 px-5 pt-10 pb-8 text-center"><h2 className="text-[28px] italic leading-snug">{inv.text.greeting}</h2><p className="mt-6 text-[19px] leading-[1.9]">{inv.text.body}</p></Reveal>
-      {inv.sides&&<section className="px-7 py-11 text-center"><p className="text-[14px] text-muted">{t.sides.groom}</p><p ref={groom} className="mt-3 w-full leading-snug [--fit:24px]"><span className="text-[length:var(--fit)]"><Words text={inv.sides.groom??""}/></span></p><div aria-hidden className="mx-auto my-7 h-2 w-2 rounded-full border border-primary"/><p className="text-[14px] text-muted">{t.sides.bride}</p><p ref={bride} className="mt-3 w-full leading-snug [--fit:24px]"><span className="text-[length:var(--fit)]"><Words text={inv.sides.bride??""}/></span></p></section>}
-      <Reveal className="mx-6 border-y border-gold/60 py-8 text-center"><p className="text-[16px] text-muted">{t.countdown.title[inv.occasion]}</p><Countdown startsAt={inv.main.when.startsAt} look={{grid:"mt-5 grid grid-cols-4 gap-2",box:"flex min-w-0 flex-col",number:"text-[25px] whitespace-nowrap text-primary",label:"mt-2 text-[12px] text-muted",today:"text-[26px] text-primary"}}/></Reveal>
-      <section className="px-7 pt-11"><h2 className="mb-8 text-center text-[30px] italic text-primary">{t.venue.programTitle}</h2>{inv.program.map((e,i)=><Reveal key={i} className="mb-9"><div data-event className="border-b border-gold/50 pb-8"><div className="flex items-center gap-4"><div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-gold/70 text-[28px] text-primary">{e.when.day}</div><div className="min-w-0"><p className="text-[15px] text-muted">{t.date.long(e.when.day,e.when.monthIndex,e.when.year)}</p><p className="mt-1 text-[26px] text-primary">{t.date.clock(e.time)}</p></div></div><h3 className="mt-5 text-[24px] leading-snug">{e.title}</h3><p className="mt-4 text-[22px] leading-snug">{e.venueName}</p><p className="mt-2 text-[17px] leading-relaxed text-muted">{e.address}</p><MapButton href={e.mapHref} className="mt-5 rounded-full border border-primary/40 px-5 py-3 text-primary" iconClassName="text-primary"/></div></Reveal>)}</section>
-      <Reveal className="px-7 pt-3 text-center"><p className="text-[24px] italic leading-[1.8]">{inv.blessing}</p><p className="mt-9 text-[15px] text-muted">{t.hosts.respectDeep}</p><p ref={hosts} className="mt-3 w-full leading-snug [--fit:25px]"><span className="text-[length:var(--fit)]"><Words text={data.hosts}/></span></p><p className="mt-6 text-[18px] text-primary">{t.hosts.waiting}</p></Reveal>
-    </main>
-  </InvitationShell>;
+export default function Design({ data, mode }: TemplateProps) {
+  const inv = useInvitation(data, mode, { opening: false }),
+    names = useFitWords<HTMLHeadingElement>(45),
+    hosts = useFitWords<HTMLParagraphElement>(25),
+    groom = useFitWords<HTMLParagraphElement>(24),
+    bride = useFitWords<HTMLParagraphElement>(24);
+  return (
+    <InvitationShell
+      inv={inv}
+      style={vars}
+      fontsClassName={font.variable}
+      backdropClassName="bg-[#dde1e0]"
+      className="bg-paper text-ink [overflow-wrap:anywhere]"
+    >
+      <header className="px-7 pt-8 pb-10 text-center">
+        <p className="text-[12px] uppercase tracking-[.2em] text-muted">{t.opening.invitation}</p>
+        <Comb />
+        <h1 ref={names} className="mt-6 w-full leading-tight [--fit:45px]">
+          <span className="block text-[length:var(--fit)] italic">
+            <Words text={data.groom ?? ""} />
+          </span>
+          <span className="my-4 block text-[22px] text-muted">{t.cover.andWord}</span>
+          <span className="block text-[length:var(--fit)] italic">
+            <Words text={data.bride ?? ""} />
+          </span>
+        </h1>
+        <p className="mt-7 text-[20px] text-primary">{t.occasionTitles[inv.occasion]}</p>
+      </header>
+      <main className="pb-24">
+        <Reveal className="mx-5 rounded-[90px_90px_4px_4px] border-double border-4 border-gold/40 px-5 pt-10 pb-8 text-center">
+          <h2 className="text-[28px] italic leading-snug">{inv.text.greeting}</h2>
+          <p className="mt-6 text-[19px] leading-[1.9]">{inv.text.body}</p>
+        </Reveal>
+        {inv.sides && (
+          <section className="px-7 py-11 text-center">
+            <p className="text-[14px] text-muted">{t.sides.groom}</p>
+            <p ref={groom} className="mt-3 w-full leading-snug [--fit:24px]">
+              <span className="text-[length:var(--fit)]">
+                <Words text={inv.sides.groom ?? ""} />
+              </span>
+            </p>
+            <div aria-hidden className="mx-auto my-7 h-2 w-2 rounded-full border border-primary" />
+            <p className="text-[14px] text-muted">{t.sides.bride}</p>
+            <p ref={bride} className="mt-3 w-full leading-snug [--fit:24px]">
+              <span className="text-[length:var(--fit)]">
+                <Words text={inv.sides.bride ?? ""} />
+              </span>
+            </p>
+          </section>
+        )}
+        <Reveal className="mx-6 border-y border-gold/60 py-8 text-center">
+          <p className="text-[16px] text-muted">{t.countdown.title[inv.occasion]}</p>
+          <Countdown
+            startsAt={inv.main.when.startsAt}
+            look={{
+              grid: "mt-5 grid grid-cols-4 gap-2",
+              box: "flex min-w-0 flex-col",
+              number: "text-[25px] whitespace-nowrap text-primary",
+              label: "mt-2 text-[12px] text-muted",
+              today: "text-[26px] text-primary",
+            }}
+          />
+        </Reveal>
+        <section className="px-7 pt-11">
+          <h2 className="mb-8 text-center text-[30px] italic text-primary">{t.venue.programTitle}</h2>
+          {inv.program.map((e, i) => (
+            <Reveal key={i} className="mb-9">
+              <div data-event className="border-b border-gold/50 pb-8">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-gold/70 text-[28px] text-primary">
+                    {e.when.day}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[15px] text-muted">{t.date.long(e.when.day, e.when.monthIndex, e.when.year)}</p>
+                    <p className="mt-1 text-[26px] text-primary">{t.date.clock(e.time)}</p>
+                  </div>
+                </div>
+                <h3 className="mt-5 text-[24px] leading-snug">{e.title}</h3>
+                <p className="mt-4 text-[22px] leading-snug">{e.venueName}</p>
+                <p className="mt-2 text-[17px] leading-relaxed text-muted">{e.address}</p>
+                <MapButton
+                  href={e.mapHref}
+                  className="mt-5 rounded-full border border-primary/40 px-5 py-3 text-primary"
+                  iconClassName="text-primary"
+                />
+              </div>
+            </Reveal>
+          ))}
+        </section>
+        <Reveal className="px-7 pt-3 text-center">
+          <p className="text-[24px] italic leading-[1.8]">{inv.blessing}</p>
+          <p className="mt-9 text-[15px] text-muted">{t.hosts.respectDeep}</p>
+          <p ref={hosts} className="mt-3 w-full leading-snug [--fit:25px]">
+            <span className="text-[length:var(--fit)]">
+              <Words text={data.hosts} />
+            </span>
+          </p>
+          <p className="mt-6 text-[18px] text-primary">{t.hosts.waiting}</p>
+        </Reveal>
+      </main>
+    </InvitationShell>
+  );
 }
-function Comb(){return <svg data-decor aria-hidden="true" viewBox="0 0 320 185" className="mt-4 w-full" fill="none" stroke="#939e9f" strokeWidth="1.3"><path d="M42 90Q160-20 278 90v19H42Z" fill="#e2e5e2"/><path d="M54 88Q160-5 266 88M64 88Q160 10 256 88M42 97H278"/>{[0,1,2,3,4,5,6,7,8,9,10,11].map(i=><path key={i} d={`M${51+i*20} 109v46q0 8 5 8t5-8v-46`} fill="#e9ece7"/>)}{[[79,73],[119,53],[160,44],[201,53],[241,73]].map(([x,y],i)=><g key={i} transform={`translate(${x} ${y})`}><path d="M0-15Q-16-3 0 10Q16-3 0-15Z" fill="#f8f7f0"/><circle cy="-1" r="3" fill="#c6ceca"/><path d="M-13 9q13 11 26 0"/></g>)}<path d="M24 177H296" stroke="#b9c0ba" strokeWidth=".8"/></svg>;}
+function Comb() {
+  return (
+    <svg
+      data-decor
+      aria-hidden="true"
+      viewBox="0 0 320 185"
+      className="mt-4 w-full"
+      fill="none"
+      stroke="#939e9f"
+      strokeWidth="1.3"
+    >
+      <path d="M42 90Q160-20 278 90v19H42Z" fill="#e2e5e2" />
+      <path d="M54 88Q160-5 266 88M64 88Q160 10 256 88M42 97H278" />
+      {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => (
+        <path key={i} d={`M${51 + i * 20} 109v46q0 8 5 8t5-8v-46`} fill="#e9ece7" />
+      ))}
+      {[
+        [79, 73],
+        [119, 53],
+        [160, 44],
+        [201, 53],
+        [241, 73],
+      ].map(([x, y], i) => (
+        <g key={i} transform={`translate(${x} ${y})`}>
+          <path d="M0-15Q-16-3 0 10Q16-3 0-15Z" fill="#f8f7f0" />
+          <circle cy="-1" r="3" fill="#c6ceca" />
+          <path d="M-13 9q13 11 26 0" />
+        </g>
+      ))}
+      <path d="M24 177H296" stroke="#b9c0ba" strokeWidth=".8" />
+    </svg>
+  );
+}
