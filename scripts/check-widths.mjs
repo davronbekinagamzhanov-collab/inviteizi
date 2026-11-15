@@ -5,7 +5,7 @@
 // Отчёт: $CHECK_WIDTHS_REPORT или <tmpdir>/inviteizi-widths.json. Только чтение, без записи в базу.
 import "./ts-hooks.mjs";
 import { chromium } from "playwright-core";
-import { writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
@@ -17,6 +17,8 @@ if (!["localhost", "127.0.0.1"].includes(new URL(BASE).hostname)) throw Error("�
 const { designs } = await import("../templates/registry.ts");
 const targets = only ? designs.filter((d) => only.split(",").includes(d.id)) : designs;
 const WIDTHS = [320, 360, 375, 390, 430];
+// Демо-музыка лежит в Supabase Storage: подменяем локальным файлом, проверка не обращается к рабочему хранилищу
+const musicFixture = await readFile("public/music/namuna-kuy.wav");
 
 // CHROMIUM_PATH — свой Chromium, если playwright-core не нашёл браузер
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined });
@@ -25,6 +27,9 @@ try {
   for (const d of targets) {
     for (const width of WIDTHS) {
       const context = await browser.newContext({ viewport: { width, height: 812 }, isMobile: true, hasTouch: true });
+      await context.route("**/storage/v1/object/public/music/**", (r) =>
+        r.fulfill({ status: 200, contentType: "audio/wav", body: musicFixture }),
+      );
       const page = await context.newPage();
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));

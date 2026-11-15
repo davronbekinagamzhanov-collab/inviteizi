@@ -7,7 +7,7 @@
 // Отчёт: $CHECK_RU_REPORT или <tmpdir>/inviteizi-ru-strings.json. Только чтение, без записи в базу.
 import "./ts-hooks.mjs";
 import { chromium } from "playwright-core";
-import { writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
@@ -19,6 +19,7 @@ if (!["localhost", "127.0.0.1"].includes(new URL(BASE).hostname) && !BASE.includ
 }
 const { designs } = await import("../templates/registry.ts");
 const { futureDemoData } = await import("../lib/marketing/demo-dates.ts");
+const musicFixture = await readFile("public/music/namuna-kuy.wav");
 const targets = only ? designs.filter((d) => only.split(",").includes(d.id)) : designs;
 
 const UZ_LETTERS = /[ўқғҳЎҚҒҲ]/;
@@ -67,7 +68,12 @@ const browser = await chromium.launch({
 const results = [];
 try {
   for (const d of targets) {
-    const page = await browser.newPage({ viewport: { width: 375, height: 812 }, isMobile: true, hasTouch: true });
+    const context = await browser.newContext({ viewport: { width: 375, height: 812 }, isMobile: true, hasTouch: true });
+    // демо-музыка из Supabase Storage подменяется локальным файлом: к рабочему хранилищу не обращаемся
+    await context.route("**/storage/v1/object/public/music/**", (r) =>
+      r.fulfill({ status: 200, contentType: "audio/wav", body: musicFixture }),
+    );
+    const page = await context.newPage();
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
     const res = await page.goto(`${BASE}/demo/${d.id}?lang=ru`, { waitUntil: "networkidle", timeout: 120000 });
@@ -110,7 +116,7 @@ try {
     console.log(
       `${bad.length || errors.length ? "FAIL" : "ok  "} ${d.id} ${after.lang} ${bad.slice(0, 4).join(" | ")}`,
     );
-    await page.close();
+    await context.close();
   }
 } finally {
   await browser.close();
