@@ -49,7 +49,10 @@ export function newPartnerCode() {
 
 /** Телефон → +77011234567. 8 701… и 701… — казахстанские; 998… и другие — как есть. null — не номер */
 export function normalizePhone(raw: string): string | null {
-  const d = raw.trim().replace(/[\s\-().]/g, "").replace(/^\+/, "");
+  const d = raw
+    .trim()
+    .replace(/[\s\-().]/g, "")
+    .replace(/^\+/, "");
   if (!/^\d+$/.test(d)) return null;
   if (d.length === 10 && d[0] === "7") return `+7${d}`;
   if (d.length === 11 && (d[0] === "7" || d[0] === "8")) return `+7${d.slice(1)}`;
@@ -90,7 +93,9 @@ export function parseRate(raw: string): RateSpec | null {
 /** «8 000 → 1 200 ₸ · 6 000 → 900 ₸ · 5 000 → 750 ₸» — сколько партнёр получит с каждой цены */
 export function rateExamples(pct: number) {
   const prices = [...new Set(Object.values(PRICES))].sort((a, b) => b - a);
-  return prices.map((p) => `${price(p).replace(/ ₸$/, "")} → ${price(earningFor({ rate: 0, ratePercent: pct }, p))}`).join(" · ");
+  return prices
+    .map((p) => `${price(p).replace(/ ₸$/, "")} → ${price(earningFor({ rate: 0, ratePercent: pct }, p))}`)
+    .join(" · ");
 }
 
 const isSchedule = (v: string): v is PayoutSchedule => (SCHEDULES as string[]).includes(v);
@@ -103,9 +108,11 @@ const termsOf = (rate: number, schedule: PayoutSchedule, pct: number | null = nu
       : T.terms(price(rate), T.scheduleLower[schedule]);
 /** «15%» или «1 000 ₸» */
 const rateLabel = (rate: number, pct: number | null) => (pct != null ? T.pct(pct) : price(rate));
-const termsOfPartner = (p: Pick<Partner, "rate" | "ratePercent" | "schedule">) => termsOf(p.rate, p.schedule, p.ratePercent ?? null);
+const termsOfPartner = (p: Pick<Partner, "rate" | "ratePercent" | "schedule">) =>
+  termsOf(p.rate, p.schedule, p.ratePercent ?? null);
 
-const tgOf = (p: Pick<Partner, "username" | "telegramId">) => (p.username ? `@${p.username}` : p.telegramId ? `id ${p.telegramId}` : T.notJoined);
+const tgOf = (p: Pick<Partner, "username" | "telegramId">) =>
+  p.username ? `@${p.username}` : p.telegramId ? `id ${p.telegramId}` : T.notJoined;
 
 // ── Ссылки и QR ──
 
@@ -114,7 +121,8 @@ export async function linkOf(deps: Deps, p: Partner) {
 }
 
 /** Демо для маленького QR «Намуна»: сильнейший дизайн никоҳ, код партнёра в #p= (кнопки демо ведут в бота с p_<код>) */
-export const posterDemoUrl = (deps: Deps, p: Partner) => `${deps.env.publicBaseUrl}/demo/${activeDesigns().find((d) => d.occasion === "nikoh")?.id ?? "muhr"}#p=${p.code}`;
+export const posterDemoUrl = (deps: Deps, p: Partner) =>
+  `${deps.env.publicBaseUrl}/demo/${activeDesigns().find((d) => d.occasion === "nikoh")?.id ?? "muhr"}#p=${p.code}`;
 
 /** Кто может получить QR и постер партнёра: владелец, менеджер — своего, сам партнёр */
 async function canSeePack(c: Ctx, p: Partner) {
@@ -132,7 +140,10 @@ export async function sendPack(c: Ctx, p: Partner) {
   await c.deps.tg.sendPhoto(c.chatId, new Uint8Array(png), {
     caption: tx.role.qrCaption(p.name, link),
     markup: inline([
-      [{ text: tx.role.posterUz, data: `pq:${p.id}:uz` }, { text: tx.role.posterRu, data: `pq:${p.id}:ru` }],
+      [
+        { text: tx.role.posterUz, data: `pq:${p.id}:uz` },
+        { text: tx.role.posterRu, data: `pq:${p.id}:ru` },
+      ],
       ...(c.deps.env.kazakhEnabled ? [[{ text: tx.role.posterKk, data: `pq:${p.id}:kk` }]] : []),
     ]),
   });
@@ -141,7 +152,10 @@ export async function sendPack(c: Ctx, p: Partner) {
 
 /** Ссылка партнёра текстом + кнопка «📋 Скопировать»: отправлять в WhatsApp, заказы по ней засчитываются партнёру */
 async function sendRefLink(c: Ctx, link: string, tx: typeof texts.ru) {
-  await c.deps.tg.sendMessage(c.chatId, tx.role.refLink(link), { markup: inline([[{ text: tx.role.copyLink, copy: link }]]), noPreview: true });
+  await c.deps.tg.sendMessage(c.chatId, tx.role.refLink(link), {
+    markup: inline([[{ text: tx.role.copyLink, copy: link }]]),
+    noPreview: true,
+  });
 }
 
 /** pq:<id>:<язык> — постер A4: PDF для печати и PNG для телефона */
@@ -160,7 +174,13 @@ export async function sendPoster(c: Ctx, idArg: string, lang: string) {
 }
 
 /** Постер A4 (PDF + PNG) и ссылка партнёра — в чат chatId. Из бота (pq:) и из панели партнёра в приложении */
-export async function sendPosterTo(deps: Deps, chatId: number, p: Partner, lang: "uz" | "ru" | "kk", tx: typeof texts.ru) {
+export async function sendPosterTo(
+  deps: Deps,
+  chatId: number,
+  p: Partner,
+  lang: "uz" | "ru" | "kk",
+  tx: typeof texts.ru,
+) {
   const link = await linkOf(deps, p);
   const png = await renderPosterPng({
     text: lang === "kk" ? posterKk : texts[lang].role.poster,
@@ -173,13 +193,22 @@ export async function sendPosterTo(deps: Deps, chatId: number, p: Partner, lang:
   const file = `inviteizi-${p.code}-${lang}`;
   await deps.tg.sendDocument(chatId, pdf, { fileName: `${file}.pdf`, caption: tx.role.posterReady(p.name) });
   await deps.tg.sendDocument(chatId, png, { fileName: `${file}.png` });
-  await deps.tg.sendMessage(chatId, tx.role.refLink(link), { markup: inline([[{ text: tx.role.copyLink, copy: link }]]), noPreview: true });
+  await deps.tg.sendMessage(chatId, tx.role.refLink(link), {
+    markup: inline([[{ text: tx.role.copyLink, copy: link }]]),
+    noPreview: true,
+  });
 }
 
 /** Одноразовая ссылка партнёру (7 дней) + кнопки WhatsApp на узбекском и русском */
 async function joinLink(c: Ctx, p: Partner) {
   const token = newToken();
-  await c.deps.repo.createInvite({ tokenHash: hashToken(token), kind: "partner", createdBy: c.user.id, partnerId: p.id, expiresAt: new Date(+c.deps.now() + INVITE_TTL_MS.partner) });
+  await c.deps.repo.createInvite({
+    tokenHash: hashToken(token),
+    kind: "partner",
+    createdBy: c.user.id,
+    partnerId: p.id,
+    expiresAt: new Date(+c.deps.now() + INVITE_TTL_MS.partner),
+  });
   const link = `https://t.me/${await c.deps.tg.botUsername()}?start=join_${token}`;
   const wa: InlineButton[][] = [
     [{ text: S.btn.waUz, url: `https://wa.me/?text=${encodeURIComponent(texts.uz.role.joinShare(link))}` }],
@@ -189,7 +218,8 @@ async function joinLink(c: Ctx, p: Partner) {
 }
 
 /** Снимок для всех цифр панели и /hamkor: без владельца и админов */
-export const panelData = async (deps: Deps) => withoutStaff(await deps.repo.panelSnapshot(), await deps.repo.staffIds());
+export const panelData = async (deps: Deps) =>
+  withoutStaff(await deps.repo.panelSnapshot(), await deps.repo.staffIds());
 
 /** Тот же снимок + заказы сотрудников (владелец, админы, менеджеры) отдельно: в цифры не идут, но владельцу видно, сколько их */
 export async function panelDataWithStaff(deps: Deps) {
@@ -216,11 +246,18 @@ export function partnerList(c: Ctx, s: PanelSnapshot, rows: PartnerRow[], p: Per
   const pages = Math.max(1, Math.ceil(sorted.length / PAGE));
   const page = Math.min(Math.max(0, Number(pageArg) || 0), pages - 1);
   const shown = sorted.slice(page * PAGE, (page + 1) * PAGE);
-  const list = shown.map((r) => `${r.partner.name.slice(0, 40)}\n${statLine(c, r)}${r.undelivered ? `\n${t.undelivered(r.undelivered)}` : ""}`);
+  const list = shown.map(
+    (r) =>
+      `${r.partner.name.slice(0, 40)}\n${statLine(c, r)}${r.undelivered ? `\n${t.undelivered(r.undelivered)}` : ""}`,
+  );
   const nav: InlineButton[][] = [];
   if (pages > 1) {
     const to = (n: number) => `dash:partners:${p}::${n}`;
-    nav.push([{ text: "◀", data: to(Math.max(0, page - 1)) }, { text: `${page + 1}/${pages}`, data: to(page) }, { text: "▶", data: to(Math.min(pages - 1, page + 1)) }]);
+    nav.push([
+      { text: "◀", data: to(Math.max(0, page - 1)) },
+      { text: `${page + 1}/${pages}`, data: to(page) },
+      { text: "▶", data: to(Math.min(pages - 1, page + 1)) },
+    ]);
   }
   return {
     text: list.join("\n\n") || t.empty,
@@ -239,7 +276,13 @@ export function partnerDetail(c: Ctx, s: PanelSnapshot, rows: PartnerRow[], p: P
   if (!r) return { text: t.empty, rows: [back] };
   const buttons: InlineButton[][] = [];
   if (r.due > 0) buttons.push([{ text: t.pay(price(r.due)), data: `dp:pay:${r.partner.id}:${r.due}` }]);
-  buttons.push([{ text: t.qr, data: `dp:qr:${r.partner.id}` }, { text: t.rate, data: `dp:rate:${r.partner.id}` }], back);
+  buttons.push(
+    [
+      { text: t.qr, data: `dp:qr:${r.partner.id}` },
+      { text: t.rate, data: `dp:rate:${r.partner.id}` },
+    ],
+    back,
+  );
   return {
     text: `${r.partner.name}\n${tgOf(r.partner)} · ${t.rateValue}: ${rateLabel(r.partner.rate, r.partner.ratePercent ?? null)}\n\n${statLine(c, r)}${r.undelivered ? `\n${t.undelivered(r.undelivered)}` : ""}`,
     rows: buttons,
@@ -250,7 +293,13 @@ const isOwner = async (c: Ctx) => (await roleOf(c)) === "owner";
 const canAddPartners = async (c: Ctx) => ["owner", "manager"].includes(await roleOf(c));
 
 /** Кнопки dp: панели-отчёта. Ставка, выплаты и QR — только владелец */
-export async function partnerAction(c: Ctx, action: string, idArg: string, amountArg: string, versionArg = ""): Promise<Result | void> {
+export async function partnerAction(
+  c: Ctx,
+  action: string,
+  idArg: string,
+  amountArg: string,
+  versionArg = "",
+): Promise<Result | void> {
   if (action === "new" && (await canAddPartners(c))) return startNewPartner(c);
   if (!(await isOwner(c))) {
     await send(c, c.tx.dashboard.denied);
@@ -268,7 +317,11 @@ export async function partnerAction(c: Ctx, action: string, idArg: string, amoun
   if (!Number.isInteger(amount) || amount <= 0) return;
   if (action === "pay") {
     const version = await payoutVersion(c.deps, partner.id);
-    await send(c, t.payConfirm(partner.name, price(amount)), inline([[{ text: t.payYes, data: `dp:ok:${partner.id}:${amount}:${version}` }]]));
+    await send(
+      c,
+      t.payConfirm(partner.name, price(amount)),
+      inline([[{ text: t.payYes, data: `dp:ok:${partner.id}:${amount}:${version}` }]]),
+    );
     return;
   }
   if (action === "ok") {
@@ -312,7 +365,11 @@ export async function ptList(c: Ctx, role: "owner" | "manager", pageArg = ""): P
   const nav: InlineButton[][] = [];
   if (pages > 1) {
     const to = (n: number) => `pa:l:0:${n}`;
-    nav.push([{ text: "◀", data: to(Math.max(0, page - 1)) }, { text: `${page + 1}/${pages}`, data: to(page) }, { text: "▶", data: to(Math.min(pages - 1, page + 1)) }]);
+    nav.push([
+      { text: "◀", data: to(Math.max(0, page - 1)) },
+      { text: `${page + 1}/${pages}`, data: to(page) },
+      { text: "▶", data: to(Math.min(pages - 1, page + 1)) },
+    ]);
   }
   return {
     text: [
@@ -321,7 +378,14 @@ export async function ptList(c: Ctx, role: "owner" | "manager", pageArg = ""): P
       "",
       ...shown.map((r) => T.line(mark(r.partner), r.partner.name.slice(0, 40), r.paid, r.due > 0 ? price(r.due) : "")),
     ].join("\n"),
-    rows: [...shown.map((r) => [{ text: `${mark(r.partner)} ${r.partner.name.slice(0, 40)}`, data: `pa:v:${r.partner.id}` }]), ...nav, add, back],
+    rows: [
+      ...shown.map((r) => [
+        { text: `${mark(r.partner)} ${r.partner.name.slice(0, 40)}`, data: `pa:v:${r.partner.id}` },
+      ]),
+      ...nav,
+      add,
+      back,
+    ],
   };
 }
 
@@ -333,7 +397,10 @@ async function managerLabel(deps: Deps, id: number | null) {
 
 export async function ptCard(c: Ctx, role: "owner" | "manager", p: Partner): Promise<Screen> {
   const r = (await visibleRows(c, role)).find((x) => x.partner.id === p.id);
-  const proposal = hasProposal(p) && p.proposedSchedule ? termsOf(p.proposedRate!, p.proposedSchedule, p.proposedRatePercent ?? null) : "";
+  const proposal =
+    hasProposal(p) && p.proposedSchedule
+      ? termsOf(p.proposedRate!, p.proposedSchedule, p.proposedRatePercent ?? null)
+      : "";
   const card = T.card({
     name: p.name,
     status: T.status[p.status],
@@ -345,17 +412,44 @@ export async function ptCard(c: Ctx, role: "owner" | "manager", p: Partner): Pro
     proposal,
   });
   const stats = r
-    ? T.stats({ scanned: r.scanned, started: r.started, paid: r.paid, earned: price(r.earned), paidOut: price(r.paidOut), due: price(r.due), onHold: r.onHold > 0 ? price(r.onHold) : "" })
+    ? T.stats({
+        scanned: r.scanned,
+        started: r.started,
+        paid: r.paid,
+        earned: price(r.earned),
+        paidOut: price(r.paidOut),
+        due: price(r.due),
+        onHold: r.onHold > 0 ? price(r.onHold) : "",
+      })
     : "";
   const rows: InlineButton[][] = [];
   if (role === "owner") {
-    if (p.status === "pending") rows.push([{ text: T.btn.approve, data: `pa:ok:${p.id}` }, { text: T.btn.reject, data: `pa:no:${p.id}` }]);
-    if (proposal) rows.push([{ text: T.btn.acceptProposal, data: `pa:pok:${p.id}` }], [{ text: T.btn.rejectProposal, data: `pa:pno:${p.id}` }]);
+    if (p.status === "pending")
+      rows.push([
+        { text: T.btn.approve, data: `pa:ok:${p.id}` },
+        { text: T.btn.reject, data: `pa:no:${p.id}` },
+      ]);
+    if (proposal)
+      rows.push(
+        [{ text: T.btn.acceptProposal, data: `pa:pok:${p.id}` }],
+        [{ text: T.btn.rejectProposal, data: `pa:pno:${p.id}` }],
+      );
     if (r && r.due > 0) rows.push([{ text: T.btn.pay(price(r.due)), data: `pa:pay:${p.id}:${r.due}` }]);
-    if (p.status !== "rejected") rows.push([{ text: T.btn.rate, data: `pa:rate:${p.id}` }, { text: T.btn.schedule, data: `pa:sch:${p.id}` }]);
+    if (p.status !== "rejected")
+      rows.push([
+        { text: T.btn.rate, data: `pa:rate:${p.id}` },
+        { text: T.btn.schedule, data: `pa:sch:${p.id}` },
+      ]);
   } else if (p.status !== "rejected" && !proposal) rows.push([{ text: T.btn.propose, data: `pa:prop:${p.id}` }]);
   if (p.status !== "rejected") {
-    rows.push(p.telegramId === null ? [{ text: T.btn.qr, data: `pa:qr:${p.id}` }, { text: T.btn.link, data: `pa:link:${p.id}` }] : [{ text: T.btn.qr, data: `pa:qr:${p.id}` }]);
+    rows.push(
+      p.telegramId === null
+        ? [
+            { text: T.btn.qr, data: `pa:qr:${p.id}` },
+            { text: T.btn.link, data: `pa:link:${p.id}` },
+          ]
+        : [{ text: T.btn.qr, data: `pa:qr:${p.id}` }],
+    );
   }
   rows.push([{ text: S.back, data: "pa:l" }]);
   return { text: stats ? `${card}\n\n${stats}` : card, rows };
@@ -387,7 +481,8 @@ export async function ptAction(c: Ctx, action: string, idArg: string, x: string,
   if (action === "l") return show(c, await ptList(c, role, x));
   const p = await c.deps.repo.getPartner(Number(idArg));
   // Менеджер видит только свою сеть; решения и выплаты — только владелец
-  if (!p || (role === "manager" && p.managedBy !== c.user.id) || (OWNER_ONLY.has(action) && role !== "owner")) return void (await toast(c, c.tx.oldButton));
+  if (!p || (role === "manager" && p.managedBy !== c.user.id) || (OWNER_ONLY.has(action) && role !== "owner"))
+    return void (await toast(c, c.tx.oldButton));
 
   switch (action) {
     case "v":
@@ -412,7 +507,12 @@ export async function ptAction(c: Ctx, action: string, idArg: string, x: string,
     case "sch":
       return show(c, {
         text: `🤝 ${p.name}\n\n${T.askSchedule}`,
-        rows: [...SCHEDULES.map((s) => [{ text: `${s === p.schedule ? "✓ " : ""}${T.schedule[s]}`, data: `pa:sset:${p.id}:${s}` }]), [{ text: S.back, data: `pa:v:${p.id}` }]],
+        rows: [
+          ...SCHEDULES.map((s) => [
+            { text: `${s === p.schedule ? "✓ " : ""}${T.schedule[s]}`, data: `pa:sset:${p.id}:${s}` },
+          ]),
+          [{ text: S.back, data: `pa:v:${p.id}` }],
+        ],
       });
     case "sset":
       if (isSchedule(x) && p.status !== "rejected") await c.deps.repo.updatePartner(p.id, { schedule: x });
@@ -423,16 +523,26 @@ export async function ptAction(c: Ctx, action: string, idArg: string, x: string,
       const version = await payoutVersion(c.deps, p.id);
       return show(c, {
         text: T.payConfirm(p.name, price(amount), p.kaspi ? fmtPhone(p.kaspi) : T.none),
-        rows: [[{ text: T.btn.payYes, data: `pa:paid:${p.id}:${amount}:${version}` }], [{ text: S.back, data: `pa:v:${p.id}` }]],
+        rows: [
+          [{ text: T.btn.payYes, data: `pa:paid:${p.id}:${amount}:${version}` }],
+          [{ text: S.back, data: `pa:v:${p.id}` }],
+        ],
       });
     }
     case "paid": {
       const amount = Number(x);
       // Сумма и номер выплаты в кнопке: двойное нажатие или вчерашняя кнопка не проведут выплату второй раз
       const fresh = extra === String(await payoutVersion(c.deps, p.id));
-      const done = fresh && Number.isInteger(amount) && amount > 0 && (await c.deps.repo.recordPartnerPayout(p.id, amount, c.user.id));
+      const done =
+        fresh &&
+        Number.isInteger(amount) &&
+        amount > 0 &&
+        (await c.deps.repo.recordPartnerPayout(p.id, amount, c.user.id));
       if (done) await afterPartnerPayout(c.deps, p, amount);
-      return show(c, { text: done ? T.paidDone(p.name, price(amount)) : T.payStale, rows: [[{ text: S.back, data: `pa:v:${p.id}` }]] });
+      return show(c, {
+        text: done ? T.paidDone(p.name, price(amount)) : T.payStale,
+        rows: [[{ text: S.back, data: `pa:v:${p.id}` }]],
+      });
     }
     case "prop":
       if (p.status === "rejected") return show(c, await ptCard(c, role, p));
@@ -455,13 +565,27 @@ async function ownerCard(deps: Deps, p: Partner): Promise<Screen> {
   const manager = (await managerLabel(deps, p.managedBy)) || "—";
   if (p.status === "active" && p.proposedRate !== null && p.proposedSchedule) {
     return {
-      text: T.proposal(manager, p.name, `${rateLabel(p.rate, p.ratePercent ?? null)} → ${rateLabel(p.proposedRate, p.proposedRatePercent ?? null)}`, `${T.scheduleLower[p.schedule]} → ${T.scheduleLower[p.proposedSchedule]}`),
-      rows: [[{ text: T.btn.approve, data: `pa:pok:${p.id}` }, { text: T.btn.reject, data: `pa:pno:${p.id}` }]],
+      text: T.proposal(
+        manager,
+        p.name,
+        `${rateLabel(p.rate, p.ratePercent ?? null)} → ${rateLabel(p.proposedRate, p.proposedRatePercent ?? null)}`,
+        `${T.scheduleLower[p.schedule]} → ${T.scheduleLower[p.proposedSchedule]}`,
+      ),
+      rows: [
+        [
+          { text: T.btn.approve, data: `pa:pok:${p.id}` },
+          { text: T.btn.reject, data: `pa:pno:${p.id}` },
+        ],
+      ],
     };
   }
   return {
     text: T.newFrom(manager, p.name, p.phone ? fmtPhone(p.phone) : T.none, termsOfPartner(p)),
-    rows: [[{ text: T.btn.approve, data: `pa:ok:${p.id}` }], [{ text: T.btn.editRate, data: `pa:rate:${p.id}` }], [{ text: T.btn.reject, data: `pa:no:${p.id}` }]],
+    rows: [
+      [{ text: T.btn.approve, data: `pa:ok:${p.id}` }],
+      [{ text: T.btn.editRate, data: `pa:rate:${p.id}` }],
+      [{ text: T.btn.reject, data: `pa:no:${p.id}` }],
+    ],
   };
 }
 
@@ -476,7 +600,9 @@ export async function notifyOwners(deps: Deps, p: Partner) {
   await deps.repo.updatePartner(p.id, { ownerNotifiedAt: deps.now() });
   const card = await ownerCard(deps, p);
   for (const id of await deps.repo.listAdminIds()) {
-    await deps.tg.sendMessage(id, card.text, { markup: inline(card.rows) }).catch((e) => console.error("partner owner card", e instanceof Error ? e.name : "Error"));
+    await deps.tg
+      .sendMessage(id, card.text, { markup: inline(card.rows) })
+      .catch((e) => console.error("partner owner card", e instanceof Error ? e.name : "Error"));
   }
   return true;
 }
@@ -494,7 +620,12 @@ async function decide(c: Ctx, p: Partner, status: "active" | "rejected") {
   }
   await toast(c, T.decided[status]);
   const fresh = (await c.deps.repo.getPartner(p.id)) ?? p;
-  if (p.managedBy !== null) await tellBringer(c.deps, fresh, status === "active" ? T.toManagerApproved(p.name, termsOfPartner(fresh)) : T.toManagerRejected(p.name));
+  if (p.managedBy !== null)
+    await tellBringer(
+      c.deps,
+      fresh,
+      status === "active" ? T.toManagerApproved(p.name, termsOfPartner(fresh)) : T.toManagerRejected(p.name),
+    );
   return show(c, await ptCard(c, "owner", fresh));
 }
 
@@ -505,7 +636,12 @@ async function settleProposal(c: Ctx, p: Partner, accept: boolean) {
     return show(c, await ptCard(c, "owner", (await c.deps.repo.getPartner(p.id)) ?? p));
   }
   await toast(c, accept ? T.decided.active : T.decided.rejected);
-  if (p.managedBy !== null) await tellBringer(c.deps, after, accept ? T.toManagerProposalOk(p.name, termsOfPartner(after)) : T.toManagerProposalNo(p.name));
+  if (p.managedBy !== null)
+    await tellBringer(
+      c.deps,
+      after,
+      accept ? T.toManagerProposalOk(p.name, termsOfPartner(after)) : T.toManagerProposalNo(p.name),
+    );
   return show(c, await ptCard(c, "owner", after));
 }
 
@@ -519,11 +655,13 @@ export function startNewPartner(c: Ctx): Result {
 /** Шаги сотрудника: «◀️ Назад» по-русски, роль проверяется на каждом ответе */
 const staffBack = (c: Ctx): InlineButton[] => [ib(c, S.back, "back")];
 
-const staffText = (step: (c: Ctx, text: string) => Promise<Result>) => async (c: Ctx): Promise<Result> => {
-  if (!(await canAddPartners(c))) return { done: true };
-  if (c.u.kind !== "text" || !c.u.text.trim()) return null;
-  return step(c, c.u.text.trim());
-};
+const staffText =
+  (step: (c: Ctx, text: string) => Promise<Result>) =>
+  async (c: Ctx): Promise<Result> => {
+    if (!(await canAddPartners(c))) return { done: true };
+    if (c.u.kind !== "text" || !c.u.text.trim()) return null;
+    return step(c, c.u.text.trim());
+  };
 
 /** [10%] [15%] [20%] / [✏️ Свой %] [0 ₸ — только счёт] [1 000 ₸ фикс.] */
 const rateButtons = (c: Ctx) => [
@@ -532,7 +670,15 @@ const rateButtons = (c: Ctx) => [
 ];
 /** Кнопка ставки → RateSpec; «own» — подсказка написать процент */
 const rateFromButton = (v: string): RateSpec | "own" | null =>
-  v === "own" ? "own" : v.startsWith("p:") ? parseRate(`${v.slice(2)}%`) : v.startsWith("r:") ? (v === "r:0" ? { rate: 0, pct: null } : parseRate(v.slice(2)) && { rate: Number(v.slice(2)), pct: null }) : null;
+  v === "own"
+    ? "own"
+    : v.startsWith("p:")
+      ? parseRate(`${v.slice(2)}%`)
+      : v.startsWith("r:")
+        ? v === "r:0"
+          ? { rate: 0, pct: null }
+          : parseRate(v.slice(2)) && { rate: Number(v.slice(2)), pct: null }
+        : null;
 const askRateText = () => T.askRate(rateExamples(DEFAULT_PERCENT));
 const scheduleButtons = (c: Ctx) => SCHEDULES.map((s) => [ib(c, T.schedule[s], `s:${s}`)]);
 
@@ -596,9 +742,18 @@ export const partnerConfirm: Step = {
   async ask(c) {
     const d = c.s.partnerDraft ?? {};
     const role = await roleOf(c);
-    const bringer = role === "manager" ? (c.user.username ? `@${c.user.username}` : (c.user.firstName ?? `id ${c.user.id}`)) : T.bringerOwner;
+    const bringer =
+      role === "manager"
+        ? c.user.username
+          ? `@${c.user.username}`
+          : (c.user.firstName ?? `id ${c.user.id}`)
+        : T.bringerOwner;
     const terms = termsOf(d.rate ?? DEFAULT_RATE, d.schedule ?? "weekly", d.ratePercent ?? null);
-    await send(c, T.contract({ name: d.name ?? "", phone: d.phone ? fmtPhone(d.phone) : T.none, terms, bringer }), inline([[ib(c, T.create, "go")], staffBack(c)]));
+    await send(
+      c,
+      T.contract({ name: d.name ?? "", phone: d.phone ? fmtPhone(d.phone) : T.none, terms, bringer }),
+      inline([[ib(c, T.create, "go")], staffBack(c)]),
+    );
   },
   async onButton(c, v) {
     const role = await roleOf(c);
@@ -621,7 +776,11 @@ export const partnerConfirm: Step = {
       ownerNotifiedAt: role === "owner" ? c.deps.now() : null,
     });
     const { link, wa } = await joinLink(c, partner);
-    await send(c, `${T.created(partner.name, link)}${partner.status === "pending" ? `\n\n${T.createdPending}` : ""}`, inline([...wa, [{ text: S.btn.panel, data: "pn:home" }]]));
+    await send(
+      c,
+      `${T.created(partner.name, link)}${partner.status === "pending" ? `\n\n${T.createdPending}` : ""}`,
+      inline([...wa, [{ text: S.btn.panel, data: "pn:home" }]]),
+    );
     await sendPack(c, partner);
     await notifyOwners(c.deps, partner);
     return { done: true };
@@ -741,7 +900,11 @@ export const joinLang: Step = {
   async ask(c) {
     const tx = texts.uz;
     const kk = Boolean(c.deps.env.kazakhEnabled);
-    await send(c, kk ? tx.role.joinHello3 : tx.role.joinHello, inline([[ib(c, tx.langUz, "uz"), ib(c, tx.langRu, "ru"), ...(kk ? [ib(c, tx.langKk, "kk")] : [])]]));
+    await send(
+      c,
+      kk ? tx.role.joinHello3 : tx.role.joinHello,
+      inline([[ib(c, tx.langUz, "uz"), ib(c, tx.langRu, "ru"), ...(kk ? [ib(c, tx.langKk, "kk")] : [])]]),
+    );
   },
   async onButton(c, v) {
     if (v !== "uz" && v !== "ru" && !(v === "kk" && c.deps.env.kazakhEnabled)) return null;
@@ -763,7 +926,12 @@ export const joinPhone: Step = {
     const p = await myPartner(c);
     if (!p) return { done: true };
     // Кнопка «📱 Рақамни юбориш» — свой номер; чужую карточку контакта не принимаем. Номер текстом — тоже можно
-    const phone = c.u.kind === "contact" && c.u.own ? normalizePhone(c.u.phone) : c.u.kind === "text" ? normalizePhone(c.u.text) : null;
+    const phone =
+      c.u.kind === "contact" && c.u.own
+        ? normalizePhone(c.u.phone)
+        : c.u.kind === "text"
+          ? normalizePhone(c.u.text)
+          : null;
     if (!phone) return { hint: c.tx.role.badPhone };
     await c.deps.repo.updatePartner(p.id, { phone });
     return { to: "joinKaspi" };
@@ -774,12 +942,17 @@ export const joinKaspi: Step = {
   replyKeyboard: true,
   async ask(c) {
     const p = await myPartner(c);
-    await send(c, c.tx.role.askKaspi, p?.phone ? { reply: [[{ text: fmtPhone(p.phone) }]], oneTime: true } : { removeReply: true });
+    await send(
+      c,
+      c.tx.role.askKaspi,
+      p?.phone ? { reply: [[{ text: fmtPhone(p.phone) }]], oneTime: true } : { removeReply: true },
+    );
   },
   async onMessage(c) {
     const p = await myPartner(c);
     if (!p) return { done: true };
-    const kaspi = c.u.kind === "text" ? normalizeKaspi(c.u.text) : c.u.kind === "contact" ? normalizePhone(c.u.phone) : null;
+    const kaspi =
+      c.u.kind === "text" ? normalizeKaspi(c.u.text) : c.u.kind === "contact" ? normalizePhone(c.u.phone) : null;
     if (!kaspi) return { hint: c.tx.role.badKaspi };
     await c.deps.repo.updatePartner(p.id, { kaspi });
     // Убрать нижнюю клавиатуру и сразу показать меню партнёра
@@ -799,13 +972,17 @@ export async function notifySleeping(deps: Deps) {
   let sent = 0;
   for (const r of partnerRows(await panelData(deps), "all", now)) {
     const p = r.partner;
-    if (p.status === "rejected") continue;
+    if (p.status === "rejected" || p.customerUserId) continue;
     const last = r.lastScanAt && r.lastScanAt > p.createdAt ? r.lastScanAt : p.createdAt;
     if (+now - +last < SLEEP_AFTER_MS || (p.sleepNotifiedAt && p.sleepNotifiedAt >= last)) continue;
     // Метка до отправки: повтор cron не пришлёт второе сообщение
     await deps.repo.updatePartner(p.id, { sleepNotifiedAt: now });
     for (const id of await bringerIds(deps, p)) {
-      await deps.tg.sendMessage(id, T.sleeping(p.name), { markup: inline([[{ text: `🤝 ${p.name.slice(0, 40)}`, data: `pa:v:${p.id}` }]]) }).catch(() => undefined);
+      await deps.tg
+        .sendMessage(id, T.sleeping(p.name), {
+          markup: inline([[{ text: `🤝 ${p.name.slice(0, 40)}`, data: `pa:v:${p.id}` }]]),
+        })
+        .catch(() => undefined);
     }
     sent++;
   }
@@ -825,6 +1002,10 @@ export async function flushOwnerNotices(deps: Deps) {
 /** Кому писать: id из карточки или человек с таким username, который нажимал /start */
 async function recipientOf(deps: Deps, p: Partner) {
   if (p.telegramId) return deps.repo.getUser(p.telegramId);
+  if (deps.env.marketing?.referrals && deps.repo.marketing) {
+    const id = await deps.repo.marketing.recipientForPartner(p.id);
+    if (id) return deps.repo.getUser(id);
+  }
   return p.username ? deps.repo.findUserByUsername(p.username) : null;
 }
 

@@ -2,8 +2,24 @@ import localFont from "next/font/local";
 
 import { t } from "@/texts/uz-cyrl";
 
-const display = localFont({src:[{path:"../../assets/fonts/google/cormorantgaramond/CormorantGaramond[wght].woff2",weight:"300.0 700.0",style:"normal"}],display:"swap",variable:"--font-expired-display"});
-const body = localFont({src:[{path:"../../assets/fonts/google/ptserif/PT_Serif-Web-Regular.woff2",weight:"400",style:"normal"}],display:"swap",variable:"--font-expired-body"});
+const display = localFont({
+  preload: false,
+  src: [
+    {
+      path: "../../assets/fonts/web/google/cormorantgaramond/CormorantGaramond[wght].woff2",
+      weight: "300.0 700.0",
+      style: "normal",
+    },
+  ],
+  display: "swap",
+  variable: "--font-expired-display",
+});
+const body = localFont({
+  preload: false,
+  src: [{ path: "../../assets/fonts/google/ptserif/PT_Serif-Web-Regular.woff2", weight: "400", style: "normal" }],
+  display: "swap",
+  variable: "--font-expired-body",
+});
 
 /** Заглушка после срока ссылки (последний тадбир + 30 дней) или для архивного заказа; та же страница — для неверной ссылки */
 export default function Expired({ texts = t.invitationPage.expired }: { texts?: { title: string; body: string } }) {

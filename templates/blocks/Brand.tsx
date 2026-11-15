@@ -1,4 +1,9 @@
-import { botLink } from "@/lib/brand";
+"use client";
+import { useRef, type CSSProperties, type ReactNode } from "react";
+import { useBrandTone, type BrandTone } from "./brandTone";
+import styles from "@/components/marketing/badge.module.css";
+import { useBrandDestination } from "@/components/marketing/BrandContext";
+import { useBadgePlacement } from "@/components/marketing/useBadgePlacement";
 import { t } from "@/texts/uz-cyrl";
 
 // Слева внизу: кнопка музыки стоит справа, поэтому они не пересекаются
@@ -7,19 +12,58 @@ const BOTTOM = "bottom-[calc(1.5rem+env(safe-area-inset-bottom))]";
 // В НАМУНА внизу плашка «Тўловдан сўнг…» — поднимаем над ней, как кнопку музыки
 const BOTTOM_RAISED = "bottom-[calc(4rem+env(safe-area-inset-bottom))]";
 
-/** Маленькая плашка на всё время просмотра: плотная «пилюля» с лёгким размытием — читается на любом узоре (контраст ≥ 4,5, scripts/check-badge.mjs) */
+/**
+ * Маленький бейдж «✦ InviteIZI» в цветах дизайна: бумага дизайна на 90 %, текст — цвет палитры
+ * с лучшим контрастом (≥ 4,5), ✦ — акцент палитры. Контраст проверяет scripts/check-badge.mjs.
+ */
+export const BADGE_LOOK =
+  "inline-flex h-7 items-center gap-1.5 rounded-full px-3 font-sans text-[11.5px] font-normal tracking-[0.08em] backdrop-blur-[4px] active:scale-95";
+
+/** Цвета бейджа: пока тон не посчитан — переменные дизайна (--n-* / --c-*) */
+export function badgeStyle(tone: BrandTone | null): CSSProperties {
+  return {
+    color: tone?.ink ?? "var(--n-ink, var(--c-ink, #2b1f16))",
+    backgroundColor: `color-mix(in srgb, ${tone?.paper ?? "var(--n-paper, var(--c-paper, #fffaf2))"} 90%, transparent)`,
+    boxShadow: `0 0 0 1px color-mix(in srgb, ${tone?.ink ?? "var(--n-ink, var(--c-ink, #2b1f16))"} 14%, transparent)`,
+    ["--brand-accent" as string]: tone?.accent ?? "var(--n-accent, var(--c-accent, currentColor))",
+  };
+}
+
+export function BadgeContent() {
+  return (
+    <>
+      <span aria-hidden className="text-[10px] text-[var(--brand-accent)]">
+        ✦
+      </span>
+      {t.brand.badge}
+    </>
+  );
+}
 export function BrandBadge({ raised }: { raised: boolean }) {
+  const badgeRef = useRef<HTMLAnchorElement>(null);
+  const destination = useBrandDestination("badge"),
+    placement = useBadgePlacement(badgeRef, destination.enabled, false, raised);
+  const tone = useBrandTone(badgeRef);
   return (
     <a
+      ref={badgeRef}
+      style={{
+        ...badgeStyle(tone),
+        ...(destination.enabled && placement.lower
+          ? { bottom: `calc(${placement.bottom}px + env(safe-area-inset-bottom))` }
+          : undefined),
+      }}
+      aria-hidden={destination.enabled && !placement.shown}
+      tabIndex={destination.enabled && !placement.shown ? -1 : undefined}
+      data-shown={!destination.enabled || placement.shown}
       data-brand-badge
-      href={botLink("badge")}
+      href={destination.href}
       target="_blank"
       rel="noopener"
       aria-label={t.brand.badgeLabel}
-      className={`fixed ${LEFT} ${raised ? BOTTOM_RAISED : BOTTOM} z-40 inline-flex h-8 items-center gap-1 rounded-full bg-[#2b1f16]/80 px-3 font-sans text-[12px] font-medium tracking-wide text-white shadow-md shadow-black/20 ring-1 ring-white/25 backdrop-blur-[6px] active:scale-95`}
+      className={`${styles.badge} ${BADGE_LOOK} ${destination.enabled && !placement.shown ? "pointer-events-none opacity-0" : "opacity-100"} transition-opacity duration-500 motion-reduce:transition-none fixed ${LEFT} ${raised ? BOTTOM_RAISED : BOTTOM} z-40`}
     >
-      <span aria-hidden className="text-[#f0d596]">✦</span>
-      {t.brand.badge}
+      <BadgeContent />
     </a>
   );
 }
@@ -27,29 +71,72 @@ export function BrandBadge({ raised }: { raised: boolean }) {
 /** Автор фото (Unsplash и др.): «Сурат: Имя / Unsplash» со ссылками */
 export type PhotoCredit = { author: string; authorUrl: string; source: string; sourceUrl: string };
 
-/** Самый конец приглашения. Снизу запас: плашка и кнопка музыки не закрывают ссылку */
-export function BrandFooter({ credits = [], creditClassName = "text-current opacity-60" }: { credits?: PhotoCredit[]; creditClassName?: string }) {
+/**
+ * Самый конец приглашения: тонкая линия, «InviteIZI билан яратилди» и ссылка без подложки.
+ * Цвет — из палитры дизайна (useBrandTone), снизу запас: бейдж и кнопка музыки не закрывают ссылку.
+ */
+export function BrandFooter({
+  credits = [],
+  creditClassName = "",
+  creditsNode,
+}: {
+  credits?: PhotoCredit[];
+  creditClassName?: string;
+  /** Свой вид строки авторов фото (мягкий вариант группирует источники) */
+  creditsNode?: ReactNode;
+}) {
+  const destination = useBrandDestination("footer");
+  const ref = useRef<HTMLElement>(null);
+  const tone = useBrandTone(ref);
+  const ink = tone?.ink ?? "var(--n-ink, var(--c-ink, currentColor))";
   return (
-    <footer data-brand-footer className="relative z-10 flex flex-col items-center gap-3 px-4 pt-6 pb-28">
-      {credits.length > 0 && (
-        <p data-photo-credits className={`max-w-[360px] text-center font-sans text-[11px] leading-relaxed ${creditClassName}`}>
-          {credits.map((c, i) => (
-            <span key={c.authorUrl} className="inline-block">
-              {i > 0 && <span aria-hidden className="px-1.5">·</span>}
-              {t.photoCredits.label}{" "}
-              <a href={c.authorUrl} target="_blank" rel="noopener" className="underline underline-offset-2">{c.author}</a>
-              {" / "}
-              <a href={c.sourceUrl} target="_blank" rel="noopener" className="underline underline-offset-2">{c.source}</a>
-            </span>
-          ))}
-        </p>
-      )}
-      <div className="flex flex-col items-center gap-2 rounded-2xl bg-[#2b1f16]/70 px-5 py-3 text-center font-sans text-white ring-1 ring-white/20">
-        <p className="text-[13px] leading-snug">{t.brand.footer}</p>
-        <a href={botLink("footer")} target="_blank" rel="noopener" className="rounded-full bg-[#f0d596] px-4 py-2 text-[14px] font-semibold text-[#2b1f16] active:scale-95">
-          {t.brand.footerLink}
-        </a>
-      </div>
+    <footer
+      ref={ref}
+      data-brand-footer
+      style={{ color: ink, ["--brand-accent" as string]: tone?.accent ?? "currentColor" }}
+      className="relative z-10 flex flex-col items-center gap-2 px-8 pt-14 pb-28 text-center font-sans"
+    >
+      {creditsNode ??
+        (credits.length > 0 && (
+          <p
+            data-photo-credits
+            className={`mb-4 max-w-[340px] text-[11px] leading-relaxed opacity-80 ${creditClassName}`}
+          >
+            {credits.map((c, i) => (
+              <span key={c.authorUrl} className="inline-block">
+                {i > 0 && (
+                  <span aria-hidden className="px-1.5">
+                    ·
+                  </span>
+                )}
+                {t.photoCredits.label}{" "}
+                <a href={c.authorUrl} target="_blank" rel="noopener" className="underline underline-offset-2">
+                  {c.author}
+                </a>
+                {" / "}
+                <a href={c.sourceUrl} target="_blank" rel="noopener" className="underline underline-offset-2">
+                  {c.source}
+                </a>
+              </span>
+            ))}
+          </p>
+        ))}
+      <span aria-hidden className="mb-2 h-px w-10 bg-current opacity-30" />
+      <p className="text-[12px] font-light tracking-[0.12em]">
+        <span aria-hidden className="pr-1.5 text-[var(--brand-accent)]">
+          ✦
+        </span>
+        {t.brand.footer}
+      </p>
+      <a
+        href={destination.href}
+        target="_blank"
+        rel="noopener"
+        data-brand-footer-link
+        className="inline-flex min-h-11 items-center px-3 text-[14px] font-light tracking-[0.02em] underline decoration-current/40 decoration-1 underline-offset-[6px] transition-opacity active:opacity-60"
+      >
+        {t.brand.footerLink}
+      </a>
     </footer>
   );
 }

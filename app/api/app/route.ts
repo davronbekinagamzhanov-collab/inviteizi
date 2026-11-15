@@ -1,6 +1,7 @@
 /** API приложения (/app): одно действие на запрос. Пользователь — только из проверенного initData */
 import { createBotDeps } from "@/bot/deps";
 import { appGate, json } from "@/lib/app-auth";
+import { allow, LIMITS } from "@/lib/rate-limit";
 import * as app from "@/bot/app/service";
 import { partnerPoster, rolePanel } from "@/bot/app/roles-panel";
 import { ownerExport, ownerPanel } from "@/bot/app/owner";
@@ -10,8 +11,11 @@ export const maxDuration = 30;
 const MAX_BODY = 32_000;
 
 export async function POST(req: Request) {
+  // Preview must never write through inherited live credentials. Native fixture tests cover mutations.
+  if (process.env.VERCEL_ENV === "preview") return new Response(null, { status: 404 });
   const user = appGate(req);
   if (user instanceof Response) return user;
+  if (!allow(`api:${user.id}`, LIMITS.api)) return json({ error: "tooOften" }, 429);
   const raw = await req.text();
   if (raw.length > MAX_BODY) return json({ error: "bad" }, 413);
   let body: { action?: string; [k: string]: unknown };
@@ -44,6 +48,7 @@ export async function POST(req: Request) {
       case "orders":
         return json(await app.listOrders(deps, user));
       case "musicUpload": {
+        if (!allow(`music:${user.id}`, LIMITS.musicUpload)) return json({ error: "tooOften" }, 429);
         const r = await app.musicUpload(deps, body.ext, body.size);
         return json(r, "error" in r ? (r.error === "server" ? 500 : 400) : 200);
       }

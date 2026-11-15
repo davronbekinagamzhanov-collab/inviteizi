@@ -1,26 +1,162 @@
 "use client";
 import localFont from "next/font/local";
-import {designVars,type TemplateProps} from "../types";
-import {useInvitation} from "../../blocks/useInvitation";
-import {InvitationShell} from "../../blocks/InvitationShell";
-import {Words,useFitWords} from "../../blocks/FitWords";
-import {Reveal} from "../../blocks/Reveal";
-import {MapButton} from "../../blocks/MapButton";
-import {Countdown} from "../../blocks/Countdown";
-import {designTexts} from "@/texts/uz-cyrl";
-const font=localFont({ preload: false,src:[{path:"../../../assets/fonts/Lora-Regular.ttf"},{path:"../../../assets/fonts/Lora-Italic.ttf",style:"italic"}],variable:"--dn-font",display:"swap"});
-const vars=designVars({primary:"#815345",primaryDark:"#613a31",gold:"#b39870",goldLight:"#e7d4b6",paper:"#fcf5e9",ink:"#554338",muted:"#735d4c"},{display:"var(--dn-font)",accent:"var(--dn-font)",body:"var(--dn-font)"});
-const t=designTexts("dutor-navosi");
+import { designVars, type TemplateProps } from "../types";
+import { useInvitation } from "../../blocks/useInvitation";
+import { InvitationShell } from "../../blocks/InvitationShell";
+import { Words, useFitWords } from "../../blocks/FitWords";
+import { Reveal } from "../../blocks/Reveal";
+import { MapButton } from "../../blocks/MapButton";
+import { Countdown } from "../../blocks/Countdown";
+import { designTexts } from "@/texts/uz-cyrl";
+const font = localFont({
+  preload: false,
+  src: [
+    { path: "../../../assets/fonts/web/Lora-Regular.woff2" },
+    { path: "../../../assets/fonts/web/Lora-Italic.woff2", style: "italic" },
+  ],
+  variable: "--dn-font",
+  display: "swap",
+});
+const vars = designVars(
+  {
+    primary: "#815345",
+    primaryDark: "#613a31",
+    gold: "#b39870",
+    goldLight: "#e7d4b6",
+    paper: "#fcf5e9",
+    ink: "#554338",
+    muted: "#735d4c",
+  },
+  { display: "var(--dn-font)", accent: "var(--dn-font)", body: "var(--dn-font)" },
+);
+const t = designTexts("dutor-navosi");
 /** A diagonal two-string dutar and paired voices; the musical system itself remains unchanged. */
-export default function Design({data,mode}:TemplateProps){
- const inv=useInvitation(data,mode,{opening:false}),names=useFitWords<HTMLHeadingElement>(45),hosts=useFitWords<HTMLParagraphElement>(26),groom=useFitWords<HTMLParagraphElement>(24),bride=useFitWords<HTMLParagraphElement>(24);
- return <InvitationShell inv={inv} style={vars} fontsClassName={font.variable} backdropClassName="bg-[#e5d3c1]" className="bg-paper text-ink [overflow-wrap:anywhere]">
-  <header className="px-7 pt-8 pb-9"><p className="text-[12px] tracking-[.2em] uppercase text-muted">{t.opening.invitation}</p><h1 ref={names} className="mt-7 w-full leading-tight [--fit:45px]"><span className="block text-[length:var(--fit)]"><Words text={data.groom??""}/></span><span className="my-3 block text-[22px] italic text-primary">{t.cover.andWord}</span><span className="block text-right text-[length:var(--fit)]"><Words text={data.bride??""}/></span></h1><Dutar/><p className="mt-2 text-[20px] italic text-primary">{t.occasionTitles[inv.occasion]}</p><p className="mt-4 text-[18px] text-muted">{t.date.long(inv.main.when.day,inv.main.when.monthIndex,inv.main.when.year)}</p></header>
-  <main className="pb-24"><Reveal className="mx-6 border-y border-primary/40 py-8"><h2 className="text-[29px] italic leading-snug">{inv.text.greeting}</h2><p className="mt-6 text-[20px] leading-[1.9]">{inv.text.body}</p></Reveal>
-   {inv.sides&&<section className="mx-6 my-10 border-x-[3px] border-primary/30 px-5 py-3"><p className="text-[14px] text-muted">{t.sides.groom}</p><p ref={groom} className="mt-3 w-full leading-snug [--fit:24px]"><span className="text-[length:var(--fit)]"><Words text={inv.sides.groom??""}/></span></p><div aria-hidden className="my-7 flex gap-1"><span className="h-px flex-1 bg-primary/30"/><span className="h-px flex-1 bg-primary/30"/></div><p className="text-[14px] text-muted">{t.sides.bride}</p><p ref={bride} className="mt-3 w-full leading-snug [--fit:24px]"><span className="text-[length:var(--fit)]"><Words text={inv.sides.bride??""}/></span></p></section>}
-   <Reveal className="bg-[#f0e3ce] px-7 py-8"><p className="text-[16px] text-muted">{t.countdown.title[inv.occasion]}</p><Countdown startsAt={inv.main.when.startsAt} look={{grid:"mt-5 grid grid-cols-4 gap-2",box:"flex min-w-0 flex-col",number:"text-[25px] whitespace-nowrap text-primary",label:"mt-2 text-[12px] text-muted",today:"text-[26px] text-primary"}}/></Reveal>
-   <section className="px-7 pt-12"><h2 className="mb-8 text-[31px] italic text-primary">{t.venue.programTitle}</h2>{inv.program.map((e,i)=><Reveal key={i} className="mb-9"><div data-event className="border-t-2 border-double border-gold/50 pt-6"><p className="text-[14px] text-muted">0{i+1} · {t.date.long(e.when.day,e.when.monthIndex,e.when.year)}</p><div className="mt-4 flex items-start gap-4"><span aria-hidden className="mt-2 h-8 w-px shrink-0 bg-primary/40"/><h3 className="text-[25px] leading-snug">{e.title}</h3></div><p className="mt-3 text-[36px] text-primary">{t.date.clock(e.time)}</p><p className="mt-5 text-[22px] leading-snug">{e.venueName}</p><p className="mt-2 text-[17px] leading-relaxed text-muted">{e.address}</p><MapButton href={e.mapHref} className="mt-5 border-b border-primary/50 pb-2 text-primary" iconClassName="text-primary"/></div></Reveal>)}</section>
-   <Reveal className="mx-6 border-y border-gold/50 py-8"><p className="text-[24px] italic leading-[1.8]">{inv.blessing}</p><p className="mt-9 text-[15px] text-muted">{t.hosts.respectDeep}</p><p ref={hosts} className="mt-3 w-full leading-snug [--fit:26px]"><span className="text-[length:var(--fit)]"><Words text={data.hosts}/></span></p><p className="mt-6 text-[18px] text-primary">{t.hosts.waiting}</p></Reveal>
-  </main></InvitationShell>;
+export default function Design({ data, mode }: TemplateProps) {
+  const inv = useInvitation(data, mode, { opening: false }),
+    names = useFitWords<HTMLHeadingElement>(45),
+    hosts = useFitWords<HTMLParagraphElement>(26),
+    groom = useFitWords<HTMLParagraphElement>(24),
+    bride = useFitWords<HTMLParagraphElement>(24);
+  return (
+    <InvitationShell
+      inv={inv}
+      style={vars}
+      fontsClassName={font.variable}
+      backdropClassName="bg-[#e5d3c1]"
+      className="bg-paper text-ink [overflow-wrap:anywhere]"
+    >
+      <header className="px-7 pt-8 pb-9">
+        <p className="text-[12px] tracking-[.2em] uppercase text-muted">{t.opening.invitation}</p>
+        <h1 ref={names} className="mt-7 w-full leading-tight [--fit:45px]">
+          <span className="block text-[length:var(--fit)]">
+            <Words text={data.groom ?? ""} />
+          </span>
+          <span className="my-3 block text-[22px] italic text-primary">{t.cover.andWord}</span>
+          <span className="block text-right text-[length:var(--fit)]">
+            <Words text={data.bride ?? ""} />
+          </span>
+        </h1>
+        <Dutar />
+        <p className="mt-2 text-[20px] italic text-primary">{t.occasionTitles[inv.occasion]}</p>
+        <p className="mt-4 text-[18px] text-muted">
+          {t.date.long(inv.main.when.day, inv.main.when.monthIndex, inv.main.when.year)}
+        </p>
+      </header>
+      <main className="pb-24">
+        <Reveal className="mx-6 border-y border-primary/40 py-8">
+          <h2 className="text-[29px] italic leading-snug">{inv.text.greeting}</h2>
+          <p className="mt-6 text-[20px] leading-[1.9]">{inv.text.body}</p>
+        </Reveal>
+        {inv.sides && (
+          <section className="mx-6 my-10 border-x-[3px] border-primary/30 px-5 py-3">
+            <p className="text-[14px] text-muted">{t.sides.groom}</p>
+            <p ref={groom} className="mt-3 w-full leading-snug [--fit:24px]">
+              <span className="text-[length:var(--fit)]">
+                <Words text={inv.sides.groom ?? ""} />
+              </span>
+            </p>
+            <div aria-hidden className="my-7 flex gap-1">
+              <span className="h-px flex-1 bg-primary/30" />
+              <span className="h-px flex-1 bg-primary/30" />
+            </div>
+            <p className="text-[14px] text-muted">{t.sides.bride}</p>
+            <p ref={bride} className="mt-3 w-full leading-snug [--fit:24px]">
+              <span className="text-[length:var(--fit)]">
+                <Words text={inv.sides.bride ?? ""} />
+              </span>
+            </p>
+          </section>
+        )}
+        <Reveal className="bg-[#f0e3ce] px-7 py-8">
+          <p className="text-[16px] text-muted">{t.countdown.title[inv.occasion]}</p>
+          <Countdown
+            startsAt={inv.main.when.startsAt}
+            look={{
+              grid: "mt-5 grid grid-cols-4 gap-2",
+              box: "flex min-w-0 flex-col",
+              number: "text-[25px] whitespace-nowrap text-primary",
+              label: "mt-2 text-[12px] text-muted",
+              today: "text-[26px] text-primary",
+            }}
+          />
+        </Reveal>
+        <section className="px-7 pt-12">
+          <h2 className="mb-8 text-[31px] italic text-primary">{t.venue.programTitle}</h2>
+          {inv.program.map((e, i) => (
+            <Reveal key={i} className="mb-9">
+              <div data-event className="border-t-2 border-double border-gold/50 pt-6">
+                <p className="text-[14px] text-muted">
+                  0{i + 1} · {t.date.long(e.when.day, e.when.monthIndex, e.when.year)}
+                </p>
+                <div className="mt-4 flex items-start gap-4">
+                  <span aria-hidden className="mt-2 h-8 w-px shrink-0 bg-primary/40" />
+                  <h3 className="text-[25px] leading-snug">{e.title}</h3>
+                </div>
+                <p className="mt-3 text-[36px] text-primary">{t.date.clock(e.time)}</p>
+                <p className="mt-5 text-[22px] leading-snug">{e.venueName}</p>
+                <p className="mt-2 text-[17px] leading-relaxed text-muted">{e.address}</p>
+                <MapButton
+                  href={e.mapHref}
+                  className="mt-5 border-b border-primary/50 pb-2 text-primary"
+                  iconClassName="text-primary"
+                />
+              </div>
+            </Reveal>
+          ))}
+        </section>
+        <Reveal className="mx-6 border-y border-gold/50 py-8">
+          <p className="text-[24px] italic leading-[1.8]">{inv.blessing}</p>
+          <p className="mt-9 text-[15px] text-muted">{t.hosts.respectDeep}</p>
+          <p ref={hosts} className="mt-3 w-full leading-snug [--fit:26px]">
+            <span className="text-[length:var(--fit)]">
+              <Words text={data.hosts} />
+            </span>
+          </p>
+          <p className="mt-6 text-[18px] text-primary">{t.hosts.waiting}</p>
+        </Reveal>
+      </main>
+    </InvitationShell>
+  );
 }
-function Dutar(){return <svg data-decor aria-hidden="true" viewBox="0 0 320 210" className="mt-4 w-full" fill="none"><g transform="rotate(48 160 110)"><path d="M148-10h24v24h-24Z" fill="#826149"/><path d="M153 10h14v103h-14Z" fill="#a27c51" stroke="#755438"/><path d="M148 109q-46 37-27 65q15 23 39 23t39-23q19-28-27-65Z" fill="#c6a070" stroke="#967047"/><path d="M152 116q-30 32-20 53q9 19 28 19t28-19q10-21-20-53Z" stroke="#ead6b3"/><path d="M157 0v174M163 0v174" stroke="#fbecd2" strokeWidth="1.1"/><path d="M147 18h29M151 34h18M151 49h18M151 63h18M151 78h18M151 94h18M146 174h28" stroke="#70553b" strokeWidth="1.3"/><circle cx="160" cy="143" r="4" fill="#866544"/><circle cx="153" cy="151" r="2" fill="#866544"/><circle cx="167" cy="151" r="2" fill="#866544"/></g><path d="M21 188q62 7 108 0M228 190h71" stroke="#b39870" strokeWidth=".8"/></svg>;}
+function Dutar() {
+  return (
+    <svg data-decor aria-hidden="true" viewBox="0 0 320 210" className="mt-4 w-full" fill="none">
+      <g transform="rotate(48 160 110)">
+        <path d="M148-10h24v24h-24Z" fill="#826149" />
+        <path d="M153 10h14v103h-14Z" fill="#a27c51" stroke="#755438" />
+        <path d="M148 109q-46 37-27 65q15 23 39 23t39-23q19-28-27-65Z" fill="#c6a070" stroke="#967047" />
+        <path d="M152 116q-30 32-20 53q9 19 28 19t28-19q10-21-20-53Z" stroke="#ead6b3" />
+        <path d="M157 0v174M163 0v174" stroke="#fbecd2" strokeWidth="1.1" />
+        <path
+          d="M147 18h29M151 34h18M151 49h18M151 63h18M151 78h18M151 94h18M146 174h28"
+          stroke="#70553b"
+          strokeWidth="1.3"
+        />
+        <circle cx="160" cy="143" r="4" fill="#866544" />
+        <circle cx="153" cy="151" r="2" fill="#866544" />
+        <circle cx="167" cy="151" r="2" fill="#866544" />
+      </g>
+      <path d="M21 188q62 7 108 0M228 190h71" stroke="#b39870" strokeWidth=".8" />
+    </svg>
+  );
+}

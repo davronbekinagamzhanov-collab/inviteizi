@@ -5,15 +5,49 @@ import { designVars } from "../types";
 
 // Имена и цифры. Marck Script (из каталога) не знает қ ғ ҳ, поэтому имена — Viaoda Libre:
 // высокий контрастный шрифт с «каплями» на концах, похож на шёлковую нить.
-const display = localFont({ preload: false,src:[{path:"../../../assets/fonts/google/viaodalibre/ViaodaLibre-Regular.woff2",weight:"400",style:"normal"}],display:"swap",variable:"--ir-display"});
+const display = localFont({
+  preload: false,
+  src: [
+    { path: "../../../assets/fonts/web/google/viaodalibre/ViaodaLibre-Regular.woff2", weight: "400", style: "normal" },
+  ],
+  display: "swap",
+  variable: "--ir-display",
+});
 
 /** Буквы, которых нет в Marck Script (узбекские и казахские): такое слово набираем шрифтом имён */
 export const MISSING_IN_SCRIPT = /[қғҳәңөұүһіҚҒҲӘҢӨҰҮҺІ]/;
 
 // Marck Script — только для «ва» между именами (в этом слове нет ў қ ғ ҳ; казахское «және» — шрифтом имён)
-const script = localFont({ preload: false,src:[{path:"../../../assets/fonts/google/marckscript/MarckScript-Regular.woff2",weight:"400",style:"normal"}],display:"swap",variable:"--ir-script"});
+const script = localFont({
+  preload: false,
+  src: [{ path: "../../../assets/fonts/google/marckscript/MarckScript-Regular.woff2", weight: "400", style: "normal" }],
+  display: "swap",
+  variable: "--ir-script",
+});
 
-const body = localFont({ preload: false,src:[{path:"../../../assets/fonts/google/gentiumbookplus/GentiumBookPlus-Regular.woff2",weight:"400",style:"normal"},{path:"../../../assets/fonts/google/gentiumbookplus/GentiumBookPlus-Italic.woff2",weight:"400",style:"italic"},{path:"../../../assets/fonts/google/gentiumbookplus/GentiumBookPlus-Bold.woff2",weight:"700",style:"normal"},{path:"../../../assets/fonts/google/gentiumbookplus/GentiumBookPlus-BoldItalic.woff2",weight:"700",style:"italic"}],display:"swap",variable:"--ir-body"});
+const body = localFont({
+  preload: false,
+  src: [
+    {
+      path: "../../../assets/fonts/google/gentiumbookplus/GentiumBookPlus-Regular.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../../../assets/fonts/google/gentiumbookplus/GentiumBookPlus-Italic.woff2",
+      weight: "400",
+      style: "italic",
+    },
+    { path: "../../../assets/fonts/google/gentiumbookplus/GentiumBookPlus-Bold.woff2", weight: "700", style: "normal" },
+    {
+      path: "../../../assets/fonts/google/gentiumbookplus/GentiumBookPlus-BoldItalic.woff2",
+      weight: "700",
+      style: "italic",
+    },
+  ],
+  display: "swap",
+  variable: "--ir-body",
+});
 
 export const fontClasses = `${display.variable} ${script.variable} ${body.variable}`;
 

@@ -1,0 +1,38 @@
+[
+  {
+    "slot": 1,
+    "source": "exec-efe3059f-d345-4d9f-b93b-8037d876a858.png",
+    "kind": "AI-generated photographic image",
+    "generator": "image_gen",
+    "sha256": "0351320473444dbc111e50f9420b3e71a624d212bc41b8d874298797f28a18ff",
+    "bytes": 166248,
+    "path": "/art/suzani-medalyon/1.webp",
+    "sourceSha256": "4756f10072a020e2ab7ad0b3bd2dd88360dedc2dc96c24cb5f58337cf76f5d82",
+    "width": 1200,
+    "height": 800
+  },
+  {
+    "slot": 2,
+    "source": "exec-7f639d37-7be8-4458-96bb-d4feb30c9ab5.png",
+    "kind": "AI-generated photographic image",
+    "generator": "image_gen",
+    "sha256": "a1a1ec1bd797cc149d2094aff342c10146b1b77a0d4750fe8d1a75d997458827",
+    "bytes": 51608,
+    "path": "/art/suzani-medalyon/2.webp",
+    "sourceSha256": "e2b91d05ba9e28be407d6cf7dd972eb04c441db9e879acba221ac6c7f8bc1bcf",
+    "width": 640,
+    "height": 427
+  },
+  {
+    "slot": 3,
+    "source": "exec-106c4d6c-6661-405a-b306-3d50a74a5e01.png",
+    "kind": "AI-generated photographic image",
+    "generator": "image_gen",
+    "sha256": "435ef5f375562f7b2121a5f5c511cadb6b08a500fe5fcd5023da5e5390df3891",
+    "bytes": 52918,
+    "path": "/art/suzani-medalyon/3.webp",
+    "sourceSha256": "18cc7396c4a8bb6d95c24eb15590068f2191ea1a2e07fc69c1838cc6624fe8b9",
+    "width": 640,
+    "height": 427
+  }
+]

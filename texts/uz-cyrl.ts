@@ -25,15 +25,7 @@ const months = [
 ] as const;
 
 // Неделя начинается с понедельника (Душанба)
-const weekdays = [
-  "Душанба",
-  "Сешанба",
-  "Чоршанба",
-  "Пайшанба",
-  "Жума",
-  "Шанба",
-  "Якшанба",
-] as const;
+const weekdays = ["Душанба", "Сешанба", "Чоршанба", "Пайшанба", "Жума", "Шанба", "Якшанба"] as const;
 
 const weekdaysShort = ["Ду", "Се", "Чо", "Па", "Жу", "Ша", "Як"] as const;
 
@@ -331,6 +323,27 @@ const raw = {
 
   /** Названия дизайнов каталога */
   designs: {
+    "zarhal-duo": "Зарҳал дуо",
+    "moviy-ayvon": "Мовий айвон",
+    "umr-durdonasi": "Умр дурдонаси",
+    "qadr-surati": "Қадр сурати",
+    "tulpor-quvonchi": "Тулпор қувончи",
+    "kashta-tilagi": "Кашта тилаги",
+    "bog-nasimi": "Боғ насими",
+    "tong-naqshi": "Тонг нақши",
+    "sahar-sabosi": "Саҳар сабоси",
+    "subhi-safo": "Субҳи сафо",
+    "vip-tilla-muhr": "Тилла муҳр",
+    "vip-osmon": "Осмон",
+    "vip-suzana": "Сўзана",
+    "vip-ipak-ziyosi": "Ипак зиёси",
+    "vip-zarbof": "Зарбоф",
+    "vip-visol-nuri": "Висол нури",
+    "vip-zarrin-ahd": "Заррин аҳд",
+    "vip-marvarid": "Марварид",
+    "vip-bogi-visol": "Боғи висол",
+    "vip-oq-tulpor": "Оқ тулпор",
+    "vip-umr-ziyosi": "Умр зиёси",
     "gul-doira": "Гул доира",
     "girih-barg": "Гиреҳ барг",
     "muhrli-maktub": "Муҳрли мактуб",
@@ -506,8 +519,7 @@ const raw = {
     time: "Соат",
     year: "йил",
     /** «14 ноябр, 2026 йил» */
-    long: (day: number, monthIndex: number, year: number) =>
-      `${day} ${months[monthIndex]}, ${year} йил`,
+    long: (day: number, monthIndex: number, year: number) => `${day} ${months[monthIndex]}, ${year} йил`,
     /** «14.11.2026» */
     short: (day: number, monthIndex: number, year: number) =>
       `${String(day).padStart(2, "0")}.${String(monthIndex + 1).padStart(2, "0")}.${year}`,
@@ -534,10 +546,8 @@ const raw = {
     text: {
       nikoh:
         "Сизнинг иштирокингиз ва эзгу тилакларингиз — оиламиз учун энг қимматли совға. Ушбу қутлуғ кунда ёнимизда бўлсангиз, бахтиёр бўламиз.",
-      sunnat:
-        "Ушбу қутлуғ кунда дуоларингиз ва ташрифингиз биз учун энг азиз совға бўлади. Қувончимизга шерик бўлинг!",
-      nahorgi:
-        "Тонгги дастурхонимиз Сизнинг ташрифингиз билан тўкис бўлади. Дуоларингиз — биз учун энг азиз совға.",
+      sunnat: "Ушбу қутлуғ кунда дуоларингиз ва ташрифингиз биз учун энг азиз совға бўлади. Қувончимизга шерик бўлинг!",
+      nahorgi: "Тонгги дастурхонимиз Сизнинг ташрифингиз билан тўкис бўлади. Дуоларингиз — биз учун энг азиз совға.",
       yubiley:
         "Ушбу муборак кунда ёнимизда бўлишингиз — биз учун катта бахт ва ҳурмат. Дуо ва эзгу тилакларингизни интизорлик билан кутамиз.",
     } satisfies Record<Occasion, string>,
@@ -614,6 +624,21 @@ const raw = {
     calendarAria: (date: string) => `Тадбир куни: ${date}`,
   },
 
+  /** VIP invitations: private demo-only collection. */
+  vip: {
+    privateLetter: "Сиз учун махсус таклифнома",
+    forever: "Бир умр бирга",
+    openMe: "Мени очинг",
+    withLove: "Меҳр ва эҳтиром билан",
+    retry: "Сурат юкланмади. Қайта босинг",
+    loading: "Таклифнома тайёрланмоқда…",
+    saveDate: "Қалбимиздаги энг гўзал кун",
+    ourDay: "Бир кун — бир умрлик хотира",
+    together: "Дийдорлашув манзили",
+    scroll: "Ҳикоямизни варақланг",
+    venueMood: "Безак учун сурат · ҳақиқий зал сурати эмас",
+  },
+
   /** Цветочные дизайны «Гулли рамка» (117–122) */
   /** Батч 3: подсказки листания */
   b3: {
@@ -663,10 +688,10 @@ const raw = {
     "samarqand-kitob": {}, // тексты samarqand-kitob
     "ipak-romol": {}, // тексты ipak-romol
     "rishton-koshin": {}, // тексты rishton-koshin
-    "atirgul": {}, // тексты atirgul
+    atirgul: {}, // тексты atirgul
     "shohona-baxmal": {}, // тексты shohona-baxmal
     "tandir-nuri": {}, // тексты tandir-nuri
-    "dasturxon": {}, // тексты dasturxon
+    dasturxon: {}, // тексты dasturxon
     "non-muhr": {}, // тексты non-muhr
     "tonggi-choy": {}, // тексты tonggi-choy
     "paxta-gul": {}, // тексты paxta-gul
@@ -737,8 +762,16 @@ export const tPlain = raw;
 export type Texts = typeof t;
 
 /** Public attribution metadata for photographs that require it, reused in bot/assets/pages. */
-export const photoAttributions: Record<string,{author:string;license:string;licenseUrl:string;source:string}|undefined> = {
-  "tonggi-choy": {author:"Ekaterina Kvelidze",license:"CC BY-SA 4.0",licenseUrl:"https://creativecommons.org/licenses/by-sa/4.0/",source:"https://commons.wikimedia.org/wiki/File:Uzbek_tea_couple_with_traditional_coloration.jpg"},
+export const photoAttributions: Record<
+  string,
+  { author: string; license: string; licenseUrl: string; source: string } | undefined
+> = {
+  "tonggi-choy": {
+    author: "Ekaterina Kvelidze",
+    license: "CC BY-SA 4.0",
+    licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/",
+    source: "https://commons.wikimedia.org/wiki/File:Uzbek_tea_couple_with_traditional_coloration.jpg",
+  },
 };
 
 /**
@@ -760,20 +793,52 @@ type Headings = {
 };
 
 const headings: Record<string, Headings> = {
-  "marvarid-satr": {program:"Азиз учрашув",waiting:"Қувончимизга шерик бўлинг!"},
-  "gulbog-sahifa": {date:"Гўзал сана",countdown:"Бахтли онларгача",program:"Бахтли кун дастури",waiting:"Гулдек кунларимизга марҳамат!"},
-  "suzani-yol": {date:"Қутлуғ кун",countdown:"Тўйимизгача",program:"Тўйимиз тартиби",thanks:"Ташрифингиздан мамнун бўламиз!"},
-  "bugdoy-boshoq": {program:"Тонгги дастурхон",waiting:"Хонадонимизга марҳамат!"},
-  "lola-ehtirom": {date:"Эъзозли сана",countdown:"Дийдорлашувгача",program:"Байрам дастури",waiting:"Дийдорингиз биз учун азиз!"},
-  "oq-chinni": {program:"Тонгги учрашув",waiting:"Дастурхонимизга марҳамат!"},
-  doppicha: {program:"Қувончли кунимиз",waiting:"Тўйимизга марҳамат!"},
-  "sayram-hovli": {date:"Тўй куни",countdown:"Қувончли кунгача",program:"Тўй кунининг тартиби",blessing:"Эзгу дуолар",thanks:"Қувончимизга шерик бўлинг!"},
-  zarvaraq: {program:"Муборак учрашув",waiting:"Ташрифингиз биз учун азиз!"},
-  "umr-daraxti": {date:"Қадрли сана",countdown:"Муборак санагача",program:"Дийдорлашув дастури",blessing:"Меҳр ва дуо",waiting:"Сизни интизорлик билан кутамиз!"},
+  "marvarid-satr": { program: "Азиз учрашув", waiting: "Қувончимизга шерик бўлинг!" },
+  "gulbog-sahifa": {
+    date: "Гўзал сана",
+    countdown: "Бахтли онларгача",
+    program: "Бахтли кун дастури",
+    waiting: "Гулдек кунларимизга марҳамат!",
+  },
+  "suzani-yol": {
+    date: "Қутлуғ кун",
+    countdown: "Тўйимизгача",
+    program: "Тўйимиз тартиби",
+    thanks: "Ташрифингиздан мамнун бўламиз!",
+  },
+  "bugdoy-boshoq": { program: "Тонгги дастурхон", waiting: "Хонадонимизга марҳамат!" },
+  "lola-ehtirom": {
+    date: "Эъзозли сана",
+    countdown: "Дийдорлашувгача",
+    program: "Байрам дастури",
+    waiting: "Дийдорингиз биз учун азиз!",
+  },
+  "oq-chinni": { program: "Тонгги учрашув", waiting: "Дастурхонимизга марҳамат!" },
+  doppicha: { program: "Қувончли кунимиз", waiting: "Тўйимизга марҳамат!" },
+  "sayram-hovli": {
+    date: "Тўй куни",
+    countdown: "Қувончли кунгача",
+    program: "Тўй кунининг тартиби",
+    blessing: "Эзгу дуолар",
+    thanks: "Қувончимизга шерик бўлинг!",
+  },
+  zarvaraq: { program: "Муборак учрашув", waiting: "Ташрифингиз биз учун азиз!" },
+  "umr-daraxti": {
+    date: "Қадрли сана",
+    countdown: "Муборак санагача",
+    program: "Дийдорлашув дастури",
+    blessing: "Меҳр ва дуо",
+    waiting: "Сизни интизорлик билан кутамиз!",
+  },
   // №1 — эталон: общие заголовки
   "oltin-monogramma": {},
   "oq-ot": { countdown: "Қутлуғ кунгача", date: "Қутлуғ сана", venue: "Тўй манзили", tap: "Пардани очинг" },
-  "tonggi-qozon": { countdown: "Тонгги дастурхонгача", date: "Ош санаси", venue: "Ош манзили", tap: "Таклифномани очиш учун босинг" },
+  "tonggi-qozon": {
+    countdown: "Тонгги дастурхонгача",
+    date: "Ош санаси",
+    venue: "Ош манзили",
+    tap: "Таклифномани очиш учун босинг",
+  },
   "pion-guldasta": { countdown: "Муборак кунгача", date: "Юбилей куни", venue: "Базм манзили", tap: "Конвертни очинг" },
   "tandir-nuri": {
     countdown: "Ош кунигача қолди",
@@ -814,7 +879,8 @@ const headings: Record<string, Headings> = {
   },
 };
 
-const allOccasions = (s: string) => ({ nikoh: s, sunnat: s, nahorgi: s, yubiley: s }) satisfies Record<Occasion, string>;
+const allOccasions = (s: string) =>
+  ({ nikoh: s, sunnat: s, nahorgi: s, yubiley: s }) satisfies Record<Occasion, string>;
 
 const designCache = new Map<string, Texts>();
 
@@ -837,14 +903,109 @@ export function designTexts(id: string): Texts {
 function buildDesignTexts(id: string, lang: InviteLang): Texts {
   const t = textsFor(lang);
   const h = (lang === "uz" ? headings[id] : lang === "ru" ? ruHeadings[id] : kkHeadings[id]) ?? {};
-  return glueDeep({
-    ...t,
-    countdown: { ...t.countdown, title: h.countdown ? allOccasions(h.countdown) : t.countdown.title },
-    date: { ...t.date, title: h.date ? allOccasions(h.date) : t.date.title },
-    venue: { ...t.venue, programTitle: h.program ?? t.venue.programTitle, title: h.venue ?? t.venue.title },
-    heart: { ...t.heart, title: h.heart ?? t.heart.title },
-    blessing: { ...t.blessing, title: h.blessing ?? t.blessing.title },
-    opening: { ...t.opening, tapToOpen: h.tap ?? t.opening.tapToOpen },
-    hosts: { ...t.hosts, thanks: h.thanks ?? t.hosts.thanks, waiting: h.waiting ?? t.hosts.waiting },
-  }, lang === "uz" ? glueWords : lang === "ru" ? glueRuWords : glueKkWords) as unknown as Texts;
+  return glueDeep(
+    {
+      ...t,
+      countdown: { ...t.countdown, title: h.countdown ? allOccasions(h.countdown) : t.countdown.title },
+      date: { ...t.date, title: h.date ? allOccasions(h.date) : t.date.title },
+      venue: { ...t.venue, programTitle: h.program ?? t.venue.programTitle, title: h.venue ?? t.venue.title },
+      heart: { ...t.heart, title: h.heart ?? t.heart.title },
+      blessing: { ...t.blessing, title: h.blessing ?? t.blessing.title },
+      opening: { ...t.opening, tapToOpen: h.tap ?? t.opening.tapToOpen },
+      hosts: { ...t.hosts, thanks: h.thanks ?? t.hosts.thanks, waiting: h.waiting ?? t.hosts.waiting },
+    },
+    lang === "uz" ? glueWords : lang === "ru" ? glueRuWords : glueKkWords,
+  ) as unknown as Texts;
+}
+
+/** New bespoke wedding experiences: all raster assets are text-free. */
+const masterpieceCopy = {
+  uz: {
+    invitation: "Никоҳ тўйига таклифнома",
+    open: "Таклифномани очинг",
+    loading: "Таклифнома тайёрланмоқда…",
+    retry: "Қайта очиш учун босинг",
+    love: "Меҳр ва эҳтиром билан",
+    forever: "Икки қалб. Бир тақдир.",
+    day: "Қалбимиздаги қутлуғ кун",
+    arrival: "Дийдорлашув манзили",
+    scroll: "Таклифномани варақланг",
+  },
+  ru: {
+    invitation: "Приглашение на свадьбу",
+    open: "Открыть приглашение",
+    loading: "Готовим приглашение…",
+    retry: "Нажмите, чтобы попробовать снова",
+    love: "С любовью и уважением",
+    forever: "Два сердца. Одна судьба.",
+    day: "День, который останется в сердце",
+    arrival: "Место нашей встречи",
+    scroll: "Листайте приглашение",
+  },
+  kk: {
+    invitation: "Үйлену тойына шақыру",
+    open: "Шақыруды ашу",
+    loading: "Шақыру дайындалуда…",
+    retry: "Қайталау үшін басыңыз",
+    love: "Махаббатпен және құрметпен",
+    forever: "Екі жүрек. Бір тағдыр.",
+    day: "Жүректегі ерекше күн",
+    arrival: "Кездесу орны",
+    scroll: "Шақыруды парақтаңыз",
+  },
+};
+export function luxuryWeddingCopy(lang: string) {
+  return masterpieceCopy[lang === "ru" ? "ru" : lang === "kk" ? "kk" : "uz"];
+}
+
+/** Copy scoped to the two unlisted morning previews. Art contains no lettering. */
+const celebrationWords = {
+  uz: {
+    touch: "Таклифномани очиш учун экранга тегинг",
+    invitation: "Таклифнома",
+    open: "Таклифномани очинг",
+    loading: "Таклифнома тайёрланмоқда…",
+    retry: "Қайта очиш учун босинг",
+    respect: "Меҳр ва эҳтиром билан",
+    meeting: "Дийдорлашув манзили",
+    morning: "Саҳарги дийдорга марҳамат",
+    family: "Қадрдонлар даврасида",
+    joy: "Оиламиз қувончига шерик бўлинг",
+    scroll: "Таклифномани варақланг",
+    "sahar-sabosi": "Саҳар сабоси",
+    "subhi-safo": "Субҳи сафо",
+  },
+  ru: {
+    touch: "Коснитесь экрана, чтобы открыть приглашение",
+    invitation: "Приглашение",
+    open: "Открыть приглашение",
+    loading: "Готовим приглашение…",
+    retry: "Нажмите, чтобы попробовать снова",
+    respect: "С теплом и уважением",
+    meeting: "Место нашей встречи",
+    morning: "Приглашаем на утреннюю встречу",
+    family: "В кругу родных и близких",
+    joy: "Разделите радость нашей семьи",
+    scroll: "Листайте приглашение",
+    "sahar-sabosi": "Дыхание утра",
+    "subhi-safo": "Светлое утро",
+  },
+  kk: {
+    touch: "Шақыруды ашу үшін экранды түртіңіз",
+    invitation: "Шақыру",
+    open: "Шақыруды ашу",
+    loading: "Шақыру дайындалуда…",
+    retry: "Қайталау үшін басыңыз",
+    respect: "Ізгі ниетпен және құрметпен",
+    meeting: "Кездесу орны",
+    morning: "Таңғы кездесуге шақырамыз",
+    family: "Жақындар ортасында",
+    joy: "Отбасымыздың қуанышын бөлісіңіз",
+    scroll: "Шақыруды парақтаңыз",
+    "sahar-sabosi": "Таң самалы",
+    "subhi-safo": "Нұрлы таң",
+  },
+};
+export function celebrationCopy(lang: string) {
+  return celebrationWords[lang === "ru" ? "ru" : lang === "kk" ? "kk" : "uz"];
 }

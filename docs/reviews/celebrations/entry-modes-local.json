@@ -1,0 +1,25 @@
+{
+  "scope": "Local synthetic data and default demo pages",
+  "browserStatus": "PASS",
+  "browserCases": 10,
+  "removedRoutes404": true,
+  "dataStatus": "PASS",
+  "dataCases": 10,
+  "pastLeapDay": true,
+  "longCoverWidths": [
+    320,
+    360,
+    375,
+    390,
+    430
+  ],
+  "entryModes": {
+    "sahar-sabosi": "courtyard-doors-v3",
+    "subhi-safo": "direct"
+  },
+  "limits": [
+    "Synthetic local order data and existing public image fixtures; no Telegram or production storage writes",
+    "Chromium mobile emulation; no physical iPhone/Safari",
+    "Native 2GIS, production orders, RSVP and Telegram uploads are not exercised"
+  ]
+}

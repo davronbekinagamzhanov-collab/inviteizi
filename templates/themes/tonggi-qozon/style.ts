@@ -2,9 +2,31 @@ import localFont from "next/font/local";
 
 import { designVars } from "../types";
 
-const display = localFont({ preload: false,src:[{path:"../../../assets/fonts/google/alegreya/Alegreya[wght].woff2",weight:"400.0 900.0",style:"normal"},{path:"../../../assets/fonts/google/alegreya/Alegreya-Italic[wght].woff2",weight:"400.0 900.0",style:"italic"}],display:"swap",variable:"--tq-display"});
+const display = localFont({
+  preload: false,
+  src: [
+    { path: "../../../assets/fonts/web/google/alegreya/Alegreya[wght].woff2", weight: "400.0 900.0", style: "normal" },
+    {
+      path: "../../../assets/fonts/web/google/alegreya/Alegreya-Italic[wght].woff2",
+      weight: "400.0 900.0",
+      style: "italic",
+    },
+  ],
+  display: "swap",
+  variable: "--tq-display",
+});
 
-const body = localFont({ preload: false,src:[{path:"../../../assets/fonts/google/ptserif/PT_Serif-Web-Regular.woff2",weight:"400",style:"normal"},{path:"../../../assets/fonts/google/ptserif/PT_Serif-Web-Italic.woff2",weight:"400",style:"italic"},{path:"../../../assets/fonts/google/ptserif/PT_Serif-Web-Bold.woff2",weight:"700",style:"normal"},{path:"../../../assets/fonts/google/ptserif/PT_Serif-Web-BoldItalic.woff2",weight:"700",style:"italic"}],display:"swap",variable:"--tq-body"});
+const body = localFont({
+  preload: false,
+  src: [
+    { path: "../../../assets/fonts/google/ptserif/PT_Serif-Web-Regular.woff2", weight: "400", style: "normal" },
+    { path: "../../../assets/fonts/google/ptserif/PT_Serif-Web-Italic.woff2", weight: "400", style: "italic" },
+    { path: "../../../assets/fonts/google/ptserif/PT_Serif-Web-Bold.woff2", weight: "700", style: "normal" },
+    { path: "../../../assets/fonts/google/ptserif/PT_Serif-Web-BoldItalic.woff2", weight: "700", style: "italic" },
+  ],
+  display: "swap",
+  variable: "--tq-body",
+});
 
 export const fontClasses = `${display.variable} ${body.variable}`;
 

@@ -4,7 +4,8 @@ import { Sim } from "./testing/sim";
 import { buttonLabels, inlineButtons } from "./testing/fake-tg";
 import { nikohOrder, startUz } from "./testing/paths";
 import { catalogList } from "./flow/steps-order";
-import { activeDesigns } from "@/templates/registry";
+import { activeDesigns, PRICES } from "@/templates/registry";
+import { tPlain } from "@/texts/uz-cyrl";
 
 const BASE = "https://inviteizi.vercel.app";
 
@@ -15,26 +16,53 @@ describe("весь путь никоҳ на ўзбекском", () => {
     await startUz(sim, id, "insta");
 
     // Категория → сразу каталог: альбом из 3 обложек + одно сообщение с ценами и кнопками
-    expect(buttonLabels(sim.last(id))).toEqual(expect.arrayContaining([uz.category.nikoh, uz.category.nahorgi, uz.category.sunnat, uz.back]));
+    expect(buttonLabels(sim.last(id))).toEqual(
+      expect.arrayContaining([uz.category.nikoh, uz.category.nahorgi, uz.category.sunnat, uz.back]),
+    );
     await sim.click(id, uz.category.nikoh);
     const list = catalogList({ s: { occasion: "nikoh" } });
     const album = sim.tg.to(id).filter((m) => m.type === "photo");
     expect(album.map((m) => m.media)).toEqual(list.slice(0, 3).map((d) => `${BASE}/covers/${d.id}.jpg`));
     const menu = sim.last(id);
-    expect(menu.text).toContain("1️⃣ №113 Муҳр — 8 000 ₸ · 📷");
+    const first = list[0];
+    expect(menu.text).toContain(`1️⃣ №${first.number} ${tPlain.designs[first.id]} — `);
+    expect(
+      menu.text
+        .split("\n")
+        .find((l) => l.startsWith("1️⃣"))!
+        .includes("📷"),
+    ).toBe(Boolean(first.clientPhotos));
     expect(menu.text).not.toMatch(/Анимацияли|Варақланадиган|Оддий/);
-    expect(buttonLabels(menu)).toEqual(expect.arrayContaining(["◀", `1–3 / ${list.length}`, "▶", uz.catalog.view("1️⃣"), uz.catalog.pick("1️⃣")]));
-    expect(inlineButtons(menu).find((b) => b.text === uz.catalog.view("1️⃣"))).toEqual({ text: uz.catalog.view("1️⃣"), url: `${BASE}/demo/muhr` });
+    expect(buttonLabels(menu)).toEqual(
+      expect.arrayContaining(["◀", `1–3 / ${list.length}`, "▶", uz.catalog.view("1️⃣"), uz.catalog.pick("1️⃣")]),
+    );
+    expect(inlineButtons(menu).find((b) => b.text === uz.catalog.view("1️⃣"))).toEqual({
+      text: uz.catalog.view("1️⃣"),
+      url: `${BASE}/demo/${first.id}`,
+    });
     // ▶ — следующая страница: старый альбом и кнопки удалены, в чате только новая страница
     await sim.click(id, "▶");
-    expect(sim.tg.to(id).filter((m) => m.type === "photo").map((m) => m.media)).toEqual(list.slice(3, 6).map((d) => `${BASE}/covers/${d.id}.jpg`));
+    expect(
+      sim.tg
+        .to(id)
+        .filter((m) => m.type === "photo")
+        .map((m) => m.media),
+    ).toEqual(list.slice(3, 6).map((d) => `${BASE}/covers/${d.id}.jpg`));
     expect(sim.tg.to(id).some((m) => m.id === menu.id)).toBe(false);
     expect(sim.lastText(id)).toContain(`№${list[3].number} `);
     await sim.click(id, "◀");
     await sim.click(id, uz.catalog.pick("2️⃣"));
     // Выбор: альбом убран, кнопки заменены строкой «✅ Танланди»
     expect(sim.tg.to(id).filter((m) => m.type === "photo")).toEqual([]);
-    expect(sim.tg.to(id).some((m) => m.text === uz.catalog.chosen(list[1].number, "Ипак") || m.text.startsWith(`✅ Танланди: №${list[1].number} `))).toBe(true);
+    expect(
+      sim.tg
+        .to(id)
+        .some(
+          (m) =>
+            m.text === uz.catalog.chosen(list[1].number, "Ипак") ||
+            m.text.startsWith(`✅ Танланди: №${list[1].number} `),
+        ),
+    ).toBe(true);
 
     // Анкета
     expect(sim.lastText(id)).toBe(uz.form.groom);
@@ -42,7 +70,9 @@ describe("весь путь никоҳ на ўзбекском", () => {
     expect(sim.lastText(id)).toBe(uz.form.bride);
     await sim.text(id, "Мадина");
     expect(sim.lastText(id)).toBe(uz.form.relationNikoh);
-    expect(buttonLabels(sim.last(id))).toEqual(expect.arrayContaining(["Фарзандларимиз", "Набираларимиз", "Ўзимизники"]));
+    expect(buttonLabels(sim.last(id))).toEqual(
+      expect.arrayContaining(["Фарзандларимиз", "Набираларимиз", "Ўзимизники"]),
+    );
     await sim.click(id, "Фарзандларимиз");
     expect(sim.lastText(id)).toBe(uz.form.hosts);
     await sim.text(id, "Каримовлар оиласи");
@@ -55,7 +85,9 @@ describe("весь путь никоҳ на ўзбекском", () => {
     expect(sim.lastText(id)).toBe(uz.event.date("Никоҳ базми"));
     await sim.click(id, "14");
     expect(sim.lastText(id)).toBe(uz.event.time("Никоҳ базми"));
-    expect(buttonLabels(sim.last(id))).toEqual(expect.arrayContaining(["11:00", "12:00", "17:00", "18:00", "19:00", uz.event.timeOther]));
+    expect(buttonLabels(sim.last(id))).toEqual(
+      expect.arrayContaining(["11:00", "12:00", "17:00", "18:00", "19:00", uz.event.timeOther]),
+    );
     await sim.click(id, "18:00");
     expect(sim.lastText(id)).toBe(uz.event.venue("Никоҳ базми"));
     await sim.text(id, "«Наврўз» тўйхонаси");
@@ -63,15 +95,33 @@ describe("весь путь никоҳ на ўзбекском", () => {
     await sim.text(id, "Сайрам, Амир Темур кўчаси 45");
     const loc = sim.last(id);
     expect(loc.text).toBe(uz.event.location);
-    expect(buttonLabels(loc)).toEqual(expect.arrayContaining([uz.event.readyVenues,uz.event.mapChoice,uz.event.linkChoice,uz.event.manualChoice,uz.event.skip,uz.back]));
+    expect(buttonLabels(loc)).toEqual(
+      expect.arrayContaining([
+        uz.event.readyVenues,
+        uz.event.mapChoice,
+        uz.event.linkChoice,
+        uz.event.manualChoice,
+        uz.event.skip,
+        uz.back,
+      ]),
+    );
     expect(JSON.stringify(loc.markup)).not.toContain("location");
     await sim.location(id, 42.3005, 69.7612);
     // клавиатура «📍 Локация» убирается (removeReply), главное меню — кнопками под сообщением /start
-    expect(sim.tg.to(id).some((m) => m.text === uz.event.locationSaved && JSON.stringify(m.markup) === JSON.stringify({ removeReply: true }))).toBe(true);
+    expect(
+      sim.tg
+        .to(id)
+        .some(
+          (m) =>
+            m.text === uz.event.locationSaved && JSON.stringify(m.markup) === JSON.stringify({ removeReply: true }),
+        ),
+    ).toBe(true);
 
     // Тадбир 2: наҳорги ош в тот же день
     expect(sim.lastText(id)).toContain("1. Никоҳ базми — 14.11.2026, 18:00");
-    expect(buttonLabels(sim.last(id))).toEqual(expect.arrayContaining([uz.event.addNahorgi, uz.event.addKelinSalom, uz.event.noMore]));
+    expect(buttonLabels(sim.last(id))).toEqual(
+      expect.arrayContaining([uz.event.addNahorgi, uz.event.addKelinSalom, uz.event.noMore]),
+    );
     await sim.click(id, uz.event.addNahorgi);
     expect(sim.lastText(id)).toBe(uz.event.sameDay("Наҳорги ош", "14.11.2026"));
     await sim.click(id, uz.event.sameDayYes);
@@ -87,7 +137,9 @@ describe("весь путь никоҳ на ўзбекском", () => {
     await sim.click(id, uz.review.editText);
     // Текст: варианты из t.inviteOptions
     expect(sim.lastText(id)).toContain("Сизни фарзандларимиз Азиз ва Мадинанинг никоҳ тўйларига");
-    expect(buttonLabels(sim.last(id))).toEqual(expect.arrayContaining([uz.text.pick(1), uz.text.pick(2), uz.text.pick(3), uz.text.own]));
+    expect(buttonLabels(sim.last(id))).toEqual(
+      expect.arrayContaining([uz.text.pick(1), uz.text.pick(2), uz.text.pick(3), uz.text.own]),
+    );
     await sim.click(id, uz.text.pick(2));
     await sim.click(id, uz.review.editMusic);
 
@@ -108,7 +160,7 @@ describe("весь путь никоҳ на ўзбекском", () => {
     // Сводка
     const review = sim.lastText(id);
     expect(review).toContain(uz.review.title);
-    expect(review).toContain("Дизайн: №114 Ипак");
+    expect(review).toContain(`Дизайн: №${list[1].number} ${tPlain.designs[list[1].id]}`);
     expect(review).toContain(uz.review.groom("Азиз"));
     expect(review).toContain(uz.review.bride("Мадина"));
     expect(review).toContain(uz.review.sideBride("Юсуповлар оиласи"));
@@ -135,10 +187,10 @@ describe("весь путь никоҳ на ўзбекском", () => {
     expect(o).toMatchObject({
       status: "preview",
       occasion: "nikoh",
-      format: "animated",
-      templateId: "ipak",
+      format: list[1].format,
+      templateId: list[1].id,
       slug: "aziz-madina",
-      amount: 8_000,
+      amount: PRICES[list[1].format],
       music: { kind: "list", musicId: "yor-yor" },
     });
     expect(o.data).toMatchObject({
@@ -204,6 +256,11 @@ describe("весь путь никоҳ на ўзбекском", () => {
     await sim.click(1, uz.category.sunnat);
     expect((await sim.user(1))!.step).toBe("catalog");
     const list = catalogList({ s: { occasion: "sunnat" } });
-    expect(list.map((d) => d.id).sort()).toEqual(activeDesigns().filter((d) => d.occasion === "sunnat").map((d) => d.id).sort());
+    expect(list.map((d) => d.id).sort()).toEqual(
+      activeDesigns()
+        .filter((d) => d.occasion === "sunnat")
+        .map((d) => d.id)
+        .sort(),
+    );
   });
 });

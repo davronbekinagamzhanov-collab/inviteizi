@@ -8,8 +8,25 @@ import { t } from "@/texts/uz-cyrl";
 import type { Occasion } from "@/lib/types";
 import { activeDesigns, PRICES, thumbOf } from "@/templates/registry";
 
-const display = localFont({src:[{path:"../../assets/fonts/google/cormorantgaramond/CormorantGaramond[wght].woff2",weight:"300.0 700.0",style:"normal"}],display:"swap",variable:"--font-catalog-display"});
-const body = localFont({src:[{path:"../../assets/fonts/google/ptserif/PT_Serif-Web-Regular.woff2",weight:"400",style:"normal"},{path:"../../assets/fonts/google/ptserif/PT_Serif-Web-Bold.woff2",weight:"700",style:"normal"}],display:"swap",variable:"--font-catalog-body"});
+const display = localFont({
+  src: [
+    {
+      path: "../../assets/fonts/web/google/cormorantgaramond/CormorantGaramond[wght].woff2",
+      weight: "300.0 700.0",
+      style: "normal",
+    },
+  ],
+  display: "swap",
+  variable: "--font-catalog-display",
+});
+const body = localFont({
+  src: [
+    { path: "../../assets/fonts/google/ptserif/PT_Serif-Web-Regular.woff2", weight: "400", style: "normal" },
+    { path: "../../assets/fonts/google/ptserif/PT_Serif-Web-Bold.woff2", weight: "700", style: "normal" },
+  ],
+  display: "swap",
+  variable: "--font-catalog-body",
+});
 
 export const metadata = { title: t.catalog.title };
 
@@ -69,7 +86,10 @@ export default function CatalogPage() {
                   <p className="mt-2 text-[13px] tracking-[0.14em] text-[#a87a28] uppercase">
                     {t.catalog.number(d.number)} · {t.formats[d.format]}
                   </p>
-                  <p className="text-[22px] leading-tight font-semibold" style={{ fontFamily: "var(--font-catalog-display)" }}>
+                  <p
+                    className="text-[22px] leading-tight font-semibold"
+                    style={{ fontFamily: "var(--font-catalog-display)" }}
+                  >
                     {t.designs[d.id]}
                   </p>
                   <p className="text-[16px] font-bold">{t.price(PRICES[d.format])}</p>

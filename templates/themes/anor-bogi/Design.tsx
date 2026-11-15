@@ -36,7 +36,6 @@ import { GARNET, GARNET_DEEP, PAPER, fontClasses, vars } from "./style";
 
 const ART = "/art/anor-bogi.webp";
 const EASE = [0.22, 1, 0.36, 1] as const;
-const txt = t.design["anor-bogi"];
 
 /**
  * №64 «Анор боғи» — никоҳ тўйи, Анимацияли.
@@ -76,7 +75,9 @@ export default function Design({ data, mode, art }: TemplateProps) {
                   {inv.text.greeting}
                 </p>
               )}
-              <p className="mx-auto mt-4 max-w-[340px] text-[19px] leading-[1.75] text-balance text-ink/90">{inv.text.body}</p>
+              <p className="mx-auto mt-4 max-w-[340px] text-[19px] leading-[1.75] text-balance text-ink/90">
+                {inv.text.body}
+              </p>
             </Reveal>
           </Section>
 
@@ -123,9 +124,15 @@ export default function Design({ data, mode, art }: TemplateProps) {
                   renderUnit: (u) => (
                     <div className="relative flex flex-col items-center pt-1">
                       {u.key !== "days" && (
-                        <Seed className="absolute top-[22px] left-0 h-[11px] w-[9px] -translate-x-1/2" rotate={u.key === "minutes" ? 0 : 18} />
+                        <Seed
+                          className="absolute top-[22px] left-0 h-[11px] w-[9px] -translate-x-1/2"
+                          rotate={u.key === "minutes" ? 0 : 18}
+                        />
                       )}
-                      <span className="font-body text-[46px] leading-none font-medium lining-nums tabular-nums" style={goldInk}>
+                      <span
+                        className="font-body text-[46px] leading-none font-medium lining-nums tabular-nums"
+                        style={goldInk}
+                      >
                         {u.value}
                       </span>
                       <span className="mt-2 text-[16px] text-muted italic">{u.label}</span>
@@ -189,7 +196,11 @@ function Hero({ inv, photo, show }: { inv: Invitation; photo: string; show: bool
         <HalfAnor draw={show} delay={0.15} className="relative w-[min(30vw,118px,15svh)]" />
       </motion.div>
 
-      <motion.p {...appear(0.5)} className="relative mt-[1.6svh] text-[19px] tracking-[0.04em] italic" style={{ color: GARNET }}>
+      <motion.p
+        {...appear(0.5)}
+        className="relative mt-[1.6svh] text-[19px] tracking-[0.04em] italic"
+        style={{ color: GARNET }}
+      >
         {t.occasionTitles[inv.occasion]}
       </motion.p>
 
@@ -218,7 +229,14 @@ function Hero({ inv, photo, show }: { inv: Invitation; photo: string; show: bool
         animate={show ? { opacity: 0.75, y: [0, 6, 0] } : { opacity: 0 }}
         transition={{ opacity: { delay: 1.8 }, y: { duration: 2.2, repeat: Infinity, ease: "easeInOut" } }}
       >
-        <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="url(#ab-gold)" strokeWidth="1.4" strokeLinecap="round">
+        <svg
+          viewBox="0 0 24 24"
+          className="h-6 w-6"
+          fill="none"
+          stroke="url(#ab-gold)"
+          strokeWidth="1.4"
+          strokeLinecap="round"
+        >
           <path d="M6 9l6 6 6-6" />
         </svg>
       </motion.div>
@@ -226,7 +244,15 @@ function Hero({ inv, photo, show }: { inv: Invitation; photo: string; show: bool
   );
 }
 
-function Section({ title, className = "pt-20", children }: { title?: string; className?: string; children: ReactNode }) {
+function Section({
+  title,
+  className = "pt-20",
+  children,
+}: {
+  title?: string;
+  className?: string;
+  children: ReactNode;
+}) {
   return (
     <section className={`text-center ${className}`}>
       {title && (
@@ -301,12 +327,18 @@ function Program({ events }: { events: InvitationEventView[] }) {
   return (
     <ol className="relative mx-auto max-w-[350px] text-left">
       {/* стебель */}
-      <span aria-hidden className="absolute top-6 bottom-16 left-[19px] w-px" style={{ background: "linear-gradient(180deg, #B4893A, #E2C27C 40%, #8E6A26 100%)" }} />
+      <span
+        aria-hidden
+        className="absolute top-6 bottom-16 left-[19px] w-px"
+        style={{ background: "linear-gradient(180deg, #B4893A, #E2C27C 40%, #8E6A26 100%)" }}
+      />
       {events.map((ev, i) => (
         <li key={i} className="relative pb-12 pl-[58px] last:pb-6">
           <Reveal delay={0.05}>
             <FruitNode className="absolute top-0 left-0 h-[44px] w-[40px] drop-shadow-[0_6px_8px_rgba(110,22,38,0.3)]" />
-            {i < events.length - 1 && <StemLeaves className="absolute top-[54%] -left-[1px] h-[60px] w-[40px] opacity-90" />}
+            {i < events.length - 1 && (
+              <StemLeaves className="absolute top-[54%] -left-[1px] h-[60px] w-[40px] opacity-90" />
+            )}
             <p className="font-body text-[42px] leading-none font-medium lining-nums tabular-nums" style={goldInk}>
               {t.date.clock(ev.time)}
             </p>
@@ -349,8 +381,11 @@ function Blessing({ text }: { text: string }) {
       </h2>
       <p className="relative mt-5 text-[21px] leading-[1.65] text-balance italic">{text}</p>
       <SeedRow className="relative mt-6" width="w-10" />
-      <p className="relative mx-auto mt-5 max-w-[300px] text-[17px] leading-[1.6] text-balance" style={{ color: GARNET }}>
-        {txt.anorWish}
+      <p
+        className="relative mx-auto mt-5 max-w-[300px] text-[17px] leading-[1.6] text-balance"
+        style={{ color: GARNET }}
+      >
+        {t.design["anor-bogi"].anorWish /* читается при рендере: язык выбирает гость */}
       </p>
     </div>
   );

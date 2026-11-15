@@ -1,0 +1,56 @@
+{
+  "comparedMain": "bb599e9afa8aa7faacb3810559528ca52d652b6d",
+  "checked": "2026-11-10",
+  "files": [
+    {
+      "path": "lib/types.ts",
+      "identical": true,
+      "sha256": "1d0e2a97e74dd6a570604d86d5e991e292f46e8d20cf288396aed311f4af9a0c"
+    },
+    {
+      "path": "lib/map-link.ts",
+      "identical": true,
+      "sha256": "0fc11a3c81a7ef35d0aaf8a31d37216004683c56323b2bd3a7c093c9f355ac7f"
+    },
+    {
+      "path": "lib/wedding-date.ts",
+      "identical": true,
+      "sha256": "7b765ab5278cc6a5f10321947fb73967887798c00645710a8e7829deb84afec8"
+    },
+    {
+      "path": "lib/music.ts",
+      "identical": true,
+      "sha256": "3552eb7635c8c255f3dcf17aa61c63f917fa8be7def8ceb69f4c68727db5de4b"
+    },
+    {
+      "path": "templates/order-design.ts",
+      "identical": true,
+      "sha256": "2f5e795f6fbf3929891b34fa7cdd1d093a9d915f312497320589dcc01e39f4b7"
+    },
+    {
+      "path": "templates/blocks/InvitationShell.tsx",
+      "identical": true,
+      "sha256": "40699e0ae43284507047212adca1f4cb64317ae649f6a7b806755e3302703177"
+    },
+    {
+      "path": "templates/blocks/Rsvp.tsx",
+      "identical": true,
+      "sha256": "360c40c6a69659b1cfae4a34a5be7fe12f33d7f3a1aef55ae9d0dcc6fecdc5e0"
+    },
+    {
+      "path": "app/[slug]/page.tsx",
+      "identical": true,
+      "sha256": "4f52fa8a417135ada5b4ac8f0682c61b3dd64fd23d96df94429bc2ce8a69b98e"
+    },
+    {
+      "path": "app/demo/[template]/page.tsx",
+      "identical": true,
+      "sha256": "5416780f6c680db95f12860cfae213e5942bd4957b580433f60d665514da62ea"
+    },
+    {
+      "path": "bot/flow/steps-photo.ts",
+      "identical": true,
+      "sha256": "63e17b0015ad27c74a2da68135c203382a6be1c7491d287723a598c542918d87"
+    }
+  ]
+}

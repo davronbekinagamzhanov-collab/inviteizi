@@ -79,6 +79,7 @@ export type OrderRecord = {
   updatedAt: Date;
   receiptAt: Date | null;
   paidAt: Date | null;
+  refundedAt?: Date | null;
   paymentRemindedAt: Date | null;
   adminRemindedAt: Date | null;
   /** После этой даты ссылка показывает заглушку (последний тадбир + 30 дней) */

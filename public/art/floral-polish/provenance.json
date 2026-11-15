@@ -1,0 +1,152 @@
+[
+  {
+    "id": "girih-barg",
+    "part": 1,
+    "source": "/workspace/generated_images/exec-d6177d5f-50d9-426f-b4ca-c3605fdbe43a.png",
+    "path": "public/art/floral-polish/girih-barg-1.webp",
+    "tool": "image_gen",
+    "kind": "generated watercolor illustration",
+    "sha256": "bc577a270787ac4e821f994531c5842fd9af39017eae2a0252063f40ac332aa9",
+    "bytes": 119234
+  },
+  {
+    "id": "girih-barg",
+    "part": 2,
+    "source": "/workspace/generated_images/exec-c1f9c02b-20d5-4933-bd6e-054f6dbf230a.png",
+    "path": "public/art/floral-polish/girih-barg-2.webp",
+    "tool": "image_gen",
+    "kind": "generated watercolor illustration",
+    "sha256": "d5fdeee7f005745c6c1864e91c07fd12013532b801c14e25d68fe927bd451e24",
+    "bytes": 25304
+  },
+  {
+    "id": "girih-barg",
+    "part": 3,
+    "source": "/workspace/generated_images/exec-94363bdd-471a-4789-abb0-99c046ddc24d.png",
+    "path": "public/art/floral-polish/girih-barg-3.webp",
+    "tool": "image_gen",
+    "kind": "generated watercolor illustration",
+    "sha256": "562d7d8c55e45ca2873074dffcd73dd79bfd7c3e983d3b21edbbcaa33dfc410d",
+    "bytes": 237518
+  },
+  {
+    "id": "gul-doira",
+    "part": 1,
+    "source": "/workspace/generated_images/exec-73029ac1-2763-494c-9721-391cfd12e5ec.png",
+    "path": "public/art/floral-polish/gul-doira-1.webp",
+    "tool": "image_gen",
+    "kind": "generated watercolor illustration",
+    "sha256": "e404615389c9725bf7d045ec76159e96cf3c4eb29d5920b1d9f42ada72c82ac5",
+    "bytes": 119420
+  },
+  {
+    "id": "gul-doira",
+    "part": 2,
+    "source": "/workspace/generated_images/exec-312edec9-6077-43c9-ae14-0ee6453930db.png",
+    "path": "public/art/floral-polish/gul-doira-2.webp",
+    "tool": "image_gen",
+    "kind": "generated watercolor illustration",
+    "sha256": "8d432f3a89ef2573e78b4c19ed2497d1e9fa722413137f2adc846bf41ea6a587",
+    "bytes": 32544
+  },
+  {
+    "id": "gul-doira",
+    "part": 3,
+    "source": "/workspace/generated_images/exec-602e9834-4ce3-48d3-b7ef-7b4c6248d898.png",
+    "path": "public/art/floral-polish/gul-doira-3.webp",
+    "tool": "image_gen",
+    "kind": "generated watercolor illustration",
+    "sha256": "eb1aeeba6e8fb004cf6743f763470c5ca9b4f6b92de2b609ce97e6b4294b943f",
+    "bytes": 221576
+  },
+  {
+    "id": "suvbuyoq-tuman",
+    "part": 1,
+    "source": "/workspace/generated_images/exec-42da31d4-2fe9-47e0-8fef-0d9162cfadf5.png",
+    "path": "public/art/floral-polish/suvbuyoq-tuman-1.webp",
+    "tool": "image_gen",
+    "kind": "generated watercolor illustration",
+    "sha256": "d978395df96023944eac85b6c72cb1c08fb275152a926239bad10fc93566ac44",
+    "bytes": 162330
+  },
+  {
+    "id": "suvbuyoq-tuman",
+    "part": 2,
+    "source": "/workspace/generated_images/exec-19aec120-5d29-44df-8e7a-35a4f47bb74d.png",
+    "path": "public/art/floral-polish/suvbuyoq-tuman-2.webp",
+    "tool": "image_gen",
+    "kind": "generated watercolor illustration",
+    "sha256": "b192550643be40cff538011e709f1844e86c5154d02e0c1366fafa3f22323fe1",
+    "bytes": 41430
+  },
+  {
+    "id": "suvbuyoq-tuman",
+    "part": 3,
+    "source": "/workspace/generated_images/exec-e6ad6e2d-22d0-464e-8138-ba9fbbbc3b60.png",
+    "path": "public/art/floral-polish/suvbuyoq-tuman-3.webp",
+    "tool": "image_gen",
+    "kind": "generated watercolor illustration",
+    "sha256": "130ae9647ad66b3f38261a22a4af1826c61776aa1409070d575545685bb01d38",
+    "bytes": 54536
+  },
+  {
+    "id": "suvbuyoq-zumrad",
+    "part": 1,
+    "source": "/workspace/generated_images/exec-b5f27c75-7a0c-4add-98f9-6f50fac5677b.png",
+    "path": "public/art/floral-polish/suvbuyoq-zumrad-1.webp",
+    "tool": "image_gen",
+    "kind": "generated watercolor illustration",
+    "sha256": "02decc018baa221ea577cdd4109c29267532c691c3078dfbce6db1cacba1e017",
+    "bytes": 172440
+  },
+  {
+    "id": "suvbuyoq-zumrad",
+    "part": 2,
+    "source": "/workspace/generated_images/exec-e603fe3e-62da-42e6-87a9-a85771a61704.png",
+    "path": "public/art/floral-polish/suvbuyoq-zumrad-2.webp",
+    "tool": "image_gen",
+    "kind": "generated watercolor illustration",
+    "sha256": "b457a59bf74c52de2fb8cdff4967139ec81e0e7418bbb4047104fab6bc7b9975",
+    "bytes": 42488
+  },
+  {
+    "id": "suvbuyoq-zumrad",
+    "part": 3,
+    "source": "/workspace/generated_images/exec-07d75c27-2adb-48e9-a878-e450b4d067f2.png",
+    "path": "public/art/floral-polish/suvbuyoq-zumrad-3.webp",
+    "tool": "image_gen",
+    "kind": "generated watercolor illustration",
+    "sha256": "08d28a0779c2c153e132a4ed28562120e122759d9c7569d4dd2b876b4ae671bb",
+    "bytes": 52046
+  },
+  {
+    "id": "suvbuyoq-upa",
+    "part": 1,
+    "source": "/workspace/generated_images/exec-45020584-6fb8-4952-83a6-17d0c0435db4.png",
+    "path": "public/art/floral-polish/suvbuyoq-upa-1.webp",
+    "tool": "image_gen",
+    "kind": "generated watercolor illustration",
+    "sha256": "e259b3530214e5b0c8d5a7aac9e93890622fa921625560d96ff9662f1874d351",
+    "bytes": 153438
+  },
+  {
+    "id": "suvbuyoq-upa",
+    "part": 2,
+    "source": "/workspace/generated_images/exec-e314111e-6ad8-49e4-acb0-98ba2c8175bd.png",
+    "path": "public/art/floral-polish/suvbuyoq-upa-2.webp",
+    "tool": "image_gen",
+    "kind": "generated watercolor illustration",
+    "sha256": "fa6ef6b2b711db18109071826e6cf448142bd2de633071331fa27e2953c4c4a2",
+    "bytes": 34988
+  },
+  {
+    "id": "suvbuyoq-upa",
+    "part": 3,
+    "source": "/workspace/generated_images/exec-87a170c4-71ef-43ef-9d2a-c5e5065eb7e1.png",
+    "path": "public/art/floral-polish/suvbuyoq-upa-3.webp",
+    "tool": "image_gen",
+    "kind": "generated watercolor illustration",
+    "sha256": "ee0becb7b22a2bf879c4094572e79f0df5588a677afa83fa1a49056cde7312d7",
+    "bytes": 50648
+  }
+]

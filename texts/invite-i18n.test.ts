@@ -25,7 +25,17 @@ function samples(): InvitationData[] {
   for (const occasion of OCCASIONS)
     for (const relation of RELATIONS)
       for (const person of ["Азиз", "Азиз ва Сардор"])
-        out.push({ occasion, relation, groom: "Азиз", bride: "Мадина", person, cause: "nikoh", age: 60, hosts: "Оила", events: [ev] });
+        out.push({
+          occasion,
+          relation,
+          groom: "Азиз",
+          bride: "Мадина",
+          person,
+          cause: "nikoh",
+          age: 60,
+          hosts: "Оила",
+          events: [ev],
+        });
   return out;
 }
 
@@ -52,7 +62,16 @@ function leaves(node: unknown, path: string, out: [string, string][] = []): [str
   return out;
 }
 
+/** Не гостевые разделы uz (каталог, сайт, цены, названия дизайнов): на странице приглашения не показываются */
+const NOT_GUEST = ["site", "catalog", "designs", "formats", "price"];
+
 describe("переводы приглашения", () => {
+  it("каждый гостевой раздел узбекского есть в русском и казахском (иначе гость видит узбекский)", () => {
+    const uzKeys = Object.keys(tPlain).filter((k) => !NOT_GUEST.includes(k));
+    expect(uzKeys.filter((k) => !(k in ru))).toEqual([]);
+    expect(uzKeys.filter((k) => !(k in kk))).toEqual([]);
+  });
+
   it("русский и казахский закрывают одни и те же гостевые ключи, у каждого раздела те же подключи", () => {
     expect(Object.keys(kk).sort()).toEqual(GUEST.map(String).sort());
     const uz = tPlain as unknown as Record<string, unknown>;
@@ -60,12 +79,16 @@ describe("переводы приглашения", () => {
       expect(uz[key], `uz.${String(key)}`).toBeDefined();
       const u = uz[key];
       if (u && typeof u === "object" && !Array.isArray(u) && key !== "design") {
-        expect(Object.keys((ru as unknown as Record<string, object>)[key]).sort(), `ru.${String(key)}`).toEqual(Object.keys(u).sort());
-        expect(Object.keys((kk as unknown as Record<string, object>)[key]).sort(), `kk.${String(key)}`).toEqual(Object.keys(u).sort());
+        expect(Object.keys((ru as unknown as Record<string, object>)[key]).sort(), `ru.${String(key)}`).toEqual(
+          Object.keys(u).sort(),
+        );
+        expect(Object.keys((kk as unknown as Record<string, object>)[key]).sort(), `kk.${String(key)}`).toEqual(
+          Object.keys(u).sort(),
+        );
       }
       if (Array.isArray(u)) {
-        expect(((ru as unknown as Record<string, unknown[]>)[key]).length).toBe(u.length);
-        expect(((kk as unknown as Record<string, unknown[]>)[key]).length).toBe(u.length);
+        expect((ru as unknown as Record<string, unknown[]>)[key].length).toBe(u.length);
+        expect((kk as unknown as Record<string, unknown[]>)[key].length).toBe(u.length);
       }
     }
   });
@@ -84,18 +107,34 @@ describe("переводы приглашения", () => {
   it("варианты текста — те же id для всех тадбиров и «кем приходится»; свой текст — перевод клиента или узбекский", () => {
     for (const d of samples()) {
       const ids = tPlain.inviteOptions(d).map((o) => o.id);
-      expect(ru.inviteOptions(d).map((o) => o.id), `${d.occasion}/${d.relation}`).toEqual(ids);
-      expect(kk.inviteOptions(d).map((o) => o.id), `${d.occasion}/${d.relation}`).toEqual(ids);
-      for (const o of [...ru.inviteOptions(d), ...kk.inviteOptions(d)]) expect(o.body).not.toMatch(/undefined|null|NaN|  /);
+      expect(
+        ru.inviteOptions(d).map((o) => o.id),
+        `${d.occasion}/${d.relation}`,
+      ).toEqual(ids);
+      expect(
+        kk.inviteOptions(d).map((o) => o.id),
+        `${d.occasion}/${d.relation}`,
+      ).toEqual(ids);
+      for (const o of [...ru.inviteOptions(d), ...kk.inviteOptions(d)])
+        expect(o.body).not.toMatch(/undefined|null|NaN|  /);
     }
-    const own: InvitationData = { occasion: "nikoh", groom: "А", bride: "Б", hosts: "О", events: [ev], customText: "Ўз матним", customTexts: { ru: "Мой текст" } };
+    const own: InvitationData = {
+      occasion: "nikoh",
+      groom: "А",
+      bride: "Б",
+      hosts: "О",
+      events: [ev],
+      customText: "Ўз матним",
+      customTexts: { ru: "Мой текст" },
+    };
     expect(ru.invite(own).body).toBe("Мой текст");
     expect(kk.invite(own).body).toBe("Ўз матним");
   });
 
   it("заголовки дизайнов переведены для всех дизайнов, где они есть", () => {
     expect(Object.keys(ruHeadings).sort()).toEqual(Object.keys(kkHeadings).sort());
-    for (const id of Object.keys(ruHeadings)) expect(Object.keys(kkHeadings[id]).sort(), id).toEqual(Object.keys(ruHeadings[id]).sort());
+    for (const id of Object.keys(ruHeadings))
+      expect(Object.keys(kkHeadings[id]).sort(), id).toEqual(Object.keys(ruHeadings[id]).sort());
   });
 
   it("textsFor: русский/казахский заменяют гостевые тексты, каталог и названия дизайнов — общие", () => {

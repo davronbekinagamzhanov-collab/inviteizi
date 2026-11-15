@@ -1,3 +1,4 @@
+import { flushMarketing, withMarketingReady } from "./marketing";
 /**
  * Задания по расписанию (pg_cron → POST /api/cron каждые 10 минут):
  *  - админам: чек ждёт больше 30 минут — напоминание днём, дальше каждые 2 часа до 21:00;
@@ -72,7 +73,15 @@ async function sendRsvpDigests(deps: Deps, now: Date, r: CronResult) {
   }
 }
 
-const ALL_STATUSES = ["draft", "preview", "awaiting_payment", "receipt_sent", "active", "archived", "rejected"] as const;
+const ALL_STATUSES = [
+  "draft",
+  "preview",
+  "awaiting_payment",
+  "receipt_sent",
+  "active",
+  "archived",
+  "rejected",
+] as const;
 
 async function removeOldPhotos(deps: Deps, now: Date, r: CronResult) {
   if (!deps.removePhotos) return;
@@ -88,10 +97,27 @@ async function removeOldPhotos(deps: Deps, now: Date, r: CronResult) {
 
 const CRON_EVERY_MIN = 10;
 
-export async function runCron(deps: Deps): Promise<CronResult> {
+export async function runCron(input: Deps): Promise<CronResult> {
+  const deps = await withMarketingReady(input);
   const { repo, tg } = deps;
   const now = deps.now();
-  const r: CronResult = { adminReminded: 0, clientReminded: 0, archived: 0, rsvpDigests: 0, photosRemoved: 0, partnerNotices: 0, sleeping: 0, notices: 0, payDay: 0, evening: 0, nudges: 0, reviews: 0, cleaned: 0, errorAlerts: 0, errors: 0 };
+  const r: CronResult = {
+    adminReminded: 0,
+    clientReminded: 0,
+    archived: 0,
+    rsvpDigests: 0,
+    photosRemoved: 0,
+    partnerNotices: 0,
+    sleeping: 0,
+    notices: 0,
+    payDay: 0,
+    evening: 0,
+    nudges: 0,
+    reviews: 0,
+    cleaned: 0,
+    errorAlerts: 0,
+    errors: 0,
+  };
   const ctx = { deps };
 
   // ── Админам: чек ждёт > 30 мин — днём (08:00–21:00), дальше каждые 2 часа до 21:00 ──
@@ -102,7 +128,9 @@ export async function runCron(deps: Deps): Promise<CronResult> {
           (o) =>
             o.receiptAt &&
             +o.receiptAt <= +now - ADMIN_REMIND_AFTER_MIN * MIN &&
-            (!o.adminRemindedAt || +o.adminRemindedAt <= +now - ADMIN_REMIND_EVERY_MIN * MIN || +o.adminRemindedAt < +o.receiptAt),
+            (!o.adminRemindedAt ||
+              +o.adminRemindedAt <= +now - ADMIN_REMIND_EVERY_MIN * MIN ||
+              +o.adminRemindedAt < +o.receiptAt),
         )
       : [];
   if (waiting.length) {
@@ -114,9 +142,13 @@ export async function runCron(deps: Deps): Promise<CronResult> {
         const lang = (await repo.getUser(adminId))?.lang ?? "uz";
         const tx = txFor(lang);
         try {
-          await tg.sendMessage(adminId, `${tx.admin.remind(o.number, minutes)}\n\n${adminCard(deps, o, lang, client)}`, {
-            markup: inline(decisionButtons(tx, o.number)),
-          });
+          await tg.sendMessage(
+            adminId,
+            `${tx.admin.remind(o.number, minutes)}\n\n${adminCard(deps, o, lang, client)}`,
+            {
+              markup: inline(decisionButtons(tx, o.number)),
+            },
+          );
         } catch (e) {
           r.errors++;
           console.error("cron admin remind", e instanceof Error ? e.name : "Error");
@@ -129,7 +161,9 @@ export async function runCron(deps: Deps): Promise<CronResult> {
 
   // ── Клиенту: пропал на оплате ──
   // Тихие часы: ночью клиенту не пишем — напоминание уйдёт утром (метку не ставим)
-  for (const o of isQuiet(now) ? [] : await repo.ordersAbandonedAtPayment(new Date(now.getTime() - CLIENT_REMIND_AFTER_MIN * MIN))) {
+  for (const o of isQuiet(now)
+    ? []
+    : await repo.ordersAbandonedAtPayment(new Date(now.getTime() - CLIENT_REMIND_AFTER_MIN * MIN))) {
     const tx = txFor((await repo.getUser(o.userId))?.lang);
     try {
       await tg.sendMessage(o.userId, tx.pay.reminder(pageUrl(ctx, o.slug)), {
@@ -179,7 +213,11 @@ export async function runCron(deps: Deps): Promise<CronResult> {
 
   // ── v2, часть 7: отложенные на ночь сообщения, отчёты 20:00, выплаты 10:00 ──
   try {
-    r.notices = await flushNotices(deps);
+    if (deps.env.marketing?.delivery && deps.repo.marketing) {
+      await deps.repo.marketing.releaseExpired(now);
+      await deps.repo.marketing.queueDeliveryAlert(now);
+      r.notices = await flushMarketing(deps);
+    } else r.notices = await flushNotices(deps);
     r.payDay = await payDayNotices(deps);
     r.evening = await eveningReports(deps);
     r.errorAlerts = await errorAlert(deps);

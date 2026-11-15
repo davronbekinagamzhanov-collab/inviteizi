@@ -1,0 +1,18 @@
+[
+  {
+    "path": "public/art/floral-pilots/paper.webp",
+    "source": "/workspace/generated_images/exec-6f6daa96-876a-45d2-815b-4243881b268e.png",
+    "tool": "image_gen",
+    "type": "generated photorealistic envelope material",
+    "bytes": 130710,
+    "sha256": "0853afc4ec76f0dd187b39a948e62dfcdb4c780421f6a42a5af81ac8a3262380"
+  },
+  {
+    "path": "public/art/floral-pilots/seal.webp",
+    "source": "/workspace/generated_images/exec-7d704d2e-320a-4d13-9bd6-90638a7e99d0.png",
+    "tool": "image_gen",
+    "type": "generated photorealistic envelope material",
+    "bytes": 22600,
+    "sha256": "349367f029603058ccc71e400710d1278874952ac568702c8efbb78e9472cf44"
+  }
+]

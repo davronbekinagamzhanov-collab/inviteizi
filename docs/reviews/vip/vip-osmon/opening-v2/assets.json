@@ -1,0 +1,22 @@
+{
+  "source": "image_gen, generated for the opening-only revision, 2026-11-07",
+  "files": [
+    {
+      "file": "opening-envelope.webp",
+      "bytes": 205870,
+      "sha256": "fe3e2c046e9b1a450deef5274226482fba7f129455956d8605419cd03ed85139"
+    },
+    {
+      "file": "opening-lining.webp",
+      "bytes": 117282,
+      "sha256": "9ed8c7063d1aa30ee8ee8ebd1e8057a41afb67397c1e22a95da055859904a73f"
+    },
+    {
+      "file": "opening-paper.webp",
+      "bytes": 44104,
+      "sha256": "556ba982558ff7de8623e86058570af559bc7874fcdb65bcc67f3089efd99592"
+    }
+  ],
+  "existingSealUnchanged": true,
+  "existingBodyPhotographsUnchanged": true
+}

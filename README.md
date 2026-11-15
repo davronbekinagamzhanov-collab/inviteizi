@@ -4,3 +4,5 @@
 
 Код создаёт Claude Code: см. `../СТАРТ_с_Claude_Code.md`.
 Правила проекта: `../CLAUDE.md`. План: `../План проекта/`.
+VIP preview verification
+VIP preview verification

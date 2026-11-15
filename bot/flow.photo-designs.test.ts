@@ -14,7 +14,8 @@ function photoSim() {
   return s;
 }
 
-const state = async (s: Sim, id: number) => (await s.user(id))!.state as { templateId?: string; data?: { photos?: string[] } };
+const state = async (s: Sim, id: number) =>
+  (await s.user(id))!.state as { templateId?: string; data?: { photos?: string[] } };
 
 async function finishForm(s: Sim, id: number) {
   await s.click(id, "Фарзандларимиз");
@@ -56,7 +57,10 @@ describe("пометка «с фото» и шаг фото по дизайну"
     const page = catalogList({ s: { occasion: "nikoh" } }).slice(0, PAGE);
     expect(page.some((d) => d.clientPhotos) && page.some((d) => !d.clientPhotos)).toBe(true);
     for (const d of page) {
-      const line = s.lastText(1).split("\n").find((x) => x.includes(`№${d.number} `));
+      const line = s
+        .lastText(1)
+        .split("\n")
+        .find((x) => x.includes(`№${d.number} `));
       expect(line, d.id).toBeDefined();
       expect(line!.includes("📷"), d.id).toBe(Boolean(d.clientPhotos));
     }
@@ -86,25 +90,25 @@ describe("пометка «с фото» и шаг фото по дизайну"
     expect(st.data?.photos ?? []).toEqual([]);
   });
 
-  it("наҳорги ош: ни у одного дизайна нет фото клиента — ни строки 📷 в подписи, ни шага фото", async () => {
-    const formats = ["animated", "scroll", "simple"] as const;
-    const all = formats.flatMap((f) => designsFor("nahorgi", f));
-    expect(all.length).toBeGreaterThan(0);
-    for (const d of all) expect(d.clientPhotos, d.id).toBeFalsy();
+  it("наҳорги ош: «📷» только у дизайнов с фото клиента (с 15.11 — «Боғ насими»), у остальных шага фото нет", async () => {
     const list = catalogList({ s: { occasion: "nahorgi" } });
+    expect(list.length).toBeGreaterThan(0);
     const s = photoSim();
     await startUz(s, 1);
     await s.click(1, uz.category.nahorgi);
-    // каждая страница каталога: ни в подписях обложек, ни в строках меню нет «📷»
+    // каждая страница каталога: «📷» стоит ровно в строках дизайнов с фото клиента
     for (let i = 0; i < list.length; i += PAGE) {
       if (i > 0) await s.click(1, "▶");
-      expect(s.lastText(1)).toContain(`№${list[i].number} `);
-      expect(s.lastText(1)).not.toContain("📷");
-      for (const m of s.tg.to(1).filter((m) => m.type === "photo")) expect(m.text).not.toContain("📷");
+      const lines = s.lastText(1).split("\n");
+      for (const d of list.slice(i, i + PAGE)) {
+        const line = lines.find((l) => l.includes(`№${d.number} `));
+        expect(line, d.id).toBeDefined();
+        expect(line!.includes("📷"), d.id).toBe(Boolean(d.clientPhotos));
+      }
     }
-    await pickDesign(s, 1);
+    const plain = list.find((d) => !d.clientPhotos)!;
+    await pickDesign(s, 1, plain.id);
     await s.text(1, "Жасурбек");
     expect((await s.user(1))!.step).not.toBe("photoAsk");
   });
-
 });

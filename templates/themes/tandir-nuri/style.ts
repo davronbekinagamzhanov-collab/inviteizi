@@ -6,10 +6,33 @@ import { designVars } from "../types";
 // Podkova — тёплый брусковый шрифт с мягкими, «лепными» засечками: плотный, как корочка нона.
 // По каталогу был Kurale, но в нём нет буквы ҳ (браузер подставлял Times) — заменён.
 // cyrillic-ext — в нём ў қ ғ ҳ
-const display = localFont({ preload: false,src:[{path:"../../../assets/fonts/google/podkova/Podkova[wght].woff2",weight:"400.0 800.0",style:"normal"}],display:"swap",variable:"--tn-display"});
+const display = localFont({
+  preload: false,
+  src: [
+    { path: "../../../assets/fonts/web/google/podkova/Podkova[wght].woff2", weight: "400.0 800.0", style: "normal" },
+  ],
+  display: "swap",
+  variable: "--tn-display",
+});
 
 // Piazzolla — книжный текст с оптическим размером (opsz): мелкий кегль плотнее, крупный тоньше
-const body = localFont({ preload: false,src:[{path:"../../../assets/fonts/google/piazzolla/Piazzolla[opsz,wght].woff2",weight:"100.0 900.0",style:"normal"},{path:"../../../assets/fonts/google/piazzolla/Piazzolla-Italic[opsz,wght].woff2",weight:"100.0 900.0",style:"italic"}],display:"swap",variable:"--tn-body"});
+const body = localFont({
+  preload: false,
+  src: [
+    {
+      path: "../../../assets/fonts/web/google/piazzolla/Piazzolla[opsz,wght].woff2",
+      weight: "100.0 900.0",
+      style: "normal",
+    },
+    {
+      path: "../../../assets/fonts/web/google/piazzolla/Piazzolla-Italic[opsz,wght].woff2",
+      weight: "100.0 900.0",
+      style: "italic",
+    },
+  ],
+  display: "swap",
+  variable: "--tn-body",
+});
 
 export const fontClasses = `${display.variable} ${body.variable}`;
 

@@ -16,13 +16,20 @@ export function useFitWords<T extends HTMLElement>(max: number) {
     let last = -1;
     const fit = () => {
       el.style.setProperty("--fit", `${max}px`);
+      // A theme may cap --fit with min(...). Scale from the rendered size,
+      // otherwise a capped heading can stay too wide after our first pass.
+      const renderedSize = parseFloat(getComputedStyle(el).fontSize);
+      const scale = el.getBoundingClientRect().width / Math.max(1, el.offsetWidth);
       const width = el.clientWidth - 1;
       let widest = 0;
       el.querySelectorAll<HTMLElement>("[data-word]").forEach((w) => {
-        // offsetWidth не зависит от transform (имена появляются с лёгким scale)
-        widest = Math.max(widest, w.offsetWidth);
+        // Block-level words report the container width; measure their text.
+        // Normalize the reveal transform so opening motion cannot shrink it.
+        const range = document.createRange();
+        range.selectNodeContents(w);
+        widest = Math.max(widest, range.getBoundingClientRect().width / (scale || 1));
       });
-      const size = widest > width && widest > 0 ? Math.floor(((max * width) / widest) * 10) / 10 - 0.2 : max;
+      const size = widest > width && widest > 0 ? Math.floor(((renderedSize * width) / widest) * 10) / 10 - 0.2 : max;
       el.style.setProperty("--fit", `${size}px`);
       last = el.clientWidth;
     };

@@ -1,30 +1,22 @@
 // Переносит дизайны из templates/registry.ts в таблицу templates (идемпотентно: upsert по id).
 // Дизайны, которых больше нет в реестре, помечаются is_active = false (заказы на них не ломаются).
+// В продаже (is_active) — ровно витрина templates/catalog.ts. Сначала проверить: --dry-run.
 // Запуск: node --env-file=.env.local scripts/seed-templates.mjs
 // Сначала применить 20261026120000_scroll_format.sql. Upsert меняет только templates,
 // не пересчитывает orders.format/amount; прежние оплаченные ссылки сохраняются.
 import "./ts-hooks.mjs";
 
-const { designs, PRICES, ACCEPTED, FORMATS } = await import("../templates/registry.ts");
+const { templateRows } = await import("../templates/catalog-rows.ts");
 const { db, closeDb } = await import("../lib/db.ts");
 
-const rows = designs.map((d) => ({
-  id: d.id,
-  number: d.number,
-  occasion: d.occasion,
-  format: d.format,
-  with_photo: d.withPhoto,
-  price: PRICES[d.format],
-  cover_url: d.cover,
-  is_active: ACCEPTED.has(d.id), // клиенты видят только принятые
-  sort: d.number,
-}));
+// is_active = в витрине templates/catalog.ts, price = цена формата, sort = порядок каталога
+const rows = templateRows();
 
-if (rows.some((r) => !FORMATS.includes(r.format) || !Number.isInteger(r.price))) {
-  throw new Error("Unknown catalog format or price");
-}
 // Review the exact registry-derived rows without credentials or a database connection.
-if(process.argv.includes("--dry-run")){console.log(JSON.stringify(rows));process.exit(0);}
+if (process.argv.includes("--dry-run")) {
+  console.log(JSON.stringify(rows));
+  process.exit(0);
+}
 const sql = db();
 try {
   await sql.begin(async (tx) => {

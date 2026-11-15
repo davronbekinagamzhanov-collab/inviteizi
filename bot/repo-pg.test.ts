@@ -32,6 +32,9 @@ describe.skipIf(!hasDb)("PgRepo (Supabase)", () => {
   afterAll(async () => {
     const { db, closeDb } = await import("@/lib/db");
     const sql = db();
+    // «заказ для клиента» ссылается на заказ без каскада — удаляется первым, как в cancelOrder
+    await sql`delete from public.client_orders where order_id in
+      (select id from public.orders where user_id >= ${CONTRACT_USER_BASE})`;
     await sql`delete from public.users where id >= ${CONTRACT_USER_BASE}`; // заказы и тадбиры — каскадом
     await sql`delete from public.admins where telegram_id >= ${CONTRACT_USER_BASE}`;
     await sql`delete from public.music where id like ${`t-${tag}-%`}`;
@@ -56,8 +59,22 @@ describe.skipIf(!hasDb)("PgRepo (Supabase)", () => {
       textId: "2",
       customText: "Азиз меҳмонлар!",
       events: [
-        { kind: "nahorgi", date: "2026-12-12", time: "06:00", venueName: "Хонадонимиз", address: "Сайрам", location: { lat: 42.3, lng: 69.76 } },
-        { kind: "nikohBazm", date: "2026-12-12", time: "18:00", venueName: "«Наврўз»", address: "Сайрам, 45", mapUrl: "https://2gis.kz/x" },
+        {
+          kind: "nahorgi",
+          date: "2026-12-12",
+          time: "06:00",
+          venueName: "Хонадонимиз",
+          address: "Сайрам",
+          location: { lat: 42.3, lng: 69.76 },
+        },
+        {
+          kind: "nikohBazm",
+          date: "2026-12-12",
+          time: "18:00",
+          venueName: "«Наврўз»",
+          address: "Сайрам, 45",
+          mapUrl: "https://2gis.kz/x",
+        },
         { kind: "kelinSalom", date: "2026-12-13", time: "09:00", venueName: "Уйимизда", address: "" },
       ],
     };
@@ -143,7 +160,14 @@ describe.skipIf(!hasDb)("PgRepo (Supabase)", () => {
       const mine = (await r.listMusic()).filter((m) => m.id.startsWith(`t-${tag}-`));
       expect(mine.map((m) => m.id)).toEqual([a, b]);
       expect(mine[0]).toEqual({
-        id: a, titleUz: "А", titleRu: "А", fileUrl: "https://x/a.mp3", telegramFileId: null, sort: -2, occasion: null, isArtist: false,
+        id: a,
+        titleUz: "А",
+        titleRu: "А",
+        fileUrl: "https://x/a.mp3",
+        telegramFileId: null,
+        sort: -2,
+        occasion: null,
+        isArtist: false,
       });
       await r.setMusicTelegramFileId(b, "TG_B");
       expect((await r.listMusic()).find((m) => m.id === b)?.telegramFileId).toBe("TG_B");

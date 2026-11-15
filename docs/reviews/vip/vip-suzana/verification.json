@@ -1,0 +1,77 @@
+{
+  "id": "vip-suzana",
+  "origin": "http://localhost:3001",
+  "capturedAt": "2026-11-07T12:05:45.172Z",
+  "browser": "156.0.8078.79",
+  "engine": "Chromium (not a physical iPhone)",
+  "viewports": [
+    {
+      "width": 390,
+      "height": 844,
+      "scroll": 390
+    },
+    {
+      "width": 360,
+      "height": 740,
+      "scroll": 360
+    },
+    {
+      "width": 375,
+      "height": 812,
+      "scroll": 375
+    },
+    {
+      "width": 320,
+      "height": 740,
+      "scroll": 320
+    },
+    {
+      "width": 430,
+      "height": 932,
+      "scroll": 430
+    }
+  ],
+  "heartPositions": [
+    {
+      "progress": "0.168",
+      "transform": "translateX(178.179px) translateY(120.399px)",
+      "top": 551.9932250976562
+    },
+    {
+      "progress": "0.509",
+      "transform": "translateX(145.599px) translateY(340.969px)",
+      "top": 522.5631103515625
+    },
+    {
+      "progress": "0.849",
+      "transform": "translateX(104.526px) translateY(542.246px)",
+      "top": 473.8397216796875
+    }
+  ],
+  "checks": {
+    "heartMoves": true,
+    "mapLinks": [
+      "https://2gis.kz/geo/69.761200,42.300500",
+      "https://2gis.kz/geo/69.765000,42.302000"
+    ],
+    "threeRealEvents": true,
+    "rsvpPreviewNoNetwork": true,
+    "reducedMotionVisible": true
+  },
+  "opening4x": {
+    "frames": 152,
+    "durationMs": 2600,
+    "fps": 58.08,
+    "p95FrameMs": 16.8,
+    "framesOver33ms": 2
+  },
+  "program4x": {
+    "frames": 181,
+    "durationMs": 2999.9,
+    "fps": 60,
+    "p95FrameMs": 16.7,
+    "framesOver33ms": 0
+  },
+  "consoleErrors": [],
+  "target55fps": true
+}
