@@ -6,5 +6,6 @@ import { checkCronSecret } from "@/lib/cron-auth";
 export const maxDuration = 60;
 
 export async function POST(req: Request) {
+  if (process.env.VERCEL_ENV === "preview") return Response.json({ ok: false }, { status: 404 });
   return handleCronRequest(req, { check: checkCronSecret, getDeps: createBotDeps });
 }

@@ -1,5 +1,16 @@
+import { PgMarketing } from "./marketing-repo";
 import { RSVP_IP_HOUR_LIMIT, RSVP_ORDER_LIMIT, type RsvpInput, type RsvpRecord } from "@/lib/rsvp";
-import { earningFor, type ManagerPayout, type PanelOrder, type PanelSnapshot, type Partner, type PartnerEarning, type PartnerPayout, type PanelUser, type PayoutSchedule } from "@/lib/owner-panel";
+import {
+  earningFor,
+  type ManagerPayout,
+  type PanelOrder,
+  type PanelSnapshot,
+  type Partner,
+  type PartnerEarning,
+  type PartnerPayout,
+  type PanelUser,
+  type PayoutSchedule,
+} from "@/lib/owner-panel";
 import type { BotErrorEntry } from "./errors";
 import type { ClaimStatus, InviteKind, InviteUse, Manager } from "@/lib/roles";
 /**
@@ -25,7 +36,16 @@ import { EXTRA_LANGS, type EventKind, type ExtraLang, type Occasion, type Relati
 import { db, type Sql, type Tx } from "@/lib/db";
 import { env } from "@/lib/env";
 import { isReservedSlug } from "@/lib/slug";
-import { summarize, withoutStaffAnalytics, type AnalyticsInput, type EventKind as AnalyticsEventKind, type MetricOrder, type MetricEvent, type MetricUser, type Period } from "@/lib/analytics";
+import {
+  summarize,
+  withoutStaffAnalytics,
+  type AnalyticsInput,
+  type EventKind as AnalyticsEventKind,
+  type MetricOrder,
+  type MetricEvent,
+  type MetricUser,
+  type Period,
+} from "@/lib/analytics";
 
 const PAID: OrderStatus[] = ["active", "archived"];
 const TZ_OFFSET_MS = 5 * 60 * 60_000; // Казахстан: UTC+5 круглый год
@@ -94,6 +114,7 @@ type OrderRow = {
   updated_at: Date;
   receipt_at: Date | null;
   paid_at: Date | null;
+  marketing_refunded_at?: Date | null;
   payment_reminded_at: Date | null;
   rsvp: boolean | null;
   /** Нет колонки до миграции client_photos — тогда undefined */
@@ -175,7 +196,11 @@ function toData(r: OrderRow): InvitationData {
   // Главный язык страницы — первый в списке
   const main = r.langs?.[0];
   if (main && main !== "uz" && extra.includes(main as ExtraLang)) d.mainLang = main as ExtraLang;
-  const own = Object.fromEntries(EXTRA_LANGS.flatMap((l) => (typeof r.custom_text_i18n?.[l] === "string" && r.custom_text_i18n[l] ? [[l, r.custom_text_i18n[l]]] : [])));
+  const own = Object.fromEntries(
+    EXTRA_LANGS.flatMap((l) =>
+      typeof r.custom_text_i18n?.[l] === "string" && r.custom_text_i18n[l] ? [[l, r.custom_text_i18n[l]]] : [],
+    ),
+  );
   if (Object.keys(own).length) d.customTexts = own;
   return d;
 }
@@ -210,6 +235,7 @@ function toOrder(r: OrderRow): OrderRecord {
     updatedAt: r.updated_at,
     receiptAt: r.receipt_at,
     paidAt: r.paid_at,
+    ...(r.marketing_refunded_at ? { refundedAt: r.marketing_refunded_at } : {}),
     paymentRemindedAt: r.payment_reminded_at,
     adminRemindedAt: r.admin_reminded_at,
     payConfirmedAt: r.pay_confirmed_at ?? null,
@@ -306,7 +332,18 @@ function patchColumns(p: OrderPatch): Columns {
   return c;
 }
 
-const EVENT_COLUMNS = ["order_id", "position", "kind", "date", "time", "venue_name", "address", "lat", "lng", "map_url"] as const;
+const EVENT_COLUMNS = [
+  "order_id",
+  "position",
+  "kind",
+  "date",
+  "time",
+  "venue_name",
+  "address",
+  "lat",
+  "lng",
+  "map_url",
+] as const;
 
 async function writeEvents(tx: Tx, orderId: string, events: InvitationEvent[], replace: boolean) {
   if (replace) await tx`delete from public.events where order_id = ${orderId}`;
@@ -346,20 +383,30 @@ async function loadOrder(tx: Tx, id: string): Promise<OrderRecord | null> {
 }
 
 const isUniqueSlugViolation = (e: unknown) =>
-  typeof e === "object" && e !== null && (e as { code?: string }).code === "23505" &&
+  typeof e === "object" &&
+  e !== null &&
+  (e as { code?: string }).code === "23505" &&
   String((e as { constraint_name?: string }).constraint_name ?? "").includes("slug");
 
 const PARTNER_COLUMNS = `id, code, name, telegram_id as "telegramId", username, rate, created_at as "createdAt", managed_by as "managedBy",
   phone, kaspi, schedule, status, proposed_rate as "proposedRate", proposed_schedule as "proposedSchedule",
   owner_notified_at as "ownerNotifiedAt", sleep_notified_at as "sleepNotifiedAt", rate_percent as "ratePercent", proposed_rate_percent as "proposedRatePercent"`;
-const PARTNER_PATCH: Record<keyof PartnerPatch, string> = { phone: "phone", kaspi: "kaspi", schedule: "schedule", ownerNotifiedAt: "owner_notified_at", sleepNotifiedAt: "sleep_notified_at" };
+const PARTNER_PATCH: Record<keyof PartnerPatch, string> = {
+  phone: "phone",
+  kaspi: "kaspi",
+  schedule: "schedule",
+  ownerNotifiedAt: "owner_notified_at",
+  sleepNotifiedAt: "sleep_notified_at",
+};
 const MANAGER_COLUMNS = `telegram_id as "telegramId", code, username, first_name as "firstName", invited_by as "invitedBy", active, created_at as "createdAt", removed_at as "removedAt"`;
 /** Миграция партнёров ещё не применена */
 const isMissingTable = (e: unknown) => (e as { code?: string } | null)?.code === "42P01";
 const isMissingColumn = (e: unknown) => (e as { code?: string } | null)?.code === "42703";
 
 export class PgRepo implements Repo {
-  async isOwner(id: number) { return env.ownerId() === id; }
+  async isOwner(id: number) {
+    return env.ownerId() === id;
+  }
 
   async canAnalyze(id: number) {
     if (await this.isOwner(id)) return true;
@@ -368,10 +415,10 @@ export class PgRepo implements Repo {
     try {
       const [r] = await this.sql`select 1 from public.admins where telegram_id = ${id} and can_analytics`;
       return Boolean(r);
-    } catch(error) {
+    } catch (error) {
       // Before the optional analytics migration there is no database grant to consult.
       // Deny by default; do not infer analytics access from payment-admin rights.
-      if(typeof error==="object"&&error!==null&&"code" in error&&error.code==="42703")return false;
+      if (typeof error === "object" && error !== null && "code" in error && error.code === "42703") return false;
       throw error;
     }
   }
@@ -380,31 +427,62 @@ export class PgRepo implements Repo {
     const owner = await this.isOwner(actorId);
     if (!(await this.canAnalyze(actorId)) || (customers && !owner)) throw new Error("Analytics access denied");
     // One consistent snapshot; only necessary columns, never event addresses or receipt files.
-    const input = await this.sql.begin("isolation level repeatable read read only", async tx => {
-      const orders = await tx<MetricOrder[]>`select id, user_id as "userId", status, occasion, format, template_id as "templateId",
-        amount, created_at as "createdAt", paid_at as "paidAt", updated_at as "updatedAt",
+    const input = await this.sql.begin("isolation level repeatable read read only", async (tx) => {
+      const orders = await tx<
+        MetricOrder[]
+      >`select id, user_id as "userId", status, occasion, format, template_id as "templateId",
+        amount, created_at as "createdAt", paid_at as "paidAt", updated_at as "updatedAt", (to_jsonb(orders)->>'marketing_refunded_at')::timestamptz as "refundedAt",
         case when music_kind = 'list' then jsonb_build_object('kind','list','musicId',music_id)
           else jsonb_build_object('kind',music_kind) end as music from public.orders`;
       const users = customers
-        ? await tx<MetricUser[]>`select id, username, first_name as "firstName", created_at as "createdAt" from public.users`
-        : await tx<MetricUser[]>`select id, null::text as username, null::text as "firstName", created_at as "createdAt" from public.users`;
-      const events = await tx<MetricEvent[]>`select kind, user_id as "userId", target, created_at as "createdAt" from public.analytics_events`;
+        ? await tx<
+            MetricUser[]
+          >`select id, username, first_name as "firstName", created_at as "createdAt" from public.users`
+        : await tx<
+            MetricUser[]
+          >`select id, null::text as username, null::text as "firstName", created_at as "createdAt" from public.users`;
+      const events = await tx<
+        MetricEvent[]
+      >`select kind, user_id as "userId", target, created_at as "createdAt" from public.analytics_events`;
       const [config] = await tx<{ started_at: Date }[]>`select started_at from public.analytics_config where singleton`;
-      const music = await tx<{ id: string; titleRu: string; titleUz: string }[]>`select id, title_ru as "titleRu", title_uz as "titleUz" from public.music`;
-      const partners = await tx<{ id: string }[]>`select telegram_id::text as id from public.partners where telegram_id is not null`;
-      return { input: { orders: [...orders], users: [...users], events: [...events], since: config.started_at, music: [...music] } satisfies AnalyticsInput, partnerIds: partners.map((p) => Number(p.id)) };
+      const music = await tx<
+        { id: string; titleRu: string; titleUz: string }[]
+      >`select id, title_ru as "titleRu", title_uz as "titleUz" from public.music`;
+      const partners = await tx<
+        { id: string }[]
+      >`select telegram_id::text as id from public.partners where telegram_id is not null`;
+      return {
+        input: {
+          orders: [...orders],
+          users: [...users],
+          events: [...events],
+          since: config.started_at,
+          music: [...music],
+        } satisfies AnalyticsInput,
+        partnerIds: partners.map((p) => Number(p.id)),
+      };
     });
-    return summarize(withoutStaffAnalytics(input.input, await this.staffIds(), input.partnerIds), period, now, customers && owner);
+    return summarize(
+      withoutStaffAnalytics(input.input, await this.staffIds(), input.partnerIds),
+      period,
+      now,
+      customers && owner,
+    );
   }
 
   async listFavorites(userId: number) {
-    const rows = await this.sql<{ template_id: string }[]>`select template_id from public.design_favorites where user_id = ${userId} order by created_at desc, template_id`;
-    return rows.map(r => r.template_id);
+    const rows = await this.sql<
+      { template_id: string }[]
+    >`select template_id from public.design_favorites where user_id = ${userId} order by created_at desc, template_id`;
+    return rows.map((r) => r.template_id);
   }
 
   async setFavorite(userId: number, templateId: string, saved: boolean) {
-    await this.sql.begin(async tx => {
-      if (!saved) { await tx`delete from public.design_favorites where user_id = ${userId} and template_id = ${templateId}`; return; }
+    await this.sql.begin(async (tx) => {
+      if (!saved) {
+        await tx`delete from public.design_favorites where user_id = ${userId} and template_id = ${templateId}`;
+        return;
+      }
       await tx`insert into public.design_favorites(user_id, template_id) values(${userId},${templateId}) on conflict do nothing`;
       await tx`insert into public.analytics_events(kind,user_id,target,dedupe_key) values('design_favorited',${userId},${templateId},${templateId}) on conflict do nothing`;
     });
@@ -413,14 +491,17 @@ export class PgRepo implements Repo {
   async staffIds() {
     // Менеджеры (и снятые): их собственные заказы и клики — не продажи
     const managers = (await this.listManagers()).map((m) => m.telegramId);
-    return [...new Set([...(await this.listAdminIds()), ...(env.ownerId() ? [env.ownerId() as number] : []), ...managers])];
+    return [
+      ...new Set([...(await this.listAdminIds()), ...(env.ownerId() ? [env.ownerId() as number] : []), ...managers]),
+    ];
   }
 
   async saveRsvp(input: RsvpInput) {
     return this.sql.begin(async (tx) => {
       // По очереди на заказ: лимиты нельзя обойти одновременными запросами
       await tx`select pg_advisory_xact_lock(hashtext(${input.orderId}))`;
-      const [old] = await tx`update public.rsvp_responses set name=${input.name}, guests=${input.guests}, attending=${input.attending}, updated_at=now()
+      const [old] =
+        await tx`update public.rsvp_responses set name=${input.name}, guests=${input.guests}, attending=${input.attending}, updated_at=now()
         where order_id=${input.orderId} and visitor_key=${input.visitorKey} returning id`;
       if (old) return "ok" as const;
       const [n] = await tx<{ total: number; ip: number }[]>`select count(*)::int8 as total,
@@ -450,7 +531,9 @@ export class PgRepo implements Repo {
 
   async listRsvp(orderId: string) {
     try {
-      const rows = await this.sql<RsvpRecord[]>`select name, guests, attending, updated_at as "updatedAt" from public.rsvp_responses where order_id=${orderId} order by updated_at desc`;
+      const rows = await this.sql<
+        RsvpRecord[]
+      >`select name, guests, attending, updated_at as "updatedAt" from public.rsvp_responses where order_id=${orderId} order by updated_at desc`;
       return [...rows];
     } catch (e) {
       if (isMissingTable(e)) return [];
@@ -460,18 +543,33 @@ export class PgRepo implements Repo {
 
   async panelSnapshot(): Promise<PanelSnapshot> {
     const base = await this.sql.begin("isolation level repeatable read read only", async (tx) => {
-      const orders = await tx<PanelOrder[]>`select o.id, o.number, o.user_id as "userId", u.username, u.first_name as "firstName", o.status, o.occasion, o.format,
-        o.template_id as "templateId", o.music_kind as "musicKind", o.amount, o.created_at as "createdAt", o.paid_at as "paidAt", o.updated_at as "updatedAt",
+      const orders = await tx<
+        PanelOrder[]
+      >`select o.id, o.number, o.user_id as "userId", u.username, u.first_name as "firstName", o.status, o.occasion, o.format,
+        o.template_id as "templateId", o.music_kind as "musicKind", o.amount, o.created_at as "createdAt", o.paid_at as "paidAt", o.updated_at as "updatedAt", (to_jsonb(o)->>'marketing_refunded_at')::timestamptz as "refundedAt",
         o.slug, nullif(concat_ws(' & ', o.groom, o.bride, o.person), '') as names
         from public.orders o join public.users u on u.id = o.user_id`;
       const users = await tx<PanelUser[]>`select id, created_at as "createdAt", source from public.users`;
       return { orders: [...orders], users: [...users] };
     });
     try {
-      const partners = await this.sql<Partner[]>`select ${this.sql.unsafe(PARTNER_COLUMNS)} from public.partners order by id`;
-      const earnings = await this.sql<PartnerEarning[]>`select order_id as "orderId", partner_id as "partnerId", amount, delivered, created_at as "createdAt" from public.partner_earnings`;
-      const payouts = await this.sql<PartnerPayout[]>`select partner_id as "partnerId", amount, created_at as "createdAt" from public.partner_payouts`;
-      return { ...base, partners: [...partners], earnings: [...earnings], payouts: [...payouts], ...(await this.v2Snapshot()), partnersReady: true };
+      const partners = await this.sql<
+        Partner[]
+      >`select ${this.sql.unsafe(PARTNER_COLUMNS)},(to_jsonb(partners)->>'customer_user_id')::bigint as "customerUserId" from public.partners order by id`;
+      const earnings = await this.sql<
+        PartnerEarning[]
+      >`select order_id as "orderId", partner_id as "partnerId", amount, delivered, created_at as "createdAt" from public.partner_earnings`;
+      const payouts = await this.sql<
+        PartnerPayout[]
+      >`select partner_id as "partnerId", amount, created_at as "createdAt" from public.partner_payouts`;
+      return {
+        ...base,
+        partners: [...partners],
+        earnings: [...earnings],
+        payouts: [...payouts],
+        ...(await this.v2Snapshot()),
+        partnersReady: true,
+      };
     } catch (e) {
       if (!isMissingTable(e)) throw e;
       return { ...base, partners: [], earnings: [], payouts: [], partnersReady: false };
@@ -480,14 +578,22 @@ export class PgRepo implements Repo {
 
   /** Заказы «для клиента» и выплаты менеджерам; до миграций v2 — пусто */
   private async v2Snapshot() {
-    const clientOrders = await this.sql<{ orderId: string; ref: string | null }[]>`select order_id as "orderId", ref_source as ref from public.client_orders where claimed_by is not null`.catch((e) => {
-      if (isMissingTable(e)) return [];
-      throw e;
-    });
-    const managerPayouts = await this.sql<ManagerPayout[]>`select manager_id as "managerId", month, amount, orders, created_at as "createdAt" from public.manager_payouts`.catch((e) => {
-      if (isMissingTable(e)) return [];
-      throw e;
-    });
+    const clientOrders = await this.sql<
+      { orderId: string; ref: string | null }[]
+    >`select order_id as "orderId", ref_source as ref from public.client_orders where claimed_by is not null`.catch(
+      (e) => {
+        if (isMissingTable(e)) return [];
+        throw e;
+      },
+    );
+    const managerPayouts = await this.sql<
+      ManagerPayout[]
+    >`select manager_id as "managerId", month, amount, orders, created_at as "createdAt" from public.manager_payouts`.catch(
+      (e) => {
+        if (isMissingTable(e)) return [];
+        throw e;
+      },
+    );
     return { clientOrders: [...clientOrders], managerPayouts: [...managerPayouts] };
   }
 
@@ -506,7 +612,8 @@ export class PgRepo implements Repo {
 
   async claimNotice(key: string, now: Date) {
     try {
-      const rows = await this.sql`update public.bot_notices set sent_at = ${now} where key = ${key} and sent_at is null returning key`;
+      const rows = await this
+        .sql`update public.bot_notices set sent_at = ${now} where key = ${key} and sent_at is null returning key`;
       return rows.length > 0;
     } catch (e) {
       if (isMissingTable(e)) return false;
@@ -516,11 +623,19 @@ export class PgRepo implements Repo {
 
   async claimDueNotices(now: Date, limit: number) {
     try {
-      const rows = await this.sql<{ key: string; chatId: number; body: { text: string; markup: Notice["markup"] }; dueAt: Date }[]>`
+      const rows = await this.sql<
+        { key: string; chatId: number; body: { text: string; markup: Notice["markup"] }; dueAt: Date }[]
+      >`
         update public.bot_notices set sent_at = ${now}
-        where key in (select key from public.bot_notices where sent_at is null and due_at <= ${now} order by due_at limit ${limit} for update skip locked)
+        where key in (select key from public.bot_notices where sent_at is null and key not like 'mk:%' and due_at <= ${now} order by due_at limit ${limit} for update skip locked)
         returning key, chat_id as "chatId", body, due_at as "dueAt"`;
-      return rows.map((r) => ({ key: r.key, chatId: r.chatId, text: r.body.text, markup: r.body.markup, dueAt: r.dueAt }));
+      return rows.map((r) => ({
+        key: r.key,
+        chatId: r.chatId,
+        text: r.body.text,
+        markup: r.body.markup,
+        dueAt: r.dueAt,
+      }));
     } catch (e) {
       if (isMissingTable(e)) return [];
       throw e;
@@ -543,11 +658,13 @@ export class PgRepo implements Repo {
   async saveReview(r: { orderId: string; userId: number; stars?: number; text?: string }) {
     try {
       if (r.stars !== undefined) {
-        await this.sql`insert into public.order_reviews(order_id, user_id, stars) values(${r.orderId}, ${r.userId}, ${r.stars})
+        await this
+          .sql`insert into public.order_reviews(order_id, user_id, stars) values(${r.orderId}, ${r.userId}, ${r.stars})
           on conflict (order_id) do update set stars = excluded.stars, updated_at = now()`;
       }
       if (r.text !== undefined) {
-        const rows = await this.sql`update public.order_reviews set text = ${r.text}, updated_at = now() where order_id = ${r.orderId} and user_id = ${r.userId} returning order_id`;
+        const rows = await this
+          .sql`update public.order_reviews set text = ${r.text}, updated_at = now() where order_id = ${r.orderId} and user_id = ${r.userId} returning order_id`;
         return rows.length > 0;
       }
       return true;
@@ -560,7 +677,9 @@ export class PgRepo implements Repo {
   async reviewSummary(from: Date, to: Date, orderIds: string[] | null) {
     try {
       const ids = orderIds ? this.sql.array(orderIds) : null;
-      const [r] = await this.sql<{ avg: number | null; count: number }[]>`select avg(stars)::float8 as avg, count(*)::int as count from public.order_reviews
+      const [r] = await this.sql<
+        { avg: number | null; count: number }[]
+      >`select avg(stars)::float8 as avg, count(*)::int as count from public.order_reviews
         where created_at >= ${from} and created_at < ${to} and (${ids}::uuid[] is null or order_id = any(${ids}::uuid[]))`;
       return r.count ? { avg: r.avg ?? 0, count: r.count } : null;
     } catch (e) {
@@ -571,9 +690,13 @@ export class PgRepo implements Repo {
 
   async errorSummary(since: Date) {
     try {
-      const rows = await this.sql<{ reason: string; n: number }[]>`select error_name || coalesce(' ' || error_code, '') || ': ' || left(message, 80) as reason, count(*)::int as n
+      const rows = await this.sql<
+        { reason: string; n: number }[]
+      >`select error_name || coalesce(' ' || error_code, '') || ': ' || left(message, 80) as reason, count(*)::int as n
         from public.bot_errors where created_at >= ${since} group by 1 order by 2 desc limit 1`;
-      const [{ count }] = await this.sql<{ count: number }[]>`select count(*)::int as count from public.bot_errors where created_at >= ${since}`;
+      const [{ count }] = await this.sql<
+        { count: number }[]
+      >`select count(*)::int as count from public.bot_errors where created_at >= ${since}`;
       return { count, top: rows[0]?.reason ?? "" };
     } catch (e) {
       const code = (e as { code?: string } | null)?.code;
@@ -584,7 +707,8 @@ export class PgRepo implements Repo {
 
   async noticeSentSince(prefix: string, since: Date) {
     try {
-      const rows = await this.sql`select 1 from public.bot_notices where key like ${prefix + "%"} and sent_at >= ${since} limit 1`;
+      const rows = await this
+        .sql`select 1 from public.bot_notices where key like ${prefix + "%"} and sent_at >= ${since} limit 1`;
       return rows.length > 0;
     } catch (e) {
       if (isMissingTable(e)) return false;
@@ -614,7 +738,9 @@ export class PgRepo implements Repo {
       const gone = await tx<{ id: string }[]>`delete from public.orders o where o.id = any(${ids}::uuid[])
         and not exists (select 1 from public.client_orders c where c.order_id = o.id) returning o.id`;
       const deleted = new Set(gone.map((g) => g.id));
-      return rows.filter((r) => deleted.has(r.id)).map((r) => ({ photos: r.photos ?? [], music: r.music_kind === "own" ? r.music_url : null }));
+      return rows
+        .filter((r) => deleted.has(r.id))
+        .map((r) => ({ photos: r.photos ?? [], music: r.music_kind === "own" ? r.music_url : null }));
     });
   }
 
@@ -633,7 +759,12 @@ export class PgRepo implements Repo {
     });
   }
 
-  async recordCancellation(c: { step: number; occasion?: string | null; format?: string | null; templateId?: string | null }) {
+  async recordCancellation(c: {
+    step: number;
+    occasion?: string | null;
+    format?: string | null;
+    templateId?: string | null;
+  }) {
     await this.sql`insert into public.order_cancellations(step, occasion, format, template_id)
       values(${Math.min(5, Math.max(1, Math.round(c.step)))}, ${c.occasion ?? null}, ${c.format ?? null}, ${c.templateId ?? null})`;
   }
@@ -646,7 +777,9 @@ export class PgRepo implements Repo {
   }
 
   async createPartner(p: NewPartner) {
-    const [r] = await this.sql<Partner[]>`insert into public.partners(code,name,telegram_id,username,rate,rate_percent,managed_by,phone,schedule,status,owner_notified_at)
+    const [r] = await this.sql<
+      Partner[]
+    >`insert into public.partners(code,name,telegram_id,username,rate,rate_percent,managed_by,phone,schedule,status,owner_notified_at)
       values(${p.code},${p.name},${p.telegramId},${p.username},${p.rate},${p.ratePercent ?? null},${p.managedBy ?? null},${p.phone ?? null},${p.schedule ?? "weekly"},${p.status ?? "active"},${p.ownerNotifiedAt ?? null})
       returning ${this.sql.unsafe(PARTNER_COLUMNS)}`;
     return r;
@@ -654,7 +787,9 @@ export class PgRepo implements Repo {
 
   async getPartner(id: number) {
     if (!Number.isSafeInteger(id)) return null;
-    const [r] = await this.sql<Partner[]>`select ${this.sql.unsafe(PARTNER_COLUMNS)} from public.partners where id = ${id}`;
+    const [r] = await this.sql<
+      Partner[]
+    >`select ${this.sql.unsafe(PARTNER_COLUMNS)} from public.partners where id = ${id}`;
     return r ?? null;
   }
 
@@ -679,27 +814,35 @@ export class PgRepo implements Repo {
   }
 
   async decidePartner(id: number, status: "active" | "rejected") {
-    const rows = await this.sql`update public.partners set status = ${status} where id = ${id} and status = 'pending' returning id`;
+    const rows = await this
+      .sql`update public.partners set status = ${status} where id = ${id} and status = 'pending' returning id`;
     return rows.length > 0;
   }
 
   async proposePartnerTerms(id: number, rate: number, schedule: PayoutSchedule, ratePercent: number | null = null) {
-    await this.sql`update public.partners set proposed_rate = ${rate}, proposed_rate_percent = ${ratePercent}, proposed_schedule = ${schedule}, owner_notified_at = null where id = ${id}`;
+    await this
+      .sql`update public.partners set proposed_rate = ${rate}, proposed_rate_percent = ${ratePercent}, proposed_schedule = ${schedule}, owner_notified_at = null where id = ${id}`;
   }
 
   async settlePartnerProposal(id: number, accept: boolean) {
     // Одно обновление: двойное нажатие не применит предложение дважды
     const [r] = accept
-      ? await this.sql<Partner[]>`update public.partners set rate = proposed_rate, rate_percent = proposed_rate_percent, schedule = proposed_schedule, proposed_rate = null, proposed_rate_percent = null, proposed_schedule = null
+      ? await this.sql<
+          Partner[]
+        >`update public.partners set rate = proposed_rate, rate_percent = proposed_rate_percent, schedule = proposed_schedule, proposed_rate = null, proposed_rate_percent = null, proposed_schedule = null
           where id = ${id} and proposed_rate is not null returning ${this.sql.unsafe(PARTNER_COLUMNS)}`
-      : await this.sql<Partner[]>`update public.partners set proposed_rate = null, proposed_rate_percent = null, proposed_schedule = null
+      : await this.sql<
+          Partner[]
+        >`update public.partners set proposed_rate = null, proposed_rate_percent = null, proposed_schedule = null
           where id = ${id} and proposed_rate is not null returning ${this.sql.unsafe(PARTNER_COLUMNS)}`;
     return r ?? null;
   }
 
   async findPartnerForUser(userId: number, username: string | null) {
     try {
-      const [byId] = await this.sql<Partner[]>`select ${this.sql.unsafe(PARTNER_COLUMNS)} from public.partners where telegram_id = ${userId} and status <> 'rejected' order by id limit 1`;
+      const [byId] = await this.sql<
+        Partner[]
+      >`select ${this.sql.unsafe(PARTNER_COLUMNS)} from public.partners where telegram_id = ${userId} and status <> 'rejected' order by id limit 1`;
       if (byId) return byId;
       if (!username) return null;
       const [bound] = await this.sql<Partner[]>`update public.partners set telegram_id = ${userId}
@@ -713,21 +856,29 @@ export class PgRepo implements Repo {
   }
 
   async findUserByUsername(username: string) {
-    const [r] = await this.sql<UserRow[]>`select * from public.users where lower(username) = lower(${username}) limit 1`;
+    const [r] = await this.sql<
+      UserRow[]
+    >`select * from public.users where lower(username) = lower(${username}) limit 1`;
     return r ? toUser(r) : null;
   }
 
   async creditPartnerOrder(orderId: string, clientId: number, code: string) {
-    const [partner] = await this.sql<Partner[]>`select ${this.sql.unsafe(PARTNER_COLUMNS)} from public.partners p where code = ${code} and p.status <> 'rejected'
-      and p.telegram_id is distinct from ${clientId}
-      and not exists (select 1 from public.users u where u.id = ${clientId} and p.username is not null and lower(u.username) = lower(p.username))`;
-    if (!partner) return null;
-    // Процент — от фактически оплаченной суммы заказа (округление до целых тенге)
-    const [order] = await this.sql<{ amount: number }[]>`select amount from public.orders where id = ${orderId}`;
-    const amount = earningFor(partner, order?.amount ?? 0);
-    const [row] = await this.sql<{ amount: number }[]>`insert into public.partner_earnings(order_id,partner_id,amount)
-      values(${orderId},${partner.id},${amount}) on conflict (order_id) do nothing returning amount`;
-    return row ? { partner, amount: row.amount } : null;
+    if (!UUID.test(orderId)) return null;
+    return this.sql.begin(async (tx) => {
+      const [o] = await tx<
+        { amount: number }[]
+      >`select o.amount from public.orders o where id=${orderId} and user_id=${clientId} and status in('active','archived') and amount>0 and to_jsonb(o)->>'marketing_refunded_at' is null for update`;
+      if (!o) return null;
+      const [p] = await tx<
+        Partner[]
+      >`select ${tx.unsafe(PARTNER_COLUMNS)} from public.partners p where code=${code} and status<>'rejected' and to_jsonb(p)->>'customer_user_id' is null and p.telegram_id is distinct from ${clientId} and not exists(select 1 from public.users u where u.id=${clientId} and p.username is not null and lower(u.username)=lower(p.username)) for update`;
+      if (!p) return null;
+      const amount = earningFor(p, o.amount);
+      const [row] = await tx<
+        { amount: number }[]
+      >`insert into public.partner_earnings(order_id,partner_id,amount) values(${orderId},${p.id},${amount}) on conflict(order_id) do nothing returning amount`;
+      return row ? { partner: p, amount: row.amount } : null;
+    });
   }
 
   async markEarningDelivered(orderId: string) {
@@ -753,7 +904,11 @@ export class PgRepo implements Repo {
   // ── Роли (v2) ──
   async listManagers() {
     try {
-      return [...(await this.sql<Manager[]>`select ${this.sql.unsafe(MANAGER_COLUMNS)} from public.managers order by created_at`)];
+      return [
+        ...(await this.sql<
+          Manager[]
+        >`select ${this.sql.unsafe(MANAGER_COLUMNS)} from public.managers order by created_at`),
+      ];
     } catch (e) {
       if (isMissingTable(e)) return [];
       throw e;
@@ -763,7 +918,9 @@ export class PgRepo implements Repo {
   async getManager(id: number) {
     if (!Number.isSafeInteger(id)) return null;
     try {
-      const [r] = await this.sql<Manager[]>`select ${this.sql.unsafe(MANAGER_COLUMNS)} from public.managers where telegram_id = ${id} and active`;
+      const [r] = await this.sql<
+        Manager[]
+      >`select ${this.sql.unsafe(MANAGER_COLUMNS)} from public.managers where telegram_id = ${id} and active`;
       return r ?? null;
     } catch (e) {
       if (isMissingTable(e)) return null;
@@ -771,7 +928,13 @@ export class PgRepo implements Repo {
     }
   }
 
-  async addManager(m: { telegramId: number; code: string; username: string | null; firstName: string | null; invitedBy: number }) {
+  async addManager(m: {
+    telegramId: number;
+    code: string;
+    username: string | null;
+    firstName: string | null;
+    invitedBy: number;
+  }) {
     const [r] = await this.sql<Manager[]>`insert into public.managers(telegram_id,code,username,first_name,invited_by)
       values(${m.telegramId},${m.code},${m.username},${m.firstName},${m.invitedBy})
       on conflict (telegram_id) do update set active = true, removed_at = null, username = excluded.username, first_name = excluded.first_name, invited_by = excluded.invited_by
@@ -780,11 +943,18 @@ export class PgRepo implements Repo {
   }
 
   async removeManager(id: number, now: Date) {
-    const rows = await this.sql`update public.managers set active = false, removed_at = ${now} where telegram_id = ${id} and active returning telegram_id`;
+    const rows = await this
+      .sql`update public.managers set active = false, removed_at = ${now} where telegram_id = ${id} and active returning telegram_id`;
     return rows.length > 0;
   }
 
-  async createInvite(i: { tokenHash: string; kind: InviteKind; createdBy: number; expiresAt: Date; partnerId?: number | null }) {
+  async createInvite(i: {
+    tokenHash: string;
+    kind: InviteKind;
+    createdBy: number;
+    expiresAt: Date;
+    partnerId?: number | null;
+  }) {
     await this.sql`insert into public.staff_invites(token_hash,kind,created_by,partner_id,expires_at)
       values(${i.tokenHash},${i.kind},${i.createdBy},${i.partnerId ?? null},${i.expiresAt})`;
   }
@@ -792,11 +962,20 @@ export class PgRepo implements Repo {
   async useInvite(tokenHash: string, kind: InviteKind, userId: number, now: Date): Promise<InviteUse> {
     try {
       // Одно обновление: два одновременных нажатия не используют ссылку дважды
-      const [r] = await this.sql<{ createdBy: number; partnerId: number | null }[]>`update public.staff_invites set used_by = ${userId}, used_at = ${now}
+      const [r] = await this.sql<
+        { createdBy: number; partnerId: number | null }[]
+      >`update public.staff_invites set used_by = ${userId}, used_at = ${now}
         where token_hash = ${tokenHash} and kind = ${kind} and used_by is null and expires_at > ${now}
         returning created_by as "createdBy", partner_id as "partnerId"`;
-      if (r) return { status: "ok", createdBy: Number(r.createdBy), partnerId: r.partnerId === null ? null : Number(r.partnerId) };
-      const [old] = await this.sql<{ used: boolean }[]>`select used_by is not null as used from public.staff_invites where token_hash = ${tokenHash} and kind = ${kind}`;
+      if (r)
+        return {
+          status: "ok",
+          createdBy: Number(r.createdBy),
+          partnerId: r.partnerId === null ? null : Number(r.partnerId),
+        };
+      const [old] = await this.sql<
+        { used: boolean }[]
+      >`select used_by is not null as used from public.staff_invites where token_hash = ${tokenHash} and kind = ${kind}`;
       return { status: !old ? "none" : old.used ? "used" : "expired" };
     } catch (e) {
       if (isMissingTable(e)) return { status: "none" };
@@ -811,16 +990,24 @@ export class PgRepo implements Repo {
       where public.client_orders.claimed_by is null`;
   }
 
-  async claimClientOrder(tokenHash: string, clientId: number, now: Date): Promise<{ status: ClaimStatus; order?: OrderRecord }> {
+  async claimClientOrder(
+    tokenHash: string,
+    clientId: number,
+    now: Date,
+  ): Promise<{ status: ClaimStatus; order?: OrderRecord }> {
     try {
       return await this.sql.begin(async (tx) => {
-        const [co] = await tx<{ orderId: string; createdBy: number; claimedBy: number | null }[]>`select order_id as "orderId", created_by as "createdBy", claimed_by as "claimedBy"
+        const [co] = await tx<
+          { orderId: string; createdBy: number; claimedBy: number | null }[]
+        >`select order_id as "orderId", created_by as "createdBy", claimed_by as "claimedBy"
           from public.client_orders where token_hash = ${tokenHash} for update`;
         if (!co) return { status: "none" as const };
         const claimedBy = co.claimedBy === null ? null : Number(co.claimedBy);
-        if (claimedBy === clientId) return { status: "mine" as const, order: (await loadOrder(tx, co.orderId)) ?? undefined };
+        if (claimedBy === clientId)
+          return { status: "mine" as const, order: (await loadOrder(tx, co.orderId)) ?? undefined };
         if (claimedBy !== null) return { status: "used" as const };
-        if (Number(co.createdBy) === clientId) return { status: "creator" as const, order: (await loadOrder(tx, co.orderId)) ?? undefined };
+        if (Number(co.createdBy) === clientId)
+          return { status: "creator" as const, order: (await loadOrder(tx, co.orderId)) ?? undefined };
         const moved = await tx`update public.orders set user_id = ${clientId}, updated_at = ${now}
           where id = ${co.orderId} and user_id = ${co.createdBy} and status in ('draft','preview','awaiting_payment','rejected') returning id`;
         if (!moved.length) return { status: "closed" as const };
@@ -836,7 +1023,9 @@ export class PgRepo implements Repo {
   async clientOrderRef(orderId: string) {
     if (!UUID.test(orderId)) return null;
     try {
-      const [r] = await this.sql<{ ref: string | null }[]>`select ref_source as ref from public.client_orders where order_id = ${orderId} and claimed_by is not null`;
+      const [r] = await this.sql<
+        { ref: string | null }[]
+      >`select ref_source as ref from public.client_orders where order_id = ${orderId} and claimed_by is not null`;
       return r ? { ref: r.ref } : null;
     } catch (e) {
       if (isMissingTable(e)) return null;
@@ -846,10 +1035,12 @@ export class PgRepo implements Repo {
 
   async uncreditedPartnerOrders() {
     try {
-      const rows = await this.sql<{ id: string; userId: number }[]>`select o.id, o.user_id as "userId" from public.orders o
+      const rows = await this.sql<
+        { id: string; userId: number }[]
+      >`select o.id, o.user_id as "userId" from public.orders o
         join public.users u on u.id = o.user_id
         join public.partners p on 'p_' || p.code = u.source
-        where o.status in ('active','archived')
+        where o.status in ('active','archived') and o.amount>0 and to_jsonb(o)->>'marketing_refunded_at' is null and to_jsonb(p)->>'customer_user_id' is null
           and p.telegram_id is distinct from o.user_id
           and not exists (select 1 from public.partner_earnings e where e.order_id = o.id)`;
       return [...rows];
@@ -863,13 +1054,21 @@ export class PgRepo implements Repo {
     await this.sql`insert into public.bot_errors(step,update_kind,error_name,error_code,message,stack,outcome)
       values(${e.step},${e.updateKind},${e.errorName},${e.errorCode},${e.message},${e.stack},${e.outcome})`;
   }
-  async recordEvent(userId: number, kind: Extract<AnalyticsEventKind, "demo_opened" | "design_selected">, target: string, key: string) {
-    await this.sql`insert into public.analytics_events(kind,user_id,target,dedupe_key) values(${kind},${userId},${target},${key}) on conflict do nothing`;
+  async recordEvent(
+    userId: number,
+    kind: Extract<AnalyticsEventKind, "demo_opened" | "design_selected">,
+    target: string,
+    key: string,
+  ) {
+    await this
+      .sql`insert into public.analytics_events(kind,user_id,target,dedupe_key) values(${kind},${userId},${target},${key}) on conflict do nothing`;
   }
   private sql: Sql;
 
+  readonly marketing: PgMarketing;
   constructor(sql: Sql = db()) {
     this.sql = sql;
+    this.marketing = new PgMarketing(sql, this);
   }
 
   // ── Пользователи ──
@@ -939,9 +1138,13 @@ export class PgRepo implements Repo {
   }
 
   // ── Заказы ──
-  async createOrder(o: NewOrder): Promise<OrderRecord> { return (await this.insertOrder(o))!; }
+  async createOrder(o: NewOrder): Promise<OrderRecord> {
+    return (await this.insertOrder(o))!;
+  }
 
-  async createOrderFromDraft(o: NewOrder, expectedQ: number, handledUpdates?: number[]) { return this.insertOrder(o, expectedQ, handledUpdates); }
+  async createOrderFromDraft(o: NewOrder, expectedQ: number, handledUpdates?: number[]) {
+    return this.insertOrder(o, expectedQ, handledUpdates);
+  }
 
   private async insertOrder(o: NewOrder, expectedQ?: number, handledUpdates?: number[]): Promise<OrderRecord | null> {
     // Одинаковый slugBase одновременно: блокировка в транзакции + повтор при гонке
@@ -949,7 +1152,7 @@ export class PgRepo implements Repo {
       try {
         return await this.sql.begin(async (tx) => {
           if (expectedQ !== undefined) {
-            const state = {q:expectedQ+1,...(handledUpdates ? {handledUpdates} : {})};
+            const state = { q: expectedQ + 1, ...(handledUpdates ? { handledUpdates } : {}) };
             const claimed = await tx`update public.users set step = 'idle', state = ${tx.json(state)}
               where id = ${o.userId} and step = 'review' and coalesce((state->>'q')::int,0) = ${expectedQ} returning id`;
             if (!claimed.length) return null;
@@ -1009,7 +1212,9 @@ export class PgRepo implements Repo {
   }
 
   async listOrdersByUser(userId: number) {
-    const rows = await this.sql<OrderRow[]>`${selectOrders(this.sql)} where o.user_id = ${userId} order by o.number desc`;
+    const rows = await this.sql<
+      OrderRow[]
+    >`${selectOrders(this.sql)} where o.user_id = ${userId} order by o.number desc`;
     return rows.map(toOrder);
   }
 
@@ -1134,10 +1339,10 @@ export class PgRepo implements Repo {
         count(*) filter (where created_at >= ${week})::int8 as o_week,
         count(*) filter (where created_at >= ${month})::int8 as o_month,
         count(*)::int8 as o_total,
-        coalesce(sum(amount) filter (where status = any(${paid}::text[]) and coalesce(paid_at, updated_at) >= ${today}), 0)::int8 as r_today,
-        coalesce(sum(amount) filter (where status = any(${paid}::text[]) and coalesce(paid_at, updated_at) >= ${week}), 0)::int8 as r_week,
-        coalesce(sum(amount) filter (where status = any(${paid}::text[]) and coalesce(paid_at, updated_at) >= ${month}), 0)::int8 as r_month,
-        coalesce(sum(amount) filter (where status = any(${paid}::text[])), 0)::int8 as r_total
+        coalesce(sum(amount) filter (where status = any(${paid}::text[]) and to_jsonb(orders)->>'marketing_refunded_at' is null and amount>0 and coalesce(paid_at, updated_at) >= ${today}), 0)::int8 as r_today,
+        coalesce(sum(amount) filter (where status = any(${paid}::text[]) and to_jsonb(orders)->>'marketing_refunded_at' is null and amount>0 and coalesce(paid_at, updated_at) >= ${week}), 0)::int8 as r_week,
+        coalesce(sum(amount) filter (where status = any(${paid}::text[]) and to_jsonb(orders)->>'marketing_refunded_at' is null and amount>0 and coalesce(paid_at, updated_at) >= ${month}), 0)::int8 as r_month,
+        coalesce(sum(amount) filter (where status = any(${paid}::text[]) and to_jsonb(orders)->>'marketing_refunded_at' is null and amount>0), 0)::int8 as r_total
       from public.orders where not (user_id = any(${staff}::text[]::bigint[]))`;
     const statusRows = await this.sql<{ status: OrderStatus; n: number }[]>`
       select status, count(*)::int8 as n from public.orders where not (user_id = any(${staff}::text[]::bigint[])) group by status`;
@@ -1145,7 +1350,7 @@ export class PgRepo implements Repo {
       select coalesce(u.source, '—') as source, count(*)::int8 as users, coalesce(sum(p.n), 0)::int8 as paid
       from public.users u
       left join (
-        select user_id, count(*) as n from public.orders where status = any(${paid}::text[]) group by user_id
+        select user_id, count(*) as n from public.orders where status = any(${paid}::text[]) and to_jsonb(orders)->>'marketing_refunded_at' is null and amount>0 group by user_id
       ) p on p.user_id = u.id
       where not (u.id = any(${staff}::text[]::bigint[]))
       group by 1

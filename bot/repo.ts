@@ -36,12 +36,22 @@ export type NewPartner = {
   status?: "pending" | "active";
   ownerNotifiedAt?: Date | null;
 };
-export type PartnerPatch = Partial<Pick<Partner, "phone" | "kaspi" | "schedule" | "ownerNotifiedAt" | "sleepNotifiedAt">>;
+export type PartnerPatch = Partial<
+  Pick<Partner, "phone" | "kaspi" | "schedule" | "ownerNotifiedAt" | "sleepNotifiedAt">
+>;
 
 /** Исходящее сообщение бота с ключом (v2, часть 7): один ключ — одно сообщение */
-export type Notice = { key: string; chatId: number; text: string; markup?: { inline: InlineButton[][] } | null; dueAt: Date };
+export type Notice = {
+  key: string;
+  chatId: number;
+  text: string;
+  markup?: { inline: InlineButton[][] } | null;
+  dueAt: Date;
+};
 
 export interface Repo {
+  /** Optional additive service; never initialized against a live DB in tests. */
+  marketing?: import("./marketing-repo").PgMarketing;
   /** Журнал ошибок бота: entry уже очищен от личных данных */
   logBotError(entry: BotErrorEntry): Promise<void>;
   isOwner(id: number): Promise<boolean>;
@@ -50,11 +60,21 @@ export interface Repo {
   /** Newest saved first, template ID ascending on equal timestamps; repeat add keeps its place. */
   listFavorites(userId: number): Promise<string[]>;
   setFavorite(userId: number, templateId: string, saved: boolean): Promise<void>;
-  recordEvent(userId: number, kind: Extract<EventKind, "demo_opened" | "design_selected">, target: string, key: string): Promise<void>;
+  recordEvent(
+    userId: number,
+    kind: Extract<EventKind, "demo_opened" | "design_selected">,
+    target: string,
+    key: string,
+  ): Promise<void>;
   // ── Пользователи ──
   getUser(id: number): Promise<UserRecord | null>;
   /** Создать при первом /start (source — метка ?start=…, только при создании) или обновить имя/username и lastSeenAt */
-  touchUser(u: { id: number; username?: string | null; firstName?: string | null; source?: string | null }): Promise<UserRecord>;
+  touchUser(u: {
+    id: number;
+    username?: string | null;
+    firstName?: string | null;
+    source?: string | null;
+  }): Promise<UserRecord>;
   setLang(id: number, lang: Lang): Promise<void>;
   /** Сохранить шаг диалога и его данные (бот помнит, где клиент остановился) */
   saveStep(id: number, step: string, state: Record<string, unknown>): Promise<void>;
@@ -141,7 +161,11 @@ export interface Repo {
    * Один раз начислить за оплаченный заказ по текущей ставке.
    * null — уже начислено, партнёра нет или заказ сделал сам партнёр.
    */
-  creditPartnerOrder(orderId: string, clientId: number, code: string): Promise<{ partner: Partner; amount: number } | null>;
+  creditPartnerOrder(
+    orderId: string,
+    clientId: number,
+    code: string,
+  ): Promise<{ partner: Partner; amount: number } | null>;
   markEarningDelivered(orderId: string): Promise<void>;
   /** Выплата проходит, только если к выплате ровно expected */
   recordPartnerPayout(partnerId: number, expected: number, createdBy: number): Promise<boolean>;
@@ -154,16 +178,37 @@ export interface Repo {
   /** Активный менеджер или null */
   getManager(id: number): Promise<Manager | null>;
   /** Назначить (снятого — вернуть) */
-  addManager(m: { telegramId: number; code: string; username: string | null; firstName: string | null; invitedBy: number }): Promise<Manager>;
+  addManager(m: {
+    telegramId: number;
+    code: string;
+    username: string | null;
+    firstName: string | null;
+    invitedBy: number;
+  }): Promise<Manager>;
   /** false — уже снят или не был менеджером */
   removeManager(id: number, now: Date): Promise<boolean>;
-  createInvite(i: { tokenHash: string; kind: InviteKind; createdBy: number; expiresAt: Date; partnerId?: number | null }): Promise<void>;
+  createInvite(i: {
+    tokenHash: string;
+    kind: InviteKind;
+    createdBy: number;
+    expiresAt: Date;
+    partnerId?: number | null;
+  }): Promise<void>;
   /** Атомарно: ссылка срабатывает один раз и только до expiresAt */
   useInvite(tokenHash: string, kind: InviteKind, userId: number, now: Date): Promise<InviteUse>;
   /** Неоплаченный заказ сотрудника → ссылка для клиента (повтор заменяет ссылку, пока клиент не забрал) */
-  issueClientOrder(o: { orderId: string; createdBy: number; tokenHash: string; refSource: string | null }): Promise<void>;
+  issueClientOrder(o: {
+    orderId: string;
+    createdBy: number;
+    tokenHash: string;
+    refSource: string | null;
+  }): Promise<void>;
   /** Клиент забирает заказ: заказ переходит к нему (user_id), один раз */
-  claimClientOrder(tokenHash: string, clientId: number, now: Date): Promise<{ status: ClaimStatus; order?: OrderRecord }>;
+  claimClientOrder(
+    tokenHash: string,
+    clientId: number,
+    now: Date,
+  ): Promise<{ status: ClaimStatus; order?: OrderRecord }>;
   /** Забранный клиентом заказ «для клиента»: кому засчитать (m_<код> менеджера; ref null — напрямую). null — обычный заказ */
   clientOrderRef(orderId: string): Promise<{ ref: string | null } | null>;
 
@@ -188,7 +233,12 @@ export interface Repo {
   /** Клиент отменил свой неоплаченный заказ: удалить заказ целиком. Чужой, оплаченный, чек на проверке — null */
   cancelOrder(orderId: string, userId: number): Promise<{ photos: string[]; music: string | null } | null>;
   /** Обезличенная запись об отмене (шаг 1–5, тадбир/формат/дизайн) — для «Где уходят» */
-  recordCancellation(c: { step: number; occasion?: string | null; format?: string | null; templateId?: string | null }): Promise<void>;
+  recordCancellation(c: {
+    step: number;
+    occasion?: string | null;
+    format?: string | null;
+    templateId?: string | null;
+  }): Promise<void>;
   /** Ошибки бота с since: сколько и самая частая причина. Нет доступа/таблицы — null */
   errorSummary(since: Date): Promise<{ count: number; top: string } | null>;
   /** Было ли отправлено сообщение с ключом, начинающимся на prefix, после since */

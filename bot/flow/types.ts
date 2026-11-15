@@ -7,6 +7,7 @@ import type { BotTexts } from "@/texts/bot-uz";
 import type { PayoutSchedule } from "@/lib/owner-panel";
 
 export type BotEnv = {
+  marketing?: ReturnType<typeof import("@/lib/marketing/config").marketingFlags>;
   ownerUsername: string;
   kaspiPhone: string;
   kaspiName: string;
@@ -42,6 +43,7 @@ export type Deps = {
 /** Шаги анкеты (users.step) */
 export type StepId =
   | "idle"
+  | "correction"
   | "cat"
   | "fmt"
   | "catalog"
@@ -99,6 +101,7 @@ export type BackEntry = { step: StepId; ev?: number; ret?: "review" };
 
 /** Черновик заказа и положение в диалоге (users.state) */
 export type Draft = {
+  correctionOrder?: string;
   handledUpdates?: number[];
   /** Черновик приложения: свой id (новый при выборе дизайна) */
   draftId?: string;
@@ -140,7 +143,13 @@ export type Draft = {
   /** Заказ уже оплачен: формат (и цену) менять нельзя */
   paid?: boolean;
   /** Новый партнёр, пока его заполняют */
-  partnerDraft?: { name?: string; phone?: string; rate?: number; ratePercent?: number | null; schedule?: PayoutSchedule };
+  partnerDraft?: {
+    name?: string;
+    phone?: string;
+    rate?: number;
+    ratePercent?: number | null;
+    schedule?: PayoutSchedule;
+  };
   /** Номер заказа «для клиента», который человек забрал до выбора языка: показать после выбора */
   claimed?: number;
   /** Партнёр, которому меняют ставку (или который знакомится с ботом по ссылке join_) */

@@ -10,6 +10,8 @@ export const maxDuration = 30;
 const MAX_BODY = 32_000;
 
 export async function POST(req: Request) {
+  // Preview must never write through inherited live credentials. Native fixture tests cover mutations.
+  if (process.env.VERCEL_ENV === "preview") return new Response(null, { status: 404 });
   const user = appGate(req);
   if (user instanceof Response) return user;
   const raw = await req.text();

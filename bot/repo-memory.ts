@@ -1,5 +1,14 @@
 import { RSVP_IP_HOUR_LIMIT, RSVP_ORDER_LIMIT, type RsvpInput, type RsvpRecord } from "@/lib/rsvp";
-import { earningFor, type ManagerPayout, type PanelOrder, type PanelSnapshot, type Partner, type PartnerEarning, type PartnerPayout, type PayoutSchedule } from "@/lib/owner-panel";
+import {
+  earningFor,
+  type ManagerPayout,
+  type PanelOrder,
+  type PanelSnapshot,
+  type Partner,
+  type PartnerEarning,
+  type PartnerPayout,
+  type PayoutSchedule,
+} from "@/lib/owner-panel";
 import type { NewPartner, Notice, PartnerPatch } from "./repo";
 import type { BotErrorEntry } from "./errors";
 import type { ClaimStatus, InviteKind, InviteUse, Manager } from "@/lib/roles";
@@ -48,7 +57,13 @@ export class MemoryRepo implements Repo {
   rsvp: (RsvpInput & { createdAt: Date; updatedAt: Date })[] = [];
   async staffIds() {
     // Менеджеры (и снятые): их собственные заказы и клики — не продажи
-    return [...new Set([...this.adminIds, ...(this.ownerId ? [this.ownerId] : []), ...this.managers.map((m) => m.telegramId)])];
+    return [
+      ...new Set([
+        ...this.adminIds,
+        ...(this.ownerId ? [this.ownerId] : []),
+        ...this.managers.map((m) => m.telegramId),
+      ]),
+    ];
   }
   async saveRsvp(input: RsvpInput) {
     const now = this.now();
@@ -68,7 +83,12 @@ export class MemoryRepo implements Repo {
     return [...this.orders.values()]
       .filter((o) => {
         const since = this.rsvpDigestAt.get(o.id);
-        return o.status === "active" && o.data.rsvp === true && (!since || since < dayStart) && this.rsvp.some((r) => r.orderId === o.id && (!since || r.updatedAt > since));
+        return (
+          o.status === "active" &&
+          o.data.rsvp === true &&
+          (!since || since < dayStart) &&
+          this.rsvp.some((r) => r.orderId === o.id && (!since || r.updatedAt > since))
+        );
       })
       .map((o) => ({ id: o.id, number: o.number, userId: o.userId, since: this.rsvpDigestAt.get(o.id) ?? null }));
   }
@@ -79,15 +99,46 @@ export class MemoryRepo implements Repo {
     return true;
   }
   async listRsvp(orderId: string): Promise<RsvpRecord[]> {
-    return this.rsvp.filter((r) => r.orderId === orderId).sort((a, b) => +b.updatedAt - +a.updatedAt).map(({ name, guests, attending, updatedAt }) => ({ name, guests, attending, updatedAt }));
+    return this.rsvp
+      .filter((r) => r.orderId === orderId)
+      .sort((a, b) => +b.updatedAt - +a.updatedAt)
+      .map(({ name, guests, attending, updatedAt }) => ({ name, guests, attending, updatedAt }));
   }
   async panelSnapshot(): Promise<PanelSnapshot> {
     const orders = [...this.orders.values()].map((o): PanelOrder => {
       const u = this.users.get(o.userId);
-      return { id: o.id, number: o.number, userId: o.userId, username: u?.username ?? null, firstName: u?.firstName ?? null, status: o.status, occasion: o.occasion, format: o.format, templateId: o.templateId, musicKind: o.music.kind, amount: o.amount, createdAt: o.createdAt, paidAt: o.paidAt, updatedAt: o.updatedAt, slug: o.slug, names: [o.data.groom, o.data.bride, o.data.person].filter(Boolean).join(" & ") || null };
+      return {
+        id: o.id,
+        number: o.number,
+        userId: o.userId,
+        username: u?.username ?? null,
+        firstName: u?.firstName ?? null,
+        status: o.status,
+        occasion: o.occasion,
+        format: o.format,
+        templateId: o.templateId,
+        musicKind: o.music.kind,
+        amount: o.amount,
+        createdAt: o.createdAt,
+        paidAt: o.paidAt,
+        updatedAt: o.updatedAt,
+        slug: o.slug,
+        names: [o.data.groom, o.data.bride, o.data.person].filter(Boolean).join(" & ") || null,
+      };
     });
     const users = [...this.users.values()].map((u) => ({ id: u.id, createdAt: u.createdAt, source: u.source }));
-    return { orders, users, partners: this.partners.map((p) => ({ ...p })), earnings: this.earnings.map((e) => ({ ...e })), payouts: this.payouts.map((p) => ({ ...p })), clientOrders: this.clientOrders.filter((x) => x.claimedBy !== null).map((x) => ({ orderId: x.orderId, ref: x.refSource })), managerPayouts: clone(this.managerPayouts), partnersReady: this.partnersReady };
+    return {
+      orders,
+      users,
+      partners: this.partners.map((p) => ({ ...p })),
+      earnings: this.earnings.map((e) => ({ ...e })),
+      payouts: this.payouts.map((p) => ({ ...p })),
+      clientOrders: this.clientOrders
+        .filter((x) => x.claimedBy !== null)
+        .map((x) => ({ orderId: x.orderId, ref: x.refSource })),
+      managerPayouts: clone(this.managerPayouts),
+      partnersReady: this.partnersReady,
+    };
   }
   // ── Уведомления и выплаты менеджерам (v2, часть 7) ──
   notices = new Map<string, Notice & { sentAt: Date | null }>();
@@ -104,7 +155,10 @@ export class MemoryRepo implements Repo {
     return true;
   }
   async claimDueNotices(now: Date, limit: number) {
-    const due = [...this.notices.values()].filter((n) => !n.sentAt && +n.dueAt <= +now).sort((a, b) => +a.dueAt - +b.dueAt).slice(0, limit);
+    const due = [...this.notices.values()]
+      .filter((n) => !n.sentAt && +n.dueAt <= +now)
+      .sort((a, b) => +a.dueAt - +b.dueAt)
+      .slice(0, limit);
     for (const n of due) n.sentAt = now;
     return due.map(({ sentAt, ...n }) => (void sentAt, clone(n)));
   }
@@ -120,7 +174,10 @@ export class MemoryRepo implements Repo {
     let rec = this.reviews.find((x) => x.orderId === r.orderId);
     if (r.stars !== undefined) {
       if (rec) rec.stars = r.stars;
-      else this.reviews.push((rec = { orderId: r.orderId, userId: r.userId, stars: r.stars, text: null, createdAt: this.now() }));
+      else
+        this.reviews.push(
+          (rec = { orderId: r.orderId, userId: r.userId, stars: r.stars, text: null, createdAt: this.now() }),
+        );
     }
     if (r.text !== undefined) {
       if (!rec || rec.userId !== r.userId) return false;
@@ -129,7 +186,9 @@ export class MemoryRepo implements Repo {
     return true;
   }
   async reviewSummary(from: Date, to: Date, orderIds: string[] | null) {
-    const list = this.reviews.filter((r) => +r.createdAt >= +from && +r.createdAt < +to && (!orderIds || orderIds.includes(r.orderId)));
+    const list = this.reviews.filter(
+      (r) => +r.createdAt >= +from && +r.createdAt < +to && (!orderIds || orderIds.includes(r.orderId)),
+    );
     return list.length ? { avg: list.reduce((n, r) => n + r.stars, 0) / list.length, count: list.length } : null;
   }
   async errorSummary(since: Date) {
@@ -146,12 +205,21 @@ export class MemoryRepo implements Repo {
     return [...this.notices.values()].some((n) => n.key.startsWith(prefix) && n.sentAt && +n.sentAt >= +since);
   }
   async staleDraftStates(before: Date) {
-    return [...this.users.values()].filter((u) => +u.lastSeenAt < +before && u.state && Object.keys(u.state).some((k) => k === "data" || k === "music")).map((u) => ({ id: u.id, state: clone(u.state) }));
+    return [...this.users.values()]
+      .filter(
+        (u) => +u.lastSeenAt < +before && u.state && Object.keys(u.state).some((k) => k === "data" || k === "music"),
+      )
+      .map((u) => ({ id: u.id, state: clone(u.state) }));
   }
   async deleteStaleDrafts(before: Date) {
     const out: { photos: string[]; music: string | null }[] = [];
     for (const o of [...this.orders.values()]) {
-      if (!["draft", "preview", "awaiting_payment", "rejected"].includes(o.status) || o.paidAt || +o.createdAt >= +before) continue;
+      if (
+        !["draft", "preview", "awaiting_payment", "rejected"].includes(o.status) ||
+        o.paidAt ||
+        +o.createdAt >= +before
+      )
+        continue;
       if (+(this.users.get(o.userId)?.lastSeenAt ?? 0) >= +before) continue;
       if (this.earnings.some((e) => e.orderId === o.id)) continue;
       const co = this.clientOrders.find((x) => x.orderId === o.id);
@@ -163,22 +231,52 @@ export class MemoryRepo implements Repo {
     return out;
   }
 
-  cancellations: { step: number; occasion: string | null; format: string | null; templateId: string | null; createdAt: Date }[] = [];
+  cancellations: {
+    step: number;
+    occasion: string | null;
+    format: string | null;
+    templateId: string | null;
+    createdAt: Date;
+  }[] = [];
   async cancelOrder(orderId: string, userId: number) {
     const o = this.orders.get(orderId);
-    if (!o || o.userId !== userId || !["draft", "preview", "awaiting_payment", "rejected"].includes(o.status) || o.paidAt) return null;
+    if (
+      !o ||
+      o.userId !== userId ||
+      !["draft", "preview", "awaiting_payment", "rejected"].includes(o.status) ||
+      o.paidAt
+    )
+      return null;
     if (this.earnings.some((e) => e.orderId === o.id)) return null;
     this.clientOrders = this.clientOrders.filter((x) => x.orderId !== o.id);
     this.orders.delete(o.id);
     return { photos: o.data.photos ?? [], music: o.music.kind === "own" ? (o.music.url ?? null) : null };
   }
-  async recordCancellation(c: { step: number; occasion?: string | null; format?: string | null; templateId?: string | null }) {
-    this.cancellations.push({ step: Math.min(5, Math.max(1, Math.round(c.step))), occasion: c.occasion ?? null, format: c.format ?? null, templateId: c.templateId ?? null, createdAt: this.now() });
+  async recordCancellation(c: {
+    step: number;
+    occasion?: string | null;
+    format?: string | null;
+    templateId?: string | null;
+  }) {
+    this.cancellations.push({
+      step: Math.min(5, Math.max(1, Math.round(c.step))),
+      occasion: c.occasion ?? null,
+      format: c.format ?? null,
+      templateId: c.templateId ?? null,
+      createdAt: this.now(),
+    });
   }
 
   async recordManagerPayout(p: Omit<ManagerPayout, "createdAt"> & { createdBy: number }) {
-    if (p.amount <= 0 || this.managerPayouts.some((x) => x.managerId === p.managerId && x.month === p.month)) return false;
-    this.managerPayouts.push({ managerId: p.managerId, month: p.month, amount: p.amount, orders: p.orders, createdAt: this.now() });
+    if (p.amount <= 0 || this.managerPayouts.some((x) => x.managerId === p.managerId && x.month === p.month))
+      return false;
+    this.managerPayouts.push({
+      managerId: p.managerId,
+      month: p.month,
+      amount: p.amount,
+      orders: p.orders,
+      createdAt: this.now(),
+    });
     return true;
   }
   async createPartner(p: NewPartner) {
@@ -232,12 +330,23 @@ export class MemoryRepo implements Repo {
   }
   async proposePartnerTerms(id: number, rate: number, schedule: PayoutSchedule, ratePercent: number | null = null) {
     const p = this.partners.find((x) => x.id === id);
-    if (p) Object.assign(p, { proposedRate: rate, proposedRatePercent: ratePercent, proposedSchedule: schedule, ownerNotifiedAt: null });
+    if (p)
+      Object.assign(p, {
+        proposedRate: rate,
+        proposedRatePercent: ratePercent,
+        proposedSchedule: schedule,
+        ownerNotifiedAt: null,
+      });
   }
   async settlePartnerProposal(id: number, accept: boolean) {
     const p = this.partners.find((x) => x.id === id);
     if (!p || p.proposedRate === null || p.proposedSchedule === null) return null;
-    if (accept) Object.assign(p, { rate: p.proposedRate, ratePercent: p.proposedRatePercent ?? null, schedule: p.proposedSchedule });
+    if (accept)
+      Object.assign(p, {
+        rate: p.proposedRate,
+        ratePercent: p.proposedRatePercent ?? null,
+        schedule: p.proposedSchedule,
+      });
     Object.assign(p, { proposedRate: null, proposedRatePercent: null, proposedSchedule: null });
     return { ...p };
   }
@@ -245,7 +354,9 @@ export class MemoryRepo implements Repo {
     if (!this.partnersReady) return null;
     const name = username?.toLowerCase();
     const live = this.partners.filter((x) => x.status !== "rejected");
-    const p = live.find((x) => x.telegramId === userId) ?? live.find((x) => x.telegramId === null && !!name && x.username?.toLowerCase() === name);
+    const p =
+      live.find((x) => x.telegramId === userId) ??
+      live.find((x) => x.telegramId === null && !!name && x.username?.toLowerCase() === name);
     if (!p) return null;
     p.telegramId = userId;
     return { ...p };
@@ -255,8 +366,16 @@ export class MemoryRepo implements Repo {
     return [...this.users.values()].find((u) => u.username?.toLowerCase() === name) ?? null;
   }
   async creditPartnerOrder(orderId: string, clientId: number, code: string) {
+    const order = this.orders.get(orderId);
+    if (!order || order.userId !== clientId || !PAID.includes(order.status) || order.amount <= 0) return null;
     const partner = this.partners.find((p) => p.code === code);
-    if (!partner || partner.status === "rejected" || partner.telegramId === clientId || this.earnings.some((e) => e.orderId === orderId)) return null;
+    if (
+      !partner ||
+      partner.status === "rejected" ||
+      partner.telegramId === clientId ||
+      this.earnings.some((e) => e.orderId === orderId)
+    )
+      return null;
     const client = this.users.get(clientId);
     if (client?.username && client.username.toLowerCase() === partner.username?.toLowerCase()) return null;
     // Процент — от фактически оплаченной суммы заказа
@@ -272,7 +391,9 @@ export class MemoryRepo implements Repo {
     void createdBy;
     const staff = await this.staffIds();
     if (this.partners.find((p) => p.id === partnerId)?.status !== "active") return false;
-    const earned = this.earnings.filter((e) => e.partnerId === partnerId && !staff.includes(this.orders.get(e.orderId)?.userId ?? 0)).reduce((n, e) => n + e.amount, 0);
+    const earned = this.earnings
+      .filter((e) => e.partnerId === partnerId && !staff.includes(this.orders.get(e.orderId)?.userId ?? 0))
+      .reduce((n, e) => n + e.amount, 0);
     const paid = this.payouts.filter((p) => p.partnerId === partnerId).reduce((n, p) => n + p.amount, 0);
     if (expected <= 0 || earned - paid !== expected) return false;
     this.payouts.push({ partnerId, amount: expected, createdAt: this.now() });
@@ -282,13 +403,31 @@ export class MemoryRepo implements Repo {
     const credited = new Set(this.earnings.map((e) => e.orderId));
     const codes = new Set(this.partners.map((p) => `p_${p.code}`));
     return [...this.orders.values()]
-      .filter((o) => (o.status === "active" || o.status === "archived") && !credited.has(o.id) && codes.has(this.users.get(o.userId)?.source ?? ""))
+      .filter(
+        (o) =>
+          (o.status === "active" || o.status === "archived") &&
+          !credited.has(o.id) &&
+          codes.has(this.users.get(o.userId)?.source ?? ""),
+      )
       .map((o) => ({ id: o.id, userId: o.userId }));
   }
   // ── Роли (v2) ──
   managers: Manager[] = [];
-  invites: { tokenHash: string; kind: InviteKind; createdBy: number; partnerId: number | null; expiresAt: Date; usedBy: number | null }[] = [];
-  clientOrders: { orderId: string; createdBy: number; tokenHash: string; refSource: string | null; claimedBy: number | null }[] = [];
+  invites: {
+    tokenHash: string;
+    kind: InviteKind;
+    createdBy: number;
+    partnerId: number | null;
+    expiresAt: Date;
+    usedBy: number | null;
+  }[] = [];
+  clientOrders: {
+    orderId: string;
+    createdBy: number;
+    tokenHash: string;
+    refSource: string | null;
+    claimedBy: number | null;
+  }[] = [];
   async listManagers() {
     return clone(this.managers);
   }
@@ -296,9 +435,22 @@ export class MemoryRepo implements Repo {
     const m = this.managers.find((x) => x.telegramId === id && x.active);
     return m ? clone(m) : null;
   }
-  async addManager(m: { telegramId: number; code: string; username: string | null; firstName: string | null; invitedBy: number }) {
+  async addManager(m: {
+    telegramId: number;
+    code: string;
+    username: string | null;
+    firstName: string | null;
+    invitedBy: number;
+  }) {
     const old = this.managers.find((x) => x.telegramId === m.telegramId);
-    if (old) Object.assign(old, { active: true, removedAt: null, username: m.username, firstName: m.firstName, invitedBy: m.invitedBy });
+    if (old)
+      Object.assign(old, {
+        active: true,
+        removedAt: null,
+        username: m.username,
+        firstName: m.firstName,
+        invitedBy: m.invitedBy,
+      });
     else this.managers.push({ ...m, active: true, createdAt: this.now() });
     return clone(this.managers.find((x) => x.telegramId === m.telegramId)!);
   }
@@ -309,7 +461,13 @@ export class MemoryRepo implements Repo {
     m.removedAt = now ?? this.now();
     return true;
   }
-  async createInvite(i: { tokenHash: string; kind: InviteKind; createdBy: number; expiresAt: Date; partnerId?: number | null }) {
+  async createInvite(i: {
+    tokenHash: string;
+    kind: InviteKind;
+    createdBy: number;
+    expiresAt: Date;
+    partnerId?: number | null;
+  }) {
     this.invites.push({ ...i, partnerId: i.partnerId ?? null, usedBy: null });
   }
   async useInvite(tokenHash: string, kind: InviteKind, userId: number, now: Date): Promise<InviteUse> {
@@ -333,7 +491,8 @@ export class MemoryRepo implements Repo {
     if (co.claimedBy === clientId) return { status: "mine", order: clone(order) };
     if (co.claimedBy !== null) return { status: "used" };
     if (co.createdBy === clientId) return { status: "creator", order: clone(order) };
-    if (!["draft", "preview", "awaiting_payment", "rejected"].includes(order.status) || order.userId !== co.createdBy) return { status: "closed" };
+    if (!["draft", "preview", "awaiting_payment", "rejected"].includes(order.status) || order.userId !== co.createdBy)
+      return { status: "closed" };
     co.claimedBy = clientId;
     order.userId = clientId;
     order.updatedAt = this.now();
@@ -348,31 +507,67 @@ export class MemoryRepo implements Repo {
     // Время записи — как created_at в базе (для сигнала «≥3 ошибок за час»)
     this.botErrors.push({ ...entry, at: this.now() } as BotErrorEntry);
   }
-  private favorites = new Map<number, Map<string,number>>();
+  private favorites = new Map<number, Map<string, number>>();
   private analyticsEvents = new Map<string, MetricEvent>();
   private ownerId?: number;
   private analyticsAdminIds: number[];
   private trackingSince: Date;
 
-  async isOwner(id: number) { return this.ownerId === id; }
-  async canAnalyze(id: number) { return await this.isOwner(id) || (await this.isAdmin(id) && this.analyticsAdminIds.includes(id)); }
+  async isOwner(id: number) {
+    return this.ownerId === id;
+  }
+  async canAnalyze(id: number) {
+    return (await this.isOwner(id)) || ((await this.isAdmin(id)) && this.analyticsAdminIds.includes(id));
+  }
   async analytics(actorId: number, period: Period, now: Date, customers = false) {
     const owner = await this.isOwner(actorId);
     if (!(await this.canAnalyze(actorId)) || (customers && !owner)) throw new Error("Analytics access denied");
-    return summarize(withoutStaffAnalytics({ orders: [...this.orders.values()], users: [...this.users.values()], events: [...this.analyticsEvents.values()], since: this.trackingSince, music: this.music }, await this.staffIds(), this.partners.flatMap((p) => (p.telegramId ? [p.telegramId] : []))), period, now, customers && owner);
+    return summarize(
+      withoutStaffAnalytics(
+        {
+          orders: [...this.orders.values()],
+          users: [...this.users.values()],
+          events: [...this.analyticsEvents.values()],
+          since: this.trackingSince,
+          music: this.music,
+        },
+        await this.staffIds(),
+        this.partners.flatMap((p) => (p.telegramId ? [p.telegramId] : [])),
+      ),
+      period,
+      now,
+      customers && owner,
+    );
   }
   async listFavorites(userId: number) {
-    return [...(this.favorites.get(userId)??new Map<string,number>())]
-      .sort((a,b)=>b[1]-a[1]||(a[0]<b[0]?-1:a[0]>b[0]?1:0)).map(([id])=>id);
+    return [...(this.favorites.get(userId) ?? new Map<string, number>())]
+      .sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0))
+      .map(([id]) => id);
   }
   async setFavorite(userId: number, templateId: string, saved: boolean) {
     if (!this.favorites.has(userId)) this.favorites.set(userId, new Map());
     const set = this.favorites.get(userId)!;
-    if (!saved) { set.delete(templateId); return; }
-    if(!set.has(templateId))set.set(templateId,this.now().getTime());
-    this.analyticsEvents.set(`favorite:${userId}:${templateId}`, this.analyticsEvents.get(`favorite:${userId}:${templateId}`) ?? { kind: "design_favorited", userId, target: templateId, createdAt: this.now() });
+    if (!saved) {
+      set.delete(templateId);
+      return;
+    }
+    if (!set.has(templateId)) set.set(templateId, this.now().getTime());
+    this.analyticsEvents.set(
+      `favorite:${userId}:${templateId}`,
+      this.analyticsEvents.get(`favorite:${userId}:${templateId}`) ?? {
+        kind: "design_favorited",
+        userId,
+        target: templateId,
+        createdAt: this.now(),
+      },
+    );
   }
-  async recordEvent(userId: number, kind: Extract<EventKind, "demo_opened" | "design_selected">, target: string, key: string) {
+  async recordEvent(
+    userId: number,
+    kind: Extract<EventKind, "demo_opened" | "design_selected">,
+    target: string,
+    key: string,
+  ) {
     const id = `${kind}:${userId}:${key}`;
     if (!this.analyticsEvents.has(id)) this.analyticsEvents.set(id, { kind, userId, target, createdAt: this.now() });
   }
@@ -473,9 +668,10 @@ export class MemoryRepo implements Repo {
     if (user.step !== "review" || Number(user.state.q ?? 0) !== expectedQ) return null;
     const previous = { step: user.step, state: clone(user.state) };
     user.step = "idle";
-    user.state = { q: expectedQ + 1, ...(handledUpdates ? {handledUpdates} : {}) };
-    try { return await this.createOrder(o); }
-    catch (error) {
+    user.state = { q: expectedQ + 1, ...(handledUpdates ? { handledUpdates } : {}) };
+    try {
+      return await this.createOrder(o);
+    } catch (error) {
       if (user.step === "idle" && user.state.q === expectedQ + 1) Object.assign(user, previous);
       throw error;
     }
@@ -584,24 +780,25 @@ export class MemoryRepo implements Repo {
 
   // ── Напоминания и статистика ──
   async ordersAwaitingAdmin(before: Date) {
-    return this.list(
-      (o) => o.status === "receipt_sent" && !!o.receiptAt && o.receiptAt < before && !o.adminRemindedAt,
-    );
+    return this.list((o) => o.status === "receipt_sent" && !!o.receiptAt && o.receiptAt < before && !o.adminRemindedAt);
   }
 
   async ordersAbandonedAtPayment(before: Date) {
     return this.list(
       (o) =>
-        (o.status === "preview" || o.status === "awaiting_payment") &&
-        o.updatedAt < before &&
-        !o.paymentRemindedAt,
+        (o.status === "preview" || o.status === "awaiting_payment") && o.updatedAt < before && !o.paymentRemindedAt,
     );
   }
 
   async stats(now: Date): Promise<Stats> {
     // «Сегодня» — с полуночи по времени Казахстана; неделя — 7 суток; месяц — 30 суток
     const localMidnight = Math.floor((now.getTime() + TZ_OFFSET_MS) / DAY) * DAY - TZ_OFFSET_MS;
-    const since = { today: localMidnight, week: now.getTime() - 7 * DAY, month: now.getTime() - 30 * DAY, total: -Infinity };
+    const since = {
+      today: localMidnight,
+      week: now.getTime() - 7 * DAY,
+      month: now.getTime() - 30 * DAY,
+      total: -Infinity,
+    };
     const staff = await this.staffIds();
     const all = [...this.orders.values()].filter((o) => !staff.includes(o.userId));
     const paid = all.filter((o) => PAID.includes(o.status));
