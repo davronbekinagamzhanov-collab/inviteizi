@@ -1,6 +1,7 @@
 /** Файлы из приложения: фото клиента (kind=photo) и чек (kind=receipt&order=<id>). Лимит тела Vercel ~4,5 МБ — фото сжимает телефон */
 import { createBotDeps } from "@/bot/deps";
 import { appGate, json } from "@/lib/app-auth";
+import { allow, LIMITS } from "@/lib/rate-limit";
 import { submitReceipt } from "@/bot/app/service";
 import { PhotoFormatError, PHOTO_MAX_BYTES } from "@/bot/own-photo";
 
@@ -11,6 +12,7 @@ export async function POST(req: Request) {
   if (process.env.VERCEL_ENV === "preview") return new Response(null, { status: 404 });
   const user = appGate(req);
   if (user instanceof Response) return user;
+  if (!allow(`upload:${user.id}`, LIMITS.upload)) return json({ error: "tooOften" }, 429);
   const url = new URL(req.url);
   const kind = url.searchParams.get("kind");
   const declared = Number(req.headers.get("content-length") ?? 0);
