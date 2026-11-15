@@ -4,6 +4,7 @@ import {renderToStaticMarkup} from "react-dom/server";
 import {activeDesigns,longSample} from "./registry";
 import {t} from "@/texts/uz-cyrl";
 import {mapLink} from "@/lib/map-link";
+import { loadDesign } from "@/templates/design-modules";
 vi.mock("next/font/local",()=>({default:()=>({variable:"test-font"})}));
 vi.mock("next/font/google",()=>{
   const font=()=>({variable:"test-font"});
@@ -13,9 +14,9 @@ vi.mock("next/font/google",()=>{
 describe("accepted non-Nikoh designs retain all supplied events and person data",()=>{
  // Холодная загрузка шаблонов (motion, шрифты, общий набор) — подготовка, а не время одного теста:
  // иначе её целиком оплачивает первый случай и при параллельном прогоне он не укладывается в лимит
- beforeAll(()=>Promise.all(activeDesigns().map(d=>d.load())),120_000);
+ beforeAll(()=>Promise.all(activeDesigns().map(d=>loadDesign(d))),120_000);
   for(const d of activeDesigns().filter(d=>d.occasion!=="nikoh"))for(const mode of ["demo","full"] as const)it(`${d.id} / ${mode}`,async()=>{
-    const {default:Design}=await d.load();
+    const {default:Design}=await loadDesign(d);
     const data={...longSample(d),noMusic:true};
     const html=renderToStaticMarkup(createElement(Design,{data,mode}));
     const plain=html.replace(/<[^>]*>/g,"").replace(/&#x27;/g,"'").replace(/&quot;/g,'"').replace(/\s+/g," ");
@@ -27,7 +28,7 @@ describe("accepted non-Nikoh designs retain all supplied events and person data"
 });
 describe("every accepted Nikoh design renders both families",()=>{
   for(const d of activeDesigns().filter(d=>d.occasion==="nikoh"))for(const mode of ["demo","full"] as const)it(`${d.id} / ${mode}`,async()=>{
-    const {default:Design}=await d.load();
+    const {default:Design}=await loadDesign(d);
     // Hosts can differ from both families: do not let an identical fixture hide data loss.
     const data={...longSample(d),hosts:"Самандар ва Мавлуда — тўй мезбонлари",noMusic:true};
     const html=renderToStaticMarkup(createElement(Design,{data,mode}));
@@ -41,7 +42,7 @@ describe("every accepted Nikoh design renders both families",()=>{
 });
 describe("Nikoh designs hide family blocks when the client gave none",()=>{
   for(const d of activeDesigns().filter(d=>d.occasion==="nikoh"))it(d.id,async()=>{
-    const {default:Design}=await d.load();
+    const {default:Design}=await loadDesign(d);
     const data={...longSample(d),noMusic:true};
     delete data.sides;
     const html=renderToStaticMarkup(createElement(Design,{data,mode:"full"}));

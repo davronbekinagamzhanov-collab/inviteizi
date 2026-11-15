@@ -10,6 +10,7 @@ import { celebrationCopy } from "@/texts/uz-cyrl";
 import type { InvitationData } from "@/lib/types";
 import { longSamples } from "@/lib/samples";
 import { parseWeddingDate } from "@/lib/wedding-date";
+import { loadDesign } from "@/templates/design-modules";
 vi.mock("next/font/local", () => ({ default: () => ({ variable: "font-test" }) }));
 const expected = {
   "sahar-sabosi": ["hero", "letter", "venue", "date", "closing"],
@@ -69,7 +70,7 @@ describe("two ordinary morning previews with different entry modes", () => {
   for (const id of celebrationIds) {
     it(`${id}: retains its own composition, occasion data and accurate map links`, async () => {
       const d = getDesign(id)!,
-        { default: Design } = await d.load(),
+        { default: Design } = await loadDesign(d),
         html = renderToStaticMarkup(createElement(Design, { data: { ...d.sample, noMusic: true }, mode: "full" }));
       expect([...html.matchAll(/data-section="([^"]+)"/g)].map((x) => x[1])).toEqual(expected[id]);
       if (id === "sahar-sabosi") {
@@ -98,7 +99,7 @@ describe("two ordinary morning previews with different entry modes", () => {
     });
     it(`${id}: supports long Uzbek text and every supplied event without inventing a programme`, async () => {
       const d = getDesign(id)!,
-        { default: Design } = await d.load(),
+        { default: Design } = await loadDesign(d),
         data: InvitationData = {
           ...longSamples[d.occasion],
           customText: "Ўғлимиз, қадрдонларимиз ва меҳмонларимизга эҳтиром билан. ".repeat(20).slice(0, 600),

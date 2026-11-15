@@ -5,6 +5,7 @@ import { ACCEPTED, activeDesigns, getDesign, PRICES } from "./registry";
 import { ON_SALE_IDS } from "./catalog";
 import { atelierIds, atelierPhotos, latinInitial, partnerInitials } from "./themes/vip-atelier/model";
 import { longSamples } from "@/lib/samples";
+import { loadDesign } from "@/templates/design-modules";
 
 vi.mock("next/font/local", () => ({ default: () => ({ variable: "test-font" }) }));
 const uploads = ["https://example.com/first.webp", "https://example.com/second.webp", "https://example.com/third.webp"];
@@ -48,7 +49,7 @@ for (const id of atelierIds)
   describe(id, () => {
     it("renders its own structure with real event data, maps and a single use of each photo", async () => {
       const d = getDesign(id)!;
-      const { default: Design } = await d.load();
+      const { default: Design } = await loadDesign(d);
       const html = renderToStaticMarkup(
         createElement(Design, { data: { ...d.sample, photos: uploads, noMusic: true }, mode: "full" }),
       );
@@ -72,7 +73,7 @@ for (const id of atelierIds)
     });
     it("renders long names and all three order events without inventing milestones", async () => {
       const d = getDesign(id)!;
-      const { default: Design } = await d.load();
+      const { default: Design } = await loadDesign(d);
       const data = longSamples[d.occasion];
       const html = renderToStaticMarkup(createElement(Design, { data: { ...data, noMusic: true }, mode: "full" }));
       expect(html.match(/<time /g) ?? []).toHaveLength(3);

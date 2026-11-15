@@ -16,6 +16,7 @@ import { pickDesign } from "./testing/paths";
 import type { FakeMessage } from "./testing/fake-tg";
 import { inlineButtons } from "./testing/fake-tg";
 import { ADMIN, Sim } from "./testing/sim";
+import { DESIGN_MODULES } from "@/templates/design-modules";
 
 const ID = 11;
 const BASE = "https://inviteizi.vercel.app";
@@ -327,7 +328,7 @@ describe("скрытые дизайны", () => {
     const shown = new Set(OCCASIONS.flatMap((oc) => catalogList({ s: { occasion: oc } }).map((d) => d.id)));
     for (const d of everAccepted()) {
       expect(shown.has(d.id), d.id).toBe(ACCEPTED.has(d.id));
-      expect(getDesign(d.id)?.load, d.id).toBeTypeOf("function");
+      expect(DESIGN_MODULES[d.id], d.id).toBeTypeOf("function");
     }
     expect(shown.has("islimi-varaq")).toBe(false);
     expect([...shown].sort()).toEqual([...ON_SALE_IDS].sort()); // ровно витрина templates/catalog.ts

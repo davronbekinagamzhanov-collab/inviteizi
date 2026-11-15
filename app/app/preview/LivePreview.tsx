@@ -7,6 +7,7 @@ import { useEffect, useState, type ComponentType } from "react";
 import { getDesign, type TemplateProps } from "@/templates/registry";
 import type { InvitationData } from "@/lib/types";
 import { glueData } from "@/lib/typography";
+import { loadDesign } from "@/templates/design-modules";
 
 type Msg = { type: "inviteizi:preview"; templateId: string; data: InvitationData };
 
@@ -31,7 +32,7 @@ export default function LivePreview() {
     const design = getDesign(id);
     if (!design) return;
     let alive = true;
-    design.load().then((m) => alive && setLoaded({ id, Design: m.default }));
+    loadDesign(design).then((m) => alive && setLoaded({ id, Design: m.default }));
     return () => {
       alive = false;
     };

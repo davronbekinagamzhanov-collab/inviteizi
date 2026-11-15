@@ -9,7 +9,11 @@ import { mapLink } from "@/lib/map-link";
 import { previewData } from "@/lib/preview-data";
 import { photoStepFor } from "@/bot/flow/steps-photo";
 import InvitationPage from "@/app/[slug]/page";
+import { loadDesign } from "@/templates/design-modules";
 const paid = vi.hoisted(() => ({ id: "umr-durdonasi" }));
+vi.mock("@/templates/design-loaders", () =>
+  import("@/templates/testing/sync-design-view").then((m) => m.syncDesignViews()),
+);
 vi.mock("next/font/local", () => ({ default: () => ({ variable: "fixture-font" }) }));
 vi.mock("@/lib/orders", () => ({
   currentSlugFor: async () => null,
@@ -64,7 +68,7 @@ for (const id of ids)
     for (const count of [1, 2, 3])
       it(`${id}/${mode}: preserves ${count} events, custom Cyrillic text, hosts and maps`, async () => {
         const d = getDesign(id)!,
-          { default: Design } = await d.load(),
+          { default: Design } = await loadDesign(d),
           data = {
             ...longSamples.yubiley,
             events: longSamples.yubiley.events.slice(0, count),
@@ -95,7 +99,7 @@ for (const id of ids)
 for (const id of ids)
   it(`${id}: no repeated imagery and only the supported photo slots`, async () => {
     const d = getDesign(id)!,
-      { default: Design } = await d.load();
+      { default: Design } = await loadDesign(d);
     for (const photos of [undefined, [], [""], own.slice(0, 1), own.slice(0, 2), own, [own[0], own[0], own[1]]]) {
       const html = renderToStaticMarkup(
         createElement(Design, { data: { ...d.sample, photos, noMusic: true }, mode: "full" }),

@@ -7,6 +7,7 @@ import { glueData } from "@/lib/typography";
 import { notFound } from "next/navigation";
 import { demoMusicUrl } from "@/lib/music";
 import { designs, getDesign } from "@/templates/registry";
+import { DesignView } from "@/templates/design-loaders";
 import { existingArt } from "@/templates/art";
 import { DemoTracker } from "./DemoTracker";
 import { env } from "@/lib/env";
@@ -36,11 +37,11 @@ async function LiveDemo({ params, searchParams }: PageProps<"/demo/[template]">)
   const design = getDesign(template);
   if (!design) notFound();
 
-  const { default: Design } = await design.load();
   return (
     <MarketingBrandProvider enabled={marketingFlags().ui} source={source}>
       <DemoTracker />
-      <Design
+      <DesignView
+        id={design.id}
         data={glueData({
           ...futureDemoData(design.sample, new Date()),
           langs: env.extraLangs(),

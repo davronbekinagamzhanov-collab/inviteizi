@@ -4,6 +4,7 @@ import { FORMATS, PRICES, getDesign } from "@/templates/registry";
 import { ON_SALE } from "@/templates/catalog";
 import { designsFor, formatsFor } from "./flow/util";
 import { OCCASIONS } from "./flow/steps-order";
+import { DESIGN_MODULES } from "@/templates/design-modules";
 
 // Настоящий реестр: тадбирлар, которые бот показывает клиенту, и форматы каждого — без пустых кнопок.
 
@@ -19,7 +20,7 @@ describe("форматы бота × тадбирлар (реальный кат
           expect(t.designs[d.id], `${d.id}: нет имени`).toBeTruthy();
           expect(d.cover, `${d.id}: нет обложки`).toBeTruthy();
           expect(d.sample.occasion, `${d.id}: пример другого тадбира`).toBe(o);
-          expect(typeof d.load).toBe("function");
+          expect(typeof DESIGN_MODULES[d.id]).toBe("function");
         }
       }
       // после батча 3 у каждого тадбира есть все три формата

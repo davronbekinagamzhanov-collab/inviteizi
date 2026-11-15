@@ -12,6 +12,7 @@ import {
   PRICES,
 } from "./registry";
 import { photoAttributions } from "@/texts/uz-cyrl";
+import { loadDesign } from "@/templates/design-modules";
 
 vi.mock("next/font/local", () => ({ default: () => ({ variable: "test-font" }) }));
 
@@ -59,7 +60,7 @@ describe("catalog acceptance integrity", () => {
     for (const d of everAccepted().filter((d) => d.format === "scroll")) {
       const { createElement } = await import("react");
       const { renderToStaticMarkup } = await import("react-dom/server");
-      const { default: Component } = await d.load();
+      const { default: Component } = await loadDesign(d);
       const html = renderToStaticMarkup(
         createElement(Component, { data: { ...d.sample, noMusic: true }, mode: "full" }),
       );

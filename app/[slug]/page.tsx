@@ -11,7 +11,8 @@ import { getDesign } from "@/templates/registry";
 import { existingArt } from "@/templates/art";
 import { t } from "@/texts/uz-cyrl";
 import Expired from "./Expired";
-import { loadOrderDesign } from "@/templates/order-design";
+import { usesLegacyDesign } from "@/templates/design-version";
+import { DesignView } from "@/templates/design-loaders";
 
 // Гости открывают ссылку напрямую (из WhatsApp/Telegram): переход внутри сайта может подождать
 export const instant = false;
@@ -78,7 +79,6 @@ async function Invitation({ params }: { params: PageProps<"/[slug]">["params"] }
   const design = getDesign(page.order.templateId);
   if (!design) notFound();
 
-  const { default: Design } = await loadOrderDesign(design, page.data.designVersion);
   // Фото клиента — только у дизайнов с clientPhotos (наҳорги ош — никогда): старые фото после смены дизайна не всплывают
   const withPhotos = design.clientPhotos ? page.data : { ...page.data, photos: undefined };
   // Казахский — только пока он включён (KAZAKH_ENABLED); выключили — гость видит узбекский и русский
@@ -98,7 +98,13 @@ async function Invitation({ params }: { params: PageProps<"/[slug]">["params"] }
   }
   return (
     <MarketingBrandProvider enabled={flags.ui} source={source}>
-      <Design data={glueData(data)} mode={page.mode} art={existingArt(design)} />
+      <DesignView
+        id={design.id}
+        legacy={usesLegacyDesign(design.id, page.data.designVersion)}
+        data={glueData(data)}
+        mode={page.mode}
+        art={existingArt(design)}
+      />
     </MarketingBrandProvider>
   );
 }

@@ -8,6 +8,7 @@ import { notFound } from "next/navigation";
 import { demoMusicUrl } from "@/lib/music";
 import { designs, getDesign } from "@/templates/registry";
 import { existingArt } from "@/templates/art";
+import { DesignView } from "@/templates/design-loaders";
 
 /** Каталожный образец личного демо: НАМУНА и музыка выбранного тадбира. */
 export const instant = false;
@@ -31,10 +32,10 @@ async function LiveDemo({ params, searchParams }: PageProps<"/demo/[template]/na
   const design = getDesign(template);
   if (!design) notFound();
 
-  const { default: Design } = await design.load();
   return (
     <MarketingBrandProvider enabled={marketingFlags().ui} source={source}>
-      <Design
+      <DesignView
+        id={design.id}
         data={glueData({ ...futureDemoData(design.sample, new Date()), musicUrl: demoMusicUrl(design.occasion) })}
         mode="demo"
         art={existingArt(design)}

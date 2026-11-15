@@ -7,6 +7,7 @@ import { masterpieceIds, photos, initials } from "./themes/vip-masterpiece/model
 import { luxuryWeddingCopy } from "@/texts/uz-cyrl";
 import { parseWeddingDate } from "@/lib/wedding-date";
 import { longSamples } from "@/lib/samples";
+import { loadDesign } from "@/templates/design-modules";
 vi.mock("next/font/local", () => ({ default: () => ({ variable: "font-test" }) }));
 const own = ["https://example.com/a.webp", "https://example.com/b.webp", "https://example.com/c.webp"];
 describe("bespoke wedding data contracts", () => {
@@ -31,7 +32,7 @@ for (const id of masterpieceIds)
   describe(id, () => {
     it("has an independent composition with real maps and three correctly sourced images", async () => {
       const d = getDesign(id)!;
-      const { default: Design } = await d.load();
+      const { default: Design } = await loadDesign(d);
       const html = renderToStaticMarkup(
         createElement(Design, { data: { ...d.sample, photos: own, noMusic: true }, mode: "full" }),
       );
@@ -60,7 +61,7 @@ for (const id of masterpieceIds)
       }
     });
     it("handles long names, custom text and all three real events", async () => {
-      const { default: Design } = await getDesign(id)!.load();
+      const { default: Design } = await loadDesign(getDesign(id)!);
       const data = { ...longSamples.nikoh, noMusic: true, customText: "Махсус таклиф матни." };
       const html = renderToStaticMarkup(createElement(Design, { data, mode: "full" }));
       expect(html.match(/<time /g) ?? []).toHaveLength(3);

@@ -4,6 +4,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { getDesign, ACCEPTED, activeDesigns } from "@/templates/registry";
 import { ON_SALE_IDS } from "@/templates/catalog";
 import { vipPhotos } from "./themes/vip-tilla-muhr/photos";
+import { loadDesign } from "@/templates/design-modules";
 
 vi.mock("next/font/local", () => ({ default: () => ({ variable: "test-font" }) }));
 const ids = ["vip-tilla-muhr", "vip-osmon", "vip-suzana"];
@@ -28,7 +29,7 @@ for (const id of ids)
     });
     it("renders each uploaded photograph once, a short split cover, and data-driven map links", async () => {
       const design = getDesign(id)!;
-      const { default: Design } = await design.load();
+      const { default: Design } = await loadDesign(design);
       const html = renderToStaticMarkup(
         createElement(Design, { data: { ...design.sample, photos, noMusic: true }, mode: "full" }),
       );

@@ -6,6 +6,7 @@ import { getDesign } from "@/templates/registry";
 import { futureDemoData } from "@/lib/marketing/demo-dates";
 import { MarketingBrandProvider } from "@/components/marketing/BrandContext";
 import { demoMusicUrl } from "@/lib/music";
+import { DesignView } from "@/templates/design-loaders";
 export default function Page() {
   return (
     <Suspense fallback={null}>
@@ -20,11 +21,11 @@ async function Fixture() {
     (process.env.NODE_ENV === "production" && process.env.VERCEL_ENV !== "preview")
   )
     notFound();
-  const d = getDesign("umr-daraxti")!,
-    { default: Design } = await d.load();
+  const d = getDesign("umr-daraxti")!;
   return (
     <MarketingBrandProvider enabled source={"inv_" + "0".repeat(32)}>
-      <Design
+      <DesignView
+        id={d.id}
         data={{
           ...futureDemoData(d.sample, new Date()),
           langs: ["ru"],

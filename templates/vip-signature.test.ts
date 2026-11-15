@@ -7,6 +7,7 @@ import { ON_SALE_IDS } from "./catalog";
 import { signatureIds, signaturePhotos, weddingEvent } from "./themes/vip-signature/model";
 import { longSamples } from "@/lib/samples";
 import { parseWeddingDate } from "@/lib/wedding-date";
+import { loadDesign } from "@/templates/design-modules";
 
 vi.mock("next/font/local", () => ({ default: () => ({ variable: "test-font" }) }));
 const photos = ["https://example.com/one.webp", "https://example.com/two.webp", "https://example.com/three.webp"];
@@ -64,7 +65,7 @@ for (const id of signatureIds)
   describe(id, () => {
     it("renders its distinct section order, Latin monograms, three photos and every actual map once", async () => {
       const d = getDesign(id)!;
-      const { default: Design } = await d.load();
+      const { default: Design } = await loadDesign(d);
       const html = renderToStaticMarkup(
         createElement(Design, { data: { ...d.sample, photos, noMusic: true }, mode: "full" }),
       );
@@ -83,7 +84,7 @@ for (const id of signatureIds)
     });
     it("retains long names, all three event times and maps, plus the supplied custom text", async () => {
       const d = getDesign(id)!;
-      const { default: Design } = await d.load();
+      const { default: Design } = await loadDesign(d);
       const data = { ...longSamples.nikoh, noMusic: true, customText: "Дилдан ёзилган махсус таклиф." };
       const html = renderToStaticMarkup(createElement(Design, { data, mode: "full" }));
       expect(html.match(/<time /g) ?? []).toHaveLength(3);

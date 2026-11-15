@@ -39,7 +39,12 @@ export function DemoTracker() {
         if (!event.isTrusted || document.visibilityState !== "visible") return;
         document.removeEventListener("pointerdown", onInteraction);
         document.removeEventListener("keydown", onInteraction);
-        void fetch("/api/demo-event", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token }), keepalive: true }).catch(() => {});
+        void fetch("/api/demo-event", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token }),
+          keepalive: true,
+        }).catch(() => {});
       };
       document.addEventListener("pointerdown", onInteraction, { passive: true });
       document.addEventListener("keydown", onInteraction);
