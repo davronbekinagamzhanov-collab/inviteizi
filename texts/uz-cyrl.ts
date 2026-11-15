@@ -331,6 +331,10 @@ const raw = {
 
   /** Названия дизайнов каталога */
   designs: {
+    "zarhal-duo":"Зарҳал дуо",
+    "moviy-ayvon":"Мовий айвон",
+    "tulpor-quvonchi":"Тулпор қувончи",
+    "kashta-tilagi":"Кашта тилаги",
     "bog-nasimi": "Боғ насими",
     "tong-naqshi": "Тонг нақши",
     "sahar-sabosi": "Саҳар сабоси",
