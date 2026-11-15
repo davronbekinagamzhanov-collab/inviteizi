@@ -1,8 +1,8 @@
-import {connection} from "next/server";
-import {futureDemoData} from "@/lib/marketing/demo-dates";
-import {MarketingBrandProvider} from "@/components/marketing/BrandContext";
-import {marketingFlags,validPublicSource} from "@/lib/marketing/config";
-import {Suspense} from "react";
+import { connection } from "next/server";
+import { futureDemoData } from "@/lib/marketing/demo-dates";
+import { MarketingBrandProvider } from "@/components/marketing/BrandContext";
+import { marketingFlags, validPublicSource } from "@/lib/marketing/config";
+import { Suspense } from "react";
 import { glueData } from "@/lib/typography";
 import { notFound } from "next/navigation";
 import { demoMusicUrl } from "@/lib/music";
@@ -21,14 +21,34 @@ export function generateStaticParams() {
   return designs.map((d) => ({ template: d.id }));
 }
 
-export default function DemoPage(props:PageProps<"/demo/[template]">){return <Suspense fallback={null}><LiveDemo {...props}/></Suspense>;}
-async function LiveDemo({ params,searchParams }: PageProps<"/demo/[template]">) {
+export default function DemoPage(props: PageProps<"/demo/[template]">) {
+  return (
+    <Suspense fallback={null}>
+      <LiveDemo {...props} />
+    </Suspense>
+  );
+}
+async function LiveDemo({ params, searchParams }: PageProps<"/demo/[template]">) {
   await connection();
-  const query=await searchParams,source=validPublicSource(query.ref);
+  const query = await searchParams,
+    source = validPublicSource(query.ref);
   const { template } = await params;
   const design = getDesign(template);
   if (!design) notFound();
 
   const { default: Design } = await design.load();
-  return <MarketingBrandProvider enabled={marketingFlags().ui} source={source}><DemoTracker /><Design data={glueData({ ...futureDemoData(design.sample,new Date()), langs: env.extraLangs(), musicUrl: demoMusicUrl(design.occasion) })} mode="full" art={existingArt(design)} /></MarketingBrandProvider>;
+  return (
+    <MarketingBrandProvider enabled={marketingFlags().ui} source={source}>
+      <DemoTracker />
+      <Design
+        data={glueData({
+          ...futureDemoData(design.sample, new Date()),
+          langs: env.extraLangs(),
+          musicUrl: demoMusicUrl(design.occasion),
+        })}
+        mode="full"
+        art={existingArt(design)}
+      />
+    </MarketingBrandProvider>
+  );
 }

@@ -8,7 +8,7 @@ export const maxDuration = 60;
 
 export async function POST(req: Request) {
   // Preview must never write through inherited live credentials. Native fixture tests cover mutations.
-  if(process.env.VERCEL_ENV==="preview")return new Response(null,{status:404});
+  if (process.env.VERCEL_ENV === "preview") return new Response(null, { status: 404 });
   const user = appGate(req);
   if (user instanceof Response) return user;
   const url = new URL(req.url);
@@ -33,7 +33,9 @@ export async function POST(req: Request) {
       return json({ url: await deps.savePhotoBytes(bytes) });
     }
     if (kind === "receipt") {
-      return json(await submitReceipt(deps, user, url.searchParams.get("order"), { bytes, mime: file.type, name: file.name }));
+      return json(
+        await submitReceipt(deps, user, url.searchParams.get("order"), { bytes, mime: file.type, name: file.name }),
+      );
     }
     return json({ error: "bad" }, 400);
   } catch (e) {

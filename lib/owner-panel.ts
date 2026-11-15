@@ -22,7 +22,7 @@ export type PanelOrder = {
   amount: number;
   createdAt: Date;
   paidAt: Date | null;
-  refundedAt?: Date|null;
+  refundedAt?: Date | null;
   updatedAt: Date;
   /** Для панели в приложении: ссылка /{slug} и имена в приглашении (поиск) */
   slug?: string | null;
@@ -35,7 +35,7 @@ export const SCHEDULES: PayoutSchedule[] = ["daily", "weekly", "monthly"];
 /** pending — создал менеджер, ждёт ✅ владельца (QR работает, оплаты считаются, выплаты нет); rejected — отклонён */
 export type PartnerStatus = "pending" | "active" | "rejected";
 export type Partner = {
-  customerUserId?:number|null;
+  customerUserId?: number | null;
   id: number;
   code: string;
   name: string;
@@ -61,7 +61,13 @@ export type Partner = {
   ownerNotifiedAt: Date | null;
   sleepNotifiedAt: Date | null;
 };
-export type PartnerEarning = { orderId: string; partnerId: number; amount: number; delivered: boolean; createdAt: Date };
+export type PartnerEarning = {
+  orderId: string;
+  partnerId: number;
+  amount: number;
+  delivered: boolean;
+  createdAt: Date;
+};
 export type PartnerPayout = { partnerId: number; amount: number; createdAt: Date };
 /** month — «2026-11» по Алматы */
 export type ManagerPayout = { managerId: number; month: string; amount: number; orders: number; createdAt: Date };
@@ -165,7 +171,14 @@ export function designTypes(s: PanelSnapshot, period: Period, now: Date) {
   });
 }
 
-export function topDesigns(s: PanelSnapshot, period: Period, now: Date, format: Format, style: DesignStyle, limit = 10) {
+export function topDesigns(
+  s: PanelSnapshot,
+  period: Period,
+  now: Date,
+  format: Format,
+  style: DesignStyle,
+  limit = 10,
+) {
   const counts = paidByDesign(s, period, now);
   return activeDesigns()
     .filter((d) => d.format === format && d.style === style)

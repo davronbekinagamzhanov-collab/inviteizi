@@ -1,4 +1,4 @@
-import {flushMarketing} from "../marketing";
+import { flushMarketing } from "../marketing";
 /**
  * v2, часть 7: уведомления, отчёты 20:00, выплаты.
  *
@@ -60,11 +60,23 @@ type Markup = { inline: InlineButton[][] } | null;
  * Отправить один раз по ключу. Днём — сразу, ночью — в очередь до 08:00.
  * urgent — ответ на действие самого человека (тихие часы не мешают).
  */
-export async function notify(deps: Deps, key: string, chatId: number, text: string, markup: Markup = null, urgent = false) {
+export async function notify(
+  deps: Deps,
+  key: string,
+  chatId: number,
+  text: string,
+  markup: Markup = null,
+  urgent = false,
+) {
   const now = deps.now();
   const night = !urgent && isQuiet(now);
-  if (!(await deps.repo.queueNotice({ key, chatId, text, markup, dueAt: night ? morningAfter(now) : now }))) return false;
-  if(deps.env.marketing?.delivery){if(night)return false;await flushMarketing(deps);return !!await deps.repo.marketing?.noticeSent(key);}
+  if (!(await deps.repo.queueNotice({ key, chatId, text, markup, dueAt: night ? morningAfter(now) : now })))
+    return false;
+  if (deps.env.marketing?.delivery) {
+    if (night) return false;
+    await flushMarketing(deps);
+    return !!(await deps.repo.marketing?.noticeSent(key));
+  }
   if (night || !(await deps.repo.claimNotice(key, now))) return false;
   try {
     await deps.tg.sendMessage(chatId, text, markup ? { markup } : undefined);
@@ -106,25 +118,36 @@ export async function paidNotices(deps: Deps, o: OrderRecord, approverId: number
   if (!s.orders.some((x) => x.id === o.id)) return "";
   const managers = await deps.repo.listManagers();
   const a = attributionOf(s, managers, o);
-  const who = a.partner ? partnerWho(a.partner, a.manager) : a.manager ? `${managerName(a.manager)} · ${N.forClient}` : N.direct;
+  const who = a.partner
+    ? partnerWho(a.partner, a.manager)
+    : a.manager
+      ? `${managerName(a.manager)} · ${N.forClient}`
+      : N.direct;
   const line = N.paid(o.number, price(o.amount), designLabel(o.templateId), who);
   for (const id of await deps.repo.listAdminIds()) {
     if (id !== approverId) await notify(deps, `paid:${o.id}:${id}`, id, line);
   }
   if (a.manager?.active) {
     const from = a.partner ? a.partner.name.slice(0, 40) : N.forClient[0].toUpperCase() + N.forClient.slice(1);
-    await notify(deps, `paid:${o.id}:${a.manager.telegramId}`, a.manager.telegramId, N.mgrPaid(from, o.number, price(o.amount), price(MANAGER_PER_ORDER)));
+    await notify(
+      deps,
+      `paid:${o.id}:${a.manager.telegramId}`,
+      a.manager.telegramId,
+      N.mgrPaid(from, o.number, price(o.amount), price(MANAGER_PER_ORDER)),
+    );
   }
   return line;
 }
 
 // ── Вечер 20:00 ──
 
-const createdToday = (s: PanelSnapshot, from: Date, to: Date) => s.orders.filter((o) => +o.createdAt >= +from && +o.createdAt < +to);
+const createdToday = (s: PanelSnapshot, from: Date, to: Date) =>
+  s.orders.filter((o) => +o.createdAt >= +from && +o.createdAt < +to);
 const paidToday = (s: PanelSnapshot, from: Date, to: Date) =>
   s.orders.filter((o) => isPaid(o) && +(o.paidAt ?? o.updatedAt) >= +from && +(o.paidAt ?? o.updatedAt) < +to);
 
-const listOf = (items: string[], max: number) => (items.length > max ? [...items.slice(0, max), N.more(items.length - max)] : items).join(" · ");
+const listOf = (items: string[], max: number) =>
+  (items.length > max ? [...items.slice(0, max), N.more(items.length - max)] : items).join(" · ");
 
 export function ownerEvening(s: PanelSnapshot, managers: Manager[], now: Date) {
   const from = kzMidnight(now);
@@ -157,7 +180,10 @@ export function ownerEvening(s: PanelSnapshot, managers: Manager[], now: Date) {
   const dues = partnerRows(s, "all", now)
     .filter((r) => r.due > 0)
     .sort((a, b) => b.due - a.due)
-    .map((r) => `${partnerWho(r.partner, managers.find((m) => m.telegramId === r.partner.managedBy) ?? null)} ${price(r.due)}`);
+    .map(
+      (r) =>
+        `${partnerWho(r.partner, managers.find((m) => m.telegramId === r.partner.managedBy) ?? null)} ${price(r.due)}`,
+    );
   const quiet = !lines.length;
   if (dues.length) lines.push(N.due(listOf(dues, 5)));
   if (quiet) return [N.quiet(date), ...(dues.length ? ["", ...lines] : [])].join("\n");
@@ -175,7 +201,9 @@ export function managerEvening(s: PanelSnapshot, managers: Manager[], m: Manager
   const rows = mine
     .map((p) => {
       const ids = new Set(s.users.filter((u) => u.source === partnerSource(p.code)).map((u) => u.id));
-      const orders = created.filter((o) => ids.has(o.userId) && !s.clientOrders?.some((c) => c.orderId === o.id)).length;
+      const orders = created.filter(
+        (o) => ids.has(o.userId) && !s.clientOrders?.some((c) => c.orderId === o.id),
+      ).length;
       const pays = paid.filter((o) => attributionOf(s, managers, o).partner?.id === p.id).length;
       return { name: p.name.slice(0, 40), orders, pays };
     })
@@ -192,7 +220,9 @@ export function managerEvening(s: PanelSnapshot, managers: Manager[], m: Manager
     ...rows.map((r) => N.mgrLine(r.name, r.orders, r.pays)),
     "",
     N.mgrMoney(price(paid.length * MANAGER_PER_ORDER), ruMonth(month), price(managerEarning(monthOrders))),
-    monthOrders >= MANAGER_GOAL ? N.goalDone(price(MANAGER_BONUS)) : N.goal(monthOrders, MANAGER_GOAL, price(MANAGER_BONUS)),
+    monthOrders >= MANAGER_GOAL
+      ? N.goalDone(price(MANAGER_BONUS))
+      : N.goal(monthOrders, MANAGER_GOAL, price(MANAGER_BONUS)),
   ].join("\n");
 }
 
@@ -220,12 +250,21 @@ export function partnerEvening(s: PanelSnapshot, p: Partner, lang: "uz" | "ru", 
     .map((o) => tx.role.evLine(o.number, maskName(o.firstName), price(o.amount)))
     .join("\n");
   const sum = today.reduce((n, e) => n + e.amount, 0);
-  return tx.role.evening({ count: today.length, lines, you: sum > 0 ? price(sum) : "", pending: p.status === "pending", payDay: payDayWord(tx, p, now) });
+  return tx.role.evening({
+    count: today.length,
+    lines,
+    you: sum > 0 ? price(sum) : "",
+    pending: p.status === "pending",
+    payDay: payDayWord(tx, p, now),
+  });
 }
 
 async function recipientOf(deps: Deps, p: Partner) {
   if (p.telegramId) return deps.repo.getUser(p.telegramId);
-  if(deps.env.marketing?.referrals&&deps.repo.marketing){const id=await deps.repo.marketing.recipientForPartner(p.id);if(id)return deps.repo.getUser(id);}
+  if (deps.env.marketing?.referrals && deps.repo.marketing) {
+    const id = await deps.repo.marketing.recipientForPartner(p.id);
+    if (id) return deps.repo.getUser(id);
+  }
   return p.username ? deps.repo.findUserByUsername(p.username) : null;
 }
 
@@ -259,7 +298,15 @@ export async function eveningReports(deps: Deps) {
 const ownerFirstName = (deps: Deps) => deps.env.kaspiName.split(/\s+/)[0] || "InviteIZI";
 
 type PayItem =
-  | { kind: "partner"; partner: Partner; amount: number; count: number; done: boolean; manager: Manager | null; version: number }
+  | {
+      kind: "partner";
+      partner: Partner;
+      amount: number;
+      count: number;
+      done: boolean;
+      manager: Manager | null;
+      version: number;
+    }
   | { kind: "manager"; manager: Manager; month: string; amount: number; count: number; done: boolean };
 
 /** Кому платить сегодня: партнёры по графику (к выплате > 0 или уже выплачено сегодня), 1-го — менеджеры за прошлый месяц */
@@ -269,12 +316,24 @@ export function payItems(s: PanelSnapshot, managers: Manager[], now: Date): PayI
   for (const r of partnerRows(s, "all", now)) {
     const p = r.partner;
     if (p.status !== "active" || !isPayDay(p.schedule, now)) continue;
-    const todayPaid = s.payouts.filter((x) => x.partnerId === p.id && +x.createdAt >= +from).reduce((n, x) => n + x.amount, 0);
+    const todayPaid = s.payouts
+      .filter((x) => x.partnerId === p.id && +x.createdAt >= +from)
+      .reduce((n, x) => n + x.amount, 0);
     const manager = managers.find((m) => m.telegramId === p.managedBy) ?? null;
     // Сколько выплат уже было: старая кнопка (вчерашняя, у второго админа) с тем же долгом не проведёт выплату
     const version = s.payouts.filter((x) => x.partnerId === p.id).length;
-    if (r.due > 0) items.push({ kind: "partner", partner: p, amount: r.due, count: unpaidCount(s, p.id), done: false, manager, version });
-    else if (todayPaid > 0) items.push({ kind: "partner", partner: p, amount: todayPaid, count: 0, done: true, manager, version });
+    if (r.due > 0)
+      items.push({
+        kind: "partner",
+        partner: p,
+        amount: r.due,
+        count: unpaidCount(s, p.id),
+        done: false,
+        manager,
+        version,
+      });
+    else if (todayPaid > 0)
+      items.push({ kind: "partner", partner: p, amount: todayPaid, count: 0, done: true, manager, version });
   }
   if (new Date(+now + 5 * HOUR).getUTCDate() === 1) {
     const month = prevMonth(kzMonth(now));
@@ -283,7 +342,8 @@ export function payItems(s: PanelSnapshot, managers: Manager[], now: Date): PayI
       if (done) items.push({ kind: "manager", manager: m, month, amount: done.amount, count: done.orders, done: true });
       else {
         const e = managerMonth(s, managers, m.telegramId, month);
-        if (e.amount > 0) items.push({ kind: "manager", manager: m, month, amount: e.amount, count: e.orders, done: false });
+        if (e.amount > 0)
+          items.push({ kind: "manager", manager: m, month, amount: e.amount, count: e.orders, done: false });
       }
     }
   }
@@ -294,17 +354,37 @@ export function payItems(s: PanelSnapshot, managers: Manager[], now: Date): PayI
 export function payScreen(items: PayItem[], now: Date) {
   const lines = items.map((x, i) => {
     if (x.kind === "manager") {
-      return x.done ? N.payMgrDone(i + 1, managerName(x.manager), price(x.amount), ruMonth(x.month)) : N.payMgr(i + 1, managerName(x.manager), price(x.amount), ruMonth(x.month), ruPayments(x.count));
+      return x.done
+        ? N.payMgrDone(i + 1, managerName(x.manager), price(x.amount), ruMonth(x.month))
+        : N.payMgr(i + 1, managerName(x.manager), price(x.amount), ruMonth(x.month), ruPayments(x.count));
     }
     const name = partnerWho(x.partner, x.manager);
-    return x.done ? N.payDone(i + 1, name, price(x.amount)) : N.payLine(i + 1, name, price(x.amount), x.partner.kaspi ? fmtPhone(x.partner.kaspi) : N.noKaspi, ruPayments(x.count));
+    return x.done
+      ? N.payDone(i + 1, name, price(x.amount))
+      : N.payLine(
+          i + 1,
+          name,
+          price(x.amount),
+          x.partner.kaspi ? fmtPhone(x.partner.kaspi) : N.noKaspi,
+          ruPayments(x.count),
+        );
   });
   const rows: InlineButton[][] = items
     .filter((x) => !x.done)
     .map((x) =>
       x.kind === "manager"
-        ? [{ text: N.payBtn(managerName(x.manager).slice(0, 24), price(x.amount)), data: `mp:${x.manager.telegramId}:${x.month.replace("-", "")}:${x.amount}` }]
-        : [{ text: N.payBtn(x.partner.name.slice(0, 24), price(x.amount)), data: `po:${x.partner.id}:${x.amount}:${x.version}` }],
+        ? [
+            {
+              text: N.payBtn(managerName(x.manager).slice(0, 24), price(x.amount)),
+              data: `mp:${x.manager.telegramId}:${x.month.replace("-", "")}:${x.amount}`,
+            },
+          ]
+        : [
+            {
+              text: N.payBtn(x.partner.name.slice(0, 24), price(x.amount)),
+              data: `po:${x.partner.id}:${x.amount}:${x.version}`,
+            },
+          ],
     );
   const all = items.length > 0 && rows.length === 0;
   return { text: [N.payTitle(ruDate(now)), "", ...lines, ...(all ? ["", N.payAll] : [])].join("\n"), rows };
@@ -322,14 +402,18 @@ export async function payDayNotices(deps: Deps) {
   if (!items.length) return 0;
   let sent = 0;
   const screen = payScreen(items, now);
-  for (const id of await deps.repo.listAdminIds()) if (await notify(deps, `pay:${day}:${id}`, id, screen.text, inline(screen.rows))) sent++;
+  for (const id of await deps.repo.listAdminIds())
+    if (await notify(deps, `pay:${day}:${id}`, id, screen.text, inline(screen.rows))) sent++;
   const owner = ownerFirstName(deps);
   for (const x of items) {
     if (x.kind === "partner") {
       const user = await recipientOf(deps, x.partner);
       if (!user) continue;
       const tx = txFor(user.lang);
-      if (await notify(deps, `payday:${day}:p${x.partner.id}`, user.id, tx.role.payToday(owner, price(x.amount), x.count))) sent++;
+      if (
+        await notify(deps, `payday:${day}:p${x.partner.id}`, user.id, tx.role.payToday(owner, price(x.amount), x.count))
+      )
+        sent++;
     } else if (x.manager.active) {
       const bonus = x.count >= MANAGER_GOAL ? price(MANAGER_BONUS) : "";
       const text = N.mgrPayToday(ruMonth(x.month), ruPayments(x.count), bonus, price(x.amount), owner);
@@ -345,7 +429,13 @@ export async function afterPartnerPayout(deps: Deps, p: Partner, amount: number)
   const user = await recipientOf(deps, p);
   if (user) {
     const tx = txFor(user.lang);
-    await notify(deps, `out:${p.id}:${stamp}`, user.id, tx.role.paidOut(price(amount)), inline([[{ text: tx.role.gotIt, data: "pg" }]]));
+    await notify(
+      deps,
+      `out:${p.id}:${stamp}`,
+      user.id,
+      tx.role.paidOut(price(amount)),
+      inline([[{ text: tx.role.gotIt, data: "pg" }]]),
+    );
   }
   const m = p.managedBy ? await deps.repo.getManager(p.managedBy) : null;
   if (m) await notify(deps, `out:${p.id}:${stamp}:m`, m.telegramId, N.mgrNote(p.name.slice(0, 40), price(amount)));
@@ -372,7 +462,12 @@ export async function payPartnerAction(c: Ctx, idArg: string, amountArg: string,
   const amount = Number(amountArg);
   const paidBefore = p ? (await c.deps.repo.panelSnapshot()).payouts.filter((x) => x.partnerId === p.id).length : -1;
   const fresh = versionArg === String(paidBefore);
-  const done = Boolean(p) && fresh && Number.isInteger(amount) && amount > 0 && (await c.deps.repo.recordPartnerPayout(p!.id, amount, c.user.id));
+  const done =
+    Boolean(p) &&
+    fresh &&
+    Number.isInteger(amount) &&
+    amount > 0 &&
+    (await c.deps.repo.recordPartnerPayout(p!.id, amount, c.user.id));
   if (done) await afterPartnerPayout(c.deps, p!, amount);
   await toast(c, done ? N.payOk : N.payStale);
   await refreshPayScreen(c);
@@ -389,7 +484,13 @@ export async function payManagerAction(c: Ctx, idArg: string, monthArg: string, 
   const expected = m && month ? managerMonth(await panelData(c.deps), managers, id, month) : null;
   const done =
     Boolean(m && expected && expected.amount === amount && amount > 0) &&
-    (await c.deps.repo.recordManagerPayout({ managerId: id, month, amount, orders: expected!.orders, createdBy: c.user.id }));
+    (await c.deps.repo.recordManagerPayout({
+      managerId: id,
+      month,
+      amount,
+      orders: expected!.orders,
+      createdBy: c.user.id,
+    }));
   if (done && m) await notify(c.deps, `mout:${month}:${id}`, id, N.mgrPaidOut(price(amount), ruMonth(month)));
   await toast(c, done ? N.payOk : N.payStale);
   await refreshPayScreen(c);

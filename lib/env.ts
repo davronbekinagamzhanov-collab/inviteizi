@@ -33,7 +33,11 @@ export const env = {
     const id = Number(optional("OWNER_TELEGRAM_ID"));
     return Number.isSafeInteger(id) && id > 0 ? id : undefined;
   },
-  analyticsAdminIds: (): number[] => (optional("ANALYTICS_ADMIN_IDS") ?? "").split(",").map(Number).filter(n => Number.isSafeInteger(n) && n > 0),
+  analyticsAdminIds: (): number[] =>
+    (optional("ANALYTICS_ADMIN_IDS") ?? "")
+      .split(",")
+      .map(Number)
+      .filter((n) => Number.isSafeInteger(n) && n > 0),
   analyticsSecret: () => optional("ANALYTICS_SIGNING_SECRET"),
   telegramBotToken: () => required("TELEGRAM_BOT_TOKEN"),
   telegramWebhookSecret: () => required("TELEGRAM_WEBHOOK_SECRET"),

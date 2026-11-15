@@ -1,7 +1,39 @@
 /** Requires a disposable native PostgreSQL cluster started with -c inviteizi.local_fixture=on. Never reads DATABASE_URL. */
-import postgres from'postgres';import{readFile,readdir}from'node:fs/promises';import{userInfo}from'node:os';
-const opts={host:'127.0.0.1',port:55437,username:userInfo().username,database:'postgres',ssl:false,max:1,onnotice:()=>{}};
-const root=postgres(opts);
-try{const[server]=await root`select current_setting('inviteizi.local_fixture',true) as marker,inet_server_addr()::text as host`;if(server.marker!=='on'||server.host!=='127.0.0.1/32'&&server.host!=='127.0.0.1')throw Error('Refusing non-fixture cluster');await root.unsafe('drop database if exists inviteizi_task7 with(force)');await root.unsafe('create database inviteizi_task7');for(const role of['anon','authenticated','inviteizi_server'])if(!(await root`select 1 from pg_roles where rolname=${role}`).length)await root.unsafe(`create role ${role}`);}finally{await root.end();}
-const sql=postgres({...opts,database:'inviteizi_task7'});
-try{await sql.unsafe('create schema storage;create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);');for(const name of(await readdir('supabase/migrations')).sort()){if(/storage_buckets|_cron\.sql/.test(name))continue;await sql.unsafe(await readFile('supabase/migrations/'+name,'utf8'));console.log(name,'PASS');}}finally{await sql.end();}
+import postgres from "postgres";
+import { readFile, readdir } from "node:fs/promises";
+import { userInfo } from "node:os";
+const opts = {
+  host: "127.0.0.1",
+  port: 55437,
+  username: userInfo().username,
+  database: "postgres",
+  ssl: false,
+  max: 1,
+  onnotice: () => {},
+};
+const root = postgres(opts);
+try {
+  const [server] =
+    await root`select current_setting('inviteizi.local_fixture',true) as marker,inet_server_addr()::text as host`;
+  if (server.marker !== "on" || (server.host !== "127.0.0.1/32" && server.host !== "127.0.0.1"))
+    throw Error("Refusing non-fixture cluster");
+  await root.unsafe("drop database if exists inviteizi_task7 with(force)");
+  await root.unsafe("create database inviteizi_task7");
+  for (const role of ["anon", "authenticated", "inviteizi_server"])
+    if (!(await root`select 1 from pg_roles where rolname=${role}`).length) await root.unsafe(`create role ${role}`);
+} finally {
+  await root.end();
+}
+const sql = postgres({ ...opts, database: "inviteizi_task7" });
+try {
+  await sql.unsafe(
+    "create schema storage;create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);",
+  );
+  for (const name of (await readdir("supabase/migrations")).sort()) {
+    if (/storage_buckets|_cron\.sql/.test(name)) continue;
+    await sql.unsafe(await readFile("supabase/migrations/" + name, "utf8"));
+    console.log(name, "PASS");
+  }
+} finally {
+  await sql.end();
+}

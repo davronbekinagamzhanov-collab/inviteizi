@@ -25,15 +25,7 @@ const months = [
 ] as const;
 
 // Неделя начинается с понедельника (Душанба)
-const weekdays = [
-  "Душанба",
-  "Сешанба",
-  "Чоршанба",
-  "Пайшанба",
-  "Жума",
-  "Шанба",
-  "Якшанба",
-] as const;
+const weekdays = ["Душанба", "Сешанба", "Чоршанба", "Пайшанба", "Жума", "Шанба", "Якшанба"] as const;
 
 const weekdaysShort = ["Ду", "Се", "Чо", "Па", "Жу", "Ша", "Як"] as const;
 
@@ -506,8 +498,7 @@ const raw = {
     time: "Соат",
     year: "йил",
     /** «14 ноябр, 2026 йил» */
-    long: (day: number, monthIndex: number, year: number) =>
-      `${day} ${months[monthIndex]}, ${year} йил`,
+    long: (day: number, monthIndex: number, year: number) => `${day} ${months[monthIndex]}, ${year} йил`,
     /** «14.11.2026» */
     short: (day: number, monthIndex: number, year: number) =>
       `${String(day).padStart(2, "0")}.${String(monthIndex + 1).padStart(2, "0")}.${year}`,
@@ -534,10 +525,8 @@ const raw = {
     text: {
       nikoh:
         "Сизнинг иштирокингиз ва эзгу тилакларингиз — оиламиз учун энг қимматли совға. Ушбу қутлуғ кунда ёнимизда бўлсангиз, бахтиёр бўламиз.",
-      sunnat:
-        "Ушбу қутлуғ кунда дуоларингиз ва ташрифингиз биз учун энг азиз совға бўлади. Қувончимизга шерик бўлинг!",
-      nahorgi:
-        "Тонгги дастурхонимиз Сизнинг ташрифингиз билан тўкис бўлади. Дуоларингиз — биз учун энг азиз совға.",
+      sunnat: "Ушбу қутлуғ кунда дуоларингиз ва ташрифингиз биз учун энг азиз совға бўлади. Қувончимизга шерик бўлинг!",
+      nahorgi: "Тонгги дастурхонимиз Сизнинг ташрифингиз билан тўкис бўлади. Дуоларингиз — биз учун энг азиз совға.",
       yubiley:
         "Ушбу муборак кунда ёнимизда бўлишингиз — биз учун катта бахт ва ҳурмат. Дуо ва эзгу тилакларингизни интизорлик билан кутамиз.",
     } satisfies Record<Occasion, string>,
@@ -574,7 +563,7 @@ const raw = {
   },
 
   brand: {
-    badge: "InviteIZI",
+    badge: "InviteIZI · 5 дақиқада",
     badgeLabel: "InviteIZI ботини очиш",
     footer: "InviteIZI билан яратилди",
     footerLink: "Ўз таклифномангизни яратинг",
@@ -663,10 +652,10 @@ const raw = {
     "samarqand-kitob": {}, // тексты samarqand-kitob
     "ipak-romol": {}, // тексты ipak-romol
     "rishton-koshin": {}, // тексты rishton-koshin
-    "atirgul": {}, // тексты atirgul
+    atirgul: {}, // тексты atirgul
     "shohona-baxmal": {}, // тексты shohona-baxmal
     "tandir-nuri": {}, // тексты tandir-nuri
-    "dasturxon": {}, // тексты dasturxon
+    dasturxon: {}, // тексты dasturxon
     "non-muhr": {}, // тексты non-muhr
     "tonggi-choy": {}, // тексты tonggi-choy
     "paxta-gul": {}, // тексты paxta-gul
@@ -737,8 +726,16 @@ export const tPlain = raw;
 export type Texts = typeof t;
 
 /** Public attribution metadata for photographs that require it, reused in bot/assets/pages. */
-export const photoAttributions: Record<string,{author:string;license:string;licenseUrl:string;source:string}|undefined> = {
-  "tonggi-choy": {author:"Ekaterina Kvelidze",license:"CC BY-SA 4.0",licenseUrl:"https://creativecommons.org/licenses/by-sa/4.0/",source:"https://commons.wikimedia.org/wiki/File:Uzbek_tea_couple_with_traditional_coloration.jpg"},
+export const photoAttributions: Record<
+  string,
+  { author: string; license: string; licenseUrl: string; source: string } | undefined
+> = {
+  "tonggi-choy": {
+    author: "Ekaterina Kvelidze",
+    license: "CC BY-SA 4.0",
+    licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/",
+    source: "https://commons.wikimedia.org/wiki/File:Uzbek_tea_couple_with_traditional_coloration.jpg",
+  },
 };
 
 /**
@@ -760,20 +757,52 @@ type Headings = {
 };
 
 const headings: Record<string, Headings> = {
-  "marvarid-satr": {program:"Азиз учрашув",waiting:"Қувончимизга шерик бўлинг!"},
-  "gulbog-sahifa": {date:"Гўзал сана",countdown:"Бахтли онларгача",program:"Бахтли кун дастури",waiting:"Гулдек кунларимизга марҳамат!"},
-  "suzani-yol": {date:"Қутлуғ кун",countdown:"Тўйимизгача",program:"Тўйимиз тартиби",thanks:"Ташрифингиздан мамнун бўламиз!"},
-  "bugdoy-boshoq": {program:"Тонгги дастурхон",waiting:"Хонадонимизга марҳамат!"},
-  "lola-ehtirom": {date:"Эъзозли сана",countdown:"Дийдорлашувгача",program:"Байрам дастури",waiting:"Дийдорингиз биз учун азиз!"},
-  "oq-chinni": {program:"Тонгги учрашув",waiting:"Дастурхонимизга марҳамат!"},
-  doppicha: {program:"Қувончли кунимиз",waiting:"Тўйимизга марҳамат!"},
-  "sayram-hovli": {date:"Тўй куни",countdown:"Қувончли кунгача",program:"Тўй кунининг тартиби",blessing:"Эзгу дуолар",thanks:"Қувончимизга шерик бўлинг!"},
-  zarvaraq: {program:"Муборак учрашув",waiting:"Ташрифингиз биз учун азиз!"},
-  "umr-daraxti": {date:"Қадрли сана",countdown:"Муборак санагача",program:"Дийдорлашув дастури",blessing:"Меҳр ва дуо",waiting:"Сизни интизорлик билан кутамиз!"},
+  "marvarid-satr": { program: "Азиз учрашув", waiting: "Қувончимизга шерик бўлинг!" },
+  "gulbog-sahifa": {
+    date: "Гўзал сана",
+    countdown: "Бахтли онларгача",
+    program: "Бахтли кун дастури",
+    waiting: "Гулдек кунларимизга марҳамат!",
+  },
+  "suzani-yol": {
+    date: "Қутлуғ кун",
+    countdown: "Тўйимизгача",
+    program: "Тўйимиз тартиби",
+    thanks: "Ташрифингиздан мамнун бўламиз!",
+  },
+  "bugdoy-boshoq": { program: "Тонгги дастурхон", waiting: "Хонадонимизга марҳамат!" },
+  "lola-ehtirom": {
+    date: "Эъзозли сана",
+    countdown: "Дийдорлашувгача",
+    program: "Байрам дастури",
+    waiting: "Дийдорингиз биз учун азиз!",
+  },
+  "oq-chinni": { program: "Тонгги учрашув", waiting: "Дастурхонимизга марҳамат!" },
+  doppicha: { program: "Қувончли кунимиз", waiting: "Тўйимизга марҳамат!" },
+  "sayram-hovli": {
+    date: "Тўй куни",
+    countdown: "Қувончли кунгача",
+    program: "Тўй кунининг тартиби",
+    blessing: "Эзгу дуолар",
+    thanks: "Қувончимизга шерик бўлинг!",
+  },
+  zarvaraq: { program: "Муборак учрашув", waiting: "Ташрифингиз биз учун азиз!" },
+  "umr-daraxti": {
+    date: "Қадрли сана",
+    countdown: "Муборак санагача",
+    program: "Дийдорлашув дастури",
+    blessing: "Меҳр ва дуо",
+    waiting: "Сизни интизорлик билан кутамиз!",
+  },
   // №1 — эталон: общие заголовки
   "oltin-monogramma": {},
   "oq-ot": { countdown: "Қутлуғ кунгача", date: "Қутлуғ сана", venue: "Тўй манзили", tap: "Пардани очинг" },
-  "tonggi-qozon": { countdown: "Тонгги дастурхонгача", date: "Ош санаси", venue: "Ош манзили", tap: "Таклифномани очиш учун босинг" },
+  "tonggi-qozon": {
+    countdown: "Тонгги дастурхонгача",
+    date: "Ош санаси",
+    venue: "Ош манзили",
+    tap: "Таклифномани очиш учун босинг",
+  },
   "pion-guldasta": { countdown: "Муборак кунгача", date: "Юбилей куни", venue: "Базм манзили", tap: "Конвертни очинг" },
   "tandir-nuri": {
     countdown: "Ош кунигача қолди",
@@ -814,7 +843,8 @@ const headings: Record<string, Headings> = {
   },
 };
 
-const allOccasions = (s: string) => ({ nikoh: s, sunnat: s, nahorgi: s, yubiley: s }) satisfies Record<Occasion, string>;
+const allOccasions = (s: string) =>
+  ({ nikoh: s, sunnat: s, nahorgi: s, yubiley: s }) satisfies Record<Occasion, string>;
 
 const designCache = new Map<string, Texts>();
 
@@ -837,14 +867,17 @@ export function designTexts(id: string): Texts {
 function buildDesignTexts(id: string, lang: InviteLang): Texts {
   const t = textsFor(lang);
   const h = (lang === "uz" ? headings[id] : lang === "ru" ? ruHeadings[id] : kkHeadings[id]) ?? {};
-  return glueDeep({
-    ...t,
-    countdown: { ...t.countdown, title: h.countdown ? allOccasions(h.countdown) : t.countdown.title },
-    date: { ...t.date, title: h.date ? allOccasions(h.date) : t.date.title },
-    venue: { ...t.venue, programTitle: h.program ?? t.venue.programTitle, title: h.venue ?? t.venue.title },
-    heart: { ...t.heart, title: h.heart ?? t.heart.title },
-    blessing: { ...t.blessing, title: h.blessing ?? t.blessing.title },
-    opening: { ...t.opening, tapToOpen: h.tap ?? t.opening.tapToOpen },
-    hosts: { ...t.hosts, thanks: h.thanks ?? t.hosts.thanks, waiting: h.waiting ?? t.hosts.waiting },
-  }, lang === "uz" ? glueWords : lang === "ru" ? glueRuWords : glueKkWords) as unknown as Texts;
+  return glueDeep(
+    {
+      ...t,
+      countdown: { ...t.countdown, title: h.countdown ? allOccasions(h.countdown) : t.countdown.title },
+      date: { ...t.date, title: h.date ? allOccasions(h.date) : t.date.title },
+      venue: { ...t.venue, programTitle: h.program ?? t.venue.programTitle, title: h.venue ?? t.venue.title },
+      heart: { ...t.heart, title: h.heart ?? t.heart.title },
+      blessing: { ...t.blessing, title: h.blessing ?? t.blessing.title },
+      opening: { ...t.opening, tapToOpen: h.tap ?? t.opening.tapToOpen },
+      hosts: { ...t.hosts, thanks: h.thanks ?? t.hosts.thanks, waiting: h.waiting ?? t.hosts.waiting },
+    },
+    lang === "uz" ? glueWords : lang === "ru" ? glueRuWords : glueKkWords,
+  ) as unknown as Texts;
 }

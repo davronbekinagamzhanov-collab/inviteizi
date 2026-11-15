@@ -1,5 +1,5 @@
-import {MarketingBrandProvider} from "@/components/marketing/BrandContext";
-import {marketingFlags} from "@/lib/marketing/config";
+import { MarketingBrandProvider } from "@/components/marketing/BrandContext";
+import { marketingFlags } from "@/lib/marketing/config";
 import { glueData } from "@/lib/typography";
 import { Suspense } from "react";
 import type { Metadata } from "next";
@@ -65,7 +65,16 @@ async function Invitation({ params }: { params: PageProps<"/[slug]">["params"] }
     notFound();
   }
   // До оплаты НАМУНА живёт 24 часа: гостю — что это неоплаченный образец, а не «тадбир ўтди»
-  if (page.mode === "expired") return <Expired texts={page.order.status === "active" || page.order.status === "archived" ? undefined : t.invitationPage.namunaExpired} />;
+  if (page.mode === "expired")
+    return (
+      <Expired
+        texts={
+          page.order.status === "active" || page.order.status === "archived"
+            ? undefined
+            : t.invitationPage.namunaExpired
+        }
+      />
+    );
   const design = getDesign(page.order.templateId);
   if (!design) notFound();
 
@@ -76,12 +85,22 @@ async function Invitation({ params }: { params: PageProps<"/[slug]">["params"] }
   const allowed = env.extraLangs();
   const langs = withPhotos.langs?.filter((l) => allowed.includes(l));
   const data = { ...withPhotos, langs: langs?.length ? langs : undefined };
-  const flags=marketingFlags();
-  let source:string|null=null;
+  const flags = marketingFlags();
+  let source: string | null = null;
   // A marketing lookup must never make an otherwise valid paid invitation unavailable.
-  try{if(page.mode==="full"&&flags.referrals){const marketingStore=new (await import("@/bot/repo-pg")).PgRepo().marketing;source=await marketingStore.ready()?await marketingStore.publicCode(page.order.id):null;}}
-  catch(e){console.error("invitation attribution unavailable",e instanceof Error?e.name:"Error");}
-  return <MarketingBrandProvider enabled={flags.ui} source={source}><Design data={glueData(data)} mode={page.mode} art={existingArt(design)} /></MarketingBrandProvider>;
+  try {
+    if (page.mode === "full" && flags.referrals) {
+      const marketingStore = new (await import("@/bot/repo-pg")).PgRepo().marketing;
+      source = (await marketingStore.ready()) ? await marketingStore.publicCode(page.order.id) : null;
+    }
+  } catch (e) {
+    console.error("invitation attribution unavailable", e instanceof Error ? e.name : "Error");
+  }
+  return (
+    <MarketingBrandProvider enabled={flags.ui} source={source}>
+      <Design data={glueData(data)} mode={page.mode} art={existingArt(design)} />
+    </MarketingBrandProvider>
+  );
 }
 
 /** Пока загружается заказ: тот же молочный фон, без мигания белым */

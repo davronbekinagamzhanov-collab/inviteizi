@@ -6,7 +6,7 @@ import { handleRsvpRequest } from "@/lib/rsvp";
 
 export async function POST(request: Request) {
   // Preview must never write through inherited live credentials. Native fixture tests cover mutations.
-  if(process.env.VERCEL_ENV==="preview")return new Response(null,{status:404});
+  if (process.env.VERCEL_ENV === "preview") return new Response(null, { status: 404 });
   try {
     return await handleRsvpRequest(request, {
       repo: new PgRepo(),

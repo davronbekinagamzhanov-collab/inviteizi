@@ -1,3 +1,5 @@
 @media (prefers-reduced-motion: reduce) {
- .badge { transition-duration: 0s !important; }
+  .badge {
+    transition-duration: 0s !important;
+  }
 }

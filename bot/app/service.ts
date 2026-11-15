@@ -1,5 +1,5 @@
-import {computeExpiresAt} from "@/lib/orders";
-import {flushMarketing} from "@/bot/marketing";
+import { computeExpiresAt } from "@/lib/orders";
+import { flushMarketing } from "@/bot/marketing";
 /**
  * Сервер Mini App (/app): те же заказы, черновик и правила, что у чата (bot/flow).
  * Каждая функция получает уже проверенного пользователя (initData — lib/tg-init-data.ts) и Deps.
@@ -16,7 +16,14 @@ import { kzToday } from "../calendar";
 import { PAID_STATUSES, PAYABLE_STATUSES, txFor } from "../flow/util";
 import { pageMode } from "@/lib/orders";
 import { adminCard, checkLines, decisionButtons, upsertDraftOrder, type UpsertOutcome } from "../flow/orders";
-import { validateForm, type FieldError, type FormInput, cleanOwnText, graphemes, MAX_CUSTOM_TEXT } from "@/lib/order-rules";
+import {
+  validateForm,
+  type FieldError,
+  type FormInput,
+  cleanOwnText,
+  graphemes,
+  MAX_CUSTOM_TEXT,
+} from "@/lib/order-rules";
 import { isQuiet } from "@/lib/quiet-hours";
 import { PHOTO_MAX_COUNT } from "../own-photo";
 import { ownMusicPath } from "../own-music";
@@ -127,7 +134,11 @@ function reasonIn(reason: string | null | undefined, lang: Lang): string | null 
 }
 
 function eventsPassed(deps: Deps, o: OrderRecord) {
-  const last = o.data.events.map((e) => e.date).filter(Boolean).sort().at(-1);
+  const last = o.data.events
+    .map((e) => e.date)
+    .filter(Boolean)
+    .sort()
+    .at(-1);
   return !!last && last < kzToday(deps.now());
 }
 
@@ -137,11 +148,26 @@ function draftOf(s: Draft): AppDraft | null {
   const d = s.data ?? {};
   return {
     templateId: s.templateId,
-    form: { ...d, photos: undefined, textId: undefined, customText: undefined, rsvp: undefined, langs: undefined, customTexts: undefined, mainLang: undefined } as FormInput,
+    form: {
+      ...d,
+      photos: undefined,
+      textId: undefined,
+      customText: undefined,
+      rsvp: undefined,
+      langs: undefined,
+      customTexts: undefined,
+      mainLang: undefined,
+    } as FormInput,
     photos: d.photos,
     textId: d.textId,
     customText: d.customText,
-    music: !s.music ? undefined : s.music.kind !== "own" ? s.music : s.music.url ? { kind: "own", url: s.music.url, title: s.music.title } : undefined,
+    music: !s.music
+      ? undefined
+      : s.music.kind !== "own"
+        ? s.music
+        : s.music.url
+          ? { kind: "own", url: s.music.url, title: s.music.title }
+          : undefined,
     rsvp: d.rsvp,
     langs: d.langs,
     customTexts: d.customTexts,
@@ -155,7 +181,8 @@ function draftOf(s: Draft): AppDraft | null {
 const LEGACY_DRAFT = "legacy";
 const draftKey = (id: unknown) => (typeof id === "string" && id ? id.slice(0, 64) : LEGACY_DRAFT);
 /** Этот черновик клиент уже отменил (запрос сохранения пришёл позже отмены) */
-const isCancelledDraft = (prev: Draft | undefined, d: AppDraft) => !!prev?.cancelled && prev.cancelled === draftKey(d.draftId);
+const isCancelledDraft = (prev: Draft | undefined, d: AppDraft) =>
+  !!prev?.cancelled && prev.cancelled === draftKey(d.draftId);
 
 /** Языки, которые клиент может добавить сейчас */
 export const allowedLangs = (deps: Deps): ExtraLang[] => (deps.env.kazakhEnabled ? ["ru", "kk"] : ["ru"]);
@@ -168,7 +195,11 @@ export function cleanLangs(deps: Deps, raw: unknown): ExtraLang[] | undefined {
 }
 
 /** Свой текст на других языках: только для выбранных языков и только если есть свой узбекский текст */
-export function cleanCustomTexts(langs: ExtraLang[] | undefined, own: string | undefined, raw: unknown): Partial<Record<ExtraLang, string>> | undefined {
+export function cleanCustomTexts(
+  langs: ExtraLang[] | undefined,
+  own: string | undefined,
+  raw: unknown,
+): Partial<Record<ExtraLang, string>> | undefined {
   if (!own || !langs || !raw || typeof raw !== "object") return undefined;
   const out: Partial<Record<ExtraLang, string>> = {};
   for (const l of langs) {
@@ -215,11 +246,27 @@ export async function confirmPay(deps: Deps, u: AppUser, orderId: unknown, terms
   if (o.status === "receipt_sent") return { error: "waiting" as const };
   if (!PAYABLE_STATUSES.includes(o.status)) return { error: "closed" as const };
   if (eventsPassed(deps, o)) return { error: "passed" as const };
-  if(o.amount===0&&deps.env.marketing?.promos&&deps.repo.marketing){
-    const paid=await deps.repo.marketing.confirm(o.id,u.id,deps.now(),deps.env.publicBaseUrl,'promotion',computeExpiresAt(o.data.events),deps.env.marketing);
-    if(!paid)return {error:'closed' as const};await flushMarketing(deps);const fresh=await deps.repo.getOrder(o.id);return fresh?{ok:true as const,order:appOrder(deps,fresh,(await deps.repo.getUser(u.id))?.lang??'uz')}:{error:'notFound' as const};
+  if (o.amount === 0 && deps.env.marketing?.promos && deps.repo.marketing) {
+    const paid = await deps.repo.marketing.confirm(
+      o.id,
+      u.id,
+      deps.now(),
+      deps.env.publicBaseUrl,
+      "promotion",
+      computeExpiresAt(o.data.events),
+      deps.env.marketing,
+    );
+    if (!paid) return { error: "closed" as const };
+    await flushMarketing(deps);
+    const fresh = await deps.repo.getOrder(o.id);
+    return fresh
+      ? { ok: true as const, order: appOrder(deps, fresh, (await deps.repo.getUser(u.id))?.lang ?? "uz") }
+      : { error: "notFound" as const };
   }
-  const r = await deps.repo.transition(o.id, PAYABLE_STATUSES, "awaiting_payment", { payConfirmedAt: deps.now(), termsAcceptedAt: deps.now() });
+  const r = await deps.repo.transition(o.id, PAYABLE_STATUSES, "awaiting_payment", {
+    payConfirmedAt: deps.now(),
+    termsAcceptedAt: deps.now(),
+  });
   if (!r) return { error: "closed" as const };
   return { ok: true as const, order: appOrder(deps, r, (await deps.repo.getUser(u.id))?.lang ?? "uz") };
 }
@@ -232,7 +279,8 @@ export async function setLang(deps: Deps, u: AppUser, lang: unknown) {
 }
 
 export async function toggleFavorite(deps: Deps, u: AppUser, templateId: unknown, saved: unknown) {
-  if (typeof templateId !== "string" || !getDesign(templateId) || typeof saved !== "boolean") return { error: "bad" as const };
+  if (typeof templateId !== "string" || !getDesign(templateId) || typeof saved !== "boolean")
+    return { error: "bad" as const };
   await deps.repo.setFavorite(u.id, templateId, saved);
   return { favorites: await deps.repo.listFavorites(u.id) };
 }
@@ -244,7 +292,9 @@ export async function musicFor(deps: Deps, templateId: unknown, lang: Lang) {
   const mine = await deps.repo.listMusic(design.occasion);
   const ids = new Set(mine.map((m) => m.id));
   // «Бошқа мусиқалар»: мелодии остальных тадбиров с подписью категории
-  const others = (await deps.repo.listMusic()).filter((m) => !ids.has(m.id) && m.occasion && m.occasion !== design.occasion);
+  const others = (await deps.repo.listMusic()).filter(
+    (m) => !ids.has(m.id) && m.occasion && m.occasion !== design.occasion,
+  );
   return {
     tracks: mine.map((m) => ({ id: m.id, title: title(m), url: m.fileUrl })),
     others: others.map((m) => ({ id: m.id, title: title(m), url: m.fileUrl, occasion: m.occasion! })),
@@ -271,7 +321,11 @@ export async function musicUpload(deps: Deps, ext: unknown, size: unknown) {
 /** Фото клиента: только наши адреса из бакета photos, не больше трёх */
 function cleanPhotos(deps: Deps, photos: unknown): string[] | undefined {
   if (!Array.isArray(photos)) return undefined;
-  const ok = photos.filter((p): p is string => typeof p === "string" && /^https:\/\/[a-z0-9]+\.supabase\.co\/storage\/v1\/object\/public\/photos\/client\/[a-f0-9]{64}\.webp$/.test(p));
+  const ok = photos.filter(
+    (p): p is string =>
+      typeof p === "string" &&
+      /^https:\/\/[a-z0-9]+\.supabase\.co\/storage\/v1\/object\/public\/photos\/client\/[a-f0-9]{64}\.webp$/.test(p),
+  );
   return ok.length ? [...new Set(ok)].slice(0, PHOTO_MAX_COUNT) : undefined;
 }
 
@@ -283,8 +337,16 @@ function toDraft(deps: Deps, prev: Draft, d: AppDraft, data: Partial<InvitationD
       ? { kind: "none" }
       : d.music?.kind === "list" && typeof d.music.musicId === "string"
         ? { kind: "list", musicId: d.music.musicId.slice(0, 64) }
-        : d.music?.kind === "own" && typeof d.music.url === "string" && ownMusicPath(d.music.url) && /^https:\/\/[a-z0-9]+\.supabase\.co\/storage\/v1\/object\/public\/music\/own\//.test(d.music.url)
-          ? { kind: "own", fileId: prev.music?.kind === "own" && prev.music.url === d.music.url ? prev.music.fileId : "app", url: d.music.url, title: typeof d.music.title === "string" ? d.music.title.slice(0, 60) : undefined }
+        : d.music?.kind === "own" &&
+            typeof d.music.url === "string" &&
+            ownMusicPath(d.music.url) &&
+            /^https:\/\/[a-z0-9]+\.supabase\.co\/storage\/v1\/object\/public\/music\/own\//.test(d.music.url)
+          ? {
+              kind: "own",
+              fileId: prev.music?.kind === "own" && prev.music.url === d.music.url ? prev.music.fileId : "app",
+              url: d.music.url,
+              title: typeof d.music.title === "string" ? d.music.title.slice(0, 60) : undefined,
+            }
           : prev.music;
   const own = cleanOwnText(d.customText);
   const photos = design?.clientPhotos ? cleanPhotos(deps, d.photos) : undefined;
@@ -308,7 +370,9 @@ function toDraft(deps: Deps, prev: Draft, d: AppDraft, data: Partial<InvitationD
       rsvp: d.rsvp !== false,
       // Языки сняли — пишем «пусто», чтобы заказ вернулся к одному узбекскому (до этого колонку не трогаем)
       langs: langs ?? (prev.data?.langs?.length ? [] : undefined),
-      customTexts: cleanCustomTexts(langs, "value" in own ? own.value : undefined, d.customTexts) ?? (prev.data?.customTexts ? {} : undefined),
+      customTexts:
+        cleanCustomTexts(langs, "value" in own ? own.value : undefined, d.customTexts) ??
+        (prev.data?.customTexts ? {} : undefined),
       // Главный язык — только из выбранных; иначе узбекский
       mainLang: typeof d.mainLang === "string" && langs?.includes(d.mainLang) ? d.mainLang : undefined,
     },
@@ -320,7 +384,9 @@ const MAX_DRAFT_JSON = 16_000;
 /** Сохранить черновик (каждое изменение формы, с задержкой на клиенте). Ничего не проверяет строго — это черновик */
 export async function saveDraft(deps: Deps, u: AppUser, d: AppDraft) {
   if (!d || typeof d !== "object" || JSON.stringify(d).length > MAX_DRAFT_JSON) return { error: "bad" as const };
-  const user = (await deps.repo.getUser(u.id)) ?? (await deps.repo.touchUser({ id: u.id, username: u.username, firstName: u.firstName }));
+  const user =
+    (await deps.repo.getUser(u.id)) ??
+    (await deps.repo.touchUser({ id: u.id, username: u.username, firstName: u.firstName }));
   const prev = user.state as Draft;
   // Гонка: сохранение ушло до «Бекор қилиш», а дошло после — черновик не воскрешаем
   if (isCancelledDraft(prev, d)) return { error: "cancelled" as const };
@@ -352,12 +418,16 @@ export async function submitDraft(deps: Deps, u: AppUser, d: AppDraft): Promise<
   const v = validateForm(design.occasion, (d.form ?? {}) as FormInput, kzToday(deps.now()));
   if ("errors" in v) return { error: "fields", fields: v.errors };
   const own = cleanOwnText(d.customText);
-  if (typeof d.customText === "string" && "problem" in own && own.problem === "long") return { error: "textLong", length: graphemes(d.customText.trim()), max: MAX_CUSTOM_TEXT };
+  if (typeof d.customText === "string" && "problem" in own && own.problem === "long")
+    return { error: "textLong", length: graphemes(d.customText.trim()), max: MAX_CUSTOM_TEXT };
   for (const l of EXTRA_LANGS) {
     const tr = d.customTexts?.[l];
-    if (typeof tr === "string" && graphemes(tr.trim()) > MAX_CUSTOM_TEXT) return { error: "textLong", length: graphemes(tr.trim()), max: MAX_CUSTOM_TEXT };
+    if (typeof tr === "string" && graphemes(tr.trim()) > MAX_CUSTOM_TEXT)
+      return { error: "textLong", length: graphemes(tr.trim()), max: MAX_CUSTOM_TEXT };
   }
-  const user = (await deps.repo.getUser(u.id)) ?? (await deps.repo.touchUser({ id: u.id, username: u.username, firstName: u.firstName }));
+  const user =
+    (await deps.repo.getUser(u.id)) ??
+    (await deps.repo.touchUser({ id: u.id, username: u.username, firstName: u.firstName }));
   const prev = user.state as Draft;
   if (isCancelledDraft(prev, d)) return { error: "notFound" };
   const draft = toDraft(deps, prev, d, v.data);
@@ -365,7 +435,10 @@ export async function submitDraft(deps: Deps, u: AppUser, d: AppDraft): Promise<
   // Мелодия — из нашего списка (своего тадбира или «Бошқа мусиқалар»); несуществующая — первая мелодия тадбира
   const tracks = await deps.repo.listMusic(design.occasion);
   const all = await deps.repo.listMusic();
-  if (!draft.music || (draft.music.kind === "list" && !all.some((t) => t.id === (draft.music as { musicId: string }).musicId))) {
+  if (
+    !draft.music ||
+    (draft.music.kind === "list" && !all.some((t) => t.id === (draft.music as { musicId: string }).musicId))
+  ) {
     draft.music = tracks[0] ? { kind: "list", musicId: tracks[0].id } : { kind: "none" };
   }
   // Готовый текст должен существовать для этого тадбира, иначе — лучший (первый)
@@ -382,14 +455,25 @@ export async function submitDraft(deps: Deps, u: AppUser, d: AppDraft): Promise<
         // Черновик правки остаётся привязан к заказу: следующее «Сақлаш» обновит ту же ссылку
         await deps.repo.saveStep(u.id, "idle", { ...draft, q: q + 1 } as Record<string, unknown>);
       } else {
-        await deps.repo.saveStep(u.id, "idle", { q: q + 2, draftId: draft.draftId, templateId: draft.templateId, occasion: draft.occasion, format: draft.format, orderId: r.order.id, music: draft.music, data: draft.data } as Record<string, unknown>);
+        await deps.repo.saveStep(u.id, "idle", {
+          q: q + 2,
+          draftId: draft.draftId,
+          templateId: draft.templateId,
+          occasion: draft.occasion,
+          format: draft.format,
+          orderId: r.order.id,
+          music: draft.music,
+          data: draft.data,
+        } as Record<string, unknown>);
       }
       return { ok: true, order: appOrder(deps, r.order, user.lang ?? "uz"), created: r.kind === "created" };
     }
     case "race": {
       // Двойное нажатие: заказ уже создан параллельным запросом — отдаём его
       const last = (await deps.repo.listOrdersByUser(u.id))[0];
-      return last && PAYABLE_STATUSES.includes(last.status) ? { ok: true, order: appOrder(deps, last, user.lang ?? "uz"), created: false } : { error: "busy" };
+      return last && PAYABLE_STATUSES.includes(last.status)
+        ? { ok: true, order: appOrder(deps, last, user.lang ?? "uz"), created: false }
+        : { error: "busy" };
     }
     case "catalogChanged":
       return { error: "design" };
@@ -401,14 +485,27 @@ export async function submitDraft(deps: Deps, u: AppUser, d: AppDraft): Promise<
 }
 
 /** Правка неоплаченного заказа: заказ → черновик приложения */
-export async function editOrder(deps: Deps, u: AppUser, orderId: unknown): Promise<{ draft: AppDraft } | { error: "notFound" | "closed" }> {
+export async function editOrder(
+  deps: Deps,
+  u: AppUser,
+  orderId: unknown,
+): Promise<{ draft: AppDraft } | { error: "notFound" | "closed" }> {
   if (typeof orderId !== "string") return { error: "notFound" };
   const o = await deps.repo.getOrder(orderId).catch(() => null);
   if (!o || o.userId !== u.id) return { error: "notFound" };
   if (!PAYABLE_STATUSES.includes(o.status)) return { error: "closed" };
   const user = await deps.repo.getUser(u.id);
   const prev = (user?.state ?? {}) as Draft;
-  const draft: Draft = { q: (prev.q ?? 0) + 1, draftId: randomUUID(), occasion: o.occasion, format: o.format, templateId: o.templateId, orderId: o.id, music: o.music, data: { ...o.data } };
+  const draft: Draft = {
+    q: (prev.q ?? 0) + 1,
+    draftId: randomUUID(),
+    occasion: o.occasion,
+    format: o.format,
+    templateId: o.templateId,
+    orderId: o.id,
+    music: o.music,
+    data: { ...o.data },
+  };
   await deps.repo.saveStep(u.id, "idle", draft as Record<string, unknown>);
   return { draft: draftOf(draft)! };
 }
@@ -425,7 +522,11 @@ function cancelStep(o: OrderRecord | null, d: Draft): number {
  * фото и своей песней; остаётся только обезличенная запись «отменён на шаге N». Чужой, оплаченный
  * или с чеком на проверке — нельзя.
  */
-export async function cancelOrder(deps: Deps, u: AppUser, orderId: unknown): Promise<{ ok: true } | { error: "notFound" | "closed" | "waiting" }> {
+export async function cancelOrder(
+  deps: Deps,
+  u: AppUser,
+  orderId: unknown,
+): Promise<{ ok: true } | { error: "notFound" | "closed" | "waiting" }> {
   const user = await deps.repo.getUser(u.id);
   const st = (user?.state ?? {}) as Draft;
   let order: OrderRecord | null = null;
@@ -455,10 +556,17 @@ export async function cancelOrder(deps: Deps, u: AppUser, orderId: unknown): Pro
   }
   const design = getDesign(order?.templateId ?? st.templateId ?? "");
   await deps.repo
-    .recordCancellation({ step, occasion: design?.occasion ?? null, format: design?.format ?? null, templateId: design?.id ?? null })
+    .recordCancellation({
+      step,
+      occasion: design?.occasion ?? null,
+      format: design?.format ?? null,
+      templateId: design?.id ?? null,
+    })
     // Нет таблицы order_cancellations (миграция не применена) — отмена всё равно прошла, запись пропускаем
     .catch((e) => console.warn("cancel record skipped", e instanceof Error ? e.name : "Error"));
-  await removeUnusedMedia(deps, removed).catch((e) => console.error("cancel media", e instanceof Error ? e.name : "Error"));
+  await removeUnusedMedia(deps, removed).catch((e) =>
+    console.error("cancel media", e instanceof Error ? e.name : "Error"),
+  );
   return { ok: true };
 }
 
@@ -478,11 +586,18 @@ export async function listOrders(deps: Deps, u: AppUser) {
 
 export const RECEIPT_MAX_BYTES = 10 * 1024 * 1024;
 export type ReceiptFile = { bytes: Uint8Array; mime: string; name: string };
-export type ReceiptResult = { ok: true; night: boolean } | { error: "notFound" | "closed" | "waiting" | "passed" | "format" | "tooBig" | "send" | "notConfirmed" };
+export type ReceiptResult =
+  | { ok: true; night: boolean }
+  | { error: "notFound" | "closed" | "waiting" | "passed" | "format" | "tooBig" | "send" | "notConfirmed" };
 
 /** Картинка → JPEG (Telegram показывает её как фото), PDF — документом */
-export async function receiptPayload(f: ReceiptFile): Promise<{ kind: "photo" | "document"; bytes: Uint8Array; name: string } | null> {
-  const isPdf = f.mime === "application/pdf" || /\.pdf$/i.test(f.name) || Buffer.from(f.bytes.subarray(0, 5)).toString("latin1") === "%PDF-";
+export async function receiptPayload(
+  f: ReceiptFile,
+): Promise<{ kind: "photo" | "document"; bytes: Uint8Array; name: string } | null> {
+  const isPdf =
+    f.mime === "application/pdf" ||
+    /\.pdf$/i.test(f.name) ||
+    Buffer.from(f.bytes.subarray(0, 5)).toString("latin1") === "%PDF-";
   if (isPdf) return { kind: "document", bytes: f.bytes, name: "chek.pdf" };
   try {
     const { toJpeg } = await import("../own-photo");
@@ -508,7 +623,12 @@ export async function submitReceipt(deps: Deps, u: AppUser, orderId: unknown, f:
 
   // Сначала «занимаем» заказ: второй чек (двойное нажатие) сюда не дойдёт
   const now = deps.now();
-  const claimed = await deps.repo.transition(o.id, PAYABLE_STATUSES, "receipt_sent", { receiptAt: now, rejectReason: null, adminRemindedAt: null, receipt: null });
+  const claimed = await deps.repo.transition(o.id, PAYABLE_STATUSES, "receipt_sent", {
+    receiptAt: now,
+    rejectReason: null,
+    adminRemindedAt: null,
+    receipt: null,
+  });
   if (!claimed) return { error: "waiting" };
 
   const client = await deps.repo.getUser(u.id);
@@ -516,10 +636,17 @@ export async function submitReceipt(deps: Deps, u: AppUser, orderId: unknown, f:
   for (const adminId of await deps.repo.listAdminIds()) {
     const lang = (await deps.repo.getUser(adminId))?.lang ?? "uz";
     const tx = txFor(lang);
-    const opts = { caption: adminCard(deps, claimed, lang, client), markup: { inline: decisionButtons(tx, claimed.number) }, fileName: payload.name };
+    const opts = {
+      caption: adminCard(deps, claimed, lang, client),
+      markup: { inline: decisionButtons(tx, claimed.number) },
+      fileName: payload.name,
+    };
     const file = fileId ?? payload.bytes;
     try {
-      const sent = payload.kind === "document" ? await deps.tg.sendDocument(adminId, file, opts) : await deps.tg.sendPhoto(adminId, file, opts);
+      const sent =
+        payload.kind === "document"
+          ? await deps.tg.sendDocument(adminId, file, opts)
+          : await deps.tg.sendPhoto(adminId, file, opts);
       fileId ??= sent.fileId;
     } catch (e) {
       // Админ мог не запускать бота — остальным всё равно отправляем

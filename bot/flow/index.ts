@@ -1,4 +1,5 @@
-import {marketingCommand,withMarketingReady} from "../marketing";
+import { correctionStep, beginCorrection } from "./correction";
+import { marketingCommand, withMarketingReady } from "../marketing";
 /**
  * Логика бота: handle(deps, update). Telegram — только через deps.tg, база — через deps.repo.
  * Бот помнит шаг (users.step) и черновик (users.state); на непонятное — подсказка и повтор вопроса.
@@ -8,9 +9,33 @@ import type { Ctx, Deps, Draft, Result, Step, StepId } from "./types";
 import { cat, catalog, dropCatalog, fmt } from "./steps-order";
 import { age, bride, cause, groom, hosts, person, relation, sideAsk, sideBride } from "./steps-form";
 import { photoAsk, photoUpload } from "./steps-photo";
-import { evPlaces, evVenueName, evMap, evLink, evAddress, evDate, evLoc, evSameDay, evTime, evTimeCustom, evVenue, more } from "./steps-event";
+import {
+  evPlaces,
+  evVenueName,
+  evMap,
+  evLink,
+  evAddress,
+  evDate,
+  evLoc,
+  evSameDay,
+  evTime,
+  evTimeCustom,
+  evVenue,
+  more,
+} from "./steps-event";
 import { evMenu, langs, langText, music, musicList, musicOwn, review, rsvp, text, textOwn } from "./steps-final";
-import { approve, askReceipt, askRejectReason, editOrder, myOrders, payOrder, receipt, reject, resendLink, rsvpAnswers } from "./orders";
+import {
+  approve,
+  askReceipt,
+  askRejectReason,
+  editOrder,
+  myOrders,
+  payOrder,
+  receipt,
+  reject,
+  resendLink,
+  rsvpAnswers,
+} from "./orders";
 import { cmdFind, cmdOrders, cmdStats } from "./admin";
 import { mainMenu, ownerUrl, roleOf, send, startMenu, texts, txFor } from "./util";
 import type { Lang } from "@/lib/domain";
@@ -74,7 +99,11 @@ export const steps: Record<StepId, Step> = {
   evTimeCustom,
   evVenue,
   evAddress,
-  evLoc, evPlaces, evVenueName, evMap, evLink,
+  evLoc,
+  evPlaces,
+  evVenueName,
+  evMap,
+  evLink,
   more,
   text,
   textOwn,
@@ -87,6 +116,7 @@ export const steps: Record<StepId, Step> = {
   review,
   evMenu,
   receipt,
+  correction: correctionStep,
   partnerName,
   partnerPhone,
   partnerRate,
@@ -113,7 +143,7 @@ export async function handle(baseDeps: Deps, u: BotUpdate): Promise<boolean> {
   let deps: Deps = { ...baseDeps, tg: attempt.tg };
   let c: Ctx | undefined;
   try {
-    deps=await withMarketingReady(deps);
+    deps = await withMarketingReady(deps);
     const isStart = u.kind === "command" && u.command === "start";
     const user = await deps.repo.touchUser({
       id: u.from.id,
@@ -122,7 +152,8 @@ export async function handle(baseDeps: Deps, u: BotUpdate): Promise<boolean> {
       // Одноразовые ссылки (mgr_, join_, o_) — не источник клиента и не должны лежать в базе
       source: isStart && u.args && !parseStartToken(u.args) ? u.args.slice(0, 64) : null,
     });
-    if(isStart&&u.args&&deps.env.marketing?.referrals&&deps.repo.marketing)await deps.repo.marketing.capture(user.id,u.args);
+    if (isStart && u.args && deps.env.marketing?.referrals && deps.repo.marketing)
+      await deps.repo.marketing.capture(user.id, u.args);
     if (u.updateId !== undefined && rememberUpdate(user.state.handledUpdates).includes(u.updateId)) {
       attempt.finish();
       return true;
@@ -159,7 +190,8 @@ export async function handle(baseDeps: Deps, u: BotUpdate): Promise<boolean> {
 // ── Переходы ──
 
 async function save(c: Ctx) {
-  if (c.u.updateId !== undefined || c.user.state.handledUpdates) c.s.handledUpdates = rememberUpdate(c.user.state.handledUpdates,c.u.updateId);
+  if (c.u.updateId !== undefined || c.user.state.handledUpdates)
+    c.s.handledUpdates = rememberUpdate(c.user.state.handledUpdates, c.u.updateId);
   await c.deps.repo.saveStep(c.user.id, c.step, c.s as Record<string, unknown>);
 }
 
@@ -238,7 +270,11 @@ async function askLang(c: Ctx) {
   const tx = texts.uz;
   // Казахский — только при KAZAKH_ENABLED (тексты ждут проверки носителем)
   const kk = Boolean(c.deps.env.kazakhEnabled);
-  const row = [{ text: tx.langUz, data: "lang:uz" }, { text: tx.langRu, data: "lang:ru" }, ...(kk ? [{ text: tx.langKk, data: "lang:kk" }] : [])];
+  const row = [
+    { text: tx.langUz, data: "lang:uz" },
+    { text: tx.langRu, data: "lang:ru" },
+    ...(kk ? [{ text: tx.langKk, data: "lang:kk" }] : []),
+  ];
   await send(c, kk ? tx.chooseLang3 : tx.chooseLang, { inline: [row] });
 }
 
@@ -272,7 +308,9 @@ async function chooseLang(c: Ctx, lang: string) {
 async function setAppButton(c: Ctx) {
   if (c.chatId !== c.user.id) return;
   const url = c.deps.env.miniAppUrl;
-  await c.deps.tg.setMenuButton(c.chatId, url ? { text: c.tx.menuButton, url } : null).catch((e) => console.warn("menu button", e instanceof Error ? e.name : "Error"));
+  await c.deps.tg
+    .setMenuButton(c.chatId, url ? { text: c.tx.menuButton, url } : null)
+    .catch((e) => console.warn("menu button", e instanceof Error ? e.name : "Error"));
 }
 
 /** Убрать старую нижнюю клавиатуру незаметно: служебное сообщение сразу удаляется */
@@ -303,7 +341,8 @@ async function help(c: Ctx) {
 type MenuKey = keyof (typeof texts)["uz"]["menu"];
 function menuKey(text: string): MenuKey | null {
   for (const tx of Object.values(texts)) {
-    for (const labels of [tx.menu, tx.menuLegacy]) for (const [k, label] of Object.entries(labels)) if (label === text) return k as MenuKey;
+    for (const labels of [tx.menu, tx.menuLegacy])
+      for (const [k, label] of Object.entries(labels)) if (label === text) return k as MenuKey;
   }
   return null;
 }
@@ -337,7 +376,11 @@ async function unknown(c: Ctx) {
 
 async function route(c: Ctx) {
   const u = c.u;
-  if(await marketingCommand(c)){if(u.updateId!==undefined&&c.deps.repo.marketing)await c.deps.repo.marketing.markUpdate(c.user.id,u.updateId);return;}
+  if (await marketingCommand(c)) {
+    if (u.updateId !== undefined && c.deps.repo.marketing)
+      await c.deps.repo.marketing.markUpdate(c.user.id, u.updateId);
+    return;
+  }
 
   if (u.kind === "callback") {
     const d = u.data;
@@ -446,6 +489,10 @@ async function stale(c: Ctx, n?: number) {
 }
 
 async function onCallback(c: Ctx, d: string) {
+  if (d.startsWith("fix:")) {
+    const result = await beginCorrection(c, Number(d.slice(4)));
+    return result ? apply(c, result) : undefined;
+  }
   if (d === "favorites") return favorites(c);
   if (d.startsWith("m:")) {
     const key = d.slice(2);
@@ -509,7 +556,7 @@ async function onCallback(c: Ctx, d: string) {
     const [, action, id] = d.split(":");
     if (action !== "choose") return favoriteAction(c, action, id);
     if (c.chatId !== c.user.id || !(await c.deps.repo.listFavorites(c.user.id)).includes(id)) return;
-    const design = activeDesigns().find(d => d.id === id);
+    const design = activeDesigns().find((d) => d.id === id);
     if (!design) return;
     const catIdx = pageOf(catalogList({ s: { occasion: design.occasion } }), id);
     // Идёт правка заказа или заполнение анкеты того же тадбира: меняем дизайн в ней, а не начинаем новый заказ

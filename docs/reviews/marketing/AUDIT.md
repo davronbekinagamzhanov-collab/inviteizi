@@ -3,6 +3,7 @@
 Base: main bb599e9afa8aa7faacb3810559528ca52d652b6d. PR13–19 are open Draft, not merged or modified. Their template/data/photo contracts remain additive; this task does not import their catalogues or designs. Runtime work is isolated in feature/referrals-marketing-automation.
 
 ## Existing architecture (reuse)
+
 - Telegram webhook: timing-safe secret header; normalize update; persistent handled-update markers plus process-local delivery ledger; pre-commit transient failures return503. Bot state uses question CAS; new-order creation consumes draft and inserts order transactionally (chat and Mini App share upsertDraftOrder).
 - Orders: seven statuses; saved format/quote, data/events, music/photos, stable slug_history. Receipt is evidence, not payment. Admin-only guarded receipt_sent→active CAS, paidAt/expiresAt, QR/link pack with text fallback. Demo personal sample24h; catalog demo uses fixed dates and full presentation.
 - Partners: partners/partner_earnings(one PK per order)/partner_payouts, fixed or percentage rate incl0, manager relationships, onboarding, daily reports, own-only stats. Integer KZT. Payout locks partner, verifies exact expected balance. First users.source is currently fixed at initial start. Reuse this ledger; customer referrals must not accidentally change customers into partner-role menus.
@@ -16,6 +17,7 @@ Base: main bb599e9afa8aa7faacb3810559528ca52d652b6d. PR13–19 are open Draft, n
 - Vercel: cacheComponents/partial prefetch, image optimization disabled, server max1 pooled connection, no Vercel cron config: pg_cron invokes authenticated /api/cron. All finance flags must default off; no live credentials or DB access during test/Preview QA.
 
 ## Planned safety invariants
+
 1. One existing earnings ledger/order PK; cash confirmation vs zero-price promotion are distinct audited events. No cash credit for free orders.
 2. Random opaque invitation mapping; strict Telegram ASCII payload≤64; server lookup, immutable order attribution; invalid/legacy links safely fall back. Existing commercial partner attribution has priority; first valid eligible referral wins and cannot overwrite an order snapshot.
 3. Coupon row lock plus durable expiring reservations; no N+1 redemption; confirmation/receipt freezes are atomic. Cancellation/expiry releases capacity; disabled/expired codes cannot newly reserve.

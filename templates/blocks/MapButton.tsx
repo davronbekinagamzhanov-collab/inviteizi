@@ -1,7 +1,6 @@
 import { t } from "@/texts/uz-cyrl";
 
-const DEFAULT_LOOK =
-  "rounded-full bg-primary px-7 py-3.5 text-paper shadow-lg shadow-primary/25 ring-1 ring-gold/60";
+const DEFAULT_LOOK = "rounded-full bg-primary px-7 py-3.5 text-paper shadow-lg shadow-primary/25 ring-1 ring-gold/60";
 
 /** Кнопка «Харитада очиш». href — из mapLink(): точные координаты, если они есть */
 export function MapButton({
