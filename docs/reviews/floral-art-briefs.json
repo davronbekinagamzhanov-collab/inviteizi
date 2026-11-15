@@ -1,0 +1,76 @@
+{
+  "heroConcepts": [
+    [
+      "girih-barg",
+      "fine botanical wedding illustration, natural ivory jasmine flowers and sage eucalyptus/olive leaves, restrained angular branch arrangement echoing Uzbek girih geometry, sage moss ivory palette"
+    ],
+    [
+      "gul-doira",
+      "fine botanical wedding illustration, organic open circular wreath of ivory garden roses, muted blush ranunculus and delicate sage leaves, asymmetric graceful loose florals, warm ivory dusty rose palette"
+    ],
+    [
+      "suvbuyoq-tuman",
+      "real hand-painted watercolor Uzbek wedding garden courtyard entrance, pale blue flowering branches and ivory jasmine, misty powder blue indigo granulation, restrained wedding drapery at carved wood doorway, no people"
+    ],
+    [
+      "suvbuyoq-zumrad",
+      "real hand-painted watercolor intimate Uzbek wedding garden with emerald foliage and ivory roses at a carved timber entrance, warm ivory paper, sap green emerald granulated pigments, no people"
+    ],
+    [
+      "suvbuyoq-upa",
+      "real hand-painted watercolor Uzbek nikoh garden, blossoming almond tree branches over an ivory and blush wedding entrance, muted dusty rose burnt sienna sage pigments, no people"
+    ]
+  ],
+  "companionPrompts": [
+    {
+      "id": "girih-barg",
+      "part": 2,
+      "prompt": "Create a new DISTINCT companion artwork for luxury nikoh wedding stationery. fine botanical wedding illustration, natural ivory jasmine flowers and sage eucalyptus/olive leaves, restrained angular branch arrangement echoing Uzbek girih geometry, sage moss ivory palette. Horizontal 3:2 composition: a delicate long flowering branch and loose pigment trails along the lower left and right edges, huge luminous blank ivory central and upper area for calendar and invitation text. No doorway scene, no complete wreath. Real handmade watercolor on cold pressed cotton paper, authentic granulation, pigment blooms, soft irregular painted edges, botanical observations, natural asymmetry. Restrained palette, subtle real paper grain, fresh modern Uzbek wedding atmosphere. Different flowers/branch shapes/composition from the hero. No text, no people, no faces, no objects still life, no blur, no CGI, no vector art."
+    },
+    {
+      "id": "girih-barg",
+      "part": 3,
+      "prompt": "Create a new DISTINCT companion artwork for luxury nikoh wedding stationery. fine botanical wedding illustration, natural ivory jasmine flowers and sage eucalyptus/olive leaves, restrained angular branch arrangement echoing Uzbek girih geometry, sage moss ivory palette. Horizontal 3:2 composition: an intimate view into a flowering wedding garden, only a small part of carved wood garden gate and climbing flowers on the far right, blossom petals drifting at left, quiet blank ivory left and central space, a joyful gentle closing illustration. Real handmade watercolor on cold pressed cotton paper, authentic granulation, pigment blooms, soft irregular painted edges, botanical observations, natural asymmetry. Restrained palette, subtle real paper grain, fresh modern Uzbek wedding atmosphere. Different flowers/branch shapes/composition from the hero. No text, no people, no faces, no objects still life, no blur, no CGI, no vector art."
+    },
+    {
+      "id": "gul-doira",
+      "part": 2,
+      "prompt": "Create a new DISTINCT companion artwork for luxury nikoh wedding stationery. fine botanical wedding illustration, organic open circular wreath of ivory garden roses, muted blush ranunculus and delicate sage leaves, asymmetric graceful loose florals, warm ivory dusty rose palette. Horizontal 3:2 composition: a delicate long flowering branch and loose pigment trails along the lower left and right edges, huge luminous blank ivory central and upper area for calendar and invitation text. No doorway scene, no complete wreath. Real handmade watercolor on cold pressed cotton paper, authentic granulation, pigment blooms, soft irregular painted edges, botanical observations, natural asymmetry. Restrained palette, subtle real paper grain, fresh modern Uzbek wedding atmosphere. Different flowers/branch shapes/composition from the hero. No text, no people, no faces, no objects still life, no blur, no CGI, no vector art."
+    },
+    {
+      "id": "gul-doira",
+      "part": 3,
+      "prompt": "Create a new DISTINCT companion artwork for luxury nikoh wedding stationery. fine botanical wedding illustration, organic open circular wreath of ivory garden roses, muted blush ranunculus and delicate sage leaves, asymmetric graceful loose florals, warm ivory dusty rose palette. Horizontal 3:2 composition: an intimate view into a flowering wedding garden, only a small part of carved wood garden gate and climbing flowers on the far right, blossom petals drifting at left, quiet blank ivory left and central space, a joyful gentle closing illustration. Real handmade watercolor on cold pressed cotton paper, authentic granulation, pigment blooms, soft irregular painted edges, botanical observations, natural asymmetry. Restrained palette, subtle real paper grain, fresh modern Uzbek wedding atmosphere. Different flowers/branch shapes/composition from the hero. No text, no people, no faces, no objects still life, no blur, no CGI, no vector art."
+    },
+    {
+      "id": "suvbuyoq-tuman",
+      "part": 2,
+      "prompt": "Create a new DISTINCT companion artwork for luxury nikoh wedding stationery. real hand-painted watercolor Uzbek wedding garden courtyard entrance, pale blue flowering branches and ivory jasmine, misty powder blue indigo granulation, restrained wedding drapery at carved wood doorway, no people. Horizontal 3:2 composition: a delicate long flowering branch and loose pigment trails along the lower left and right edges, huge luminous blank ivory central and upper area for calendar and invitation text. No doorway scene, no complete wreath. Real handmade watercolor on cold pressed cotton paper, authentic granulation, pigment blooms, soft irregular painted edges, botanical observations, natural asymmetry. Restrained palette, subtle real paper grain, fresh modern Uzbek wedding atmosphere. Different flowers/branch shapes/composition from the hero. No text, no people, no faces, no objects still life, no blur, no CGI, no vector art."
+    },
+    {
+      "id": "suvbuyoq-tuman",
+      "part": 3,
+      "prompt": "Create a new DISTINCT companion artwork for luxury nikoh wedding stationery. real hand-painted watercolor Uzbek wedding garden courtyard entrance, pale blue flowering branches and ivory jasmine, misty powder blue indigo granulation, restrained wedding drapery at carved wood doorway, no people. Horizontal 3:2 composition: an intimate view into a flowering wedding garden, only a small part of carved wood garden gate and climbing flowers on the far right, blossom petals drifting at left, quiet blank ivory left and central space, a joyful gentle closing illustration. Real handmade watercolor on cold pressed cotton paper, authentic granulation, pigment blooms, soft irregular painted edges, botanical observations, natural asymmetry. Restrained palette, subtle real paper grain, fresh modern Uzbek wedding atmosphere. Different flowers/branch shapes/composition from the hero. No text, no people, no faces, no objects still life, no blur, no CGI, no vector art."
+    },
+    {
+      "id": "suvbuyoq-zumrad",
+      "part": 2,
+      "prompt": "Create a new DISTINCT companion artwork for luxury nikoh wedding stationery. real hand-painted watercolor intimate Uzbek wedding garden with emerald foliage and ivory roses at a carved timber entrance, warm ivory paper, sap green emerald granulated pigments, no people. Horizontal 3:2 composition: a delicate long flowering branch and loose pigment trails along the lower left and right edges, huge luminous blank ivory central and upper area for calendar and invitation text. No doorway scene, no complete wreath. Real handmade watercolor on cold pressed cotton paper, authentic granulation, pigment blooms, soft irregular painted edges, botanical observations, natural asymmetry. Restrained palette, subtle real paper grain, fresh modern Uzbek wedding atmosphere. Different flowers/branch shapes/composition from the hero. No text, no people, no faces, no objects still life, no blur, no CGI, no vector art."
+    },
+    {
+      "id": "suvbuyoq-zumrad",
+      "part": 3,
+      "prompt": "Create a new DISTINCT companion artwork for luxury nikoh wedding stationery. real hand-painted watercolor intimate Uzbek wedding garden with emerald foliage and ivory roses at a carved timber entrance, warm ivory paper, sap green emerald granulated pigments, no people. Horizontal 3:2 composition: an intimate view into a flowering wedding garden, only a small part of carved wood garden gate and climbing flowers on the far right, blossom petals drifting at left, quiet blank ivory left and central space, a joyful gentle closing illustration. Real handmade watercolor on cold pressed cotton paper, authentic granulation, pigment blooms, soft irregular painted edges, botanical observations, natural asymmetry. Restrained palette, subtle real paper grain, fresh modern Uzbek wedding atmosphere. Different flowers/branch shapes/composition from the hero. No text, no people, no faces, no objects still life, no blur, no CGI, no vector art."
+    },
+    {
+      "id": "suvbuyoq-upa",
+      "part": 2,
+      "prompt": "Create a new DISTINCT companion artwork for luxury nikoh wedding stationery. real hand-painted watercolor Uzbek nikoh garden, blossoming almond tree branches over an ivory and blush wedding entrance, muted dusty rose burnt sienna sage pigments, no people. Horizontal 3:2 composition: a delicate long flowering branch and loose pigment trails along the lower left and right edges, huge luminous blank ivory central and upper area for calendar and invitation text. No doorway scene, no complete wreath. Real handmade watercolor on cold pressed cotton paper, authentic granulation, pigment blooms, soft irregular painted edges, botanical observations, natural asymmetry. Restrained palette, subtle real paper grain, fresh modern Uzbek wedding atmosphere. Different flowers/branch shapes/composition from the hero. No text, no people, no faces, no objects still life, no blur, no CGI, no vector art."
+    },
+    {
+      "id": "suvbuyoq-upa",
+      "part": 3,
+      "prompt": "Create a new DISTINCT companion artwork for luxury nikoh wedding stationery. real hand-painted watercolor Uzbek nikoh garden, blossoming almond tree branches over an ivory and blush wedding entrance, muted dusty rose burnt sienna sage pigments, no people. Horizontal 3:2 composition: an intimate view into a flowering wedding garden, only a small part of carved wood garden gate and climbing flowers on the far right, blossom petals drifting at left, quiet blank ivory left and central space, a joyful gentle closing illustration. Real handmade watercolor on cold pressed cotton paper, authentic granulation, pigment blooms, soft irregular painted edges, botanical observations, natural asymmetry. Restrained palette, subtle real paper grain, fresh modern Uzbek wedding atmosphere. Different flowers/branch shapes/composition from the hero. No text, no people, no faces, no objects still life, no blur, no CGI, no vector art."
+    }
+  ]
+}
