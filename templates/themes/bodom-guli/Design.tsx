@@ -196,7 +196,7 @@ export default function Design({ data, mode, art }: TemplateProps) {
           >
             <Blossom className="mx-auto mb-6 h-20 w-20" />
             <p className="font-display text-[36px]">{t.occasionTitles[inv.occasion]}</p>
-            <p className="mt-7 text-[17px]">{t.opening.tapToOpen}</p>
+            <p data-open-prompt className="mt-7 text-[17px]">{t.opening.tapToOpen}</p>
           </motion.div>
         </button>
       )}

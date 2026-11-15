@@ -25,3 +25,35 @@
 .letterWords p,.address,.hosts,.openHosts strong,.destination h3{overflow-wrap:anywhere}
 /* Prepare the three decoded silk layers before the first gesture, avoiding cold raster work during opening. */
 @media(prefers-reduced-motion:no-preference){.opening[data-ready=true] :is(.veilNear,.veilFar,.gauze){will-change:transform}}
+
+/*
+ * 16.11.2026 — низкое окно (Mini App ~600 px): колонка надписей ужимается по высоте самого блока (cqh),
+ * сначала узел и монограмма, потом шрифт; подсказка внизу больше не перекрывается.
+ */
+.opening .openInk {
+  container-type: size;
+  inset: max(7.5%, calc(env(safe-area-inset-top) + 16px)) 22px max(14%, calc(env(safe-area-inset-bottom) + 64px + var(--open-hint-space, 0px)));
+}
+.opening .openInk .knot {
+  width: clamp(80px, 22cqh, 140px);
+  height: clamp(28px, 8cqh, 50px);
+  margin: clamp(4px, 2cqh, 15px) auto clamp(2px, 0.6cqh, 4px);
+}
+.opening .openMonogram {
+  font-size: clamp(56px, 20cqh, 134px);
+  margin-top: clamp(4px, 2cqh, 14px);
+}
+.opening .openDedication {
+  font-size: clamp(18px, 4.4cqh, 28px);
+  margin-top: clamp(6px, 4.6cqh, 34px);
+}
+.opening .openNames {
+  font-size: min(var(--fit, 30px), clamp(20px, 5cqh, 30px));
+  margin-top: clamp(4px, 2.4cqh, 17px);
+}
+.opening .openDate {
+  margin-top: clamp(4px, 1.7cqh, 12px);
+}
+.opening .openHosts {
+  margin-top: clamp(4px, 2cqh, 14px);
+}

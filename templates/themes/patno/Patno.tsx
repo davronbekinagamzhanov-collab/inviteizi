@@ -157,7 +157,7 @@ export function Patno({ data, mode, melody, skin }: TemplateProps & { melody: Sc
             <p className={s.kicker}>{t.opening.invitation}</p>
             <Names inv={inv} as="p" className={s.coverNames} />
             <Drop className={s.coverDrop} />
-            <p className={s.coverTap}>{t.opening.tapToOpen}</p>
+            <p data-open-prompt className={s.coverTap}>{t.opening.tapToOpen}</p>
           </div>
         </div>
       )}

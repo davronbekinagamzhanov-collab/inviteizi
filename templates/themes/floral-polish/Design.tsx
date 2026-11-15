@@ -47,6 +47,6 @@ export function FloralPolish({data,mode,id,melody}:TemplateProps&{id:FloralId;me
 function Opening({id,kind,started,ready,onOpen,names,date}:{id:FloralId;kind:"girih"|"flower";started:boolean;ready:boolean;onOpen:()=>void;names:ReactNode;date:string}){
  return <button data-open data-mechanism={kind} data-started={started} className={`${s.reveal} ${kind==="girih"?s.gate:s.flower}`} disabled={!ready||started} onClick={onOpen} aria-label={t.opening.tapToOpen}>
   <Art id={id} part={3}/>
-  <span className={s.coverType}><small>{t.occasionTitles.nikoh}</small><strong>{names}</strong><span>{date}</span><small>{t.opening.tapToOpen}</small></span>
+  <span className={s.coverType}><small>{t.occasionTitles.nikoh}</small><strong>{names}</strong><span>{date}</span><small data-open-prompt>{t.opening.tapToOpen}</small></span>
  </button>;
 }

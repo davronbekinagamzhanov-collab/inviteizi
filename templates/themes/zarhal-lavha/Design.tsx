@@ -109,7 +109,7 @@ export default function Design({ data, mode }: TemplateProps) {
             <p className="mt-3 text-[16px] tracking-[.12em]">
               {t.date.short(inv.main.when.day, inv.main.when.monthIndex, inv.main.when.year)}
             </p>
-            <p className="mt-9 text-[17px]">{t.opening.tapToOpen}</p>
+            <p data-open-prompt className="mt-9 text-[17px]">{t.opening.tapToOpen}</p>
           </motion.div>
         </button>
       )}

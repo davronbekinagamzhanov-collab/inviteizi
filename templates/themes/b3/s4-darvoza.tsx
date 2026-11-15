@@ -101,7 +101,7 @@ export function Darvoza({ data, mode, melody, skin, look, motif, id }: TemplateP
           <span className={cx(s.plaque, b.soft, look.plaque)} style={{ "--len": nameLen(inv) } as CSSProperties}>
             <OpeningCaption inv={inv} nameClassName={s.plaqueName} metaClassName={s.plaqueMeta} />
           </span>
-          <span className={cx(s.tap, look.tap)}>{t.b3.tap}</span>
+          <span data-open-prompt className={cx(s.tap, look.tap)}>{t.b3.tap}</span>
         </button>
       )}
     </B3Shell>

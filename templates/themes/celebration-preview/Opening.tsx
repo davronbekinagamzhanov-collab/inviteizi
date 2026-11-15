@@ -35,6 +35,6 @@ export function Opening({inv,id,className}:{inv:Invitation;id:"sahar-sabosi";cla
    <span data-opening-date className={s.coverDate}><span>{t.date.long(e.when.day,e.when.monthIndex,e.when.year)}</span><strong>{e.time}</strong></span>
    <span data-opening-hosts className={s.coverHosts}>{inv.data.hosts}</span>
   </span>
-  <span data-opening-prompt className={s.openPrompt} role="status">{gate.status==="loading"?copy.loading:gate.status==="error"?copy.retry:copy.touch}</span>
+  <span data-open-prompt data-opening-prompt className={s.openPrompt} role="status">{gate.status==="loading"?copy.loading:gate.status==="error"?copy.retry:copy.touch}</span>
  </button>;
 }

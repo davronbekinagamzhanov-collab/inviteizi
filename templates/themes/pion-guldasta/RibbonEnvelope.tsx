@@ -118,7 +118,7 @@ export function RibbonEnvelope({ inv, age }: { inv: Invitation; age?: number }) 
             )}
           </button>
 
-          <motion.p
+          <motion.p data-open-prompt
             className="soft-pulse relative mt-10 text-[17px] tracking-[0.14em] text-[#8C6A6E]"
             animate={{ opacity: going ? 0 : 1 }}
             transition={{ duration: MOTION.fast, ease: MOTION.ease }}

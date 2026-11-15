@@ -174,7 +174,7 @@ export default function Design({ data, mode }: TemplateProps) {
               <p className="font-display text-[30px]">{t.occasionTitles[inv.occasion]}</p>
             </motion.div>
           </motion.div>
-          <motion.p
+          <motion.p data-open-prompt
             animate={{ opacity: inv.started ? 0 : 1 }}
             transition={{ duration: 0.15 }}
             className="absolute inset-x-5 bottom-[14%] text-[17px]"

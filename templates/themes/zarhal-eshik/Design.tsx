@@ -59,7 +59,7 @@ export default function Design({data,mode}:TemplateProps) {
         <div className="absolute inset-4 border border-[#98784c]/50"><Arch className="h-full w-full"/><div className="absolute top-1/2 left-1/2 h-8 w-8 -translate-x-1/2 rounded-full border-[5px] border-[#b18b4d] shadow-[inset_0_1px_2px_#fff5d9,0_2px_3px_#876f41]"/></div>
       </motion.div>)}
       <motion.div animate={{opacity:inv.started?0:1}} transition={{duration:.25}} className="pointer-events-none absolute inset-x-6 top-[16%] text-[#5d472e]"><p className="text-[14px] tracking-[.28em] uppercase">{t.opening.invitation}</p><p className="mt-5 font-display text-[40px]">{t.occasionTitles[inv.occasion]}</p></motion.div>
-      {!inv.started&&<p className="absolute inset-x-0 bottom-[12%] text-[16px] text-[#5d472e]">{t.opening.tapToOpen}</p>}
+      {!inv.started&&<p data-open-prompt className="absolute inset-x-0 bottom-[12%] text-[16px] text-[#5d472e]">{t.opening.tapToOpen}</p>}
     </button>}
   </InvitationShell>;
 }

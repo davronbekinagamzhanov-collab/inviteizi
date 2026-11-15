@@ -52,6 +52,6 @@ function Folio({names,date,started,start,finish}:{names:ReactNode;date:string;st
    <span className={s.leaf} aria-hidden><span className={s.inside}><span className={s.eyebrow}>{t.occasionTitles.nikoh}</span><strong>{names}</strong><span className={s.coverDate}>{date}</span></span></span>
    <span className={s.front}><img src={cover} alt="" aria-hidden/><span className={s.coverNames}><span className={s.eyebrow}>{t.occasionTitles.nikoh}</span><strong>{names}</strong><span className={s.coverDate}>{date}</span></span></span>
   </span>
-  <span className={s.tap}>{t.opening.tapToOpen}</span>
+  <span data-open-prompt className={s.tap}>{t.opening.tapToOpen}</span>
  </button>;
 }

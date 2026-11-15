@@ -113,7 +113,7 @@ export function Hikoya({
           <span className={cx(s.openText, b.soft, look.openText)} style={{ "--len": nameLen(inv) } as CSSProperties}>
             <span className={s.openMotif}>{motif}</span>
             <OpeningCaption inv={inv} nameClassName={cx(s.openNames, look.openNames)} metaClassName={s.openMeta} />
-            <span className={cx(s.tap, look.tap)}>{t.b3.tap}</span>
+            <span data-open-prompt className={cx(s.tap, look.tap)}>{t.b3.tap}</span>
           </span>
         </button>
       )}

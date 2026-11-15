@@ -111,7 +111,7 @@ export default function Design({ data, mode }: TemplateProps) {
             <p className="text-[12px] tracking-[.22em] uppercase">{t.opening.invitation}</p>
             <p className="mt-5 text-[34px] italic text-primary">{t.occasionTitles[inv.occasion]}</p>
           </motion.div>
-          <motion.p
+          <motion.p data-open-prompt
             initial={false}
             animate={{ opacity: inv.started ? 0 : 1 }}
             transition={{ duration: reduced ? 0 : 0.15 }}

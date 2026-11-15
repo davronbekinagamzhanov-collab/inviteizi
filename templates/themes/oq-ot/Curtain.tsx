@@ -75,7 +75,7 @@ export function Curtain({ inv, name }: { inv: Invitation; name: string }) {
               </p>
               <div className="mx-auto mt-3 h-px w-24 gold-fill" />
             </div>
-            <p className="soft-pulse mt-6 text-[17px] tracking-[0.16em] text-[#F4EBD6]">{t.opening.tapToOpen}</p>
+            <p data-open-prompt className="soft-pulse mt-6 text-[17px] tracking-[0.16em] text-[#F4EBD6]">{t.opening.tapToOpen}</p>
           </motion.div>
         </motion.button>
       )}

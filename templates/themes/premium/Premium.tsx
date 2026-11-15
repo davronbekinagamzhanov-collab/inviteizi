@@ -191,7 +191,7 @@ export function Premium({ data, mode, concept }: TemplateProps & { concept: Conc
               </>
             )}
           </div>
-          <p className={s.prompt}>
+          <p data-open-prompt className={s.prompt}>
             {t.opening.tapToOpen}
             <span aria-hidden="true">↓</span>
           </p>

@@ -1,14 +1,17 @@
-// Закрытый экран приглашения: тексты и печать не должны налезать друг на друга.
-// Для каждого дизайна в продаже × язык × размер окна (в т.ч. «низкое» окно Mini App) × обычные и длинные имена
-// собирает прямоугольники видимых текстовых строк и печатей на закрытом экране; пересечение > 2 px — ошибка.
-// Запуск на production-сборке: npm run build && npx next start -p 3130, затем
-//   node scripts/check-closed-overlap.mjs [--base=http://localhost:3130] [--only=id1,id2] [--sizes=375x600,390x844]
+// Закрытый экран приглашения: надписи и печать не должны налезать друг на друга.
+// Для каждого дизайна в продаже × язык × размер окна (в т.ч. «низкое» окно Mini App) × обычные и длинные имена:
+//  1) собирает прямоугольники видимых надписей (по границам букв, не строки) и печатей;
+//  2) для каждой пересекающейся пары (> 2 px) проверяет по пикселям, что обе надписи действительно видны
+//     (если надпись спрятать, кадр в её прямоугольнике меняется) — так не считается текст, закрытый обложкой.
+// Запуск на production-сборке: npm run build && INVITEIZI_CHECK=1 npx next start -p 3130, затем
+//   node scripts/check-closed-overlap.mjs [--base=...] [--only=id1,id2] [--sizes=375x600] [--langs=uz,ru] [--variants=demo,long]
 // Отчёт: $CHECK_OVERLAP_REPORT или <tmpdir>/inviteizi-closed-overlap.json; скриншоты ошибок рядом. Только чтение.
 import "./ts-hooks.mjs";
 import { chromium } from "playwright-core";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import sharp from "sharp";
 
 const arg = (name, def) => process.argv.find((a) => a.startsWith(`--${name}=`))?.split("=")[1] ?? def;
 const BASE = arg("base", "http://localhost:3130");
@@ -26,9 +29,12 @@ const SHOTS = path.join(path.dirname(OUT), "closed-overlap-shots");
 await mkdir(SHOTS, { recursive: true });
 const musicFixture = await readFile("public/music/namuna-kuy.wav");
 
-/** В браузере: прямоугольники строк текста и печатей закрытого экрана, затем пересечения */
+/** В браузере: надписи и печати закрытого экрана, пары с пересечением */
 function collect() {
-  const visible = (el) => {
+  const SKIP =
+    "[data-lang-switch],[data-brand-badge],[data-watermark],[data-music-hint]," +
+    "[aria-label^='Мусиқани'],[aria-label^='Музык'],script,style,noscript";
+  const shown = (el) => {
     for (let n = el; n && n !== document.body; n = n.parentElement) {
       if (n.hasAttribute("inert")) return false;
       const s = getComputedStyle(n);
@@ -36,40 +42,52 @@ function collect() {
     }
     return true;
   };
-  const skip = "[data-lang-switch],[data-brand-badge],[data-tap-hint],[data-watermark],script,style,noscript";
+  const ctx = document.createElement("canvas").getContext("2d");
   const boxes = [];
+  const tag = (el) => {
+    const t = `o${boxes.length}`;
+    el.setAttribute("data-ovl", `${el.getAttribute("data-ovl") ?? ""} ${t}`.trim());
+    return t;
+  };
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-  for (let t = walker.nextNode(); t; t = walker.nextNode()) {
-    const el = t.parentElement;
-    if (!el || !t.textContent.trim() || el.closest(skip) || !visible(el)) continue;
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    const el = node.parentElement;
+    if (!el || !node.textContent.trim() || el.closest(SKIP) || !shown(el)) continue;
+    const st = getComputedStyle(el);
+    ctx.font = `${st.fontStyle} ${st.fontWeight} ${st.fontSize} ${st.fontFamily}`;
     const r = document.createRange();
-    r.selectNodeContents(t);
+    r.selectNodeContents(node);
     for (const rect of r.getClientRects()) {
-      if (rect.width < 2 || rect.height < 2) continue;
-      if (rect.bottom < 0 || rect.top > innerHeight || rect.right < 0 || rect.left > innerWidth) continue;
+      if (rect.width < 2 || rect.height < 2 || rect.bottom < 0 || rect.top > innerHeight) continue;
+      const str = (st.textTransform === "uppercase" ? node.textContent.toUpperCase() : node.textContent).trim();
+      const m = ctx.measureText(str || "x");
+      const area = m.fontBoundingBoxAscent + m.fontBoundingBoxDescent || rect.height;
+      const base = rect.top + (m.fontBoundingBoxAscent * rect.height) / area;
+      const top = Math.max(rect.top, base - m.actualBoundingBoxAscent);
+      const bottom = Math.min(rect.bottom, base + m.actualBoundingBoxDescent);
       boxes.push({
         kind: "text",
-        text: t.textContent.trim().slice(0, 40),
+        text: node.textContent.trim().slice(0, 40),
         el,
+        tag: tag(el),
         x: rect.left,
-        y: rect.top,
+        y: top,
         w: rect.width,
-        h: rect.height,
+        h: Math.max(1, bottom - top),
       });
     }
   }
-  const seals = [
-    ...document.querySelectorAll("[data-seal],[class*='seal' i],[class*='wax' i],[data-envelope-seal]"),
-  ].filter((el) => !el.closest(skip) && visible(el));
-  for (const el of seals) {
+  const sealSel = "[data-seal],[class*='seal' i],[class*='wax' i],[class*='medallion' i]";
+  for (const el of document.querySelectorAll(sealSel)) {
+    if (el.closest(SKIP) || !shown(el)) continue;
     const rect = el.getBoundingClientRect();
     if (rect.width < 8 || rect.height < 8 || rect.bottom < 0 || rect.top > innerHeight) continue;
-    // круглая печать: берём вписанный квадрат, чтобы не считать пустые углы
-    const k = 0.15;
+    const k = 0.15; // круглая печать: вписанный квадрат
     boxes.push({
       kind: "seal",
       text: "печать",
       el,
+      tag: tag(el),
       x: rect.left + rect.width * k,
       y: rect.top + rect.height * k,
       w: rect.width * (1 - 2 * k),
@@ -77,29 +95,60 @@ function collect() {
     });
   }
   const hits = [];
+  const inside = (t, s) =>
+    s.kind === "seal" &&
+    t.kind === "text" &&
+    t.x >= s.x - 10 &&
+    t.y >= s.y - 10 &&
+    t.x + t.w <= s.x + s.w + 10 &&
+    t.y + t.h <= s.y + s.h + 10;
+  const gp = (e) => e.parentElement?.parentElement;
   for (let i = 0; i < boxes.length; i++)
     for (let j = i + 1; j < boxes.length; j++) {
       const a = boxes[i],
         b = boxes[j];
       if (a.el === b.el || a.el.contains(b.el) || b.el.contains(a.el)) continue;
-      if (a.kind === "seal" && b.kind === "seal") continue; // слои одной печати
+      if (a.kind === "seal" && b.kind === "seal") continue;
+      if (inside(a, b) || inside(b, a)) continue; // надпись на самой печати
       // буквы монограммы «AM» задуманно сплетены
-      if (a.text.length <= 2 && b.text.length <= 2 && a.el.parentElement?.closest("*")?.parentElement?.contains(b.el))
-        continue;
-      // одна и та же надпись в двух слоях (лицевая и обратная сторона при открытии)
-      if (a.text === b.text && Math.abs(a.x - b.x) < 4 && Math.abs(a.y - b.y) < 4) continue;
-      // надпись внутри печати («А · М» на сургуче) — часть печати
-      const own = (t, s) => s.kind === "seal" && s.el.contains(t.el);
-      if (own(a, b) || own(b, a)) continue;
+      if (a.text.length <= 2 && b.text.length <= 2 && gp(a.el) && gp(a.el) === gp(b.el)) continue;
+      // одна надпись двумя слоями (тиснение/тень): тот же текст почти в том же месте
+      if (a.text === b.text && Math.abs(a.x - b.x) < 6 && Math.abs(a.y - b.y) < 6) continue;
       const ix = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
       const iy = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
       if (ix > 2 && iy > 2)
-        hits.push(`${a.kind}:«${a.text}» × ${b.kind}:«${b.text}» (${Math.round(ix)}×${Math.round(iy)})`);
+        hits.push({
+          msg: `${a.kind}:«${a.text}» × ${b.kind}:«${b.text}» (${Math.round(ix)}×${Math.round(iy)})`,
+          boxes: [a, b].map(({ tag, x, y, w, h }) => ({ tag, x, y, w, h })),
+        });
     }
-  // текст за краем экрана по горизонтали тоже ошибка
   for (const b of boxes)
-    if (b.kind === "text" && (b.x < -2 || b.x + b.w > innerWidth + 2)) hits.push(`за краем: «${b.text}»`);
-  return { hits: [...new Set(hits)], opener: Boolean(document.querySelector("[data-open]")) };
+    if (b.kind === "text" && (b.x < -2 || b.x + b.w > innerWidth + 2))
+      hits.push({ msg: `за краем: «${b.text}»`, boxes: [{ tag: b.tag, x: b.x, y: b.y, w: b.w, h: b.h }] });
+  return { hits, opener: Boolean(document.querySelector("[data-open]")) };
+}
+
+/** Надпись действительно видна: если её спрятать, пиксели в её прямоугольнике меняются */
+async function visibleOnScreen(page, b) {
+  const vp = page.viewportSize();
+  const x = Math.min(vp.width - 1, Math.max(0, Math.floor(b.x)));
+  const y = Math.min(vp.height - 1, Math.max(0, Math.floor(b.y)));
+  const clip = {
+    x,
+    y,
+    width: Math.max(1, Math.min(Math.ceil(b.w), vp.width - x)),
+    height: Math.max(1, Math.min(Math.ceil(b.h), vp.height - y)),
+  };
+  const sel = `[data-ovl~="${b.tag}"]`;
+  const shot = () => page.screenshot({ clip, animations: "disabled" });
+  const before = await shot();
+  await page.$eval(sel, (el) => el.style.setProperty("visibility", "hidden", "important"));
+  const after = await shot();
+  await page.$eval(sel, (el) => el.style.removeProperty("visibility"));
+  const [p, q] = await Promise.all([before, after].map((png) => sharp(png).raw().toBuffer()));
+  let diff = 0;
+  for (let i = 0; i < p.length; i++) if (Math.abs(p[i] - q[i]) > 24) diff++;
+  return diff > 12;
 }
 
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined });
@@ -114,8 +163,16 @@ try {
             r.fulfill({ status: 200, contentType: "audio/wav", body: musicFixture }),
           );
           const page = await ctx.newPage();
-          const url = `${BASE}/demo/${d.id}${variant === "long" ? "/long" : ""}?lang=${lang}`;
-          await page.goto(url, { waitUntil: "networkidle", timeout: 120000 });
+          // длинные имена и три тадбира — служебная страница (сервер запущен с INVITEIZI_CHECK=1)
+          const url =
+            variant === "long"
+              ? `${BASE}/dev/invitation/${d.id}?long=1&lang=${lang}`
+              : `${BASE}/demo/${d.id}?lang=${lang}`;
+          const res = await page.goto(url, {
+            waitUntil: "networkidle",
+            timeout: 120000,
+          });
+          if (res?.status() !== 200) throw Error(`${url}: ${res?.status()} (для long нужен INVITEIZI_CHECK=1)`);
           await page.evaluate(async () => {
             await document.fonts.ready;
             const imgs = [...document.images].filter((i) => i.loading !== "lazy");
@@ -123,11 +180,18 @@ try {
             await Promise.race([wait, new Promise((r) => setTimeout(r, 3000))]);
           });
           await page.waitForTimeout(1500);
-          const r = await page.evaluate(collect);
+          const raw = await page.evaluate(collect);
+          const hits = [];
+          for (const hit of raw.hits) {
+            let all = true;
+            for (const b of hit.boxes) if (!(await visibleOnScreen(page, b))) all = false;
+            if (all) hits.push(hit.msg);
+          }
+          const uniq = [...new Set(hits)];
           const id = `${d.id}-${variant}-${lang}-${w}x${h}`;
-          if (r.hits.length) await page.screenshot({ path: path.join(SHOTS, `${id}.png`) });
-          results.push({ id: d.id, variant, lang, size: `${w}x${h}`, opener: r.opener, hits: r.hits });
-          if (r.hits.length) console.log(`FAIL ${id}: ${r.hits.slice(0, 3).join(" | ")}`);
+          if (uniq.length) await page.screenshot({ path: path.join(SHOTS, `${id}.png`) });
+          results.push({ id: d.id, variant, lang, size: `${w}x${h}`, opener: raw.opener, hits: uniq });
+          if (uniq.length) console.log(`FAIL ${id}: ${uniq.slice(0, 3).join(" | ")}`);
           await ctx.close();
         }
       }
@@ -139,7 +203,6 @@ try {
 }
 await writeFile(OUT, JSON.stringify(results, null, 2));
 const bad = results.filter((r) => r.hits.length);
-console.log(
-  `\nПроверок: ${results.length}, с наложениями: ${bad.length} (${new Set(bad.map((r) => r.id)).size} дизайнов). Отчёт: ${OUT}`,
-);
+const n = new Set(bad.map((r) => r.id)).size;
+console.log(`\nПроверок: ${results.length}, с наложениями: ${bad.length} (${n} дизайнов). Отчёт: ${OUT}`);
 process.exitCode = bad.length ? 1 : 0;

@@ -1,6 +1,6 @@
 "use client";
 
-import {useCallback, useEffect, useRef, useState, type CSSProperties} from "react";
+import {useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties} from "react";
 import {useAnimate, useReducedMotion} from "motion/react";
 import {t} from "@/texts/uz-cyrl";
 import type {Invitation} from "../../blocks/useInvitation";
@@ -33,6 +33,22 @@ export function AtelierOpening({inv, id}: {inv: Invitation; id: AtelierId}) {
     void ready.current.then(() => {if(alive.current)scope.current?.setAttribute("data-ready","true");}).catch(() => {});
     return () => {alive.current = false;};
   }, [preload, scope]);
+
+  // Шов «жемчужного» конверта проходит через печать, где бы она ни оказалась на экране этой высоты
+  useLayoutEffect(() => {
+    const el = scope.current;
+    if (!el) return;
+    const place = () => {
+      const seal = el.querySelector<HTMLElement>("[data-opening-medallion]");
+      if (!seal) return;
+      const box = el.getBoundingClientRect(), r = seal.getBoundingClientRect();
+      if (box.height) el.style.setProperty("--seam", `${(((r.top + r.height / 2) - box.top) / box.height) * 100}%`);
+    };
+    place();
+    const ro = new ResizeObserver(place);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [scope, inv.opened]);
 
   async function open() {
     if(busy.current)return;
@@ -76,7 +92,7 @@ export function AtelierOpening({inv, id}: {inv: Invitation; id: AtelierId}) {
       <span className={s.openingDate}>{t.date.long(inv.main.when.day,inv.main.when.monthIndex,inv.main.when.year)}</span>
     </span>
     <span data-opening-medallion className={s.medallion} aria-hidden="true">{wedding ? <Monogram data={inv.data} /> : <Ornament />}</span>
-    <span data-opening-ink role="status" className={s.openPrompt}>{status==="error" ? t.vip.retry : status==="loading" ? t.vip.loading : t.vip.openMe}<span>↓</span></span>
+    <span data-open-prompt data-opening-ink role="status" className={s.openPrompt}>{status==="error" ? t.vip.retry : status==="loading" ? t.vip.loading : t.vip.openMe}<span>↓</span></span>
     <span data-opening-ink className={s.openingFoot}>{t.vip.withLove}</span>
   </button>;
 }

@@ -211,7 +211,7 @@ export function Opening({ inv, name }: { inv: Invitation; name: string }) {
             animate={{ opacity: phase === "idle" ? 1 : 0 }}
             transition={{ duration: 0.35 }}
           >
-            <p className="soft-pulse font-body text-[17px] tracking-[0.04em] text-[#5A6C8C]">{t.opening.tapToOpen}</p>
+            <p data-open-prompt className="soft-pulse font-body text-[17px] tracking-[0.04em] text-[#5A6C8C]">{t.opening.tapToOpen}</p>
           </motion.div>
         </motion.div>
       )}

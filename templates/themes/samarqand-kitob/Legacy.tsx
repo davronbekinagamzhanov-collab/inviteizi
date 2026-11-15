@@ -201,7 +201,7 @@ export default function Design({ data, mode, art }: TemplateProps) {
               <p className="mt-8 text-[13px] tracking-[.12em] uppercase">{t.opening.invitation}</p>
               <p className="mt-6 font-display text-[33px]">{t.occasionTitles[inv.occasion]}</p>
               <div aria-hidden className="my-8 h-px w-12 bg-[#cbb77e]" />
-              <p className="text-[17px]">{t.opening.tapToOpen}</p>
+              <p data-open-prompt className="text-[17px]">{t.opening.tapToOpen}</p>
             </div>
           </motion.div>
         </button>

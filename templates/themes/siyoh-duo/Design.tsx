@@ -71,7 +71,7 @@ export default function Design({ data, mode }: TemplateProps) {
           <div className={styles.words}>
             <p className="text-[12px] uppercase tracking-[.2em]">{t.opening.invitation}</p>
             <p className="mt-6 text-[36px] italic">{t.occasionTitles[inv.occasion]}</p>
-            <p className="mt-12 text-[17px]">{t.opening.tapToOpen}</p>
+            <p data-open-prompt className="mt-12 text-[17px]">{t.opening.tapToOpen}</p>
           </div>
         </button>
       )}

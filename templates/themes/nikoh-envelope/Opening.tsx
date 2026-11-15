@@ -77,7 +77,7 @@ export function WeddingOpening({ kind, data, date, started, onOpen }: Props) {
         </span>
         <span className={s.date}>{date}</span>
       </span>
-      <span className={s.hint}>{t.floral.tap}</span>
+      <span data-open-prompt className={s.hint}>{t.floral.tap}</span>
     </button>
   );
 }
