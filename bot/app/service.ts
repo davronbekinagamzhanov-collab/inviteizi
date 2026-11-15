@@ -1,3 +1,5 @@
+import {computeExpiresAt} from "@/lib/orders";
+import {flushMarketing} from "@/bot/marketing";
 /**
  * Сервер Mini App (/app): те же заказы, черновик и правила, что у чата (bot/flow).
  * Каждая функция получает уже проверенного пользователя (initData — lib/tg-init-data.ts) и Deps.
@@ -213,6 +215,10 @@ export async function confirmPay(deps: Deps, u: AppUser, orderId: unknown, terms
   if (o.status === "receipt_sent") return { error: "waiting" as const };
   if (!PAYABLE_STATUSES.includes(o.status)) return { error: "closed" as const };
   if (eventsPassed(deps, o)) return { error: "passed" as const };
+  if(o.amount===0&&deps.env.marketing?.promos&&deps.repo.marketing){
+    const paid=await deps.repo.marketing.confirm(o.id,u.id,deps.now(),deps.env.publicBaseUrl,'promotion',computeExpiresAt(o.data.events),deps.env.marketing);
+    if(!paid)return {error:'closed' as const};await flushMarketing(deps);const fresh=await deps.repo.getOrder(o.id);return fresh?{ok:true as const,order:appOrder(deps,fresh,(await deps.repo.getUser(u.id))?.lang??'uz')}:{error:'notFound' as const};
+  }
   const r = await deps.repo.transition(o.id, PAYABLE_STATUSES, "awaiting_payment", { payConfirmedAt: deps.now(), termsAcceptedAt: deps.now() });
   if (!r) return { error: "closed" as const };
   return { ok: true as const, order: appOrder(deps, r, (await deps.repo.getUser(u.id))?.lang ?? "uz") };

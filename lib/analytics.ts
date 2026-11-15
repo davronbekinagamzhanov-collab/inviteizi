@@ -2,7 +2,7 @@ import type { OrderRecord } from "./domain";
 
 export type Period = "today" | "week" | "month" | "all";
 export const PERIODS: Period[] = ["today", "week", "month", "all"];
-export type MetricOrder = Pick<OrderRecord, "id" | "userId" | "status" | "occasion" | "format" | "templateId" | "music" | "amount" | "createdAt" | "paidAt" | "updatedAt">;
+export type MetricOrder = Pick<OrderRecord, "id" | "userId" | "status" | "occasion" | "format" | "templateId" | "music" | "amount" | "createdAt" | "paidAt" | "updatedAt"> & {refundedAt?:Date|null};
 export type MetricUser = { id: number; username: string | null; firstName: string | null; createdAt: Date };
 export type EventKind = "demo_opened" | "design_favorited" | "design_selected" | "order_created" | "payment_confirmed" | "music_selected";
 export type MetricEvent = { kind: EventKind; userId: number; target: string; createdAt: Date };
@@ -23,7 +23,7 @@ export function periodStart(period: Period, now: Date): Date {
   return new Date(period === "all" ? 0 : midnight - (period === "week" ? 6 : period === "month" ? 29 : 0) * 86_400_000);
 }
 export const almatyDay = (d: Date) => new Date(+d + 18_000_000).toISOString().slice(0, 10);
-export const isPaid = (o: Pick<MetricOrder, "status">) => o.status === "active" || o.status === "archived";
+export const isPaid = (o: Pick<MetricOrder,"status"> & {amount?:number;refundedAt?:Date|null}) => (o.status === "active" || o.status === "archived") && o.amount!==0 && !o.refundedAt;
 
 /** Financial truth is orders, never event counts. No addresses, receipts or invitation texts. */
 export function summarize(input: AnalyticsInput, period: Period, now: Date, owner = false) {

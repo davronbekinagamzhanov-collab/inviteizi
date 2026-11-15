@@ -7,6 +7,7 @@ import type { BotTexts } from "@/texts/bot-uz";
 import type { PayoutSchedule } from "@/lib/owner-panel";
 
 export type BotEnv = {
+  marketing?: ReturnType<typeof import("@/lib/marketing/config").marketingFlags>;
   ownerUsername: string;
   kaspiPhone: string;
   kaspiName: string;

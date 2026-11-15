@@ -15,6 +15,7 @@ export function MapButton({
 }) {
   return (
     <a
+      data-brand-trigger
       href={href}
       target="_blank"
       rel="noopener noreferrer"

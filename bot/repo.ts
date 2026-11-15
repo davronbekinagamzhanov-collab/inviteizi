@@ -42,6 +42,8 @@ export type PartnerPatch = Partial<Pick<Partner, "phone" | "kaspi" | "schedule" 
 export type Notice = { key: string; chatId: number; text: string; markup?: { inline: InlineButton[][] } | null; dueAt: Date };
 
 export interface Repo {
+  /** Optional additive service; never initialized against a live DB in tests. */
+  marketing?: import("./marketing-repo").PgMarketing;
   /** Журнал ошибок бота: entry уже очищен от личных данных */
   logBotError(entry: BotErrorEntry): Promise<void>;
   isOwner(id: number): Promise<boolean>;

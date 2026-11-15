@@ -1,3 +1,5 @@
+import {flushMarketing,fulfillPromotion} from "../marketing";
+import {marketingCopy} from "@/texts/marketing";
 import { CURRENT_DESIGN_VERSION } from "@/templates/design-version";
 import { rsvpTotals } from "@/lib/rsvp";
 /** Заказ: создание/сохранение, оплата Kaspi, чек, решение админа, «мои приглашения», смена ссылки */
@@ -180,7 +182,9 @@ export async function confirmDraft(c: Ctx): Promise<Result> {
 
 async function ownOrder(c: Ctx, n: number) {
   const o = await c.deps.repo.getOrderByNumber(n);
-  return o && o.userId === c.user.id ? o : null;
+  if(!o||o.userId!==c.user.id)return null;
+  if(c.deps.env.marketing?.promos&&c.deps.repo.marketing&&await c.deps.repo.marketing.releaseExpired(c.deps.now(),o.id))return c.deps.repo.getOrder(o.id);
+  return o;
 }
 
 /** Открыть заказ на правку: сводка с данными заказа (slug не меняется) */
@@ -196,7 +200,7 @@ export async function editOrder(c: Ctx, n: number): Promise<Result> {
     return { done: true };
   }
   if (PAID_STATUSES.includes(o.status)) {
-    await send(c, c.tx.order.closed, inline([[{ text: c.tx.contact, url: ownerUrl(c) }]]));
+    await send(c, c.deps.env.marketing?.edits?marketingCopy(c.lang).correction+"\n"+marketingCopy(c.lang).editRule+"\n/correction "+o.number+" ...":c.tx.order.closed, inline([[{ text: c.tx.contact, url: ownerUrl(c) }]]));
     return { done: true };
   }
   c.s = {
@@ -264,6 +268,7 @@ export async function payOrder(c: Ctx, n: number, confirmed = false, stamp?: str
     );
     return { stay: true };
   }
+  if(o.amount===0&&c.deps.env.marketing?.promos){await fulfillPromotion(c,o);return {done:true};}
   // «✅ Ҳаммаси тўғри» в чате — согласие и с проверкой, и с условиями (ссылка /terms — в том же сообщении)
   await c.deps.repo.transition(o.id, PAYABLE_STATUSES, "awaiting_payment", { payConfirmedAt: c.deps.now(), termsAcceptedAt: c.deps.now() });
   const env = c.deps.env;
@@ -274,7 +279,7 @@ export async function payOrder(c: Ctx, n: number, confirmed = false, stamp?: str
   paymentRows.push([{text:c.tx.pay.sendReceipt,data:`rcpt:${o.number}:${o.amount}`}]);
   await send(
     c,
-    c.tx.pay.info(price(o.amount), env.kaspiPhone, env.kaspiName, o.number)+(card?"\n\n"+c.tx.pay.card(card):""),
+    c.tx.pay.info(price(o.amount), env.kaspiPhone, env.kaspiName, o.number)+(card?"\n\n"+c.tx.pay.card(card):"")+(c.deps.env.marketing?.delivery?"\n\n"+marketingCopy(c.lang).manualPayment:""),
     inline(paymentRows),
   );
   // Чек можно прислать сразу, не нажимая «Чекни юбориш»
@@ -429,7 +434,7 @@ export function guestShareText(o: OrderRecord, url: string) {
  * Каждая отправка отдельно: сбой одной не отменяет остальные.
  * afterPayment — сразу после ✅: в конце спасибо и ОДНА кнопка «🆕 Янги таклифнома».
  */
-async function sendLinkPack(deps: Deps, o: OrderRecord, afterPayment: boolean) {
+export async function sendLinkPack(deps: Deps, o: OrderRecord, afterPayment: boolean,promotion=false) {
   const client = o.userId;
   const tx = txFor(await langOf(deps, client));
   const url = `${deps.env.publicBaseUrl}/${o.slug}`;
@@ -437,7 +442,7 @@ async function sendLinkPack(deps: Deps, o: OrderRecord, afterPayment: boolean) {
   // ОДНО сообщение: QR-картинка, под ней ссылка, как разослать гостям и спасибо; кнопки — гостям, ответы, новый заказ
   const share = guestShareText(o, url);
   const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(share.replace(url, "").trim())}`;
-  const caption = afterPayment ? tx.pay.paidPack(url) : tx.pay.linkPack(url);
+  const caption = promotion?marketingCopy((await langOf(deps,client))).free+"\n\n"+tx.pay.linkPack(url):afterPayment ? tx.pay.paidPack(url) : tx.pay.linkPack(url);
   const markup = inline([
     [{ text: tx.pay.shareButton, url: shareUrl }],
     ...(o.data.rsvp ? [[{ text: tx.rsvp.answers, data: `rsvp:${o.number}` }]] : []),
@@ -445,18 +450,18 @@ async function sendLinkPack(deps: Deps, o: OrderRecord, afterPayment: boolean) {
   ]);
   try {
     const png = await QRCode.toBuffer(url, { width: 600, margin: 2 });
-    await tg.sendPhoto(client, new Uint8Array(png), { caption, markup });
-    return { linkSent: true, shareSent: true };
+    const sent=await tg.sendPhoto(client, new Uint8Array(png), { caption, markup });
+    return { linkSent: true, shareSent: true, messageId:sent.messageId };
   } catch (e) {
     console.error("клиенту не отправлено: QR", e instanceof Error ? e.name : "Error");
   }
   // QR не ушёл — то же самое текстом (ссылка и кнопки важнее картинки)
   try {
-    await tg.sendMessage(client, caption, { markup });
-    return { linkSent: true, shareSent: true };
+    const sent=await tg.sendMessage(client, caption, { markup });
+    return { linkSent: true, shareSent: true, messageId:sent.messageId };
   } catch (e) {
     console.error("клиенту не отправлено: ссылка", e instanceof Error ? e.name : "Error");
-    return { linkSent: false, shareSent: false };
+    return { linkSent: false, shareSent: false, messageId:undefined };
   }
 }
 
@@ -467,7 +472,7 @@ export async function resendLink(c: Ctx, n: number): Promise<Result> {
     await send(c, c.tx.order.notFound);
     return { done: true };
   }
-  if (o.status === "active") await sendLinkPack(c.deps, o, false);
+  if (o.status === "active"){const sent=await sendLinkPack(c.deps,o,false);if(sent.linkSent&&c.deps.env.marketing?.delivery&&c.deps.repo.marketing)await c.deps.repo.marketing.markIssued(o.id,c.deps.now(),sent.messageId);}
   else await send(c, c.tx.my.item(o.number, namesOf(o.data), c.tx.my.statuses[o.status], pageUrl(c, o.slug)));
   return { done: true };
 }
@@ -497,10 +502,13 @@ export async function approve(c: Ctx, n: number) {
   if (!(await guardAdmin(c))) return;
   const o0 = await c.deps.repo.getOrderByNumber(n);
   const now = c.deps.now();
-  const o = o0 && (await c.deps.repo.transition(o0.id, ["receipt_sent"], "active", { paidAt: now, expiresAt: expiresAt(o0.data) }));
+  const o = c.deps.env.marketing?.delivery&&c.deps.repo.marketing
+    ? o0&&await c.deps.repo.marketing.confirm(o0.id,c.user.id,now,c.deps.env.publicBaseUrl,"kaspi",expiresAt(o0.data),c.deps.env.marketing)?await c.deps.repo.getOrder(o0!.id):null
+    : o0 && (await c.deps.repo.transition(o0.id, ["receipt_sent"], "active", { paidAt: now, expiresAt: expiresAt(o0.data) }));
   if (!o) return already(c);
   await c.deps.tg.editMessageReplyMarkup(c.chatId, c.u.messageId, null).catch(() => {});
 
+  if(c.deps.env.marketing?.delivery){await flushMarketing(c.deps);const line=await paidNotices(c.deps,o,c.user.id).catch(()=>"");await sendAfterCommit(c,c.chatId,((await c.deps.repo.marketing?.issuance(o.id))?.marketing_issued_at?c.tx.admin.approved(n):c.tx.admin.approvedFailed(n))+(line?"\n"+line:""));return;}
   await creditPartnerSafely(c, o);
   const { linkSent, shareSent } = await sendLinkPack(c.deps, o, true);
   // «💳 №134 · 8 000 ₸ · дизайн · кто привёл» — к ответу подтвердившего; другим админам и менеджеру — отдельно
@@ -564,5 +572,6 @@ export async function myOrders(c: Ctx) {
     rows.push([...last, { text: c.tx.contact, url: ownerUrl(c) }]);
     const title = `${namesOf(o.data)} · ${designName(o.templateId)}`;
     await send(c, c.tx.my.item(o.number, title, c.tx.my.statuses[o.status], pageUrl(c, o.slug)), inline(rows));
+    if(o.status==="active"&&c.deps.env.marketing?.delivery&&c.deps.repo.marketing)await c.deps.repo.marketing.markIssued(o.id,c.deps.now());
   }
 }

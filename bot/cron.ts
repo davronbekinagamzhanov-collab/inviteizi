@@ -1,3 +1,4 @@
+import {flushMarketing,withMarketingReady} from "./marketing";
 /**
  * Задания по расписанию (pg_cron → POST /api/cron каждые 10 минут):
  *  - админам: чек ждёт больше 30 минут — напоминание днём, дальше каждые 2 часа до 21:00;
@@ -88,7 +89,8 @@ async function removeOldPhotos(deps: Deps, now: Date, r: CronResult) {
 
 const CRON_EVERY_MIN = 10;
 
-export async function runCron(deps: Deps): Promise<CronResult> {
+export async function runCron(input: Deps): Promise<CronResult> {
+  const deps=await withMarketingReady(input);
   const { repo, tg } = deps;
   const now = deps.now();
   const r: CronResult = { adminReminded: 0, clientReminded: 0, archived: 0, rsvpDigests: 0, photosRemoved: 0, partnerNotices: 0, sleeping: 0, notices: 0, payDay: 0, evening: 0, nudges: 0, reviews: 0, cleaned: 0, errorAlerts: 0, errors: 0 };
@@ -179,7 +181,8 @@ export async function runCron(deps: Deps): Promise<CronResult> {
 
   // ── v2, часть 7: отложенные на ночь сообщения, отчёты 20:00, выплаты 10:00 ──
   try {
-    r.notices = await flushNotices(deps);
+    if(deps.env.marketing?.delivery&&deps.repo.marketing){await deps.repo.marketing.releaseExpired(now);await deps.repo.marketing.queueDeliveryAlert(now);r.notices=await flushMarketing(deps);}
+    else r.notices = await flushNotices(deps);
     r.payDay = await payDayNotices(deps);
     r.evening = await eveningReports(deps);
     r.errorAlerts = await errorAlert(deps);

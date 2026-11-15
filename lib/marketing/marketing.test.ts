@@ -1,0 +1,18 @@
+import { it, expect, vi } from 'vitest';
+import { futureDemoData } from './demo-dates';
+import { marketingFlags, whatsappUrl, referralReward, validPublicSource } from './config';
+import { getDesign } from '@/templates/registry';
+import { statusPoster } from './status-poster';
+import sharp from 'sharp';
+import jsQR from 'jsqr';
+import { writeFile } from 'node:fs/promises';
+import type { OrderRecord } from '@/lib/domain';
+vi.mock('next/font/local', () => ({ default: () => ({ variable: 'fixture-font' }) }));
+it('financial flags off by default and cannot be enabled by UI/Preview; missing WhatsApp hidden, invalid reward rejected', () => { expect(marketingFlags({})).toMatchObject({ delivery: false, referrals: false, promos: false, status: false, edits: false }); expect(marketingFlags({ VERCEL_ENV: 'preview' })).toMatchObject({ ui: true, delivery: false }); expect(whatsappUrl(undefined)).toBeNull(); for (const v of ['javascript:alert(1)', '123', '+7<&bad', '12.34.56'])
+    expect(whatsappUrl(v)).toBeNull(); expect(whatsappUrl('+7 (700) 123-45-67')).toBe('https://wa.me/77001234567'); expect(referralReward({})).toBe(1000); expect(() => referralReward({ REFERRAL_REWARD_KZT: '-100' })).toThrow(); });
+it('Telegram payloads are bounded ASCII and contain no identity; invalid/legacy fallback remains possible', () => { expect(validPublicSource('inv_' + 'a'.repeat(32))).toBeTruthy(); expect(validPublicSource('p_' + 'b'.repeat(24))).toBeTruthy(); for (const s of ['inv_123', 'inv_' + 'а'.repeat(32), '../admin', 'p_' + 'x'.repeat(65), 'badge', null, []])
+    expect(validPublicSource(s)).toBeNull(); });
+it('demo dates follow event timezone across midnight/leap/year and preserve all relative dates without mutating sample', () => { const sample = { ...getDesign('muhr')!.sample, events: [{ ...getDesign('muhr')!.sample.events[0], date: '2026-01-01' }, { ...getDesign('muhr')!.sample.events[0], date: '2026-01-02' }] }; const before = JSON.stringify(sample); expect(futureDemoData(sample, new Date('2026-12-31T18:59:59Z')).events.map(e => e.date)).toEqual(['2027-02-14', '2027-02-15']); expect(futureDemoData(sample, new Date('2026-12-31T19:00:00Z')).events[0].date).toBe('2027-02-15'); expect(futureDemoData(sample, new Date('2028-01-15T00:00:00Z')).events[0].date).toBe('2028-02-29'); expect(JSON.stringify(sample)).toBe(before); });
+for (const [template, lang] of [['muhr', 'uz'], ['girih-barg', 'ru'], ['bordo-guldasta', 'uz']] as const)
+    it(`${template}/${lang}: status1080x1920, long Cyrillic, QR decodes exact live-link shape`, async () => { const d = getDesign(template)!, order = { id: '00000000-0000-4000-8000-000000000000', templateId: template, occasion: d.occasion, data: { ...d.sample, groom: 'Муҳаммадали Абдураҳмонов', bride: 'Мадина Ғуломова', person: 'Муҳтарам Гулчеҳра Абдураҳмоновна Қодирова' }, slug: 'fixture-invitation' } as OrderRecord; const url = 'https://preview.invalid/fixture-invitation', png = await statusPoster(order, url, lang), meta = await sharp(png).metadata(); expect([meta.width, meta.height]).toEqual([1080, 1920]); const { data, info } = await sharp(png).ensureAlpha().raw().toBuffer({ resolveWithObject: true }); const qr = jsQR(new Uint8ClampedArray(data), info.width, info.height); expect(qr?.data).toBe(url); await writeFile('/workspace/work/task7-status-' + template + '.png', png); }, 20000);
+it('poster rejects insecure or mismatched target rather than creating a misleading QR', async () => { const d = getDesign('muhr')!, order = { templateId: d.id, occasion: d.occasion, data: d.sample, slug: 'one' } as OrderRecord; await expect(statusPoster(order, 'http://example.test/one')).rejects.toThrow(); await expect(statusPoster(order, 'https://example.test/other')).rejects.toThrow(); });

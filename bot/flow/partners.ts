@@ -799,7 +799,7 @@ export async function notifySleeping(deps: Deps) {
   let sent = 0;
   for (const r of partnerRows(await panelData(deps), "all", now)) {
     const p = r.partner;
-    if (p.status === "rejected") continue;
+    if (p.status === "rejected"||p.customerUserId) continue;
     const last = r.lastScanAt && r.lastScanAt > p.createdAt ? r.lastScanAt : p.createdAt;
     if (+now - +last < SLEEP_AFTER_MS || (p.sleepNotifiedAt && p.sleepNotifiedAt >= last)) continue;
     // Метка до отправки: повтор cron не пришлёт второе сообщение
@@ -825,6 +825,7 @@ export async function flushOwnerNotices(deps: Deps) {
 /** Кому писать: id из карточки или человек с таким username, который нажимал /start */
 async function recipientOf(deps: Deps, p: Partner) {
   if (p.telegramId) return deps.repo.getUser(p.telegramId);
+  if(deps.env.marketing?.referrals&&deps.repo.marketing){const id=await deps.repo.marketing.recipientForPartner(p.id);if(id)return deps.repo.getUser(id);}
   return p.username ? deps.repo.findUserByUsername(p.username) : null;
 }
 

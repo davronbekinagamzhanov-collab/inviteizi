@@ -1,3 +1,4 @@
+import {marketingCommand,withMarketingReady} from "../marketing";
 /**
  * Логика бота: handle(deps, update). Telegram — только через deps.tg, база — через deps.repo.
  * Бот помнит шаг (users.step) и черновик (users.state); на непонятное — подсказка и повтор вопроса.
@@ -109,9 +110,10 @@ const isStep = (s: string): s is StepId => s in steps;
  */
 export async function handle(baseDeps: Deps, u: BotUpdate): Promise<boolean> {
   const attempt = beginAttempt(baseDeps, u.updateId);
-  const deps: Deps = { ...baseDeps, tg: attempt.tg };
+  let deps: Deps = { ...baseDeps, tg: attempt.tg };
   let c: Ctx | undefined;
   try {
+    deps=await withMarketingReady(deps);
     const isStart = u.kind === "command" && u.command === "start";
     const user = await deps.repo.touchUser({
       id: u.from.id,
@@ -120,6 +122,7 @@ export async function handle(baseDeps: Deps, u: BotUpdate): Promise<boolean> {
       // Одноразовые ссылки (mgr_, join_, o_) — не источник клиента и не должны лежать в базе
       source: isStart && u.args && !parseStartToken(u.args) ? u.args.slice(0, 64) : null,
     });
+    if(isStart&&u.args&&deps.env.marketing?.referrals&&deps.repo.marketing)await deps.repo.marketing.capture(user.id,u.args);
     if (u.updateId !== undefined && rememberUpdate(user.state.handledUpdates).includes(u.updateId)) {
       attempt.finish();
       return true;
@@ -334,6 +337,7 @@ async function unknown(c: Ctx) {
 
 async function route(c: Ctx) {
   const u = c.u;
+  if(await marketingCommand(c)){if(u.updateId!==undefined&&c.deps.repo.marketing)await c.deps.repo.marketing.markUpdate(c.user.id,u.updateId);return;}
 
   if (u.kind === "callback") {
     const d = u.data;

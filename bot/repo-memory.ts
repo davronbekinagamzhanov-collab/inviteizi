@@ -255,6 +255,8 @@ export class MemoryRepo implements Repo {
     return [...this.users.values()].find((u) => u.username?.toLowerCase() === name) ?? null;
   }
   async creditPartnerOrder(orderId: string, clientId: number, code: string) {
+    const order=this.orders.get(orderId);
+    if(!order||order.userId!==clientId||!PAID.includes(order.status)||order.amount<=0)return null;
     const partner = this.partners.find((p) => p.code === code);
     if (!partner || partner.status === "rejected" || partner.telegramId === clientId || this.earnings.some((e) => e.orderId === orderId)) return null;
     const client = this.users.get(clientId);

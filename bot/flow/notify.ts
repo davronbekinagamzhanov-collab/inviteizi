@@ -1,3 +1,4 @@
+import {flushMarketing} from "../marketing";
 /**
  * v2, часть 7: уведомления, отчёты 20:00, выплаты.
  *
@@ -63,6 +64,7 @@ export async function notify(deps: Deps, key: string, chatId: number, text: stri
   const now = deps.now();
   const night = !urgent && isQuiet(now);
   if (!(await deps.repo.queueNotice({ key, chatId, text, markup, dueAt: night ? morningAfter(now) : now }))) return false;
+  if(deps.env.marketing?.delivery){if(night)return false;await flushMarketing(deps);return !!await deps.repo.marketing?.noticeSent(key);}
   if (night || !(await deps.repo.claimNotice(key, now))) return false;
   try {
     await deps.tg.sendMessage(chatId, text, markup ? { markup } : undefined);
@@ -223,6 +225,7 @@ export function partnerEvening(s: PanelSnapshot, p: Partner, lang: "uz" | "ru", 
 
 async function recipientOf(deps: Deps, p: Partner) {
   if (p.telegramId) return deps.repo.getUser(p.telegramId);
+  if(deps.env.marketing?.referrals&&deps.repo.marketing){const id=await deps.repo.marketing.recipientForPartner(p.id);if(id)return deps.repo.getUser(id);}
   return p.username ? deps.repo.findUserByUsername(p.username) : null;
 }
 

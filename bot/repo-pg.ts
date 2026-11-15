@@ -1,3 +1,4 @@
+import {PgMarketing} from "./marketing-repo";
 import { RSVP_IP_HOUR_LIMIT, RSVP_ORDER_LIMIT, type RsvpInput, type RsvpRecord } from "@/lib/rsvp";
 import { earningFor, type ManagerPayout, type PanelOrder, type PanelSnapshot, type Partner, type PartnerEarning, type PartnerPayout, type PanelUser, type PayoutSchedule } from "@/lib/owner-panel";
 import type { BotErrorEntry } from "./errors";
@@ -94,6 +95,7 @@ type OrderRow = {
   updated_at: Date;
   receipt_at: Date | null;
   paid_at: Date | null;
+  marketing_refunded_at?:Date|null;
   payment_reminded_at: Date | null;
   rsvp: boolean | null;
   /** Нет колонки до миграции client_photos — тогда undefined */
@@ -210,6 +212,7 @@ function toOrder(r: OrderRow): OrderRecord {
     updatedAt: r.updated_at,
     receiptAt: r.receipt_at,
     paidAt: r.paid_at,
+    ...(r.marketing_refunded_at?{refundedAt:r.marketing_refunded_at}:{}),
     paymentRemindedAt: r.payment_reminded_at,
     adminRemindedAt: r.admin_reminded_at,
     payConfirmedAt: r.pay_confirmed_at ?? null,
@@ -382,7 +385,7 @@ export class PgRepo implements Repo {
     // One consistent snapshot; only necessary columns, never event addresses or receipt files.
     const input = await this.sql.begin("isolation level repeatable read read only", async tx => {
       const orders = await tx<MetricOrder[]>`select id, user_id as "userId", status, occasion, format, template_id as "templateId",
-        amount, created_at as "createdAt", paid_at as "paidAt", updated_at as "updatedAt",
+        amount, created_at as "createdAt", paid_at as "paidAt", updated_at as "updatedAt", (to_jsonb(orders)->>'marketing_refunded_at')::timestamptz as "refundedAt",
         case when music_kind = 'list' then jsonb_build_object('kind','list','musicId',music_id)
           else jsonb_build_object('kind',music_kind) end as music from public.orders`;
       const users = customers
@@ -461,14 +464,14 @@ export class PgRepo implements Repo {
   async panelSnapshot(): Promise<PanelSnapshot> {
     const base = await this.sql.begin("isolation level repeatable read read only", async (tx) => {
       const orders = await tx<PanelOrder[]>`select o.id, o.number, o.user_id as "userId", u.username, u.first_name as "firstName", o.status, o.occasion, o.format,
-        o.template_id as "templateId", o.music_kind as "musicKind", o.amount, o.created_at as "createdAt", o.paid_at as "paidAt", o.updated_at as "updatedAt",
+        o.template_id as "templateId", o.music_kind as "musicKind", o.amount, o.created_at as "createdAt", o.paid_at as "paidAt", o.updated_at as "updatedAt", (to_jsonb(o)->>'marketing_refunded_at')::timestamptz as "refundedAt",
         o.slug, nullif(concat_ws(' & ', o.groom, o.bride, o.person), '') as names
         from public.orders o join public.users u on u.id = o.user_id`;
       const users = await tx<PanelUser[]>`select id, created_at as "createdAt", source from public.users`;
       return { orders: [...orders], users: [...users] };
     });
     try {
-      const partners = await this.sql<Partner[]>`select ${this.sql.unsafe(PARTNER_COLUMNS)} from public.partners order by id`;
+      const partners = await this.sql<Partner[]>`select ${this.sql.unsafe(PARTNER_COLUMNS)},(to_jsonb(partners)->>'customer_user_id')::bigint as "customerUserId" from public.partners order by id`;
       const earnings = await this.sql<PartnerEarning[]>`select order_id as "orderId", partner_id as "partnerId", amount, delivered, created_at as "createdAt" from public.partner_earnings`;
       const payouts = await this.sql<PartnerPayout[]>`select partner_id as "partnerId", amount, created_at as "createdAt" from public.partner_payouts`;
       return { ...base, partners: [...partners], earnings: [...earnings], payouts: [...payouts], ...(await this.v2Snapshot()), partnersReady: true };
@@ -518,7 +521,7 @@ export class PgRepo implements Repo {
     try {
       const rows = await this.sql<{ key: string; chatId: number; body: { text: string; markup: Notice["markup"] }; dueAt: Date }[]>`
         update public.bot_notices set sent_at = ${now}
-        where key in (select key from public.bot_notices where sent_at is null and due_at <= ${now} order by due_at limit ${limit} for update skip locked)
+        where key in (select key from public.bot_notices where sent_at is null and key not like 'mk:%' and due_at <= ${now} order by due_at limit ${limit} for update skip locked)
         returning key, chat_id as "chatId", body, due_at as "dueAt"`;
       return rows.map((r) => ({ key: r.key, chatId: r.chatId, text: r.body.text, markup: r.body.markup, dueAt: r.dueAt }));
     } catch (e) {
@@ -717,17 +720,16 @@ export class PgRepo implements Repo {
     return r ? toUser(r) : null;
   }
 
-  async creditPartnerOrder(orderId: string, clientId: number, code: string) {
-    const [partner] = await this.sql<Partner[]>`select ${this.sql.unsafe(PARTNER_COLUMNS)} from public.partners p where code = ${code} and p.status <> 'rejected'
-      and p.telegram_id is distinct from ${clientId}
-      and not exists (select 1 from public.users u where u.id = ${clientId} and p.username is not null and lower(u.username) = lower(p.username))`;
-    if (!partner) return null;
-    // Процент — от фактически оплаченной суммы заказа (округление до целых тенге)
-    const [order] = await this.sql<{ amount: number }[]>`select amount from public.orders where id = ${orderId}`;
-    const amount = earningFor(partner, order?.amount ?? 0);
-    const [row] = await this.sql<{ amount: number }[]>`insert into public.partner_earnings(order_id,partner_id,amount)
-      values(${orderId},${partner.id},${amount}) on conflict (order_id) do nothing returning amount`;
-    return row ? { partner, amount: row.amount } : null;
+  async creditPartnerOrder(orderId:string,clientId:number,code:string){
+    if(!UUID.test(orderId))return null;
+    return this.sql.begin(async tx=>{
+      const[o]=await tx<{amount:number}[]>`select o.amount from public.orders o where id=${orderId} and user_id=${clientId} and status in('active','archived') and amount>0 and to_jsonb(o)->>'marketing_refunded_at' is null for update`;
+      if(!o)return null;
+      const[p]=await tx<Partner[]>`select ${tx.unsafe(PARTNER_COLUMNS)} from public.partners p where code=${code} and status<>'rejected' and to_jsonb(p)->>'customer_user_id' is null and p.telegram_id is distinct from ${clientId} and not exists(select 1 from public.users u where u.id=${clientId} and p.username is not null and lower(u.username)=lower(p.username)) for update`;
+      if(!p)return null;const amount=earningFor(p,o.amount);
+      const[row]=await tx<{amount:number}[]>`insert into public.partner_earnings(order_id,partner_id,amount) values(${orderId},${p.id},${amount}) on conflict(order_id) do nothing returning amount`;
+      return row?{partner:p,amount:row.amount}:null;
+    });
   }
 
   async markEarningDelivered(orderId: string) {
@@ -849,7 +851,7 @@ export class PgRepo implements Repo {
       const rows = await this.sql<{ id: string; userId: number }[]>`select o.id, o.user_id as "userId" from public.orders o
         join public.users u on u.id = o.user_id
         join public.partners p on 'p_' || p.code = u.source
-        where o.status in ('active','archived')
+        where o.status in ('active','archived') and o.amount>0 and to_jsonb(o)->>'marketing_refunded_at' is null and to_jsonb(p)->>'customer_user_id' is null
           and p.telegram_id is distinct from o.user_id
           and not exists (select 1 from public.partner_earnings e where e.order_id = o.id)`;
       return [...rows];
@@ -868,8 +870,10 @@ export class PgRepo implements Repo {
   }
   private sql: Sql;
 
+  readonly marketing:PgMarketing;
   constructor(sql: Sql = db()) {
     this.sql = sql;
+    this.marketing=new PgMarketing(sql,this);
   }
 
   // ── Пользователи ──
@@ -1134,10 +1138,10 @@ export class PgRepo implements Repo {
         count(*) filter (where created_at >= ${week})::int8 as o_week,
         count(*) filter (where created_at >= ${month})::int8 as o_month,
         count(*)::int8 as o_total,
-        coalesce(sum(amount) filter (where status = any(${paid}::text[]) and coalesce(paid_at, updated_at) >= ${today}), 0)::int8 as r_today,
-        coalesce(sum(amount) filter (where status = any(${paid}::text[]) and coalesce(paid_at, updated_at) >= ${week}), 0)::int8 as r_week,
-        coalesce(sum(amount) filter (where status = any(${paid}::text[]) and coalesce(paid_at, updated_at) >= ${month}), 0)::int8 as r_month,
-        coalesce(sum(amount) filter (where status = any(${paid}::text[])), 0)::int8 as r_total
+        coalesce(sum(amount) filter (where status = any(${paid}::text[]) and to_jsonb(orders)->>'marketing_refunded_at' is null and amount>0 and coalesce(paid_at, updated_at) >= ${today}), 0)::int8 as r_today,
+        coalesce(sum(amount) filter (where status = any(${paid}::text[]) and to_jsonb(orders)->>'marketing_refunded_at' is null and amount>0 and coalesce(paid_at, updated_at) >= ${week}), 0)::int8 as r_week,
+        coalesce(sum(amount) filter (where status = any(${paid}::text[]) and to_jsonb(orders)->>'marketing_refunded_at' is null and amount>0 and coalesce(paid_at, updated_at) >= ${month}), 0)::int8 as r_month,
+        coalesce(sum(amount) filter (where status = any(${paid}::text[]) and to_jsonb(orders)->>'marketing_refunded_at' is null and amount>0), 0)::int8 as r_total
       from public.orders where not (user_id = any(${staff}::text[]::bigint[]))`;
     const statusRows = await this.sql<{ status: OrderStatus; n: number }[]>`
       select status, count(*)::int8 as n from public.orders where not (user_id = any(${staff}::text[]::bigint[])) group by status`;
@@ -1145,7 +1149,7 @@ export class PgRepo implements Repo {
       select coalesce(u.source, '—') as source, count(*)::int8 as users, coalesce(sum(p.n), 0)::int8 as paid
       from public.users u
       left join (
-        select user_id, count(*) as n from public.orders where status = any(${paid}::text[]) group by user_id
+        select user_id, count(*) as n from public.orders where status = any(${paid}::text[]) and to_jsonb(orders)->>'marketing_refunded_at' is null and amount>0 group by user_id
       ) p on p.user_id = u.id
       where not (u.id = any(${staff}::text[]::bigint[]))
       group by 1

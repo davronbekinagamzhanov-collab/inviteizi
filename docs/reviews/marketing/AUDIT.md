@@ -24,3 +24,5 @@ Base: main bb599e9afa8aa7faacb3810559528ca52d652b6d. PR13–19 are open Draft, n
 6. No schema execution against production, no real Telegram calls, no real orders/payments. All new financial functions gated; deployment is Preview only. Migration rollback must preserve records/audit and disable features first.
 
 Implementation/results/limitations will be appended as each part is completed. This document is an audit baseline, not a claim that all11 requirements are implemented or production-approved.
+
+Implementation, release/rollback policy and final evidence: [RELEASE.md](RELEASE.md), [VALIDATION.md](VALIDATION.md). Financial features remain disabled pending isolated staging/manual acceptance.

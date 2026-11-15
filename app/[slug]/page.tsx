@@ -1,3 +1,5 @@
+import {MarketingBrandProvider} from "@/components/marketing/BrandContext";
+import {marketingFlags} from "@/lib/marketing/config";
 import { glueData } from "@/lib/typography";
 import { Suspense } from "react";
 import type { Metadata } from "next";
@@ -74,7 +76,12 @@ async function Invitation({ params }: { params: PageProps<"/[slug]">["params"] }
   const allowed = env.extraLangs();
   const langs = withPhotos.langs?.filter((l) => allowed.includes(l));
   const data = { ...withPhotos, langs: langs?.length ? langs : undefined };
-  return <Design data={glueData(data)} mode={page.mode} art={existingArt(design)} />;
+  const flags=marketingFlags();
+  let source:string|null=null;
+  // A marketing lookup must never make an otherwise valid paid invitation unavailable.
+  try{if(page.mode==="full"&&flags.referrals){const marketingStore=new (await import("@/bot/repo-pg")).PgRepo().marketing;source=await marketingStore.ready()?await marketingStore.publicCode(page.order.id):null;}}
+  catch(e){console.error("invitation attribution unavailable",e instanceof Error?e.name:"Error");}
+  return <MarketingBrandProvider enabled={flags.ui} source={source}><Design data={glueData(data)} mode={page.mode} art={existingArt(design)} /></MarketingBrandProvider>;
 }
 
 /** Пока загружается заказ: тот же молочный фон, без мигания белым */

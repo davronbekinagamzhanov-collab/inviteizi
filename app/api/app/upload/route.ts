@@ -7,6 +7,8 @@ import { PhotoFormatError, PHOTO_MAX_BYTES } from "@/bot/own-photo";
 export const maxDuration = 60;
 
 export async function POST(req: Request) {
+  // Preview must never write through inherited live credentials. Native fixture tests cover mutations.
+  if(process.env.VERCEL_ENV==="preview")return new Response(null,{status:404});
   const user = appGate(req);
   if (user instanceof Response) return user;
   const url = new URL(req.url);

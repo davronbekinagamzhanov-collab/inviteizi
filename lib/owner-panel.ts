@@ -22,6 +22,7 @@ export type PanelOrder = {
   amount: number;
   createdAt: Date;
   paidAt: Date | null;
+  refundedAt?: Date|null;
   updatedAt: Date;
   /** Для панели в приложении: ссылка /{slug} и имена в приглашении (поиск) */
   slug?: string | null;
@@ -34,6 +35,7 @@ export const SCHEDULES: PayoutSchedule[] = ["daily", "weekly", "monthly"];
 /** pending — создал менеджер, ждёт ✅ владельца (QR работает, оплаты считаются, выплаты нет); rejected — отклонён */
 export type PartnerStatus = "pending" | "active" | "rejected";
 export type Partner = {
+  customerUserId?:number|null;
   id: number;
   code: string;
   name: string;

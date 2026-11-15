@@ -2,8 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
-    "/api/bot": ["./assets/fonts/*.ttf"],
-    "/*/opengraph-image": ["./assets/fonts/*.ttf", "./public/og/**/*"],
+    "/api/bot": ["./assets/fonts/**/*.ttf","./public/art/**/*.webp","./public/art/**/*.png","./public/floral/*.webp","./public/vip/**/*.webp","./public/pilots/*.png"],
+    "/api/cron": ["./assets/fonts/**/*.ttf","./public/art/**/*.webp","./public/art/**/*.png","./public/floral/*.webp","./public/vip/**/*.webp","./public/pilots/*.png"],
+    "/api/marketing/status-preview": ["./assets/fonts/**/*.ttf","./public/art/**/*.webp","./public/art/**/*.png","./public/floral/*.webp","./public/vip/**/*.webp","./public/pilots/*.png"],
+    "/*/opengraph-image": ["./assets/fonts/**/*.ttf", "./public/og/**/*"],
   },
   cacheComponents: true,
   // Vercel Hobby: без оптимизации картинок на лету — все картинки уже готовые сжатые WebP
