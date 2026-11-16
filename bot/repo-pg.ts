@@ -1136,6 +1136,17 @@ export class PgRepo implements Repo {
     return r ? toUser(r) : null;
   }
 
+  async claimPromoLine(id: number, now: Date, gapMs: number) {
+    try {
+      const rows = await this.sql`update public.users set promo_line_at = ${now}
+        where id = ${id} and (promo_line_at is null or promo_line_at <= ${new Date(+now - gapMs)}) returning id`;
+      return rows.length > 0;
+    } catch (e) {
+      if ((e as { code?: string } | null)?.code === "42703") return null; // поля ещё нет
+      throw e;
+    }
+  }
+
   async touchUser(u: { id: number; username?: string | null; firstName?: string | null; source?: string | null }) {
     const [r] = await this.sql<UserRow[]>`
       insert into public.users (id, username, first_name, source)

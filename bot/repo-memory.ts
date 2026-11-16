@@ -710,6 +710,14 @@ export class MemoryRepo implements Repo {
     return u ? clone(u) : null;
   }
 
+  private promoLineAt = new Map<number, number>();
+  async claimPromoLine(id: number, now: Date, gapMs: number) {
+    const last = this.promoLineAt.get(id);
+    if (last !== undefined && +now - last < gapMs) return false;
+    this.promoLineAt.set(id, +now);
+    return true;
+  }
+
   async touchUser(u: { id: number; username?: string | null; firstName?: string | null; source?: string | null }) {
     const now = this.now();
     const old = this.users.get(u.id);

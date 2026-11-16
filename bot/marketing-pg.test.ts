@@ -863,3 +863,18 @@ it.skipIf(!native)(
   },
   60000,
 );
+
+it.skipIf(!native)(
+  "строка об акции: время показа в users.promo_line_at — не чаще раза в 6 часов, переживает перезапуск",
+  async () => {
+    const id = ++n,
+      t0 = new Date("2026-12-01T08:00:00Z"),
+      gap = 6 * 3_600_000;
+    await repo.touchUser({ id });
+    expect(await repo.claimPromoLine(id, t0, gap)).toBe(true);
+    // «Перезапуск сервера»: новый объект репозитория, та же база
+    const fresh = new PgRepo(sql);
+    expect(await fresh.claimPromoLine(id, new Date(+t0 + gap - 60_000), gap)).toBe(false);
+    expect(await fresh.claimPromoLine(id, new Date(+t0 + gap), gap)).toBe(true);
+  },
+);
