@@ -160,7 +160,11 @@ describe.skipIf(!BASE)("музыка на устройствах", () => {
       await page.addInitScript(() => {
         HTMLMediaElement.prototype.play = () => Promise.reject(new DOMException("blocked", "NotAllowedError"));
       });
-    await page.goto(`${BASE}/demo/${id}`, { waitUntil: "networkidle", timeout: 120_000 });
+    // id — дизайн (демо) или путь целиком (/dev/invitation/<id>: настоящее приглашение с формой ответа гостя)
+    await page.goto(id.startsWith("/") ? `${BASE}${id}` : `${BASE}/demo/${id}`, {
+      waitUntil: "networkidle",
+      timeout: 120_000,
+    });
     return { ctx, page, errors };
   }
   const opener = (page: import("playwright-core").Page) => page.locator("[data-open]:not(:disabled)").first();
@@ -183,19 +187,24 @@ describe.skipIf(!BASE)("музыка на устройствах", () => {
 
   for (const [name, d] of Object.entries(DEVICES))
     it(`${name}: открыть конверт → ответ гостя «Келаман» → спасибо`, async () => {
-      const { ctx, page, errors } = await openDemo(d.device, "muhr");
+      // В демо формы нет по задумке — проверяем на служебной странице настоящего приглашения (только локально)
+      const { ctx, page, errors } = await openDemo(d.device, "/dev/invitation/muhr");
+      const sent: unknown[] = [];
       try {
-        await page.route("**/api/rsvp", (r) => r.fulfill({ json: { ok: true } }));
+        await page.route("**/api/rsvp", (r) => {
+          sent.push(JSON.parse(r.request().postData() ?? "{}"));
+          return r.fulfill({ json: { ok: true } });
+        });
         await page.waitForTimeout(600);
         if (d.device.hasTouch) await opener(page).tap();
         else await opener(page).click();
         const form = page.locator("[data-rsvp]");
         await form.scrollIntoViewIfNeeded({ timeout: 15_000 });
         await form.locator("input").first().fill("Шавкат ака");
-        await form.getByRole("button", { name: "+" }).click();
+        await form.locator("button", { hasText: "+" }).click();
         await form.locator('button[type="submit"]').click();
-        await form.locator("button", { hasText: /./ }).first().waitFor();
         await page.waitForFunction(() => !document.querySelector("[data-rsvp] form"), null, { timeout: 10_000 });
+        expect(sent).toEqual([expect.objectContaining({ name: "Шавкат ака", guests: 2, attending: true })]);
         expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)).toBe(false);
       } finally {
         await ctx.close();
