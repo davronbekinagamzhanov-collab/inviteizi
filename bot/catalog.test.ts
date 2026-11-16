@@ -1,3 +1,4 @@
+import { coverVersioned } from "@/lib/cover-version";
 import {useHistoricalCatalog} from './testing/historical';
 import {describe,it,expect} from "vitest";
 import {Sim} from "./testing/sim";
@@ -22,7 +23,7 @@ describe("catalog photo attribution",()=>{
     const credit=photoAttributions[list[credited].id]!;
     const go=async(page:number)=>{for(let k=0;k<Math.ceil(list.length/PAGE)&&(((await sim.user(1))!.state as {catIdx?:number}).catIdx??0)!==page*PAGE;k++)await sim.click(1,"▶");};
     await go(pageOf(credited));
-    expect(sim.tg.to(1).some(m=>m.media===`https://inviteizi.vercel.app/covers/${list[credited].id}.jpg`)).toBe(true);
+    expect(sim.tg.to(1).some(m=>m.media===`https://inviteizi.vercel.app${coverVersioned(`/covers/${list[credited].id}.jpg`)}`)).toBe(true);
     expect(sim.lastText(1)).toContain(tx.catalog.photoCredit(credit.author,credit.license,credit.source));
     await go(pageOf(bare));
     expect(sim.lastText(1)).not.toContain(credit.author);

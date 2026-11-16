@@ -1,3 +1,4 @@
+import { coverVersioned } from "@/lib/cover-version";
 import { describe, expect, it } from "vitest";
 import { uz } from "@/texts/bot-uz";
 import { Sim } from "./testing/sim";
@@ -22,7 +23,7 @@ describe("весь путь никоҳ на ўзбекском", () => {
     await sim.click(id, uz.category.nikoh);
     const list = catalogList({ s: { occasion: "nikoh" } });
     const album = sim.tg.to(id).filter((m) => m.type === "photo");
-    expect(album.map((m) => m.media)).toEqual(list.slice(0, 3).map((d) => `${BASE}/covers/${d.id}.jpg`));
+    expect(album.map((m) => m.media)).toEqual(list.slice(0, 3).map((d) => `${BASE}${coverVersioned(`/covers/${d.id}.jpg`)}`));
     const menu = sim.last(id);
     const first = list[0];
     expect(menu.text).toContain(`1️⃣ №${first.number} ${tPlain.designs[first.id]} — `);
@@ -47,7 +48,7 @@ describe("весь путь никоҳ на ўзбекском", () => {
         .to(id)
         .filter((m) => m.type === "photo")
         .map((m) => m.media),
-    ).toEqual(list.slice(3, 6).map((d) => `${BASE}/covers/${d.id}.jpg`));
+    ).toEqual(list.slice(3, 6).map((d) => `${BASE}${coverVersioned(`/covers/${d.id}.jpg`)}`));
     expect(sim.tg.to(id).some((m) => m.id === menu.id)).toBe(false);
     expect(sim.lastText(id)).toContain(`№${list[3].number} `);
     await sim.click(id, "◀");
@@ -247,7 +248,7 @@ describe("весь путь никоҳ на ўзбекском", () => {
     expect(sim.lastText(1)).toContain(`№${list.at(-1)!.number} `);
     await sim.click(1, "▶");
     expect(buttonLabels(sim.last(1))).toContain(`1–3 / ${list.length}`);
-    expect(sim.tg.to(1).filter((m) => m.type === "photo")[0].media).toBe(`${BASE}/covers/${list[0].id}.jpg`);
+    expect(sim.tg.to(1).filter((m) => m.type === "photo")[0].media).toBe(`${BASE}${coverVersioned(`/covers/${list[0].id}.jpg`)}`);
   });
 
   it("суннат: в каталоге все принятые дизайны тадбира, шага «формат» нет", async () => {

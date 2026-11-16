@@ -22,7 +22,12 @@ function find(base) {
 }
 
 /** Файлы проекта .ts — это ES-модули (в package.json нет "type": "module") */
-const asModule = (r) => (r.url.endsWith(".ts") ? { ...r, format: "module-typescript", shortCircuit: true } : r);
+const asModule = (r) =>
+  r.url.endsWith(".ts")
+    ? { ...r, format: "module-typescript", shortCircuit: true }
+    : r.url.endsWith(".json")
+      ? { ...r, format: "json", shortCircuit: true, importAttributes: { type: "json" } }
+      : { ...r, shortCircuit: true };
 
 registerHooks({
   resolve(specifier, context, next) {

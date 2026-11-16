@@ -1,4 +1,5 @@
 /** Общие помощники логики бота: клавиатуры, форматирование, данные черновика */
+import { coverVersioned } from "@/lib/cover-version";
 import type { InlineButton, Markup } from "../tg";
 import type { Ctx, Draft, DraftData } from "./types";
 import type { InvitationData, InvitationEvent, Lang, Occasion, OrderRecord, OrderStatus } from "@/lib/domain";
@@ -85,7 +86,8 @@ export const price = (amount: number) => t.price(amount);
 export const fmtDate = (date: string) => date.split("-").reverse().join(".");
 export const designName = (id: string) => t.designs[id] ?? id;
 export const pageUrl = (c: Pick<Ctx, "deps">, slug: string) => `${c.deps.env.publicBaseUrl}/${slug}`;
-export const coverUrl = (c: Pick<Ctx, "deps">, id: string, legacy = false) => `${c.deps.env.publicBaseUrl}/covers/${legacy ? "legacy/" : ""}${id}.jpg`;
+export const coverUrl = (c: Pick<Ctx, "deps">, id: string, legacy = false) =>
+  `${c.deps.env.publicBaseUrl}${coverVersioned(`/covers/${legacy ? "legacy/" : ""}${id}.jpg`)}`;
 // «👁 Намуна» в каталоге — чистое демо без надписи НАМУНА (личная НАМУНА — по ссылке заказа)
 export const demoUrl = (c: Pick<Ctx, "deps"> & Partial<Pick<Ctx, "user">>, id: string, legacy = false) => {
   const token = c.user ? demoToken(c.user.id, id, c.deps.now()) : undefined;

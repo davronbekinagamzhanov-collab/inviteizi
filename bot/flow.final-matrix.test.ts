@@ -1,3 +1,4 @@
+import { coverVersioned } from "@/lib/cover-version";
 /**
  * Финальная матрица перед релизом (03.11.2026): КАЖДЫЙ тадбир × КАЖДЫЙ формат × uz/ru.
  * Каталог листается ▶ до конца и по кругу, ◀ обратно; «👁 Намуна» ведёт на /demo/<id>; дальше анкета
@@ -62,7 +63,7 @@ async function browse(sim: Sim, occasion: Occasion, pick: "photo" | "plain") {
       const demo = buttons(menu).filter((b) => b.url)[n];
       expect(demo?.url, d.id).toMatch(new RegExp(`/demo/${d.id}(\\?|#|$)`));
       expect(
-        albums.some((m) => m.media === `${BASE}/covers/${d.id}.jpg`),
+        albums.some((m) => m.media === `${BASE}${coverVersioned(`/covers/${d.id}.jpg`)}`),
         d.id,
       ).toBe(true);
     }
