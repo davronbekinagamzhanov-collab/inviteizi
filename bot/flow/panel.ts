@@ -16,7 +16,7 @@ import { orderButtons, sendReceiptTo } from "./orders";
 import { panelData, partnerRowOf, payoutsText, ptList, sendPack, startNewPartner } from "./partners";
 import { managerEarningsScreen, partnerStatsScreen, statsScreen } from "./stats";
 import { exportScreen } from "./export";
-import type { Ctx, Result } from "./types";
+import type { Ctx, Deps, Result } from "./types";
 import { syncMenuButton } from "./menu-button";
 
 type Screen = { text: string; rows: InlineButton[][] };
@@ -201,15 +201,20 @@ async function settings(c: Ctx): Promise<Screen> {
   };
 }
 
-async function newManagerLink(c: Ctx): Promise<Screen> {
+/** Одноразовая ссылка менеджеру (mgr_). Общая для бота и админки Mini App */
+export async function managerInviteLink(deps: Deps, createdBy: number) {
   const token = newToken();
-  await c.deps.repo.createInvite({
+  await deps.repo.createInvite({
     tokenHash: hashToken(token),
     kind: "manager",
-    createdBy: c.user.id,
-    expiresAt: new Date(+c.deps.now() + INVITE_TTL_MS.manager),
+    createdBy,
+    expiresAt: new Date(+deps.now() + INVITE_TTL_MS.manager),
   });
-  const link = `https://t.me/${await c.deps.tg.botUsername()}?start=mgr_${token}`;
+  return `https://t.me/${await deps.tg.botUsername()}?start=mgr_${token}`;
+}
+
+async function newManagerLink(c: Ctx): Promise<Screen> {
+  const link = await managerInviteLink(c.deps, c.user.id);
   return { text: S.managerLink(link), rows: [back("pn:set")] };
 }
 
@@ -233,6 +238,23 @@ const waLink = (text: string) => {
   return url.length <= 2000 ? url : null;
 };
 
+/** Неоплаченный заказ сотрудника → одноразовая ссылка клиенту (o_) и готовые тексты на двух языках. Общая для бота и админки */
+export async function clientOrderShare(deps: Deps, createdBy: number, o: OrderRecord, managerCode: string | null) {
+  const token = newToken();
+  await deps.repo.issueClientOrder({
+    orderId: o.id,
+    createdBy,
+    tokenHash: hashToken(token),
+    refSource: managerCode ? managerSource(managerCode) : null,
+  });
+  const share = {
+    url: `${deps.env.publicBaseUrl}/${o.slug}`,
+    amount: price(o.amount),
+    bot: `https://t.me/${await deps.tg.botUsername()}?start=o_${token}`,
+  };
+  return { ...share, uz: texts.uz.role.clientShare(share), ru: texts.ru.role.clientShare(share) };
+}
+
 /** cl:<n> — готовое сообщение для WhatsApp: НАМУНА, предупреждение, сумма, ссылка в бота (реквизиты — там, после подтверждения) */
 export async function toClient(c: Ctx, n: number): Promise<Result | void> {
   const role = await roleOf(c);
@@ -241,21 +263,7 @@ export async function toClient(c: Ctx, n: number): Promise<Result | void> {
   if (!o || o.userId !== c.user.id) return void (await toast(c, c.tx.oldButton));
   if (!PAYABLE_STATUSES.includes(o.status)) return void (await send(c, S.clientNotPayable));
   const manager = role === "manager" ? await c.deps.repo.getManager(c.user.id) : null;
-  const token = newToken();
-  await c.deps.repo.issueClientOrder({
-    orderId: o.id,
-    createdBy: c.user.id,
-    tokenHash: hashToken(token),
-    refSource: manager ? managerSource(manager.code) : null,
-  });
-  // Реквизитов здесь нет: клиент увидит их в боте только после предупреждения и «✅ Ҳаммаси тўғри»
-  const share = {
-    url: pageUrl(c, o.slug),
-    amount: price(o.amount),
-    bot: `https://t.me/${await c.deps.tg.botUsername()}?start=o_${token}`,
-  };
-  const uz = texts.uz.role.clientShare(share);
-  const ru = texts.ru.role.clientShare(share);
+  const { uz, ru } = await clientOrderShare(c.deps, c.user.id, o, manager?.code ?? null);
   const wa = [
     [uz, S.btn.waUz],
     [ru, S.btn.waRu],

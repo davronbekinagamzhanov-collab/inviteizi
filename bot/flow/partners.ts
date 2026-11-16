@@ -200,21 +200,24 @@ export async function sendPosterTo(
   });
 }
 
-/** Одноразовая ссылка партнёру (7 дней) + кнопки WhatsApp на узбекском и русском */
-async function joinLink(c: Ctx, p: Partner) {
+/** Одноразовая ссылка партнёру (7 дней) + тексты WhatsApp на узбекском и русском. Общая для бота и админки Mini App */
+export async function partnerJoinLink(deps: Deps, createdBy: number, p: Partner) {
   const token = newToken();
-  await c.deps.repo.createInvite({
+  await deps.repo.createInvite({
     tokenHash: hashToken(token),
     kind: "partner",
-    createdBy: c.user.id,
+    createdBy,
     partnerId: p.id,
-    expiresAt: new Date(+c.deps.now() + INVITE_TTL_MS.partner),
+    expiresAt: new Date(+deps.now() + INVITE_TTL_MS.partner),
   });
-  const link = `https://t.me/${await c.deps.tg.botUsername()}?start=join_${token}`;
-  const wa: InlineButton[][] = [
-    [{ text: S.btn.waUz, url: `https://wa.me/?text=${encodeURIComponent(texts.uz.role.joinShare(link))}` }],
-    [{ text: S.btn.waRu, url: `https://wa.me/?text=${encodeURIComponent(texts.ru.role.joinShare(link))}` }],
-  ];
+  const link = `https://t.me/${await deps.tg.botUsername()}?start=join_${token}`;
+  const wa = (text: string) => `https://wa.me/?text=${encodeURIComponent(text)}`;
+  return { link, waUz: wa(texts.uz.role.joinShare(link)), waRu: wa(texts.ru.role.joinShare(link)) };
+}
+
+async function joinLink(c: Ctx, p: Partner) {
+  const { link, waUz, waRu } = await partnerJoinLink(c.deps, c.user.id, p);
+  const wa: InlineButton[][] = [[{ text: S.btn.waUz, url: waUz }], [{ text: S.btn.waRu, url: waRu }]];
   return { link, wa };
 }
 

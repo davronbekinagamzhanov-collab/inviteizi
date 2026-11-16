@@ -45,6 +45,26 @@ export function Pay({
   const [busy, setBusy] = useState(false);
   const [agree, setAgree] = useState(false);
   const [reason, setReason] = useState<StaffGrantReason | null>(null);
+  const [clientLink, setClientLink] = useState<string | null>(null);
+
+  // Владелец заполнил за клиента: одноразовая ссылка o_ — заказ перейдёт к клиенту, оплатит он сам
+  async function forClient() {
+    if (busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const r = await api<{ ok: true; bot: string } | { error: string }>("ownerClientLink", { orderId: order.id });
+      if ("ok" in r) {
+        haptic.ok();
+        setClientLink(r.bot);
+      } else setError(T.pay.free.failed);
+    } catch (e) {
+      haptic.error();
+      setError(e instanceof ApiError && e.code === "offline" ? T.offline : T.pay.free.failed);
+    } finally {
+      setBusy(false);
+    }
+  }
 
   // Владелец: без Kaspi и чека — причина и «Бесплатно яратиш» (права ещё раз проверяет сервер)
   async function issueFree() {
@@ -208,6 +228,43 @@ export function Pay({
           {busy ? <SpinnerIcon size={20} /> : null}
           {T.pay.free.create}
         </button>
+        <p className={s.help}>{T.pay.free.forClientLead}</p>
+        {clientLink ? (
+          <div data-client-link>
+            <p className={s.label} style={{ overflowWrap: "anywhere" }}>
+              {clientLink}
+            </p>
+            <button
+              type="button"
+              className={`${s.btn} ${s.btnGhost} ${s.btnWide}`}
+              onClick={async () => {
+                if (await copyText(clientLink)) {
+                  haptic.ok();
+                  onToast(T.pay.copied);
+                }
+              }}
+            >
+              {T.pay.free.forClientCopy}
+            </button>
+            <button
+              type="button"
+              className={`${s.btn} ${s.btnGhost} ${s.btnWide}`}
+              onClick={() => shareLink(clientLink, order.title)}
+            >
+              {T.pay.free.forClientShare}
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            className={`${s.btn} ${s.btnGhost} ${s.btnWide}`}
+            onClick={forClient}
+            disabled={busy}
+            data-for-client
+          >
+            {T.pay.free.forClient}
+          </button>
+        )}
       </div>
     );
   }

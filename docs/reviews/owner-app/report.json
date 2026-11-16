@@ -8,6 +8,16 @@
       "errors": []
     },
     {
+      "tag": "admin-screens-375",
+      "ok": true,
+      "errors": []
+    },
+    {
+      "tag": "admin-screens-320",
+      "ok": true,
+      "errors": []
+    },
+    {
       "tag": "non-admin-390",
       "ok": true,
       "errors": []

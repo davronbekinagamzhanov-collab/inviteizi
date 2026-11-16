@@ -6,6 +6,7 @@ import * as app from "@/bot/app/service";
 import { partnerPoster, rolePanel } from "@/bot/app/roles-panel";
 import { ownerExport, ownerPanel } from "@/bot/app/owner";
 import { ownerAct } from "@/bot/app/owner-actions";
+import { isOwnerAdminAction, ownerAdmin, ownerAdminStatus } from "@/bot/app/owner-admin";
 import type { Lang } from "@/lib/domain";
 
 export const maxDuration = 30;
@@ -83,8 +84,14 @@ export async function POST(req: Request) {
         const r = await ownerExport(deps, user.id, body.period);
         return "error" in r ? json(r, 403) : json(r);
       }
-      default:
+      default: {
+        // Админка владельца (партнёры, менеджеры, выплаты, промокоды, заказ для клиента): не админу — 403
+        if (isOwnerAdminAction(body.action)) {
+          const r = await ownerAdmin(deps, user, body.action, body);
+          return "error" in r ? json(r, ownerAdminStatus(r.error)) : json(r);
+        }
         return json({ error: "bad" }, 400);
+      }
     }
   } catch (e) {
     console.error("api/app", body.action, e instanceof Error ? e.name : "Error");

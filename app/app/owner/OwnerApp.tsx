@@ -1,7 +1,8 @@
 "use client";
 /**
  * Панель владельца: период, карточки, заказы (поиск и фильтры), партнёры, дизайны, воронка, Excel.
- * Только чтение. Сервер отвечает 403 всем, кто не в ADMIN_IDS.
+ * Чеки ✅/❌ и экраны: партнёры, менеджеры, выплаты, промокоды, заказ для клиента (OwnerScreens.tsx).
+ * Сервер отвечает 403 всем, кто не в ADMIN_IDS.
  */
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -9,6 +10,7 @@ import { ru as BOT_RU, staff as BOT } from "@/texts/bot-ru";
 import type { OwnerPanel, OwnerPeriod } from "@/bot/app/owner";
 import { api, ApiError } from "../ui/api";
 import { haptic, openLink, setupTelegram, tg } from "../ui/telegram";
+import { OwnerScreenView, type OwnerScreen } from "./OwnerScreens";
 import s from "./owner.module.css";
 
 const PERIODS: { id: OwnerPeriod; label: string }[] = [
@@ -62,9 +64,15 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
   const [note, setNote] = useState<string | null>(null);
   const [rejecting, setRejecting] = useState<number | null>(null);
   const [acting, setActing] = useState(false);
+  const [screen, setScreen] = useState<OwnerScreen | null>(null);
 
-  /** Действие владельца тем же кодом, что кнопка в боте. inChat — ответ (список, мастер) придёт в чат с ботом */
-  async function act(action: string, done: string, inChat = false) {
+  function toast(t: string) {
+    setNote(t);
+    setTimeout(() => setNote(null), 2600);
+  }
+
+  /** Действие владельца тем же кодом, что кнопка в боте (✅/❌ чека) */
+  async function act(action: string, done: string) {
     if (acting) return;
     haptic.tap();
     setActing(true);
@@ -73,8 +81,7 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
       haptic.ok();
       setNote(done);
       setRejecting(null);
-      if (inChat) setTimeout(() => tg()?.close(), 900);
-      else await load(period);
+      await load(period);
     } catch {
       haptic.error();
       setNote("Не получилось. Попробуйте ещё раз.");
@@ -156,6 +163,27 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
     );
   }
 
+  if (screen)
+    return (
+      <div className={`${s.root} ${fontClass}`} lang="ru">
+        <main className={s.wrap}>
+          <OwnerScreenView
+            screen={screen}
+            toast={toast}
+            onBack={() => {
+              setScreen(null);
+              load(period);
+            }}
+          />
+        </main>
+        {note && (
+          <div className={s.toast} role="status">
+            {note}
+          </div>
+        )}
+      </div>
+    );
+
   const c = data.cards;
   return (
     <div className={`${s.root} ${fontClass}`} lang="ru" aria-busy={loading}>
@@ -217,46 +245,29 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
           <Link className={`${s.action} ${s.actionMain}`} href="/app" data-owner-create>
             ✨ Создать приглашение
           </Link>
-          <button
-            type="button"
-            className={s.action}
-            disabled={acting}
-            onClick={() => act("pa:new", "Новый партнёр: продолжите в чате с ботом", true)}
-          >
-            🤝 Новый партнёр
-          </button>
-          <button
-            type="button"
-            className={s.action}
-            disabled={acting}
-            onClick={() => act("pn:set", "Менеджеры — в чате с ботом", true)}
-          >
-            👤 Менеджеры
-          </button>
-          <button
-            type="button"
-            className={s.action}
-            disabled={acting}
-            onClick={() => act("pn:po", "Выплаты — в чате с ботом", true)}
-          >
-            💰 Выплаты
-          </button>
-          <button
-            type="button"
-            className={s.action}
-            disabled={acting}
-            onClick={() => act("/promos", "Промокоды — в чате с ботом", true)}
-          >
-            🎟 Промокоды
-          </button>
-          <button
-            type="button"
-            className={s.action}
-            disabled={acting}
-            onClick={() => act("pn:cl", "Заказ для клиента — в чате с ботом", true)}
-          >
-            📤 Заказ для клиента
-          </button>
+          {(
+            [
+              ["partners", "🤝 Партнёры"],
+              ["managers", "👤 Менеджеры"],
+              ["payouts", "💰 Выплаты"],
+              ["promos", "🎟 Промокоды"],
+              ["client", "📤 Заказ для клиента"],
+            ] as [OwnerScreen, string][]
+          ).map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              className={s.action}
+              data-owner-open={id}
+              onClick={() => {
+                haptic.tap();
+                setScreen(id);
+                window.scrollTo(0, 0);
+              }}
+            >
+              {label}
+            </button>
+          ))}
         </section>
 
         <nav className={s.tabs} role="tablist" aria-label="Разделы">
@@ -502,7 +513,6 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
         <button type="button" className={s.excel} onClick={excel}>
           📤 Excel
         </button>
-        <p className={s.hint}>Подтверждение чеков и выплаты — в боте.</p>
       </main>
       {note && (
         <div className={s.toast} role="status">
