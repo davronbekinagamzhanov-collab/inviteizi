@@ -121,3 +121,62 @@ describe.skipIf(!BASE)("фото клиента на устройствах", ()
 });
 
 void readFile;
+
+// ── Музыка: звук только после нажатия (как на Android), касание конверта → играет; запрет → видна кнопка ▶ ──
+describe.skipIf(!BASE)("музыка на устройствах", () => {
+  let strict: Browser;
+  let wav: Buffer;
+  beforeAll(async () => {
+    strict = await chromium.launch({
+      executablePath: process.env.CHROME || "/opt/pw-browsers/chromium",
+      args: ["--autoplay-policy=user-gesture-required"],
+    });
+    wav = await readFile("public/music/namuna-kuy.wav");
+  });
+  afterAll(async () => strict?.close());
+
+  async function openDemo(device: (typeof DEVICES)[keyof typeof DEVICES]["device"], id: string, deny = false) {
+    const ctx = await strict.newContext({ ...device });
+    const page = await ctx.newPage();
+    const errors: string[] = [];
+    page.on("pageerror", (e) => errors.push(e.message));
+    await page.route("**/storage/v1/object/public/music/**", (r) =>
+      r.fulfill({ status: 200, contentType: "audio/wav", body: wav, headers: { "accept-ranges": "bytes" } }),
+    );
+    if (deny)
+      await page.addInitScript(() => {
+        HTMLMediaElement.prototype.play = () => Promise.reject(new DOMException("blocked", "NotAllowedError"));
+      });
+    await page.goto(`${BASE}/demo/${id}`, { waitUntil: "networkidle", timeout: 120_000 });
+    return { ctx, page, errors };
+  }
+  const opener = (page: import("playwright-core").Page) => page.locator("[data-open]:not(:disabled)").first();
+
+  for (const [name, d] of Object.entries(DEVICES))
+    it(`${name}: касание конверта → audio.paused === false`, async () => {
+      const { ctx, page, errors } = await openDemo(d.device, "muhr");
+      try {
+        await page.waitForTimeout(600);
+        if (d.device.hasTouch) await opener(page).tap();
+        else await opener(page).click();
+        await page.waitForFunction(() => [...document.querySelectorAll("audio")].some((a) => !a.paused), null, {
+          timeout: 10_000,
+        });
+      } finally {
+        await ctx.close();
+      }
+      expect(errors).toEqual([]);
+    }, 120_000);
+
+  it("Pixel 7: телефон запретил звук → заметная кнопка «Мусиқани ёқиш учун ▶ ни босинг», а не тишина", async () => {
+    const { ctx, page } = await openDemo(DEVICES["Pixel 7"].device, "muhr", true);
+    try {
+      await page.waitForTimeout(600);
+      await opener(page).tap();
+      await page.locator("[data-music-hint]").waitFor({ timeout: 10_000 });
+      expect(await page.locator("[data-music-hint]").innerText()).toContain("▶");
+    } finally {
+      await ctx.close();
+    }
+  }, 120_000);
+});

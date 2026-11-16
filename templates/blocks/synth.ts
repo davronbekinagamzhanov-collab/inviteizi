@@ -45,8 +45,7 @@ const NOTE_INDEX: Record<string, number> = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9,
 export function noteToFreq(pitch: string) {
   const m = /^([A-G])([#b]?)(-?\d)$/.exec(pitch);
   if (!m) throw new Error(`Нота не распознана: ${pitch}`);
-  const midi =
-    12 * (Number(m[3]) + 1) + NOTE_INDEX[m[1]] + (m[2] === "#" ? 1 : m[2] === "b" ? -1 : 0);
+  const midi = 12 * (Number(m[3]) + 1) + NOTE_INDEX[m[1]] + (m[2] === "#" ? 1 : m[2] === "b" ? -1 : 0);
   return 440 * 2 ** ((midi - 69) / 12);
 }
 
@@ -67,11 +66,14 @@ export class SynthPlayer {
 
   constructor(private score: Score) {}
 
-  /** Вызывать прямо в обработчике нажатия */
-  play() {
+  /** Вызывать прямо в обработчике нажатия. false — телефон не дал включить звук (нужна кнопка ▶) */
+  play(): Promise<boolean> {
     if (!this.ctx) this.init();
     const ctx = this.ctx!;
-    void ctx.resume();
+    const resumed = ctx.resume().then(
+      () => (ctx.state as string) === "running",
+      () => false,
+    );
     const now = ctx.currentTime;
     this.master!.gain.cancelScheduledValues(now);
     this.master!.gain.setValueAtTime(this.master!.gain.value, now);
@@ -79,6 +81,7 @@ export class SynthPlayer {
     if (!this.timer) this.timer = setInterval(() => this.schedule(), 60);
     this.schedule();
     this.playing = true;
+    return resumed;
   }
 
   pause() {
@@ -108,8 +111,7 @@ export class SynthPlayer {
     if (nav.audioSession) nav.audioSession.type = "playback";
 
     const AC =
-      window.AudioContext ??
-      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     const ctx = new AC();
     this.ctx = ctx;
 

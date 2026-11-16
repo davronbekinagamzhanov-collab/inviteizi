@@ -26,7 +26,13 @@ type Options = {
 export const LANG_KEY = "inviteizi:lang";
 
 /** Стартовый язык: ?lang= в адресе → выбор гостя раньше → язык телефона (если клиент его выбрал) → главный язык заказа */
-export function pickLang(available: InviteLang[], url: string | null, saved: string | null, phone: readonly string[], main: InviteLang = "uz"): InviteLang {
+export function pickLang(
+  available: InviteLang[],
+  url: string | null,
+  saved: string | null,
+  phone: readonly string[],
+  main: InviteLang = "uz",
+): InviteLang {
   const ok = (x: string | null | undefined): x is InviteLang => Boolean(x) && available.includes(x as InviteLang);
   if (ok(url)) return url;
   if (ok(saved)) return saved;
@@ -39,7 +45,10 @@ export function pickLang(available: InviteLang[], url: string | null, saved: str
 
 export function useInvitation(raw: InvitationData, mode: InvitationMode, opts: Options = {}) {
   // Языки этой страницы: узбекский всегда, русский/казахский — если клиент добавил
-  const langs: InviteLang[] = ["uz", ...INVITE_LANGS.filter((l) => l !== "uz" && raw.langs?.includes(l as "ru" | "kk"))];
+  const langs: InviteLang[] = [
+    "uz",
+    ...INVITE_LANGS.filter((l) => l !== "uz" && raw.langs?.includes(l as "ru" | "kk")),
+  ];
   const langsKey = langs.join(",");
   const main: InviteLang = raw.mainLang && langs.includes(raw.mainLang) ? raw.mainLang : "uz";
   const [lang, setLang] = useState<InviteLang>("uz");
@@ -58,7 +67,13 @@ export function useInvitation(raw: InvitationData, mode: InvitationMode, opts: O
     const url = new URLSearchParams(window.location.search).get("lang");
     const next = opts.initialLanguage
       ? pickLang(langsKey.split(",") as InviteLang[], url, null, [], opts.initialLanguage)
-      : pickLang(langsKey.split(",") as InviteLang[], url, saved, navigator.languages?.length ? navigator.languages : [navigator.language], main);
+      : pickLang(
+          langsKey.split(",") as InviteLang[],
+          url,
+          saved,
+          navigator.languages?.length ? navigator.languages : [navigator.language],
+          main,
+        );
     // eslint-disable-next-line react-hooks/set-state-in-effect -- язык телефона известен только в браузере
     setLang(next);
     setLangReady(true);
@@ -72,6 +87,8 @@ export function useInvitation(raw: InvitationData, mode: InvitationMode, opts: O
   const [started, setStarted] = useState(!hasOpening); // гость нажал «открыть»
   const [opened, setOpened] = useState(!hasOpening); // анимация открытия закончилась
   const [playing, setPlaying] = useState(false);
+  // Телефон не дал включить звук (запрет автовоспроизведения, беззвучный режим WebView): показываем кнопку ▶, а не молчим
+  const [musicBlocked, setMusicBlocked] = useState(false);
   // Элемент <audio> храним в состоянии (его создаёт audioElement ниже)
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const synth = useRef<SynthPlayer | null>(null);
@@ -119,13 +136,26 @@ export function useInvitation(raw: InvitationData, mode: InvitationMode, opts: O
     playingNow.current = true;
     if (melody) {
       synth.current ??= new SynthPlayer(melody);
-      synth.current.play();
-      setPlaying(true);
-    } else if (audio) {
-      startAudio(audio).catch(() => {
+      const s = synth.current;
+      void s.play().then((ok) => {
+        if (ok) return setMusicBlocked(false);
+        s.pause();
         playingNow.current = false;
         setPlaying(false);
+        setMusicBlocked(true);
       });
+      setPlaying(true);
+    } else if (audio) {
+      // play() — синхронно в обработчике нажатия (Android иначе не считает это нажатием); файл грузится потом
+      startAudio(audio).then(
+        () => setMusicBlocked(false),
+        (e: unknown) => {
+          playingNow.current = false;
+          setPlaying(false);
+          // Отменили паузой — это не ошибка; иначе звук заблокирован или файл не открылся — нужна кнопка ▶
+          if (!(e instanceof DOMException && e.name === "AbortError")) setMusicBlocked(true);
+        },
+      );
     } else playingNow.current = false;
   }
 
@@ -190,6 +220,8 @@ export function useInvitation(raw: InvitationData, mode: InvitationMode, opts: O
     started,
     opened,
     playing,
+    /** Звук не включился сам — показать заметную кнопку «▶ Мусиқа» */
+    musicBlocked,
     /** Вызывать прямо в обработчике нажатия: иначе телефон заблокирует музыку */
     start() {
       if (started) return;
@@ -240,6 +272,14 @@ function startAudio(el: HTMLAudioElement) {
 /** Громкость 0 → 1 за ~1,5 с */
 function fadeIn(audio: HTMLAudioElement) {
   const start = performance.now();
+  // Если анимация кадров не идёт (свёрнутый WebView, экономия батареи) — громкость всё равно полная через 1,6 с
+  setTimeout(() => {
+    try {
+      if (!audio.paused) audio.volume = 1;
+    } catch {
+      // iPhone: громкость не меняется
+    }
+  }, 1600);
   const step = (now: number) => {
     const k = Math.min(1, (now - start) / 1500);
     try {
