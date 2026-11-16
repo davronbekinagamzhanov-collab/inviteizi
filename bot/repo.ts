@@ -15,7 +15,7 @@ import type {
   UserRecord,
 } from "@/lib/domain";
 import type { Occasion } from "@/lib/types";
-import type { NewPromotion, Promotion, Wholesaler } from "@/lib/domain";
+import type { BroadcastJob, BroadcastStats, BroadcastUser, NewPromotion, Promotion, Wholesaler } from "@/lib/domain";
 import type { Analytics, Period, EventKind } from "@/lib/analytics";
 import type { BotErrorEntry } from "./errors";
 import type { ManagerPayout, PanelSnapshot, Partner, PayoutSchedule } from "@/lib/owner-panel";
@@ -235,6 +235,27 @@ export interface Repo {
   /** Только действующий оптовик (не снятый) */
   getWholesaler(userId: number): Promise<Wholesaler | null>;
   listWholesalers(): Promise<Wholesaler[]>;
+
+  // ── Рассылка об акции (17.11.2026). Без миграции 20261117130000 — получателей нет, очередь пуста ──
+  /** Все, кто нажимал /start, кроме отключивших сообщения и заблокировавших бота */
+  listBroadcastUsers(): Promise<BroadcastUser[]>;
+  /** «🔕» или 403: больше не слать (blocked — бот заблокирован) */
+  setBroadcastOff(userId: number, off: boolean, blocked?: boolean): Promise<void>;
+  /**
+   * Отметить, что рассылка (start) или напоминание (last) акции ушли в очередь — ровно один раз.
+   * start: false, если уже было или другая рассылка была меньше чем minGapMs назад
+   */
+  markPromotionBroadcast(id: string, kind: "start" | "last", now: Date, minGapMs: number): Promise<boolean>;
+  /** Поставить сообщения в очередь; повторный ключ не добавляется. Возвращает число новых */
+  enqueueBroadcast(rows: { key: string; chatId: number; dueAt: Date }[]): Promise<number>;
+  /** Забрать созревшие сообщения рассылки с арендой (lease) */
+  claimBroadcast(now: Date, limit: number, leaseMs: number): Promise<BroadcastJob[]>;
+  /** Отправляется сейчас (до вызова Telegram): аренда истекла после этой отметки — не повторять, а считать сбоем */
+  markBroadcastSending(key: string, token: string, now: Date): Promise<boolean>;
+  ackBroadcast(key: string, token: string, now: Date): Promise<void>;
+  /** retryAt — повторить позже (429, временная ошибка); иначе — больше не слать (code: blocked | error) */
+  failBroadcast(key: string, token: string, r: { retryAt?: Date; code: string }, now: Date): Promise<void>;
+  broadcastStats(prefix: string): Promise<BroadcastStats>;
 
   // ── Часть 10: напоминания, отзывы, автоочистка ──
   setNudge(id: number, patch: { count?: number; off?: boolean }): Promise<void>;

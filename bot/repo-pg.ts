@@ -26,6 +26,8 @@ import type {
   MusicChoice,
   MusicRecord,
   NewOrder,
+  BroadcastJob,
+  BroadcastUser,
   NewPromotion,
   OrderPatch,
   OrderPricing,
@@ -423,6 +425,10 @@ type PromotionRow = {
   stopped_at: Date | null;
   created_by: number;
   created_at: Date;
+  broadcast?: boolean;
+  remind?: boolean;
+  broadcast_at?: Date | null;
+  remind_at?: Date | null;
 };
 const toPromotion = (r: PromotionRow): Promotion => ({
   id: r.id,
@@ -436,6 +442,11 @@ const toPromotion = (r: PromotionRow): Promotion => ({
   stoppedAt: r.stopped_at,
   createdBy: Number(r.created_by),
   createdAt: r.created_at,
+  // Без миграции рассылки (20261117130000) — рассылки нет
+  broadcast: r.broadcast ?? false,
+  remind: r.remind ?? false,
+  broadcastAt: r.broadcast_at ?? null,
+  remindAt: r.remind_at ?? null,
 });
 
 const isMissingTable = (e: unknown) => (e as { code?: string } | null)?.code === "42P01";
@@ -665,7 +676,7 @@ export class PgRepo implements Repo {
         { key: string; chatId: number; body: { text: string; markup: Notice["markup"] }; dueAt: Date }[]
       >`
         update public.bot_notices set sent_at = ${now}
-        where key in (select key from public.bot_notices where sent_at is null and key not like 'mk:%' and due_at <= ${now} order by due_at limit ${limit} for update skip locked)
+        where key in (select key from public.bot_notices where sent_at is null and key not like 'mk:%' and key not like 'promo:%' and due_at <= ${now} order by due_at limit ${limit} for update skip locked)
         returning key, chat_id as "chatId", body, due_at as "dueAt"`;
       return rows.map((r) => ({
         key: r.key,
@@ -1155,7 +1166,15 @@ export class PgRepo implements Repo {
         (name,discount_percent,starts_at,ends_at,occasions,formats,for_partner_clients,created_by)
         values(${p.name},${p.percent},${p.startsAt},${p.endsAt},${p.occasions ? this.sql.array(p.occasions) : null},
           ${p.formats ? this.sql.array(p.formats) : null},${p.forPartnerClients},${p.createdBy}) returning *`;
-      return toPromotion(r);
+      // Рассылка и напоминание — отдельно: без миграции рассылки акция создаётся как раньше
+      if (p.broadcast !== undefined || p.remind !== undefined)
+        await this
+          .sql`update public.promotions set broadcast=${p.broadcast ?? true},remind=${p.remind ?? true} where id=${r.id}`.catch(
+          (e) => {
+            if (!isMissingColumn(e)) throw e;
+          },
+        );
+      return toPromotion({ ...r, broadcast: p.broadcast ?? true, remind: p.remind ?? true });
     } catch (e) {
       if (isMissingTable(e)) return "missing" as const;
       if ((e as { code?: string }).code === "23P01") return "overlap" as const;
@@ -1221,6 +1240,105 @@ export class PgRepo implements Repo {
       if (isMissingTable(e)) return [];
       throw e;
     }
+  }
+
+  // ── Рассылка об акции (миграция 20261117130000; без неё — пусто) ──
+  private async noTable<T>(fallback: T, run: () => Promise<T>): Promise<T> {
+    try {
+      return await run();
+    } catch (e) {
+      if (isMissingTable(e) || isMissingColumn(e)) return fallback;
+      throw e;
+    }
+  }
+  async listBroadcastUsers() {
+    return this.noTable([] as BroadcastUser[], async () => {
+      const rows = await this.sql<{ id: number; lang: Lang | null; source: string | null; username: string | null }[]>`
+        select id,lang,source,username from public.users
+        where not broadcast_off and bot_blocked_at is null and not coalesce((to_jsonb(users)->>'nudge_off')::boolean,false)`;
+      return rows.map((r) => ({ ...r, id: Number(r.id) }));
+    });
+  }
+  async setBroadcastOff(userId: number, off: boolean, blocked = false) {
+    await this.noTable(undefined, async () => {
+      await this.sql`update public.users set broadcast_off=${off},
+        bot_blocked_at=case when ${blocked} then coalesce(bot_blocked_at, now()) else bot_blocked_at end where id=${userId}`;
+    });
+  }
+  async markPromotionBroadcast(id: string, kind: "start" | "last", now: Date, minGapMs: number) {
+    if (!UUID.test(id)) return false;
+    return this.noTable(false, async () => {
+      const since = new Date(+now - minGapMs);
+      // Одна строка — одно решение: двойное нажатие и два сервера разом не поставят рассылку дважды
+      const rows =
+        kind === "last"
+          ? await this
+              .sql`update public.promotions set remind_at=${now} where id=${id} and remind_at is null returning id`
+          : await this.sql`update public.promotions set broadcast_at=${now} where id=${id} and broadcast_at is null
+              and not exists(select 1 from public.promotions where broadcast_at > ${since}) returning id`;
+      return rows.length > 0;
+    });
+  }
+  async enqueueBroadcast(rows: { key: string; chatId: number; dueAt: Date }[]) {
+    if (!rows.length) return 0;
+    return this.noTable(0, async () => {
+      let n = 0;
+      for (let i = 0; i < rows.length; i += 500) {
+        const part = rows.slice(i, i + 500).map((r) => ({
+          key: r.key,
+          chat_id: r.chatId,
+          body: { kind: "promo" },
+          due_at: r.dueAt,
+        }));
+        const done = await this
+          .sql`insert into public.bot_notices ${this.sql(part as never, "key", "chat_id", "body", "due_at")}
+          on conflict(key) do nothing returning key`;
+        n += done.length;
+      }
+      return n;
+    });
+  }
+  async claimBroadcast(now: Date, limit: number, leaseMs: number) {
+    return this.noTable([] as BroadcastJob[], async () => {
+      // Аренда истекла посреди отправки: Telegram мог доставить — не повторяем, считаем сбоем (ровно 1 раз)
+      await this
+        .sql`update public.bot_notices set dead_at=${now},last_error_code='ambiguous',lease_token=null,lease_until=null
+        where key like 'promo:%' and sent_at is null and dead_at is null and sending_at is not null and lease_until<${now}`;
+      const token = crypto.randomUUID();
+      const rows = await this.sql<{ key: string; chat_id: number; attempts: number }[]>`
+        update public.bot_notices set lease_token=${token},lease_until=${new Date(+now + leaseMs)},attempts=attempts+1
+        where key in(select key from public.bot_notices where key like 'promo:%' and sent_at is null and dead_at is null
+          and due_at<=${now} and (lease_until is null or lease_until<${now}) order by due_at,key limit ${limit} for update skip locked)
+        returning key,chat_id,attempts`;
+      return rows.map((r) => ({ key: r.key, chatId: Number(r.chat_id), token, attempts: r.attempts }));
+    });
+  }
+  async markBroadcastSending(key: string, token: string, now: Date) {
+    const r = await this.sql`update public.bot_notices set sending_at=${now}
+      where key=${key} and lease_token=${token} and sent_at is null and dead_at is null returning key`;
+    return r.length > 0;
+  }
+  async ackBroadcast(key: string, token: string, now: Date) {
+    await this.sql`update public.bot_notices set sent_at=${now},lease_token=null,lease_until=null
+      where key=${key} and lease_token=${token}`;
+  }
+  async failBroadcast(key: string, token: string, r: { retryAt?: Date; code: string }, now: Date) {
+    const code = /^[a-z0-9_]{1,40}$/.test(r.code) ? r.code : "error";
+    await this
+      .sql`update public.bot_notices set lease_token=null,lease_until=null,sending_at=null,last_error_code=${code},
+      due_at=coalesce(${r.retryAt ?? null}::timestamptz,due_at),dead_at=${r.retryAt ? null : now}
+      where key=${key} and lease_token=${token}`;
+  }
+  async broadcastStats(prefix: string) {
+    return this.noTable({ queued: 0, sent: 0, blocked: 0, failed: 0 }, async () => {
+      const [r] = await this.sql<{ queued: number; sent: number; blocked: number; failed: number }[]>`
+        select count(*) filter(where sent_at is null and dead_at is null)::int as queued,
+          count(*) filter(where sent_at is not null)::int as sent,
+          count(*) filter(where dead_at is not null and last_error_code='blocked')::int as blocked,
+          count(*) filter(where dead_at is not null and coalesce(last_error_code,'')<>'blocked')::int as failed
+        from public.bot_notices where key like ${prefix + "%"}`;
+      return r;
+    });
   }
 
   // ── Админы ──

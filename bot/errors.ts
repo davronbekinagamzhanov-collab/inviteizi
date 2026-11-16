@@ -19,10 +19,23 @@ export type BotErrorEntry = {
 type Described = { error_code?: unknown; description?: unknown; code?: unknown; name?: unknown; message?: unknown };
 
 const described = (e: unknown): Described => (e && typeof e === "object" ? (e as Described) : {});
-const apiCode = (e: unknown) => (typeof described(e).error_code === "number" ? (described(e).error_code as number) : null);
-const apiText = (e: unknown) => (typeof described(e).description === "string" ? (described(e).description as string) : "");
+const apiCode = (e: unknown) =>
+  typeof described(e).error_code === "number" ? (described(e).error_code as number) : null;
+const apiText = (e: unknown) =>
+  typeof described(e).description === "string" ? (described(e).description as string) : "";
 
-const NETWORK_CODES = new Set(["ECONNRESET", "ECONNREFUSED", "ETIMEDOUT", "ENOTFOUND", "EAI_AGAIN", "EPIPE", "CONNECTION_CLOSED", "CONNECTION_ENDED", "CONNECTION_DESTROYED", "CONNECT_TIMEOUT"]);
+const NETWORK_CODES = new Set([
+  "ECONNRESET",
+  "ECONNREFUSED",
+  "ETIMEDOUT",
+  "ENOTFOUND",
+  "EAI_AGAIN",
+  "EPIPE",
+  "CONNECTION_CLOSED",
+  "CONNECTION_ENDED",
+  "CONNECTION_DESTROYED",
+  "CONNECT_TIMEOUT",
+]);
 /** SQLSTATE: соединение, конфликт транзакций, нехватка ресурсов, остановка сервера */
 const PG_TRANSIENT = /^(08|40|53|57|58)/;
 const PG_STATE = /^[0-9A-Z]{5}$/;
@@ -41,21 +54,35 @@ export function classifyError(e: unknown): "transient" | "permanent" {
   }
   if (name === "HttpError" || name === "AbortError" || name === "TimeoutError") return "transient";
   if (name === "TypeError" && /fetch failed|network/i.test(String(message ?? ""))) return "transient";
-  if (e instanceof TypeError || e instanceof ReferenceError || e instanceof RangeError || e instanceof SyntaxError) return "permanent";
+  if (e instanceof TypeError || e instanceof ReferenceError || e instanceof RangeError || e instanceof SyntaxError)
+    return "permanent";
   return "transient";
 }
 
+/** 429 Too Many Requests: через сколько секунд Telegram разрешит повтор (null — это не 429) */
+export const retryAfterSec = (e: unknown): number | null => {
+  if (apiCode(e) !== 429) return null;
+  const p = (described(e) as { parameters?: { retry_after?: unknown } }).parameters;
+  const n = typeof p?.retry_after === "number" ? p.retry_after : Number(/retry after (\d+)/i.exec(apiText(e))?.[1]);
+  return Number.isFinite(n) && n > 0 ? n : 5;
+};
+
 /** Сообщения для правки больше нет или его нельзя править: показываем новым сообщением */
 export const isEditImpossible = (e: unknown) =>
-  apiCode(e) === 400 && /message to edit not found|message can't be edited|no text in the message to edit|no media in the message to edit|message_id_invalid/i.test(apiText(e));
+  apiCode(e) === 400 &&
+  /message to edit not found|message can't be edited|no text in the message to edit|no media in the message to edit|message_id_invalid/i.test(
+    apiText(e),
+  );
 
 export const isNotModified = (e: unknown) => apiCode(e) === 400 && /message is not modified/i.test(apiText(e));
 
 /** Кнопку нажали давно: отвечать на неё уже нельзя, и это не ошибка */
-export const isStaleCallback = (e: unknown) => apiCode(e) === 400 && /query is too old|query id is invalid/i.test(apiText(e));
+export const isStaleCallback = (e: unknown) =>
+  apiCode(e) === 400 && /query is too old|query id is invalid/i.test(apiText(e));
 
 /** Клиент заблокировал бота или чат недоступен: сообщение об ошибке отправлять некому */
-export const isUnreachable = (e: unknown) => apiCode(e) === 403 || (apiCode(e) === 400 && /chat not found/i.test(apiText(e)));
+export const isUnreachable = (e: unknown) =>
+  apiCode(e) === 403 || (apiCode(e) === 400 && /chat not found/i.test(apiText(e)));
 
 /** Telegram отдаёт файлы только до 20 МБ */
 export const isFileTooBig = (e: unknown) => apiCode(e) === 400 && /file is too big/i.test(apiText(e));
@@ -78,16 +105,33 @@ function clientValues(u: BotUpdate) {
   return [u.from.firstName, u.from.username, u.kind === "text" ? u.text : null, u.kind === "command" ? u.args : null];
 }
 
-export function toEntry(e: unknown, u: BotUpdate, step: string | null, outcome: BotErrorEntry["outcome"]): BotErrorEntry {
+export function toEntry(
+  e: unknown,
+  u: BotUpdate,
+  step: string | null,
+  outcome: BotErrorEntry["outcome"],
+): BotErrorEntry {
   const known = clientValues(u);
   const { code, name, message } = described(e);
-  const stack = e instanceof Error && e.stack ? e.stack.split("\n").filter((l) => /^\s+at /.test(l)).slice(0, 12).join("\n") : "";
+  const stack =
+    e instanceof Error && e.stack
+      ? e.stack
+          .split("\n")
+          .filter((l) => /^\s+at /.test(l))
+          .slice(0, 12)
+          .join("\n")
+      : "";
   const api = apiCode(e);
   return {
     step,
     updateKind: u.kind,
     errorName: redact(typeof name === "string" ? name : "Error", known).slice(0, 80),
-    errorCode: api !== null ? String(api) : typeof code === "string" || typeof code === "number" ? redact(String(code), known).slice(0, 40) : null,
+    errorCode:
+      api !== null
+        ? String(api)
+        : typeof code === "string" || typeof code === "number"
+          ? redact(String(code), known).slice(0, 40)
+          : null,
     message: redact(apiText(e) || (typeof message === "string" ? message : String(e)), known).slice(0, 500),
     stack: stack ? redact(stack, known).slice(0, 2000) : null,
     outcome,
@@ -100,7 +144,9 @@ export async function recordBotError(deps: Pick<Deps, "repo">, entry: BotErrorEn
   try {
     await Promise.race([
       deps.repo.logBotError(entry),
-      new Promise<void>((resolve) => { timer = setTimeout(resolve, timeoutMs); }),
+      new Promise<void>((resolve) => {
+        timer = setTimeout(resolve, timeoutMs);
+      }),
     ]);
   } catch (e) {
     // Например, миграция bot_errors ещё не применена

@@ -3,6 +3,7 @@
  * Каждый запрос сначала проверяет права на сервере по initData (repo.isAdmin) — клиенту, менеджеру и партнёру 403.
  * Логика та же, что у кнопок бота (общие функции ссылок, ставок и выплат), отдельной бизнес-логики здесь нет.
  */
+import { audience, broadcastMessage, runBroadcast, startBroadcast } from "../broadcast";
 import type { AppUser } from "@/lib/tg-init-data";
 import { partnerRowsWithin, SCHEDULES, type Partner, type PayoutSchedule } from "@/lib/owner-panel";
 import { managerName } from "@/lib/roles";
@@ -39,12 +40,14 @@ export const OWNER_ADMIN_ACTIONS = [
   "ownerWholesalers",
   "ownerWholesaleSet",
   "ownerWholesaleRemove",
+  "ownerBroadcastPreview",
+  "ownerBroadcastStart",
 ] as const;
 export type OwnerAdminAction = (typeof OWNER_ADMIN_ACTIONS)[number];
 export const isOwnerAdminAction = (a: unknown): a is OwnerAdminAction =>
   typeof a === "string" && (OWNER_ADMIN_ACTIONS as readonly string[]).includes(a);
 
-type Fail = { error: "forbidden" | "bad" | "notFound" | "stale" | "disabled" | "exists" };
+type Fail = { error: "forbidden" | "bad" | "notFound" | "stale" | "disabled" | "exists"; reason?: string };
 /** HTTP-код ошибки админки: чужой роли — всегда 403 */
 export const ownerAdminStatus = (e: Fail["error"]) =>
   ({ forbidden: 403, notFound: 404, stale: 409, exists: 409, disabled: 503, bad: 400 })[e];
@@ -160,6 +163,12 @@ export type AdminPromotion = {
   orders: number;
   sum: number;
   free: number;
+  /** Рассылка клиентам: включена ли, когда ушла, напоминание; прогресс отправки */
+  broadcast: boolean;
+  remind: boolean;
+  broadcastAt: string | null;
+  remindAt: string | null;
+  progress: { queued: number; sent: number; blocked: number; failed: number };
 };
 
 /** Акции с итогами: сколько оплаченных/выданных заказов и на какую сумму */
@@ -167,7 +176,11 @@ async function promotions(deps: Deps) {
   const now = deps.now();
   const staff = new Set(await deps.repo.staffIds());
   const orders = (await deps.repo.listOrdersByStatus(["active", "archived"])).filter((o) => !staff.has(o.userId));
-  const list: AdminPromotion[] = (await deps.repo.listPromotions()).map((p) => {
+  const all = await deps.repo.listPromotions();
+  const stats = new Map(
+    await Promise.all(all.map(async (p) => [p.id, await deps.repo.broadcastStats(`promo:${p.id}:`)] as const)),
+  );
+  const list: AdminPromotion[] = all.map((p) => {
     const mine = orders.filter((o) => o.pricing?.promotionId === p.id);
     return {
       id: p.id,
@@ -182,6 +195,11 @@ async function promotions(deps: Deps) {
       orders: mine.length,
       sum: mine.reduce((n, o) => n + o.amount, 0),
       free: mine.filter((o) => o.amount === 0).length,
+      broadcast: p.broadcast !== false,
+      remind: p.remind !== false,
+      broadcastAt: p.broadcastAt?.toISOString() ?? null,
+      remindAt: p.remindAt?.toISOString() ?? null,
+      progress: stats.get(p.id) ?? { queued: 0, sent: 0, blocked: 0, failed: 0 },
     };
   });
   return { promotions: list };
@@ -419,11 +437,45 @@ export async function ownerAdmin(deps: Deps, u: AppUser, action: OwnerAdminActio
         occasions,
         formats,
         forPartnerClients: body.forPartnerClients === true,
+        // «Разослать клиентам» и «Охирги кун!» — по умолчанию включены
+        broadcast: body.broadcast !== false,
+        remind: body.remind !== false,
         createdBy: u.id,
       });
       if (r === "overlap") return { error: "exists" } as Fail;
       if (r === "missing") return { error: "disabled" } as Fail;
       return { ok: true as const, id: r.id };
+    }
+
+    case "ownerBroadcastPreview": {
+      // Перед отправкой: как выглядит сообщение (уз и ру) и сколько человек его получат
+      const p = (await deps.repo.listPromotions()).find((x) => x.id === str(body.id, 40));
+      if (!p) return { error: "notFound" } as Fail;
+      const now = deps.now();
+      const uz = broadcastMessage(deps, p, "uz", "start", now);
+      return {
+        ok: true as const,
+        recipients: (await audience(deps, p)).length,
+        photo: uz.photo,
+        uz: uz.caption,
+        ru: broadcastMessage(deps, p, "ru", "start", now).caption,
+        buttons: uz.markup.inline.flat().map((b) => b.text),
+        sentAt: p.broadcastAt?.toISOString() ?? null,
+      };
+    }
+
+    case "ownerBroadcastStart": {
+      const r = await startBroadcast(deps, str(body.id, 40), "start");
+      if ("error" in r)
+        return {
+          error: r.error === "notFound" ? "notFound" : r.error === "tooSoon" || r.error === "already" ? "stale" : "bad",
+          reason: r.error,
+        } as Fail;
+      // Первая партия — сразу, остальное доотправит cron (25 сообщений в секунду)
+      await runBroadcast(deps, { budgetMs: 8_000 }).catch((e) =>
+        console.error("broadcast kick", e instanceof Error ? e.name : "Error"),
+      );
+      return { ok: true as const, queued: r.queued, recipients: r.recipients };
     }
 
     case "ownerPromotionStop":

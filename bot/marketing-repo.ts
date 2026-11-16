@@ -439,7 +439,7 @@ export class PgMarketing {
     const token = randomUUID(),
       until = new Date(+now + 120000);
     const rows = await this
-      .sql`update public.bot_notices set lease_token=${token},lease_until=${until},attempts=attempts+1 where key in(select key from public.bot_notices where sent_at is null and dead_at is null and due_at<=${now} and(lease_until is null or lease_until<${now}) and attempts<5 and(coalesce(body->>'kind','message') not in('referral','status') or exists(select 1 from public.orders o where o.id=(body->>'orderId')::uuid and o.marketing_issued_at is not null and o.status='active' and o.marketing_refunded_at is null)) order by due_at,key limit ${Math.min(20, Math.max(1, limit))} for update skip locked) returning key,chat_id,body,attempts`;
+      .sql`update public.bot_notices set lease_token=${token},lease_until=${until},attempts=attempts+1 where key in(select key from public.bot_notices where key not like 'promo:%' and sent_at is null and dead_at is null and due_at<=${now} and(lease_until is null or lease_until<${now}) and attempts<5 and(coalesce(body->>'kind','message') not in('referral','status') or exists(select 1 from public.orders o where o.id=(body->>'orderId')::uuid and o.marketing_issued_at is not null and o.status='active' and o.marketing_refunded_at is null)) order by due_at,key limit ${Math.min(20, Math.max(1, limit))} for update skip locked) returning key,chat_id,body,attempts`;
     return rows.map((r) => ({ key: r.key, chatId: Number(r.chat_id), body: r.body, token, attempts: r.attempts }));
   }
   async markSending(job: DeliveryJob, now: Date) {

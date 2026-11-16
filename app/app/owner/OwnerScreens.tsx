@@ -769,7 +769,7 @@ function Picks<K extends string>({
   );
 }
 
-function NewPromotion({ onDone, toast }: { onDone: () => void; toast: (t: string) => void }) {
+function NewPromotion({ onDone, toast }: { onDone: (id: string | null) => void; toast: (t: string) => void }) {
   const [name, setName] = useState("");
   const [percent, setPercent] = useState("20");
   const [start, setStart] = useState(() => localInput(new Date()));
@@ -777,13 +777,16 @@ function NewPromotion({ onDone, toast }: { onDone: () => void; toast: (t: string
   const [occasions, setOccasions] = useState<(keyof typeof OCC)[] | null>(null);
   const [formats, setFormats] = useState<(keyof typeof FMT)[] | null>(null);
   const [partners, setPartners] = useState(false);
+  // Рассылка клиентам и «Охирги кун!» за 24 ч — по умолчанию включены
+  const [send, setSend] = useState(true);
+  const [remind, setRemind] = useState(true);
   const [busy, setBusy] = useState(false);
   const pct = Number(percent);
   async function create() {
     if (busy) return;
     setBusy(true);
     try {
-      await api("ownerPromotionCreate", {
+      const r = await api<{ id: string }>("ownerPromotionCreate", {
         name,
         percent: pct,
         startsAt: start,
@@ -791,10 +794,12 @@ function NewPromotion({ onDone, toast }: { onDone: () => void; toast: (t: string
         occasions,
         formats,
         forPartnerClients: partners,
+        broadcast: send,
+        remind,
       });
       haptic.ok();
-      toast("Акция создана");
-      onDone();
+      toast(send ? "Акция создана — проверьте сообщение перед рассылкой" : "Акция создана");
+      onDone(send ? r.id : null);
     } catch (e) {
       haptic.error();
       toast(
@@ -837,6 +842,14 @@ function NewPromotion({ onDone, toast }: { onDone: () => void; toast: (t: string
         <input type="checkbox" checked={partners} onChange={(e) => setPartners(e.target.checked)} />
         <span>Клиентам, которые пришли по ссылке партнёра</span>
       </label>
+      <label className={s.check}>
+        <input type="checkbox" checked={send} onChange={(e) => setSend(e.target.checked)} data-broadcast-toggle />
+        <span>Разослать клиентам (предпросмотр и число получателей — перед отправкой)</span>
+      </label>
+      <label className={s.check}>
+        <input type="checkbox" checked={remind} onChange={(e) => setRemind(e.target.checked)} />
+        <span>Напомнить «Охирги кун!» за 24 часа до конца</span>
+      </label>
       <p className={s.hint}>
         Не действует для партнёров, менеджеров, оптовиков и админов. С промокодом не складывается — берётся бо́льшая
         скидка.
@@ -853,9 +866,95 @@ function NewPromotion({ onDone, toast }: { onDone: () => void; toast: (t: string
   );
 }
 
+/** Предпросмотр рассылки: картинка, текст (уз/ру), кнопки, число получателей → «Отправить» с подтверждением */
+function BroadcastPreview({ id, toast, onClose }: { id: string; toast: (t: string) => void; onClose: () => void }) {
+  const [data, setData] = useState<{
+    recipients: number;
+    photo: string | null;
+    uz: string;
+    ru: string;
+    buttons: string[];
+    sentAt: string | null;
+  } | null>(null);
+  const [lang, setLang] = useState<"uz" | "ru">("uz");
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    api<NonNullable<typeof data>>("ownerBroadcastPreview", { id }).then(
+      (r) => alive && setData(r),
+      (e) => alive && toast(errText(e)),
+    );
+    return () => {
+      alive = false;
+    };
+  }, [id, toast]);
+  async function sendNow() {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const r = await api<{ queued: number }>("ownerBroadcastStart", { id });
+      haptic.ok();
+      toast(`Рассылка запущена: ${r.queued} получателей`);
+      onClose();
+    } catch (e) {
+      haptic.error();
+      toast(
+        e instanceof ApiError && e.code === "stale"
+          ? "Рассылка уже была или прошло меньше 3 дней с прошлой"
+          : errText(e),
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+  if (!data) return <p className={s.hint}>Загрузка предпросмотра…</p>;
+  return (
+    <div className={s.editBox} data-broadcast-preview>
+      <b>Предпросмотр сообщения</b>
+      <div className={s.reasons} role="radiogroup" aria-label="Язык">
+        {(["uz", "ru"] as const).map((l) => (
+          <button key={l} type="button" role="radio" aria-checked={lang === l} onClick={() => setLang(l)}>
+            {l === "uz" ? "Ўзбекча" : "Русский"}
+          </button>
+        ))}
+      </div>
+      {data.photo && (
+        // eslint-disable-next-line @next/next/no-img-element -- обложка дизайна, готовый JPG
+        <img src={data.photo} alt="" className={s.previewImg} />
+      )}
+      <p className={s.previewText}>{lang === "uz" ? data.uz : data.ru}</p>
+      <div className={s.decide}>
+        {data.buttons.map((b) => (
+          <button key={b} type="button" disabled>
+            {b}
+          </button>
+        ))}
+      </div>
+      <p className={s.hint} data-broadcast-count>
+        Получателей: {data.recipients}. Без админов, менеджеров, партнёров, оптовиков и тех, кто отключил сообщения.
+        Отправка — 25 сообщений в секунду.
+      </p>
+      <div className={s.decide}>
+        <button
+          type="button"
+          data-approve
+          disabled={busy || !data.recipients || Boolean(data.sentAt)}
+          onClick={sendNow}
+        >
+          📣 Отправить {data.recipients}
+        </button>
+        <button type="button" onClick={onClose}>
+          Позже
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function Promotions({ toast }: { toast: (t: string) => void }) {
   const { data, error, reload } = useList<{ promotions: AdminPromotion[] }>("ownerPromotions");
   const [adding, setAdding] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
   const [stopping, setStopping] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   async function stop(id: string) {
@@ -885,8 +984,19 @@ function Promotions({ toast }: { toast: (t: string) => void }) {
       {adding && !live && (
         <NewPromotion
           toast={toast}
-          onDone={() => {
+          onDone={(id) => {
             setAdding(false);
+            setPreview(id);
+            reload();
+          }}
+        />
+      )}
+      {preview && (
+        <BroadcastPreview
+          id={preview}
+          toast={toast}
+          onClose={() => {
+            setPreview(null);
             reload();
           }}
         />
@@ -910,6 +1020,23 @@ function Promotions({ toast }: { toast: (t: string) => void }) {
               Заказов: {p.orders} на {money(p.sum)}
               {p.free ? ` · бесплатно ${p.free}` : ""}
             </p>
+            {p.broadcastAt && (
+              <p className={s.rowSub} data-broadcast-progress>
+                Рассылка: отправлено {p.progress.sent}
+                {p.progress.queued ? ` · в очереди ${p.progress.queued}` : ""} · заблокировали {p.progress.blocked} ·
+                ошибки {p.progress.failed}
+                {p.remindAt
+                  ? " · «Охирги кун!» ушло"
+                  : p.remind && (p.state === "running" || p.state === "planned")
+                    ? " · «Охирги кун!» — за 24 ч"
+                    : ""}
+              </p>
+            )}
+            {p.broadcast && !p.broadcastAt && (p.state === "running" || p.state === "planned") && preview !== p.id && (
+              <button type="button" className={s.link} onClick={() => setPreview(p.id)} data-broadcast-open>
+                📣 Разослать клиентам
+              </button>
+            )}
             <div className={s.rowFoot}>
               <span className={`${s.badge} ${p.state === "running" ? s.badgeOk : ""}`}>{STATE[p.state]}</span>
               {(p.state === "running" || p.state === "planned") &&

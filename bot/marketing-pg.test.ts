@@ -794,3 +794,39 @@ it.skipIf(!native)(
   },
   60000,
 );
+
+it.skipIf(!native)(
+  "рассылка об акции на базе: два отправителя одновременно — каждое сообщение ровно один раз; повторная постановка не дублирует",
+  async () => {
+    await freshPromotions();
+    const { broadcastKey, runBroadcast } = await import("./broadcast");
+    const sim = await launchSim();
+    const p = await repo.createPromotion({
+      name: "Очередь",
+      percent: 30,
+      startsAt: new Date("2026-11-30T00:00:00Z"),
+      endsAt: new Date("2026-12-10T00:00:00Z"),
+      occasions: null,
+      formats: null,
+      forPartnerClients: false,
+      createdBy: 500,
+    });
+    if (typeof p === "string") throw Error(p);
+    expect(await repo.markPromotionBroadcast(p.id, "start", new Date(), 0)).toBe(true);
+    expect(await repo.markPromotionBroadcast(p.id, "start", new Date(), 0)).toBe(false);
+    const ids = Array.from({ length: 40 }, () => ++n);
+    const rows = ids.map((id) => ({ key: broadcastKey(p.id, id, "start"), chatId: id, dueAt: new Date() }));
+    expect(await repo.enqueueBroadcast(rows)).toBe(40);
+    expect(await repo.enqueueBroadcast(rows)).toBe(0);
+    const noWait = { sleep: async () => {} };
+    await Promise.all([runBroadcast(sim.deps, noWait), runBroadcast(sim.deps, noWait)]);
+    for (const id of ids)
+      expect(
+        sim.tg.to(id).filter((m) => m.type === "photo"),
+        `${id}`,
+      ).toHaveLength(1);
+    expect(await repo.broadcastStats(`promo:${p.id}:`)).toEqual({ queued: 0, sent: 40, blocked: 0, failed: 0 });
+    await freshPromotions();
+  },
+  60000,
+);

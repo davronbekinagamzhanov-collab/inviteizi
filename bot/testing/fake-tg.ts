@@ -6,15 +6,22 @@ import type { FileOpts, InlineButton, Markup, SendOpts, Sent, SentFile, Tg } fro
 export const TG_LIMITS = { message: 4096, caption: 1024, alert: 200, callbackData: 64, button: 64 };
 
 const reject = (method: string, description: string): never => {
-  throw new GrammyError("Call failed", { ok: false, error_code: 400, description: `Bad Request: ${description}` }, method as never, {} as never);
+  throw new GrammyError(
+    "Call failed",
+    { ok: false, error_code: 400, description: `Bad Request: ${description}` },
+    method as never,
+    {} as never,
+  );
 };
 
 function checkMarkup(method: string, markup?: Markup) {
   if (!markup) return;
-  const buttons: { text: string; data?: string }[] = "inline" in markup ? markup.inline.flat() : "reply" in markup ? markup.reply.flat() : [];
+  const buttons: { text: string; data?: string }[] =
+    "inline" in markup ? markup.inline.flat() : "reply" in markup ? markup.reply.flat() : [];
   for (const b of buttons) {
     if (!b.text.trim() || b.text.length > TG_LIMITS.button) reject(method, `bad button text: ${b.text}`);
-    if (b.data !== undefined && (!b.data || Buffer.byteLength(b.data) > TG_LIMITS.callbackData)) reject(method, `BUTTON_DATA_INVALID: ${b.data}`);
+    if (b.data !== undefined && (!b.data || Buffer.byteLength(b.data) > TG_LIMITS.callbackData))
+      reject(method, `BUTTON_DATA_INVALID: ${b.data}`);
   }
 }
 
@@ -53,13 +60,24 @@ export class FakeTg implements Tg {
   blocked = new Set<number>();
 
   async sendMessage(chatId: number, text: string, opts: SendOpts = {}): Promise<Sent> {
-    if (this.blocked.has(chatId)) throw new GrammyError("Call failed", { ok: false, error_code: 403, description: "Forbidden: bot was blocked by the user" }, "sendMessage" as never, {} as never);
+    if (this.blocked.has(chatId))
+      throw new GrammyError(
+        "Call failed",
+        { ok: false, error_code: 403, description: "Forbidden: bot was blocked by the user" },
+        "sendMessage" as never,
+        {} as never,
+      );
     checkText("sendMessage", text);
     checkMarkup("sendMessage", opts.markup);
     return this.push({ chatId, type: "text", text, markup: opts.markup });
   }
 
-  async editMessageText(chatId: number, messageId: number, text: string, opts: { markup?: { inline: InlineButton[][] } } = {}) {
+  async editMessageText(
+    chatId: number,
+    messageId: number,
+    text: string,
+    opts: { markup?: { inline: InlineButton[][] } } = {},
+  ) {
     checkText("editMessageText", text);
     checkMarkup("editMessageText", opts.markup);
     this.calls.push({ method: "editMessageText", chatId });
@@ -69,7 +87,13 @@ export class FakeTg implements Tg {
     m.edits++;
   }
 
-  async editMessageMedia(chatId: number, messageId: number, photoUrl: string, caption: string, markup?: { inline: InlineButton[][] }) {
+  async editMessageMedia(
+    chatId: number,
+    messageId: number,
+    photoUrl: string,
+    caption: string,
+    markup?: { inline: InlineButton[][] },
+  ) {
     checkCaption("editMessageMedia", caption);
     checkMarkup("editMessageMedia", markup);
     this.calls.push({ method: "editMessageMedia", chatId });
@@ -88,7 +112,31 @@ export class FakeTg implements Tg {
     m.edits++;
   }
 
+  /** Следующие N вызовов sendPhoto ответят 429 «Too Many Requests: retry after <retryAfter>» */
+  floodNext = 0;
+  floodRetryAfter = 3;
   async sendPhoto(chatId: number, photo: string | Uint8Array, opts: FileOpts = {}): Promise<SentFile> {
+    if (this.blocked.has(chatId))
+      throw new GrammyError(
+        "Call failed",
+        { ok: false, error_code: 403, description: "Forbidden: bot was blocked by the user" },
+        "sendPhoto" as never,
+        {} as never,
+      );
+    if (this.floodNext > 0) {
+      this.floodNext--;
+      throw new GrammyError(
+        "Call failed",
+        {
+          ok: false,
+          error_code: 429,
+          description: `Too Many Requests: retry after ${this.floodRetryAfter}`,
+          parameters: { retry_after: this.floodRetryAfter },
+        },
+        "sendPhoto" as never,
+        {} as never,
+      );
+    }
     checkCaption("sendPhoto", opts.caption);
     checkMarkup("sendPhoto", opts.markup);
     const sent = this.push({ chatId, type: "photo", text: opts.caption ?? "", markup: opts.markup, media: photo });
@@ -98,14 +146,23 @@ export class FakeTg implements Tg {
   async sendDocument(chatId: number, doc: string | Uint8Array, opts: FileOpts = {}): Promise<SentFile> {
     checkCaption("sendDocument", opts.caption);
     checkMarkup("sendDocument", opts.markup);
-    const sent = this.push({ chatId, type: "document", text: opts.caption ?? "", markup: opts.markup, media: doc, fileName: opts.fileName });
+    const sent = this.push({
+      chatId,
+      type: "document",
+      text: opts.caption ?? "",
+      markup: opts.markup,
+      media: doc,
+      fileName: opts.fileName,
+    });
     return { ...sent, fileId: typeof doc === "string" ? doc : `TGDOC_${this.nextFile++}` };
   }
 
   async sendMediaGroup(chatId: number, photos: { url: string; caption?: string }[]) {
     if (photos.length < 2 || photos.length > 10) reject("sendMediaGroup", "wrong number of media");
     for (const p of photos) checkCaption("sendMediaGroup", p.caption);
-    const messageIds = photos.map((p) => this.push({ chatId, type: "photo", text: p.caption ?? "", media: p.url }).messageId);
+    const messageIds = photos.map(
+      (p) => this.push({ chatId, type: "photo", text: p.caption ?? "", media: p.url }).messageId,
+    );
     return { messageId: messageIds[0], messageIds };
   }
 

@@ -1,5 +1,6 @@
 import { correctionStep, beginCorrection } from "./correction";
 import { beginPromo, promoCode, promotionLine } from "./sales";
+import { salesCopy } from "@/texts/sales";
 import { marketingCommand, withMarketingReady } from "../marketing";
 /**
  * Логика бота: handle(deps, update). Telegram — только через deps.tg, база — через deps.repo.
@@ -496,6 +497,12 @@ async function onCallback(c: Ctx, d: string) {
   if (d.startsWith("fix:")) {
     const result = await beginCorrection(c, Number(d.slice(4)));
     return result ? apply(c, result) : undefined;
+  }
+  // «🔕 Хабарларни ўчириш» в рассылке об акции: больше не пишем
+  if (d === "bo:off") {
+    await c.deps.repo.setBroadcastOff(c.user.id, true);
+    await c.deps.tg.editMessageReplyMarkup(c.chatId, c.u.messageId, null).catch(() => undefined);
+    return void (await send(c, salesCopy(c.lang).bcOffDone));
   }
   if (d === "favorites") return favorites(c);
   if (d.startsWith("m:")) {
