@@ -22,7 +22,7 @@ describe("оплата Kaspi и чек", () => {
     await sim.click(1, /^💳 Тўлаш/);
     await sim.click(1, /^✅ (Ҳаммаси тўғри|Всё верно|Бәрі дұрыс)/);
     const m = sim.last(1);
-    expect(m.text).toMatch(/^💳 Kaspi орқали 8.000 ₸ ўтказинг:/);
+    expect(m.text).toMatch(/^💳 Kaspi орқали 7.990 ₸ ўтказинг:/);
     expect(m.text).toContain("📱 +7 700 000 00 00");
     expect(m.text).toContain("👤 Давронбек И.");
     expect(m.text).toContain(`#${o.number}`);
@@ -236,8 +236,8 @@ describe("мои приглашения, правка, ссылка", () => {
     await pickDesign(sim, 1, "ipak");
     expect(sim.lastText(1)).toContain("Дизайн: №114 Ипак");
     await sim.click(1, uz.review.confirm);
-    expect(await sim.repo.getOrder(o.id)).toMatchObject({ slug: "aziz-madina", format: "animated", amount: 8_000, templateId: "ipak" });
-    expect(buttonLabels(sim.last(1)).some((l) => /^💳 Тўлаш — 8.000 ₸$/.test(l))).toBe(true);
+    expect(await sim.repo.getOrder(o.id)).toMatchObject({ slug: "aziz-madina", format: "animated", amount: 7_990, templateId: "ipak" });
+    expect(buttonLabels(sim.last(1)).some((l) => /^💳 Тўлаш — 7.990 ₸$/.test(l))).toBe(true);
   });
 
   it("правка тадбира из сводки: время", async () => {

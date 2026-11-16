@@ -89,7 +89,7 @@ describe("catalog acceptance integrity", () => {
         id,
       ).toBe(true);
     expect(ACCEPTED.has("anor-bogi")).toBe(false);
-    expect(PRICES).toEqual({ animated: 8000, scroll: 6000, simple: 5000 });
+    expect(PRICES).toEqual({ animated: 7990, scroll: 4990, simple: 2990 });
   });
   it("only publishes completed code with both bot and web covers and private-data-free OG art", () => {
     const pilots: Record<string, string> = {

@@ -46,7 +46,7 @@ describe("гонки и сбои (ревью бота I1, I3)", () => {
     await sim.callback(ADMIN,`ok:${order.number}`,1);
     const full=(await sim.repo.getOrder(order.id))!;
     expect(pageMode(full,sim.clock)).toBe("full"); expect(full.slug).toBe(order.slug);
-    expect((await sim.repo.analytics(ADMIN,"all",sim.clock)).revenue).toBe(8000);
+    expect((await sim.repo.analytics(ADMIN,"all",sim.clock)).revenue).toBe(7990);
   });
   it("двойное «Ҳаммаси тўғри» одновременно → один заказ", async () => {
     const sim = new Sim();

@@ -80,7 +80,7 @@ for (const id of ids)
 it("formats and prices follow the registry without changing PRICES", async () => {
   const { PRICES } = await import("./registry");
   for (const id of ids) expect(getDesign(id)!.format).toBe(id.startsWith("suvbuyoq") ? "scroll" : "animated");
-  expect(PRICES).toEqual({ animated: 8000, scroll: 6000, simple: 5000 });
+  expect(PRICES).toEqual({ animated: 7990, scroll: 4990, simple: 2990 });
 });
 
 // Preserve the owner's distinct reading paths, rather than allowing one shared section order to return.

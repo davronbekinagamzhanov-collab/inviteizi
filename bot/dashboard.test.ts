@@ -112,8 +112,8 @@ describe("расчёты", () => {
     await nikohToMusic(s, 3);
     await s.command(ADMIN, "dashboard");
     const screen = s.last(ADMIN);
-    expect(screen.text).toContain(staff.st.paid(1, "8 000 ₸"));
-    expect(screen.text).toContain(staff.st.average("8 000 ₸"));
+    expect(screen.text).toContain(staff.st.paid(1, "7 990 ₸"));
+    expect(screen.text).toContain(staff.st.average("7 990 ₸"));
     await s.callback(ADMIN, "st:d:fn", screen.id);
     expect(screen.text).toContain(staff.st.fnSamples(2, "67%"));
     expect(screen.text).toContain(staff.st.fnPaid(1, "50%"));
@@ -147,7 +147,7 @@ describe("расчёты", () => {
     await s.callback(ADMIN, "dash:revenue:all", screen.id);
     for (const name of Object.values(uz.format.names)) expect(screen.text).toContain(name);
     for (const name of [uz.category.nikoh, uz.category.nahorgi, uz.category.sunnat, uz.category.yubiley]) expect(screen.text).toContain(name);
-    expect(screen.text).toContain(`${uz.format.names.animated} (${price(8000)}): 1 · ${price(8000)}`);
+    expect(screen.text).toContain(`${uz.format.names.animated} (${price(7990)}): 1 · ${price(7990)}`);
     expect(screen.text).toMatch(/: 0 · 0 ₸/);
   });
 

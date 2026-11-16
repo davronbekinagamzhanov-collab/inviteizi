@@ -135,12 +135,12 @@ describe("optional payment card and immutable existing amounts",()=>{
     await s.photo(1,"receipt");await s.callback(ADMIN,`ok:${o.number}`,1);await s.callback(ADMIN,`ok:${o.number}`,1);
     expect((await s.repo.analytics(ADMIN,"all",s.clock)).revenue).toBe(o.amount);
   });
-  it("same-format design change keeps the agreed amount, then paid edits remain closed",async()=>{
+  it("same-format design change: unpaid order gets the current price (prices changed 17.11.2026), then paid edits remain closed",async()=>{
     const s=new Sim(),o=await nikohOrder(s,1);await s.repo.updateOrder(o.id,{amount:10000});
     await s.callback(1,`edit:${o.number}`,1);await s.click(1,uz.review.editDesign);await pickDesign(s,1,"ipak");
-    expect(s.lastText(1)).toContain("10 000 ₸");await s.click(1,uz.review.confirm);
-    expect(await s.repo.getOrder(o.id)).toMatchObject({format:"animated",amount:10000,slug:o.slug});
-    await s.callback(1,`payok:${o.number}`,1);expect(s.lastText(1)).toContain("10 000 ₸");await s.photo(1,"receipt");await s.callback(ADMIN,`ok:${o.number}`,1);await s.callback(1,`edit:${o.number}`,1);
-    expect(s.lastText(1)).toBe(uz.order.closed);expect(await s.repo.getOrder(o.id)).toMatchObject({amount:10000,format:"animated"});
+    expect(s.lastText(1)).toContain("7 990 ₸");await s.click(1,uz.review.confirm);
+    expect(await s.repo.getOrder(o.id)).toMatchObject({format:"animated",amount:7990,slug:o.slug});
+    await s.callback(1,`payok:${o.number}`,1);expect(s.lastText(1)).toContain("7 990 ₸");await s.photo(1,"receipt");await s.callback(ADMIN,`ok:${o.number}`,1);await s.callback(1,`edit:${o.number}`,1);
+    expect(s.lastText(1)).toBe(uz.order.closed);expect(await s.repo.getOrder(o.id)).toMatchObject({amount:7990,format:"animated"});
   });
 });

@@ -218,13 +218,14 @@ export async function confirmDraft(c: Ctx): Promise<Result> {
 async function ownOrder(c: Ctx, n: number) {
   const o = await c.deps.repo.getOrderByNumber(n);
   if (!o || o.userId !== c.user.id) return null;
-  if (
+  const fresh =
     c.deps.env.marketing?.promos &&
     c.deps.repo.marketing &&
     (await c.deps.repo.marketing.releaseExpired(c.deps.now(), o.id))
-  )
-    return c.deps.repo.getOrder(o.id);
-  return o;
+      ? await c.deps.repo.getOrder(o.id)
+      : o;
+  // Неоплаченный заказ — по текущему прайсу при каждом показе (правка, оплата, чек)
+  return fresh ? applyPricing(c.deps, fresh) : null;
 }
 
 /** Открыть заказ на правку: сводка с данными заказа (slug не меняется) */
@@ -738,7 +739,10 @@ export async function reject(c: Ctx, n: number, code: string) {
 const MY_LIMIT = 10;
 
 export async function myOrders(c: Ctx) {
-  const list = (await c.deps.repo.listOrdersByUser(c.user.id)).slice(0, MY_LIMIT);
+  // Неоплаченные — по текущему прайсу (после смены цен — новая сумма); с чеком и оплаченные не трогаем
+  const list = await Promise.all(
+    (await c.deps.repo.listOrdersByUser(c.user.id)).slice(0, MY_LIMIT).map((o) => applyPricing(c.deps, o)),
+  );
   if (!list.length) {
     await send(c, c.tx.my.empty, await startMenu(c));
     return;

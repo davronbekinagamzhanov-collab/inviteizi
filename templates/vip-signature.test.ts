@@ -44,7 +44,7 @@ describe("two independent signature weddings", () => {
   });
   it("does not change the accepted catalogue, format prices, or older VIP entries", () => {
     expect(activeDesigns().map((d) => d.id)).toEqual([...ON_SALE_IDS]);
-    expect(PRICES).toEqual({ animated: 8000, scroll: 6000, simple: 5000 });
+    expect(PRICES).toEqual({ animated: 7990, scroll: 4990, simple: 2990 });
     for (const id of signatureIds) {
       expect(ACCEPTED.has(id)).toBe(ON_SALE_IDS.includes(id));
       expect(getDesign(id)?.clientPhotos).toBe(true);

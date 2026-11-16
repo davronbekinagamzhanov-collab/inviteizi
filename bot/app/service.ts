@@ -673,7 +673,11 @@ export async function newDraft(deps: Deps, u: AppUser) {
 
 export async function listOrders(deps: Deps, u: AppUser) {
   const lang = (await deps.repo.getUser(u.id))?.lang ?? "uz";
-  return { orders: (await deps.repo.listOrdersByUser(u.id)).slice(0, MAX_ORDERS).map((o) => appOrder(deps, o, lang)) };
+  // Неоплаченные — по текущему прайсу (после смены цен — новая сумма); с чеком и оплаченные не трогаем
+  const list = await Promise.all(
+    (await deps.repo.listOrdersByUser(u.id)).slice(0, MAX_ORDERS).map((o) => applyPricing(deps, o)),
+  );
+  return { orders: list.map((o) => appOrder(deps, o, lang)) };
 }
 
 // ── Чек из приложения ──

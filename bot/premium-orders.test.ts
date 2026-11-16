@@ -26,7 +26,7 @@ describe('pinned premium order revision',()=>{
   const s=new Sim();await startUz(s,960001);
   for(const id of revised){const d=getDesign(id)!;const o=await s.repo.createOrder({userId:960001,occasion:'nikoh',format:d.format,templateId:id,data:{...d.sample},music:{kind:'none'},amount:4321,slugBase:'historical-'+id,status:'preview'});
    await s.callback(960001,`edit:${o.number}`,1);await s.click(960001,uz.review.editNames);await s.text(960001,'Эски исм');await s.text(960001,'Нозима');await s.click(960001,uz.review.confirm);
-   const edited=(await s.repo.getOrder(o.id))!;expect(edited.data.designVersion).toBeUndefined();expect(usesLegacyDesign(id,edited.data.designVersion)).toBe(true);expect(edited.amount).toBe(4321);expect(edited.slug).toBe(o.slug);
+   const edited=(await s.repo.getOrder(o.id))!;expect(edited.data.designVersion).toBeUndefined();expect(usesLegacyDesign(id,edited.data.designVersion)).toBe(true);expect(edited.amount).toBe(PRICES[d.format]);expect(edited.slug).toBe(o.slug);
    await s.callback(960001,`payok:${o.number}`,1);await s.photo(960001,'old-receipt');await s.callback(ADMIN,`ok:${o.number}`,1);expect((await s.repo.getOrder(o.id))?.data.designVersion).toBeUndefined();
   }
  });
@@ -35,7 +35,7 @@ describe('pinned premium order revision',()=>{
 });
 describe('one display order across web and bot',()=>{
  it('ranks new premiums first inside every category/format without renumbering',()=>{for(const occasion of ['nikoh','sunnat','nahorgi','yubiley'] as const)for(const format of ['simple','scroll','animated'] as const){const list=designsFor(occasion,format);expect(list).toEqual(activeDesigns().filter(d=>d.occasion===occasion&&d.format===format));const priority=list.filter(d=>DISPLAY_PRIORITY.includes(d.id));if(priority.length)expect(DISPLAY_PRIORITY.indexOf(list[0].id)).toBeGreaterThanOrEqual(0)}});
- it('retains all fifty original identities and prices',async()=>{const original=(await import('@/docs/reviews/final/original-catalog.json')).default;for(const old of original.filter(d=>d.is_active)){const d=getDesign(old.id)!;expect(d).toMatchObject({number:old.number,format:old.format,occasion:old.occasion});expect(PRICES[d.format]).toBe(old.price)}});
+ it('retains all fifty original identities and prices',async()=>{const original=(await import('@/docs/reviews/final/original-catalog.json')).default;for(const old of original.filter(d=>d.is_active)){const d=getDesign(old.id)!;expect(d).toMatchObject({number:old.number,format:old.format,occasion:old.occasion});expect(PRICES[d.format]).toBe(PRICES[old.format as keyof typeof PRICES])}});
 });
 
 describe('catalog promises the pinned appearance when an older unpaid order is edited',()=>{

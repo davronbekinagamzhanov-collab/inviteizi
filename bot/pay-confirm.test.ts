@@ -48,7 +48,7 @@ describe("проверка перед оплатой — чат", () => {
     await s.callback(1, `payok:${o.number}`, 1);
     await s.photo(1, "R");
     const card = s.tg.to(ADMIN).at(-1)!.text!;
-    expect(card).toContain("💰 КУТИЛГАН СУММА: 8 000 ₸");
+    expect(card).toContain("💰 КУТИЛГАН СУММА: 7 990 ₸");
     expect(card).toContain(`🔢 ИЗОҲДА: #${o.number}`);
   });
 

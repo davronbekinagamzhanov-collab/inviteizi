@@ -188,7 +188,7 @@ try {
       await press(page, "main");
       // Итог → проверка перед оплатой
       await page.getByText(T.summary.title).waitFor();
-      const price = { animated: 8000, scroll: 6000, simple: 5000 }[getDesign(NIKOH).format];
+      const price = { animated: 7990, scroll: 4990, simple: 2990 }[getDesign(NIKOH).format];
       await waitMain(page, T.summary.pay(price));
       await step("05-summary");
       await press(page, "main");

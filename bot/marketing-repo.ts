@@ -1,4 +1,6 @@
 import { env } from "@/lib/env";
+import { discounted } from "@/lib/pricing-math";
+import { PRICES, type Format } from "@/templates/registry";
 /** Server-only transactional additions to existing orders, partners and bot_notices. No external side effects here. */
 import { randomBytes, randomUUID } from "node:crypto";
 import type { Sql, Tx } from "@/lib/db";
@@ -135,7 +137,7 @@ export class PgMarketing {
     if (!validId(orderId)) throw new MarketingError("order_missing");
     return this.sql.begin(async (tx) => {
       const [o] =
-        await tx`select id,status,amount,marketing_original_amount from public.orders where id=${orderId} and user_id=${userId} for update`;
+        await tx`select id,status,amount,format,marketing_original_amount from public.orders where id=${orderId} and user_id=${userId} for update`;
       if (!o || !payable.includes(o.status)) throw new MarketingError("order_locked");
       const [p] = await tx`select * from public.promotion_codes where code=${codeOf(raw)} for update`;
       if (!p || !p.enabled || (p.expires_at && +p.expires_at <= +now)) throw new MarketingError("promo_unavailable");
@@ -147,9 +149,11 @@ export class PgMarketing {
       const [{ used }] =
         await tx`select count(*)::int as used from public.promotion_reservations where promo_id=${p.id} and(state in('consumed','receipt') or(state='reserved' and expires_at>${now}))`;
       if (used >= p.usage_limit) throw new MarketingError("promo_exhausted");
-      const original = Number(o.marketing_original_amount ?? o.amount),
+      // Скидка — от текущей цены формата (прайс мог смениться после создания заказа)
+      const original = Number(PRICES[o.format as Format] ?? o.marketing_original_amount ?? o.amount),
         // Кратно 100 ₸ (вниз), 100 % — 0 ₸ (как у акций, bot/pricing.ts)
-        amount = p.discount_percent >= 100 ? 0 : Math.floor((original * (100 - p.discount_percent)) / 10000) * 100,
+        // Как у акций (lib/pricing-math.ts): вниз до …90 ₸, 100 % — 0 ₸
+        amount = discounted(original, p.discount_percent),
         expiry = new Date(+now + 30 * 60000);
       await tx`insert into public.promotion_reservations(order_id,promo_id,original_amount,discounted_amount,state,expires_at) values(${orderId},${p.id},${original},${amount},'reserved',${expiry}) on conflict(order_id) do update set promo_id=excluded.promo_id,original_amount=excluded.original_amount,discounted_amount=excluded.discounted_amount,state='reserved',expires_at=excluded.expires_at,consumed_at=null`;
       await tx`update public.orders set marketing_original_amount=${original},amount=${amount},pay_confirmed_at=null,terms_accepted_at=null where id=${orderId}`;

@@ -316,9 +316,9 @@ describe("акция по ролям (Mini App, тот же обработчик
       return ((await appAction(s.deps, user(id), { action: "quote", orderId: o.id })).body as { order: app.AppOrder })
         .order;
     };
-    expect(await quote(CLIENT)).toMatchObject({ amount: 4000, price: { kind: "promotion" } });
-    expect(await quote(OTHER)).toMatchObject({ amount: 6400, price: { kind: "wholesale", percent: 20 } });
-    expect(await quote(PARTNER)).toMatchObject({ amount: 8000, price: null });
+    expect(await quote(CLIENT)).toMatchObject({ amount: 3990, price: { kind: "promotion" } });
+    expect(await quote(OTHER)).toMatchObject({ amount: 6390, price: { kind: "wholesale", percent: 20 } });
+    expect(await quote(PARTNER)).toMatchObject({ amount: 7990, price: null });
     const session = async (id: number) =>
       (await appAction(s.deps, user(id), { action: "session" })).body as { promotion: unknown };
     expect((await session(CLIENT)).promotion).toMatchObject({ percent: 50 });

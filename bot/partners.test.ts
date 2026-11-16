@@ -571,7 +571,7 @@ describe("ставка в процентах («договор», ночная �
     expect([8000, 6000, 5000].map((a) => earningFor(p, a))).toEqual([1200, 900, 750]);
     expect(earningFor({ rate: 0, ratePercent: 12 }, 6543)).toBe(785); // округление до целых тенге
     expect(earningFor({ rate: 700, ratePercent: null }, 8000)).toBe(700);
-    expect(rateExamples(15)).toBe("8 000 → 1 200 ₸ · 6 000 → 900 ₸ · 5 000 → 750 ₸");
+    expect(rateExamples(15)).toBe("7 990 → 1 199 ₸ · 4 990 → 749 ₸ · 2 990 → 449 ₸");
     expect(parseRate("15%")).toEqual({ rate: 0, pct: 15 });
     expect(parseRate("12")).toEqual({ rate: 0, pct: 12 });
     expect(parseRate("1 000 ₸")).toEqual({ rate: 1000, pct: null });
@@ -582,7 +582,7 @@ describe("ставка в процентах («договор», ночная �
     const s = new Sim();
     await createPartner(s, ADMIN, { rate: /^⭐ 15%$/ });
     const contract = [...s.tg.to(ADMIN)].reverse().find((m) => m.text.startsWith("📄 Договор"))!.text;
-    expect(contract).toContain("15% от оплаты (8 000 → 1 200 ₸ · 6 000 → 900 ₸ · 5 000 → 750 ₸)");
+    expect(contract).toContain("15% от оплаты (7 990 → 1 199 ₸ · 4 990 → 749 ₸ · 2 990 → 449 ₸)");
     expect(contract).toContain("👤 Привёл: владелец");
     expect(s.repo.partners[0]).toMatchObject({ ratePercent: 15 });
   });
