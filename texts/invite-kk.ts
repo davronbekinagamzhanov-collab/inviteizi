@@ -496,6 +496,7 @@ export const kk = {
   },
   footer: { madeWith: "InviteIZI арқылы жасалды" },
   musicHint: "Музыка",
+  musicBlocked: "Музыканы қосу үшін ▶ басыңыз",
 };
 
 export const kkHeadings: Record<

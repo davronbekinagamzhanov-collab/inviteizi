@@ -174,7 +174,7 @@ async function walk(lang: Lang, occasion: Occasion, pick: "photo" | "plain" = "p
           await sim.photo(ID, "P3"); // третье — дальше само
         } else {
           const mark = sim.mark();
-          await sim.document(ID, "BIG", "image/jpeg", "big.jpg", 11 * 1024 * 1024);
+          await sim.document(ID, "BIG", "image/jpeg", "big.jpg", 21 * 1024 * 1024);
           expect(sim.textsSince(ID, mark)).toContain(tx.photo.tooBig);
           expect((await sim.user(ID))!.step).toBe("photoUpload");
           await sim.photo(ID, "P1");

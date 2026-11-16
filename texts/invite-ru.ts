@@ -504,6 +504,7 @@ export const ru = {
   footer: { madeWith: "Создано в InviteIZI" },
   /** Первый экран без открытия: кнопка музыки */
   musicHint: "Музыка",
+  musicBlocked: "Чтобы включить музыку, нажмите ▶",
 };
 
 /** Свои заголовки дизайнов (ключи — как в headings из uz-cyrl.ts) */
