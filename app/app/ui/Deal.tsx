@@ -14,10 +14,16 @@ import s from "../app.module.css";
 
 /** Текущее время, обновляется раз в 30 с (таймер без мерцания: меняется только текст минут) */
 function useNow(stepMs = 30_000) {
-  const [now, setNow] = useState(() => Date.now());
+  // 0 до первого кадра в браузере: на сервере время не читаем (страница собирается заранее)
+  const [now, setNow] = useState(0);
   useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), stepMs);
-    return () => clearInterval(id);
+    const tick = () => setNow(Date.now());
+    const first = setTimeout(tick, 0);
+    const id = setInterval(tick, stepMs);
+    return () => {
+      clearTimeout(first);
+      clearInterval(id);
+    };
   }, [stepMs]);
   return now;
 }
@@ -25,7 +31,7 @@ function useNow(stepMs = 30_000) {
 /** Акция, пока она идёт; по окончании — null (бейджи и зачёркивания исчезают) */
 export function useLivePromotion(p: PromotionView | null | undefined) {
   const now = useNow();
-  return p && now < +new Date(p.endsAt) ? { promotion: p, now } : { promotion: null, now };
+  return p && now > 0 && now < +new Date(p.endsAt) ? { promotion: p, now } : { promotion: null, now };
 }
 
 export const coversDesign = (p: PromotionView | null, d: Pick<Design, "occasion" | "format">) =>
