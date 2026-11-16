@@ -65,11 +65,24 @@
   color: var(--ink);
   box-shadow: 0 2px 8px -4px rgba(59, 42, 30, 0.4);
 }
+/* Вкладки разделов: одна строка с горизонтальной прокруткой (раньше 5-я переносилась на вторую строку) */
 .tabs {
+  display: flex;
   margin: 20px 0 14px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.tabs::-webkit-scrollbar {
+  display: none;
 }
 .tabs button {
+  flex: 0 0 auto;
+  padding: 0 14px;
   font-size: 14px;
+  scroll-snap-align: start;
 }
 .wrap {
   max-width: 480px;
@@ -493,6 +506,23 @@
   user-select: all;
 }
 .reasons button[aria-checked="true"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff8ec;
+}
+.check {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 15px;
+}
+.check input {
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  accent-color: var(--ink);
+}
+.reasons button[role="checkbox"][aria-checked="true"] {
   background: var(--ink);
   border-color: var(--ink);
   color: #fff8ec;

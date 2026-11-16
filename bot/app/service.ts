@@ -1,5 +1,5 @@
 import { computeExpiresAt } from "@/lib/orders";
-import { applyPricing, buyerOf, priceNote, type PriceNote } from "../pricing";
+import { applyPricing, buyerOf, catalogPromotion, priceNote, type PriceNote, type PromotionView } from "../pricing";
 import { applyPromoCode, issueByPromotion } from "../flow/sales";
 import { flushMarketing } from "@/bot/marketing";
 /**
@@ -106,6 +106,8 @@ export type AppSession = {
   contact: string;
   /** Владелец/админ: вместо Kaspi и чека — «Бесплатно яратиш» (проверка ещё раз на сервере) */
   staff?: boolean;
+  /** Действующая акция для этого покупателя (партнёрам, оптовикам, сотрудникам — null: бейджей нет) */
+  promotion?: PromotionView | null;
 };
 
 const MAX_ORDERS = 20;
@@ -255,6 +257,7 @@ export async function openSession(deps: Deps, u: AppUser): Promise<AppSession> {
     extraLangs: allowedLangs(deps),
     contact: `https://t.me/${deps.env.ownerUsername.replace(/^@/, "")}`,
     staff: await deps.repo.isAdmin(u.id),
+    promotion: await catalogPromotion(deps, u.id),
   };
 }
 

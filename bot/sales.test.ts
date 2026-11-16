@@ -230,3 +230,22 @@ describe("оптовик", () => {
     expect(await admin(s, "ownerWholesaleSet", { userId: ADMIN, percent: 10 })).toEqual({ error: "bad" });
   });
 });
+
+describe("витрина акции в боте", () => {
+  it("клиенту: строка об акции при старте (один раз) и цена со скидкой в каталоге; партнёру — ничего", async () => {
+    const s = new Sim();
+    await partner(s, 800);
+    await promotion(s);
+    await s.start(1);
+    await s.click(1, uz.langUz);
+    await s.start(1);
+    const lines = s.tg.to(1).filter((m) => m.text.includes("акцияси") || m.text.includes("Акция «Куз»"));
+    expect(lines).toHaveLength(1);
+    await s.text(1, uz.menu.create);
+    await s.click(1, uz.category.nikoh);
+    const shown = s.tg.to(1).map((m) => m.text);
+    expect(shown.some((t) => t.includes(`−50 % · 4 000 ₸ ${strike("8 000 ₸")}`))).toBe(true);
+    await s.start(800);
+    expect(s.tg.to(800).some((m) => m.text.includes("−50 %"))).toBe(false);
+  });
+});

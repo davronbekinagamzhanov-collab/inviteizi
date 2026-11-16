@@ -5,7 +5,13 @@ import { notFound } from "next/navigation";
 import { env } from "@/lib/env";
 import OwnerApp from "./OwnerApp";
 
-const ui = localFont({ src: [{ path: "../../../assets/fonts/google/sourcesans3/SourceSans3[wght].woff2", weight: "300 800", style: "normal" }], display: "swap", variable: "--font-app" });
+const ui = localFont({
+  src: [
+    { path: "../../../assets/fonts/google/sourcesans3/SourceSans3[wght].woff2", weight: "300 800", style: "normal" },
+  ],
+  display: "swap",
+  variable: "--font-app",
+});
 
 export const metadata: Metadata = { title: "InviteIZI · Панель", robots: { index: false, follow: false } };
 export const viewport: Viewport = { width: "device-width", initialScale: 1, maximumScale: 1, themeColor: "#f7efe3" };

@@ -653,7 +653,7 @@ export const staff = {
     samples: (n: number) => `👁 НАМУНА: ${n}`,
     payments: (n: number, sum: string) => `💳 Оплаты: ${n} · ${sum}`,
     stuck: (n: number, steps: string) => `⏸ НАМУНА без оплаты: ${n}\n   ${steps}`,
-    steps: { draft: "анкета", preview: "смотрят НАМУНА", awaiting_payment: "на оплате", receipt_sent: "чек на проверке", rejected: "чек отклонён" } as Record<string, string>,
+    steps: { draft: "анкета", preview: "смотрят образец", awaiting_payment: "на оплате", receipt_sent: "чек на проверке", rejected: "чек отклонён" } as Record<string, string>,
     top: (list: string) => `🎨 Топ: ${list}`,
     due: (list: string) => `💰 К выплате: ${list}`,
     more: (n: number) => `ещё ${n}`,

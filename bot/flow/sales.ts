@@ -90,16 +90,18 @@ export async function priceLinesFor(c: Pick<Ctx, "deps" | "lang">, o: OrderRecor
 }
 
 /** Одна строка об акции (старт, каталог): не чаще раза в 6 часов на человека */
-const shown = new Map<number, number>();
+// По хранилищу (в тестах у каждого бота своё): кому и когда показали строку об акции
+const shownBy = new WeakMap<object, Map<number, number>>();
 export async function promotionLine(c: Pick<Ctx, "deps" | "lang" | "user">, force = false) {
   const p = await catalogPromotion(c.deps, c.user.id);
   if (!p) return null;
   const now = +c.deps.now();
+  let shown = shownBy.get(c.deps.repo);
+  if (!shown) shownBy.set(c.deps.repo, (shown = new Map()));
   if (!force && now - (shown.get(c.user.id) ?? 0) < 6 * 3_600_000) return null;
   shown.set(c.user.id, now);
   return salesCopy(c.lang).startLine(p.name, p.percent, shortDate(p.endsAt));
 }
-export const resetPromotionLines = () => shown.clear();
 
 // ── Бот: «🎟 Промокод» на шаге оплаты ──
 

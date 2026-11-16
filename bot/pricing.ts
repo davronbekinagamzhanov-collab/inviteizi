@@ -19,9 +19,8 @@ import { PAYABLE_STATUSES } from "./flow/util";
 export type BuyerRole = "admin" | "manager" | "wholesale" | "partner" | "client";
 export type Buyer = { role: BuyerRole; wholesalePercent: number | null; viaPartner: boolean };
 
-/** Цена со скидкой: кратна 100 ₸, вниз; 100 % — 0 ₸ */
-export const discounted = (base: number, percent: number) =>
-  percent >= 100 ? 0 : Math.max(0, Math.floor((base * (100 - percent)) / 10000) * 100);
+import { discounted } from "@/lib/pricing-math";
+export { discounted };
 
 /** Роль аккаунта для цены. Порядок важен: админ > менеджер > оптовик > партнёр > клиент */
 export async function buyerOf(deps: Pick<Deps, "repo">, userId: number): Promise<Buyer> {
@@ -43,7 +42,7 @@ export async function runningPromotion(deps: Pick<Deps, "repo">, now: Date) {
   return (await deps.repo.listPromotions()).find((p) => isRunning(p, now)) ?? null;
 }
 
-export const promotionCovers = (p: Promotion, occasion: Occasion, format: Format) =>
+export const promotionCovers = (p: Pick<Promotion, "occasions" | "formats">, occasion: Occasion, format: Format) =>
   (!p.occasions || p.occasions.includes(occasion)) && (!p.formats || p.formats.includes(format));
 
 /** Акция, которую этот покупатель видит и получает (null — бейджей не показывать) */

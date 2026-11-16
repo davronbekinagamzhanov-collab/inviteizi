@@ -23,7 +23,7 @@ const MAX_ORDERS = 500;
 
 export const STATUS_RU: Record<string, string> = {
   draft: "анкета",
-  preview: "НАМУНА",
+  preview: "образец",
   awaiting_payment: "на оплате",
   receipt_sent: "чек на проверке",
   active: "оплачен",
@@ -58,6 +58,8 @@ export type OwnerPanel = {
     makers: number;
     payers: number;
     due: number;
+    /** Выдано бесплатно по акции / промокоду 100 % (не продажа) */
+    freeByPromotion: number;
   };
   orders: OwnerOrder[];
   ordersTotal: number;
@@ -105,7 +107,10 @@ export async function ownerPanel(
   const managers = await deps.repo.listManagers();
   const testOrders = staffOrdersWithin(staffOrders, r.from, r.to);
 
-  const paid = s.orders.filter((o) => isPaid(o) && inside(paidAt(o)));
+  const paidAll = s.orders.filter((o) => isPaid(o) && inside(paidAt(o)));
+  // 0 ₸ по акции (или промокоду 100 %) — выдано, но не продажа: отдельной строкой «по акции»
+  const paid = paidAll.filter((o) => o.amount > 0);
+  const freeByPromotion = paidAll.length - paid.length;
   const created = s.orders.filter((o) => inside(o.createdAt));
   const makers = new Set(created.map((o) => o.userId));
   const payers = new Set(created.filter((o) => isPaid(o)).map((o) => o.userId));
@@ -157,6 +162,7 @@ export async function ownerPanel(
       makers: makers.size,
       payers: payers.size,
       due: allRows.reduce((n, x) => n + x.due, 0),
+      freeByPromotion,
     },
     orders,
     ordersTotal: listed.length,

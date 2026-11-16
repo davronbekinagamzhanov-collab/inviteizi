@@ -1,4 +1,7 @@
 /** Шаги выбора: тадбир → дизайн из каталога (альбом по 3 обложки). Шага «формат» больше нет — у каждого дизайна своя цена */
+import { catalogPromotion, discounted, promotionCovers } from "../pricing";
+import { salesCopy, strike } from "@/texts/sales";
+import { promotionLine } from "./sales";
 import type { Ctx, Result, Step, StepId } from "./types";
 import type { Occasion } from "@/lib/domain";
 import type { Design } from "@/templates/registry";
@@ -85,9 +88,18 @@ async function render(c: Ctx) {
   await dropCatalog(c);
   const t = c.tx.catalog;
   const ids: number[] = [];
+  // Акция — только обычному клиенту (партнёрам, оптовикам, сотрудникам цена и подпись обычные)
+  const promo = await catalogPromotion(c.deps, c.user.id);
+  const cost = (d: (typeof p.items)[number]["d"]) => {
+    const base = PRICES[d.format];
+    if (!promo || !promotionCovers(promo, d.occasion, d.format)) return price(base);
+    const now = discounted(base, promo.percent);
+    const st = salesCopy(c.lang);
+    return `${st.off(promo.percent)} · ${now === 0 ? st.free : price(now)} ${strike(price(base))}`;
+  };
   const photos = p.items.map(({ d, mark, legacy }) => ({
     url: coverUrl(c, d.id, legacy),
-    caption: `${mark} №${d.number} · ${price(PRICES[d.format])}`,
+    caption: `${mark} №${d.number} · ${cost(d)}`,
   }));
   try {
     if (photos.length > 1) ids.push(...(await c.deps.tg.sendMediaGroup(c.chatId, photos)).messageIds);
@@ -97,8 +109,10 @@ async function render(c: Ctx) {
     console.error("каталог: обложки", p.items.map((i) => i.d.id).join(","), e instanceof Error ? e.name : "Error");
   }
   const lines = p.items.map(({ d, mark }) =>
-    t.line(mark, d.number, designName(d.id), price(PRICES[d.format]), Boolean(d.clientPhotos)),
+    t.line(mark, d.number, designName(d.id), cost(d), Boolean(d.clientPhotos)),
   );
+  // Одна строка об акции — не чаще раза в 6 часов
+  const promoLine = await promotionLine(c);
   const credits = p.items.flatMap(({ d }) => {
     const a = photoAttributions[d.id];
     return a ? [t.photoCredit(a.author, a.license, a.source)] : [];
@@ -114,7 +128,13 @@ async function render(c: Ctx) {
       ib(c, "▶", "next"),
     ]);
   rows.push(backRow(c));
-  const text = [t.pageTitle, "", ...lines, ...(credits.length ? ["", ...credits] : [])].join("\n");
+  const text = [
+    ...(promoLine ? [promoLine, ""] : []),
+    t.pageTitle,
+    "",
+    ...lines,
+    ...(credits.length ? ["", ...credits] : []),
+  ].join("\n");
   ids.push((await send(c, text, inline(rows))).messageId);
   c.s.catMsgs = ids;
 }
