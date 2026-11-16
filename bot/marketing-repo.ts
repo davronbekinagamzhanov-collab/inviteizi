@@ -125,10 +125,10 @@ export class PgMarketing {
     const [r] = await this.sql`select sent_at from public.bot_notices where key=${key}`;
     return !!r?.sent_at;
   }
-  async promoStats(actor: number) {
+  async promoStats(actor: number, limit = 10) {
     await this.owner(actor);
     return this
-      .sql`select p.code,p.name,p.discount_percent,p.usage_limit,p.enabled,p.expires_at,count(r.order_id) filter(where r.state='consumed')::int as used,count(r.order_id) filter(where r.state='receipt' or(r.state='reserved' and r.expires_at>now()))::int as reserved from public.promotion_codes p left join public.promotion_reservations r on r.promo_id=p.id group by p.id order by p.created_at desc limit 10`;
+      .sql`select p.code,p.name,p.discount_percent,p.usage_limit,p.enabled,p.expires_at,count(r.order_id) filter(where r.state='consumed')::int as used,count(r.order_id) filter(where r.state='receipt' or(r.state='reserved' and r.expires_at>now()))::int as reserved from public.promotion_codes p left join public.promotion_reservations r on r.promo_id=p.id group by p.id order by p.created_at desc limit ${Math.min(100, Math.max(1, limit))}`;
   }
   /** Order then coupon row lock: count includes every consumed/receipt/live reservation, never speculative client state. */
   async reservePromo(userId: number, orderId: string, raw: string, now: Date) {
