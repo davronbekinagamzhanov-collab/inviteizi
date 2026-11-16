@@ -4,6 +4,10 @@
 import dynamic from "next/dynamic";
 import type { ComponentType } from "react";
 import type { TemplateProps } from "./themes/types";
+import { ONE_PAGE_LOOKS } from "./one-page-looks";
+
+/** «Оддий» — один экран без прокрутки и открытия (17.11.2026): общий макет с палитрой дизайна */
+const OnePageView = dynamic(() => import("./blocks/OnePage"));
 
 const DESIGN_VIEWS: Record<string, ComponentType<TemplateProps>> = {
   "umr-durdonasi": dynamic(() => import("./themes/umr-durdonasi/Design")),
@@ -131,6 +135,7 @@ const LEGACY_VIEWS: Record<string, ComponentType<TemplateProps>> = {
 
 /** Дизайн по id; legacy — прежняя версия для старого оплаченного заказа */
 export function DesignView({ id, legacy = false, ...props }: TemplateProps & { id: string; legacy?: boolean }) {
+  if (!legacy && id !== "default" && ONE_PAGE_LOOKS[id]) return <OnePageView id={id} {...props} />;
   const View = (legacy ? LEGACY_VIEWS[id] : undefined) ?? DESIGN_VIEWS[id];
   return <View {...props} />;
 }
