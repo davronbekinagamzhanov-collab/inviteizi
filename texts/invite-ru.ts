@@ -503,8 +503,6 @@ export const ru = {
   },
   footer: { madeWith: "Создано в InviteIZI" },
   /** Первый экран без открытия: кнопка музыки */
-  musicHint: "Музыка",
-  musicBlocked: "Чтобы включить музыку, нажмите ▶",
   onePage: { answer: "Ответить", close: "Закрыть" },
   statusPoster: {
     title: {

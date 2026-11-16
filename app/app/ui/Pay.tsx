@@ -241,7 +241,7 @@ export function Pay({
       <div className={s.screen} data-staff-free>
         <h1 className={s.title}>{T.pay.free.title}</h1>
         <Section title={order.title}>
-          <p className={s.label}>
+          <p className={s.label} style={{ whiteSpace: "pre-line" }}>
             {(order.check ?? "")
               .split("\n")
               .slice(1)
@@ -350,7 +350,8 @@ export function Pay({
       <div className={s.screen}>
         <h1 className={s.title}>{T.pay.checkTitle}</h1>
         <Section title={order.title}>
-          <p className={s.label}>
+          {/* pre-line: каждый тадбир с новой строки (раньше склеивались в один абзац) */}
+          <p className={s.label} style={{ whiteSpace: "pre-line" }}>
             {(order.check ?? "")
               .split("\n")
               .slice(1)

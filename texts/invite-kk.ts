@@ -495,8 +495,6 @@ export const kk = {
     },
   },
   footer: { madeWith: "InviteIZI арқылы жасалды" },
-  musicHint: "Музыка",
-  musicBlocked: "Музыканы қосу үшін ▶ басыңыз",
   onePage: { answer: "Жауап беру", close: "Жабу" },
   statusPoster: {
     title: {

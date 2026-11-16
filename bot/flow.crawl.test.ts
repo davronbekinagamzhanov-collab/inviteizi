@@ -12,6 +12,7 @@ import { pickDesign } from "./testing/paths";
 import type { FakeMessage } from "./testing/fake-tg";
 import { inlineButtons } from "./testing/fake-tg";
 import { ADMIN, Sim } from "./testing/sim";
+import { auditTexts } from "./testing/text-audit";
 
 const ID = 7;
 const OCCASIONS: Occasion[] = ["nikoh", "nahorgi", "sunnat", "yubiley"];
@@ -56,7 +57,7 @@ async function press(sim: Sim, screen: FakeMessage, label: string | RegExp) {
   await sim.callback(ID, b.data, screen.id);
 }
 
-async function walk(lang: "uz" | "ru", occasion: Occasion, format: "animated" | "scroll" | "simple") {
+async function walk(lang: "uz" | "ru", occasion: Occasion, format: "animated" | "scroll" | "simple", clean = false) {
   const tx = lang === "uz" ? uz : ru;
   const sim = new Sim();
   const seen = new Set<string>();
@@ -68,8 +69,10 @@ async function walk(lang: "uz" | "ru", occasion: Occasion, format: "animated" | 
     const { step } = (await sim.user(ID))!;
     if (step === "idle") break;
     const screen = structuredClone(sim.last(ID));
-    await explore(sim, screen, 2, seen);
-    await wrongMessages(sim);
+    if (!clean) {
+      await explore(sim, screen, 2, seen);
+      await wrongMessages(sim);
+    }
     switch (step) {
       case "cat": await press(sim, screen, tx.category[occasion]); break;
       case "fmt": await press(sim, screen, new RegExp(tx.format.names[format])); break;
@@ -114,6 +117,7 @@ async function walk(lang: "uz" | "ru", occasion: Occasion, format: "animated" | 
   const failures = sim.repo.botErrors.map((e) => `${e.step}: ${e.errorName} ${e.message}`);
   expect([...new Set(failures)]).toEqual([]);
   expect(sim.tg.messages.filter((m) => m.text === tx.error)).toEqual([]);
+  expect(auditTexts(sim.tg.messages, ID, lang, clean)).toEqual([]);
   return sim;
 }
 
@@ -131,6 +135,18 @@ describe("все кнопки на всём пути клиента", () => {
     const log = vi.spyOn(console, "error").mockImplementation(() => {});
     try {
       await walk(lang, occasion, format);
+    } finally {
+      log.mockRestore();
+    }
+  }, 120_000);
+});
+
+// Аудит 17.11.2026: обычный путь без «неправильных» ответов — ни одного битого текста, старой цены, двойного сообщения
+describe("тексты на обычном пути клиента", () => {
+  it.each(cases)("%s / %s / %s", async (lang, occasion, format) => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      await walk(lang, occasion, format, true);
     } finally {
       log.mockRestore();
     }
