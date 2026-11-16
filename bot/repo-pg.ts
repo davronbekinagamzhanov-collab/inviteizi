@@ -334,7 +334,8 @@ function patchColumns(p: OrderPatch): Columns {
   if (p.termsAcceptedAt !== undefined) c.terms_accepted_at = p.termsAcceptedAt;
   if (p.expiresAt !== undefined) c.expires_at = p.expiresAt;
   if (p.pricing !== undefined) {
-    c.pricing = p.pricing ? (JSON.stringify(p.pricing) as never) : null;
+    // Объект — jsonb как есть (как custom_text_i18n); строка записалась бы JSON-строкой
+    c.pricing = (p.pricing ?? null) as never;
     c.promotion_id = p.pricing?.promotionId ?? null;
   }
   // updated_at всё равно ставит триггер; так в update всегда есть хотя бы одна колонка

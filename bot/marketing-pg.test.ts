@@ -654,3 +654,143 @@ it.skipIf(!native)(
   },
   60000,
 );
+
+// ── Акции, поле промокода, оптовики (17.11.2026) на настоящей базе ──
+
+async function freshPromotions() {
+  await root`update public.promotions set stopped_at=now() where stopped_at is null`;
+}
+const ownerUser = (id: number) => ({ id, firstName: null, username: null, languageCode: null });
+
+it.skipIf(!native)(
+  "поле промокода (Mini App): применение, лимит, ❌ возвращает; не для партнёра и оптовика; акция больше — берётся акция",
+  async () => {
+    await freshPromotions();
+    const { ownerAdmin } = await import("./app/owner-admin"),
+      app = await import("./app/service"),
+      { nikohOrder } = await import("./testing/paths"),
+      { uz } = await import("@/texts/bot-uz");
+    const sim = await launchSim();
+    const code = "FIELD" + ++n;
+    await ownerAdmin(sim.deps, owner, "ownerPromoCreate", { code, percent: 20, limit: 1 });
+    // 1) клиент: −20 % → 6 400 ₸, кратно 100
+    const a = ++n;
+    const oa = await nikohOrder(sim, a);
+    const r = (await app.promoForOrder(sim.deps, ownerUser(a), oa.id, code.toLowerCase())) as {
+      order: { amount: number; price: { kind: string; before: number } };
+    };
+    expect(r.order).toMatchObject({ amount: 6400, price: { kind: "promo", before: 8000 } });
+    // 2) лимит 1: второй клиент — «закончился»
+    const b = ++n;
+    const ob = await nikohOrder(sim, b);
+    expect(await app.promoForOrder(sim.deps, ownerUser(b), ob.id, code)).toEqual({ error: "promo_exhausted" });
+    // 3) чек → ❌ — код снова свободен, цена полная
+    await sim.click(a, /^💳 Тўлаш/);
+    await sim.click(a, uz.pay.confirmYes);
+    await sim.photo(a, "RECEIPT_" + a);
+    expect((await repo.getOrder(oa.id))?.status).toBe("receipt_sent");
+    await sim.callback(500, `nr:${oa.number}:money`, 1);
+    expect(await repo.getOrder(oa.id)).toMatchObject({ status: "rejected", amount: 8000 });
+    expect(await app.promoForOrder(sim.deps, ownerUser(b), ob.id, code)).toMatchObject({ ok: true });
+    // 4) оптовик — «не для вас», цена оптовая
+    const w = ++n;
+    const ow = await nikohOrder(sim, w);
+    await ownerAdmin(sim.deps, owner, "ownerWholesaleSet", { userId: w, percent: 10 });
+    expect(await app.promoForOrder(sim.deps, ownerUser(w), ow.id, code)).toEqual({ error: "notForYou" });
+    // 5) акция 50 % больше кода 20 % — бронь снимается, берётся акция
+    const big = "SMALL" + ++n;
+    await ownerAdmin(sim.deps, owner, "ownerPromoCreate", { code: big, percent: 20, limit: 5 });
+    await ownerAdmin(sim.deps, owner, "ownerPromotionCreate", {
+      name: "Катта",
+      percent: 50,
+      startsAt: "2026-11-30T00:00",
+      endsAt: "2026-12-10T00:00",
+    });
+    const c = ++n;
+    const oc = await nikohOrder(sim, c);
+    expect(await app.promoForOrder(sim.deps, ownerUser(c), oc.id, big)).toEqual({ error: "better" });
+    expect(await repo.getOrder(oc.id)).toMatchObject({ amount: 4000, pricing: { kind: "promotion", percent: 50 } });
+    expect(
+      (await sql`select state from public.promotion_reservations where order_id=${oc.id}`).map((x) => x.state),
+    ).toEqual(["released"]);
+    expect((await sql`select promotion_id from public.orders where id=${oc.id}`)[0].promotion_id).toBeTruthy();
+  },
+  60000,
+);
+
+it.skipIf(!native)(
+  "акция 100 % на базе: без чека, ссылка сразу, начислений нет; партнёру и оптовику цена обычная/оптовая",
+  async () => {
+    await freshPromotions();
+    const { ownerAdmin } = await import("./app/owner-admin"),
+      { nikohOrder } = await import("./testing/paths"),
+      { salesTexts } = await import("@/texts/sales"),
+      { uz } = await import("@/texts/bot-uz"),
+      { partnerSource } = await import("@/lib/owner-panel");
+    const sim = await launchSim();
+    await ownerAdmin(sim.deps, owner, "ownerPromotionCreate", {
+      name: "Бепул",
+      percent: 100,
+      startsAt: "2026-11-30T00:00",
+      endsAt: "2026-12-10T00:00",
+    });
+    // партнёр: цена обычная
+    const made = (await ownerAdmin(sim.deps, owner, "ownerPartnerNew", {
+      name: "Салон " + ++n,
+      phone: "+7 701 555 44 33",
+      rate: "1000",
+      schedule: "weekly",
+    })) as { id: number; link: string };
+    const pu = ++n;
+    await sim.start(pu, "join_" + /start=join_([a-z0-9]+)/.exec(made.link)![1]);
+    await sim.click(pu, uz.langUz);
+    await sim.contact(pu, "77015554433");
+    const op = await nikohOrder(sim, pu);
+    await sim.click(pu, /^💳 Тўлаш/);
+    expect((await repo.getOrder(op.id))?.amount).toBe(8000);
+    // клиент по ссылке партнёра (акция по умолчанию не для него) — цена обычная
+    const viaPartner = ++n;
+    await sim.start(viaPartner, partnerSource((await repo.getPartner(made.id))!.code));
+    const ov = await nikohOrder(sim, viaPartner);
+    await sim.click(viaPartner, /^💳 Тўлаш/);
+    expect((await repo.getOrder(ov.id))?.amount).toBe(8000);
+    // обычный клиент: 0 ₸, без Kaspi и чека
+    const client = ++n;
+    const o = await nikohOrder(sim, client);
+    await sim.click(client, /^💳 Тўлаш/);
+    expect((await repo.getOrder(o.id))?.amount).toBe(0);
+    await sim.click(client, salesTexts.uz.freeAction);
+    const done = (await repo.getOrder(o.id))!;
+    expect(done).toMatchObject({ status: "active", amount: 0, receipt: null, pricing: { kind: "promotion" } });
+    expect(sim.tg.to(client).some((m) => m.text.includes(`/${done.slug}`))).toBe(true);
+    expect(await sql`select 1 from public.partner_earnings where order_id=${o.id}`).toHaveLength(0);
+  },
+  60000,
+);
+
+it.skipIf(!native)(
+  "бот: «🎟 Промокод» на шаге оплаты → код → новая цена; неверный код — понятная ошибка",
+  async () => {
+    await freshPromotions();
+    const { ownerAdmin } = await import("./app/owner-admin"),
+      { nikohOrder } = await import("./testing/paths"),
+      { salesTexts } = await import("@/texts/sales");
+    const T = salesTexts.uz;
+    const sim = await launchSim();
+    const code = "BOT" + ++n;
+    await ownerAdmin(sim.deps, owner, "ownerPromoCreate", { code, percent: 25, limit: 3 });
+    const client = ++n;
+    const o = await nikohOrder(sim, client);
+    await sim.click(client, /^💳 Тўлаш/);
+    await sim.click(client, T.promoButton);
+    expect(sim.lastText(client)).toContain(T.promoAsk);
+    await sim.text(client, "NOSUCH");
+    expect(sim.tg.to(client).some((m) => m.text.includes(T.promoErrors.promo_unavailable))).toBe(true);
+    await sim.text(client, code.toLowerCase());
+    expect(sim.tg.to(client).some((m) => m.text.includes(T.promoApplied(code, 25, "6 000 ₸")))).toBe(true);
+    expect((await repo.getOrder(o.id))?.amount).toBe(6000);
+    expect(sim.lastText(client)).toContain(T.promoLine(code, 25));
+    await freshPromotions();
+  },
+  60000,
+);
