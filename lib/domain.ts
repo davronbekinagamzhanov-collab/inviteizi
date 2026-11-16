@@ -90,6 +90,8 @@ export type OrderRecord = {
   payConfirmedAt?: Date | null;
   /** п.18: клиент отметил «Шартларга розиман» (вместе с payConfirmedAt) */
   termsAcceptedAt?: Date | null;
+  /** 17.11.2026: оплата без чека — имя плательщика, как в Kaspi («✅ Тўладим»). Чек при этом по желанию */
+  payerName?: string | null;
   /** 17.11.2026: цена зафиксирована по акции или оптовой скидке (в момент перехода к оплате). null — обычная/промокод */
   pricing?: OrderPricing | null;
 };
@@ -163,6 +165,7 @@ export type OrderPatch = Partial<
     | "payConfirmedAt"
     | "termsAcceptedAt"
     | "pricing"
+    | "payerName"
   >
 >;
 

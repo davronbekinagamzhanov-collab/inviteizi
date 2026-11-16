@@ -428,7 +428,7 @@ export const ru = {
     approve: "✅ Подтвердить",
     reject: "❌ Отклонить",
     reasonAsk: "Выберите причину 👇",
-    reasons: { money: "Деньги не пришли", sum: "Неверная сумма", other: "Чужой чек" } as Record<string, string>,
+    reasons: { nopay: "Оплата не пришла", money: "Деньги не пришли", sum: "Неверная сумма", other: "Чужой чек" } as Record<string, string>,
     approved: (n: number) => `✅ #${n} подтверждён. Клиенту отправлена ссылка.`,
     approvedFailed: (n: number) =>
       `⚠️ #${n} подтверждён, но ссылка до клиента не дошла (возможно, он заблокировал бота). Напишите клиенту сами: ссылка — в «/find ${n}».`,

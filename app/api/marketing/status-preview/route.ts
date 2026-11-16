@@ -19,7 +19,11 @@ export async function GET(req: Request) {
     data = futureDemoData(design.sample, new Date()),
     order = { templateId: id, occasion: design.occasion, data, slug: "demo/" + id } as OrderRecord;
   return new Response(
-    await statusPoster(order, origin + "/demo/" + id, q.searchParams.get("lang") === "ru" ? "ru" : "uz"),
+    await statusPoster(
+      order,
+      origin + "/demo/" + id,
+      q.searchParams.get("lang") === "ru" ? "ru" : q.searchParams.get("lang") === "kk" ? "kk" : "uz",
+    ),
     { headers: { "content-type": "image/png", "cache-control": "private,no-store" } },
   );
 }

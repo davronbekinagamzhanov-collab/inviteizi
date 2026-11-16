@@ -63,7 +63,7 @@ describe("порядок каталога", () => {
   it("в каждом тадбире есть дизайны всех трёх цен", () => {
     for (const o of OCCASIONS) {
       const prices = new Set(list(o).map((d) => PRICES[d.format]));
-      expect([...prices].sort(), o).toEqual([5_000, 6_000, 8_000]);
+      expect([...prices].sort(), o).toEqual([2990, 4990, 7990]);
     }
   });
 });

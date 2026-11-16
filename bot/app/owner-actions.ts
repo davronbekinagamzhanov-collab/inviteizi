@@ -11,7 +11,7 @@ import type { Deps } from "../flow/types";
 import { designName } from "../flow/util";
 
 /** Кнопки бота владельца, которые можно нажать из админки */
-const CALLBACKS = /^(ok:\d{1,9}|nr:\d{1,9}:(money|sum|other)|pn:(stats|rc|pt|po|ex|set|madd|cl)|pa:new)$/;
+const CALLBACKS = /^(ok:\d{1,9}|nr:\d{1,9}:(nopay|money|sum|other)|pn:(stats|rc|pt|po|ex|set|madd|cl)|pa:new)$/;
 /** Команды владельца (промокоды PR #20 и др.) */
 const COMMANDS = new Set(["promos", "corrections", "delivery", "referrals"]);
 
@@ -47,6 +47,10 @@ export type OwnerReceipt = {
   names: string | null;
   sentAt: string | null;
   url: string | null;
+  /** Оплата без чека: имя плательщика, как в Kaspi (null — пришёл чек) */
+  payerName: string | null;
+  /** Есть файл чека (фото/PDF) — можно открыть в боте */
+  hasReceipt: boolean;
 };
 
 /** Чеки на проверке — без учёта периода, старые сверху */
@@ -63,6 +67,8 @@ export async function ownerReceipts(deps: Deps): Promise<OwnerReceipt[]> {
       names: o.data.occasion === "nikoh" ? `${o.data.groom ?? ""} ва ${o.data.bride ?? ""}` : (o.data.person ?? null),
       sentAt: (o.receiptAt ?? o.updatedAt)?.toISOString() ?? null,
       url: `${deps.env.publicBaseUrl}/${o.slug}`,
+      payerName: o.payerName ?? null,
+      hasReceipt: Boolean(o.receipt),
     }));
 }
 

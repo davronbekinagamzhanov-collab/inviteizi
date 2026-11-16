@@ -8,6 +8,9 @@ export type SalesLang = "uz" | "ru" | "kk";
 export const strike = (s: string) => [...s].map((ch) => (ch === " " ? " " : ch + "̶")).join("");
 
 const uz = {
+  promoBanner: "🎟 Промокод борми? Чегирма олинг",
+  promoActive: (code: string, p: number) => `${code}: −${p} %`,
+  promoRemove: "Промокодни олиб ташлаш",
   // Рассылка об акции (17.11.2026)
   bcLast: "⏰ Охирги кун!",
   bcLeft: (d: number, h: number) =>
@@ -54,6 +57,9 @@ const uz = {
 };
 
 const ru: typeof uz = {
+  promoBanner: "🎟 Есть промокод? Получите скидку",
+  promoActive: (code, p) => `${code}: −${p} %`,
+  promoRemove: "Убрать промокод",
   bcLast: "⏰ Последний день!",
   bcLeft: (d, h) => (d > 0 ? `До конца акции ${d} дн ${h} ч` : `До конца акции ${h} ч`),
   bcFormats: { animated: "Анимация", scroll: "Листаемое", simple: "Простое" },
@@ -94,6 +100,8 @@ const ru: typeof uz = {
 
 const kk: typeof uz = {
   ...ru,
+  promoBanner: "🎟 Промокод бар ма? Жеңілдік алыңыз",
+  promoRemove: "Промокодты алып тастау",
   bcLast: "⏰ Соңғы күн!",
   bcLeft: (d, h) => (d > 0 ? `Акция аяқталуына ${d} күн ${h} сағ қалды` : `Акция аяқталуына ${h} сағ қалды`),
   bcFormats: { animated: "Анимациялы", scroll: "Парақталатын", simple: "Қарапайым" },

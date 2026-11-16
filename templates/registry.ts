@@ -11,7 +11,8 @@ export const FORMATS = ["animated", "scroll", "simple"] as const;
 export type Format = (typeof FORMATS)[number];
 
 /** Цена формата, ₸ (музыка входит в цену) */
-export const PRICES: Record<Format, number> = { animated: 8_000, scroll: 6_000, simple: 5_000 };
+/** Цены владельца с 17.11.2026 (были 8 000 / 6 000 / 5 000). Неоплаченные заказы получают новую цену при показе */
+export const PRICES: Record<Format, number> = { animated: 7_990, scroll: 4_990, simple: 2_990 };
 
 /** Внешний вид дизайна (распределены по обложкам): для панели владельца */
 export const DESIGN_STYLES = ["milk", "gold", "floral", "national", "dark", "photo"] as const;

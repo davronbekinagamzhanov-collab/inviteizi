@@ -6,6 +6,7 @@ import postgres from "postgres";
 import { readFile, writeFile } from "node:fs/promises";
 import { PgRepo } from "./repo-pg";
 import { designs, PRICES, getDesign } from "@/templates/registry";
+import { discounted } from "@/lib/pricing-math";
 import { computeExpiresAt } from "@/lib/orders";
 import type { Sql } from "@/lib/db";
 vi.mock("next/font/local", () => ({ default: () => ({ variable: "fixture-font" }) }));
@@ -57,7 +58,7 @@ async function order(userId = ++n, status: "preview" | "receipt_sent" = "preview
     templateId: "muhr",
     data: getDesign("muhr")!.sample,
     music: { kind: "none" },
-    amount: 8000,
+    amount: PRICES.animated,
     slugBase: "fixture-" + userId + "-" + ++n,
     status,
   });
@@ -176,7 +177,7 @@ it.skipIf(!native)(
     });
     const expiry = orders.filter((o) => o.id !== accepted.id && o.id !== rejected.id)[0];
     await repo.marketing.releaseExpired(new Date(Date.now() + 31 * 60000), expiry.id);
-    expect((await repo.getOrder(expiry.id))?.amount).toBe(8000);
+    expect((await repo.getOrder(expiry.id))?.amount).toBe(7990);
   },
   30000,
 );
@@ -288,7 +289,7 @@ it.skipIf(!native)(
     await repo.marketing.confirm(o.id, 500, new Date(), "https://fixture.invalid", "kaspi", null, flags);
     const s = await repo.panelSnapshot();
     expect(s.users.find((u) => u.id === id)?.source).toBe("p_" + partner.code);
-    expect(s.orders.find((x) => x.id === o.id)?.amount).toBe(8000);
+    expect(s.orders.find((x) => x.id === o.id)?.amount).toBe(7990);
     expect(s.earnings.find((e) => e.orderId === o.id)).toMatchObject({ partnerId: partner.id, amount: 0 });
   },
 );
@@ -326,17 +327,17 @@ it.skipIf(!native)(
     const code = "PARTIAL" + ++n;
     await repo.marketing.createPromo(500, code, 25, 1, null);
     const o = await order();
-    expect((await repo.marketing.reservePromo(o.userId, o.id, code, new Date())).amount).toBe(6000);
+    expect((await repo.marketing.reservePromo(o.userId, o.id, code, new Date())).amount).toBe(5990);
     await repo.transition(o.id, ["preview"], "receipt_sent");
     await repo.marketing.releaseExpired(new Date(Date.now() + 86400000));
-    expect((await repo.getOrder(o.id))?.amount).toBe(6000);
+    expect((await repo.getOrder(o.id))?.amount).toBe(5990);
     const other = await order();
     await expect(repo.marketing.reservePromo(other.userId, other.id, code, new Date())).rejects.toThrow(
       "promo_exhausted",
     );
     await repo.transition(o.id, ["receipt_sent"], "rejected");
-    expect((await repo.getOrder(o.id))?.amount).toBe(8000);
-    expect((await repo.marketing.reservePromo(other.userId, other.id, code, new Date())).amount).toBe(6000);
+    expect((await repo.getOrder(o.id))?.amount).toBe(7990);
+    expect((await repo.marketing.reservePromo(other.userId, other.id, code, new Date())).amount).toBe(5990);
   },
 );
 it.skipIf(!native)(
@@ -628,7 +629,7 @@ it.skipIf(!native)(
 
     // 1) ❌ владельца: использование возвращается, цена — снова полная
     const first = await pay(++n);
-    expect(first.quoted.amount).toBe(Math.floor((first.o.amount * 75) / 100));
+    expect(first.quoted.amount).toBe(discounted(first.o.amount, 25));
     expect(first.after.status).toBe("receipt_sent");
     expect(await used()).toMatchObject({ used: 0, reserved: 1 });
     await sim.callback(500, `nr:${first.o.number}:money`, 1);
@@ -637,7 +638,7 @@ it.skipIf(!native)(
 
     // 2) лимит 1 снова свободен: другой клиент, ✅ дважды → списан ровно 1 раз
     const second = await pay(++n);
-    expect(second.after).toMatchObject({ status: "receipt_sent", amount: Math.floor((second.o.amount * 75) / 100) });
+    expect(second.after).toMatchObject({ status: "receipt_sent", amount: discounted(second.o.amount, 25) });
     await sim.callback(500, `ok:${second.o.number}`, 1);
     await sim.callback(500, `ok:${second.o.number}`, 1);
     expect((await repo.getOrder(second.o.id))?.status).toBe("active");
@@ -679,7 +680,7 @@ it.skipIf(!native)(
     const r = (await app.promoForOrder(sim.deps, ownerUser(a), oa.id, code.toLowerCase())) as {
       order: { amount: number; price: { kind: string; before: number } };
     };
-    expect(r.order).toMatchObject({ amount: 6400, price: { kind: "promo", before: 8000 } });
+    expect(r.order).toMatchObject({ amount: 6390, price: { kind: "promo", before: 7990 } });
     // 2) лимит 1: второй клиент — «закончился»
     const b = ++n;
     const ob = await nikohOrder(sim, b);
@@ -690,7 +691,7 @@ it.skipIf(!native)(
     await sim.photo(a, "RECEIPT_" + a);
     expect((await repo.getOrder(oa.id))?.status).toBe("receipt_sent");
     await sim.callback(500, `nr:${oa.number}:money`, 1);
-    expect(await repo.getOrder(oa.id)).toMatchObject({ status: "rejected", amount: 8000 });
+    expect(await repo.getOrder(oa.id)).toMatchObject({ status: "rejected", amount: 7990 });
     expect(await app.promoForOrder(sim.deps, ownerUser(b), ob.id, code)).toMatchObject({ ok: true });
     // 4) оптовик — «не для вас», цена оптовая
     const w = ++n;
@@ -709,7 +710,7 @@ it.skipIf(!native)(
     const c = ++n;
     const oc = await nikohOrder(sim, c);
     expect(await app.promoForOrder(sim.deps, ownerUser(c), oc.id, big)).toEqual({ error: "better" });
-    expect(await repo.getOrder(oc.id)).toMatchObject({ amount: 4000, pricing: { kind: "promotion", percent: 50 } });
+    expect(await repo.getOrder(oc.id)).toMatchObject({ amount: 3990, pricing: { kind: "promotion", percent: 50 } });
     expect(
       (await sql`select state from public.promotion_reservations where order_id=${oc.id}`).map((x) => x.state),
     ).toEqual(["released"]);
@@ -747,13 +748,13 @@ it.skipIf(!native)(
     await sim.contact(pu, "77015554433");
     const op = await nikohOrder(sim, pu);
     await sim.click(pu, /^💳 Тўлаш/);
-    expect((await repo.getOrder(op.id))?.amount).toBe(8000);
+    expect((await repo.getOrder(op.id))?.amount).toBe(7990);
     // клиент по ссылке партнёра (акция по умолчанию не для него) — цена обычная
     const viaPartner = ++n;
     await sim.start(viaPartner, partnerSource((await repo.getPartner(made.id))!.code));
     const ov = await nikohOrder(sim, viaPartner);
     await sim.click(viaPartner, /^💳 Тўлаш/);
-    expect((await repo.getOrder(ov.id))?.amount).toBe(8000);
+    expect((await repo.getOrder(ov.id))?.amount).toBe(7990);
     // обычный клиент: 0 ₸, без Kaspi и чека
     const client = ++n;
     const o = await nikohOrder(sim, client);
@@ -782,14 +783,22 @@ it.skipIf(!native)(
     const client = ++n;
     const o = await nikohOrder(sim, client);
     await sim.click(client, /^💳 Тўлаш/);
-    await sim.click(client, T.promoButton);
+    await sim.click(client, T.promoBanner);
     expect(sim.lastText(client)).toContain(T.promoAsk);
     await sim.text(client, "NOSUCH");
     expect(sim.tg.to(client).some((m) => m.text.includes(T.promoErrors.promo_unavailable))).toBe(true);
     await sim.text(client, code.toLowerCase());
-    expect(sim.tg.to(client).some((m) => m.text.includes(T.promoApplied(code, 25, "6 000 ₸")))).toBe(true);
-    expect((await repo.getOrder(o.id))?.amount).toBe(6000);
+    expect(sim.tg.to(client).some((m) => m.text.includes(T.promoApplied(code, 25, "5 990 ₸")))).toBe(true);
+    expect((await repo.getOrder(o.id))?.amount).toBe(5990);
     expect(sim.lastText(client)).toContain(T.promoLine(code, 25));
+    // «✕ KOD: −25 %» — убрать: цена снова обычная, код освобождается
+    await sim.click(client, `✕ ${T.promoActive(code, 25)}`);
+    expect((await repo.getOrder(o.id))?.amount).toBe(7990);
+    // Mini App: снова применить и убрать «✕»
+    const app = await import("./app/service");
+    const u = { id: client, firstName: null, username: null, languageCode: null };
+    expect(await app.promoForOrder(sim.deps, u, o.id, code)).toMatchObject({ ok: true, order: { amount: 5990 } });
+    expect(await app.removePromo(sim.deps, u, o.id)).toMatchObject({ ok: true, order: { amount: 7990, price: null } });
     await freshPromotions();
   },
   60000,
@@ -829,4 +838,43 @@ it.skipIf(!native)(
     await freshPromotions();
   },
   60000,
+);
+
+it.skipIf(!native)(
+  "оплата без чека на базе: payer_name и способ name сохраняются; чек по желанию дописывается к тому же заказу",
+  async () => {
+    const { payByName } = await import("./flow/pay-name");
+    const sim = await launchSim();
+    const o = await order();
+    await repo.updateOrder(o.id, { payConfirmedAt: new Date() });
+    const r = await payByName(sim.deps, o.userId, o.id, "Давронбек И.");
+    expect(r).toMatchObject({ ok: true });
+    const [row] = await sql`select status,payer_name,receipt_kind,receipt_file_id from public.orders where id=${o.id}`;
+    expect(row).toEqual({
+      status: "receipt_sent",
+      payer_name: "Давронбек И.",
+      receipt_kind: "name",
+      receipt_file_id: null,
+    });
+    expect((await repo.getOrder(o.id))!).toMatchObject({ payerName: "Давронбек И.", receipt: null });
+    await repo.updateOrder(o.id, { receipt: { fileId: "KASPI", kind: "photo" } });
+    const [after] = await sql`select receipt_kind,receipt_file_id,payer_name from public.orders where id=${o.id}`;
+    expect(after).toEqual({ receipt_kind: "photo", receipt_file_id: "KASPI", payer_name: "Давронбек И." });
+  },
+  60000,
+);
+
+it.skipIf(!native)(
+  "строка об акции: время показа в users.promo_line_at — не чаще раза в 6 часов, переживает перезапуск",
+  async () => {
+    const id = ++n,
+      t0 = new Date("2026-12-01T08:00:00Z"),
+      gap = 6 * 3_600_000;
+    await repo.touchUser({ id });
+    expect(await repo.claimPromoLine(id, t0, gap)).toBe(true);
+    // «Перезапуск сервера»: новый объект репозитория, та же база
+    const fresh = new PgRepo(sql);
+    expect(await fresh.claimPromoLine(id, new Date(+t0 + gap - 60_000), gap)).toBe(false);
+    expect(await fresh.claimPromoLine(id, new Date(+t0 + gap), gap)).toBe(true);
+  },
 );

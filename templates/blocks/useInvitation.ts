@@ -143,17 +143,38 @@ export function useInvitation(raw: InvitationData, mode: InvitationMode, opts: O
         playingNow.current = false;
         setPlaying(false);
         setMusicBlocked(true);
+        reportAudio(null, "SynthBlocked");
       });
       setPlaying(true);
     } else if (audio) {
       // play() — синхронно в обработчике нажатия (Android иначе не считает это нажатием); файл грузится потом
+      const fail = (e: unknown) => {
+        playingNow.current = false;
+        setPlaying(false);
+        // Отменили паузой — это не ошибка; иначе звук заблокирован или файл не открылся — кнопка ♪ мигает
+        if (e instanceof DOMException && e.name === "AbortError") return;
+        setMusicBlocked(true);
+        reportAudio(audio, e instanceof Error ? e.name : "PlayError");
+      };
       startAudio(audio).then(
-        () => setMusicBlocked(false),
+        () => {
+          setMusicBlocked(false);
+          watchSilence(audio);
+        },
         (e: unknown) => {
-          playingNow.current = false;
-          setPlaying(false);
-          // Отменили паузой — это не ошибка; иначе звук заблокирован или файл не открылся — нужна кнопка ▶
-          if (!(e instanceof DOMException && e.name === "AbortError")) setMusicBlocked(true);
+          // Файл не открылся (часто — кэш/формат в WebView): один повтор с новым адресом
+          if (e instanceof DOMException && e.name === "NotSupportedError" && !audio.dataset.retried) {
+            audio.dataset.retried = "1";
+            const src = audio.currentSrc || audio.src;
+            audio.src = `${src}${src.includes("?") ? "&" : "?"}r=${Date.now()}`;
+            audio.load();
+            startAudio(audio).then(() => {
+              setMusicBlocked(false);
+              watchSilence(audio);
+            }, fail);
+            return;
+          }
+          fail(e);
         },
       );
     } else playingNow.current = false;
@@ -214,7 +235,10 @@ export function useInvitation(raw: InvitationData, mode: InvitationMode, opts: O
           preload: "none",
           onPlay: () => setPlaying(true),
           onPause: () => setPlaying(false),
-          onError: () => setPlaying(false),
+          onError: (e: { currentTarget: HTMLAudioElement }) => {
+            setPlaying(false);
+            reportAudio(e.currentTarget, "MediaError");
+          },
         })
       : null,
     started,
@@ -264,32 +288,61 @@ export function useInvitation(raw: InvitationData, mode: InvitationMode, opts: O
 }
 
 /** Плавное нарастание громкости ~1,5 с (iPhone громкость не меняет — там просто играет) */
+/**
+ * Сразу полная громкость (17.11.2026): плавное нарастание через кадры анимации на части Android WebView
+ * оставляло громкость 0 — музыка «играла», но её не было слышно.
+ */
 function startAudio(el: HTMLAudioElement) {
-  el.volume = 0;
-  return el.play().then(() => fadeIn(el));
+  try {
+    el.volume = 1;
+    el.muted = false;
+  } catch {
+    // iPhone: громкость не меняется
+  }
+  return el.play();
 }
 
-/** Громкость 0 → 1 за ~1,5 с */
-function fadeIn(audio: HTMLAudioElement) {
-  const start = performance.now();
-  // Если анимация кадров не идёт (свёрнутый WebView, экономия батареи) — громкость всё равно полная через 1,6 с
+/** Через 8 с после старта звука всё ещё нет (стоит на паузе или время не идёт) — одна запись в журнал */
+function watchSilence(el: HTMLAudioElement) {
+  const at = el.currentTime;
   setTimeout(() => {
-    try {
-      if (!audio.paused) audio.volume = 1;
-    } catch {
-      // iPhone: громкость не меняется
-    }
-  }, 1600);
-  const step = (now: number) => {
-    const k = Math.min(1, (now - start) / 1500);
-    try {
-      audio.volume = k;
-    } catch {
-      return;
-    }
-    if (k < 1 && !audio.paused) requestAnimationFrame(step);
-  };
-  requestAnimationFrame(step);
+    if (el.paused || el.currentTime <= at) reportAudio(el, "Silent");
+  }, 8000);
+}
+
+let reported = false;
+/** Ошибка звука с настоящего телефона → bot_errors (без данных клиента), не чаще раза на страницу */
+export function reportAudio(el: HTMLAudioElement | null, name: string) {
+  if (reported || typeof window === "undefined") return;
+  reported = true;
+  try {
+    const src = el ? (el.currentSrc || el.src).replace(location.origin, "") : "";
+    const where =
+      window.self !== window.top
+        ? "iframe"
+        : /Telegram/i.test(navigator.userAgent) || "TelegramWebviewProxy" in window
+          ? "telegram"
+          : "browser";
+    const body = JSON.stringify({
+      name,
+      networkState: el?.networkState ?? null,
+      readyState: el?.readyState ?? null,
+      errorCode: el?.error?.code ?? null,
+      // Только адрес файла музыки, без параметров (в ссылке приглашения — имена)
+      src: src.split("?")[0].slice(0, 160),
+      where,
+      design: (window as { __inviteDesign?: string }).__inviteDesign ?? null,
+      ua: navigator.userAgent.slice(0, 200),
+    });
+    void fetch("/api/client-error", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body,
+      keepalive: true,
+    }).catch(() => {});
+  } catch {
+    // журнал не должен мешать странице
+  }
 }
 
 export type Invitation = ReturnType<typeof useInvitation>;

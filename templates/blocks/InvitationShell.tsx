@@ -9,7 +9,6 @@ import { BrandBadge, BrandFooter, type PhotoCredit } from "./Brand";
 import { SoftBrandBadge, SoftBrandFooter } from "./BrandSoft";
 import { Rsvp, type RsvpLook } from "./Rsvp";
 import { LangSwitch } from "./LangSwitch";
-import { MusicHint } from "./MusicHint";
 import { PaidRefresh } from "./PaidRefresh";
 import { TapHint } from "./TapHint";
 
@@ -68,7 +67,10 @@ export function InvitationShell({
   return (
     // reducedMotion="user": если в телефоне отключены анимации, не мучаем гостя
     <MotionConfig reducedMotion="user">
-      <div style={inv.langReady ? style : { ...style, visibility: "hidden" }} className={`min-h-svh ${fontsClassName} ${backdropClassName}`}>
+      <div
+        style={inv.langReady ? style : { ...style, visibility: "hidden" }}
+        className={`min-h-svh ${fontsClassName} ${backdropClassName}`}
+      >
         <div
           data-opened={inv.opened}
           className={`relative mx-auto min-h-svh w-full max-w-[430px] overflow-x-clip font-body ${className ?? ""}`}
@@ -89,20 +91,15 @@ export function InvitationShell({
             <MusicButton
               playing={inv.playing}
               onToggle={inv.toggleMusic}
+              blocked={inv.musicBlocked}
               className={musicButtonClassName}
               variant={musicVariant}
               raised={inv.mode === "demo"}
             />
           )}
-          {inv.opened &&
-            (brandVariant === "soft" ? (
-              <SoftBrandBadge />
-            ) : (
-              <BrandBadge raised={inv.mode === "demo"} />
-            ))}
+          {inv.opened && (brandVariant === "soft" ? <SoftBrandBadge /> : <BrandBadge raised={inv.mode === "demo"} />)}
           {/* v2: язык гостя и кнопка музыки на первом экране дизайнов без заставки */}
           <LangSwitch inv={inv} />
-          {inv.opened && <MusicHint inv={inv} />}
           {inv.mode === "demo" && <Watermark />}
           {inv.mode === "demo" && <PaidRefresh />}
           {!inv.opened && <TapHint inv={inv} />}

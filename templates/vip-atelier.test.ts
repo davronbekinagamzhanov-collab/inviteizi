@@ -42,7 +42,7 @@ describe("VIP atelier data contracts", () => {
   it("keeps the accepted catalogue and prices unchanged", () => {
     for (const id of atelierIds) expect(ACCEPTED.has(id)).toBe(ON_SALE_IDS.includes(id));
     expect(activeDesigns().map((d) => d.id)).toEqual([...ON_SALE_IDS]);
-    expect(PRICES).toEqual({ animated: 8000, scroll: 6000, simple: 5000 });
+    expect(PRICES).toEqual({ animated: 7990, scroll: 4990, simple: 2990 });
   });
 });
 for (const id of atelierIds)

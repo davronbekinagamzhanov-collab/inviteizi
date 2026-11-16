@@ -806,7 +806,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
                 </div>
               ) : null;
             })()}
-            <iframe src={`/demo/${screen.id}`} title={screen.id} />
+            <iframe src={`/demo/${screen.id}`} title={screen.id} allow="autoplay; fullscreen" />
             {!nativeMain && <div className={s.viewerBottom} aria-hidden="true" />}
           </div>
         )}
@@ -818,7 +818,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
                 {T.form.previewClose}
               </button>
             </div>
-            <iframe src={viewer} title="НАМУНА" />
+            <iframe src={viewer} title="НАМУНА" allow="autoplay; fullscreen" />
           </div>
         )}
 

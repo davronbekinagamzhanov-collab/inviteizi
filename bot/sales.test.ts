@@ -54,11 +54,14 @@ async function toCheck(s: Sim, id: number) {
 
 describe("цена со скидкой", () => {
   it("кратна 100 ₸ вниз, 100 % — 0 ₸", () => {
-    expect(discounted(8000, 50)).toBe(4000);
-    expect(discounted(6000, 15)).toBe(5100);
-    expect(discounted(5000, 33)).toBe(3300);
-    expect(discounted(8000, 100)).toBe(0);
-    expect(discounted(8000, 1)).toBe(7900);
+    // Правило владельца 17.11.2026: вниз до числа, оканчивающегося на 90
+    expect(discounted(2990, 50)).toBe(1490);
+    expect(discounted(4990, 50)).toBe(2490);
+    expect(discounted(7990, 20)).toBe(6390);
+    expect(discounted(4990, 15)).toBe(4190);
+    expect(discounted(7990, 100)).toBe(0);
+    expect(discounted(7990, 1)).toBe(7890);
+    expect(discounted(2990, 99)).toBe(0);
   });
 });
 
@@ -67,10 +70,10 @@ describe("акция", () => {
     const s = new Sim();
     await promotion(s);
     const o = await toCheck(s, 1);
-    expect(o).toMatchObject({ amount: 4000, pricing: { kind: "promotion", base: 8000, percent: 50 } });
+    expect(o).toMatchObject({ amount: 3990, pricing: { kind: "promotion", base: 7990, percent: 50 } });
     const text = s.lastText(1);
-    expect(text).toContain(strike("8 000 ₸"));
-    expect(text).toContain("4 000 ₸");
+    expect(text).toContain(strike("7 990 ₸"));
+    expect(text).toContain("3 990 ₸");
     expect(text).toContain(T.saving("4 000 ₸"));
     expect(text).toContain("08.11 гача");
   });
@@ -86,10 +89,10 @@ describe("акция", () => {
     expect(await admin(s, "ownerWholesaleSet", { userId: 900, percent: 10 })).toMatchObject({ ok: true });
     for (const id of [ADMIN, 800]) {
       const o = await toCheck(s, id);
-      expect(o.amount, `роль ${id}`).toBe(8000);
+      expect(o.amount, `роль ${id}`).toBe(7990);
       expect(o.pricing ?? null).toBeNull();
       expect((await app.quoteOrder(s.deps, user(id), o.id)) as { order: { price: unknown } }).toMatchObject({
-        order: { price: null, amount: 8000 },
+        order: { price: null, amount: 7990 },
       });
     }
     // менеджеру заказ создать можно только как сотруднику: цена — без акции
@@ -97,7 +100,7 @@ describe("акция", () => {
     for (const id of [ADMIN, 700, 800, 900]) expect(await catalogPromotion(s.deps, id), `роль ${id}`).toBeNull();
     expect(await catalogPromotion(s.deps, 1)).toMatchObject({ percent: 50 });
     const w = await toCheck(s, 900);
-    expect(w).toMatchObject({ amount: 7200, pricing: { kind: "wholesale", percent: 10 } });
+    expect(w).toMatchObject({ amount: 7190, pricing: { kind: "wholesale", percent: 10 } });
   });
 
   it("клиент по ссылке партнёра: по умолчанию обычная цена; с переключателем — со скидкой", async () => {
@@ -105,20 +108,20 @@ describe("акция", () => {
     const p = await partner(s, 800);
     const id = await promotion(s);
     await s.start(2, partnerSource(p.code));
-    expect((await toCheck(s, 2)).amount).toBe(8000);
+    expect((await toCheck(s, 2)).amount).toBe(7990);
     await admin(s, "ownerPromotionStop", { id });
     await promotion(s, { forPartnerClients: true, startsAt: "2026-11-01T12:00" });
     await s.click(2, /^💳 Тўлаш/);
-    expect((await s.repo.listOrdersByUser(2))[0].amount).toBe(4000);
+    expect((await s.repo.listOrdersByUser(2))[0].amount).toBe(3990);
   });
 
   it("только выбранные тадбиры и форматы", async () => {
     const s = new Sim();
     await promotion(s, { occasions: ["sunnat"] });
-    expect((await toCheck(s, 1)).amount).toBe(8000);
+    expect((await toCheck(s, 1)).amount).toBe(7990);
     const s2 = new Sim();
     await promotion(s2, { formats: ["animated"], occasions: ["nikoh"] });
-    expect((await toCheck(s2, 1)).amount).toBe(4000);
+    expect((await toCheck(s2, 1)).amount).toBe(3990);
   });
 
   it("одна активная акция одновременно; «Остановить» — цена снова обычная", async () => {
@@ -133,20 +136,20 @@ describe("акция", () => {
       }),
     ).toEqual({ error: "exists" });
     expect(await admin(s, "ownerPromotionStop", { id })).toEqual({ ok: true });
-    expect((await toCheck(s, 1)).amount).toBe(8000);
+    expect((await toCheck(s, 1)).amount).toBe(7990);
   });
 
   it("акция закончилась до чека: чек не принят, клиент видит новую сумму и подтверждает снова", async () => {
     const s = new Sim();
     await promotion(s, { endsAt: "2026-11-01T13:00" });
     const o = await toCheck(s, 1);
-    expect(o.amount).toBe(4000);
+    expect(o.amount).toBe(3990);
     await s.click(1, uz.pay.confirmYes);
     s.advance(120);
     await s.photo(1, "RECEIPT_1");
     const after = (await s.repo.getOrder(o.id))!;
-    expect(after).toMatchObject({ status: "awaiting_payment", amount: 8000, pricing: null });
-    expect(s.tg.to(1).some((m) => m.text.includes(T.priceChanged("8 000 ₸")))).toBe(true);
+    expect(after).toMatchObject({ status: "awaiting_payment", amount: 7990, pricing: null });
+    expect(s.tg.to(1).some((m) => m.text.includes(T.priceChanged("7 990 ₸")))).toBe(true);
     // Mini App: тот же пересчёт перед чеком
     const s2 = new Sim();
     await promotion(s2, { endsAt: "2026-11-01T13:00" });
@@ -159,7 +162,7 @@ describe("акция", () => {
       mime: "application/pdf",
     });
     expect(r).toEqual({ error: "priceChanged" });
-    expect((await s2.repo.getOrder(o2.id))!).toMatchObject({ status: "awaiting_payment", amount: 8000 });
+    expect((await s2.repo.getOrder(o2.id))!).toMatchObject({ status: "awaiting_payment", amount: 7990 });
   });
 
   it("100 % — без Kaspi и чека, ссылка сразу; партнёру начисления нет; в итогах акции — 1 заказ на 0 ₸", async () => {
@@ -183,12 +186,12 @@ describe("акция", () => {
     await promotion(s, { percent: 100 });
     const o = await nikohOrder(s, 1);
     const q = (await app.quoteOrder(s.deps, user(1), o.id)) as { order: app.AppOrder };
-    expect(q.order).toMatchObject({ amount: 0, price: { kind: "promotion", before: 8000, saving: 8000 } });
+    expect(q.order).toMatchObject({ amount: 0, price: { kind: "promotion", before: 7990, saving: 7990 } });
     expect(await app.confirmPay(s.deps, user(1), o.id, true)).toMatchObject({ ok: true, free: true });
     expect((await s.repo.getOrder(o.id))!.status).toBe("active");
   });
 
-  it("партнёру процент — только с реально оплаченной суммы (50 % акция → 15 % от 4 000)", async () => {
+  it("партнёру процент — только с реально оплаченной суммы (50 % акция → 15 % от 3 990)", async () => {
     const s = new Sim();
     const p = await partner(s, 800, "15%");
     await promotion(s, { forPartnerClients: true });
@@ -197,7 +200,7 @@ describe("акция", () => {
     await s.click(2, uz.pay.confirmYes);
     await s.photo(2, "RECEIPT_2");
     await s.callback(ADMIN, `ok:${o.number}`, 1);
-    expect((await panelData(s.deps)).earnings.map((e) => e.amount)).toEqual([600]);
+    expect((await panelData(s.deps)).earnings.map((e) => e.amount)).toEqual([599]);
   });
 });
 
@@ -212,16 +215,16 @@ describe("оптовик", () => {
     expect(await admin(s, "ownerWholesaleSet", { orderNumber: first.number, percent: 20 })).toMatchObject({ ok: true });
     await s.click(3, /^💳 Тўлаш/);
     const o = (await s.repo.getOrder(first.id))!;
-    expect(o).toMatchObject({ amount: 6400, pricing: { kind: "wholesale", percent: 20 } });
+    expect(o).toMatchObject({ amount: 6390, pricing: { kind: "wholesale", percent: 20 } });
     await s.click(3, uz.pay.confirmYes);
     await s.photo(3, "RECEIPT_3");
     await s.callback(ADMIN, `ok:${o.number}`, 1);
     expect((await s.repo.getOrder(o.id))!.status).toBe("active");
     expect((await panelData(s.deps)).earnings).toEqual([]);
     const list = (await admin(s, "ownerWholesalers")).wholesalers as { userId: number; orders: number; sum: number }[];
-    expect(list).toEqual([expect.objectContaining({ userId: 3, percent: 20, orders: 1, sum: 6400 })]);
+    expect(list).toEqual([expect.objectContaining({ userId: 3, percent: 20, orders: 1, sum: 6390 })]);
     expect(await admin(s, "ownerWholesaleRemove", { userId: 3 })).toEqual({ ok: true });
-    expect((await toCheck(s, 3)).amount).toBe(3200);
+    expect((await toCheck(s, 3)).amount).toBe(3190);
   });
 
   it("сотруднику роль оптовика не даётся", async () => {
@@ -244,7 +247,7 @@ describe("витрина акции в боте", () => {
     await s.text(1, uz.menu.create);
     await s.click(1, uz.category.nikoh);
     const shown = s.tg.to(1).map((m) => m.text);
-    expect(shown.some((t) => t.includes(`−50 % · 4 000 ₸ ${strike("8 000 ₸")}`))).toBe(true);
+    expect(shown.some((t) => t.includes(`−50 % · 3 990 ₸ ${strike("7 990 ₸")}`))).toBe(true);
     await s.start(800);
     expect(s.tg.to(800).some((m) => m.text.includes("−50 %"))).toBe(false);
   });
@@ -259,8 +262,8 @@ describe("кнопка оплаты до перехода к оплате", () =
       .to(1)
       .flatMap((m) => (m.markup && "inline" in m.markup ? m.markup.inline.flat() : []))
       .map((b) => b.text);
-    expect(buttons.some((t) => /^💳 Тўлаш/.test(t) && t.includes("4 000"))).toBe(true);
-    expect(buttons.some((t) => /^💳 Тўлаш/.test(t) && t.includes("8 000"))).toBe(false);
+    expect(buttons.some((t) => /^💳 Тўлаш/.test(t) && t.includes("3 990"))).toBe(true);
+    expect(buttons.some((t) => /^💳 Тўлаш/.test(t) && t.includes("7 990"))).toBe(false);
   });
 });
 
@@ -270,7 +273,7 @@ describe("смена формата после фиксации цены", () =>
     const s = new Sim();
     await promotion(s);
     const o = await toCheck(s, 1);
-    expect(o).toMatchObject({ amount: 4000, pricing: { base: 8000 } });
+    expect(o).toMatchObject({ amount: 3990, pricing: { base: 7990 } });
     const r = await upsertDraftOrder(
       s.deps,
       1,
@@ -286,7 +289,7 @@ describe("смена формата после фиксации цены", () =>
     );
     expect(r.kind).toBe("updated");
     const n = (await s.repo.getOrder(o.id))!;
-    expect(n).toMatchObject({ format: "scroll", amount: 3000, pricing: { kind: "promotion", base: 6000 } });
+    expect(n).toMatchObject({ format: "scroll", amount: 2490, pricing: { kind: "promotion", base: 4990 } });
   });
 });
 
@@ -306,7 +309,7 @@ describe("промокод: кнопки зависят от флага", () => 
     s.tg
       .to(id)
       .flatMap((m) => (m.markup && "inline" in m.markup ? m.markup.inline.flat() : []))
-      .filter((b) => b.text === salesTexts.uz.promoButton);
+      .filter((b) => b.text === salesTexts.uz.promoBanner);
 
   it("флаг включён: «🎟 Промокод» в боте и «Есть промокод?» в Mini App видны клиенту на шаге оплаты", async () => {
     const s = new Sim();
@@ -333,5 +336,27 @@ describe("промокод: кнопки зависят от флага", () => 
     const o = await toCheck(s, 800);
     expect(promoButtons(s, 800)).toEqual([]);
     expect(((await app.quoteOrder(s.deps, user(800), o.id)) as { order: app.AppOrder }).order.promoAllowed).toBe(false);
+  });
+});
+
+describe("новые цены (17.11.2026)", () => {
+  it("2 990 / 4 990 / 7 990; неоплаченный заказ по старой цене получает новую, с чеком и оплаченный — нет", async () => {
+    const { PRICES } = await import("@/templates/registry");
+    expect(PRICES).toEqual({ simple: 2990, scroll: 4990, animated: 7990 });
+    const s = new Sim();
+    const unpaid = await nikohOrder(s, 1);
+    await s.repo.updateOrder(unpaid.id, { amount: 8000 });
+    const sent = await nikohOrder(s, 2);
+    await s.repo.updateOrder(sent.id, { amount: 8000 });
+    await s.repo.transition(sent.id, ["preview"], "receipt_sent");
+    // «Менинг таклифномаларим» — показ списка
+    await s.text(1, uz.menu.my);
+    await s.text(2, uz.menu.my);
+    expect((await s.repo.getOrder(unpaid.id))!.amount).toBe(7990);
+    expect((await s.repo.getOrder(sent.id))!.amount).toBe(8000);
+    // Mini App: тот же пересчёт при показе списка
+    await s.repo.updateOrder(unpaid.id, { amount: 8000 });
+    const list = (await app.listOrders(s.deps, user(1))).orders;
+    expect(list.find((o) => o.id === unpaid.id)?.amount).toBe(7990);
   });
 });

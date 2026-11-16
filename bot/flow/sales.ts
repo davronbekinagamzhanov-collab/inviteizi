@@ -89,17 +89,26 @@ export async function priceLinesFor(c: Pick<Ctx, "deps" | "lang">, o: OrderRecor
   return priceLines(c.lang, o.amount, await priceNote(c.deps, o));
 }
 
-/** Одна строка об акции (старт, каталог): не чаще раза в 6 часов на человека */
-// По хранилищу (в тестах у каждого бота своё): кому и когда показали строку об акции
+/**
+ * Одна строка об акции (старт, каталог): не чаще раза в 6 часов на человека.
+ * Время показа — в базе (users.promo_line_at), чтобы перезапуск сервера не показывал строку снова.
+ * Пока миграции нет — запасной вариант в памяти процесса.
+ */
+const PROMO_LINE_GAP_MS = 6 * 3_600_000;
 const shownBy = new WeakMap<object, Map<number, number>>();
 export async function promotionLine(c: Pick<Ctx, "deps" | "lang" | "user">, force = false) {
   const p = await catalogPromotion(c.deps, c.user.id);
   if (!p) return null;
-  const now = +c.deps.now();
-  let shown = shownBy.get(c.deps.repo);
-  if (!shown) shownBy.set(c.deps.repo, (shown = new Map()));
-  if (!force && now - (shown.get(c.user.id) ?? 0) < 6 * 3_600_000) return null;
-  shown.set(c.user.id, now);
+  const at = c.deps.now(),
+    now = +at;
+  const claimed = force ? true : ((await c.deps.repo.claimPromoLine?.(c.user.id, at, PROMO_LINE_GAP_MS)) ?? null);
+  if (claimed === false) return null;
+  if (claimed === null) {
+    let shown = shownBy.get(c.deps.repo);
+    if (!shown) shownBy.set(c.deps.repo, (shown = new Map()));
+    if (now - (shown.get(c.user.id) ?? 0) < PROMO_LINE_GAP_MS) return null;
+    shown.set(c.user.id, now);
+  }
   return salesCopy(c.lang).startLine(p.name, p.percent, shortDate(p.endsAt));
 }
 

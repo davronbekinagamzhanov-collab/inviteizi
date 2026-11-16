@@ -21,7 +21,7 @@ describe("9-template future bot/order compatibility", () => {
     expect(cohort).toHaveLength(9);
     expect(new Set(cohort.map((x) => x.id)).size).toBe(9);
     expect(activeDesigns().map((d) => d.id)).toEqual([...ON_SALE_IDS]);
-    expect(PRICES).toEqual({ animated: 8000, scroll: 6000, simple: 5000 });
+    expect(PRICES).toEqual({ animated: 7990, scroll: 4990, simple: 2990 });
     for (const row of cohort) {
       const d = getDesign(row.id)!;
       expect(d.occasion).toBe(row.occasion);

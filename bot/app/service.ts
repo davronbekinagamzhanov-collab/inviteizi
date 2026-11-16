@@ -365,6 +365,16 @@ export async function promoForOrder(deps: Deps, u: AppUser, orderId: unknown, co
   return { ok: true as const, order: await pricedOrder(deps, u, r.order) };
 }
 
+/** «✕» у применённого промокода: бронь снимается, цена — обычная (или акционная) */
+export async function removePromo(deps: Deps, u: AppUser, orderId: unknown) {
+  if (typeof orderId !== "string") return { error: "notFound" as const };
+  const o = await deps.repo.getOrder(orderId).catch(() => null);
+  if (!o || o.userId !== u.id || !PAYABLE_STATUSES.includes(o.status)) return { error: "notFound" as const };
+  await deps.repo.marketing?.releaseHold(o.id);
+  const fresh = (await deps.repo.getOrder(o.id)) ?? o;
+  return { ok: true as const, order: await pricedOrder(deps, u, await applyPricing(deps, fresh)) };
+}
+
 export async function setLang(deps: Deps, u: AppUser, lang: unknown) {
   if (lang !== "uz" && lang !== "ru" && !(lang === "kk" && deps.env.kazakhEnabled)) return { error: "bad" as const };
   await deps.repo.touchUser({ id: u.id, username: u.username, firstName: u.firstName });
@@ -673,7 +683,11 @@ export async function newDraft(deps: Deps, u: AppUser) {
 
 export async function listOrders(deps: Deps, u: AppUser) {
   const lang = (await deps.repo.getUser(u.id))?.lang ?? "uz";
-  return { orders: (await deps.repo.listOrdersByUser(u.id)).slice(0, MAX_ORDERS).map((o) => appOrder(deps, o, lang)) };
+  // Неоплаченные — по текущему прайсу (после смены цен — новая сумма); с чеком и оплаченные не трогаем
+  const list = await Promise.all(
+    (await deps.repo.listOrdersByUser(u.id)).slice(0, MAX_ORDERS).map((o) => applyPricing(deps, o)),
+  );
+  return { orders: list.map((o) => appOrder(deps, o, lang)) };
 }
 
 // ── Чек из приложения ──

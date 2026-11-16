@@ -38,7 +38,7 @@ const ids = ["zarhal-duo", "moviy-ayvon", "tulpor-quvonchi", "kashta-tilagi"] as
 const old = CATALOG_ORDER.sunnat;
 const own = [1, 2, 3, 4].map((n) => `https://photo.test/customer-${n}.webp`);
 it("stages four distinct identities, correct prices and photo contracts without activating or retiring sales", () => {
-  expect(PRICES).toEqual({ animated: 8000, scroll: 6000, simple: 5000 });
+  expect(PRICES).toEqual({ animated: 7990, scroll: 4990, simple: 2990 });
   expect(activeDesigns().map((d) => d.id)).toEqual([...ON_SALE_IDS]);
   expect(
     activeDesigns()

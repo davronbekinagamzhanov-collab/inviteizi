@@ -8,6 +8,8 @@ import { getDesign, type TemplateProps } from "@/templates/registry";
 import type { InvitationData } from "@/lib/types";
 import { glueData } from "@/lib/typography";
 import { loadDesign } from "@/templates/design-modules";
+import { ONE_PAGE_LOOKS } from "@/templates/one-page-looks";
+import { OnePage } from "@/templates/blocks/OnePage";
 
 type Msg = { type: "inviteizi:preview"; templateId: string; data: InvitationData };
 
@@ -42,5 +44,10 @@ export default function LivePreview() {
     return <main className="min-h-svh bg-[#f7efe3]" />;
   }
   const { Design } = loaded;
-  return <Design data={glueData(msg.data)} mode="full" />;
+  // Маленькое превью (?mini=1) — без музыки: его не нажать, кнопка музыки там лишняя
+  const mini = typeof window !== "undefined" && new URLSearchParams(window.location.search).has("mini");
+  const data = glueData(mini ? { ...msg.data, noMusic: true } : msg.data);
+  // «Оддий» — тот же одноэкранный макет, что на странице приглашения (раньше превью показывало старый вид)
+  if (ONE_PAGE_LOOKS[loaded.id]) return <OnePage id={loaded.id} data={data} mode="full" />;
+  return <Design data={data} mode="full" />;
 }

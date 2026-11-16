@@ -11,7 +11,7 @@
  */
 import type { OrderPricing, OrderRecord, Promotion } from "@/lib/domain";
 import type { Occasion } from "@/lib/types";
-import type { Format } from "@/templates/registry";
+import { PRICES, type Format } from "@/templates/registry";
 import { PARTNER_CODE } from "@/lib/marketing/config";
 import type { Deps } from "./flow/types";
 import { PAYABLE_STATUSES } from "./flow/util";
@@ -96,9 +96,13 @@ export type Quote = {
 export async function quote(deps: Deps, o: OrderRecord): Promise<Quote> {
   const now = deps.now();
   const buyer = await buyerOf(deps, o.userId);
-  const hold = await promoHold(deps, o);
-  const base = o.pricing?.base ?? hold?.original ?? o.amount;
-  const plain = { amount: base, base, pricing: null, promo: null, dropPromo: Boolean(hold), buyer };
+  // База — текущая цена формата: неоплаченные заказы после смены прайса получают новую цену (17.11.2026)
+  const base = PRICES[o.format] ?? o.pricing?.base ?? o.amount;
+  const held = await promoHold(deps, o);
+  // Бронь промокода посчитана от старой цены — снимаем, клиент применит код заново к новой
+  const stale = Boolean(held && held.original !== base);
+  const hold = stale ? null : held;
+  const plain = { amount: base, base, pricing: null, promo: null, dropPromo: Boolean(held), buyer };
   if (buyer.role === "wholesale" && buyer.wholesalePercent) {
     const percent = buyer.wholesalePercent;
     return { ...plain, amount: discounted(base, percent), pricing: { kind: "wholesale", base, percent } };
@@ -121,7 +125,7 @@ export async function quote(deps: Deps, o: OrderRecord): Promise<Quote> {
     };
   }
   if (hold) return { ...plain, amount: o.amount, promo: { code: hold.code, percent: hold.percent }, dropPromo: false };
-  return { ...plain, dropPromo: false };
+  return { ...plain, dropPromo: stale };
 }
 
 const samePricing = (a: OrderPricing | null | undefined, b: OrderPricing | null) =>

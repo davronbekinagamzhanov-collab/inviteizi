@@ -17,7 +17,7 @@ import { inline, pageUrl, price, txFor } from "./flow/util";
 import { creditPartner, flushOwnerNotices, notifySleeping } from "./flow/partners";
 import { rsvpTotals } from "@/lib/rsvp";
 import { expiresAtOf } from "@/lib/orders";
-import { PHOTO_KEEP_AFTER_EXPIRY_MS } from "./own-photo";
+import { FILES_KEEP_AFTER_EXPIRY_MS } from "./own-photo";
 import { errorAlert, eveningReports, flushNotices, payDayNotices } from "./flow/notify";
 import { cleanup, nudges, reviewRequests } from "./flow/care";
 import { isQuiet, kzHour, QUIET_TO } from "@/lib/quiet-hours";
@@ -28,6 +28,7 @@ export type CronResult = {
   archived: number;
   rsvpDigests: number;
   photosRemoved: number;
+  musicRemoved: number;
   partnerNotices: number;
   sleeping: number;
   notices: number;
@@ -87,15 +88,37 @@ const ALL_STATUSES = [
   "rejected",
 ] as const;
 
-async function removeOldPhotos(deps: Deps, now: Date, r: CronResult) {
-  if (!deps.removePhotos) return;
-  for (const o of await deps.repo.listOrdersByStatus([...ALL_STATUSES])) {
-    const photos = o.data.photos;
+/**
+ * Автоочистка (17.11.2026): когда ссылка закрылась (последний тадбир + 30 дней или expires_at),
+ * из Storage удаляются фото клиента и его своя песня. Заказ, сумма и статистика остаются.
+ * Файл, который ещё нужен другому заказу (та же песня или то же фото), не трогаем.
+ */
+async function removeExpiredFiles(deps: Deps, now: Date, r: CronResult) {
+  if (!deps.removePhotos && !deps.removeMusic) return;
+  const all = await deps.repo.listOrdersByStatus([...ALL_STATUSES]);
+  const ownUrl = (o: (typeof all)[number]) => (o.music.kind === "own" ? (o.music.url ?? null) : null);
+  const due = (o: (typeof all)[number]) => {
     const end = expiresAtOf(o);
-    if (!photos?.length || !end || end.getTime() + PHOTO_KEEP_AFTER_EXPIRY_MS > now.getTime()) continue;
-    await deps.removePhotos(photos);
-    await deps.repo.updateOrder(o.id, { data: { ...o.data, photos: [] } });
-    r.photosRemoved++;
+    return !!end && end.getTime() + FILES_KEEP_AFTER_EXPIRY_MS <= now.getTime();
+  };
+  const used = new Set(
+    all.filter((o) => !due(o)).flatMap((o) => [...(o.data.photos ?? []), ...(ownUrl(o) ? [ownUrl(o)!] : [])]),
+  );
+  for (const o of all) {
+    const photos = o.data.photos ?? [],
+      music = ownUrl(o);
+    if ((!photos.length && !music) || !due(o)) continue;
+    const freePhotos = photos.filter((u) => !used.has(u));
+    if (freePhotos.length) await deps.removePhotos?.(freePhotos);
+    if (music && !used.has(music)) await deps.removeMusic?.([music]);
+    await deps.repo.updateOrder(o.id, {
+      data: { ...o.data, photos: [] },
+      ...(music && o.music.kind === "own"
+        ? { music: { kind: "own" as const, fileId: o.music.fileId, title: o.music.title } }
+        : {}),
+    });
+    if (photos.length) r.photosRemoved++;
+    if (music) r.musicRemoved++;
   }
 }
 
@@ -111,6 +134,7 @@ export async function runCron(input: Deps): Promise<CronResult> {
     archived: 0,
     rsvpDigests: 0,
     photosRemoved: 0,
+    musicRemoved: 0,
     partnerNotices: 0,
     sleeping: 0,
     notices: 0,
@@ -192,7 +216,7 @@ export async function runCron(input: Deps): Promise<CronResult> {
 
   // ── Фото клиента: через 30 дней после того, как ссылка закрылась ──
   try {
-    if (hourly) await removeOldPhotos(deps, now, r);
+    if (hourly) await removeExpiredFiles(deps, now, r);
   } catch (e) {
     r.errors++;
     console.error("cron photos", e instanceof Error ? e.name : "Error");

@@ -59,6 +59,6 @@ describe("витрина templates/catalog.ts", () => {
   });
 
   it("отдельной VIP-цены нет: базовые цены форматов прежние", () => {
-    expect(PRICES).toEqual({ animated: 8_000, scroll: 6_000, simple: 5_000 });
+    expect(PRICES).toEqual({ animated: 7990, scroll: 4990, simple: 2990 });
   });
 });

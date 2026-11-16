@@ -136,20 +136,20 @@ describe("RSVP", () => {
 
 describe("Нарх ўзгармайди и тексты", () => {
   it("в каталоге и в сводке — цена дизайна, цифры из PRICES", async () => {
-    expect(PRICES).toEqual({ animated: 8000, scroll: 6000, simple: 5000 });
+    expect(PRICES).toEqual({ animated: 7990, scroll: 4990, simple: 2990 });
     for (const [tx, lang] of [[uz, uz.langUz], [ru, ru.langRu]] as const) {
       const s = new Sim();
       await prepare(s, 1, lang);
       await s.text(1, tx.menu.create);
       await s.click(1, tx.category.nikoh);
-      expect(s.lastText(1)).toMatch(/8.000 ₸/);
+      expect(s.lastText(1)).toMatch(/7.990 ₸/);
     }
     const s = new Sim();
     await nikohToMusic(s, 1);
     await s.click(1, uz.music.none);
     await s.click(1, uz.rsvp.edit);
     await s.click(1, uz.rsvp.no);
-    expect(s.lastText(1)).toMatch(/· 8.000 ₸/);
+    expect(s.lastText(1)).toMatch(/· 7.990 ₸/);
   });
 
   it("текст музыки называет настоящую кнопку", () => {

@@ -21,7 +21,7 @@ for (const id of ["oq-maktub", "suzani-medalyon"])
   it(`${id}: compact direct Simple preserves order fields`, async () => {
     const d = getDesign(id)!;
     expect(d.format).toBe("simple");
-    expect(PRICES[d.format]).toBe(5000);
+    expect(PRICES[d.format]).toBe(2990);
     const { default: Design } = await loadOrderDesign(d);
     const html = renderToStaticMarkup(
       createElement(Design, { data: { ...longSamples.nikoh, noMusic: true }, mode: "full" }),

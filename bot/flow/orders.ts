@@ -1,4 +1,6 @@
-import { applyPricing, buyerOf } from "../pricing";
+import { payCopy } from "@/texts/pay";
+import { payerLine } from "./pay-name";
+import { applyPricing, buyerOf, priceNote } from "../pricing";
 import { salesCopy } from "@/texts/sales";
 import { issueByPromotion, priceLinesFor } from "./sales";
 import { flushMarketing, fulfillPromotion } from "../marketing";
@@ -218,13 +220,14 @@ export async function confirmDraft(c: Ctx): Promise<Result> {
 async function ownOrder(c: Ctx, n: number) {
   const o = await c.deps.repo.getOrderByNumber(n);
   if (!o || o.userId !== c.user.id) return null;
-  if (
+  const fresh =
     c.deps.env.marketing?.promos &&
     c.deps.repo.marketing &&
     (await c.deps.repo.marketing.releaseExpired(c.deps.now(), o.id))
-  )
-    return c.deps.repo.getOrder(o.id);
-  return o;
+      ? await c.deps.repo.getOrder(o.id)
+      : o;
+  // Неоплаченный заказ — по текущему прайсу при каждом показе (правка, оплата, чек)
+  return fresh ? applyPricing(c.deps, fresh) : null;
 }
 
 /** Открыть заказ на правку: сводка с данными заказа (slug не меняется) */
@@ -298,6 +301,15 @@ async function checkWithPrice(c: Ctx, o: OrderRecord) {
   return lines ? base.replace(/\n💳 .*$/, `\n${lines}`) : base;
 }
 
+async function promoRows(c: Ctx, o: OrderRecord): Promise<InlineButton[][]> {
+  if (!(await canUsePromo(c, o))) return [];
+  const t = salesCopy(c.lang);
+  const note = await priceNote(c.deps, o);
+  if (note?.kind === "promo")
+    return [[{ text: `✕ ${t.promoActive(note.label, note.percent)}`, data: `pcx:${o.number}` }]];
+  return [[{ text: t.promoBanner, data: `pc:${o.number}` }]];
+}
+
 async function canUsePromo(c: Ctx, o: OrderRecord) {
   if (!c.deps.env.marketing?.promos || !c.deps.repo.marketing) return false;
   if (o.pricing?.kind === "promotion" && o.amount === 0) return false;
@@ -348,7 +360,8 @@ export async function payOrder(c: Ctx, n: number, confirmed = false, stamp?: str
           },
         ],
         // Промокод — только обычным клиентам и при включённых промокодах; бесплатно по акции — уже лучше любого кода
-        ...((await canUsePromo(c, o)) ? [[{ text: salesCopy(c.lang).promoButton, data: `pc:${o.number}` }]] : []),
+        // Промокод — заметной кнопкой; уже применён — «✕ KOD: −20 %» (убрать)
+        ...(await promoRows(c, o)),
         [{ text: c.tx.order.edit, data: `edit:${o.number}` }],
       ]),
     );
@@ -372,14 +385,24 @@ export async function payOrder(c: Ctx, n: number, confirmed = false, stamp?: str
   });
   const env = c.deps.env;
   const card = env.paymentCardNumber?.trim();
-  const paymentRows: InlineButton[][] = [[{ text: c.tx.pay.copy, copy: env.kaspiPhone.replace(/[^\d+]/g, "") }]];
+  // 17.11.2026: основной способ — без чека: перевод в Kaspi → «✅ Тўладим» → имя. Чек — по желанию
+  const pt = payCopy(c.lang);
+  const paymentRows: InlineButton[][] = [
+    [
+      { text: pt.copyPhone, copy: env.kaspiPhone.replace(/[^\d+]/g, "") },
+      { text: pt.copyAmount, copy: String(o.amount) },
+    ],
+  ];
   if (card) paymentRows.push([{ text: c.tx.pay.copyCard, copy: card }]);
-  // Сумма в кнопке: если до чека сменили формат (новая цена), старая кнопка снова покажет реквизиты
-  paymentRows.push([{ text: c.tx.pay.sendReceipt, data: `rcpt:${o.number}:${o.amount}` }]);
+  // Сумма в кнопке: если до оплаты сменилась цена, старая кнопка снова покажет оплату
+  paymentRows.push([{ text: pt.paid, data: `paid:${o.number}:${o.amount}` }]);
+  paymentRows.push([{ text: pt.receiptOptional, data: `rcpt:${o.number}:${o.amount}` }]);
   await send(
     c,
-    c.tx.pay.info(price(o.amount), env.kaspiPhone, env.kaspiName, o.number) +
+    pt.info(price(o.amount), env.kaspiPhone, env.kaspiName, o.number) +
       (card ? "\n\n" + c.tx.pay.card(card) : "") +
+      "\n\n" +
+      pt.receiptHint +
       (c.deps.env.marketing?.delivery ? "\n\n" + marketingCopy(c.lang).manualPayment : ""),
     inline(paymentRows),
   );
@@ -506,7 +529,8 @@ export const decisionButtons = (tx: ReturnType<typeof txFor>, n: number): Inline
 export async function sendReceiptTo(deps: Deps, adminId: number, o: OrderRecord, prefix = "") {
   const client = await deps.repo.getUser(o.userId);
   const lang = await langOf(deps, adminId);
-  const caption = prefix + adminCard(deps, o, lang, client);
+  // Оплата по имени («✅ Тўладим»): первой строкой — №, сумма, от кого, время
+  const caption = prefix + payerLine(lang, o) + adminCard(deps, o, lang, client);
   const opts = { caption, markup: inline(decisionButtons(txFor(lang), o.number)) };
   if (o.receipt?.kind === "document") await deps.tg.sendDocument(adminId, o.receipt.fileId, opts);
   else if (o.receipt) await deps.tg.sendPhoto(adminId, o.receipt.fileId, opts);
@@ -703,7 +727,7 @@ export async function approve(c: Ctx, n: number) {
   await sendAfterCommit(c, c.chatId, paidLine ? `${done}\n${paidLine}` : done);
 }
 
-const REASONS = ["money", "sum", "other"] as const;
+const REASONS = ["nopay", "money", "sum", "other"] as const;
 
 export async function askRejectReason(c: Ctx, n: number) {
   if (!(await guardAdmin(c))) return;
@@ -726,6 +750,8 @@ export async function reject(c: Ctx, n: number, code: string) {
   const tx = txFor(await langOf(c.deps, o.userId).catch(() => "uz" as const));
   await sendAfterCommit(c, o.userId, tx.pay.rejected(n, tx.admin.reasons[code]), {
     markup: inline([
+      // Можно снова нажать «✅ Тўладим» (оплата по имени) или прислать чек
+      [{ text: payCopy(await langOf(c.deps, o.userId).catch(() => "uz")).paid, data: `paid:${n}:${o.amount}` }],
       [{ text: tx.pay.resend, data: `rcpt:${n}:${o.amount}` }],
       [{ text: tx.contact, url: ownerUrl(c) }],
     ]),
@@ -738,7 +764,10 @@ export async function reject(c: Ctx, n: number, code: string) {
 const MY_LIMIT = 10;
 
 export async function myOrders(c: Ctx) {
-  const list = (await c.deps.repo.listOrdersByUser(c.user.id)).slice(0, MY_LIMIT);
+  // Неоплаченные — по текущему прайсу (после смены цен — новая сумма); с чеком и оплаченные не трогаем
+  const list = await Promise.all(
+    (await c.deps.repo.listOrdersByUser(c.user.id)).slice(0, MY_LIMIT).map((o) => applyPricing(c.deps, o)),
+  );
   if (!list.length) {
     await send(c, c.tx.my.empty, await startMenu(c));
     return;

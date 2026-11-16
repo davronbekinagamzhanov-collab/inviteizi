@@ -77,6 +77,11 @@ export interface Repo {
     source?: string | null;
   }): Promise<UserRecord>;
   setLang(id: number, lang: Lang): Promise<void>;
+  /**
+   * Строка об акции (старт, каталог): отметить показ, если прошлый был раньше чем gapMs назад.
+   * true — показать сейчас; false — уже показывали. null — поля в базе ещё нет (миграция 20261117150000).
+   */
+  claimPromoLine?(id: number, now: Date, gapMs: number): Promise<boolean | null>;
   /** Сохранить шаг диалога и его данные (бот помнит, где клиент остановился) */
   saveStep(id: number, step: string, state: Record<string, unknown>): Promise<void>;
   /**

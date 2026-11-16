@@ -118,5 +118,8 @@ export function photoPath(url: string): string | null {
   return m ? decodeURIComponent(m[1]) : null;
 }
 
-/** Фото удаляем через 30 дней после того, как приглашение закончилось (ссылка закрылась) */
-export const PHOTO_KEEP_AFTER_EXPIRY_MS = 30 * 24 * 60 * 60_000;
+/**
+ * Фото и своя песня удаляются, когда ссылка закрылась: последний тадбир + 30 дней (или expires_at).
+ * Решение 17.11.2026 (задание владельца: «через 30 дней после последнего тадбира»); прежде ждали ещё 30 дней.
+ */
+export const FILES_KEEP_AFTER_EXPIRY_MS = 0;

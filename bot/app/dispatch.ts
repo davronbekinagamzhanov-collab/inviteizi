@@ -2,6 +2,7 @@
  * Действия Mini App: одно действие на запрос. Вынесено из app/api/app/route.ts (17.11.2026), чтобы
  * браузерная проверка ролей гоняла тот же серверный код на тестовой базе. Пользователь — уже проверенный initData.
  */
+import { payByName } from "../flow/pay-name";
 import { allow, LIMITS } from "@/lib/rate-limit";
 import type { AppUser } from "@/lib/tg-init-data";
 import type { Lang } from "@/lib/domain";
@@ -43,8 +44,15 @@ export async function appAction(
       return ok(await app.quoteOrder(deps, user, body.orderId));
     case "promo":
       return ok(await app.promoForOrder(deps, user, body.orderId, body.code));
+    case "promoRemove":
+      return ok(await app.removePromo(deps, user, body.orderId));
     case "confirmPay":
       return ok(await app.confirmPay(deps, user, body.orderId, body.terms));
+    // Оплата без чека: «✅ Тўладим» + имя, как в Kaspi
+    case "paidByName": {
+      const r = await payByName(deps, user.id, typeof body.orderId === "string" ? body.orderId : "", body.name);
+      return "error" in r ? res(r, r.error === "tooOften" ? 429 : 200) : ok({ ok: true, night: r.night });
+    }
     case "orders":
       return ok(await app.listOrders(deps, user));
     case "musicUpload": {

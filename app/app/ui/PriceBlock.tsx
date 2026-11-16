@@ -47,6 +47,39 @@ export function PromoField({ order, onApplied }: { order: AppOrder; onApplied: (
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   if (!order.promoAllowed) return null;
+  // Код уже применён: зелёная плашка «KOD: −20 %» и «✕» — убрать (цена вернётся к обычной/акционной)
+  if (order.price?.kind === "promo")
+    return (
+      <div className={s.promoActive} data-promo-active>
+        <span>🎟 {t.promoActive(order.price.label, order.price.percent)}</span>
+        <button
+          type="button"
+          aria-label={t.promoRemove}
+          disabled={busy}
+          onClick={async () => {
+            setBusy(true);
+            try {
+              const r = await api<{ ok: true; order: AppOrder } | { error: string }>("promoRemove", {
+                orderId: order.id,
+              });
+              if ("ok" in r) {
+                haptic.select();
+                setOpen(false);
+                setMsg(null);
+                onApplied(r.order);
+              }
+            } catch {
+              haptic.error();
+            } finally {
+              setBusy(false);
+            }
+          }}
+          data-promo-remove
+        >
+          ✕
+        </button>
+      </div>
+    );
   async function apply() {
     if (busy || code.length < 3) return;
     setBusy(true);
@@ -77,8 +110,16 @@ export function PromoField({ order, onApplied }: { order: AppOrder; onApplied: (
   }
   if (!open)
     return (
-      <button type="button" className={s.textMore} onClick={() => setOpen(true)} data-promo-open>
-        {t.promoHave}
+      <button
+        type="button"
+        className={s.promoBanner}
+        onClick={() => {
+          haptic.tap();
+          setOpen(true);
+        }}
+        data-promo-open
+      >
+        {t.promoBanner}
       </button>
     );
   return (

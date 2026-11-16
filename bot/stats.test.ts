@@ -73,7 +73,7 @@ describe("📊 Статистика владельца", () => {
     }
     expect(s.tg.to(ADMIN).length).toBe(count);
     await s.callback(ADMIN, "st:m:money", screen.id);
-    expect(screen.text).toContain(S.paid(2, "16 000 ₸"));
+    expect(screen.text).toContain(S.paid(2, "15 980 ₸"));
     expect(screen.text).toContain(S.partnersCost("1 000 ₸", "0 ₸"));
     expect(screen.text).toContain(S.managersCost("500 ₸"));
     await s.callback(ADMIN, "st:m:pt", screen.id);
@@ -107,7 +107,7 @@ describe("статистика менеджера и партнёра", () => {
     await s.click(MANAGER, staff.btn.myStats);
     const screen = s.last(MANAGER)!;
     await s.callback(MANAGER, "sm:m:money", screen.id);
-    expect(screen.text).toContain(S.paid(1, "8 000 ₸"));
+    expect(screen.text).toContain(S.paid(1, "7 990 ₸"));
     expect(screen.text).toContain(S.myMoney("500 ₸"));
     await s.callback(MANAGER, "sm:m:pt", screen.id);
     expect(screen.text).toContain("Салон Малика");

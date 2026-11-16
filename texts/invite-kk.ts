@@ -495,8 +495,16 @@ export const kk = {
     },
   },
   footer: { madeWith: "InviteIZI арқылы жасалды" },
-  musicHint: "Музыка",
-  musicBlocked: "Музыканы қосу үшін ▶ басыңыз",
+  onePage: { answer: "Жауап беру", close: "Жабу" },
+  statusPoster: {
+    title: {
+      nikoh: "Тойымызға шақырамыз",
+      sunnat: "Сүндет тойымызға шақырамыз",
+      nahorgi: "Таңғы асқа шақырамыз",
+      yubiley: "Мерейтойымызға шақырамыз",
+    },
+    scan: "Шақыруды ашу үшін сканерлеңіз",
+  },
 };
 
 export const kkHeadings: Record<

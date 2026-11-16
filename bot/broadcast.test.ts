@@ -83,7 +83,7 @@ describe("рассылка об акции", () => {
     // клиенты 1, 2 и заблокировавший (его не видно, пока Telegram не ответит 403)
     expect(preview).toMatchObject({ ok: true, recipients: 3 });
     expect(String(preview.uz)).toContain("−50 %");
-    expect(String(preview.uz)).toContain(`${strike("8 000 ₸")} → 4 000 ₸`);
+    expect(String(preview.uz)).toContain(`${strike("7 990 ₸")} → 3 990 ₸`);
     expect(preview.buttons).toEqual([salesTexts.uz.bcChoose, salesTexts.uz.bcOff]);
     const r = await admin(s, "ownerBroadcastStart", { id });
     expect(r).toMatchObject({ ok: true, queued: 3 });

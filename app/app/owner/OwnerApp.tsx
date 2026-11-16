@@ -302,9 +302,12 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
                 <div>
                   <b>
                     №{r.number} · {money(r.amount)}
+                    {r.payerName ? ` · от ${r.payerName}` : ""}
+                    {r.sentAt ? ` · ${when(r.sentAt).slice(6)}` : ""}
                   </b>
                   <span>
                     {r.names ?? "—"} · {r.design}
+                    {r.payerName && !r.hasReceipt ? " · без чека (проверьте Kaspi)" : ""}
                   </span>
                   {r.url && (
                     <button type="button" className={s.link} onClick={() => openLink(r.url!)}>
@@ -314,7 +317,7 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
                 </div>
                 {rejecting === r.number ? (
                   <div className={s.reasons}>
-                    {(["money", "sum", "other"] as const).map((code) => (
+                    {(["nopay", "money", "sum", "other"] as const).map((code) => (
                       <button
                         key={code}
                         type="button"

@@ -93,7 +93,7 @@ describe("весь путь наҳорги ош на русском", () => {
       status: "preview",
       occasion: "nahorgi",
       templateId: "tong-dasturxon",
-      amount: 6_000,
+      amount: 4_990,
     });
     expect(o.data).toMatchObject({
       person: "Жасурбек",

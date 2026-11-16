@@ -210,3 +210,21 @@ body {
     animation: none;
   }
 }
+
+/*
+ * Курсор в полях ввода (17.11.2026): на телефоне владельца он не был виден. По умолчанию курсор — цвета текста
+ * (тонкая тёмная черта), а в Telegram с тёмной темой WebView может перекрасить страницу. Курсор — заметный,
+ * в цвете акцента, на всех полях (данные, имена, промокод, имя плательщика, RSVP), страница — только светлая.
+ */
+:root {
+  color-scheme: light;
+}
+input,
+textarea,
+[contenteditable="true"] {
+  caret-color: var(--caret, #a8772a);
+}
+[data-rsvp] input,
+[data-rsvp] textarea {
+  caret-color: var(--rsvp-accent, var(--caret, #a8772a));
+}

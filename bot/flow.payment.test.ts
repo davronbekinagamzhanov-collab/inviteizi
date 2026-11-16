@@ -1,3 +1,4 @@
+import { payTexts } from "@/texts/pay";
 import { designName, price } from "./flow/util";
 import { describe, expect, it } from "vitest";
 import { uz } from "@/texts/bot-uz";
@@ -22,14 +23,17 @@ describe("оплата Kaspi и чек", () => {
     await sim.click(1, /^💳 Тўлаш/);
     await sim.click(1, /^✅ (Ҳаммаси тўғри|Всё верно|Бәрі дұрыс)/);
     const m = sim.last(1);
-    expect(m.text).toMatch(/^💳 Kaspi орқали 8.000 ₸ ўтказинг:/);
-    expect(m.text).toContain("📱 +7 700 000 00 00");
-    expect(m.text).toContain("👤 Давронбек И.");
-    expect(m.text).toContain(`#${o.number}`);
+    // 17.11.2026: оплата без чека — сумма и номер крупно, «✅ Тўладим», чек — по желанию
+    expect(m.text).toMatch(/^💳 Тўланадиган сумма: 7.990 ₸/);
+    expect(m.text).toContain("+7 700 000 00 00 (Давронбек И.)");
+    expect(m.text).toContain(`№${o.number}`);
+    expect(m.text).toContain(payTexts.uz.how);
     expect(inlineButtons(m)).toEqual(
       expect.arrayContaining([
-        { text: uz.pay.copy, copy: "+77000000000" },
-        { text: uz.pay.sendReceipt, data: `rcpt:${o.number}:${o.amount}` },
+        { text: payTexts.uz.copyPhone, copy: "+77000000000" },
+        { text: payTexts.uz.copyAmount, copy: String(o.amount) },
+        { text: payTexts.uz.paid, data: `paid:${o.number}:${o.amount}` },
+        { text: payTexts.uz.receiptOptional, data: `rcpt:${o.number}:${o.amount}` },
       ]),
     );
     expect((await sim.repo.getOrder(o.id))?.status).toBe("awaiting_payment");
@@ -79,7 +83,7 @@ describe("оплата Kaspi и чек", () => {
     const o = await nikohOrder(sim, 1);
     await sim.start(2);
     await sim.click(2, uz.langUz);
-    await sim.callback(2,`payok:${o.number}`, 1);
+    await sim.callback(2, `payok:${o.number}`, 1);
     expect(sim.lastText(2)).toBe(uz.order.notFound);
     expect((await sim.repo.getOrder(o.id))?.status).toBe("preview");
   });
@@ -123,7 +127,9 @@ describe("подтверждение админом", () => {
     expect(decodeURIComponent(share.url)).toContain("Азиз ва Мадинанинг никоҳ тўйига");
     expect(inlineButtons(toClient[0]).map((b) => b.text)).toContain(uz.pay.newOrder);
     expect(card.markup).toBeUndefined(); // кнопки у карточки убраны
-    expect(sim.lastText(ADMIN)).toBe(`${uz.admin.approved(o.number)}\n💳 №${o.number} · ${price(o.amount)} · ${designName(o.templateId)} · напрямую`);
+    expect(sim.lastText(ADMIN)).toBe(
+      `${uz.admin.approved(o.number)}\n💳 №${o.number} · ${price(o.amount)} · ${designName(o.templateId)} · напрямую`,
+    );
   });
 
   it("двойное «Тасдиқлаш» (тот же или второй админ) → клиенту одно сообщение", async () => {
@@ -136,7 +142,9 @@ describe("подтверждение админом", () => {
     await sim.callback(ADMIN, card1.data, card1.msg.id);
     await sim.callback(ADMIN, card1.data, card1.msg.id);
     await sim.callback(ADMIN2, card2.data, card2.msg.id, ADMIN2);
-    expect(sim.tg.to(1).filter((m) => m.id >= mark && m.text === uz.pay.paidPack(`${BASE}/aziz-madina`))).toHaveLength(1);
+    expect(sim.tg.to(1).filter((m) => m.id >= mark && m.text === uz.pay.paidPack(`${BASE}/aziz-madina`))).toHaveLength(
+      1,
+    );
     expect(sim.tg.answers.filter((a) => a.text === uz.admin.already)).toHaveLength(2);
     expect((await sim.repo.getOrder(o.id))?.status).toBe("active");
   });
@@ -147,6 +155,7 @@ describe("подтверждение админом", () => {
     const o = await nikohWithReceipt(sim, 1);
     await sim.click(ADMIN, uz.admin.reject);
     expect(buttonLabels(sim.findButton(ADMIN, uz.admin.reasons.money).msg)).toEqual([
+      uz.admin.reasons.nopay,
       uz.admin.reasons.money,
       uz.admin.reasons.sum,
       uz.admin.reasons.other,
@@ -160,7 +169,11 @@ describe("подтверждение админом", () => {
     await sim.click(1, uz.pay.resend);
     expect(sim.lastText(1)).toBe(uz.pay.receiptAsk);
     await sim.photo(1, "PHOTO_2");
-    expect(await sim.repo.getOrder(o.id)).toMatchObject({ status: "receipt_sent", receipt: { fileId: "PHOTO_2" }, rejectReason: null });
+    expect(await sim.repo.getOrder(o.id)).toMatchObject({
+      status: "receipt_sent",
+      receipt: { fileId: "PHOTO_2" },
+      rejectReason: null,
+    });
     const cards = sim.tg.to(ADMIN).filter((m) => m.type === "photo");
     expect(cards.map((m) => m.media)).toEqual([`RECEIPT_1`, "PHOTO_2"]);
     expect(buttonLabels(cards[1])).toEqual([uz.admin.approve, uz.admin.reject]);
@@ -225,7 +238,10 @@ describe("мои приглашения, правка, ссылка", () => {
     expect(old.text).toContain(uz.my.statuses.active);
     expect(buttonLabels(old).some((l) => l.startsWith("💳"))).toBe(false);
     expect(buttonLabels(old)).toEqual([uz.my.link, uz.contact]); // заказ закрыт: правки только через владельца
-    expect(inlineButtons(old).find((b) => b.text === uz.contact)).toEqual({ text: uz.contact, url: "https://t.me/inviteizi_owner" });
+    expect(inlineButtons(old).find((b) => b.text === uz.contact)).toEqual({
+      text: uz.contact,
+      url: "https://t.me/inviteizi_owner",
+    });
   });
 
   it("правка неоплаченного: смена дизайна в том же формате сохраняет согласованную сумму, slug тот же", async () => {
@@ -236,8 +252,13 @@ describe("мои приглашения, правка, ссылка", () => {
     await pickDesign(sim, 1, "ipak");
     expect(sim.lastText(1)).toContain("Дизайн: №114 Ипак");
     await sim.click(1, uz.review.confirm);
-    expect(await sim.repo.getOrder(o.id)).toMatchObject({ slug: "aziz-madina", format: "animated", amount: 8_000, templateId: "ipak" });
-    expect(buttonLabels(sim.last(1)).some((l) => /^💳 Тўлаш — 8.000 ₸$/.test(l))).toBe(true);
+    expect(await sim.repo.getOrder(o.id)).toMatchObject({
+      slug: "aziz-madina",
+      format: "animated",
+      amount: 7_990,
+      templateId: "ipak",
+    });
+    expect(buttonLabels(sim.last(1)).some((l) => /^💳 Тўлаш — 7.990 ₸$/.test(l))).toBe(true);
   });
 
   it("правка тадбира из сводки: время", async () => {
@@ -252,8 +273,6 @@ describe("мои приглашения, правка, ссылка", () => {
     await sim.click(1, uz.review.confirm);
     expect((await sim.repo.getOrder(o.id))?.data.events[0].time).toBe("19:00");
   });
-
-
 });
 
 describe("команды админа", () => {

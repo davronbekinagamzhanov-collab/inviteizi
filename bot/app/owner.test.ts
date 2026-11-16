@@ -74,7 +74,7 @@ describe("панель владельца: цифры = статистика б�
     const ds = (await statsScreen(c, "owner", per, "ds")).text;
     const pt = (await statsScreen(c, "owner", per, "pt")).text;
 
-    expect(r.cards).toMatchObject({ paid: 2, revenue: 16000, namuna: 1, makers: 3, payers: 2, conversion: 67, due: 1000 });
+    expect(r.cards).toMatchObject({ paid: 2, revenue: 15980, namuna: 1, makers: 3, payers: 2, conversion: 67, due: 1000 });
     expect(money).toContain(S.paid(r.cards.paid, price(r.cards.revenue)));
     expect(fn).toContain(S.fnClients(r.funnel.clients));
     expect(fn).toContain(S.fnSamples(r.funnel.makers, `${Math.round((r.funnel.makers / r.funnel.clients) * 100)}%`));
@@ -88,7 +88,7 @@ describe("панель владельца: цифры = статистика б�
     // Заказы: номер, сумма, дизайн, партнёр, статус, ссылка; поиск по номеру и именам работает на этих полях
     expect(r.orders).toHaveLength(3);
     const viaPartner = r.orders.find((o) => o.partnerId === p.id)!;
-    expect(viaPartner).toMatchObject({ paid: true, status: "active", amount: 8000, partner: p.name, names: "Азиз & Мадина" });
+    expect(viaPartner).toMatchObject({ paid: true, status: "active", amount: 7990, partner: p.name, names: "Азиз & Мадина" });
     expect(viaPartner.url).toMatch(/^https?:\/\/.+\/aziz-madina$/);
     expect(r.orders.find((o) => o.names === "Жасур & Нигора")).toMatchObject({ paid: false, partner: null });
   }, 30_000);

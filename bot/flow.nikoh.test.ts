@@ -223,7 +223,7 @@ describe("весь путь никоҳ на ўзбекском", () => {
     ]);
     const done = sim.last(id);
     expect(done.text).toBe(uz.order.created(`${BASE}/aziz-madina`));
-    expect(buttonLabels(done).some((l) => /^💳 Тўлаш — 8.000 ₸$/.test(l))).toBe(true);
+    expect(buttonLabels(done).some((l) => /^💳 Тўлаш — 7.990 ₸$/.test(l))).toBe(true);
     expect(buttonLabels(done)).toContain(uz.order.edit);
     expect((await sim.user(id))?.step).toBe("idle");
   });
