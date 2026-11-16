@@ -3,6 +3,10 @@
 // Музыку загружает scripts/music-sync.mjs (по папкам тадбиров, с таблицей music).
 // Идемпотентно: файл с тем же размером уже лежит в бакете — пропускается; иначе перезаписывается.
 // Запуск: node --env-file=.env.local scripts/upload-assets.mjs [--force]
+// 17.11.2026: Supabase Storage больше не используется (с 16.11 отвечает 402). Обложки и картины отдаются с сайта (public/), в хранилище их грузить не нужно.
+console.error("Скрипт отключён: Supabase Storage больше не используется. Обложки и картины отдаются с сайта (public/), в хранилище их грузить не нужно.");
+process.exit(1);
+
 import "./ts-hooks.mjs";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";

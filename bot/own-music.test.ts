@@ -40,7 +40,7 @@ describe("copyOwnMusic", () => {
     expect(uploads).toHaveLength(2);
   });
 
-  it("файл без file_size больше 20 МБ останавливается при скачивании", async () => {
+  it("файл без file_size больше 12 МБ останавливается при скачивании", async () => {
     const big = new ReadableStream({ start(c) { c.enqueue(new Uint8Array(MAX_MUSIC_BYTES + 1)); c.close(); } });
     const { value, uploads } = io({}, "music/f.mp3", big);
     await expect(copyOwnMusic("F", value)).rejects.toBeInstanceOf(MusicTooBigError);
@@ -109,7 +109,7 @@ describe("шаг «своя музыка»", () => {
 
   it("подсказка объясняет forward и раздел «Музыка» на обоих языках", () => {
     for (const text of [uz.music.ownAsk, uz.music.sendFile]) {
-      expect(text).toContain("Қўшиқни Telegram'даги каналдан шу ерга юборинг (forward) ёки mp3 файл юборинг");
+      expect(text).toContain("Қўшиқни Telegram'даги каналдан шу ерга юборинг (forward) ёки mp3");
       expect(text).toContain('Телефондаги "Музыка" бўлимидан юбориб бўлмайди');
     }
     for (const text of [ru.music.ownAsk, ru.music.sendFile]) {
@@ -118,11 +118,11 @@ describe("шаг «своя музыка»", () => {
     }
   });
 
-  it("файл больше 20 МБ не скачивается", async () => {
+  it("файл больше 12 МБ не скачивается", async () => {
     const sim = await atOwn();
     await sim.audio(1, "BIG", MAX_MUSIC_BYTES + 1);
     expect(sim.savedMusic).toEqual([]);
-    expect(sim.tg.to(1).some(m => m.text === uz.music.tooBig("20.0"))).toBe(true);
+    expect(sim.tg.to(1).some(m => m.text === uz.music.tooBig("12.0"))).toBe(true);
     expect((await sim.user(1))!.step).toBe("musicOwn");
   });
 
@@ -147,6 +147,32 @@ describe("шаг «своя музыка»", () => {
       await sim.audio(1, "SLOW", 1000);
       expect((await sim.user(1))!.state.music).toMatchObject({ url: SAVED });
     } finally { log.mockRestore(); }
+  });
+
+  it.each([
+    ["ogg-документ", { document: { file_id: "O", file_unique_id: "u", mime_type: "audio/ogg", file_name: "song.ogg" } }],
+    ["wav-аудио", { audio: { file_id: "W", file_unique_id: "u", duration: 1, mime_type: "audio/wav", file_name: "song.wav" } }],
+  ])("%s → «только mp3 или m4a», файл не скачивается (17.11.2026)", async (_, fields) => {
+    const sim = await atOwn();
+    await sim.send(raw(fields));
+    expect(sim.tg.to(1).some((m) => m.text === uz.music.format)).toBe(true);
+    expect(sim.savedMusic).toEqual([]);
+    expect((await sim.user(1))!.step).toBe("musicOwn");
+  });
+
+  it("m4a-документ принимается", async () => {
+    const sim = await atOwn();
+    await sim.send(raw({ document: { file_id: "M", file_unique_id: "u", mime_type: "audio/mp4", file_name: "Тўй.m4a" } }));
+    expect(sim.savedMusic).toEqual(["M"]);
+  });
+
+  it("хранилище не подключено → «временно не сохраняются», анкета цела", async () => {
+    const { StorageUnavailableError } = await import("@/lib/storage");
+    const sim = await atOwn();
+    sim.deps.saveMusic = async () => { throw new StorageUnavailableError("test"); };
+    await sim.audio(1, "F", 1000);
+    expect(sim.tg.to(1).some((m) => m.text === uz.music.storageDown)).toBe(true);
+    expect((await sim.user(1))!.step).toBe("musicOwn");
   });
 
   it("адрес не https не считается сохранением", async () => {

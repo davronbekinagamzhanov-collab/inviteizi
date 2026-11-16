@@ -23,10 +23,13 @@ export async function POST(req: Request) {
   }
   const name = str(b.name, 40);
   if (!name || !/^[A-Za-z]+$/.test(name)) return new Response(null, { status: 400 });
-  // Только адрес музыки: путь /audio/… или /storage/v1/object/public/music/…
+  // Только адрес музыки: /audio/…, своя песня в Vercel Blob (…/music/…) или старый Supabase Storage
   const src = str(b.src, 160);
   const safeSrc =
-    src && /^(\/audio\/|https:\/\/[a-z0-9]+\.supabase\.co\/storage\/v1\/object\/public\/music\/|\/music\/)/.test(src)
+    src &&
+    /^(\/audio\/|\/music\/|https:\/\/[a-z0-9]+\.supabase\.co\/storage\/v1\/object\/public\/music\/|https:\/\/[a-z0-9]+\.public\.blob\.vercel-storage\.com\/music\/)/.test(
+      src,
+    )
       ? src
       : null;
   const where = ["iframe", "telegram", "browser"].includes(String(b.where)) ? String(b.where) : "unknown";

@@ -1,17 +1,18 @@
 "use client";
 /**
- * «Ўз мусиқам»: файл с телефона → подписанная ссылка (api musicUpload) → загрузка прямо в хранилище с процентом.
- * Видно всё: «Юкланмоқда… 42%» с кружком, «Тайёр» с галочкой, ошибка (размер/формат/сеть) с кнопкой «Қайта».
+ * «Ўз мусиқам»: файл с телефона → одноразовый токен (api musicUpload) → загрузка прямо в Vercel Blob с процентом.
+ * Только MP3/M4A до 12 МБ (17.11.2026). Видно всё: «Юкланмоқда… 42%», «Тайёр» с галочкой, ошибка с кнопкой «Қайта».
  */
 import { useRef, useState } from "react";
+import { put as blobPut } from "@vercel/blob/client";
 import { api, ApiError } from "./api";
 import { useT } from "./shared";
 import { haptic } from "./telegram";
 import { CheckIcon, SpinnerIcon } from "./icons";
 import s from "../app.module.css";
 
-const MAX = 20 * 1024 * 1024;
-const EXT = /\.(mp3|m4a|aac|ogg|oga|opus|wav)$/i;
+const MAX = 12 * 1024 * 1024;
+const EXT = /\.(mp3|m4a)$/i;
 
 type State =
   | { phase: "idle" }
@@ -19,30 +20,9 @@ type State =
   | { phase: "done" }
   | { phase: "error"; text: string };
 
-const AUDIO_TYPE: Record<string, string> = {
-  mp3: "audio/mpeg",
-  m4a: "audio/mp4",
-  aac: "audio/aac",
-  ogg: "audio/ogg",
-  oga: "audio/ogg",
-  opus: "audio/ogg",
-  wav: "audio/wav",
-};
-
-function put(url: string, file: File, ext: string, onPct: (n: number) => void) {
-  return new Promise<void>((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open("PUT", url);
-    // Тип — по расширению: Android присылает m4a как «audio/mp4a-latm» или пусто, ogg — как «application/ogg».
-    // С неверным Content-Type в хранилище Chrome на Android песню не играет
-    xhr.setRequestHeader("content-type", AUDIO_TYPE[ext] ?? "audio/mpeg");
-    xhr.setRequestHeader("x-upsert", "true");
-    xhr.upload.onprogress = (e) => e.lengthComputable && onPct(Math.round((e.loaded / e.total) * 100));
-    xhr.onerror = () => reject(new ApiError("offline"));
-    xhr.onload = () => (xhr.status < 300 ? resolve() : reject(new ApiError("server", xhr.status)));
-    xhr.send(file);
-  });
-}
+// Тип — по расширению: Android присылает m4a как «audio/mp4a-latm» или пусто.
+// С неверным Content-Type в хранилище Chrome на Android песню не играет
+const AUDIO_TYPE: Record<string, string> = { mp3: "audio/mpeg", m4a: "audio/mp4" };
 
 export function OwnMusic({ onDone }: { onDone: (url: string, title: string) => void }) {
   const T = useT();
@@ -54,24 +34,41 @@ export function OwnMusic({ onDone }: { onDone: (url: string, title: string) => v
     if (!file || st.phase === "uploading") return;
     setLast(file);
     const ext = EXT.exec(file.name)?.[1]?.toLowerCase() ?? (file.type === "audio/mpeg" ? "mp3" : "");
-    // Формат — по расширению: на Android тип файла часто пустой, «application/ogg» или «video/mp4» (m4a)
-    if (!ext || (file.type && !/^(audio\/|video\/mp4|application\/(ogg|octet-stream))/.test(file.type)))
+    // Формат — по расширению: на Android тип файла часто пустой или «video/mp4» (m4a)
+    if (!ext || (file.type && !/^(audio\/|video\/mp4|application\/octet-stream)/.test(file.type)))
       return fail(T.summary.ownFormat);
     if (file.size > MAX) return fail(T.summary.ownTooBig);
     setSt({ phase: "uploading", pct: 0 });
     try {
-      const r = await api<{ signedUrl: string; url: string } | { error: string }>("musicUpload", {
+      const r = await api<{ clientToken: string; pathname: string; url: string } | { error: string }>("musicUpload", {
         ext,
         size: file.size,
       });
       if ("error" in r)
         return fail(
-          r.error === "tooBig" ? T.summary.ownTooBig : r.error === "format" ? T.summary.ownFormat : T.summary.ownFailed,
+          r.error === "tooBig"
+            ? T.summary.ownTooBig
+            : r.error === "format"
+              ? T.summary.ownFormat
+              : r.error === "storage"
+                ? T.summary.ownUnavailable
+                : T.summary.ownFailed,
         );
-      await put(r.signedUrl, file, ext, (pct) => setSt({ phase: "uploading", pct }));
+      let saved: string;
+      try {
+        const blob = await blobPut(r.pathname, file, {
+          access: "public",
+          token: r.clientToken,
+          contentType: AUDIO_TYPE[ext] ?? "audio/mpeg",
+          onUploadProgress: (p) => setSt({ phase: "uploading", pct: Math.round(p.percentage) }),
+        });
+        saved = blob.url;
+      } catch {
+        throw new ApiError(navigator.onLine === false ? "offline" : "server");
+      }
       haptic.ok();
       setSt({ phase: "done" });
-      onDone(r.url, file.name.replace(EXT, "").slice(0, 60));
+      onDone(saved, file.name.replace(EXT, "").slice(0, 60));
     } catch (e) {
       fail(
         e instanceof ApiError && (e.code === "tooBig" || e.code === "format")
@@ -132,7 +129,7 @@ export function OwnMusic({ onDone }: { onDone: (url: string, title: string) => v
       <input
         ref={input}
         type="file"
-        accept="audio/*,.mp3,.m4a,.aac,.ogg,.oga,.opus,.wav"
+        accept=".mp3,.m4a,audio/mpeg,audio/mp4"
         hidden
         onChange={(e) => send(e.target.files?.[0])}
         name="ownMusic"

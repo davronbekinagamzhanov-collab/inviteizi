@@ -41,8 +41,22 @@ export function isHeic(bytes: Uint8Array) {
 }
 
 /** Любое изображение → WebP, повёрнутое по EXIF, без метаданных (там бывает GPS) */
+/** Фото в хранилище — не больше 600 КБ (трафик Vercel Blob): при необходимости ниже качество, потом размер */
+export const PHOTO_STORED_MAX_BYTES = 600 * 1024;
+const WEBP_STEPS = [
+  { side: MAX_SIDE, quality: 80 },
+  { side: MAX_SIDE, quality: 68 },
+  { side: 1280, quality: 66 },
+  { side: 1024, quality: 60 },
+];
+
 export async function toWebp(bytes: Uint8Array): Promise<Uint8Array> {
-  return convert(bytes, (img) => img.webp({ quality: 80, effort: 4 }));
+  let out: Uint8Array = new Uint8Array();
+  for (const step of WEBP_STEPS) {
+    out = await convert(bytes, (img) => img.webp({ quality: step.quality, effort: 4 }), step.side);
+    if (out.byteLength <= PHOTO_STORED_MAX_BYTES) return out;
+  }
+  return out;
 }
 
 /** Чек из приложения → JPEG для Telegram (HEIC и WebP Telegram как фото не показывает) */
@@ -51,7 +65,7 @@ export async function toJpeg(bytes: Uint8Array): Promise<Uint8Array> {
 }
 
 type Sharp = import("sharp").Sharp;
-async function convert(bytes: Uint8Array, encode: (img: Sharp) => Sharp): Promise<Uint8Array> {
+async function convert(bytes: Uint8Array, encode: (img: Sharp) => Sharp, side = MAX_SIDE): Promise<Uint8Array> {
   const { default: sharp } = await import("sharp");
   let input: ReturnType<typeof sharp>;
   if (isHeic(bytes)) {
@@ -70,7 +84,7 @@ async function convert(bytes: Uint8Array, encode: (img: Sharp) => Sharp): Promis
   }
   try {
     const out = await encode(
-      input.resize({ width: MAX_SIDE, height: MAX_SIDE, fit: "inside", withoutEnlargement: true }),
+      input.resize({ width: side, height: side, fit: "inside", withoutEnlargement: true }),
     ).toBuffer();
     return new Uint8Array(out);
   } catch {
@@ -112,10 +126,14 @@ export async function copyClientPhoto(fileId: string, io: PhotoIo, budgetMs = PH
   return url;
 }
 
-/** Путь файла в бакете photos по его публичному адресу (для удаления) */
+/** Наш адрес фото клиента: Vercel Blob (новые) или Supabase Storage (заказы до 17.11.2026) */
+export const CLIENT_PHOTO_URL =
+  /^https:\/\/(?:[a-z0-9]+\.public\.blob\.vercel-storage\.com|[a-z0-9]+\.supabase\.co\/storage\/v1\/object\/public)\/photos\/client\/[a-f0-9]{64}\.webp$/;
+
+/** Путь файла в папке photos по его адресу */
 export function photoPath(url: string): string | null {
-  const m = /\/storage\/v1\/object\/public\/photos\/(.+)$/.exec(url);
-  return m ? decodeURIComponent(m[1]) : null;
+  const m = /\/(?:storage\/v1\/object\/public\/)?photos\/(client\/[a-f0-9]{64}\.webp)$/.exec(url);
+  return m && CLIENT_PHOTO_URL.test(url) ? m[1] : null;
 }
 
 /**

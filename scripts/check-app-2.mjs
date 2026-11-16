@@ -156,7 +156,9 @@ for (const lang of ["uz", "ru"]) {
     // п.21: «Бошқа мусиқалар» с категорией; своя песня — ошибка формата/размера с «Қайта», потом процент и «Тайёр»
     ok(await page.getByText(T.summary.otherMusic).isVisible(), "«Бошқа мусиқалар» видны");
     ok(await page.locator('[data-track="m3"]').getByText(T.occasions.nahorgi).isVisible(), "у чужой мелодии — подпись категории");
-    await page.route("https://storage.mock/**", async (r) => { await new Promise((x) => setTimeout(x, 600)); return r.fulfill({ status: 200, body: "" }); });
+    // Своя песня грузится прямо в Vercel Blob (17.11.2026): подменяем ответ API хранилища
+    const ownUrl = "https://abcd1234.public.blob.vercel-storage.com/music/own/" + "e".repeat(32) + ".mp3";
+    await page.route("https://vercel.com/api/blob/**", async (r) => { await new Promise((x) => setTimeout(x, 600)); return r.fulfill({ json: { url: ownUrl, downloadUrl: ownUrl + "?download=1", pathname: "music/own/" + "e".repeat(32) + ".mp3", contentType: "audio/mpeg", contentDisposition: "inline" } }); });
     const own = page.locator('input[name="ownMusic"]');
     await own.setInputFiles([{ name: "notes.txt", mimeType: "text/plain", buffer: Buffer.from("hello") }]);
     ok(await page.getByText(T.summary.ownFormat).isVisible(), "не аудио — понятная ошибка");

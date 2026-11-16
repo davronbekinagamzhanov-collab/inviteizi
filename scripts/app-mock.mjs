@@ -38,7 +38,7 @@ export function mockServer(lang, base) {
           return route.fulfill({ json: { tracks: [{ id: "m1", title: "Ёр-ёр", url: "/music/none.mp3" }, { id: "m2", title: "Тўй муборак", url: "/music/none.mp3" }], others: [{ id: "m3", title: "Ош куйи", url: "/music/none.mp3", occasion: "nahorgi" }] } });
         case "musicUpload":
           if (body.size > 20 * 1024 * 1024) return route.fulfill({ status: 400, json: { error: "tooBig" } });
-          return route.fulfill({ json: { signedUrl: "https://storage.mock/upload/own.mp3", url: "https://abcd.supabase.co/storage/v1/object/public/music/own/" + "e".repeat(32) + ".mp3" } });
+          return route.fulfill({ json: { clientToken: "vercel_blob_client_mock", pathname: "music/own/" + "e".repeat(32) + ".mp3", url: "https://abcd1234.public.blob.vercel-storage.com/music/own/" + "e".repeat(32) + ".mp3" } });
         case "draft":
           st.draft = body.draft;
           return route.fulfill({ json: { ok: true } });

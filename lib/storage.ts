@@ -1,37 +1,60 @@
 /**
- * Хранилище Supabase для сервера. Ключа service_role у сервера нет:
- * подписанные ссылки выдаёт edge-функция storage-gate (по секрету STORAGE_GATE_SECRET).
- * Публичные бакеты: art, previews, music. Приватные: receipts, deploy.
+ * Файлы клиентов (фото, своя песня) — Vercel Blob, публичное хранилище (17.11.2026).
+ * Supabase Storage с 16.11 отвечает 402 (бесплатный трафик исчерпан) — новые файлы туда не пишем.
+ * Старые адреса …supabase.co/storage/… в заказах читаются как есть; удаляются «по возможности» (legacy).
+ *
+ * Имена файлов непредсказуемые (HMAC/sha256 или 128 бит случайности) и без данных клиента,
+ * поэтому публичное хранилище безопасно. Чеки сюда не попадают: они уходят владельцу в Telegram.
+ * Токен: BLOB_READ_WRITE_TOKEN (Vercel → Storage → Blob → Connect to project). Нет токена — понятная ошибка.
  */
+import { del, head, put } from "@vercel/blob";
+import { generateClientTokenFromReadWriteToken } from "@vercel/blob/client";
 import { env } from "./env";
 
-export type Bucket = "art" | "previews" | "music" | "photos" | "receipts" | "deploy";
-const PUBLIC_BUCKETS = new Set<Bucket>(["art", "previews", "music", "photos"]);
+export type Bucket = "music" | "photos" | "health";
 
-const encodePath = (path: string) => path.split("/").map(encodeURIComponent).join("/");
+/** Год в кэше: имя файла меняется вместе с содержимым */
+const YEAR = 31_536_000;
 
-/** Постоянный адрес файла публичного бакета */
+export class StorageUnavailableError extends Error {
+  constructor(reason: string) {
+    super(`Файлы временно недоступны: ${reason}`);
+    this.name = "StorageUnavailableError";
+  }
+}
+
+function token(): string {
+  const t = process.env.BLOB_READ_WRITE_TOKEN?.trim();
+  if (!t) throw new StorageUnavailableError("не подключено хранилище Vercel Blob (BLOB_READ_WRITE_TOKEN)");
+  return t;
+}
+
+/** Хранилище подключено (для проверок здоровья и понятных ответов) */
+export const storageConfigured = () => Boolean(process.env.BLOB_READ_WRITE_TOKEN?.trim());
+
+/** Адрес публичного хранилища: из токена vercel_blob_rw_<storeId>_<секрет> (или BLOB_PUBLIC_BASE_URL) */
+export function blobBaseUrl(): string {
+  const fixed = process.env.BLOB_PUBLIC_BASE_URL?.trim().replace(/\/+$/, "");
+  if (fixed) return fixed;
+  const m = /^vercel_blob_rw_([A-Za-z0-9]+)_/.exec(token());
+  if (!m) throw new StorageUnavailableError("неверный формат BLOB_READ_WRITE_TOKEN");
+  return `https://${m[1].toLowerCase()}.public.blob.vercel-storage.com`;
+}
+
+const pathname = (bucket: Bucket, path: string) => `${bucket}/${path.replace(/^\/+/, "")}`;
+
+/** Постоянный адрес файла */
 export function publicUrl(bucket: Bucket, path: string): string {
-  return `${env.supabaseUrl()}/storage/v1/object/public/${bucket}/${encodePath(path)}`;
+  return `${blobBaseUrl()}/${pathname(bucket, path).split("/").map(encodeURIComponent).join("/")}`;
 }
 
-async function gate<T>(body: Record<string, unknown>, signal?: AbortSignal): Promise<T> {
-  const res = await fetch(`${env.supabaseUrl()}/functions/v1/storage-gate`, {
-    method: "POST",
-    headers: { "content-type": "application/json", "x-gate-secret": env.storageGateSecret() },
-    body: JSON.stringify(body),
-    cache: "no-store",
-    signal,
-  });
-  const data = (await res.json().catch(() => ({}))) as T & { error?: string; message?: string };
-  if (!res.ok) throw new Error(`storage-gate ${res.status}: ${data.error ?? ""} ${data.message ?? ""}`.trim());
-  return data;
-}
+/** Адрес из нашего Blob-хранилища (любой store-id Vercel Blob; путь — только наши папки) */
+export const BLOB_URL =
+  /^https:\/\/[a-z0-9]+\.public\.blob\.vercel-storage\.com\/(music|photos|health)\/[A-Za-z0-9._/-]+$/;
+/** Старый адрес Supabase Storage (заказы до 17.11.2026) */
+export const LEGACY_URL = /^https:\/\/[a-z0-9]+\.supabase\.co\/storage\/v1\/object\/public\/(music|photos)\/(.+)$/;
 
-/**
- * Загрузить файл (перезаписывает, если путь уже есть).
- * Возвращает публичный адрес (art/previews/music) или путь в бакете (receipts/deploy — читать через signedReadUrl).
- */
+/** Загрузить файл (перезаписывает тот же путь). Возвращает публичный адрес */
 export async function uploadFile(
   bucket: Bucket,
   path: string,
@@ -39,30 +62,74 @@ export async function uploadFile(
   contentType: string,
   signal?: AbortSignal,
 ): Promise<string> {
-  const { signedUrl } = await gate<{ signedUrl: string }>({ action: "signUpload", bucket, path }, signal);
-  const res = await fetch(signedUrl, {
-    method: "PUT",
-    headers: { "content-type": contentType, "x-upsert": "true", "cache-control": "max-age=3600" },
-    body: bytes as BodyInit,
-    signal,
+  const body = bytes instanceof Blob ? bytes : Buffer.from(bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes));
+  const r = await put(pathname(bucket, path), body, {
+    access: "public",
+    token: token(),
+    contentType,
+    addRandomSuffix: false,
+    allowOverwrite: true,
+    cacheControlMaxAge: YEAR,
+    abortSignal: signal,
   });
-  if (!res.ok) throw new Error(`Загрузка ${bucket}/${path}: ${res.status} ${await res.text().catch(() => "")}`);
-  return PUBLIC_BUCKETS.has(bucket) ? publicUrl(bucket, path) : path;
+  return r.url;
 }
 
-/** Подписанная ссылка на загрузку прямо с телефона (своя песня из приложения: мимо лимита тела Vercel 4,5 МБ) */
-export async function signedUpload(bucket: Bucket, path: string): Promise<{ signedUrl: string; url: string }> {
-  const { signedUrl } = await gate<{ signedUrl: string }>({ action: "signUpload", bucket, path });
-  return { signedUrl, url: publicUrl(bucket, path) };
+/**
+ * Загрузка прямо с телефона (своя песня из приложения: мимо лимита тела Vercel 4,5 МБ).
+ * Сервер выдаёт одноразовый клиентский токен только на этот путь, размер и типы; телефон грузит сам.
+ */
+export async function signedUpload(
+  bucket: Bucket,
+  path: string,
+  limits: { maxBytes: number; contentTypes: string[] },
+): Promise<{ clientToken: string; pathname: string; url: string }> {
+  const name = pathname(bucket, path);
+  const clientToken = await generateClientTokenFromReadWriteToken({
+    token: token(),
+    pathname: name,
+    maximumSizeInBytes: limits.maxBytes,
+    allowedContentTypes: limits.contentTypes,
+    addRandomSuffix: false,
+    allowOverwrite: false,
+    cacheControlMaxAge: YEAR,
+    validUntil: Date.now() + 15 * 60_000,
+  });
+  return { clientToken, pathname: name, url: publicUrl(bucket, path) };
 }
 
-/** Временная ссылка на чтение (для приватных бакетов: чеки) */
-export async function signedReadUrl(bucket: Bucket, path: string, seconds = 3600): Promise<string> {
-  const { signedUrl } = await gate<{ signedUrl: string }>({ action: "signRead", bucket, path, expiresIn: seconds });
-  return signedUrl;
+/** Файл есть в хранилище (для проверки здоровья): код ответа */
+export async function blobExists(bucket: Bucket, path: string): Promise<boolean> {
+  try {
+    await head(pathname(bucket, path), { token: token() });
+    return true;
+  } catch (e) {
+    if (e instanceof Error && e.name === "BlobNotFoundError") return false;
+    throw e;
+  }
 }
 
-/** Удалить файлы бакета (фото клиента после конца приглашения). Нет файла — не ошибка */
-export async function removeFiles(bucket: Bucket, paths: string[]): Promise<void> {
-  for (const path of paths) await gate<{ ok: boolean }>({ action: "remove", bucket, path });
+/** Удалить файлы по адресам. Blob — сразу; старые Supabase — по возможности (хранилище Supabase заблокировано) */
+export async function removeUrls(urls: string[]): Promise<void> {
+  const blob = urls.filter((u) => BLOB_URL.test(u));
+  if (blob.length) await del(blob, { token: token() });
+  const legacy = urls.map((u) => LEGACY_URL.exec(u)).filter((m): m is RegExpExecArray => Boolean(m));
+  for (const [, bucket, path] of legacy)
+    try {
+      await legacyRemove(bucket, decodeURIComponent(path));
+    } catch (e) {
+      // Supabase Storage отвечает 402: файл останется там, ссылка в заказе всё равно очищается
+      console.error("storage legacy remove", e instanceof Error ? e.message.slice(0, 80) : "Error");
+    }
+}
+
+async function legacyRemove(bucket: string, path: string) {
+  const res = await fetch(`${env.supabaseUrl()}/functions/v1/storage-gate`, {
+    method: "POST",
+    headers: { "content-type": "application/json", "x-gate-secret": env.storageGateSecret() },
+    body: JSON.stringify({ action: "remove", bucket, path }),
+    cache: "no-store",
+    signal: AbortSignal.timeout(10_000),
+  });
+  if (!res.ok) throw new Error(`storage-gate ${res.status}`);
 }

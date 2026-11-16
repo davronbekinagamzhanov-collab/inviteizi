@@ -4,14 +4,25 @@
  * клиент не получит ответа, а Telegram будет повторять тот же update.
  */
 import { isFileTooBig } from "./errors";
-import { audioFileInfo, readAudioBytes } from "./audio-type";
+import { audioFileInfo, MAX_MUSIC_BYTES, OWN_MUSIC_TYPES, readAudioBytes } from "./audio-type";
+
+export const OWN_MUSIC_MAX = MAX_MUSIC_BYTES;
+export { OWN_MUSIC_TYPES };
 
 export const MUSIC_BUDGET_MS = 40_000;
 
 export class MusicTooBigError extends Error {
   constructor() {
-    super("Audio exceeds 20 MiB");
+    super("Audio exceeds 12 MiB");
     this.name = "MusicTooBigError";
+  }
+}
+
+/** Не mp3/m4a (ogg, wav, flac…) */
+export class MusicFormatError extends Error {
+  constructor() {
+    super("Only mp3/m4a");
+    this.name = "MusicFormatError";
   }
 }
 
@@ -27,7 +38,7 @@ export async function copyOwnMusic(fileId: string, io: MusicIo, budgetMs = MUSIC
     signal.addEventListener("abort", () => reject(signal.reason), { once: true });
   });
   expired.catch(() => {});
-  const within = <T,>(step: Promise<T>) => Promise.race([step, expired]);
+  const within = <T>(step: Promise<T>) => Promise.race([step, expired]);
 
   let source: string;
   try {
@@ -38,7 +49,12 @@ export async function copyOwnMusic(fileId: string, io: MusicIo, budgetMs = MUSIC
   }
   const res = await within(io.fetch(source, { signal }));
   if (!res.ok) throw new Error(`Telegram file download: HTTP ${res.status}`);
-  const { ext, contentType } = audioFileInfo(source);
+  const info = audioFileInfo(source);
+  if (!info) {
+    await res.body?.cancel().catch(() => {});
+    throw new MusicFormatError();
+  }
+  const { ext, contentType } = info;
   let bytes: Uint8Array;
   try {
     bytes = await within(readAudioBytes(res));
@@ -54,8 +70,17 @@ export async function copyOwnMusic(fileId: string, io: MusicIo, budgetMs = MUSIC
   return url;
 }
 
-/** Публичный адрес своей песни → путь в бакете music («own/<id>.mp3»). Чужой адрес — null */
+/**
+ * Адрес своей песни → путь «own/<id>.<ext>». Чужой адрес — null.
+ * Новые — Vercel Blob (…public.blob.vercel-storage.com/music/own/…), старые — Supabase Storage.
+ */
 export function ownMusicPath(url: string): string | null {
-  const m = /\/storage\/v1\/object\/public\/music\/(own\/[a-f0-9]{16,64}\.[a-z0-9]{2,5})$/.exec(url);
+  const m =
+    /^https:\/\/[a-z0-9]+\.public\.blob\.vercel-storage\.com\/music\/(own\/[a-f0-9]{16,64}\.[a-z0-9]{2,5})$/.exec(
+      url,
+    ) ??
+    /^https:\/\/[a-z0-9]+\.supabase\.co\/storage\/v1\/object\/public\/music\/(own\/[a-f0-9]{16,64}\.[a-z0-9]{2,5})$/.exec(
+      url,
+    );
   return m ? m[1] : null;
 }

@@ -8,6 +8,10 @@
 //  4) строка в music: название (texts/music-titles.ts, иначе из имени файла), тадбир, «исполнитель», порядок;
 //  5) временные мелодии (сделанные кодом) скрываются, если у тадбира есть настоящие файлы;
 //     треки, файлов которых больше нет, скрываются (is_active = false), а не удаляются.
+// 17.11.2026: Supabase Storage больше не используется (с 16.11 отвечает 402). Песни библиотеки лежат на сайте: public/audio/lib/<тадбир>/<имя>.mp3, адреса — SQL supabase/release/music-local-urls.sql.
+console.error("Скрипт отключён: Supabase Storage больше не используется. Песни библиотеки лежат на сайте: public/audio/lib/<тадбир>/<имя>.mp3, адреса — SQL supabase/release/music-local-urls.sql.");
+process.exit(1);
+
 import "./ts-hooks.mjs";
 import { readdirSync, renameSync, statSync, existsSync } from "node:fs";
 import path from "node:path";
