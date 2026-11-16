@@ -212,13 +212,14 @@ describe.skipIf(!BASE)("музыка на устройствах", () => {
       expect(errors).toEqual([]);
     }, 120_000);
 
-  it("Pixel 7: телефон запретил звук → заметная кнопка «Мусиқани ёқиш учун ▶ ни босинг», а не тишина", async () => {
+  it("Pixel 7: телефон запретил звук → кнопка ♪ пульсирует, а не тишина", async () => {
     const { ctx, page } = await openDemo(DEVICES["Pixel 7"].device, "muhr", true);
     try {
       await page.waitForTimeout(600);
       await opener(page).tap();
-      await page.locator("[data-music-hint]").waitFor({ timeout: 10_000 });
-      expect(await page.locator("[data-music-hint]").innerText()).toContain("▶");
+      // 17.11.2026: без плашки с текстом — круглая кнопка ♪ мягко пульсирует
+      await page.locator("[data-music-pulse]").waitFor({ timeout: 10_000 });
+      expect(await page.locator("[data-music-hint]").count()).toBe(0);
     } finally {
       await ctx.close();
     }

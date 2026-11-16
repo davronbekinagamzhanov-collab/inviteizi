@@ -50,10 +50,21 @@ function useFeed(templateId: string, data: InvitationData) {
 }
 
 /** Ширина карточки: крупно, но с полями по краям экрана (320–430 px) */
-const cardWidth = () => (typeof window === "undefined" ? 260 : Math.round(Math.min(300, Math.max(230, window.innerWidth * 0.72))));
+const cardWidth = () =>
+  typeof window === "undefined" ? 260 : Math.round(Math.min(300, Math.max(230, window.innerWidth * 0.72)));
 
 /** Карточка-превью (уменьшенная копия экрана телефона) + «⤢ Очиш» сверху */
-export function PreviewCard({ templateId, data, big, onBig }: { templateId: string; data: InvitationData; big: boolean; onBig: (open: boolean) => void }) {
+export function PreviewCard({
+  templateId,
+  data,
+  big,
+  onBig,
+}: {
+  templateId: string;
+  data: InvitationData;
+  big: boolean;
+  onBig: (open: boolean) => void;
+}) {
   const T = useT();
   const [width] = useState(cardWidth);
   const scale = width / FRAME_W;
@@ -63,7 +74,12 @@ export function PreviewCard({ templateId, data, big, onBig }: { templateId: stri
   };
   return (
     <>
-      <div className={s.previewCard} style={{ width, height: FRAME_H * scale }} aria-label={T.form.preview} data-preview-card>
+      <div
+        className={s.previewCard}
+        style={{ width, height: FRAME_H * scale }}
+        aria-label={T.form.preview}
+        data-preview-card
+      >
         {!big && <PreviewFrame templateId={templateId} data={data} scale={scale} />}
         <button type="button" className={s.previewOpen} onClick={() => toggle(true)}>
           <ExpandIcon size={18} />
@@ -78,7 +94,17 @@ export function PreviewCard({ templateId, data, big, onBig }: { templateId: stri
 function PreviewFrame({ templateId, data, scale }: { templateId: string; data: InvitationData; scale: number }) {
   const T = useT();
   const ref = useFeed(templateId, data);
-  return <iframe ref={ref} src="/app/preview" title={T.form.preview} className={s.previewFrame} style={{ transform: `scale(${scale})` }} tabIndex={-1} />;
+  // Маленькое превью не нажимается (pointer-events: none) — без музыки и её кнопок (?mini=1)
+  return (
+    <iframe
+      ref={ref}
+      src="/app/preview?mini=1"
+      title={T.form.preview}
+      className={s.previewFrame}
+      style={{ transform: `scale(${scale})` }}
+      tabIndex={-1}
+    />
+  );
 }
 
 function BigPreview({ templateId, data, onClose }: { templateId: string; data: InvitationData; onClose: () => void }) {
@@ -95,7 +121,7 @@ function BigPreview({ templateId, data, onClose }: { templateId: string; data: I
           {T.form.previewClose}
         </button>
       </div>
-      <iframe ref={ref} src="/app/preview" title={T.form.preview} />
+      <iframe ref={ref} src="/app/preview" title={T.form.preview} allow="autoplay; fullscreen" />
     </div>,
     root,
   );

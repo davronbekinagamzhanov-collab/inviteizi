@@ -10,8 +10,7 @@ const BASE =
 // в НАМУНА внизу плашка «Тўловдан сўнг…» — кнопку поднимаем над ней
 const BOTTOM = "bottom-[calc(1rem+env(safe-area-inset-bottom))]";
 const BOTTOM_RAISED = "bottom-[calc(3.5rem+env(safe-area-inset-bottom))]";
-const DEFAULT_LOOK =
-  "rounded-full bg-primary text-gold-light shadow-xl shadow-black/30 ring-1 ring-gold/70";
+const DEFAULT_LOOK = "rounded-full bg-primary text-gold-light shadow-xl shadow-black/30 ring-1 ring-gold/70";
 
 /** Кнопка ▶/⏸ в углу экрана. className — внешний вид от дизайна */
 export function MusicButton({
@@ -20,15 +19,21 @@ export function MusicButton({
   className,
   raised = false,
   variant = "default",
+  blocked = false,
 }: {
   playing: boolean;
   onToggle: () => void;
   className?: string;
   raised?: boolean;
+  /** Звук не включился сам (запрет телефона) — кнопка мягко пульсирует, без текста (17.11.2026) */
+  blocked?: boolean;
   /** soft — круглая полупрозрачная кнопка с линейной иконкой (натуральные дизайны) */
   variant?: "default" | "soft";
 }) {
-  if (variant === "soft") return <SoftMusicButton playing={playing} onToggle={onToggle} className={className} raised={raised} />;
+  if (variant === "soft")
+    return (
+      <SoftMusicButton playing={playing} onToggle={onToggle} className={className} raised={raised} blocked={blocked} />
+    );
   return (
     <motion.button
       type="button"
@@ -41,8 +46,11 @@ export function MusicButton({
       transition={{ delay: 0.3, duration: MOTION.fast, ease: MOTION.ease }}
       className={`${BASE} ${raised ? BOTTOM_RAISED : BOTTOM} ${className ?? DEFAULT_LOOK}`}
     >
-      {playing && (
-        <span className="absolute inset-0 animate-ping rounded-[inherit] ring-1 ring-current opacity-40 [animation-duration:2.4s]" />
+      {(playing || blocked) && (
+        <span
+          data-music-pulse={blocked && !playing ? "" : undefined}
+          className={`absolute inset-0 animate-ping rounded-[inherit] ring-1 ring-current [animation-duration:2.4s] ${blocked && !playing ? "opacity-70 ring-2" : "opacity-40"}`}
+        />
       )}
       <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden>
         {playing ? (
@@ -60,7 +68,19 @@ export function MusicButton({
  * Пока играет музыка, по тонкому кольцу медленно (7 с на оборот) идёт точка — как пластинка; на паузе стоит.
  * className задаёт цвета: фон (bg-…/70), текст (text-…), обводку (ring-…).
  */
-function SoftMusicButton({ playing, onToggle, className, raised }: { playing: boolean; onToggle: () => void; className?: string; raised: boolean }) {
+function SoftMusicButton({
+  playing,
+  onToggle,
+  className,
+  raised,
+  blocked = false,
+}: {
+  playing: boolean;
+  onToggle: () => void;
+  className?: string;
+  raised: boolean;
+  blocked?: boolean;
+}) {
   return (
     <motion.button
       type="button"
@@ -79,7 +99,23 @@ function SoftMusicButton({ playing, onToggle, className, raised }: { playing: bo
       >
         <span className="absolute left-1/2 top-[-2.5px] h-[4px] w-[4px] -translate-x-1/2 rounded-full bg-current" />
       </span>
-      <svg viewBox="0 0 24 24" className="h-[21px] w-[21px]" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      {blocked && !playing && (
+        <span
+          aria-hidden
+          data-music-pulse
+          className="pointer-events-none absolute inset-0 animate-ping rounded-full ring-2 ring-current opacity-60 [animation-duration:2.4s]"
+        />
+      )}
+      <svg
+        viewBox="0 0 24 24"
+        className="h-[21px] w-[21px]"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden
+      >
         <path d="M4 9.5h3l4.5-3.8v12.6L7 14.5H4z" />
         <g className={`transition-opacity duration-300 ${playing ? "opacity-100" : "opacity-0"}`}>
           <path d="M15 9.2a4 4 0 0 1 0 5.6" />

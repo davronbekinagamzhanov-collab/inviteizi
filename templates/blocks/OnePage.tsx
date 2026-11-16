@@ -13,7 +13,6 @@ import type { TemplateProps } from "../themes/types";
 import { t } from "@/texts/uz-cyrl";
 import { useInvitation } from "./useInvitation";
 import { MusicButton } from "./MusicButton";
-import { MusicHint } from "./MusicHint";
 import { LangSwitch } from "./LangSwitch";
 import { Watermark } from "./Watermark";
 import { PaidRefresh } from "./PaidRefresh";
@@ -275,10 +274,16 @@ export function OnePage({ id, data, mode }: TemplateProps & { id: string }) {
           </div>
         </div>
 
-        {inv.hasMusic && <MusicButton playing={inv.playing} onToggle={inv.toggleMusic} raised={inv.mode === "demo"} />}
+        {inv.hasMusic && (
+          <MusicButton
+            playing={inv.playing}
+            onToggle={inv.toggleMusic}
+            blocked={inv.musicBlocked}
+            raised={inv.mode === "demo"}
+          />
+        )}
         <BrandBadge raised={inv.mode === "demo"} />
         <LangSwitch inv={inv} />
-        <MusicHint inv={inv} />
         {inv.mode === "demo" && <Watermark />}
         {inv.mode === "demo" && <PaidRefresh />}
       </div>
