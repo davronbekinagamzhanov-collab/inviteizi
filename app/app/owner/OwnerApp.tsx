@@ -3,7 +3,9 @@
  * Панель владельца: период, карточки, заказы (поиск и фильтры), партнёры, дизайны, воронка, Excel.
  * Только чтение. Сервер отвечает 403 всем, кто не в ADMIN_IDS.
  */
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { ru as BOT_RU, staff as BOT } from "@/texts/bot-ru";
 import type { OwnerPanel, OwnerPeriod } from "@/bot/app/owner";
 import { api, ApiError } from "../ui/api";
 import { haptic, openLink, setupTelegram, tg } from "../ui/telegram";
@@ -16,6 +18,7 @@ const PERIODS: { id: OwnerPeriod; label: string }[] = [
   { id: "y", label: "Год" },
 ];
 const TABS = [
+  { id: "receipts", label: "Чеки" },
   { id: "orders", label: "Заказы" },
   { id: "partners", label: "Партнёры" },
   { id: "designs", label: "Дизайны" },
@@ -34,7 +37,8 @@ const STATUS: Record<string, string> = {
 };
 
 const plural = (n: number, one: string, few: string, many: string) => {
-  const m10 = n % 10, m100 = n % 100;
+  const m10 = n % 10,
+    m100 = n % 100;
   return m10 === 1 && m100 !== 11 ? one : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? few : many;
 };
 const money = (n: number) => `${n.toLocaleString("ru-RU").replace(/ /g, " ")} ₸`;
@@ -51,11 +55,34 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
   const [period, setPeriod] = useState<OwnerPeriod>("d");
   const [data, setData] = useState<OwnerPanel | null>(null);
   const [loading, setLoading] = useState(false);
-  const [tab, setTab] = useState<Tab>("orders");
+  const [tab, setTab] = useState<Tab>("receipts");
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("");
   const [partner, setPartner] = useState("");
   const [note, setNote] = useState<string | null>(null);
+  const [rejecting, setRejecting] = useState<number | null>(null);
+  const [acting, setActing] = useState(false);
+
+  /** Действие владельца тем же кодом, что кнопка в боте. inChat — ответ (список, мастер) придёт в чат с ботом */
+  async function act(action: string, done: string, inChat = false) {
+    if (acting) return;
+    haptic.tap();
+    setActing(true);
+    try {
+      await api("ownerAct", { act: action });
+      haptic.ok();
+      setNote(done);
+      setRejecting(null);
+      if (inChat) setTimeout(() => tg()?.close(), 900);
+      else await load(period);
+    } catch {
+      haptic.error();
+      setNote("Не получилось. Попробуйте ещё раз.");
+    } finally {
+      setActing(false);
+      setTimeout(() => setNote(null), 2600);
+    }
+  }
 
   const load = useCallback(async (p: OwnerPeriod) => {
     setLoading(true);
@@ -109,7 +136,9 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
       (o) =>
         (!status || (status === "paid" ? o.paid : o.status === status)) &&
         (!partner || (partner === "none" ? !o.partner : String(o.partnerId) === partner)) &&
-        (!needle || String(o.number) === needle || [o.names, o.client, o.design].some((x) => x?.toLowerCase().includes(needle))),
+        (!needle ||
+          String(o.number) === needle ||
+          [o.names, o.client, o.design].some((x) => x?.toLowerCase().includes(needle))),
     );
   }, [data, q, status, partner]);
 
@@ -117,7 +146,11 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
     return (
       <div className={`${s.root} ${fontClass}`}>
         <p className={s.center}>
-          {phase === "boot" ? "Загрузка…" : phase === "denied" ? "Нет доступа. Панель открывается только владельцу из бота." : "Ошибка сервера. Закройте и откройте панель ещё раз."}
+          {phase === "boot"
+            ? "Загрузка…"
+            : phase === "denied"
+              ? "Нет доступа. Панель открывается только владельцу из бота."
+              : "Ошибка сервера. Закройте и откройте панель ещё раз."}
         </p>
       </div>
     );
@@ -129,7 +162,13 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
       <header className={s.top}>
         <div className={s.periods} role="tablist" aria-label="Период">
           {PERIODS.map((p) => (
-            <button key={p.id} type="button" role="tab" aria-selected={period === p.id} onClick={() => pickPeriod(p.id)}>
+            <button
+              key={p.id}
+              type="button"
+              role="tab"
+              aria-selected={period === p.id}
+              onClick={() => pickPeriod(p.id)}
+            >
               {p.label}
             </button>
           ))}
@@ -142,7 +181,9 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
           <div className={`${s.card} ${s.cardWide}`} data-card="paid">
             <small>Оплачено</small>
             <strong>{money(c.revenue)}</strong>
-            <span>{c.paid} {plural(c.paid, "заказ", "заказа", "заказов")}</span>
+            <span>
+              {c.paid} {plural(c.paid, "заказ", "заказа", "заказов")}
+            </span>
           </div>
           <div className={s.card} data-card="namuna">
             <small>НАМУНА без оплаты</small>
@@ -160,19 +201,146 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
             <strong>{money(c.due)}</strong>
           </div>
         </section>
-        {data.testOrders > 0 && <p className={s.hint} data-test-orders>Тестовые заказы админов не учитываются ({data.testOrders})</p>}
+        {data.testOrders > 0 && (
+          <p className={s.hint} data-test-orders>
+            Тестовые заказы админов не учитываются ({data.testOrders})
+          </p>
+        )}
+        {Object.values(data.free).some(Boolean) && (
+          <p className={s.hint} data-free-grants>
+            Бесплатно выдано: подарок {data.free.gift} · пример {data.free.sample} · наличные {data.free.cash} · замена{" "}
+            {data.free.replace}
+          </p>
+        )}
+
+        <section className={s.actions} aria-label="Действия">
+          <Link className={`${s.action} ${s.actionMain}`} href="/app" data-owner-create>
+            ✨ Создать приглашение
+          </Link>
+          <button
+            type="button"
+            className={s.action}
+            disabled={acting}
+            onClick={() => act("pa:new", "Новый партнёр: продолжите в чате с ботом", true)}
+          >
+            🤝 Новый партнёр
+          </button>
+          <button
+            type="button"
+            className={s.action}
+            disabled={acting}
+            onClick={() => act("pn:set", "Менеджеры — в чате с ботом", true)}
+          >
+            👤 Менеджеры
+          </button>
+          <button
+            type="button"
+            className={s.action}
+            disabled={acting}
+            onClick={() => act("pn:po", "Выплаты — в чате с ботом", true)}
+          >
+            💰 Выплаты
+          </button>
+          <button
+            type="button"
+            className={s.action}
+            disabled={acting}
+            onClick={() => act("/promos", "Промокоды — в чате с ботом", true)}
+          >
+            🎟 Промокоды
+          </button>
+          <button
+            type="button"
+            className={s.action}
+            disabled={acting}
+            onClick={() => act("pn:cl", "Заказ для клиента — в чате с ботом", true)}
+          >
+            📤 Заказ для клиента
+          </button>
+        </section>
 
         <nav className={s.tabs} role="tablist" aria-label="Разделы">
           {TABS.map((t) => (
-            <button key={t.id} type="button" role="tab" aria-selected={tab === t.id} onClick={() => { haptic.select(); setTab(t.id); }}>
-              {t.label}
+            <button
+              key={t.id}
+              type="button"
+              role="tab"
+              aria-selected={tab === t.id}
+              onClick={() => {
+                haptic.select();
+                setTab(t.id);
+              }}
+            >
+              {t.id === "receipts" && data.receipts.length ? `${t.label} (${data.receipts.length})` : t.label}
             </button>
           ))}
         </nav>
 
+        {tab === "receipts" && (
+          <section data-owner-receipts>
+            {data.receipts.length === 0 && <p className={s.hint}>{BOT.receiptsNone}</p>}
+            {data.receipts.map((r) => (
+              <article key={r.number} className={s.receipt}>
+                <div>
+                  <b>
+                    №{r.number} · {money(r.amount)}
+                  </b>
+                  <span>
+                    {r.names ?? "—"} · {r.design}
+                  </span>
+                  {r.url && (
+                    <button type="button" className={s.link} onClick={() => openLink(r.url!)}>
+                      Открыть НАМУНА
+                    </button>
+                  )}
+                </div>
+                {rejecting === r.number ? (
+                  <div className={s.reasons}>
+                    {(["money", "sum", "other"] as const).map((code) => (
+                      <button
+                        key={code}
+                        type="button"
+                        disabled={acting}
+                        onClick={() => act(`nr:${r.number}:${code}`, `❌ №${r.number} отклонён`)}
+                      >
+                        {BOT_RU.admin.reasons[code]}
+                      </button>
+                    ))}
+                    <button type="button" onClick={() => setRejecting(null)}>
+                      Назад
+                    </button>
+                  </div>
+                ) : (
+                  <div className={s.decide}>
+                    <button
+                      type="button"
+                      disabled={acting}
+                      data-approve
+                      onClick={() => act(`ok:${r.number}`, `✅ №${r.number} подтверждён, ссылка отправлена`)}
+                    >
+                      ✅ Подтвердить
+                    </button>
+                    <button type="button" disabled={acting} onClick={() => setRejecting(r.number)}>
+                      ❌ Отклонить
+                    </button>
+                  </div>
+                )}
+              </article>
+            ))}
+          </section>
+        )}
+
         {tab === "orders" && (
           <section>
-            <input className={s.search} type="search" inputMode="search" placeholder="№, имя, дизайн" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Поиск заказа" />
+            <input
+              className={s.search}
+              type="search"
+              inputMode="search"
+              placeholder="№, имя, дизайн"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              aria-label="Поиск заказа"
+            />
             <div className={s.filters}>
               <select value={status} onChange={(e) => setStatus(e.target.value)} aria-label="Статус">
                 <option value="">Все статусы</option>
@@ -244,11 +412,26 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
                       {p.sleeping ? " · 😴 спит" : ""}
                     </p>
                     <dl className={s.grid}>
-                      <div><dt>Сканы</dt><dd>{p.scanned}</dd></div>
-                      <div><dt>Оплаты</dt><dd>{p.paid}</dd></div>
-                      <div><dt>Начислено</dt><dd>{money(p.earned)}</dd></div>
-                      <div><dt>Выплачено</dt><dd>{money(p.paidOut)}</dd></div>
-                      <div><dt>Долг</dt><dd className={p.due > 0 ? s.debt : ""}>{money(p.due + p.onHold)}</dd></div>
+                      <div>
+                        <dt>Сканы</dt>
+                        <dd>{p.scanned}</dd>
+                      </div>
+                      <div>
+                        <dt>Оплаты</dt>
+                        <dd>{p.paid}</dd>
+                      </div>
+                      <div>
+                        <dt>Начислено</dt>
+                        <dd>{money(p.earned)}</dd>
+                      </div>
+                      <div>
+                        <dt>Выплачено</dt>
+                        <dd>{money(p.paidOut)}</dd>
+                      </div>
+                      <div>
+                        <dt>Долг</dt>
+                        <dd className={p.due > 0 ? s.debt : ""}>{money(p.due + p.onHold)}</dd>
+                      </div>
                     </dl>
                   </li>
                 ))}
@@ -292,7 +475,11 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
                   <b>{x.n}</b>
                 </div>
                 <div className={s.bar}>
-                  <i style={{ width: `${Math.min(100, Math.round((x.n / Math.max(1, data.funnel.clients, data.funnel.makers)) * 100))}%` }} />
+                  <i
+                    style={{
+                      width: `${Math.min(100, Math.round((x.n / Math.max(1, data.funnel.clients, data.funnel.makers)) * 100))}%`,
+                    }}
+                  />
                 </div>
               </div>
             ))}

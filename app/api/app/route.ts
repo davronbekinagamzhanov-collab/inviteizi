@@ -5,6 +5,7 @@ import { allow, LIMITS } from "@/lib/rate-limit";
 import * as app from "@/bot/app/service";
 import { partnerPoster, rolePanel } from "@/bot/app/roles-panel";
 import { ownerExport, ownerPanel } from "@/bot/app/owner";
+import { ownerAct } from "@/bot/app/owner-actions";
 import type { Lang } from "@/lib/domain";
 
 export const maxDuration = 30;
@@ -52,6 +53,11 @@ export async function POST(req: Request) {
         const r = await app.musicUpload(deps, body.ext, body.size);
         return json(r, "error" in r ? (r.error === "server" ? 500 : 400) : 200);
       }
+      // Владелец: приглашение без оплаты с причиной; клиенту — 403
+      case "freeIssue": {
+        const r = await app.staffFreeIssue(deps, user, body.orderId, body.reason);
+        return "error" in r ? json(r, r.error === "forbidden" ? 403 : 400) : json(r);
+      }
       case "cancel":
         return json(await app.cancelOrder(deps, user, body.orderId));
       // Панель владельца: только ADMIN_IDS, остальным 403
@@ -67,6 +73,11 @@ export async function POST(req: Request) {
       case "partnerPoster": {
         const r = await partnerPoster(deps, user, body.lang);
         return "error" in r ? json(r, r.error === "tooOften" ? 429 : 403) : json(r);
+      }
+      // Действия владельца из админки — тем же кодом, что кнопки бота (белый список)
+      case "ownerAct": {
+        const r = await ownerAct(deps, user, body.act);
+        return "error" in r ? json(r, r.error === "forbidden" ? 403 : 400) : json(r);
       }
       case "ownerExport": {
         const r = await ownerExport(deps, user.id, body.period);

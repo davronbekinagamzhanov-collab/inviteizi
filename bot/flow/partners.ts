@@ -33,6 +33,7 @@ import { editOrSend, ib, inline, price, roleOf, send, texts } from "./util";
 import { roleHome } from "./panel";
 import { afterPartnerPayout } from "./notify";
 import type { Ctx, Deps, Result, Step } from "./types";
+import { syncMenuButton } from "./menu-button";
 
 const PAGE = 8;
 export const DEFAULT_RATE = 1000;
@@ -882,6 +883,7 @@ export async function acceptPartnerInvite(c: Ctx, token: string): Promise<Result
     return "failed";
   }
   const p = await c.deps.repo.bindPartner(use.partnerId, c.user.id, c.user.username);
+  if (p) await syncMenuButton(c.deps, c.user.id, "partner", c.tx.menuButton);
   if (!p) {
     await send(c, tx.joinTaken);
     return "failed";

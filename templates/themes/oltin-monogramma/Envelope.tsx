@@ -145,11 +145,12 @@ export function Envelope({ inv, initials }: { inv: Invitation; initials: [string
           </motion.button>
 
           <motion.div
+            data-open-prompt
             className="relative mt-12 flex flex-col items-center gap-3"
             animate={{ opacity: phase === "idle" ? 1 : 0 }}
             transition={{ duration: MOTION.fast, ease: MOTION.ease }}
           >
-            <p data-open-prompt className="soft-pulse font-body text-[17px] tracking-[0.18em] text-muted">{t.opening.tapToOpen}</p>
+            <p className="soft-pulse font-body text-[17px] tracking-[0.18em] text-muted">{t.opening.tapToOpen}</p>
             <TapHint />
           </motion.div>
         </motion.div>

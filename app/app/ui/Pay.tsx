@@ -4,13 +4,38 @@ import { useRef, useState } from "react";
 import type { AppOrder, ReceiptResult } from "@/bot/app/service";
 import { api, ApiError, MAX_FILE, shrinkImage, upload } from "./api";
 import { Section, useT } from "./shared";
+import { STAFF_GRANT_REASONS, type StaffGrantReason } from "@/lib/types";
 import { copyText, haptic, openLink, shareLink } from "./telegram";
 import { CheckIcon, ClockIcon, CloseIcon, SpinnerIcon } from "./icons";
 import s from "../app.module.css";
 
 type PayInfo = { phone: string; name: string; card: string | null };
 
-export function Pay({ order, step, pay, onDone, onToast, onTerms, onConfirmed, onEdit, busy: editBusy }: { order: AppOrder; step: "check" | "pay"; pay: PayInfo; onDone: (night: boolean) => void; onToast: (t: string) => void; onTerms: () => void; onConfirmed: (o: AppOrder) => void; onEdit: (o: AppOrder) => void; busy?: boolean }) {
+export function Pay({
+  order,
+  step,
+  pay,
+  onDone,
+  onToast,
+  onTerms,
+  onConfirmed,
+  onEdit,
+  busy: editBusy,
+  staff = false,
+  onIssued,
+}: {
+  order: AppOrder;
+  step: "check" | "pay";
+  pay: PayInfo;
+  onDone: (night: boolean) => void;
+  onToast: (t: string) => void;
+  onTerms: () => void;
+  onConfirmed: (o: AppOrder) => void;
+  onEdit: (o: AppOrder) => void;
+  busy?: boolean;
+  staff?: boolean;
+  onIssued?: (o: AppOrder) => void;
+}) {
   const T = useT();
   const input = useRef<HTMLInputElement>(null);
   const [progress, setProgress] = useState<number | null>(null);
@@ -19,6 +44,34 @@ export function Pay({ order, step, pay, onDone, onToast, onTerms, onConfirmed, o
   const confirmed = step === "pay";
   const [busy, setBusy] = useState(false);
   const [agree, setAgree] = useState(false);
+  const [reason, setReason] = useState<StaffGrantReason | null>(null);
+
+  // Владелец: без Kaspi и чека — причина и «Бесплатно яратиш» (права ещё раз проверяет сервер)
+  async function issueFree() {
+    if (busy) return;
+    if (!reason) {
+      haptic.error();
+      return setError(T.pay.free.pick);
+    }
+    setBusy(true);
+    try {
+      const r = await api<{ ok: true; order: AppOrder } | { error: string }>("freeIssue", {
+        orderId: order.id,
+        reason,
+      });
+      if ("ok" in r) {
+        haptic.ok();
+        onIssued?.(r.order);
+      } else {
+        haptic.error();
+        setError(T.pay.free.failed);
+      }
+    } catch (e) {
+      setError(e instanceof ApiError && e.code === "offline" ? T.offline : T.pay.free.failed);
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function confirm() {
     if (busy) return;
@@ -28,7 +81,10 @@ export function Pay({ order, step, pay, onDone, onToast, onTerms, onConfirmed, o
     }
     setBusy(true);
     try {
-      const r = await api<{ ok: true; order: AppOrder } | { error: string }>("confirmPay", { orderId: order.id, terms: true });
+      const r = await api<{ ok: true; order: AppOrder } | { error: string }>("confirmPay", {
+        orderId: order.id,
+        terms: true,
+      });
       if ("ok" in r) {
         haptic.ok();
         onConfirmed(r.order ?? { ...order, confirmed: true });
@@ -69,11 +125,91 @@ export function Pay({ order, step, pay, onDone, onToast, onTerms, onConfirmed, o
     } catch (e) {
       haptic.error();
       const code = e instanceof ApiError ? e.code : "server";
-      setError(code === "tooBig" ? T.pay.errors.tooBig : code === "format" ? T.pay.errors.format : code === "offline" ? T.offline : T.serverError);
+      setError(
+        code === "tooBig"
+          ? T.pay.errors.tooBig
+          : code === "format"
+            ? T.pay.errors.format
+            : code === "offline"
+              ? T.offline
+              : T.serverError,
+      );
     } finally {
       setProgress(null);
       if (input.current) input.current.value = "";
     }
+  }
+
+  if (staff) {
+    return (
+      <div className={s.screen} data-staff-free>
+        <h1 className={s.title}>{T.pay.free.title}</h1>
+        <Section title={order.title}>
+          <p className={s.label}>
+            {(order.check ?? "")
+              .split("\n")
+              .slice(1)
+              .filter((l) => !l.startsWith("💳"))
+              .join("\n")}
+          </p>
+          {order.namunaOpen !== false && (
+            <a className={`${s.btn} ${s.btnGhost} ${s.btnSmall}`} href={order.url} target="_blank" rel="noopener">
+              {T.pay.checkOpen}
+            </a>
+          )}
+          <button
+            type="button"
+            className={`${s.btn} ${s.btnGhost} ${s.btnWide} ${s.btnEdit}`}
+            onClick={() => onEdit(order)}
+            disabled={editBusy}
+            aria-busy={editBusy}
+            data-edit-data
+          >
+            {T.form.editData}
+          </button>
+        </Section>
+        <p className={s.help}>{T.pay.free.lead}</p>
+        <div
+          className={s.chips}
+          style={{ flexWrap: "wrap", overflow: "visible" }}
+          role="radiogroup"
+          aria-label={T.pay.free.pick}
+        >
+          {STAFF_GRANT_REASONS.map((r) => (
+            <button
+              key={r}
+              type="button"
+              role="radio"
+              aria-checked={reason === r}
+              className={`${s.btn} ${reason === r ? "" : s.btnGhost} ${s.btnSmall}`}
+              onClick={() => {
+                haptic.select();
+                setReason(r);
+                setError(null);
+              }}
+            >
+              {T.pay.free.reasons[r]}
+            </button>
+          ))}
+        </div>
+        {error && (
+          <p className={s.formErr} role="alert">
+            {error}
+          </p>
+        )}
+        <button
+          type="button"
+          className={`${s.btn} ${s.btnWide}`}
+          onClick={issueFree}
+          disabled={busy || !reason}
+          aria-busy={busy}
+          data-free-issue
+        >
+          {busy ? <SpinnerIcon size={20} /> : null}
+          {T.pay.free.create}
+        </button>
+      </div>
+    );
   }
 
   if (!confirmed) {
@@ -81,7 +217,13 @@ export function Pay({ order, step, pay, onDone, onToast, onTerms, onConfirmed, o
       <div className={s.screen}>
         <h1 className={s.title}>{T.pay.checkTitle}</h1>
         <Section title={order.title}>
-          <p className={s.label}>{(order.check ?? "").split("\n").slice(1).filter((l) => !l.startsWith("💳")).join("\n")}</p>
+          <p className={s.label}>
+            {(order.check ?? "")
+              .split("\n")
+              .slice(1)
+              .filter((l) => !l.startsWith("💳"))
+              .join("\n")}
+          </p>
           {order.namunaOpen !== false ? (
             <a className={`${s.btn} ${s.btnGhost} ${s.btnSmall}`} href={order.url} target="_blank" rel="noopener">
               {T.pay.checkOpen}
@@ -89,7 +231,14 @@ export function Pay({ order, step, pay, onDone, onToast, onTerms, onConfirmed, o
           ) : (
             <p className={s.help}>{T.pay.namunaClosed}</p>
           )}
-          <button type="button" className={`${s.btn} ${s.btnGhost} ${s.btnWide} ${s.btnEdit}`} onClick={() => onEdit(order)} disabled={editBusy} aria-busy={editBusy} data-edit-data>
+          <button
+            type="button"
+            className={`${s.btn} ${s.btnGhost} ${s.btnWide} ${s.btnEdit}`}
+            onClick={() => onEdit(order)}
+            disabled={editBusy}
+            aria-busy={editBusy}
+            data-edit-data
+          >
             {T.form.editData}
           </button>
         </Section>
@@ -97,18 +246,39 @@ export function Pay({ order, step, pay, onDone, onToast, onTerms, onConfirmed, o
           <small>{T.pay.amount}</small>
           <b>{T.price(order.amount)}</b>
         </div>
-        <p className={s.formErr} style={{ color: "var(--ink)" }}>{T.pay.checkWarn}</p>
+        <p className={s.formErr} style={{ color: "var(--ink)" }}>
+          {T.pay.checkWarn}
+        </p>
         <div className={s.terms}>
           <label>
-            <input type="checkbox" checked={agree} onChange={(e) => { haptic.select(); setAgree(e.target.checked); setError(null); }} name="terms" />
+            <input
+              type="checkbox"
+              checked={agree}
+              onChange={(e) => {
+                haptic.select();
+                setAgree(e.target.checked);
+                setError(null);
+              }}
+              name="terms"
+            />
             <span>{T.pay.termsAgree}</span>
           </label>
           <button type="button" className={s.textMore} onClick={onTerms}>
             {T.pay.termsLink}
           </button>
         </div>
-        {error && <p className={s.formErr} role="alert">{error}</p>}
-        <button type="button" className={`${s.btn} ${s.btnWide}`} onClick={confirm} disabled={busy || !agree} aria-busy={busy}>
+        {error && (
+          <p className={s.formErr} role="alert">
+            {error}
+          </p>
+        )}
+        <button
+          type="button"
+          className={`${s.btn} ${s.btnWide}`}
+          onClick={confirm}
+          disabled={busy || !agree}
+          aria-busy={busy}
+        >
           {busy ? <SpinnerIcon size={20} /> : null}
           {T.pay.checkYes}
         </button>
@@ -116,7 +286,11 @@ export function Pay({ order, step, pay, onDone, onToast, onTerms, onConfirmed, o
     );
   }
 
-  const rows: [string, string][] = [[T.pay.phone, pay.phone], ...(pay.card ? ([[T.pay.card, pay.card]] as [string, string][]) : []), [T.pay.name, pay.name]];
+  const rows: [string, string][] = [
+    [T.pay.phone, pay.phone],
+    ...(pay.card ? ([[T.pay.card, pay.card]] as [string, string][]) : []),
+    [T.pay.name, pay.name],
+  ];
   return (
     <div className={s.screen}>
       <h1 className={s.title}>{T.pay.title}</h1>
@@ -143,13 +317,27 @@ export function Pay({ order, step, pay, onDone, onToast, onTerms, onConfirmed, o
             <small>{T.pay.note(order.number)}</small>
             <b>#{order.number}</b>
           </span>
-          <button type="button" className={`${s.btn} ${s.btnGhost} ${s.btnSmall}`} onClick={() => copy(`#${order.number}`)}>
+          <button
+            type="button"
+            className={`${s.btn} ${s.btnGhost} ${s.btnSmall}`}
+            onClick={() => copy(`#${order.number}`)}
+          >
             {T.pay.copy}
           </button>
         </div>
       </Section>
-      {error && <p className={s.formErr} role="alert">{error}</p>}
-      <button type="button" className={`${s.btn} ${s.btnWide}`} onClick={() => input.current?.click()} disabled={progress !== null} aria-busy={progress !== null}>
+      {error && (
+        <p className={s.formErr} role="alert">
+          {error}
+        </p>
+      )}
+      <button
+        type="button"
+        className={`${s.btn} ${s.btnWide}`}
+        onClick={() => input.current?.click()}
+        disabled={progress !== null}
+        aria-busy={progress !== null}
+      >
         {progress !== null ? (
           <>
             <SpinnerIcon size={20} />
@@ -160,7 +348,13 @@ export function Pay({ order, step, pay, onDone, onToast, onTerms, onConfirmed, o
         )}
       </button>
       <p className={s.status}>{T.pay.uploadHint}</p>
-      <input ref={input} type="file" accept="image/*,application/pdf" hidden onChange={(e) => send(e.target.files?.[0])} />
+      <input
+        ref={input}
+        type="file"
+        accept="image/*,application/pdf"
+        hidden
+        onChange={(e) => send(e.target.files?.[0])}
+      />
     </div>
   );
 }
@@ -169,7 +363,17 @@ export function Pay({ order, step, pay, onDone, onToast, onTerms, onConfirmed, o
  * После чека: «Тўловингиз текширилмоқда» (экран сам спрашивает статус — MiniApp),
  * подтвердили — «Таклифномангиз тайёр!» с крупной ссылкой; отказ — причина и «Чекни қайта юбориш».
  */
-export function Waiting({ order, night, onResend, onToast }: { order: AppOrder; night: boolean; onResend: () => void; onToast: (t: string) => void }) {
+export function Waiting({
+  order,
+  night,
+  onResend,
+  onToast,
+}: {
+  order: AppOrder;
+  night: boolean;
+  onResend: () => void;
+  onToast: (t: string) => void;
+}) {
   const T = useT();
   if (order.status === "active") {
     return (
@@ -179,14 +383,36 @@ export function Waiting({ order, night, onResend, onToast }: { order: AppOrder; 
         </div>
         <h1 className={s.title}>{T.pay.readyTitle}</h1>
         <p>{T.pay.readyLead}</p>
-        <a className={s.readyLink} href={order.url} target="_blank" rel="noopener" onClick={(e) => { e.preventDefault(); openLink(order.url); }}>
+        <a
+          className={s.readyLink}
+          href={order.url}
+          target="_blank"
+          rel="noopener"
+          onClick={(e) => {
+            e.preventDefault();
+            openLink(order.url);
+          }}
+        >
           {order.url.replace(/^https?:\/\//, "")}
         </a>
         <div className={s.doneActions}>
-          <button type="button" className={`${s.btn} ${s.btnWide}`} onClick={() => shareLink(order.url, T.orders.shareText)}>
+          <button
+            type="button"
+            className={`${s.btn} ${s.btnWide}`}
+            onClick={() => shareLink(order.url, T.orders.shareText)}
+          >
             {T.pay.readyShare}
           </button>
-          <button type="button" className={`${s.btn} ${s.btnGhost} ${s.btnWide}`} onClick={async () => { if (await copyText(order.url)) { haptic.ok(); onToast(T.orders.copied); } }}>
+          <button
+            type="button"
+            className={`${s.btn} ${s.btnGhost} ${s.btnWide}`}
+            onClick={async () => {
+              if (await copyText(order.url)) {
+                haptic.ok();
+                onToast(T.orders.copied);
+              }
+            }}
+          >
             {T.pay.readyCopy}
           </button>
         </div>

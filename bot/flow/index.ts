@@ -60,6 +60,7 @@ import {
 } from "./partners";
 import { favorites, favoriteAction } from "./favorites";
 import { activeDesigns } from "@/templates/registry";
+import { syncMenuButton } from "./menu-button";
 import { catalogList, pageOf } from "./steps-order";
 import { rememberUpdate } from "../update";
 import { classifyError, isUnreachable, recordBotError, toEntry } from "../errors";
@@ -304,13 +305,10 @@ async function chooseLang(c: Ctx, lang: string) {
   }
 }
 
-/** Кнопка меню Telegram у поля ввода: «✨ Очиш» открывает приложение (на языке клиента) */
+/** Кнопка меню Telegram у поля ввода: по роли — админка владельцу, панель менеджеру/партнёру, приложение клиенту */
 async function setAppButton(c: Ctx) {
   if (c.chatId !== c.user.id) return;
-  const url = c.deps.env.miniAppUrl;
-  await c.deps.tg
-    .setMenuButton(c.chatId, url ? { text: c.tx.menuButton, url } : null)
-    .catch((e) => console.warn("menu button", e instanceof Error ? e.name : "Error"));
+  await syncMenuButton(c.deps, c.chatId, await roleOf(c), c.tx.menuButton);
 }
 
 /** Убрать старую нижнюю клавиатуру незаметно: служебное сообщение сразу удаляется */

@@ -354,3 +354,88 @@
   font-size: 15px;
   white-space: nowrap;
 }
+
+/* 16.11.2026: действия владельца и чеки на проверке */
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 14px 0 6px;
+}
+.action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid #3b2a1e22;
+  border-radius: 12px;
+  background: #fffaf2;
+  color: #3b2a1e;
+  font: inherit;
+  font-size: 14px;
+  text-align: center;
+  text-decoration: none;
+}
+.actionMain {
+  grid-column: 1 / -1;
+  background: #3b2a1e;
+  color: #fffaf2;
+  font-weight: 600;
+}
+.action:disabled {
+  opacity: 0.55;
+}
+.receipt {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+  border: 1px solid #3b2a1e1f;
+  border-radius: 14px;
+  background: #fffaf2;
+}
+.receipt > div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.receipt span {
+  font-size: 13px;
+  opacity: 0.75;
+  overflow-wrap: anywhere;
+}
+.link {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #8a5d1c;
+  font: inherit;
+  font-size: 13px;
+  text-decoration: underline;
+}
+.decide,
+.reasons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.decide button,
+.reasons button {
+  flex: 1 1 auto;
+  min-height: 40px;
+  padding: 6px 12px;
+  border: 1px solid #3b2a1e26;
+  border-radius: 10px;
+  background: #fff;
+  color: #3b2a1e;
+  font: inherit;
+  font-size: 14px;
+}
+.decide button[data-approve] {
+  background: #2f5d3a;
+  border-color: #2f5d3a;
+  color: #fff;
+}

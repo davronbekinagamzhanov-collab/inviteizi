@@ -40,7 +40,7 @@ export function TapHint({ inv }: { inv: Invitation }) {
       ref={ref}
       aria-hidden={!shown}
       data-tap-hint={shown ? "on" : "off"}
-      className={`pointer-events-none fixed inset-x-0 z-[45] mx-auto flex w-full max-w-[430px] justify-center px-4 transition-opacity duration-[600ms] ease-out motion-reduce:transition-none ${inv.mode === "demo" ? "bottom-[calc(3.9rem+env(safe-area-inset-bottom))]" : "bottom-[calc(0.9rem+env(safe-area-inset-bottom))]"} ${shown ? "opacity-100" : "opacity-0"}`}
+      className={`pointer-events-none fixed inset-x-0 z-[90] mx-auto flex w-full max-w-[430px] justify-center px-4 transition-opacity duration-[600ms] ease-out motion-reduce:transition-none ${inv.mode === "demo" ? "bottom-[calc(3.9rem+env(safe-area-inset-bottom))]" : "bottom-[calc(0.9rem+env(safe-area-inset-bottom))]"} ${shown ? "opacity-100" : "opacity-0"}`}
     >
       <span
         role="status"
