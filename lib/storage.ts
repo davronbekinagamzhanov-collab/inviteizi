@@ -54,6 +54,22 @@ export const BLOB_URL =
 /** Старый адрес Supabase Storage (заказы до 17.11.2026) */
 export const LEGACY_URL = /^https:\/\/[a-z0-9]+\.supabase\.co\/storage\/v1\/object\/public\/(music|photos)\/(.+)$/;
 
+/**
+ * Адрес из НАШЕГО хранилища: Blob этого проекта (по токену) или наш старый Supabase.
+ * Чужой store Vercel Blob с похожим адресом не принимается.
+ */
+export function isOurFileUrl(url: string): boolean {
+  if (BLOB_URL.test(url)) {
+    if (!storageConfigured()) return false;
+    try {
+      return url.startsWith(blobBaseUrl() + "/");
+    } catch {
+      return false;
+    }
+  }
+  return LEGACY_URL.test(url) && url.startsWith(env.supabaseUrl() + "/storage/v1/object/public/");
+}
+
 /** Загрузить файл (перезаписывает тот же путь). Возвращает публичный адрес */
 export async function uploadFile(
   bucket: Bucket,

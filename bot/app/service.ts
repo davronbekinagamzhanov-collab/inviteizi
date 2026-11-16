@@ -43,7 +43,7 @@ import { isQuiet } from "@/lib/quiet-hours";
 import { PHOTO_MAX_COUNT } from "../own-photo";
 import { OWN_MUSIC_MAX, OWN_MUSIC_TYPES, ownMusicPath } from "../own-music";
 import { CLIENT_PHOTO_URL } from "../own-photo";
-import { StorageUnavailableError } from "@/lib/storage";
+import { isOurFileUrl, StorageUnavailableError } from "@/lib/storage";
 import { removeUnusedMedia } from "../flow/care";
 
 /** Черновик, как его хранит и присылает приложение */
@@ -431,7 +431,7 @@ export async function musicUpload(deps: Deps, ext: unknown, size: unknown) {
 /** Фото клиента: только наши адреса из бакета photos, не больше трёх */
 function cleanPhotos(deps: Deps, photos: unknown): string[] | undefined {
   if (!Array.isArray(photos)) return undefined;
-  const ok = photos.filter((p): p is string => typeof p === "string" && CLIENT_PHOTO_URL.test(p));
+  const ok = photos.filter((p): p is string => typeof p === "string" && CLIENT_PHOTO_URL.test(p) && isOurFileUrl(p));
   return ok.length ? [...new Set(ok)].slice(0, PHOTO_MAX_COUNT) : undefined;
 }
 
@@ -443,7 +443,10 @@ function toDraft(deps: Deps, prev: Draft, d: AppDraft, data: Partial<InvitationD
       ? { kind: "none" }
       : d.music?.kind === "list" && typeof d.music.musicId === "string"
         ? { kind: "list", musicId: d.music.musicId.slice(0, 64) }
-        : d.music?.kind === "own" && typeof d.music.url === "string" && ownMusicPath(d.music.url)
+        : d.music?.kind === "own" &&
+            typeof d.music.url === "string" &&
+            ownMusicPath(d.music.url) &&
+            isOurFileUrl(d.music.url)
           ? {
               kind: "own",
               fileId: prev.music?.kind === "own" && prev.music.url === d.music.url ? prev.music.fileId : "app",

@@ -3,11 +3,18 @@
  * Отмена удаляет личные данные (заказ, фото, черновик), оставляет обезличенную запись шага;
  * чужой заказ, чек на проверке и оплаченный — не отменяются.
  */
-import { describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { Sim } from "../testing/sim";
 import { activeDesigns } from "@/templates/registry";
 import type { AppUser } from "@/lib/tg-init-data";
 import * as app from "./service";
+
+// Наше хранилище: Blob этого проекта (store abcd1234) и старый Supabase проекта abcd — чужие адреса не принимаются
+beforeAll(() => {
+  vi.stubEnv("BLOB_READ_WRITE_TOKEN", "vercel_blob_rw_abcd1234_secret");
+  vi.stubEnv("SUPABASE_URL", "https://abcd.supabase.co");
+});
+afterAll(() => vi.unstubAllEnvs());
 
 const user = (id: number, lang = "uz"): AppUser => ({ id, firstName: "Апа", username: `u${id}`, languageCode: lang });
 const PHOTO = `https://abcd.supabase.co/storage/v1/object/public/photos/client/${"a".repeat(64)}.webp`;
@@ -249,6 +256,10 @@ describe("п.21: музыка", () => {
     const { StorageUnavailableError } = await import("@/lib/storage");
     sim.deps.signMusicUpload = async () => { throw new StorageUnavailableError("test"); };
     expect(await app.musicUpload(sim.deps, "mp3", 100)).toEqual({ error: "storage" });
+    // Чужой store Vercel Blob с похожим адресом не принимается
+    const foreign = await app.submitDraft(sim.deps, user(107), { templateId: design.id, form, music: { kind: "own", url: `https://zzzz9999.public.blob.vercel-storage.com/music/own/${"f".repeat(32)}.mp3` } });
+    if (!("ok" in foreign)) throw new Error("foreign");
+    expect((await sim.repo.getOrder(foreign.order.id))!.music).toEqual({ kind: "list", musicId: "yor-yor" });
     // Чужой адрес вместо нашего бакета не принимается
     const bad = await app.submitDraft(sim.deps, user(105), { templateId: design.id, form, music: { kind: "own", url: `https://evil.test/storage/v1/object/public/music/own/${"d".repeat(32)}.mp3` } });
     if (!("ok" in bad)) throw new Error("bad");

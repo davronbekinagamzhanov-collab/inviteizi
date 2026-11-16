@@ -29,6 +29,7 @@ import {
   storageConfigured,
   StorageUnavailableError,
   uploadFile,
+  isOurFileUrl,
 } from "./storage";
 
 const TOKEN = "vercel_blob_rw_Store1ABC_secretpart";
@@ -127,5 +128,16 @@ describe("Vercel Blob", () => {
   it("проверка наличия файла", async () => {
     expect(await blobExists("health", "ping.txt")).toBe(true);
     expect(await blobExists("health", "missing.txt")).toBe(false);
+  });
+
+  it("принимаем адреса только своего хранилища: наш Blob и наш старый Supabase", () => {
+    vi.stubEnv("SUPABASE_URL", "https://ours.supabase.co");
+    expect(isOurFileUrl("https://store1abc.public.blob.vercel-storage.com/music/own/a.mp3")).toBe(true);
+    expect(isOurFileUrl("https://other999.public.blob.vercel-storage.com/music/own/a.mp3")).toBe(false);
+    expect(isOurFileUrl("https://ours.supabase.co/storage/v1/object/public/photos/client/a.webp")).toBe(true);
+    expect(isOurFileUrl("https://theirs.supabase.co/storage/v1/object/public/photos/client/a.webp")).toBe(false);
+    expect(isOurFileUrl("https://evil.example/music/own/a.mp3")).toBe(false);
+    vi.stubEnv("BLOB_READ_WRITE_TOKEN", "");
+    expect(isOurFileUrl("https://store1abc.public.blob.vercel-storage.com/music/own/a.mp3")).toBe(false);
   });
 });
