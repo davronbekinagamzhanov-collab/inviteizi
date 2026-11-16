@@ -6,6 +6,8 @@
 import { isFileTooBig } from "./errors";
 
 export const PHOTO_MAX_BYTES = 10 * 1024 * 1024;
+/** Фото-документом в чате: Telegram отдаёт боту файлы до 20 МБ (камера Pixel/Samsung — 10–20 МБ), сжимаем до 1600 px */
+export const PHOTO_CHAT_MAX_BYTES = 20 * 1024 * 1024;
 export const PHOTO_MAX_COUNT = 3;
 export const PHOTO_BUDGET_MS = 40_000;
 /** Длинная сторона после сжатия: телефону больше не нужно */
@@ -67,7 +69,9 @@ async function convert(bytes: Uint8Array, encode: (img: Sharp) => Sharp): Promis
     input = sharp(bytes, { failOn: "none" }).rotate();
   }
   try {
-    const out = await encode(input.resize({ width: MAX_SIDE, height: MAX_SIDE, fit: "inside", withoutEnlargement: true })).toBuffer();
+    const out = await encode(
+      input.resize({ width: MAX_SIDE, height: MAX_SIDE, fit: "inside", withoutEnlargement: true }),
+    ).toBuffer();
     return new Uint8Array(out);
   } catch {
     throw new PhotoFormatError();
@@ -88,7 +92,7 @@ export async function copyClientPhoto(fileId: string, io: PhotoIo, budgetMs = PH
     signal.addEventListener("abort", () => reject(signal.reason), { once: true });
   });
   expired.catch(() => {});
-  const within = <T,>(step: Promise<T>) => Promise.race([step, expired]);
+  const within = <T>(step: Promise<T>) => Promise.race([step, expired]);
 
   let source: string;
   try {
@@ -99,7 +103,7 @@ export async function copyClientPhoto(fileId: string, io: PhotoIo, budgetMs = PH
   }
   const res = await within(io.fetch(source, { signal }));
   if (!res.ok) throw new Error(`Telegram file download: HTTP ${res.status}`);
-  const bytes = await within(readLimited(res, PHOTO_MAX_BYTES));
+  const bytes = await within(readLimited(res, PHOTO_CHAT_MAX_BYTES));
   if (!bytes.byteLength) throw new PhotoFormatError();
   const webp = await within(toWebp(bytes));
   const url = await within(io.upload(webp, signal));

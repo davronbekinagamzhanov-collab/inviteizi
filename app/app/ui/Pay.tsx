@@ -2,7 +2,7 @@
 /** Оплата: сумма, реквизиты Kaspi с «Нусха олиш», чек — прямо здесь. Потом «Чек қабул қилинди ✅» */
 import { useEffect, useRef, useState } from "react";
 import type { AppOrder, ReceiptResult } from "@/bot/app/service";
-import { api, ApiError, MAX_FILE, shrinkImage, upload } from "./api";
+import { api, ApiError, MAX_FILE, MAX_RAW_UPLOAD, shrinkImage, upload } from "./api";
 import { Section, useT } from "./shared";
 import { STAFF_GRANT_REASONS, type StaffGrantReason } from "@/lib/types";
 import { copyText, haptic, openLink, shareLink } from "./telegram";
@@ -156,10 +156,11 @@ export function Pay({
   async function send(file: File | undefined) {
     if (!file || progress !== null) return;
     setError(null);
-    if (file.size > MAX_FILE) return setError(T.pay.errors.tooBig);
+    // Лимит — на то, что уйдёт на сервер: фото ужмём на телефоне, PDF — как есть (тело запроса ≤ 4,3 МБ)
+    const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
+    if (file.size > (isPdf ? MAX_RAW_UPLOAD : MAX_FILE)) return setError(T.pay.errors.tooBig);
     setProgress(0);
     try {
-      const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
       const body = isPdf ? { blob: file as Blob, name: file.name || "chek.pdf" } : await shrinkImage(file);
       const r = await upload<ReceiptResult>("receipt", body.blob, body.name, { order: order.id }, setProgress);
       if ("ok" in r) {

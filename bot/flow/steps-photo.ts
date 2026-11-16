@@ -2,7 +2,7 @@
 import type { Ctx, Result, Step } from "./types";
 import { after, backRow, data, ib, inline, send } from "./util";
 import { getDesign } from "@/templates/registry";
-import { PHOTO_MAX_BYTES, PHOTO_MAX_COUNT, PhotoFormatError, PhotoTooBigError } from "../own-photo";
+import { PHOTO_CHAT_MAX_BYTES, PHOTO_MAX_COUNT, PhotoFormatError, PhotoTooBigError } from "../own-photo";
 
 /** Дизайн умеет показывать фото клиента и бот умеет их сохранять */
 export function photoStepFor(c: Ctx) {
@@ -79,7 +79,7 @@ export const photoUpload: Step = {
     const d = data(c);
     const list = (d.photos ??= []);
     if (list.length >= PHOTO_MAX_COUNT) return { hint: p.full(PHOTO_MAX_COUNT) };
-    if (file.size && file.size > PHOTO_MAX_BYTES) return { hint: p.tooBig };
+    if (file.size && file.size > PHOTO_CHAT_MAX_BYTES) return { hint: p.tooBig };
     const save = c.deps.savePhoto;
     if (!save) return next(c);
     let url: string;

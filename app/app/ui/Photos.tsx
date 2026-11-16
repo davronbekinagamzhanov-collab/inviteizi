@@ -19,6 +19,36 @@ export function Photos({ photos, onChange, onToast, onPending }: { photos: strin
     latest.current = photos;
   }, [photos]);
   const free = MAX_PHOTOS - photos.length - pending.length;
+  // Галерея не открылась или закрыта без выбора (часто — нет доступа к фото): подсказываем, а не молчим
+  const [noPick, setNoPick] = useState(false);
+  const waiting = useRef(false);
+  // Chrome/Android: событие «cancel», когда выбор закрыли без файла
+  useEffect(() => {
+    const el = input.current;
+    if (!el) return;
+    const onCancel = () => {
+      waiting.current = false;
+      setNoPick(true);
+    };
+    el.addEventListener("cancel", onCancel);
+    return () => el.removeEventListener("cancel", onCancel);
+  }, []);
+  function openPicker() {
+    setNoPick(false);
+    waiting.current = true;
+    const back = () => {
+      if (document.visibilityState !== "visible") return;
+      window.removeEventListener("focus", back);
+      document.removeEventListener("visibilitychange", back);
+      setTimeout(() => {
+        if (waiting.current) setNoPick(true);
+        waiting.current = false;
+      }, 1500);
+    };
+    window.addEventListener("focus", back);
+    document.addEventListener("visibilitychange", back);
+    input.current?.click();
+  }
   // Пока фото грузятся, «Давом этиш» закрыта: фото не потеряются
   useEffect(() => {
     onPending?.(pending.length);
@@ -26,7 +56,9 @@ export function Photos({ photos, onChange, onToast, onPending }: { photos: strin
   useEffect(() => () => onPending?.(0), [onPending]);
 
   async function pick(files: FileList | null) {
-    if (!files?.length) return;
+    waiting.current = false;
+    if (!files?.length) return setNoPick(true);
+    setNoPick(false);
     const chosen = [...files];
     if (chosen.length > free) onToast(T.photos.max);
     for (const file of chosen.slice(0, Math.max(0, free))) {
@@ -58,7 +90,7 @@ export function Photos({ photos, onChange, onToast, onPending }: { photos: strin
       <p className={s.lead}>{T.photos.lead}</p>
       <div className={s.photos}>
         {photos.map((url, i) => (
-          <div key={url} className={s.photo}>
+          <div key={url} className={s.photo} data-photo>
             {/* eslint-disable-next-line @next/next/no-img-element -- фото клиента из Storage, размер уже ужат */}
             <img src={url} alt="" />
             <button type="button" className={s.photoX} aria-label={T.photos.remove} onClick={() => { haptic.tap(); onChange(photos.filter((_, j) => j !== i)); }}>
@@ -81,12 +113,24 @@ export function Photos({ photos, onChange, onToast, onPending }: { photos: strin
         ))}
       </div>
       {free > 0 && (
-        <button type="button" className={`${s.btn} ${s.btnGhost} ${s.btnWide}`} onClick={() => input.current?.click()}>
+        <button type="button" className={`${s.btn} ${s.btnGhost} ${s.btnWide}`} onClick={openPicker}>
           <CameraIcon size={20} />
           {photos.length ? T.photos.addMore : T.photos.add}
         </button>
       )}
-      <input ref={input} type="file" accept="image/*" multiple hidden onChange={(e) => pick(e.target.files)} />
+      {noPick && free > 0 && (
+        <p className={s.help} role="status" data-photo-permission>
+          {T.photos.permission}
+        </p>
+      )}
+      <input
+        ref={input}
+        type="file"
+        accept="image/*"
+        multiple
+        hidden
+        onChange={(e) => pick(e.target.files)}
+      />
     </div>
   );
 }

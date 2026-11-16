@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import sharp from "sharp";
 import { GrammyError } from "grammy";
-import { copyClientPhoto, isHeic, photoPath, PhotoFormatError, PhotoTooBigError, toWebp, PHOTO_MAX_BYTES } from "./own-photo";
+import { copyClientPhoto, isHeic, photoPath, PhotoFormatError, PhotoTooBigError, toWebp, PHOTO_CHAT_MAX_BYTES } from "./own-photo";
 
 const jpeg = () => sharp({ create: { width: 3000, height: 2000, channels: 3, background: "#c9a" } }).jpeg().toBuffer();
 
@@ -54,9 +54,9 @@ describe("фото клиента", () => {
     expect(uploaded).toHaveLength(1);
   });
 
-  it("больше 10 МБ — отказ (Telegram или сам файл)", async () => {
+  it("больше 20 МБ — отказ (Telegram или сам файл)", async () => {
     await expect(copyClientPhoto("f1", io(await jpeg(), { tooBig: true }))).rejects.toBeInstanceOf(PhotoTooBigError);
-    await expect(copyClientPhoto("f1", io(new Uint8Array(PHOTO_MAX_BYTES + 1)))).rejects.toBeInstanceOf(PhotoTooBigError);
+    await expect(copyClientPhoto("f1", io(new Uint8Array(PHOTO_CHAT_MAX_BYTES + 1)))).rejects.toBeInstanceOf(PhotoTooBigError);
   });
 
   it("путь в бакете по публичному адресу", () => {
