@@ -9,6 +9,7 @@ import { copyText, haptic, openLink, shareLink } from "./telegram";
 import { CheckIcon, ClockIcon, CloseIcon, SpinnerIcon } from "./icons";
 import { PriceBlock, PromoField } from "./PriceBlock";
 import { salesCopy } from "@/texts/sales";
+import { payCopy } from "@/texts/pay";
 import s from "../app.module.css";
 
 type PayInfo = { phone: string; name: string; card: string | null };
@@ -63,6 +64,47 @@ export function Pay({
   const [agree, setAgree] = useState(false);
   const [reason, setReason] = useState<StaffGrantReason | null>(null);
   const [clientLink, setClientLink] = useState<string | null>(null);
+  // Оплата без чека: «✅ Тўладим» → имя, как в Kaspi
+  const [asking, setAsking] = useState(false);
+  const [payer, setPayer] = useState("");
+  const [receiptOpen, setReceiptOpen] = useState(false);
+
+  async function sendName() {
+    if (busy) return;
+    const pt = payCopy(T.lang);
+    setBusy(true);
+    setError(null);
+    try {
+      const r = await api<{ ok: true; night: boolean } | { error: string }>("paidByName", {
+        orderId: order.id,
+        name: payer,
+      });
+      if ("ok" in r) {
+        haptic.ok();
+        onDone(r.night);
+        return;
+      }
+      haptic.error();
+      if (r.error === "priceChanged" || r.error === "notConfirmed") {
+        const q = await api<{ ok: true; order: AppOrder } | { error: string }>("quote", { orderId: order.id });
+        if ("ok" in q) setOrder(q.order);
+        setAgree(false);
+        setRecheck(true);
+      }
+      setError(r.error === "name" ? pt.nameBad : (T.pay.errors[r.error as keyof typeof T.pay.errors] ?? T.serverError));
+    } catch (e) {
+      haptic.error();
+      setError(
+        e instanceof ApiError && e.code === "tooOften"
+          ? payCopy(T.lang).tooOften
+          : e instanceof ApiError && e.code === "offline"
+            ? T.offline
+            : T.serverError,
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
 
   // Владелец заполнил за клиента: одноразовая ссылка o_ — заказ перейдёт к клиенту, оплатит он сам
   async function forClient() {
@@ -375,65 +417,139 @@ export function Pay({
     );
   }
 
-  const rows: [string, string][] = [
-    [T.pay.phone, pay.phone],
-    ...(pay.card ? ([[T.pay.card, pay.card]] as [string, string][]) : []),
-    [T.pay.name, pay.name],
-  ];
+  // 17.11.2026: основной способ — без чека. Сумма и номер Kaspi крупно → «✅ Тўладим» → имя, как в Kaspi
+  const pt = payCopy(T.lang);
   return (
     <div className={s.screen}>
-      <h1 className={s.title}>{T.pay.title}</h1>
+      <h1 className={s.title}>{pt.title}</h1>
       <PriceBlock order={order} />
-      <Section title={T.pay.how}>
-        {rows.map(([label, value]) => (
-          <div key={label} className={s.req}>
-            <span>
-              <small>{label}</small>
-              <b>{value}</b>
-            </span>
-            {label !== T.pay.name && (
-              <button type="button" className={`${s.btn} ${s.btnGhost} ${s.btnSmall}`} onClick={() => copy(value)}>
-                {T.pay.copy}
-              </button>
-            )}
-          </div>
-        ))}
+      <div className={s.kaspiBox} data-kaspi>
         <div className={s.req}>
           <span>
-            <small>{T.pay.note(order.number)}</small>
-            <b>#{order.number}</b>
+            <small>{pt.kaspi}</small>
+            <b className={s.kaspiPhone}>{pay.phone}</b>
+            <small>{pay.name}</small>
           </span>
           <button
             type="button"
             className={`${s.btn} ${s.btnGhost} ${s.btnSmall}`}
-            onClick={() => copy(`#${order.number}`)}
+            onClick={() => copy(pay.phone)}
+            data-copy-phone
           >
-            {T.pay.copy}
+            {pt.copyPhone}
           </button>
         </div>
-      </Section>
+        <div className={s.req}>
+          <span>
+            <small>{pt.amount}</small>
+            <b>{T.price(order.amount)}</b>
+          </span>
+          <button
+            type="button"
+            className={`${s.btn} ${s.btnGhost} ${s.btnSmall}`}
+            onClick={() => copy(String(order.amount))}
+            data-copy-amount
+          >
+            {pt.copyAmount}
+          </button>
+        </div>
+        {pay.card && (
+          <div className={s.req}>
+            <span>
+              <small>{T.pay.card}</small>
+              <b>{pay.card}</b>
+            </span>
+            <button type="button" className={`${s.btn} ${s.btnGhost} ${s.btnSmall}`} onClick={() => copy(pay.card!)}>
+              {T.pay.copy}
+            </button>
+          </div>
+        )}
+        <p className={s.help}>
+          {pt.how}
+          <br />
+          {pt.note(order.number)}
+        </p>
+      </div>
       {error && (
         <p className={s.formErr} role="alert">
           {error}
         </p>
       )}
-      <button
-        type="button"
-        className={`${s.btn} ${s.btnWide}`}
-        onClick={() => input.current?.click()}
-        disabled={progress !== null}
-        aria-busy={progress !== null}
-      >
-        {progress !== null ? (
-          <>
-            <SpinnerIcon size={20} />
-            {`${T.pay.sending} ${Math.round(progress * 100)}%`}
-          </>
-        ) : (
-          T.pay.upload
-        )}
-      </button>
-      <p className={s.status}>{T.pay.uploadHint}</p>
+      {asking ? (
+        <form
+          className={s.payerForm}
+          onSubmit={(e) => {
+            e.preventDefault();
+            sendName();
+          }}
+          data-payer-form
+        >
+          <label className={s.label} htmlFor="payer-name">
+            {pt.askName}
+          </label>
+          <input
+            id="payer-name"
+            className={s.input}
+            value={payer}
+            onChange={(e) => {
+              setPayer(e.target.value.slice(0, 40));
+              setError(null);
+            }}
+            placeholder={pt.namePlaceholder}
+            autoComplete="name"
+            maxLength={40}
+            name="payerName"
+            autoFocus
+          />
+          <button
+            type="submit"
+            className={`${s.btn} ${s.btnWide}`}
+            disabled={busy || payer.trim().length < 2}
+            aria-busy={busy}
+          >
+            {busy ? <SpinnerIcon size={20} /> : null}
+            {pt.send}
+          </button>
+        </form>
+      ) : (
+        <button
+          type="button"
+          className={`${s.btn} ${s.btnWide}`}
+          onClick={() => {
+            haptic.tap();
+            setAsking(true);
+          }}
+          data-paid
+        >
+          {pt.paid}
+        </button>
+      )}
+      {/* Чек — по желанию: прежний путь (фото/PDF) */}
+      {receiptOpen ? (
+        <>
+          <button
+            type="button"
+            className={`${s.btn} ${s.btnGhost} ${s.btnWide}`}
+            onClick={() => input.current?.click()}
+            disabled={progress !== null}
+            aria-busy={progress !== null}
+          >
+            {progress !== null ? (
+              <>
+                <SpinnerIcon size={20} />
+                {`${T.pay.sending} ${Math.round(progress * 100)}%`}
+              </>
+            ) : (
+              T.pay.upload
+            )}
+          </button>
+          <p className={s.status}>{pt.receiptHint}</p>
+        </>
+      ) : (
+        <button type="button" className={s.textMore} onClick={() => setReceiptOpen(true)} data-receipt-optional>
+          {pt.receiptOptional}
+        </button>
+      )}
       <input
         ref={input}
         type="file"

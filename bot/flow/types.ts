@@ -45,6 +45,7 @@ export type StepId =
   | "idle"
   | "correction"
   | "promoCode"
+  | "payerName"
   | "cat"
   | "fmt"
   | "catalog"

@@ -420,7 +420,7 @@ export const uz = {
     approve: "✅ Тасдиқлаш",
     reject: "❌ Рад этиш",
     reasonAsk: "Сабабини танланг 👇",
-    reasons: { money: "Пул келмади", sum: "Сумма нотўғри", other: "Бошқа чек" } as Record<string, string>,
+    reasons: { nopay: "Тўлов келмади", money: "Пул келмади", sum: "Сумма нотўғри", other: "Бошқа чек" } as Record<string, string>,
     approved: (n: number) => `✅ #${n} тасдиқланди. Мижозга ҳавола юборилди.`,
     approvedFailed: (n: number) =>
       `⚠️ #${n} тасдиқланди, лекин мижозга ҳавола етиб бормади (ботни блоклаган бўлиши мумкин). Мижозга ўзингиз ёзинг: ҳавола «/find ${n}» да.`,

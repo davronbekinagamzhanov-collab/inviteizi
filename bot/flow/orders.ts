@@ -1,3 +1,5 @@
+import { payCopy } from "@/texts/pay";
+import { payerLine } from "./pay-name";
 import { applyPricing, buyerOf } from "../pricing";
 import { salesCopy } from "@/texts/sales";
 import { issueByPromotion, priceLinesFor } from "./sales";
@@ -373,14 +375,24 @@ export async function payOrder(c: Ctx, n: number, confirmed = false, stamp?: str
   });
   const env = c.deps.env;
   const card = env.paymentCardNumber?.trim();
-  const paymentRows: InlineButton[][] = [[{ text: c.tx.pay.copy, copy: env.kaspiPhone.replace(/[^\d+]/g, "") }]];
+  // 17.11.2026: основной способ — без чека: перевод в Kaspi → «✅ Тўладим» → имя. Чек — по желанию
+  const pt = payCopy(c.lang);
+  const paymentRows: InlineButton[][] = [
+    [
+      { text: pt.copyPhone, copy: env.kaspiPhone.replace(/[^\d+]/g, "") },
+      { text: pt.copyAmount, copy: String(o.amount) },
+    ],
+  ];
   if (card) paymentRows.push([{ text: c.tx.pay.copyCard, copy: card }]);
-  // Сумма в кнопке: если до чека сменили формат (новая цена), старая кнопка снова покажет реквизиты
-  paymentRows.push([{ text: c.tx.pay.sendReceipt, data: `rcpt:${o.number}:${o.amount}` }]);
+  // Сумма в кнопке: если до оплаты сменилась цена, старая кнопка снова покажет оплату
+  paymentRows.push([{ text: pt.paid, data: `paid:${o.number}:${o.amount}` }]);
+  paymentRows.push([{ text: pt.receiptOptional, data: `rcpt:${o.number}:${o.amount}` }]);
   await send(
     c,
-    c.tx.pay.info(price(o.amount), env.kaspiPhone, env.kaspiName, o.number) +
+    pt.info(price(o.amount), env.kaspiPhone, env.kaspiName, o.number) +
       (card ? "\n\n" + c.tx.pay.card(card) : "") +
+      "\n\n" +
+      pt.receiptHint +
       (c.deps.env.marketing?.delivery ? "\n\n" + marketingCopy(c.lang).manualPayment : ""),
     inline(paymentRows),
   );
@@ -507,7 +519,8 @@ export const decisionButtons = (tx: ReturnType<typeof txFor>, n: number): Inline
 export async function sendReceiptTo(deps: Deps, adminId: number, o: OrderRecord, prefix = "") {
   const client = await deps.repo.getUser(o.userId);
   const lang = await langOf(deps, adminId);
-  const caption = prefix + adminCard(deps, o, lang, client);
+  // Оплата по имени («✅ Тўладим»): первой строкой — №, сумма, от кого, время
+  const caption = prefix + payerLine(lang, o) + adminCard(deps, o, lang, client);
   const opts = { caption, markup: inline(decisionButtons(txFor(lang), o.number)) };
   if (o.receipt?.kind === "document") await deps.tg.sendDocument(adminId, o.receipt.fileId, opts);
   else if (o.receipt) await deps.tg.sendPhoto(adminId, o.receipt.fileId, opts);
@@ -704,7 +717,7 @@ export async function approve(c: Ctx, n: number) {
   await sendAfterCommit(c, c.chatId, paidLine ? `${done}\n${paidLine}` : done);
 }
 
-const REASONS = ["money", "sum", "other"] as const;
+const REASONS = ["nopay", "money", "sum", "other"] as const;
 
 export async function askRejectReason(c: Ctx, n: number) {
   if (!(await guardAdmin(c))) return;
@@ -727,6 +740,8 @@ export async function reject(c: Ctx, n: number, code: string) {
   const tx = txFor(await langOf(c.deps, o.userId).catch(() => "uz" as const));
   await sendAfterCommit(c, o.userId, tx.pay.rejected(n, tx.admin.reasons[code]), {
     markup: inline([
+      // Можно снова нажать «✅ Тўладим» (оплата по имени) или прислать чек
+      [{ text: payCopy(await langOf(c.deps, o.userId).catch(() => "uz")).paid, data: `paid:${n}:${o.amount}` }],
       [{ text: tx.pay.resend, data: `rcpt:${n}:${o.amount}` }],
       [{ text: tx.contact, url: ownerUrl(c) }],
     ]),

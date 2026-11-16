@@ -24,7 +24,7 @@ describe("проверка перед оплатой — чат", () => {
     expect((await s.repo.getOrder(o.id))!.payConfirmedAt).toBeNull();
     await s.click(1, uz.pay.confirmYes);
     expect(s.lastText(1)).toContain(s.deps.env.kaspiPhone);
-    expect(s.lastText(1)).toContain(`#${o.number}`);
+    expect(s.lastText(1)).toContain(`№${o.number}`);
     expect((await s.repo.getOrder(o.id))!.payConfirmedAt).toEqual(s.clock);
     // Двойное нажатие — реквизиты те же, без ошибки
     await s.callback(1, `payok:${o.number}`, 1);

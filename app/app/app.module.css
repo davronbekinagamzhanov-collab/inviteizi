@@ -1794,3 +1794,22 @@ textarea.input {
   background: var(--milk);
   border-bottom: 1px solid var(--line);
 }
+
+/* Оплата без чека (17.11.2026): номер Kaspi крупно, имя плательщика */
+.kaspiBox {
+  display: grid;
+  gap: 4px;
+  padding: 6px 16px 10px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--card, #fffaf2);
+}
+.kaspiPhone {
+  font-size: 22px;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.payerForm {
+  display: grid;
+  gap: 8px;
+}

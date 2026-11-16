@@ -122,6 +122,7 @@ type OrderRow = {
   paid_at: Date | null;
   marketing_refunded_at?: Date | null;
   pricing?: OrderPricing | null;
+  payer_name?: string | null;
   payment_reminded_at: Date | null;
   rsvp: boolean | null;
   /** Нет колонки до миграции client_photos — тогда undefined */
@@ -244,6 +245,7 @@ function toOrder(r: OrderRow): OrderRecord {
     paidAt: r.paid_at,
     ...(r.marketing_refunded_at ? { refundedAt: r.marketing_refunded_at } : {}),
     pricing: r.pricing ?? null,
+    payerName: r.payer_name ?? null,
     paymentRemindedAt: r.payment_reminded_at,
     adminRemindedAt: r.admin_reminded_at,
     payConfirmedAt: r.pay_confirmed_at ?? null,
@@ -335,6 +337,14 @@ function patchColumns(p: OrderPatch): Columns {
   if (p.payConfirmedAt !== undefined) c.pay_confirmed_at = p.payConfirmedAt;
   if (p.termsAcceptedAt !== undefined) c.terms_accepted_at = p.termsAcceptedAt;
   if (p.expiresAt !== undefined) c.expires_at = p.expiresAt;
+  if (p.payerName !== undefined) {
+    c.payer_name = p.payerName;
+    // Оплата по имени: способ «name», файла нет (чек может прийти позже — тогда photo/document)
+    if (p.payerName && !p.receipt) {
+      c.receipt_kind = "name";
+      c.receipt_file_id = null;
+    }
+  }
   if (p.pricing !== undefined) {
     // Объект — jsonb как есть (как custom_text_i18n); строка записалась бы JSON-строкой
     c.pricing = (p.pricing ?? null) as never;
@@ -1509,7 +1519,11 @@ export class PgRepo implements Repo {
     return this.sql.begin(async (tx) => {
       const cols = patchColumns(patch);
       // Миграция акций (20261117) не применена: цену без отметки акции сохраняем как раньше
-      if (legacy >= 1) for (const k of ["terms_accepted_at", "pricing", "promotion_id"]) delete cols[k];
+      if (legacy >= 1) {
+        for (const k of ["terms_accepted_at", "pricing", "promotion_id", "payer_name"]) delete cols[k];
+        // Без миграции оплаты по имени receipt_kind = 'name' недопустим — статус меняется без отметки способа
+        if (cols.receipt_kind === "name") delete cols.receipt_kind;
+      }
       if (legacy >= 2) for (const k of ["pay_confirmed_at", "langs", "custom_text_i18n"]) delete cols[k];
       const rows = from
         ? await tx`update public.orders set ${tx(cols)}
