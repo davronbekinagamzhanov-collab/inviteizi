@@ -263,3 +263,29 @@ describe("кнопка оплаты до перехода к оплате", () =
     expect(buttons.some((t) => /^💳 Тўлаш/.test(t) && t.includes("8 000"))).toBe(false);
   });
 });
+
+describe("смена формата после фиксации цены", () => {
+  it("цена акции пересчитывается от цены нового формата", async () => {
+    const { upsertDraftOrder } = await import("./flow/orders");
+    const s = new Sim();
+    await promotion(s);
+    const o = await toCheck(s, 1);
+    expect(o).toMatchObject({ amount: 4000, pricing: { base: 8000 } });
+    const r = await upsertDraftOrder(
+      s.deps,
+      1,
+      {
+        orderId: o.id,
+        templateId: "nur-varaq",
+        format: "scroll",
+        occasion: o.occasion,
+        data: o.data,
+        music: o.music,
+      } as never,
+      0,
+    );
+    expect(r.kind).toBe("updated");
+    const n = (await s.repo.getOrder(o.id))!;
+    expect(n).toMatchObject({ format: "scroll", amount: 3000, pricing: { kind: "promotion", base: 6000 } });
+  });
+});

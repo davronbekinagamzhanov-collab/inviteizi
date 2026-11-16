@@ -140,6 +140,8 @@ export async function upsertDraftOrder(
       // Тот же формат — согласованная сумма (каталог её не меняет); другой формат — цена этого формата
       format: s.format,
       amount: s.format === old.format ? old.amount : PRICES[s.format],
+      // Другой формат — прежняя зафиксированная цена (акция/оптовая) считалась от старой базы: сбросить
+      ...(s.format === old.format ? {} : { pricing: null }),
       // Заказ изменили — перед оплатой клиент снова проверяет его
       ...(old.payConfirmedAt ? { payConfirmedAt: null } : {}),
     });
