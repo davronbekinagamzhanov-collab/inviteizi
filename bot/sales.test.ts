@@ -289,3 +289,49 @@ describe("смена формата после фиксации цены", () =>
     expect(n).toMatchObject({ format: "scroll", amount: 3000, pricing: { kind: "promotion", base: 6000 } });
   });
 });
+
+describe("промокод: кнопки зависят от флага", () => {
+  /** Заглушка маркетинга: брони нет (настоящая логика — в Postgres-тестах) */
+  const withPromos = (s: Sim, on: boolean) => {
+    s.deps.env.marketing = on
+      ? { ui: true, delivery: false, referrals: false, promos: true, status: false, edits: false }
+      : { ui: true, delivery: false, referrals: false, promos: false, status: false, edits: false };
+    (s.deps.repo as { marketing?: unknown }).marketing = {
+      holdOf: async () => null,
+      releaseHold: async () => false,
+      releaseExpired: async () => 0,
+    };
+  };
+  const promoButtons = (s: Sim, id: number) =>
+    s.tg
+      .to(id)
+      .flatMap((m) => (m.markup && "inline" in m.markup ? m.markup.inline.flat() : []))
+      .filter((b) => b.text === salesTexts.uz.promoButton);
+
+  it("флаг включён: «🎟 Промокод» в боте и «Есть промокод?» в Mini App видны клиенту на шаге оплаты", async () => {
+    const s = new Sim();
+    withPromos(s, true);
+    const o = await toCheck(s, 1);
+    expect(promoButtons(s, 1).length).toBeGreaterThan(0);
+    expect(((await app.quoteOrder(s.deps, user(1), o.id)) as { order: app.AppOrder }).order.promoAllowed).toBe(true);
+  });
+
+  it("флаг выключен: кнопок нет совсем (ни в боте, ни в Mini App)", async () => {
+    const s = new Sim();
+    withPromos(s, false);
+    const o = await toCheck(s, 1);
+    expect(promoButtons(s, 1)).toEqual([]);
+    expect(((await app.quoteOrder(s.deps, user(1), o.id)) as { order: app.AppOrder }).order.promoAllowed).toBe(false);
+    // и прямой запрос «promo» — честный отказ, а не сбой
+    expect(await app.promoForOrder(s.deps, user(1), o.id, "TOY10")).toEqual({ error: "disabled" });
+  });
+
+  it("партнёру кнопки промокода нет даже при включённом флаге", async () => {
+    const s = new Sim();
+    withPromos(s, true);
+    await partner(s, 800);
+    const o = await toCheck(s, 800);
+    expect(promoButtons(s, 800)).toEqual([]);
+    expect(((await app.quoteOrder(s.deps, user(800), o.id)) as { order: app.AppOrder }).order.promoAllowed).toBe(false);
+  });
+});

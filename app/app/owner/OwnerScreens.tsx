@@ -515,7 +515,8 @@ function Promos({ toast }: { toast: (t: string) => void }) {
       {data && !data.ready && <p className={s.hint}>Промокоды ещё не подключены к базе (миграция маркетинга).</p>}
       {data?.ready && !data.enabled && (
         <p className={s.hint} data-promos-off>
-          Клиенты пока не видят промокоды: флаг MARKETING_PROMOS_ENABLED выключен. Создать заранее можно.
+          ⚠️ Промокоды выключены: клиенты не смогут ввести код (нет кнопки «🎟 Промокод»). Включается флагами
+          MARKETING_AUTOMATION_ENABLED и MARKETING_PROMOS_ENABLED. Создать код заранее можно.
         </p>
       )}
       {data?.ready && (
@@ -558,7 +559,9 @@ function Promos({ toast }: { toast: (t: string) => void }) {
               run(
                 "ownerPromoCreate",
                 { code, percent: Number(percent), limit: Number(limit), expires: expires || null },
-                `Промокод ${code} создан`,
+                data.enabled
+                  ? `Промокод ${code} создан`
+                  : `Промокод ${code} создан, но промокоды выключены — клиенты не смогут ввести`,
               )
             }
           >

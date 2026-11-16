@@ -353,7 +353,8 @@ export async function ownerAdmin(deps: Deps, u: AppUser, action: OwnerAdminActio
           expires,
           str(body.name, 80) || code,
         );
-        return { ok: true as const, code: saved };
+        // Флаг промокодов выключен — код создан заранее, но клиенты его ввести не смогут
+        return { ok: true as const, code: saved, promosOff: !deps.env.marketing?.promos };
       } catch (e) {
         return promoError(e);
       }
