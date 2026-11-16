@@ -23,28 +23,28 @@ import { melody as defaultMelody } from "../themes/oq-ot/melody";
 import { ONE_PAGE_LOOKS, type OnePageLook } from "../one-page-looks";
 
 const vollkorn = localFont({
+  preload: false,
   src: "../../assets/fonts/google/vollkorn/Vollkorn[wght].woff2",
   variable: "--op-vollkorn",
   display: "swap",
-  preload: false,
 });
 const piazzolla = localFont({
+  preload: false,
   src: "../../assets/fonts/google/piazzolla/Piazzolla[opsz,wght].woff2",
   variable: "--op-piazzolla",
   display: "swap",
-  preload: false,
 });
 const cormorant = localFont({
+  preload: false,
   src: "../../assets/fonts/google/cormorantgaramond/CormorantGaramond[wght].woff2",
   variable: "--op-cormorant",
   display: "swap",
-  preload: false,
 });
 const unicase = localFont({
+  preload: false,
   src: "../../assets/fonts/google/cormorantunicase/CormorantUnicase-Medium.woff2",
   variable: "--op-unicase",
   display: "swap",
-  preload: false,
 });
 const FONT_VARS = `${vollkorn.variable} ${piazzolla.variable} ${cormorant.variable} ${unicase.variable}`;
 const FAMILY: Record<OnePageLook["font"], string> = {
