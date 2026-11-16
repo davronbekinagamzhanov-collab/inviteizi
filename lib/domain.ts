@@ -88,7 +88,40 @@ export type OrderRecord = {
   payConfirmedAt?: Date | null;
   /** п.18: клиент отметил «Шартларга розиман» (вместе с payConfirmedAt) */
   termsAcceptedAt?: Date | null;
+  /** 17.11.2026: цена зафиксирована по акции или оптовой скидке (в момент перехода к оплате). null — обычная/промокод */
+  pricing?: OrderPricing | null;
 };
+
+/** Скидка, по которой посчитан amount: base — цена до скидки, percent — скидка */
+export type OrderPricing = {
+  kind: "promotion" | "wholesale";
+  base: number;
+  percent: number;
+  promotionId?: string;
+  name?: string;
+  endsAt?: string;
+};
+
+/** Акция: скидка для обычных клиентов без промокода, одна активная одновременно */
+export type Promotion = {
+  id: string;
+  name: string;
+  percent: number;
+  startsAt: Date;
+  endsAt: Date;
+  /** null — все тадбиры / все форматы */
+  occasions: Occasion[] | null;
+  formats: Format[] | null;
+  /** Клиентам, пришедшим по ссылке партнёра (по умолчанию — нет) */
+  forPartnerClients: boolean;
+  stoppedAt: Date | null;
+  createdBy: number;
+  createdAt: Date;
+};
+export type NewPromotion = Omit<Promotion, "id" | "stoppedAt" | "createdAt">;
+
+/** Оптовик: постоянная скидка, без акций, промокодов и начислений партнёрам */
+export type Wholesaler = { userId: number; percent: number; createdAt: Date; removedAt: Date | null };
 
 export type NewOrder = Pick<
   OrderRecord,
@@ -114,6 +147,7 @@ export type OrderPatch = Partial<
     | "expiresAt"
     | "payConfirmedAt"
     | "termsAcceptedAt"
+    | "pricing"
   >
 >;
 

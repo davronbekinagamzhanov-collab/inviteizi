@@ -15,6 +15,7 @@ import type {
   UserRecord,
 } from "@/lib/domain";
 import type { Occasion } from "@/lib/types";
+import type { NewPromotion, Promotion, Wholesaler } from "@/lib/domain";
 import type { Analytics, Period, EventKind } from "@/lib/analytics";
 import type { BotErrorEntry } from "./errors";
 import type { ManagerPayout, PanelSnapshot, Partner, PayoutSchedule } from "@/lib/owner-panel";
@@ -223,6 +224,17 @@ export interface Repo {
   recordManagerPayout(p: Omit<ManagerPayout, "createdAt"> & { createdBy: number }): Promise<boolean>;
   /** Средняя оценка отзывов за промежуток (orderIds — только эти заказы; null — все). Нет таблицы — null */
   reviewSummary?(from: Date, to: Date, orderIds: string[] | null): Promise<{ avg: number; count: number } | null>;
+
+  // ── Акции и оптовики (17.11.2026). Без миграции: акций и оптовиков нет, создание — "missing" ──
+  /** "overlap" — пересекается по времени с другой неостановленной акцией (одна активная одновременно) */
+  createPromotion(p: NewPromotion): Promise<Promotion | "overlap" | "missing">;
+  listPromotions(): Promise<Promotion[]>;
+  stopPromotion(id: string, now: Date): Promise<boolean>;
+  setWholesaler(userId: number, percent: number, by: number): Promise<boolean>;
+  removeWholesaler(userId: number, now: Date): Promise<boolean>;
+  /** Только действующий оптовик (не снятый) */
+  getWholesaler(userId: number): Promise<Wholesaler | null>;
+  listWholesalers(): Promise<Wholesaler[]>;
 
   // ── Часть 10: напоминания, отзывы, автоочистка ──
   setNudge(id: number, patch: { count?: number; off?: boolean }): Promise<void>;

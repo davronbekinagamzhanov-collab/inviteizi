@@ -44,6 +44,7 @@ export type Deps = {
 export type StepId =
   | "idle"
   | "correction"
+  | "promoCode"
   | "cat"
   | "fmt"
   | "catalog"

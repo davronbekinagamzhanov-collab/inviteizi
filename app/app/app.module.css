@@ -1673,3 +1673,40 @@ textarea.input {
     font-size: 14px;
   }
 }
+
+/* Цена со скидкой (акция / промокод / оптовая), 17.11.2026 */
+.payDeal {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+}
+.oldPrice {
+  color: var(--muted);
+  font-size: 18px;
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+}
+.newPrice {
+  color: var(--deal, #9a3d24);
+}
+.saving {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--deal, #9a3d24);
+}
+.dealLabel {
+  font-size: 14px;
+  color: var(--muted);
+  text-align: center;
+}
+.promoRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 4px 0 12px;
+}
+.promoRow input {
+  flex: 1 1 140px;
+  min-width: 0;
+}

@@ -24,6 +24,9 @@ import type {
   Lang,
   MusicRecord,
   NewOrder,
+  NewPromotion,
+  Promotion,
+  Wholesaler,
   OrderPatch,
   OrderRecord,
   OrderStatus,
@@ -406,6 +409,7 @@ export class MemoryRepo implements Repo {
       .filter(
         (o) =>
           (o.status === "active" || o.status === "archived") &&
+          o.amount > 0 &&
           !credited.has(o.id) &&
           codes.has(this.users.get(o.userId)?.source ?? ""),
       )
@@ -741,6 +745,45 @@ export class MemoryRepo implements Repo {
         .filter(Boolean)
         .some((s) => String(s).toLowerCase().includes(q));
     });
+  }
+
+  // ── Акции и оптовики ──
+  promotions: Promotion[] = [];
+  wholesalers = new Map<number, Wholesaler>();
+  async createPromotion(p: NewPromotion) {
+    const overlap = this.promotions.some((x) => !x.stoppedAt && +x.startsAt < +p.endsAt && +p.startsAt < +x.endsAt);
+    if (overlap) return "overlap" as const;
+    const row: Promotion = { ...clone(p), id: crypto.randomUUID(), stoppedAt: null, createdAt: this.now() };
+    this.promotions.push(row);
+    return clone(row);
+  }
+  async listPromotions() {
+    return clone([...this.promotions].sort((a, b) => +b.startsAt - +a.startsAt));
+  }
+  async stopPromotion(id: string, now: Date) {
+    const p = this.promotions.find((x) => x.id === id && !x.stoppedAt);
+    if (!p) return false;
+    p.stoppedAt = now;
+    return true;
+  }
+  async setWholesaler(userId: number, percent: number, by: number) {
+    void by;
+    if (!this.users.has(userId)) return false;
+    this.wholesalers.set(userId, { userId, percent, createdAt: this.now(), removedAt: null });
+    return true;
+  }
+  async removeWholesaler(userId: number, now: Date) {
+    const w = this.wholesalers.get(userId);
+    if (!w || w.removedAt) return false;
+    w.removedAt = now;
+    return true;
+  }
+  async getWholesaler(userId: number) {
+    const w = this.wholesalers.get(userId);
+    return w && !w.removedAt ? clone(w) : null;
+  }
+  async listWholesalers() {
+    return [...this.wholesalers.values()].filter((w) => !w.removedAt).map(clone);
   }
 
   async updateOrder(id: string, patch: OrderPatch) {

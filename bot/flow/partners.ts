@@ -1024,6 +1024,9 @@ export async function creditPartner(deps: Deps, order: Pick<OrderRecord, "id" | 
   if ((await deps.repo.staffIds()).includes(order.userId)) return;
   // Заказ, собранный сотрудником для клиента: продажа менеджера или владельца, не партнёра
   if (await deps.repo.clientOrderRef(order.id)) return;
+  // Оптовик: постоянная скидка, начислений партнёрам с его заказов нет
+  const full = await deps.repo.getOrder(order.id);
+  if (full?.pricing?.kind === "wholesale" || (await deps.repo.getWholesaler(order.userId))) return;
   const client = await deps.repo.getUser(order.userId);
   const code = parsePartnerSource(client?.source ?? null);
   if (!code) return;

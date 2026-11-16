@@ -45,6 +45,11 @@ export async function POST(req: Request) {
         return json(await app.editOrder(deps, user, body.orderId));
       case "new":
         return json(await app.newDraft(deps, user));
+      // Переход к оплате: цена фиксируется (акция / промокод / оптовая)
+      case "quote":
+        return json(await app.quoteOrder(deps, user, body.orderId));
+      case "promo":
+        return json(await app.promoForOrder(deps, user, body.orderId, body.code));
       case "confirmPay":
         return json(await app.confirmPay(deps, user, body.orderId, body.terms));
       case "orders":

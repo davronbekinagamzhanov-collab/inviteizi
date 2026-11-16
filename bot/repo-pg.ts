@@ -26,12 +26,16 @@ import type {
   MusicChoice,
   MusicRecord,
   NewOrder,
+  NewPromotion,
   OrderPatch,
+  OrderPricing,
   OrderRecord,
   OrderStatus,
+  Promotion,
   Stats,
   UserRecord,
 } from "@/lib/domain";
+import type { Format } from "@/templates/registry";
 import { EXTRA_LANGS, type EventKind, type ExtraLang, type Occasion, type Relation } from "@/lib/types";
 import { db, type Sql, type Tx } from "@/lib/db";
 import { env } from "@/lib/env";
@@ -115,6 +119,7 @@ type OrderRow = {
   receipt_at: Date | null;
   paid_at: Date | null;
   marketing_refunded_at?: Date | null;
+  pricing?: OrderPricing | null;
   payment_reminded_at: Date | null;
   rsvp: boolean | null;
   /** Нет колонки до миграции client_photos — тогда undefined */
@@ -236,6 +241,7 @@ function toOrder(r: OrderRow): OrderRecord {
     receiptAt: r.receipt_at,
     paidAt: r.paid_at,
     ...(r.marketing_refunded_at ? { refundedAt: r.marketing_refunded_at } : {}),
+    pricing: r.pricing ?? null,
     paymentRemindedAt: r.payment_reminded_at,
     adminRemindedAt: r.admin_reminded_at,
     payConfirmedAt: r.pay_confirmed_at ?? null,
@@ -327,6 +333,10 @@ function patchColumns(p: OrderPatch): Columns {
   if (p.payConfirmedAt !== undefined) c.pay_confirmed_at = p.payConfirmedAt;
   if (p.termsAcceptedAt !== undefined) c.terms_accepted_at = p.termsAcceptedAt;
   if (p.expiresAt !== undefined) c.expires_at = p.expiresAt;
+  if (p.pricing !== undefined) {
+    c.pricing = p.pricing ? (JSON.stringify(p.pricing) as never) : null;
+    c.promotion_id = p.pricing?.promotionId ?? null;
+  }
   // updated_at всё равно ставит триггер; так в update всегда есть хотя бы одна колонка
   c.updated_at = new Date();
   return c;
@@ -400,6 +410,33 @@ const PARTNER_PATCH: Record<keyof PartnerPatch, string> = {
 };
 const MANAGER_COLUMNS = `telegram_id as "telegramId", code, username, first_name as "firstName", invited_by as "invitedBy", active, created_at as "createdAt", removed_at as "removedAt"`;
 /** Миграция партнёров ещё не применена */
+type PromotionRow = {
+  id: string;
+  name: string;
+  discount_percent: number;
+  starts_at: Date;
+  ends_at: Date;
+  occasions: Occasion[] | null;
+  formats: Format[] | null;
+  for_partner_clients: boolean;
+  stopped_at: Date | null;
+  created_by: number;
+  created_at: Date;
+};
+const toPromotion = (r: PromotionRow): Promotion => ({
+  id: r.id,
+  name: r.name,
+  percent: r.discount_percent,
+  startsAt: r.starts_at,
+  endsAt: r.ends_at,
+  occasions: r.occasions,
+  formats: r.formats,
+  forPartnerClients: r.for_partner_clients,
+  stoppedAt: r.stopped_at,
+  createdBy: Number(r.created_by),
+  createdAt: r.created_at,
+});
+
 const isMissingTable = (e: unknown) => (e as { code?: string } | null)?.code === "42P01";
 const isMissingColumn = (e: unknown) => (e as { code?: string } | null)?.code === "42703";
 
@@ -1110,6 +1147,81 @@ export class PgRepo implements Repo {
     return r.length > 0;
   }
 
+  // ── Акции и оптовики (миграция 20261117120000; без неё — пусто) ──
+  async createPromotion(p: NewPromotion) {
+    try {
+      const [r] = await this.sql<PromotionRow[]>`insert into public.promotions
+        (name,discount_percent,starts_at,ends_at,occasions,formats,for_partner_clients,created_by)
+        values(${p.name},${p.percent},${p.startsAt},${p.endsAt},${p.occasions ? this.sql.array(p.occasions) : null},
+          ${p.formats ? this.sql.array(p.formats) : null},${p.forPartnerClients},${p.createdBy}) returning *`;
+      return toPromotion(r);
+    } catch (e) {
+      if (isMissingTable(e)) return "missing" as const;
+      if ((e as { code?: string }).code === "23P01") return "overlap" as const;
+      throw e;
+    }
+  }
+  async listPromotions() {
+    try {
+      const rows = await this.sql<PromotionRow[]>`select * from public.promotions order by starts_at desc limit 100`;
+      return rows.map(toPromotion);
+    } catch (e) {
+      if (isMissingTable(e)) return [];
+      throw e;
+    }
+  }
+  async stopPromotion(id: string, now: Date) {
+    if (!UUID.test(id)) return false;
+    try {
+      const r = await this
+        .sql`update public.promotions set stopped_at=${now} where id=${id} and stopped_at is null returning id`;
+      return r.length > 0;
+    } catch (e) {
+      if (isMissingTable(e)) return false;
+      throw e;
+    }
+  }
+  async setWholesaler(userId: number, percent: number, by: number) {
+    try {
+      const r = await this.sql`insert into public.wholesalers(user_id,discount_percent,created_by)
+        select ${userId},${percent},${by} where exists(select 1 from public.users where id=${userId})
+        on conflict(user_id) do update set discount_percent=excluded.discount_percent,removed_at=null returning user_id`;
+      return r.length > 0;
+    } catch (e) {
+      if (isMissingTable(e)) return false;
+      throw e;
+    }
+  }
+  async removeWholesaler(userId: number, now: Date) {
+    try {
+      const r = await this
+        .sql`update public.wholesalers set removed_at=${now} where user_id=${userId} and removed_at is null returning user_id`;
+      return r.length > 0;
+    } catch (e) {
+      if (isMissingTable(e)) return false;
+      throw e;
+    }
+  }
+  async getWholesaler(userId: number) {
+    return (await this.listWholesalers(userId))[0] ?? null;
+  }
+  async listWholesalers(userId: number | null = null) {
+    try {
+      const rows = await this.sql<{ user_id: number; discount_percent: number; created_at: Date }[]>`
+        select user_id,discount_percent,created_at from public.wholesalers
+        where removed_at is null and (${userId}::bigint is null or user_id=${userId}) order by created_at`;
+      return rows.map((r) => ({
+        userId: Number(r.user_id),
+        percent: r.discount_percent,
+        createdAt: r.created_at,
+        removedAt: null,
+      }));
+    } catch (e) {
+      if (isMissingTable(e)) return [];
+      throw e;
+    }
+  }
+
   // ── Админы ──
   async isAdmin(id: number) {
     if (env.adminIdsOrEmpty().includes(id)) return true;
@@ -1277,7 +1389,8 @@ export class PgRepo implements Repo {
   private updateOnce(id: string, from: OrderStatus[] | null, patch: OrderPatch, legacy: 0 | 1 | 2) {
     return this.sql.begin(async (tx) => {
       const cols = patchColumns(patch);
-      if (legacy >= 1) delete cols.terms_accepted_at;
+      // Миграция акций (20261117) не применена: цену без отметки акции сохраняем как раньше
+      if (legacy >= 1) for (const k of ["terms_accepted_at", "pricing", "promotion_id"]) delete cols[k];
       if (legacy >= 2) for (const k of ["pay_confirmed_at", "langs", "custom_text_i18n"]) delete cols[k];
       const rows = from
         ? await tx`update public.orders set ${tx(cols)}

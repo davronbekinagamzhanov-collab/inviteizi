@@ -1,4 +1,5 @@
 import { correctionStep, beginCorrection } from "./correction";
+import { beginPromo, promoCode } from "./sales";
 import { marketingCommand, withMarketingReady } from "../marketing";
 /**
  * Логика бота: handle(deps, update). Telegram — только через deps.tg, база — через deps.repo.
@@ -118,6 +119,7 @@ export const steps: Record<StepId, Step> = {
   evMenu,
   receipt,
   correction: correctionStep,
+  promoCode,
   partnerName,
   partnerPhone,
   partnerRate,
@@ -577,6 +579,8 @@ async function onCallback(c: Ctx, d: string) {
       const [, , amount, mark] = d.split(":");
       return apply(c, await payOrder(c, n, true, amount !== undefined ? `${amount}:${mark ?? ""}` : undefined));
     }
+    case "pc":
+      return apply(c, await beginPromo(c, n));
     case "rcpt":
       return apply(c, await askReceipt(c, n, b === undefined ? undefined : Number(b)));
     case "edit":

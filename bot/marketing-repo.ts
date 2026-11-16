@@ -148,11 +148,31 @@ export class PgMarketing {
         await tx`select count(*)::int as used from public.promotion_reservations where promo_id=${p.id} and(state in('consumed','receipt') or(state='reserved' and expires_at>${now}))`;
       if (used >= p.usage_limit) throw new MarketingError("promo_exhausted");
       const original = Number(o.marketing_original_amount ?? o.amount),
-        amount = Math.floor((original * (100 - p.discount_percent)) / 100),
+        // Кратно 100 ₸ (вниз), 100 % — 0 ₸ (как у акций, bot/pricing.ts)
+        amount = p.discount_percent >= 100 ? 0 : Math.floor((original * (100 - p.discount_percent)) / 10000) * 100,
         expiry = new Date(+now + 30 * 60000);
       await tx`insert into public.promotion_reservations(order_id,promo_id,original_amount,discounted_amount,state,expires_at) values(${orderId},${p.id},${original},${amount},'reserved',${expiry}) on conflict(order_id) do update set promo_id=excluded.promo_id,original_amount=excluded.original_amount,discounted_amount=excluded.discounted_amount,state='reserved',expires_at=excluded.expires_at,consumed_at=null`;
       await tx`update public.orders set marketing_original_amount=${original},amount=${amount},pay_confirmed_at=null,terms_accepted_at=null where id=${orderId}`;
       return { amount, expiresAt: expiry };
+    });
+  }
+  /** Живая бронь промокода на заказе: код, скидка, цена до скидки. Нет — null */
+  async holdOf(orderId: string, now: Date) {
+    if (!validId(orderId)) return null;
+    const [r] = await this.sql`select p.code,p.discount_percent,r.original_amount,r.state,r.expires_at
+      from public.promotion_reservations r join public.promotion_codes p on p.id=r.promo_id where r.order_id=${orderId}`;
+    if (!r || !(r.state === "receipt" || (r.state === "reserved" && +r.expires_at > +now))) return null;
+    return { code: String(r.code), percent: Number(r.discount_percent), original: Number(r.original_amount) };
+  }
+  /** Снять бронь (акция выгоднее, или покупатель не клиент): цена — снова полная, лимит кода освобождается */
+  async releaseHold(orderId: string) {
+    if (!validId(orderId)) return false;
+    return this.sql.begin(async (tx) => {
+      const [r] =
+        await tx`update public.promotion_reservations set state='released',expires_at=null,consumed_at=null where order_id=${orderId} and state='reserved' returning original_amount`;
+      if (!r) return false;
+      await tx`update public.orders set amount=${r.original_amount},pay_confirmed_at=null,terms_accepted_at=null where id=${orderId} and status in('draft','preview','awaiting_payment','rejected')`;
+      return true;
     });
   }
   private async enqueue(
@@ -234,7 +254,9 @@ export class PgMarketing {
           }
         }
         const employee = (await tx`select order_id from public.client_orders where order_id=${orderId}`).length > 0;
-        if (partnerId && !employee) {
+        // Оптовик: без начислений партнёрам с его заказов
+        const wholesale = (o.pricing as { kind?: string } | null)?.kind === "wholesale";
+        if (partnerId && !employee && !wholesale) {
           const [p] = await tx`select * from public.partners where id=${partnerId} for update`;
           const [u] = await tx`select username from public.users where id=${o.user_id}`;
           if (

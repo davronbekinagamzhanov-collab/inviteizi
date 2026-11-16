@@ -242,6 +242,11 @@ export function partnerRowsWithin(s: PanelSnapshot, inside: (d: Date) => boolean
   });
 }
 
-/** Начисление партнёру за оплату: процент от фактически оплаченной суммы (до целых тенге) или фиксированная ставка */
+/** Начисление партнёру за оплату: процент от фактически оплаченной суммы (до целых тенге) или фиксированная ставка; 0 ₸ — 0 */
 export const earningFor = (p: Pick<Partner, "rate" | "ratePercent">, paidAmount: number) =>
-  p.ratePercent != null ? Math.round((paidAmount * p.ratePercent) / 100) : p.rate;
+  paidAmount <= 0
+    ? 0
+    : p.ratePercent != null
+      ? Math.round((paidAmount * p.ratePercent) / 100)
+      : // Фиксированная ставка — не больше реально оплаченной суммы (заказ по акции со скидкой)
+        Math.min(p.rate, paidAmount);
