@@ -122,8 +122,16 @@ function collect() {
           boxes: [a, b].map(({ tag, x, y, w, h }) => ({ tag, x, y, w, h })),
         });
     }
+  // за краем — ошибка, кроме карточек горизонтальной ленты (альбом листается вбок, соседняя карточка заглядывает)
+  const inStrip = (el) => {
+    for (let n = el.parentElement; n && n !== document.body; n = n.parentElement) {
+      const ox = getComputedStyle(n).overflowX;
+      if ((ox === "auto" || ox === "scroll") && n.scrollWidth > n.clientWidth + 4) return true;
+    }
+    return false;
+  };
   for (const b of boxes)
-    if (b.kind === "text" && (b.x < -2 || b.x + b.w > innerWidth + 2))
+    if (b.kind === "text" && (b.x < -2 || b.x + b.w > innerWidth + 2) && !inStrip(b.el))
       hits.push({ msg: `за краем: «${b.text}»`, boxes: [{ tag: b.tag, x: b.x, y: b.y, w: b.w, h: b.h }] });
   return { hits, opener: Boolean(document.querySelector("[data-open]")) };
 }
