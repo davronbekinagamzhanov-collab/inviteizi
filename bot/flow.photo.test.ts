@@ -143,7 +143,7 @@ describe("фото клиента в боте", () => {
     expect((await s.user(1))!.step).toBe("relation");
   });
 
-  it("cron: фото удаляются через 30 дней после конца приглашения, не раньше", async () => {
+  it("cron: фото удаляются, когда ссылка закрылась (тадбир + 30 дней), не раньше", async () => {
     const { s, removed } = photoSim();
     await toPhotoAsk(s, 1);
     await s.click(1, uz.photo.yes);
@@ -154,10 +154,10 @@ describe("фото клиента в боте", () => {
     const [o] = await s.repo.listOrdersByUser(1);
     // Оплаченный заказ (неоплаченный через 30 дней удаляет автоочистка — это проверяет bot/care.test.ts)
     await s.repo.updateOrder(o.id, { status: "active", paidAt: s.clock });
-    // Тадбир 14 ноября → ссылка до 14 декабря → фото до 13 января
-    s.clock = new Date("2027-01-10T00:00:00Z");
+    // Тадбир 14 ноября → ссылка до 14 декабря (тадбир + 30 дней) → в этот день фото удаляются
+    s.clock = new Date("2026-12-14T12:00:00Z");
     expect((await runCron(s.deps)).photosRemoved).toBe(0);
-    s.clock = new Date("2027-01-15T00:00:00Z");
+    s.clock = new Date("2026-12-15T12:00:00Z");
     expect((await runCron(s.deps)).photosRemoved).toBe(1);
     expect(removed).toEqual([["https://x.supabase.co/storage/v1/object/public/photos/client/P1.webp"]]);
     expect((await s.repo.getOrder(o.id))!.data.photos ?? []).toEqual([]);
