@@ -1,7 +1,7 @@
 import type { Ctx, Deps } from "./flow/types";
 import { marketingCopy } from "@/texts/marketing";
 import { MarketingError } from "./marketing-repo";
-import { statusPoster } from "@/lib/marketing/status-poster";
+import { statusCaption, statusPoster } from "@/lib/marketing/status-poster";
 import { inline, price, txFor, expiresAt } from "./flow/util";
 import { isUnreachable } from "./errors";
 import { sendLinkPack } from "./flow/orders";
@@ -83,9 +83,9 @@ export async function flushMarketing(deps: Deps) {
               continue;
             }
             if (job.body.kind === "status" && deps.env.marketing?.status) {
-              const bytes = await statusPoster(order, url, lang);
+              const bytes = await statusPoster(order, url);
               if (!(await store.markSending(job, deps.now()))) continue;
-              const m = await deps.tg.sendPhoto(order.userId, bytes, { caption: tx.status });
+              const m = await deps.tg.sendPhoto(order.userId, bytes, { caption: statusCaption(order, url, tx.status) });
               messageId = m.messageId;
             }
             if (job.body.kind === "referral") {
