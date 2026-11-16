@@ -12,7 +12,7 @@ import { ADMIN, Sim } from "../testing/sim";
 const S = staff.st;
 const price = (n: number) => `${n.toLocaleString("ru-RU").replace(/ /g, " ")} ₸`;
 
-/** Партнёр владельца + 2 оплаченных заказа (1 через партнёра) + 1 НАМУНА без оплаты */
+/** Партнёр владельца + 2 оплаченных заказа (1 через партнёра) + 1 Образцы без оплаты */
 async function dataset() {
   const s = new Sim();
   await s.start(ADMIN);

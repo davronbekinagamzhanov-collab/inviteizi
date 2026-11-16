@@ -42,7 +42,7 @@ const panel = (period) => ({
     { id: "ganch-peshtoq", number: 87, name: "Ганч пештоқ", samples: 2, paid: 1 },
     { id: "gulzor", number: 64, name: "Гулзор", samples: 1, paid: 1 },
   ],
-  funnel: { clients: 20, makers: 12, payers: 7, stuck: [{ step: "preview", label: "смотрят НАМУНА", count: 3 }, { step: "awaiting_payment", label: "на оплате", count: 1 }, { step: "receipt_sent", label: "чек на проверке", count: 1 }] },
+  funnel: { clients: 20, makers: 12, payers: 7, stuck: [{ step: "preview", label: "смотрят образец", count: 3 }, { step: "awaiting_payment", label: "на оплате", count: 1 }, { step: "receipt_sent", label: "чек на проверке", count: 1 }] },
 });
 
 const report = [];
@@ -78,6 +78,17 @@ const ADMIN_MOCK = {
   ownerPromoCreate: { ok: true, code: "BAHOR15" },
   ownerPromoDisable: { ok: true },
   ownerClientOrders: { orders: [{ id: "o1", number: 141, amount: 8000, design: "Муҳр", names: "Азиз ва Мадина", url: "http://localhost/demo/muhr" }] },
+  ownerPromotions: {
+    promotions: [
+      { id: "p1", name: "Куз чегирмаси", percent: 50, startsAt: iso(1), endsAt: iso(30), occasions: null, formats: ["animated"], forPartnerClients: false, state: "running", orders: 6, sum: 24000, free: 0 },
+      { id: "p0", name: "Наврўз — бепул", percent: 100, startsAt: iso(0), endsAt: iso(1), occasions: ["nikoh"], formats: null, forPartnerClients: true, state: "stopped", orders: 3, sum: 0, free: 3 },
+    ],
+  },
+  ownerPromotionStop: { ok: true },
+  ownerPromotionCreate: { ok: true, id: "p2" },
+  ownerWholesalers: { wholesalers: [{ userId: 9, name: "@toyxona_saltanat", percent: 20, orders: 4, sum: 25600, since: iso(2) }] },
+  ownerWholesaleSet: { ok: true, userId: 9 },
+  ownerWholesaleRemove: { ok: true },
   ownerClientLink: { ok: true, url: "http://localhost/x", bot: link("o"), amount: "8 000 ₸", waUz: "https://wa.me/?text=uz", waRu: "https://wa.me/?text=ru" },
 };
 
@@ -144,7 +155,7 @@ try {
     await ctx.close();
   }
   // Экраны админки на 375 и 320: открываются, действия доходят до сервера, ничего не вылезает
-  for (const width of [375, 320]) {
+  for (const width of [390, 320]) {
     const { ctx, page, errors, calls } = await open(true);
     await page.setViewportSize({ width, height: 812 });
     try {
@@ -185,12 +196,23 @@ try {
         await page.getByRole("button", { name: "Выключить" }).click();
         await page.getByRole("button", { name: "Да, выключить" }).click();
       });
+      await screen("promotions", "promotions", async () => {
+        await page.getByRole("button", { name: "Остановить" }).click();
+        await page.getByRole("button", { name: "Да, остановить" }).click();
+      });
+      await page.getByRole("tab", { name: "Оптовики" }).click();
+      await page.locator("[data-wholesaler]").first().waitFor();
+      if (await overflow(page)) errors.push("wholesale overflow");
+      // вкладки — одна строка
+      const rows = await page.$$eval('[aria-label="Разделы"] button', (b) => new Set(b.map((x) => Math.round(x.getBoundingClientRect().top))).size);
+      if (rows !== 1) errors.push(`tabs in ${rows} rows`);
+      await page.screenshot({ path: `${out}/${width}-tab-wholesale.png`, fullPage: true });
       await screen("client", "client", async () => {
         await page.getByRole("button", { name: /Клиенту · ждёт оплату/ }).click();
         await page.locator("[data-share-link]").waitFor();
       });
       const sent = new Set(calls.map((c) => c.action));
-      for (const a of ["ownerPartnerNew", "ownerPartnerTerms", "ownerPartnerPause", "ownerManagerInvite", "ownerManagerRemove", "ownerPayoutMark", "ownerPromoCreate", "ownerPromoDisable", "ownerClientLink"])
+      for (const a of ["ownerPartnerNew", "ownerPartnerTerms", "ownerPartnerPause", "ownerManagerInvite", "ownerManagerRemove", "ownerPayoutMark", "ownerPromoCreate", "ownerPromoDisable", "ownerClientLink", "ownerPromotionStop"])
         if (!sent.has(a)) errors.push(`${a} not sent`);
       const mark = calls.find((c) => c.action === "ownerPayoutMark");
       if (mark && (mark.amount !== 2800 || mark.version !== 1)) errors.push("payout mark body");

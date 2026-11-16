@@ -1,4 +1,5 @@
 import { correctionStep, beginCorrection } from "./correction";
+import { beginPromo, promoCode, promotionLine } from "./sales";
 import { marketingCommand, withMarketingReady } from "../marketing";
 /**
  * Логика бота: handle(deps, update). Telegram — только через deps.tg, база — через deps.repo.
@@ -118,6 +119,7 @@ export const steps: Record<StepId, Step> = {
   evMenu,
   receipt,
   correction: correctionStep,
+  promoCode,
   partnerName,
   partnerPhone,
   partnerRate,
@@ -328,7 +330,11 @@ async function welcome(c: Ctx) {
   await dropReplyKeyboard(c);
   await setAppButton(c);
   // Запись последней: записанный update повторно не обрабатывается, и приветствие бы потерялось
-  if (!(await roleHome(c))) await send(c, c.tx.welcome(c.user.firstName), await startMenu(c));
+  if (!(await roleHome(c))) {
+    // Акция — одной строкой под приветствием (только обычному клиенту, не чаще раза в 6 часов)
+    const line = await promotionLine(c);
+    await send(c, c.tx.welcome(c.user.firstName) + (line ? `\n\n${line}` : ""), await startMenu(c));
+  }
   await save(c);
 }
 
@@ -577,6 +583,8 @@ async function onCallback(c: Ctx, d: string) {
       const [, , amount, mark] = d.split(":");
       return apply(c, await payOrder(c, n, true, amount !== undefined ? `${amount}:${mark ?? ""}` : undefined));
     }
+    case "pc":
+      return apply(c, await beginPromo(c, n));
     case "rcpt":
       return apply(c, await askReceipt(c, n, b === undefined ? undefined : Number(b)));
     case "edit":

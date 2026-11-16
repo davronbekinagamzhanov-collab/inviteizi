@@ -1,3 +1,6 @@
+import { applyPricing, buyerOf } from "../pricing";
+import { salesCopy } from "@/texts/sales";
+import { issueByPromotion, priceLinesFor } from "./sales";
 import { flushMarketing, fulfillPromotion } from "../marketing";
 import { marketingCopy } from "@/texts/marketing";
 import { CURRENT_DESIGN_VERSION } from "@/templates/design-version";
@@ -137,6 +140,8 @@ export async function upsertDraftOrder(
       // Тот же формат — согласованная сумма (каталог её не меняет); другой формат — цена этого формата
       format: s.format,
       amount: s.format === old.format ? old.amount : PRICES[s.format],
+      // Другой формат — прежняя зафиксированная цена (акция/оптовая) считалась от старой базы: сбросить
+      ...(s.format === old.format ? {} : { pricing: null }),
       // Заказ изменили — перед оплатой клиент снова проверяет его
       ...(old.payConfirmedAt ? { payConfirmedAt: null } : {}),
     });
@@ -144,7 +149,7 @@ export async function upsertDraftOrder(
       const current = await repo.getOrder(old.id);
       return { kind: current?.status === "receipt_sent" ? "waiting" : "closed" };
     }
-    return { kind: "updated", order: o };
+    return { kind: "updated", order: await applyPricing(deps, o) };
   }
 
   const selected = getDesign(s.templateId);
@@ -167,7 +172,8 @@ export async function upsertDraftOrder(
     expectedQ,
     handledUpdates,
   );
-  return o ? { kind: "created", order: o } : { kind: "race" };
+  // Ожидаемая цена (акция / оптовая) видна сразу на кнопке «💳 Тўлаш»; при переходе к оплате — фиксируется ещё раз
+  return o ? { kind: "created", order: await applyPricing(deps, o) } : { kind: "race" };
 }
 
 export async function confirmDraft(c: Ctx): Promise<Result> {
@@ -285,12 +291,27 @@ export const checkStamp = (o: OrderRecord) => {
   return (h >>> 0).toString(36);
 };
 
+/** Проверка перед оплатой: сводка + строки цены (старая цена зачёркнута, скидка, экономия) */
+async function checkWithPrice(c: Ctx, o: OrderRecord) {
+  const lines = await priceLinesFor(c, o);
+  const base = checkLines(o, c.lang);
+  return lines ? base.replace(/\n💳 .*$/, `\n${lines}`) : base;
+}
+
+async function canUsePromo(c: Ctx, o: OrderRecord) {
+  if (!c.deps.env.marketing?.promos || !c.deps.repo.marketing) return false;
+  if (o.pricing?.kind === "promotion" && o.amount === 0) return false;
+  return (await buyerOf(c.deps, c.user.id)).role === "client";
+}
+
 export async function payOrder(c: Ctx, n: number, confirmed = false, stamp?: string): Promise<Result> {
-  const o = await ownOrder(c, n);
-  if (!o) {
+  const own = await ownOrder(c, n);
+  if (!own) {
     await send(c, c.tx.order.notFound);
     return { done: true };
   }
+  // Переход к оплате: цена фиксируется (акция / оптовая / промокод — бо́льшая скидка), роль — на сейчас
+  const o = await applyPricing(c.deps, own);
   if (PAID_STATUSES.includes(o.status)) {
     await send(c, c.tx.pay.alreadyPaid);
     return { done: true };
@@ -314,16 +335,31 @@ export async function payOrder(c: Ctx, n: number, confirmed = false, stamp?: str
       c,
       // НАМУНА живёт 24 часа: если уже закрыта — не даём мёртвую ссылку
       c.tx.pay.check(
-        checkLines(o, c.lang),
+        await checkWithPrice(c, o),
         pageMode(o, c.deps.now()) === "expired" ? null : pageUrl(c, o.slug),
         `${c.deps.env.publicBaseUrl}/terms${c.lang === "ru" ? "/ru" : ""}`,
       ),
       inline([
-        [{ text: c.tx.pay.confirmYes, data: `payok:${o.number}:${o.amount}:${checkStamp(o)}` }],
+        [
+          {
+            text:
+              o.amount === 0 && o.pricing?.kind === "promotion" ? salesCopy(c.lang).freeAction : c.tx.pay.confirmYes,
+            data: `payok:${o.number}:${o.amount}:${checkStamp(o)}`,
+          },
+        ],
+        // Промокод — только обычным клиентам и при включённых промокодах; бесплатно по акции — уже лучше любого кода
+        ...((await canUsePromo(c, o)) ? [[{ text: salesCopy(c.lang).promoButton, data: `pc:${o.number}` }]] : []),
         [{ text: c.tx.order.edit, data: `edit:${o.number}` }],
       ]),
     );
     return { stay: true };
+  }
+  // 0 ₸ по акции: без Kaspi и чека — ссылка сразу
+  if (o.amount === 0 && o.pricing?.kind === "promotion") {
+    const done = await issueByPromotion(c.deps, o);
+    if (done) await send(c, salesCopy(c.lang).freeIssued);
+    else await send(c, c.tx.pay.alreadyPaid);
+    return { done: true };
   }
   if (o.amount === 0 && c.deps.env.marketing?.promos) {
     await fulfillPromotion(c, o);
@@ -377,6 +413,12 @@ export async function askReceipt(c: Ctx, n: number, shownAmount?: number): Promi
   }
   // Клиент видел реквизиты с другой суммой (цена сменилась) — показываем актуальные
   if (shownAmount !== undefined && shownAmount !== o.amount) return payOrder(c, n);
+  // Акция могла закончиться, пока клиент переводил: новая сумма — до чека
+  const priced = await applyPricing(c.deps, o);
+  if (priced.amount !== o.amount) {
+    await send(c, salesCopy(c.lang).priceChanged(price(priced.amount)));
+    return payOrder(c, n);
+  }
   c.s = { q: c.s.q, orderId: o.id };
   return { enter: "receipt" };
 }
@@ -394,6 +436,15 @@ export const receipt: Step = {
       (u.kind === "document" && (RECEIPT_DOC.test(u.mimeType ?? "") || /\.pdf$/i.test(u.fileName ?? "")));
     if (!ok) return { hint: c.tx.pay.receiptBad };
     const file = u as Extract<typeof u, { kind: "photo" | "document" }>;
+    // Перед чеком цена ещё раз: акция закончилась — клиент видит новую сумму и подтверждает снова
+    const before = c.s.orderId ? await c.deps.repo.getOrder(c.s.orderId) : null;
+    if (before && PAYABLE_STATUSES.includes(before.status)) {
+      const priced = await applyPricing(c.deps, before);
+      if (priced.amount !== before.amount) {
+        await send(c, salesCopy(c.lang).priceChanged(price(priced.amount)));
+        return payOrder(c, priced.number);
+      }
+    }
     const o = await c.deps.repo.transition(c.s.orderId ?? "", PAYABLE_STATUSES, "receipt_sent", {
       receipt: { fileId: file.fileId, kind: file.kind },
       receiptAt: c.deps.now(),

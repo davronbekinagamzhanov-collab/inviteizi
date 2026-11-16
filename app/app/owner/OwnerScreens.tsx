@@ -5,12 +5,12 @@
  */
 import Link from "next/link";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
-import type { AdminPartner } from "@/bot/app/owner-admin";
+import type { AdminPartner, AdminPromotion } from "@/bot/app/owner-admin";
 import { api, ApiError } from "../ui/api";
 import { copyText, haptic, openLink } from "../ui/telegram";
 import s from "./owner.module.css";
 
-export type OwnerScreen = "partners" | "managers" | "payouts" | "promos" | "client";
+export type OwnerScreen = "partners" | "managers" | "payouts" | "promos" | "client" | "promotions" | "wholesale";
 
 const money = (n: number) => `${n.toLocaleString("ru-RU").replace(/ /g, " ")} ₸`;
 const day = (iso: string) => {
@@ -226,6 +226,7 @@ function PartnerCard({ p, onDone, toast }: { p: AdminPartner; onDone: () => void
             </button>
           )}
           {link && <ShareLink {...link} note="Одноразовая ссылка, 7 дней. Отправьте партнёру." />}
+          {p.joined && <WholesaleAssign target={{ partnerId: p.id }} toast={toast} />}
         </div>
       )}
     </li>
@@ -659,7 +660,7 @@ function ClientOrderRow({ o, onDone, toast }: { o: ClientOrder; onDone: () => vo
       <p className={s.rowSub}>
         {o.design} ·{" "}
         <button type="button" className={s.link} onClick={() => openLink(o.url)}>
-          НАМУНА ↗
+          Образец ↗
         </button>
       </p>
       {share ? (
@@ -714,6 +715,356 @@ function ClientOrders({ toast }: { toast: (t: string) => void }) {
   );
 }
 
+// ── Акции ──
+
+const OCC = { nikoh: "Никоҳ", nahorgi: "Наҳорги ош", sunnat: "Суннат", yubiley: "Юбилей" } as const;
+const FMT = { animated: "Анимация", scroll: "Листаемый", simple: "Простой" } as const;
+const STATE: Record<AdminPromotion["state"], string> = {
+  running: "идёт",
+  planned: "запланирована",
+  ended: "закончилась",
+  stopped: "остановлена",
+};
+/** «2026-11-20T18:00» по Алматы */
+const localInput = (d: Date) => new Date(+d + 5 * 3_600_000).toISOString().slice(0, 16);
+const dayTime = (iso: string) => {
+  const d = new Date(+new Date(iso) + 5 * 3_600_000).toISOString();
+  return `${d.slice(8, 10)}.${d.slice(5, 7)} ${d.slice(11, 16)}`;
+};
+
+function Picks<K extends string>({
+  all,
+  value,
+  onChange,
+  label,
+}: {
+  all: Record<K, string>;
+  value: K[] | null;
+  onChange: (v: K[] | null) => void;
+  label: string;
+}) {
+  const keys = Object.keys(all) as K[];
+  const on = (k: K) => value === null || value.includes(k);
+  return (
+    <div className={s.reasons} role="group" aria-label={label}>
+      <button type="button" role="checkbox" aria-checked={value === null} onClick={() => onChange(null)}>
+        Все
+      </button>
+      {keys.map((k) => (
+        <button
+          key={k}
+          type="button"
+          role="checkbox"
+          aria-checked={value !== null && on(k)}
+          onClick={() => {
+            const cur = value ?? [];
+            const next = cur.includes(k) ? cur.filter((x) => x !== k) : [...cur, k];
+            onChange(next.length === 0 || next.length === keys.length ? null : next);
+          }}
+        >
+          {all[k]}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function NewPromotion({ onDone, toast }: { onDone: () => void; toast: (t: string) => void }) {
+  const [name, setName] = useState("");
+  const [percent, setPercent] = useState("20");
+  const [start, setStart] = useState(() => localInput(new Date()));
+  const [end, setEnd] = useState(() => localInput(new Date(Date.now() + 7 * 86_400_000)));
+  const [occasions, setOccasions] = useState<(keyof typeof OCC)[] | null>(null);
+  const [formats, setFormats] = useState<(keyof typeof FMT)[] | null>(null);
+  const [partners, setPartners] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const pct = Number(percent);
+  async function create() {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await api("ownerPromotionCreate", {
+        name,
+        percent: pct,
+        startsAt: start,
+        endsAt: end,
+        occasions,
+        formats,
+        forPartnerClients: partners,
+      });
+      haptic.ok();
+      toast("Акция создана");
+      onDone();
+    } catch (e) {
+      haptic.error();
+      toast(
+        e instanceof ApiError && e.code === "exists" ? "Уже есть акция на эти дни — сначала остановите её" : errText(e),
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <div className={s.editBox} data-promotion-new>
+      <Field label="Название (видят клиенты)">
+        <input
+          className={s.search}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          maxLength={80}
+          placeholder="Куз чегирмаси"
+        />
+      </Field>
+      <Field label="Скидка, % (100 = бесплатно)">
+        <input
+          className={s.search}
+          value={percent}
+          onChange={(e) => setPercent(e.target.value.replace(/\D/g, "").slice(0, 3))}
+          inputMode="numeric"
+        />
+      </Field>
+      <div className={s.filters}>
+        <Field label="Начало">
+          <input className={s.search} type="datetime-local" value={start} onChange={(e) => setStart(e.target.value)} />
+        </Field>
+        <Field label="Конец">
+          <input className={s.search} type="datetime-local" value={end} onChange={(e) => setEnd(e.target.value)} />
+        </Field>
+      </div>
+      <Picks all={OCC} value={occasions} onChange={setOccasions} label="Тадбиры" />
+      <Picks all={FMT} value={formats} onChange={setFormats} label="Форматы" />
+      <label className={s.check}>
+        <input type="checkbox" checked={partners} onChange={(e) => setPartners(e.target.checked)} />
+        <span>Клиентам, которые пришли по ссылке партнёра</span>
+      </label>
+      <p className={s.hint}>
+        Не действует для партнёров, менеджеров, оптовиков и админов. С промокодом не складывается — берётся бо́льшая
+        скидка.
+      </p>
+      <button
+        type="button"
+        className={`${s.action} ${s.actionMain}`}
+        disabled={busy || !name.trim() || !(pct >= 1 && pct <= 100)}
+        onClick={create}
+      >
+        🎉 Запустить акцию
+      </button>
+    </div>
+  );
+}
+
+function Promotions({ toast }: { toast: (t: string) => void }) {
+  const { data, error, reload } = useList<{ promotions: AdminPromotion[] }>("ownerPromotions");
+  const [adding, setAdding] = useState(false);
+  const [stopping, setStopping] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  async function stop(id: string) {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await api("ownerPromotionStop", { id });
+      haptic.ok();
+      toast("Акция остановлена — цены снова обычные");
+      setStopping(null);
+      await reload();
+    } catch (e) {
+      haptic.error();
+      toast(errText(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+  const live = data?.promotions.some((p) => p.state === "running" || p.state === "planned");
+  return (
+    <>
+      {!live && (
+        <button type="button" className={`${s.action} ${s.actionMain}`} onClick={() => setAdding(!adding)}>
+          {adding ? "Закрыть" : "🎉 Новая акция"}
+        </button>
+      )}
+      {adding && !live && (
+        <NewPromotion
+          toast={toast}
+          onDone={() => {
+            setAdding(false);
+            reload();
+          }}
+        />
+      )}
+      <Status error={error} loading={!data} />
+      {data?.promotions.length === 0 && <p className={s.empty}>Акций пока не было</p>}
+      <ul className={s.list}>
+        {data?.promotions.map((p) => (
+          <li key={p.id} className={s.row} data-promotion={p.state}>
+            <div className={s.rowHead}>
+              <b className={s.ellipsis}>{p.name}</b>
+              <span className={`${s.amount} ${s.debt}`}>{p.percent >= 100 ? "бесплатно" : `−${p.percent}%`}</span>
+            </div>
+            <p className={s.rowSub}>
+              {dayTime(p.startsAt)} — {dayTime(p.endsAt)} ·{" "}
+              {p.occasions ? p.occasions.map((o) => OCC[o]).join(", ") : "все тадбиры"} ·{" "}
+              {p.formats ? p.formats.map((f) => FMT[f]).join(", ") : "все форматы"}
+              {p.forPartnerClients ? " · и клиентам партнёров" : ""}
+            </p>
+            <p className={s.rowSub}>
+              Заказов: {p.orders} на {money(p.sum)}
+              {p.free ? ` · бесплатно ${p.free}` : ""}
+            </p>
+            <div className={s.rowFoot}>
+              <span className={`${s.badge} ${p.state === "running" ? s.badgeOk : ""}`}>{STATE[p.state]}</span>
+              {(p.state === "running" || p.state === "planned") &&
+                (stopping === p.id ? (
+                  <div className={s.decide}>
+                    <button type="button" data-approve disabled={busy} onClick={() => stop(p.id)}>
+                      Да, остановить
+                    </button>
+                    <button type="button" onClick={() => setStopping(null)}>
+                      Нет
+                    </button>
+                  </div>
+                ) : (
+                  <button type="button" className={s.link} onClick={() => setStopping(p.id)}>
+                    Остановить
+                  </button>
+                ))}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </>
+  );
+}
+
+// ── Оптовики ──
+
+/** «Назначить оптовиком»: скидка % и кнопка. target — партнёр, № заказа клиента */
+export function WholesaleAssign({
+  target,
+  toast,
+  onDone,
+}: {
+  target: { partnerId: number } | { orderNumber: number };
+  toast: (t: string) => void;
+  onDone?: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [percent, setPercent] = useState("15");
+  const [busy, setBusy] = useState(false);
+  if (!open)
+    return (
+      <button type="button" className={s.link} onClick={() => setOpen(true)} data-wholesale-open>
+        🏷 Назначить оптовиком
+      </button>
+    );
+  return (
+    <div className={s.decide} data-wholesale-assign>
+      <input
+        className={s.search}
+        style={{ flex: "0 1 90px" }}
+        value={percent}
+        onChange={(e) => setPercent(e.target.value.replace(/\D/g, "").slice(0, 2))}
+        inputMode="numeric"
+        aria-label="Скидка оптовика, %"
+      />
+      <button
+        type="button"
+        data-approve
+        disabled={busy || !(Number(percent) >= 1 && Number(percent) <= 90)}
+        onClick={async () => {
+          setBusy(true);
+          try {
+            await api("ownerWholesaleSet", { ...target, percent: Number(percent) });
+            haptic.ok();
+            toast(`Оптовик со скидкой ${percent}%`);
+            setOpen(false);
+            onDone?.();
+          } catch (e) {
+            haptic.error();
+            toast(e instanceof ApiError && e.code === "bad" ? "Сотруднику роль оптовика не даётся" : errText(e));
+          } finally {
+            setBusy(false);
+          }
+        }}
+      >
+        Сохранить −{percent || 0}%
+      </button>
+      <button type="button" onClick={() => setOpen(false)}>
+        Отмена
+      </button>
+    </div>
+  );
+}
+
+type AdminWholesaler = { userId: number; name: string; percent: number; orders: number; sum: number; since: string };
+
+export function Wholesale({ toast }: { toast: (t: string) => void }) {
+  const { data, error, reload } = useList<{ wholesalers: AdminWholesaler[] }>("ownerWholesalers");
+  const [num, setNum] = useState("");
+  const [removing, setRemoving] = useState<number | null>(null);
+  async function remove(userId: number) {
+    try {
+      await api("ownerWholesaleRemove", { userId });
+      haptic.ok();
+      toast("Роль оптовика снята");
+      setRemoving(null);
+      await reload();
+    } catch (e) {
+      haptic.error();
+      toast(errText(e));
+    }
+  }
+  return (
+    <>
+      <p className={s.hint}>
+        Оптовик: своя постоянная скидка, без акций и промокодов, партнёрам с его заказов не начисляется.
+      </p>
+      <div className={s.editBox}>
+        <Field label="Назначить по № заказа клиента">
+          <input
+            className={s.search}
+            value={num}
+            onChange={(e) => setNum(e.target.value.replace(/\D/g, "").slice(0, 9))}
+            inputMode="numeric"
+            placeholder="№ заказа"
+          />
+        </Field>
+        {Number(num) > 0 && (
+          <WholesaleAssign key={num} target={{ orderNumber: Number(num) }} toast={toast} onDone={reload} />
+        )}
+      </div>
+      <Status error={error} loading={!data} />
+      {data?.wholesalers.length === 0 && <p className={s.empty}>Оптовиков пока нет</p>}
+      <ul className={s.list}>
+        {data?.wholesalers.map((w) => (
+          <li key={w.userId} className={s.row} data-wholesaler={w.userId}>
+            <div className={s.rowHead}>
+              <b className={s.ellipsis}>{w.name}</b>
+              <span className={s.amount}>−{w.percent}%</span>
+            </div>
+            <p className={s.rowSub}>
+              Заказов: {w.orders} на {money(w.sum)} · с {day(w.since)}
+            </p>
+            {removing === w.userId ? (
+              <div className={s.decide}>
+                <button type="button" data-approve onClick={() => remove(w.userId)}>
+                  Да, снять роль
+                </button>
+                <button type="button" onClick={() => setRemoving(null)}>
+                  Нет
+                </button>
+              </div>
+            ) : (
+              <button type="button" className={s.link} onClick={() => setRemoving(w.userId)}>
+                Снять роль
+              </button>
+            )}
+          </li>
+        ))}
+      </ul>
+    </>
+  );
+}
+
 function Status({ error, loading }: { error: string | null; loading: boolean }) {
   if (error) return <p className={s.hint}>{error}</p>;
   return loading ? <p className={s.hint}>Загрузка…</p> : null;
@@ -725,6 +1076,8 @@ const TITLES: Record<OwnerScreen, string> = {
   payouts: "Выплаты",
   promos: "Промокоды",
   client: "Заказ для клиента",
+  promotions: "Акции",
+  wholesale: "Оптовики",
 };
 
 export function OwnerScreenView({
@@ -749,6 +1102,8 @@ export function OwnerScreenView({
       {screen === "payouts" && <PayoutsScreen toast={toast} />}
       {screen === "promos" && <Promos toast={toast} />}
       {screen === "client" && <ClientOrders toast={toast} />}
+      {screen === "promotions" && <Promotions toast={toast} />}
+      {screen === "wholesale" && <Wholesale toast={toast} />}
     </section>
   );
 }

@@ -1,18 +1,20 @@
 "use client";
 /** Оплата: сумма, реквизиты Kaspi с «Нусха олиш», чек — прямо здесь. Потом «Чек қабул қилинди ✅» */
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { AppOrder, ReceiptResult } from "@/bot/app/service";
 import { api, ApiError, MAX_FILE, shrinkImage, upload } from "./api";
 import { Section, useT } from "./shared";
 import { STAFF_GRANT_REASONS, type StaffGrantReason } from "@/lib/types";
 import { copyText, haptic, openLink, shareLink } from "./telegram";
 import { CheckIcon, ClockIcon, CloseIcon, SpinnerIcon } from "./icons";
+import { PriceBlock, PromoField } from "./PriceBlock";
+import { salesCopy } from "@/texts/sales";
 import s from "../app.module.css";
 
 type PayInfo = { phone: string; name: string; card: string | null };
 
 export function Pay({
-  order,
+  order: initial,
   step,
   pay,
   onDone,
@@ -37,11 +39,26 @@ export function Pay({
   onIssued?: (o: AppOrder) => void;
 }) {
   const T = useT();
+  // Цена фиксируется при переходе к оплате (акция / промокод / оптовая) — сервер отвечает суммой со скидкой
+  const [order, setOrder] = useState<AppOrder>(initial);
+  useEffect(() => {
+    if (staff) return;
+    let alive = true;
+    api<{ ok: true; order: AppOrder } | { error: string }>("quote", { orderId: initial.id }).then(
+      (r) => alive && "ok" in r && setOrder(r.order),
+      () => {},
+    );
+    return () => {
+      alive = false;
+    };
+  }, [initial.id, staff]);
   const input = useRef<HTMLInputElement>(null);
   const [progress, setProgress] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   // Проверка перед оплатой: реквизиты — только после «✅ Ҳаммаси тўғри, тўлаймиз» (отдельный шаг: «назад» с реквизитов → проверка)
-  const confirmed = step === "pay";
+  // Акция закончилась до чека: снова проверка с новой суммой
+  const [recheck, setRecheck] = useState(false);
+  const confirmed = step === "pay" && !recheck;
   const [busy, setBusy] = useState(false);
   const [agree, setAgree] = useState(false);
   const [reason, setReason] = useState<StaffGrantReason | null>(null);
@@ -101,15 +118,25 @@ export function Pay({
     }
     setBusy(true);
     try {
-      const r = await api<{ ok: true; order: AppOrder } | { error: string }>("confirmPay", {
-        orderId: order.id,
-        terms: true,
-      });
-      if ("ok" in r) {
+      const r = await api<{ ok: true; order: AppOrder; free?: true } | { error: string; order?: AppOrder }>(
+        "confirmPay",
+        {
+          orderId: order.id,
+          terms: true,
+        },
+      );
+      if ("ok" in r && r.free) {
+        // 0 ₸ по акции: без Kaspi и чека — ссылка уже отправлена
         haptic.ok();
+        onIssued?.(r.order);
+      } else if ("ok" in r) {
+        haptic.ok();
+        setRecheck(false);
+        if (r.order) setOrder(r.order);
         onConfirmed(r.order ?? { ...order, confirmed: true });
       } else {
         haptic.error();
+        if (r.order) setOrder(r.order);
         setError(T.pay.errors[r.error as keyof typeof T.pay.errors] ?? T.serverError);
       }
     } catch (e) {
@@ -140,6 +167,12 @@ export function Pay({
         onDone(r.night);
       } else {
         haptic.error();
+        if (r.error === "priceChanged") {
+          const q = await api<{ ok: true; order: AppOrder } | { error: string }>("quote", { orderId: order.id });
+          if ("ok" in q) setOrder(q.order);
+          setAgree(false);
+          setRecheck(true);
+        }
         setError(T.pay.errors[r.error] ?? T.serverError);
       }
     } catch (e) {
@@ -299,10 +332,8 @@ export function Pay({
             {T.form.editData}
           </button>
         </Section>
-        <div className={s.payAmount}>
-          <small>{T.pay.amount}</small>
-          <b>{T.price(order.amount)}</b>
-        </div>
+        <PriceBlock order={order} />
+        <PromoField order={order} onApplied={setOrder} />
         <p className={s.formErr} style={{ color: "var(--ink)" }}>
           {T.pay.checkWarn}
         </p>
@@ -337,7 +368,7 @@ export function Pay({
           aria-busy={busy}
         >
           {busy ? <SpinnerIcon size={20} /> : null}
-          {T.pay.checkYes}
+          {order.amount === 0 && order.price?.kind === "promotion" ? salesCopy(T.lang).freeAction : T.pay.checkYes}
         </button>
       </div>
     );
@@ -351,10 +382,7 @@ export function Pay({
   return (
     <div className={s.screen}>
       <h1 className={s.title}>{T.pay.title}</h1>
-      <div className={s.payAmount}>
-        <small>{T.pay.amount}</small>
-        <b>{T.price(order.amount)}</b>
-      </div>
+      <PriceBlock order={order} />
       <Section title={T.pay.how}>
         {rows.map(([label, value]) => (
           <div key={label} className={s.req}>

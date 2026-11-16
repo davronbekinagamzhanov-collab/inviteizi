@@ -15,6 +15,8 @@ import { appRu } from "@/texts/app-ru";
 import { appKk } from "@/texts/app-kk";
 import { api, ApiError } from "./ui/api";
 import { Catalog, Heart, type Chip } from "./ui/Catalog";
+import { DealPrice, dealPrice, useLivePromotion } from "./ui/Deal";
+import { discounted } from "@/lib/pricing-math";
 import { emptyForm } from "./ui/form-defaults";
 
 import type { Track } from "./ui/Summary";
@@ -529,6 +531,14 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
     [design, draft, extras],
   );
   const price = order?.amount ?? (design ? PRICES[design.format] : 0);
+  // Акция для этого покупателя (сервер шлёт только обычному клиенту); закончилась — исчезает сама
+  const { promotion } = useLivePromotion(session?.promotion);
+  // Ожидаемая цена до перехода к оплате: акция или оптовая скидка (точную фиксирует сервер на шаге оплаты)
+  const deal = design
+    ? (dealPrice(promotion, design, PRICES[design.format]) ??
+      (session?.wholesalePercent ? discounted(PRICES[design.format], session.wholesalePercent) : null))
+    : null;
+  const shownPrice = design && deal !== null && (!order || order.amount === PRICES[design.format]) ? deal : price;
 
   // Своя кнопка внизу страницы видна (native MainButton не показана, а у экрана есть главное действие)
   const ownBar = !nativeMain && phase === "ready" && !viewer && !bigPreview && !help && MAIN_SCREENS.has(screen.name);
@@ -551,7 +561,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
         };
         break;
       case "summary":
-        main = { text: T.summary.pay(price), onClick: toPay, progress: busy };
+        main = { text: T.summary.pay(shownPrice), onClick: toPay, progress: busy };
         break;
       case "wait":
         main =
@@ -660,6 +670,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
                   onFavorite={toggleFavorite}
                   onOpen={(d) => go({ name: "view", id: d.id })}
                   resume={resume}
+                  promotion={session.promotion}
                 />
               )}
               {screen.name === "form" && design && draft && (
@@ -700,6 +711,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
                   tracks={tracks}
                   others={otherTracks}
                   price={price}
+                  deal={deal === null || !design ? null : { base: PRICES[design.format], price: deal }}
                   namunaUrl={order?.url ?? null}
                   status={saveStatus}
                   onChange={(patch) => patchDraft(patch, true)}
@@ -783,6 +795,17 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
                 onToggle={() => toggleFavorite(screen.id, !favorites.includes(screen.id))}
               />
             </div>
+            {(() => {
+              const d = getDesign(screen.id);
+              const v = d ? dealPrice(promotion, d, PRICES[d.format]) : null;
+              return d && v !== null ? (
+                <div className={s.viewerDealRow} data-view-deal>
+                  <span className={s.viewerDeal}>
+                    <DealPrice base={PRICES[d.format]} deal={v} />
+                  </span>
+                </div>
+              ) : null;
+            })()}
             <iframe src={`/demo/${screen.id}`} title={screen.id} />
             {!nativeMain && <div className={s.viewerBottom} aria-hidden="true" />}
           </div>

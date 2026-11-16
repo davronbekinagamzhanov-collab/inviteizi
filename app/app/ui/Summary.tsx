@@ -1,5 +1,6 @@
 "use client";
 /** «Бот сиз учун танлади»: матн · мусиқа · меҳмонлар жавоби · тиллар — у каждого ✏️; цена крупно; ссылка НАМУНА */
+import { DealPrice } from "./Deal";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ExtraLang, InvitationData, Occasion } from "@/lib/types";
 import { OwnMusic } from "./OwnMusic";
@@ -31,9 +32,19 @@ type Props = {
   /** «Бошқа мусиқалар»: мелодии других тадбиров (с подписью категории) */
   others: Track[];
   price: number;
+  /** Цена по акции (до перехода к оплате — ожидаемая) */
+  deal?: { base: number; price: number } | null;
   namunaUrl: string | null;
   status: string;
-  onChange: (patch: { textId?: string; customText?: string; music?: Props["music"]; rsvp?: boolean; langs?: ExtraLang[]; customTexts?: Partial<Record<ExtraLang, string>>; mainLang?: ExtraLang }) => void;
+  onChange: (patch: {
+    textId?: string;
+    customText?: string;
+    music?: Props["music"];
+    rsvp?: boolean;
+    langs?: ExtraLang[];
+    customTexts?: Partial<Record<ExtraLang, string>>;
+    mainLang?: ExtraLang;
+  }) => void;
   onNamuna: () => void;
   /** «✏️ Маълумотларни ўзгартириш»: анкета (имена, дата, время, место) поверх итога */
   onEdit: () => void;
@@ -47,8 +58,14 @@ export function Summary(p: Props) {
   const [own, setOwn] = useState(!!p.customText);
   const options = useMemo(() => inv.inviteOptions(p.data), [p.data]);
   const chosen = options.find((o) => o.id === p.textId) ?? options[0];
-  const music = p.music ?? (p.tracks[0] ? { kind: "list" as const, musicId: p.tracks[0].id } : { kind: "none" as const });
-  const track = music.kind === "list" ? [...p.tracks, ...p.others].find((t) => t.id === music.musicId) : music.kind === "own" ? { id: "own", title: music.title || T.summary.ownTitle, url: music.url } : undefined;
+  const music =
+    p.music ?? (p.tracks[0] ? { kind: "list" as const, musicId: p.tracks[0].id } : { kind: "none" as const });
+  const track =
+    music.kind === "list"
+      ? [...p.tracks, ...p.others].find((t) => t.id === music.musicId)
+      : music.kind === "own"
+        ? { id: "own", title: music.title || T.summary.ownTitle, url: music.url }
+        : undefined;
 
   // ▶ прослушать: одна мелодия за раз; пока грузится — кружок; не открылась — мягкое сообщение; стоп при уходе с экрана
   const audio = useRef<HTMLAudioElement | null>(null);
@@ -86,9 +103,15 @@ export function Summary(p: Props) {
     a.play().catch(fail);
   }
 
-  const selected = (t: Track) => (t.id === "own" ? music.kind === "own" : music.kind === "list" && music.musicId === t.id);
+  const selected = (t: Track) =>
+    t.id === "own" ? music.kind === "own" : music.kind === "list" && music.musicId === t.id;
   // Свой тадбир → «Бошқа мусиқалар» (с подписью категории) → своя песня
-  const list: (Track | "group")[] = [...p.tracks, ...(music.kind === "own" ? [{ id: "own", title: music.title || T.summary.ownTitle, url: music.url }] : []), ...(p.others.length ? (["group"] as const) : []), ...p.others];
+  const list: (Track | "group")[] = [
+    ...p.tracks,
+    ...(music.kind === "own" ? [{ id: "own", title: music.title || T.summary.ownTitle, url: music.url }] : []),
+    ...(p.others.length ? (["group"] as const) : []),
+    ...p.others,
+  ];
 
   const toggleOpen = (k: Open) => {
     haptic.select();
@@ -100,7 +123,12 @@ export function Summary(p: Props) {
     <div className={s.screen}>
       <h1 className={s.title}>{T.summary.title}</h1>
       <p className={s.lead}>{T.summary.lead}</p>
-      <button type="button" className={`${s.btn} ${s.btnGhost} ${s.btnWide} ${s.btnEdit}`} onClick={p.onEdit} data-edit-data>
+      <button
+        type="button"
+        className={`${s.btn} ${s.btnGhost} ${s.btnWide} ${s.btnEdit}`}
+        onClick={p.onEdit}
+        data-edit-data
+      >
         {T.form.editData}
       </button>
 
@@ -108,25 +136,55 @@ export function Summary(p: Props) {
         <button type="button" className={s.itemHead} onClick={() => toggleOpen("text")} aria-expanded={open === "text"}>
           <span>
             <b>{T.summary.text}</b>
-            <small>{p.customText ? firstLine(p.customText) : firstLine(`${chosen?.greeting ?? ""} ${chosen?.body ?? ""}`)}</small>
+            <small>
+              {p.customText ? firstLine(p.customText) : firstLine(`${chosen?.greeting ?? ""} ${chosen?.body ?? ""}`)}
+            </small>
           </span>
-          <i className={s.editMark} aria-hidden>{open === "text" ? <CheckIcon size={20} /> : <PencilIcon size={20} />}</i>
+          <i className={s.editMark} aria-hidden>
+            {open === "text" ? <CheckIcon size={20} /> : <PencilIcon size={20} />}
+          </i>
         </button>
         {open === "text" && (
           <div className={s.itemBody}>
             {options.map((o) => (
-              <button key={o.id} type="button" className={s.option} aria-pressed={!own && chosen?.id === o.id} onClick={() => { haptic.select(); setOwn(false); p.onChange({ textId: o.id, customText: "" }); }}>
+              <button
+                key={o.id}
+                type="button"
+                className={s.option}
+                aria-pressed={!own && chosen?.id === o.id}
+                onClick={() => {
+                  haptic.select();
+                  setOwn(false);
+                  p.onChange({ textId: o.id, customText: "" });
+                }}
+              >
                 <span className={s.optionText}>{`${o.greeting}\n${o.body}`}</span>
               </button>
             ))}
-            <button type="button" className={s.option} aria-pressed={own} onClick={() => { haptic.select(); setOwn(true); }}>
+            <button
+              type="button"
+              className={s.option}
+              aria-pressed={own}
+              onClick={() => {
+                haptic.select();
+                setOwn(true);
+              }}
+            >
               {T.summary.ownText}
             </button>
             {own && (
               <>
-                <textarea className={`${s.input} ${ownCount > MAX_CUSTOM_TEXT ? s.inputErr : ""}`} value={p.customText ?? ""} placeholder={T.summary.ownTextPh} onChange={(e) => p.onChange({ customText: e.target.value })} name="customText" />
+                <textarea
+                  className={`${s.input} ${ownCount > MAX_CUSTOM_TEXT ? s.inputErr : ""}`}
+                  value={p.customText ?? ""}
+                  placeholder={T.summary.ownTextPh}
+                  onChange={(e) => p.onChange({ customText: e.target.value })}
+                  name="customText"
+                />
                 <span className={ownCount > MAX_CUSTOM_TEXT ? s.err : s.help}>
-                  {ownCount > MAX_CUSTOM_TEXT ? `${T.summary.ownTextCount(ownCount, MAX_CUSTOM_TEXT)} · ${T.summary.ownTextLong(MAX_CUSTOM_TEXT)}` : T.summary.ownTextCount(ownCount, MAX_CUSTOM_TEXT)}
+                  {ownCount > MAX_CUSTOM_TEXT
+                    ? `${T.summary.ownTextCount(ownCount, MAX_CUSTOM_TEXT)} · ${T.summary.ownTextLong(MAX_CUSTOM_TEXT)}`
+                    : T.summary.ownTextCount(ownCount, MAX_CUSTOM_TEXT)}
                 </span>
               </>
             )}
@@ -135,12 +193,19 @@ export function Summary(p: Props) {
       </div>
 
       <div className={s.item}>
-        <button type="button" className={s.itemHead} onClick={() => toggleOpen("music")} aria-expanded={open === "music"}>
+        <button
+          type="button"
+          className={s.itemHead}
+          onClick={() => toggleOpen("music")}
+          aria-expanded={open === "music"}
+        >
           <span>
             <b>{T.summary.music}</b>
             <small>{track ? track.title : T.summary.noMusic}</small>
           </span>
-          <i className={s.editMark} aria-hidden>{open === "music" ? <CheckIcon size={20} /> : <PencilIcon size={20} />}</i>
+          <i className={s.editMark} aria-hidden>
+            {open === "music" ? <CheckIcon size={20} /> : <PencilIcon size={20} />}
+          </i>
         </button>
         {open === "music" && (
           <div className={s.itemBody}>
@@ -150,34 +215,55 @@ export function Summary(p: Props) {
                   {T.summary.otherMusic}
                 </p>
               ) : (
-            <div key={t.id} className={s.track}>
-              <button
-                type="button"
-                className={s.play}
-                data-state={loading === t.id ? "loading" : playing === t.id ? "playing" : "idle"}
-                aria-label={`${loading === t.id ? T.summary.musicLoading : playing === t.id ? T.summary.pause : T.summary.play}: ${t.title}`}
-                aria-busy={loading === t.id}
-                onClick={() => toggle(t)}
-              >
-                {loading === t.id ? <SpinnerIcon /> : playing === t.id ? <PauseIcon /> : <PlayIcon />}
-              </button>
-              <button
-                type="button"
-                className={s.option}
-                aria-pressed={selected(t)}
-                data-track={t.id}
-                onClick={() => { haptic.select(); if (t.id !== "own") p.onChange({ music: { kind: "list", musicId: t.id } }); }}
-              >
-                <span>{t.title}</span>
-                {t.occasion && <small className={s.trackCat}>{T.occasions[t.occasion]}</small>}
-              </button>
-            </div>
-          
+                <div key={t.id} className={s.track}>
+                  <button
+                    type="button"
+                    className={s.play}
+                    data-state={loading === t.id ? "loading" : playing === t.id ? "playing" : "idle"}
+                    aria-label={`${loading === t.id ? T.summary.musicLoading : playing === t.id ? T.summary.pause : T.summary.play}: ${t.title}`}
+                    aria-busy={loading === t.id}
+                    onClick={() => toggle(t)}
+                  >
+                    {loading === t.id ? <SpinnerIcon /> : playing === t.id ? <PauseIcon /> : <PlayIcon />}
+                  </button>
+                  <button
+                    type="button"
+                    className={s.option}
+                    aria-pressed={selected(t)}
+                    data-track={t.id}
+                    onClick={() => {
+                      haptic.select();
+                      if (t.id !== "own") p.onChange({ music: { kind: "list", musicId: t.id } });
+                    }}
+                  >
+                    <span>{t.title}</span>
+                    {t.occasion && <small className={s.trackCat}>{T.occasions[t.occasion]}</small>}
+                  </button>
+                </div>
               ),
             )}
-            <OwnMusic onDone={(url, title) => { stop(); setFailed(null); p.onChange({ music: { kind: "own", url, title } }); }} />
-            {failed && <p className={s.trackErr} role="alert">{T.summary.musicError}</p>}
-            <button type="button" className={s.option} aria-pressed={music.kind === "none"} onClick={() => { haptic.select(); stop(); p.onChange({ music: { kind: "none" } }); }}>
+            <OwnMusic
+              onDone={(url, title) => {
+                stop();
+                setFailed(null);
+                p.onChange({ music: { kind: "own", url, title } });
+              }}
+            />
+            {failed && (
+              <p className={s.trackErr} role="alert">
+                {T.summary.musicError}
+              </p>
+            )}
+            <button
+              type="button"
+              className={s.option}
+              aria-pressed={music.kind === "none"}
+              onClick={() => {
+                haptic.select();
+                stop();
+                p.onChange({ music: { kind: "none" } });
+              }}
+            >
               {T.summary.noMusic}
             </button>
           </div>
@@ -190,17 +276,34 @@ export function Summary(p: Props) {
             <b>{T.summary.rsvp}</b>
             <small>{p.rsvp ? T.summary.rsvpOn : T.summary.rsvpOff}</small>
           </span>
-          <button type="button" role="switch" aria-checked={p.rsvp} aria-label={T.summary.rsvp} className={s.toggle} onClick={() => { haptic.tap(); p.onChange({ rsvp: !p.rsvp }); }} />
+          <button
+            type="button"
+            role="switch"
+            aria-checked={p.rsvp}
+            aria-label={T.summary.rsvp}
+            className={s.toggle}
+            onClick={() => {
+              haptic.tap();
+              p.onChange({ rsvp: !p.rsvp });
+            }}
+          />
         </div>
       </div>
 
       <div className={s.item}>
-        <button type="button" className={s.itemHead} onClick={() => toggleOpen("langs")} aria-expanded={open === "langs"}>
+        <button
+          type="button"
+          className={s.itemHead}
+          onClick={() => toggleOpen("langs")}
+          aria-expanded={open === "langs"}
+        >
           <span>
             <b>{T.summary.langs}</b>
             <small>{T.summary.langsValue(p.langs.map((l) => T.summary.langNames[l]).join(" · "))}</small>
           </span>
-          <i className={s.editMark} aria-hidden>{open === "langs" ? <CheckIcon size={20} /> : <PencilIcon size={20} />}</i>
+          <i className={s.editMark} aria-hidden>
+            {open === "langs" ? <CheckIcon size={20} /> : <PencilIcon size={20} />}
+          </i>
         </button>
         {open === "langs" && (
           <div className={s.itemBody}>
@@ -217,13 +320,22 @@ export function Summary(p: Props) {
                     className={s.toggle}
                     onClick={() => {
                       haptic.tap();
-                      const next = on ? p.langs.filter((x) => x !== l) : p.extraLangs.filter((x) => x === l || p.langs.includes(x));
+                      const next = on
+                        ? p.langs.filter((x) => x !== l)
+                        : p.extraLangs.filter((x) => x === l || p.langs.includes(x));
                       p.onChange({ langs: next, ...(on && p.mainLang === l ? { mainLang: undefined } : {}) });
                     }}
                   />
                   <b style={{ flex: 1 }}>{T.summary.langNames[l]}</b>
                   {p.demoUrl && (
-                    <button type="button" className={`${s.btn} ${s.btnSmall}`} onClick={() => { haptic.tap(); p.onExample(`${p.demoUrl}?lang=${l}`); }}>
+                    <button
+                      type="button"
+                      className={`${s.btn} ${s.btnSmall}`}
+                      onClick={() => {
+                        haptic.tap();
+                        p.onExample(`${p.demoUrl}?lang=${l}`);
+                      }}
+                    >
                       {T.summary.langExample}
                     </button>
                   )}
@@ -241,7 +353,10 @@ export function Summary(p: Props) {
                       role="radio"
                       className={s.segBtn}
                       aria-checked={(p.mainLang ?? "uz") === l}
-                      onClick={() => { haptic.select(); p.onChange({ mainLang: l === "uz" ? undefined : l }); }}
+                      onClick={() => {
+                        haptic.select();
+                        p.onChange({ mainLang: l === "uz" ? undefined : l });
+                      }}
                     >
                       {T.langSwitch[l]}
                     </button>
@@ -264,7 +379,13 @@ export function Summary(p: Props) {
                       name={`customText-${l}`}
                       onChange={(e) => p.onChange({ customTexts: { ...p.customTexts, [l]: e.target.value } })}
                     />
-                    <span className={n > MAX_CUSTOM_TEXT ? s.err : s.help}>{n > MAX_CUSTOM_TEXT ? `${T.summary.ownTextCount(n, MAX_CUSTOM_TEXT)} · ${T.summary.ownTextLong(MAX_CUSTOM_TEXT)}` : value ? T.summary.ownTextCount(n, MAX_CUSTOM_TEXT) : T.summary.ownTextInHint}</span>
+                    <span className={n > MAX_CUSTOM_TEXT ? s.err : s.help}>
+                      {n > MAX_CUSTOM_TEXT
+                        ? `${T.summary.ownTextCount(n, MAX_CUSTOM_TEXT)} · ${T.summary.ownTextLong(MAX_CUSTOM_TEXT)}`
+                        : value
+                          ? T.summary.ownTextCount(n, MAX_CUSTOM_TEXT)
+                          : T.summary.ownTextInHint}
+                    </span>
                   </label>
                 );
               })}
@@ -274,7 +395,7 @@ export function Summary(p: Props) {
 
       <div className={s.total}>
         <span>{T.summary.total}</span>
-        <b>{T.price(p.price)}</b>
+        <b>{p.deal ? <DealPrice base={p.deal.base} deal={p.deal.price} /> : T.price(p.price)}</b>
       </div>
 
       {p.namunaUrl && (
@@ -285,7 +406,9 @@ export function Summary(p: Props) {
           </button>
         </div>
       )}
-      <p className={s.status} aria-live="polite">{p.status}</p>
+      <p className={s.status} aria-live="polite">
+        {p.status}
+      </p>
     </div>
   );
 }

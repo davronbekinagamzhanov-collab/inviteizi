@@ -13,6 +13,8 @@ import { afterPartnerPayout } from "../flow/notify";
 import { syncMenuButton } from "../flow/menu-button";
 import { designName, PAYABLE_STATUSES, texts } from "../flow/util";
 import type { Deps } from "../flow/types";
+import type { Occasion } from "@/lib/types";
+import { FORMATS, type Format } from "@/templates/registry";
 
 /** Все действия админки. Имя действия API = ключ */
 export const OWNER_ADMIN_ACTIONS = [
@@ -31,6 +33,12 @@ export const OWNER_ADMIN_ACTIONS = [
   "ownerPromoDisable",
   "ownerClientOrders",
   "ownerClientLink",
+  "ownerPromotions",
+  "ownerPromotionCreate",
+  "ownerPromotionStop",
+  "ownerWholesalers",
+  "ownerWholesaleSet",
+  "ownerWholesaleRemove",
 ] as const;
 export type OwnerAdminAction = (typeof OWNER_ADMIN_ACTIONS)[number];
 export const isOwnerAdminAction = (a: unknown): a is OwnerAdminAction =>
@@ -122,6 +130,61 @@ async function payouts(deps: Deps) {
         at: x.createdAt.toISOString(),
       })),
   };
+}
+
+const OCCASIONS: Occasion[] = ["nikoh", "nahorgi", "sunnat", "yubiley"];
+/** «2026-11-20T18:00» (время Алматы, как в форме) → дата */
+function almaty(v: unknown) {
+  if (typeof v !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(v)) return null;
+  const d = new Date(`${v}:00+05:00`);
+  return Number.isFinite(+d) ? d : null;
+}
+/** null — «все»; false — неверное значение */
+function pickList<T extends string>(v: unknown, all: readonly T[]): T[] | null | false {
+  if (v === null || v === undefined) return null;
+  if (!Array.isArray(v) || !v.length || !v.every((x) => (all as readonly unknown[]).includes(x))) return false;
+  const set = [...new Set(v as T[])];
+  return set.length === all.length ? null : set;
+}
+
+export type AdminPromotion = {
+  id: string;
+  name: string;
+  percent: number;
+  startsAt: string;
+  endsAt: string;
+  occasions: Occasion[] | null;
+  formats: Format[] | null;
+  forPartnerClients: boolean;
+  state: "running" | "planned" | "ended" | "stopped";
+  orders: number;
+  sum: number;
+  free: number;
+};
+
+/** Акции с итогами: сколько оплаченных/выданных заказов и на какую сумму */
+async function promotions(deps: Deps) {
+  const now = deps.now();
+  const staff = new Set(await deps.repo.staffIds());
+  const orders = (await deps.repo.listOrdersByStatus(["active", "archived"])).filter((o) => !staff.has(o.userId));
+  const list: AdminPromotion[] = (await deps.repo.listPromotions()).map((p) => {
+    const mine = orders.filter((o) => o.pricing?.promotionId === p.id);
+    return {
+      id: p.id,
+      name: p.name,
+      percent: p.percent,
+      startsAt: p.startsAt.toISOString(),
+      endsAt: p.endsAt.toISOString(),
+      occasions: p.occasions,
+      formats: p.formats,
+      forPartnerClients: p.forPartnerClients,
+      state: p.stoppedAt ? "stopped" : +now < +p.startsAt ? "planned" : +now >= +p.endsAt ? "ended" : "running",
+      orders: mine.length,
+      sum: mine.reduce((n, o) => n + o.amount, 0),
+      free: mine.filter((o) => o.amount === 0).length,
+    };
+  });
+  return { promotions: list };
 }
 
 async function editablePartner(deps: Deps, id: number): Promise<Partner | null> {
@@ -326,5 +389,89 @@ export async function ownerAdmin(deps: Deps, u: AppUser, action: OwnerAdminActio
         waRu: wa(share.ru),
       };
     }
+
+    case "ownerPromotions":
+      return promotions(deps);
+
+    case "ownerPromotionCreate": {
+      const name = str(body.name, 80);
+      const percent = int(body.percent);
+      const startsAt = almaty(body.startsAt);
+      const endsAt = almaty(body.endsAt);
+      const occasions = pickList(body.occasions, OCCASIONS);
+      const formats = pickList(body.formats, FORMATS);
+      if (
+        !name ||
+        !(percent >= 1 && percent <= 100) ||
+        !startsAt ||
+        !endsAt ||
+        +endsAt <= +startsAt ||
+        +endsAt <= +deps.now() ||
+        occasions === false ||
+        formats === false
+      )
+        return bad();
+      const r = await deps.repo.createPromotion({
+        name,
+        percent,
+        startsAt,
+        endsAt,
+        occasions,
+        formats,
+        forPartnerClients: body.forPartnerClients === true,
+        createdBy: u.id,
+      });
+      if (r === "overlap") return { error: "exists" } as Fail;
+      if (r === "missing") return { error: "disabled" } as Fail;
+      return { ok: true as const, id: r.id };
+    }
+
+    case "ownerPromotionStop":
+      return (await deps.repo.stopPromotion(str(body.id, 40), deps.now()))
+        ? { ok: true as const }
+        : ({ error: "notFound" } as Fail);
+
+    case "ownerWholesalers": {
+      const list = await deps.repo.listWholesalers();
+      const orders = await deps.repo.listOrdersByStatus(["active", "archived"]);
+      return {
+        wholesalers: await Promise.all(
+          list.map(async (w) => {
+            const user = await deps.repo.getUser(w.userId);
+            const mine = orders.filter((o) => o.userId === w.userId && o.amount > 0);
+            return {
+              userId: w.userId,
+              name: user?.username ? `@${user.username}` : (user?.firstName ?? `id ${w.userId}`),
+              percent: w.percent,
+              orders: mine.length,
+              sum: mine.reduce((n, o) => n + o.amount, 0),
+              since: w.createdAt.toISOString(),
+            };
+          }),
+        ),
+      };
+    }
+
+    case "ownerWholesaleSet": {
+      // Кому: по № заказа клиента или по партнёру (его Telegram-аккаунт). Сотрудникам роль не даётся
+      const percent = int(body.percent);
+      if (!(percent >= 1 && percent <= 90)) return bad();
+      let userId: number | null = null;
+      if (body.orderNumber !== undefined)
+        userId = (await deps.repo.getOrderByNumber(int(body.orderNumber)))?.userId ?? null;
+      else if (body.partnerId !== undefined)
+        userId = (await deps.repo.getPartner(int(body.partnerId)))?.telegramId ?? null;
+      else if (body.userId !== undefined) userId = int(body.userId);
+      if (!userId || !Number.isSafeInteger(userId)) return { error: "notFound" } as Fail;
+      if ((await deps.repo.isAdmin(userId)) || (await deps.repo.getManager(userId))) return bad();
+      return (await deps.repo.setWholesaler(userId, percent, u.id))
+        ? { ok: true as const, userId }
+        : ({ error: "notFound" } as Fail);
+    }
+
+    case "ownerWholesaleRemove":
+      return (await deps.repo.removeWholesaler(int(body.userId), deps.now()))
+        ? { ok: true as const }
+        : ({ error: "notFound" } as Fail);
   }
 }

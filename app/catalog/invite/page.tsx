@@ -3,7 +3,7 @@ import { naturalFonts } from "@/templates/themes/natural/fonts";
 import { tPlain } from "@/texts/uz-cyrl";
 import { Suspense } from "react";
 import { env } from "@/lib/env";
-import { getDesign, isOnSale, activeDesigns } from "@/templates/registry";
+import { coverOf, getDesign, isOnSale, activeDesigns } from "@/templates/registry";
 import { validPublicSource, whatsappUrl } from "@/lib/marketing/config";
 import { marketingCopy } from "@/texts/marketing";
 import { BOT_USERNAME } from "@/lib/brand";
@@ -82,7 +82,7 @@ async function Landing({
               href={`/demo/${d.id}?lang=${lang}${source ? "&ref=" + encodeURIComponent(source) : ""}`}
               className={s.cover}
             >
-              <img src={d.cover} width={1080} height={1920} alt={t.preview} loading={i ? "lazy" : "eager"} />
+              <img src={coverOf(d.cover)} width={1080} height={1920} alt={t.preview} loading={i ? "lazy" : "eager"} />
               <span>{String(i + 1).padStart(2, "0")}</span>
             </a>
             <h2 className={s.designTitle}>{(tPlain.designs as Record<string, string>)[d.id] ?? d.id}</h2>

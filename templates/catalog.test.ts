@@ -32,7 +32,7 @@ describe("витрина templates/catalog.ts", () => {
 
   it("у каждого дизайна реестра есть обложка каталога (webp, миниатюра), JPG для бота и OG-превью ссылки", () => {
     const missing = designs.flatMap((d) =>
-      [d.cover, thumbOf(d.cover), `/covers/${d.id}.jpg`, `/og/${d.id}.jpg`]
+      [d.cover, thumbOf(d.cover).split("?")[0], `/covers/${d.id}.jpg`, `/og/${d.id}.jpg`]
         .filter((f) => !existsSync(`public${f}`))
         .map((f) => `${d.id}: ${f}`),
     );

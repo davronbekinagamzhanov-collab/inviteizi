@@ -1673,3 +1673,124 @@ textarea.input {
     font-size: 14px;
   }
 }
+
+/* Цена со скидкой (акция / промокод / оптовая), 17.11.2026 */
+.payDeal {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+}
+.oldPrice {
+  color: var(--muted);
+  font-size: 18px;
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+}
+.newPrice {
+  color: var(--deal, #9a3d24);
+}
+.saving {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--deal, #9a3d24);
+}
+.dealLabel {
+  font-size: 14px;
+  color: var(--muted);
+  text-align: center;
+}
+.promoRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 4px 0 12px;
+}
+.promoRow input {
+  flex: 1 1 140px;
+  min-width: 0;
+}
+
+/* Акция в каталоге: баннер с таймером, бейдж, зачёркнутая цена (палитра интерфейса) */
+.dealBanner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0 12px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #fbe9df, #fff4e6);
+  border: 1px solid rgba(154, 61, 36, 0.18);
+}
+.dealBadgeBig {
+  flex: none;
+  padding: 6px 10px;
+  border-radius: 12px;
+  background: var(--deal, #9a3d24);
+  color: #fff8ec;
+  font-weight: 800;
+  font-size: 17px;
+  letter-spacing: 0.01em;
+}
+.dealText {
+  display: grid;
+  min-width: 0;
+}
+.dealText b {
+  font-size: 16px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dealText small {
+  color: var(--muted);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.dealBadge {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--deal, #9a3d24);
+  color: #fff8ec;
+  font-size: 14px;
+  font-weight: 800;
+  box-shadow: 0 4px 12px -6px rgba(59, 42, 30, 0.6);
+}
+.dealPrice {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.dealPrice s {
+  color: var(--muted);
+  font-size: 0.8em;
+  font-weight: 500;
+  text-decoration-thickness: 1.5px;
+}
+.dealPrice b {
+  color: var(--deal, #9a3d24);
+}
+.dealBadge ~ .photoBadge {
+  top: 42px;
+}
+.viewerDeal {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 250, 242, 0.94);
+  font-weight: 700;
+  box-shadow: 0 4px 12px -6px rgba(59, 42, 30, 0.6);
+}
+.viewerDealRow {
+  flex: none;
+  display: flex;
+  justify-content: center;
+  padding: 6px 12px;
+  background: var(--milk);
+  border-bottom: 1px solid var(--line);
+}

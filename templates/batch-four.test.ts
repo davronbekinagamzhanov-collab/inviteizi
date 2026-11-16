@@ -74,7 +74,7 @@ describe("batch four: exactly five new complete designs", () => {
         s.tg
           .to(17)
           .filter((m) => m.type === "photo")
-          .some((m) => String(m.media).endsWith(`/covers/${id}.jpg`)),
+          .some((m) => String(m.media).split("?")[0].endsWith(`/covers/${id}.jpg`)),
       ).toBe(true);
       const line = s
         .lastText(17)

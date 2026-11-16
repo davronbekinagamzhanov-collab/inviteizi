@@ -10,7 +10,7 @@ import { ru as BOT_RU, staff as BOT } from "@/texts/bot-ru";
 import type { OwnerPanel, OwnerPeriod } from "@/bot/app/owner";
 import { api, ApiError } from "../ui/api";
 import { haptic, openLink, setupTelegram, tg } from "../ui/telegram";
-import { OwnerScreenView, type OwnerScreen } from "./OwnerScreens";
+import { OwnerScreenView, Wholesale, WholesaleAssign, type OwnerScreen } from "./OwnerScreens";
 import s from "./owner.module.css";
 
 const PERIODS: { id: OwnerPeriod; label: string }[] = [
@@ -25,12 +25,13 @@ const TABS = [
   { id: "partners", label: "Партнёры" },
   { id: "designs", label: "Дизайны" },
   { id: "funnel", label: "Где уходят" },
+  { id: "wholesale", label: "Оптовики" },
 ] as const;
 type Tab = (typeof TABS)[number]["id"];
 
 const STATUS: Record<string, string> = {
   draft: "анкета",
-  preview: "НАМУНА",
+  preview: "образец",
   awaiting_payment: "на оплате",
   receipt_sent: "чек на проверке",
   active: "оплачен",
@@ -214,7 +215,7 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
             </span>
           </div>
           <div className={s.card} data-card="namuna">
-            <small>НАМУНА без оплаты</small>
+            <small>Образцы без оплаты</small>
             <strong>{c.namuna}</strong>
           </div>
           <div className={s.card} data-card="conversion">
@@ -229,6 +230,11 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
             <strong>{money(c.due)}</strong>
           </div>
         </section>
+        {c.freeByPromotion > 0 && (
+          <p className={s.hint} data-free-promotion>
+            Бесплатно по акции: {c.freeByPromotion} (в продажи не входят)
+          </p>
+        )}
         {data.testOrders > 0 && (
           <p className={s.hint} data-test-orders>
             Тестовые заказы админов не учитываются ({data.testOrders})
@@ -252,6 +258,7 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
               ["payouts", "💰 Выплаты"],
               ["promos", "🎟 Промокоды"],
               ["client", "📤 Заказ для клиента"],
+              ["promotions", "🎉 Акции"],
             ] as [OwnerScreen, string][]
           ).map(([id, label]) => (
             <button
@@ -301,7 +308,7 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
                   </span>
                   {r.url && (
                     <button type="button" className={s.link} onClick={() => openLink(r.url!)}>
-                      Открыть НАМУНА
+                      Открыть образец
                     </button>
                   )}
                 </div>
@@ -398,6 +405,8 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
                         </button>
                       )}
                     </div>
+                    {/* «Список клиентов»: назначить заказчика оптовиком (сервер проверит роль) */}
+                    <WholesaleAssign target={{ orderNumber: o.number }} toast={toast} />
                   </li>
                 ))}
               </ul>
@@ -464,7 +473,7 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
                       №{d.number} {d.name}
                     </span>
                     <span className={s.nums}>
-                      <b>{d.paid}</b> опл. · {d.samples} НАМУНА
+                      <b>{d.paid}</b> опл. · {d.samples} обр.
                     </span>
                   </li>
                 ))}
@@ -473,11 +482,17 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
           </section>
         )}
 
+        {tab === "wholesale" && (
+          <section data-owner-wholesale>
+            <Wholesale toast={toast} />
+          </section>
+        )}
+
         {tab === "funnel" && (
           <section className={s.funnel}>
             {[
               { label: "Новые клиенты", n: data.funnel.clients },
-              { label: "Сделали НАМУНА", n: data.funnel.makers },
+              { label: "Сделали образец", n: data.funnel.makers },
               { label: "Оплатили", n: data.funnel.payers },
             ].map((x) => (
               <div key={x.label} className={s.step}>

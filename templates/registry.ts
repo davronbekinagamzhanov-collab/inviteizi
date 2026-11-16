@@ -1,3 +1,4 @@
+import { coverVersioned } from "@/lib/cover-version";
 import type { ComponentType } from "react";
 import type { TemplateProps } from "./themes/types";
 import type { InvitationData, Occasion } from "@/lib/types";
@@ -44,7 +45,9 @@ export type Design = {
 
 const cover = (id: string) => `/covers/${id}.webp`;
 /** Миниатюра обложки 480 px для каталога (готовый WebP, scripts/make-cover-thumbs.mjs) */
-export const thumbOf = (cover: string) => cover.replace("/covers/", "/covers/thumb/");
+export const thumbOf = (cover: string) => coverVersioned(cover.split("?")[0].replace("/covers/", "/covers/thumb/"));
+/** Полная обложка с версией в адресе (кэш /covers — год; ?v= меняется при замене файла) */
+export const coverOf = (cover: string) => coverVersioned(cover);
 
 type RawDesign = Omit<Design, "style">;
 

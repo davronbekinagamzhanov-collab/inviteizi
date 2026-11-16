@@ -1,4 +1,6 @@
 import { computeExpiresAt } from "@/lib/orders";
+import { applyPricing, buyerOf, catalogPromotion, priceNote, type PriceNote, type PromotionView } from "../pricing";
+import { applyPromoCode, issueByPromotion } from "../flow/sales";
 import { flushMarketing } from "@/bot/marketing";
 /**
  * Сервер Mini App (/app): те же заказы, черновик и правила, что у чата (bot/flow).
@@ -72,6 +74,10 @@ export type AppOrder = {
   date: string | null;
   amount: number;
   url: string;
+  /** Скидка на эту сумму (акция / промокод / оптовая): старая цена, экономия, подпись. Только в quote/confirmPay */
+  price?: PriceNote | null;
+  /** Можно ввести промокод (обычный клиент, промокоды включены, не 0 ₸ по акции) */
+  promoAllowed?: boolean;
   /** v2: короткая сводка для проверки перед оплатой («📅 14.11.2026, 18:00 · Наврўз») и подтверждена ли она */
   check: string;
   /** НАМУНА ещё открыта (24 часа после создания) */
@@ -100,6 +106,10 @@ export type AppSession = {
   contact: string;
   /** Владелец/админ: вместо Kaspi и чека — «Бесплатно яратиш» (проверка ещё раз на сервере) */
   staff?: boolean;
+  /** Действующая акция для этого покупателя (партнёрам, оптовикам, сотрудникам — null: бейджей нет) */
+  promotion?: PromotionView | null;
+  /** Оптовик: постоянная скидка, % (для ожидаемой цены в итоге; точную считает сервер на шаге оплаты) */
+  wholesalePercent?: number | null;
 };
 
 const MAX_ORDERS = 20;
@@ -249,6 +259,8 @@ export async function openSession(deps: Deps, u: AppUser): Promise<AppSession> {
     extraLangs: allowedLangs(deps),
     contact: `https://t.me/${deps.env.ownerUsername.replace(/^@/, "")}`,
     staff: await deps.repo.isAdmin(u.id),
+    promotion: await catalogPromotion(deps, u.id),
+    wholesalePercent: (await deps.repo.getWholesaler(u.id))?.percent ?? null,
   };
 }
 
@@ -292,6 +304,15 @@ export async function confirmPay(deps: Deps, u: AppUser, orderId: unknown, terms
   if (o.status === "receipt_sent") return { error: "waiting" as const };
   if (!PAYABLE_STATUSES.includes(o.status)) return { error: "closed" as const };
   if (eventsPassed(deps, o)) return { error: "passed" as const };
+  // Цена могла измениться (акция закончилась) — клиент видит новую сумму до реквизитов
+  const priced = await applyPricing(deps, o);
+  if (priced.amount !== o.amount) return { error: "priceChanged" as const, order: await pricedOrder(deps, u, priced) };
+  // 0 ₸ по акции: без Kaspi и чека, ссылка сразу
+  if (o.amount === 0 && o.pricing?.kind === "promotion") {
+    const done = await issueByPromotion(deps, o);
+    if (!done) return { error: "closed" as const };
+    return { ok: true as const, order: await pricedOrder(deps, u, done), free: true as const };
+  }
   if (o.amount === 0 && deps.env.marketing?.promos && deps.repo.marketing) {
     const paid = await deps.repo.marketing.confirm(
       o.id,
@@ -314,7 +335,34 @@ export async function confirmPay(deps: Deps, u: AppUser, orderId: unknown, terms
     termsAcceptedAt: deps.now(),
   });
   if (!r) return { error: "closed" as const };
-  return { ok: true as const, order: appOrder(deps, r, (await deps.repo.getUser(u.id))?.lang ?? "uz") };
+  return { ok: true as const, order: await pricedOrder(deps, u, r) };
+}
+
+/** Заказ для экрана оплаты: цена зафиксирована сейчас + строка скидки + можно ли промокод */
+async function pricedOrder(deps: Deps, u: AppUser, o: OrderRecord): Promise<AppOrder> {
+  const lang = (await deps.repo.getUser(u.id))?.lang ?? "uz";
+  const promoAllowed =
+    Boolean(deps.env.marketing?.promos && deps.repo.marketing) &&
+    PAYABLE_STATUSES.includes(o.status) &&
+    !(o.amount === 0 && o.pricing?.kind === "promotion") &&
+    (await buyerOf(deps, u.id)).role === "client";
+  return { ...appOrder(deps, o, lang), price: await priceNote(deps, o), promoAllowed };
+}
+
+/** Переход к оплате в приложении: цена фиксируется (акция / промокод / оптовая) и показывается со скидкой */
+export async function quoteOrder(deps: Deps, u: AppUser, orderId: unknown) {
+  if (typeof orderId !== "string") return { error: "notFound" as const };
+  const o = await deps.repo.getOrder(orderId).catch(() => null);
+  if (!o || o.userId !== u.id) return { error: "notFound" as const };
+  return { ok: true as const, order: await pricedOrder(deps, u, await applyPricing(deps, o)) };
+}
+
+/** «Есть промокод?» в приложении */
+export async function promoForOrder(deps: Deps, u: AppUser, orderId: unknown, code: unknown) {
+  if (typeof orderId !== "string") return { error: "notFound" as const };
+  const r = await applyPromoCode(deps, u.id, orderId, code);
+  if ("error" in r) return r;
+  return { ok: true as const, order: await pricedOrder(deps, u, r.order) };
 }
 
 export async function setLang(deps: Deps, u: AppUser, lang: unknown) {
@@ -634,7 +682,18 @@ export const RECEIPT_MAX_BYTES = 10 * 1024 * 1024;
 export type ReceiptFile = { bytes: Uint8Array; mime: string; name: string };
 export type ReceiptResult =
   | { ok: true; night: boolean }
-  | { error: "notFound" | "closed" | "waiting" | "passed" | "format" | "tooBig" | "send" | "notConfirmed" };
+  | {
+      error:
+        | "notFound"
+        | "closed"
+        | "waiting"
+        | "passed"
+        | "format"
+        | "tooBig"
+        | "send"
+        | "notConfirmed"
+        | "priceChanged";
+    };
 
 /** Картинка → JPEG (Telegram показывает её как фото), PDF — документом */
 export async function receiptPayload(
@@ -664,6 +723,8 @@ export async function submitReceipt(deps: Deps, u: AppUser, orderId: unknown, f:
   if (eventsPassed(deps, o)) return { error: "passed" };
   // Чек — только после «✅ Ҳаммаси тўғри» (pay_confirmed_at): без него нет доказательства, что клиент видел предупреждение
   if (!o.payConfirmedAt) return { error: "notConfirmed" };
+  // Акция закончилась до чека: сумма другая — сначала показать новую сумму (подтверждение сбрасывается)
+  if ((await applyPricing(deps, o)).amount !== o.amount) return { error: "priceChanged" };
   const payload = await receiptPayload(f);
   if (!payload) return { error: "format" };
 

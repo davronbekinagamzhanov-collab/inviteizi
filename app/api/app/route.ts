@@ -2,12 +2,7 @@
 import { createBotDeps } from "@/bot/deps";
 import { appGate, json } from "@/lib/app-auth";
 import { allow, LIMITS } from "@/lib/rate-limit";
-import * as app from "@/bot/app/service";
-import { partnerPoster, rolePanel } from "@/bot/app/roles-panel";
-import { ownerExport, ownerPanel } from "@/bot/app/owner";
-import { ownerAct } from "@/bot/app/owner-actions";
-import { isOwnerAdminAction, ownerAdmin, ownerAdminStatus } from "@/bot/app/owner-admin";
-import type { Lang } from "@/lib/domain";
+import { appAction } from "@/bot/app/dispatch";
 
 export const maxDuration = 30;
 const MAX_BODY = 32_000;
@@ -28,71 +23,8 @@ export async function POST(req: Request) {
   }
   const deps = createBotDeps();
   try {
-    switch (body.action) {
-      case "session":
-        return json(await app.openSession(deps, user));
-      case "lang":
-        return json(await app.setLang(deps, user, body.lang));
-      case "favorite":
-        return json(await app.toggleFavorite(deps, user, body.templateId, body.saved));
-      case "music":
-        return json(await app.musicFor(deps, body.templateId, (body.lang === "ru" ? "ru" : "uz") as Lang));
-      case "draft":
-        return json(await app.saveDraft(deps, user, body.draft as app.AppDraft));
-      case "submit":
-        return json(await app.submitDraft(deps, user, body.draft as app.AppDraft));
-      case "edit":
-        return json(await app.editOrder(deps, user, body.orderId));
-      case "new":
-        return json(await app.newDraft(deps, user));
-      case "confirmPay":
-        return json(await app.confirmPay(deps, user, body.orderId, body.terms));
-      case "orders":
-        return json(await app.listOrders(deps, user));
-      case "musicUpload": {
-        if (!allow(`music:${user.id}`, LIMITS.musicUpload)) return json({ error: "tooOften" }, 429);
-        const r = await app.musicUpload(deps, body.ext, body.size);
-        return json(r, "error" in r ? (r.error === "server" ? 500 : 400) : 200);
-      }
-      // Владелец: приглашение без оплаты с причиной; клиенту — 403
-      case "freeIssue": {
-        const r = await app.staffFreeIssue(deps, user, body.orderId, body.reason);
-        return "error" in r ? json(r, r.error === "forbidden" ? 403 : 400) : json(r);
-      }
-      case "cancel":
-        return json(await app.cancelOrder(deps, user, body.orderId));
-      // Панель владельца: только ADMIN_IDS, остальным 403
-      case "owner": {
-        const r = await ownerPanel(deps, user.id, body.period);
-        return "error" in r ? json(r, 403) : json(r);
-      }
-      // Панель менеджера/партнёра: роль по initData, остальным 403
-      case "rolePanel": {
-        const r = await rolePanel(deps, user, body.period);
-        return "error" in r ? json(r, 403) : json(r);
-      }
-      case "partnerPoster": {
-        const r = await partnerPoster(deps, user, body.lang);
-        return "error" in r ? json(r, r.error === "tooOften" ? 429 : 403) : json(r);
-      }
-      // Действия владельца из админки — тем же кодом, что кнопки бота (белый список)
-      case "ownerAct": {
-        const r = await ownerAct(deps, user, body.act);
-        return "error" in r ? json(r, r.error === "forbidden" ? 403 : 400) : json(r);
-      }
-      case "ownerExport": {
-        const r = await ownerExport(deps, user.id, body.period);
-        return "error" in r ? json(r, 403) : json(r);
-      }
-      default: {
-        // Админка владельца (партнёры, менеджеры, выплаты, промокоды, заказ для клиента): не админу — 403
-        if (isOwnerAdminAction(body.action)) {
-          const r = await ownerAdmin(deps, user, body.action, body);
-          return "error" in r ? json(r, ownerAdminStatus(r.error)) : json(r);
-        }
-        return json({ error: "bad" }, 400);
-      }
-    }
+    const r = await appAction(deps, user, body);
+    return json(r.body, r.status);
   } catch (e) {
     console.error("api/app", body.action, e instanceof Error ? e.name : "Error");
     return json({ error: "server" }, 500);

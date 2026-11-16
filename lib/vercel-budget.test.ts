@@ -15,7 +15,7 @@ it("next/image не оптимизирует на лету; обложки, ар
 it("у каждой обложки есть готовая миниатюра WebP ≤ 60 КБ", () => {
   for (const d of designs) {
     if (!existsSync(`public${d.cover}`)) continue;
-    const thumb = `public${thumbOf(d.cover)}`;
+    const thumb = `public${thumbOf(d.cover).split("?")[0]}`;
     expect(existsSync(thumb), thumb).toBe(true);
     expect(statSync(thumb).size).toBeLessThan(60_000);
   }
