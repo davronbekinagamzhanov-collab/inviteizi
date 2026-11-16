@@ -164,7 +164,7 @@ export function Cover({ inv }: { inv: Invitation }) {
                     nameClassName="font-display text-[23px] leading-[1.15] font-medium text-ink"
                     metaClassName="text-[13px] tracking-[0.06em] text-ink/80"
                   />
-                  <span className="soft-pulse mt-1.5 text-[16px] text-muted italic">{t.opening.tapToOpen}</span>
+                  <span data-open-prompt className="soft-pulse mt-1.5 text-[16px] text-muted italic">{t.opening.tapToOpen}</span>
                 </span>
               </Kitoba>
             </motion.span>

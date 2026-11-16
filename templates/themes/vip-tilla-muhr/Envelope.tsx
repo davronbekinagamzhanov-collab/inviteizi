@@ -98,7 +98,7 @@ export function Envelope({ inv, id }: { inv: Invitation; id: string }) {
         <img src={`${base}/seal.webp`} alt="" width={480} height={480} /><span>{initials}</span>
       </span>)}
     </span></span>
-    <span data-vip-footer-ink className={s.openLabel} role="status">{error ? copy(inv.lang).retry : loading ? copy(inv.lang).loading : copy(inv.lang).open}</span>
+    <span data-open-prompt data-vip-footer-ink className={s.openLabel} role="status">{error ? copy(inv.lang).retry : loading ? copy(inv.lang).loading : copy(inv.lang).open}</span>
     <span data-vip-footer-ink className={s.coverFooter}>{copy(inv.lang).love}</span>
   </button>;
 }

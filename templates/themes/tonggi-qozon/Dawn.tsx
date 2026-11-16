@@ -89,7 +89,7 @@ export function Dawn({ inv }: { inv: Invitation }) {
             <div className="gold-fill mt-5 h-px w-24 opacity-80" />
           </motion.div>
 
-          <motion.p
+          <motion.p data-open-prompt
             className="soft-pulse absolute inset-x-0 bottom-[150px] text-center text-[17px] tracking-[0.16em] text-[#FFF6E8]"
             animate={{ opacity: going ? 0 : 1 }}
             transition={{ duration: 0.4 }}

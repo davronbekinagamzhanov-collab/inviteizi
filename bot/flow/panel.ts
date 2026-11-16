@@ -8,13 +8,7 @@ import type { InlineButton } from "../tg";
 import type { OrderRecord } from "@/lib/domain";
 import { overview, partnerRows, type Partner, type PartnerRow } from "@/lib/owner-panel";
 import { isQuiet } from "@/lib/quiet-hours";
-import {
-  hashToken,
-  INVITE_TTL_MS,
-  managerName,
-  managerSource,
-  newToken,
-} from "@/lib/roles";
+import { hashToken, INVITE_TTL_MS, managerName, managerSource, newToken } from "@/lib/roles";
 import { staff as S } from "@/texts/bot-ru";
 import { texts } from "./util";
 import { editOrSend, inline, namesOf, ownerUrl, PAYABLE_STATUSES, pageUrl, price, roleOf, send } from "./util";
@@ -23,6 +17,7 @@ import { panelData, partnerRowOf, payoutsText, ptList, sendPack, startNewPartner
 import { managerEarningsScreen, partnerStatsScreen, statsScreen } from "./stats";
 import { exportScreen } from "./export";
 import type { Ctx, Result } from "./types";
+import { syncMenuButton } from "./menu-button";
 
 type Screen = { text: string; rows: InlineButton[][] };
 
@@ -46,8 +41,6 @@ const clock = (d: Date) => new Date(+d + 5 * 3_600_000).toISOString().slice(11, 
 const createButton = (c: Ctx, text: string): InlineButton =>
   c.deps.env.miniAppUrl ? { text, webApp: c.deps.env.miniAppUrl } : { text, data: "pn:mk" };
 
-
-
 // ── Домашние экраны ──
 
 async function ownerHome(c: Ctx): Promise<Screen> {
@@ -59,10 +52,19 @@ async function ownerHome(c: Ctx): Promise<Screen> {
   return {
     text: `${S.ownerTitle}\n\n${S.today(today.paid, price(today.revenue))}`,
     rows: [
-      [{ text: S.btn.stats, data: "pn:stats" }, { text: S.btn.receipts(receipts), data: "pn:rc" }],
-      [{ text: S.btn.partners, data: "pn:pt" }, { text: S.btn.payouts(payouts), data: "pn:po" }],
+      [
+        { text: S.btn.stats, data: "pn:stats" },
+        { text: S.btn.receipts(receipts), data: "pn:rc" },
+      ],
+      [
+        { text: S.btn.partners, data: "pn:pt" },
+        { text: S.btn.payouts(payouts), data: "pn:po" },
+      ],
       [{ text: S.btn.client, data: "pn:cl" }],
-      [{ text: S.btn.export, data: "pn:ex" }, { text: S.btn.settings, data: "pn:set" }],
+      [
+        { text: S.btn.export, data: "pn:ex" },
+        { text: S.btn.settings, data: "pn:set" },
+      ],
       ...(c.deps.env.miniAppUrl ? [[{ text: S.btn.ownerApp, webApp: ownerAppUrl(c.deps.env.miniAppUrl) }]] : []),
       [createButton(c, S.btn.create)],
     ],
@@ -83,10 +85,18 @@ async function managerHome(c: Ctx): Promise<Screen> {
   return {
     text: `${S.managerTitle}\n\n${S.networkLine(mine)}`,
     rows: [
-      [{ text: S.btn.myStats, data: "pn:ms" }, { text: S.btn.myPartners, data: "pn:mp" }],
-      [{ text: S.btn.newPartner, data: "pn:mpn" }, { text: S.btn.earnings, data: "pn:me" }],
+      [
+        { text: S.btn.myStats, data: "pn:ms" },
+        { text: S.btn.myPartners, data: "pn:mp" },
+      ],
+      [
+        { text: S.btn.newPartner, data: "pn:mpn" },
+        { text: S.btn.earnings, data: "pn:me" },
+      ],
       [{ text: S.btn.client, data: "pn:cl" }],
-      ...(c.deps.env.miniAppUrl ? [[{ text: S.btn.ownerApp, webApp: ownerAppUrl(c.deps.env.miniAppUrl, "panel") }]] : []),
+      ...(c.deps.env.miniAppUrl
+        ? [[{ text: S.btn.ownerApp, webApp: ownerAppUrl(c.deps.env.miniAppUrl, "panel") }]]
+        : []),
       [createButton(c, S.btn.create)],
     ],
   };
@@ -97,8 +107,14 @@ function partnerHome(c: Ctx, p: Partner): Screen {
   return {
     text: r.partnerHome(p.name, p.status === "pending"),
     rows: [
-      [{ text: r.stats, data: "pn:ps" }, { text: r.qr, data: "pn:pq" }],
-      [{ text: r.payouts, data: "pn:pp" }, { text: c.tx.contact, url: ownerUrl(c) }],
+      [
+        { text: r.stats, data: "pn:ps" },
+        { text: r.qr, data: "pn:pq" },
+      ],
+      [
+        { text: r.payouts, data: "pn:pp" },
+        { text: c.tx.contact, url: ownerUrl(c) },
+      ],
       ...(c.deps.env.miniAppUrl ? [[{ text: r.panel, webApp: ownerAppUrl(c.deps.env.miniAppUrl, "panel") }]] : []),
       [c.deps.env.miniAppUrl ? { text: r.self, webApp: c.deps.env.miniAppUrl } : { text: r.self, data: "pn:self" }],
     ],
@@ -129,14 +145,22 @@ async function receipts(c: Ctx): Promise<Screen> {
   if (!list.length) return { text: S.receiptsNone, rows: [back()] };
   const shown = list.slice(0, 10);
   return {
-    text: [S.receiptsTitle(list.length), "", ...shown.map((o) => S.receiptLine(o.number, namesOf(o.data).slice(0, 40), price(o.amount), clock(o.receiptAt ?? o.updatedAt)))].join("\n"),
+    text: [
+      S.receiptsTitle(list.length),
+      "",
+      ...shown.map((o) =>
+        S.receiptLine(o.number, namesOf(o.data).slice(0, 40), price(o.amount), clock(o.receiptAt ?? o.updatedAt)),
+      ),
+    ].join("\n"),
     rows: [...shown.map((o) => [{ text: S.receiptBtn(o.number, price(o.amount)), data: `pn:rc:${o.number}` }]), back()],
   };
 }
 
 async function payouts(c: Ctx): Promise<Screen> {
   const s = await panelData(c.deps);
-  const rows = partnerRows(s, "all", c.deps.now()).filter((r) => r.due > 0).sort((a, b) => b.due - a.due);
+  const rows = partnerRows(s, "all", c.deps.now())
+    .filter((r) => r.due > 0)
+    .sort((a, b) => b.due - a.due);
   if (!rows.length) return { text: S.payoutsNone, rows: [back()] };
   const managers = await c.deps.repo.listManagers();
   const who = (r: PartnerRow) => {
@@ -144,8 +168,17 @@ async function payouts(c: Ctx): Promise<Screen> {
     return m ? managerName(m) : "";
   };
   return {
-    text: [S.payoutsTitle, "", ...rows.map((r) => S.payoutLine(r.partner.name.slice(0, 40), price(r.due), who(r)))].join("\n"),
-    rows: [...rows.slice(0, 10).map((r) => [{ text: `${r.partner.name.slice(0, 30)} · ${price(r.due)}`, data: `pa:v:${r.partner.id}` }]), back()],
+    text: [
+      S.payoutsTitle,
+      "",
+      ...rows.map((r) => S.payoutLine(r.partner.name.slice(0, 40), price(r.due), who(r))),
+    ].join("\n"),
+    rows: [
+      ...rows
+        .slice(0, 10)
+        .map((r) => [{ text: `${r.partner.name.slice(0, 30)} · ${price(r.due)}`, data: `pa:v:${r.partner.id}` }]),
+      back(),
+    ],
   };
 }
 
@@ -153,11 +186,15 @@ async function settings(c: Ctx): Promise<Screen> {
   const managers = (await c.deps.repo.listManagers()).filter((m) => m.active);
   const s = await panelData(c.deps);
   const count = (id: number) => s.partners.filter((p) => p.managedBy === id).length;
-  const list = managers.length ? [S.managersTitle, ...managers.map((m) => S.managerLine(managerName(m), count(m.telegramId)))] : [S.managersNone];
+  const list = managers.length
+    ? [S.managersTitle, ...managers.map((m) => S.managerLine(managerName(m), count(m.telegramId)))]
+    : [S.managersNone];
   return {
     text: [S.settingsTitle, "", ...list].join("\n"),
     rows: [
-      ...managers.slice(0, 10).map((m) => [{ text: S.btn.removeManager(managerName(m)).slice(0, 60), data: `pn:mrm:${m.telegramId}` }]),
+      ...managers
+        .slice(0, 10)
+        .map((m) => [{ text: S.btn.removeManager(managerName(m)).slice(0, 60), data: `pn:mrm:${m.telegramId}` }]),
       [{ text: S.btn.addManager, data: "pn:madd" }],
       back(),
     ],
@@ -166,7 +203,12 @@ async function settings(c: Ctx): Promise<Screen> {
 
 async function newManagerLink(c: Ctx): Promise<Screen> {
   const token = newToken();
-  await c.deps.repo.createInvite({ tokenHash: hashToken(token), kind: "manager", createdBy: c.user.id, expiresAt: new Date(+c.deps.now() + INVITE_TTL_MS.manager) });
+  await c.deps.repo.createInvite({
+    tokenHash: hashToken(token),
+    kind: "manager",
+    createdBy: c.user.id,
+    expiresAt: new Date(+c.deps.now() + INVITE_TTL_MS.manager),
+  });
   const link = `https://t.me/${await c.deps.tg.botUsername()}?start=mgr_${token}`;
   return { text: S.managerLink(link), rows: [back("pn:set")] };
 }
@@ -200,12 +242,24 @@ export async function toClient(c: Ctx, n: number): Promise<Result | void> {
   if (!PAYABLE_STATUSES.includes(o.status)) return void (await send(c, S.clientNotPayable));
   const manager = role === "manager" ? await c.deps.repo.getManager(c.user.id) : null;
   const token = newToken();
-  await c.deps.repo.issueClientOrder({ orderId: o.id, createdBy: c.user.id, tokenHash: hashToken(token), refSource: manager ? managerSource(manager.code) : null });
+  await c.deps.repo.issueClientOrder({
+    orderId: o.id,
+    createdBy: c.user.id,
+    tokenHash: hashToken(token),
+    refSource: manager ? managerSource(manager.code) : null,
+  });
   // Реквизитов здесь нет: клиент увидит их в боте только после предупреждения и «✅ Ҳаммаси тўғри»
-  const share = { url: pageUrl(c, o.slug), amount: price(o.amount), bot: `https://t.me/${await c.deps.tg.botUsername()}?start=o_${token}` };
+  const share = {
+    url: pageUrl(c, o.slug),
+    amount: price(o.amount),
+    bot: `https://t.me/${await c.deps.tg.botUsername()}?start=o_${token}`,
+  };
   const uz = texts.uz.role.clientShare(share);
   const ru = texts.ru.role.clientShare(share);
-  const wa = [[uz, S.btn.waUz], [ru, S.btn.waRu]].flatMap(([text, label]) => {
+  const wa = [
+    [uz, S.btn.waUz],
+    [ru, S.btn.waRu],
+  ].flatMap(([text, label]) => {
     const url = waLink(text);
     return url ? [[{ text: label, url }]] : [];
   });
@@ -234,7 +288,8 @@ export async function claimOrder(c: Ctx, token: string): Promise<"shown" | "askL
 }
 
 export async function showClaimed(c: Ctx, o: OrderRecord) {
-  if (!PAYABLE_STATUSES.includes(o.status) || o.userId !== c.user.id) return void (await send(c, c.tx.role.claimClosed));
+  if (!PAYABLE_STATUSES.includes(o.status) || o.userId !== c.user.id)
+    return void (await send(c, c.tx.role.claimClosed));
   await send(c, c.tx.role.claimed(pageUrl(c, o.slug), price(o.amount)), inline(orderButtons(c, o, false)));
 }
 
@@ -254,7 +309,14 @@ export async function acceptManager(c: Ctx, token: string): Promise<boolean> {
     await send(c, use.status === "used" ? S.inviteUsed : use.status === "expired" ? S.inviteExpired : S.inviteNone);
     return false;
   }
-  const m = await c.deps.repo.addManager({ telegramId: c.user.id, code: newToken(10), username: c.user.username, firstName: c.user.firstName, invitedBy: use.createdBy });
+  const m = await c.deps.repo.addManager({
+    telegramId: c.user.id,
+    code: newToken(10),
+    username: c.user.username,
+    firstName: c.user.firstName,
+    invitedBy: use.createdBy,
+  });
+  await syncMenuButton(c.deps, c.user.id, "manager", c.tx.menuButton);
   if (!c.user.lang) {
     await c.deps.repo.setLang(c.user.id, "ru");
     c.user.lang = "ru";
@@ -263,7 +325,8 @@ export async function acceptManager(c: Ctx, token: string): Promise<boolean> {
   }
   await send(c, S.managerWelcome);
   // Владельцу — коротко, но не ночью: в тихие часы он увидит менеджера в «⚙️ Настройки»
-  if (!isQuiet(c.deps.now())) await c.deps.tg.sendMessage(use.createdBy, S.managerJoined(managerName(m))).catch(() => undefined);
+  if (!isQuiet(c.deps.now()))
+    await c.deps.tg.sendMessage(use.createdBy, S.managerJoined(managerName(m))).catch(() => undefined);
   return true;
 }
 
@@ -319,7 +382,12 @@ export async function panelAction(c: Ctx, action: string, arg: string): Promise<
       return show(c, await newManagerLink(c));
     case "mrm": {
       const id = Number(arg);
-      if (Number.isSafeInteger(id) && (await c.deps.repo.removeManager(id, c.deps.now()))) await toast(c, S.managerRemoved);
+      if (Number.isSafeInteger(id) && (await c.deps.repo.removeManager(id, c.deps.now()))) {
+        await toast(c, S.managerRemoved);
+        // Снятому менеджеру — обычная клиентская кнопка меню вместо панели
+        const lang = (await c.deps.repo.getUser(id))?.lang ?? "uz";
+        await syncMenuButton(c.deps, id, "client", texts[lang].menuButton);
+      }
       return show(c, await settings(c));
     }
     case "cl":

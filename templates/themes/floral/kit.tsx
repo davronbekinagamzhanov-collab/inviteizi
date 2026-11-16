@@ -336,7 +336,7 @@ export function FloralInvitation({ data, mode, cfg }: { data: InvitationData; mo
           <div className={cx(f.heroWrap, look.heroWrap)} data-on={mounted} aria-hidden>
             {cfg.hero(mounted, inv)}
           </div>
-          <button type="button" disabled={inv.started} aria-label={t.natural.playHint} className={cx(f.tap, look.tap)}>
+          <button data-open-prompt type="button" disabled={inv.started} aria-label={t.natural.playHint} className={cx(f.tap, look.tap)}>
             {t.floral.tap}
           </button>
         </div>

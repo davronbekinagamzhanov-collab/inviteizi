@@ -72,7 +72,7 @@ export default function Design({ data, mode }: TemplateProps) {
             <p className="text-[12px] tracking-[.2em] uppercase">{t.opening.invitation}</p>
             <p className="mt-5 text-[35px] italic">{t.occasionTitles[inv.occasion]}</p>
           </div>
-          <p className={styles.prompt}>{t.opening.tapToOpen}</p>
+          <p data-open-prompt className={styles.prompt}>{t.opening.tapToOpen}</p>
         </button>
       )}
     </InvitationShell>

@@ -193,7 +193,7 @@ export function CardOpening({
             transition={{ duration: 0.4 }}
           >
             <Seed className="soft-pulse h-[13px] w-[11px]" rotate={-20} />
-            <p className="soft-pulse font-body text-[18px] tracking-[0.06em] text-muted italic">{t.opening.tapToOpen}</p>
+            <p data-open-prompt className="soft-pulse font-body text-[18px] tracking-[0.06em] text-muted italic">{t.opening.tapToOpen}</p>
             <Seed className="soft-pulse h-[13px] w-[11px]" rotate={20} />
           </motion.div>
         </motion.div>

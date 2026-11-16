@@ -79,7 +79,7 @@
         }
       ],
       "submits": 3,
-      "drafts": 4
+      "drafts": 5
     },
     {
       "tag": "360-uz-sunnat",
@@ -148,7 +148,7 @@
         }
       ],
       "submits": 2,
-      "drafts": 3
+      "drafts": 4
     },
     {
       "tag": "360-uz-nahorgi",
@@ -217,7 +217,7 @@
         }
       ],
       "submits": 2,
-      "drafts": 3
+      "drafts": 4
     },
     {
       "tag": "360-uz-yubiley",
@@ -246,6 +246,16 @@
         },
         {
           "name": "05-form-filled",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "06-photos",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "07-photos-1",
           "overflow": false,
           "small": 0
         },
@@ -285,8 +295,8 @@
           "small": 0
         }
       ],
-      "submits": 2,
-      "drafts": 3
+      "submits": 3,
+      "drafts": 5
     },
     {
       "tag": "360-ru-nikoh",
@@ -365,7 +375,7 @@
         }
       ],
       "submits": 3,
-      "drafts": 4
+      "drafts": 5
     },
     {
       "tag": "360-ru-sunnat",
@@ -434,7 +444,7 @@
         }
       ],
       "submits": 2,
-      "drafts": 3
+      "drafts": 4
     },
     {
       "tag": "360-ru-nahorgi",
@@ -503,7 +513,7 @@
         }
       ],
       "submits": 2,
-      "drafts": 3
+      "drafts": 4
     },
     {
       "tag": "360-ru-yubiley",
@@ -532,6 +542,16 @@
         },
         {
           "name": "05-form-filled",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "06-photos",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "07-photos-1",
           "overflow": false,
           "small": 0
         },
@@ -571,8 +591,8 @@
           "small": 0
         }
       ],
-      "submits": 2,
-      "drafts": 3
+      "submits": 3,
+      "drafts": 5
     },
     {
       "tag": "430-uz-nikoh",
@@ -651,7 +671,7 @@
         }
       ],
       "submits": 3,
-      "drafts": 4
+      "drafts": 5
     },
     {
       "tag": "430-uz-yubiley",
@@ -680,6 +700,16 @@
         },
         {
           "name": "05-form-filled",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "06-photos",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "07-photos-1",
           "overflow": false,
           "small": 0
         },
@@ -719,8 +749,8 @@
           "small": 0
         }
       ],
-      "submits": 2,
-      "drafts": 3
+      "submits": 3,
+      "drafts": 5
     },
     {
       "tag": "430-ru-nikoh",
@@ -799,7 +829,7 @@
         }
       ],
       "submits": 3,
-      "drafts": 4
+      "drafts": 5
     },
     {
       "tag": "430-ru-yubiley",
@@ -828,6 +858,16 @@
         },
         {
           "name": "05-form-filled",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "06-photos",
+          "overflow": false,
+          "small": 0
+        },
+        {
+          "name": "07-photos-1",
           "overflow": false,
           "small": 0
         },
@@ -867,8 +907,8 @@
           "small": 0
         }
       ],
-      "submits": 2,
-      "drafts": 3
+      "submits": 3,
+      "drafts": 5
     },
     {
       "tag": "no-telegram",

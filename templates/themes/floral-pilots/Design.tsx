@@ -35,7 +35,7 @@ export function WeddingPilot({data,mode,id}:TemplateProps&{id:PilotId}){
    <span className={s.flap} aria-hidden/>
    <span className={s.coverText}><span className={s.eyebrow}>{t.occasionTitles.nikoh}</span><strong>{names}</strong><span className={s.coverDate}>{date}</span></span>
    <img className={s.seal} src="/art/floral-pilots/seal.webp" alt="" aria-hidden/>
-   <span className={s.tap}>{t.opening.tapToOpen}</span>
+   <span data-open-prompt className={s.tap}>{t.opening.tapToOpen}</span>
   </button>}
  </InvitationShell>;
 }

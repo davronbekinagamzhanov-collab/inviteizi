@@ -8,14 +8,27 @@ import { flushMarketing } from "@/bot/marketing";
 import { randomUUID } from "node:crypto";
 import type { Deps, Draft } from "../flow/types";
 import type { Lang, MusicChoice, MusicRecord, OrderRecord, OrderStatus } from "@/lib/domain";
-import { EXTRA_LANGS, type ExtraLang, type InvitationData } from "@/lib/types";
+import {
+  EXTRA_LANGS,
+  STAFF_GRANT_REASONS,
+  type ExtraLang,
+  type InvitationData,
+  type StaffGrantReason,
+} from "@/lib/types";
 import type { AppUser } from "@/lib/tg-init-data";
 import { getDesign, isOnSale } from "@/templates/registry";
 import { tPlain as t } from "@/texts/uz-cyrl";
 import { kzToday } from "../calendar";
 import { PAID_STATUSES, PAYABLE_STATUSES, txFor } from "../flow/util";
 import { pageMode } from "@/lib/orders";
-import { adminCard, checkLines, decisionButtons, upsertDraftOrder, type UpsertOutcome } from "../flow/orders";
+import {
+  adminCard,
+  checkLines,
+  decisionButtons,
+  sendLinkPack,
+  upsertDraftOrder,
+  type UpsertOutcome,
+} from "../flow/orders";
 import {
   validateForm,
   type FieldError,
@@ -85,6 +98,8 @@ export type AppSession = {
   extraLangs: ExtraLang[];
   /** «Боғланиш» в «Ёрдам»: Telegram владельца */
   contact: string;
+  /** Владелец/админ: вместо Kaspi и чека — «Бесплатно яратиш» (проверка ещё раз на сервере) */
+  staff?: boolean;
 };
 
 const MAX_ORDERS = 20;
@@ -233,7 +248,38 @@ export async function openSession(deps: Deps, u: AppUser): Promise<AppSession> {
     pay: { phone: deps.env.kaspiPhone, name: deps.env.kaspiName, card: deps.env.paymentCardNumber ?? null },
     extraLangs: allowedLangs(deps),
     contact: `https://t.me/${deps.env.ownerUsername.replace(/^@/, "")}`,
+    staff: await deps.repo.isAdmin(u.id),
   };
+}
+
+/**
+ * Владелец создаёт приглашение без оплаты (подарок, пример, наличные, замена): без Kaspi и чека.
+ * Только админ (по initData, не по URL), только свой неоплаченный заказ. Сумма 0, причина в заказе;
+ * партнёру не начисляется (заказы сотрудников вне статистики продаж и начислений), ссылка — как после оплаты.
+ */
+export async function staffFreeIssue(deps: Deps, u: AppUser, orderId: unknown, reason: unknown) {
+  if (!(await deps.repo.isAdmin(u.id))) return { error: "forbidden" as const };
+  if (typeof reason !== "string" || !(STAFF_GRANT_REASONS as readonly string[]).includes(reason))
+    return { error: "reason" as const };
+  if (typeof orderId !== "string") return { error: "notFound" as const };
+  const o = await deps.repo.getOrder(orderId).catch(() => null);
+  if (!o || o.userId !== u.id) return { error: "notFound" as const };
+  if (!PAYABLE_STATUSES.includes(o.status)) return { error: "closed" as const };
+  const now = deps.now();
+  const data = { ...o.data, staffGrant: { reason: reason as StaffGrantReason, by: u.id, at: now.toISOString() } };
+  const done = await deps.repo.transition(o.id, PAYABLE_STATUSES, "active", {
+    amount: 0,
+    data,
+    paidAt: now,
+    payConfirmedAt: now,
+    expiresAt: computeExpiresAt(data.events),
+  });
+  if (!done) return { error: "closed" as const };
+  await sendLinkPack(deps, done, true).catch((e) =>
+    console.error("free issue link", e instanceof Error ? e.name : "Error"),
+  );
+  const user = await deps.repo.getUser(u.id);
+  return { ok: true as const, order: appOrder(deps, done, user?.lang ?? "uz") };
 }
 
 /** «✅ Ҳаммаси тўғри, тўлаймиз» в приложении: время подтверждения в заказе, дальше — реквизиты */

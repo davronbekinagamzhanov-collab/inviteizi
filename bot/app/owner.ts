@@ -1,7 +1,7 @@
 /**
- * Панель владельца в приложении (/app/owner): только чтение, только ADMIN_IDS (по проверенному initData).
+ * Панель владельца в приложении (/app/owner): только ADMIN_IDS (по проверенному initData).
  * Цифры — те же формулы, что в «📊 Статистика» бота (bot/flow/stats.ts) на том же снимке panelData:
- * оплаты по дате оплаты, НАМУНА и воронка — по дате создания. Подтверждение чеков и выплаты остаются в боте.
+ * оплаты по дате оплаты, НАМУНА и воронка — по дате создания. Действия (чеки, партнёры, выплаты, промокоды) — owner-actions.ts.
  */
 import { isPaid } from "@/lib/analytics";
 import { attributionOf } from "@/lib/money";
@@ -14,6 +14,8 @@ import { panelDataWithStaff, SLEEP_AFTER_MS, staffOrdersWithin } from "../flow/p
 import { rangeOf } from "../flow/stats";
 import { sendExport } from "../flow/export";
 import { designName } from "../flow/util";
+import { ownerFreeGrants, ownerReceipts, type OwnerReceipt } from "./owner-actions";
+import type { StaffGrantReason } from "@/lib/types";
 
 export const OWNER_PERIODS = ["d", "w", "m", "y"] as const;
 export type OwnerPeriod = (typeof OWNER_PERIODS)[number];
@@ -48,7 +50,15 @@ export type OwnerPanel = {
   label: string;
   /** Тестовые заказы сотрудников за период: в цифры не идут, строкой под карточками */
   testOrders: number;
-  cards: { paid: number; revenue: number; namuna: number; conversion: number | null; makers: number; payers: number; due: number };
+  cards: {
+    paid: number;
+    revenue: number;
+    namuna: number;
+    conversion: number | null;
+    makers: number;
+    payers: number;
+    due: number;
+  };
   orders: OwnerOrder[];
   ordersTotal: number;
   partners: {
@@ -67,6 +77,10 @@ export type OwnerPanel = {
   }[];
   designs: { id: string; number: number; name: string; samples: number; paid: number }[];
   funnel: { clients: number; makers: number; payers: number; stuck: { step: string; label: string; count: number }[] };
+  /** Чеки на проверке (все, не только за период) — ✅/❌ прямо в панели */
+  receipts: OwnerReceipt[];
+  /** Бесплатные выдачи владельца за период по причинам: сумма 0, в продажах и начислениях не участвуют */
+  free: Record<StaffGrantReason, number>;
 };
 
 export async function isOwnerUser(deps: Deps, userId: number) {
@@ -75,9 +89,15 @@ export async function isOwnerUser(deps: Deps, userId: number) {
 
 const paidAt = (o: PanelOrder) => o.paidAt ?? o.updatedAt;
 
-export async function ownerPanel(deps: Deps, userId: number, periodArg: unknown): Promise<OwnerPanel | { error: "forbidden" }> {
+export async function ownerPanel(
+  deps: Deps,
+  userId: number,
+  periodArg: unknown,
+): Promise<OwnerPanel | { error: "forbidden" }> {
   if (!(await isOwnerUser(deps, userId))) return { error: "forbidden" };
-  const period: OwnerPeriod = (OWNER_PERIODS as readonly unknown[]).includes(periodArg) ? (periodArg as OwnerPeriod) : "d";
+  const period: OwnerPeriod = (OWNER_PERIODS as readonly unknown[]).includes(periodArg)
+    ? (periodArg as OwnerPeriod)
+    : "d";
   const now = deps.now();
   const r = rangeOf(period, now);
   const inside = (d: Date) => +d >= +r.from && +d < +r.to;
@@ -115,7 +135,13 @@ export async function ownerPanel(deps: Deps, userId: number, periodArg: unknown)
   });
 
   const designs = activeDesigns()
-    .map((d) => ({ id: d.id, number: d.number, name: designName(d.id), samples: created.filter((o) => o.templateId === d.id).length, paid: paid.filter((o) => o.templateId === d.id).length }))
+    .map((d) => ({
+      id: d.id,
+      number: d.number,
+      name: designName(d.id),
+      samples: created.filter((o) => o.templateId === d.id).length,
+      paid: paid.filter((o) => o.templateId === d.id).length,
+    }))
     .filter((x) => x.samples || x.paid)
     .sort((a, b) => b.paid - a.paid || b.samples - a.samples || a.number - b.number);
 
@@ -157,6 +183,8 @@ export async function ownerPanel(deps: Deps, userId: number, periodArg: unknown)
         };
       }),
     designs,
+    receipts: await ownerReceipts(deps),
+    free: await ownerFreeGrants(deps, r.from, r.to),
     funnel: {
       clients: s.users.filter((u) => inside(u.createdAt)).length,
       makers: makers.size,

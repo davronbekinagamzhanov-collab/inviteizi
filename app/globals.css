@@ -183,3 +183,30 @@ body {
     opacity: 0.35;
   }
 }
+
+/* 16.11.2026: подсказка закрытого экрана одна на все дизайны (templates/blocks/TapHint.tsx).
+   Свои надписи «открыть» дизайнов скрыты; видны только состояния «загрузка» и «ошибка» (aria-busy). */
+[data-open-prompt] {
+  visibility: hidden !important;
+}
+[aria-busy="true"] [data-open-prompt] {
+  visibility: visible !important;
+}
+@keyframes open-hint-pulse {
+  0%,
+  70%,
+  100% {
+    transform: scale(1);
+  }
+  82% {
+    transform: scale(1.045);
+  }
+}
+.open-hint-pulse {
+  animation: open-hint-pulse 2.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .open-hint-pulse {
+    animation: none;
+  }
+}

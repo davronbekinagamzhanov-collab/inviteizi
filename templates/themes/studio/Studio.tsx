@@ -289,7 +289,7 @@ export function Studio({ data, mode, id }: TemplateProps & { id: StudioId }) {
               </>
             )}
           </div>
-          <p className={s.prompt}>
+          <p data-open-prompt className={s.prompt}>
             {designTexts(id).opening.tapToOpen}
             <span aria-hidden="true">↓</span>
           </p>

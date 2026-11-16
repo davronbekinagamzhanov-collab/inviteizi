@@ -167,7 +167,7 @@ export default function Design({ data, mode }: TemplateProps) {
             <div className="absolute inset-x-8 top-1/3 border border-primary/40 bg-paper px-5 py-9">
               <p className="text-[13px] tracking-[.2em] uppercase">{t.opening.invitation}</p>
               <p className="mt-5 font-display text-[34px]">{t.occasionTitles[inv.occasion]}</p>
-              <p className="mt-7 text-[17px]">{t.opening.tapToOpen}</p>
+              <p data-open-prompt className="mt-7 text-[17px]">{t.opening.tapToOpen}</p>
             </div>
           </motion.div>
         </button>

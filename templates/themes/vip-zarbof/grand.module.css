@@ -26,3 +26,24 @@
 @media(max-width:370px){.weddingCloth{padding:25px 29px 80px}.calendarSprig{width:185px}.weddingDate .calendarDay{font-size:65px}.weddingDate>p{font-size:22px;max-width:105px}.weddingCloth .day{min-height:30px;font-size:19px}.calendarTail{width:115px;bottom:16px}.calendarScene{padding-inline:14px}.countNumber{font-size:34px}.openLetter{inset:57% 24px 11%}.openDedication{font-size:20px}.openHosts strong{font-size:10px}.stepSprig{width:80px}}
 
 .letterWords p,.address,.hosts,.openHosts strong,.location h3{overflow-wrap:anywhere}
+
+/*
+ * 16.11.2026 — низкое окно (Mini App ~600 px): печать задавалась долей ширины (52 %), а надписи — долей высоты
+ * (с 57 %), поэтому в невысоком окне печать ложилась на «Икки қалб. Бир тақдир.» и имена. Теперь печать
+ * не выше 26 % высоты экрана и всегда заканчивается выше блока надписей; монограмма — от размера печати.
+ */
+.opening {
+  --signet: min(calc(min(100vw, 430px) * 0.52), 26dvh);
+}
+.opening .signet {
+  inset: auto;
+  top: 29%;
+  left: calc(50% - var(--signet) / 2);
+  width: var(--signet);
+}
+.opening .signetMono {
+  font-size: calc(var(--signet) * 0.34);
+}
+.opening .openLetter {
+  inset: max(57%, calc(29% + var(--signet) + 12px)) 26px max(11%, calc(env(safe-area-inset-bottom) + 50px + var(--open-hint-space, 0px)));
+}

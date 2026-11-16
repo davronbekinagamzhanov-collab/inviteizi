@@ -182,3 +182,54 @@
   .cinemaHero > .photo img { transform: none !important; }
   .opening * { animation: none !important; transition: none !important; }
 }
+
+/*
+ * 16.11.2026 — закрытый экран без наложений на любой высоте: колонка с промежутками вместо позиций
+ * от высоты окна; размеры — clamp() от высоты самого экрана (cqh). Мало места — сначала монограмма, потом шрифт.
+ */
+.coverInk.coverInk {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  container-type: size;
+  padding: max(calc(env(safe-area-inset-top) + 22px), 6svh) 28px calc(env(safe-area-inset-bottom) + var(--open-hint-space, 18px));
+}
+.coverInk.coverInk > :is(.coverEyebrow, .coverIdentity, .coverPrompt, .coverFoot) {
+  position: relative;
+  inset: auto;
+  top: auto;
+  bottom: auto;
+  flex: none;
+  width: 100%;
+}
+.coverInk.coverInk > .coverIdentity {
+  margin-top: clamp(8px, 6cqh, 64px);
+}
+.coverInk.coverInk .coverIdentity .monogram {
+  font-size: clamp(64px, 20cqh, 170px);
+  height: clamp(58px, 18cqh, 155px);
+  margin: 0 0 clamp(8px, 3.4cqh, 36px);
+}
+.coverInk.coverInk .coverNames {
+  font-size: clamp(24px, 5cqh, 37px);
+}
+.coverInk.coverInk .coverNames i {
+  font-size: clamp(14px, 2.4cqh, 18px);
+  line-height: 1.5;
+}
+.coverInk.coverInk .coverDate {
+  margin-top: clamp(6px, 2.6cqh, 28px);
+}
+.coverInk.coverInk > .coverPrompt {
+  margin-top: auto;
+  padding-top: clamp(8px, 2cqh, 18px);
+  font-size: clamp(19px, 3.6cqh, 25px);
+  line-height: 1.35;
+}
+.coverInk.coverInk > .coverPrompt > span {
+  font-size: clamp(18px, 3.6cqh, 28px);
+  line-height: 1.2;
+}
+.coverInk.coverInk > .coverFoot {
+  margin-top: clamp(6px, 2.4cqh, 24px);
+}

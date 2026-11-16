@@ -314,6 +314,7 @@ export const kk = {
   opening: {
     tapToOpen: "Ашу үшін басыңыз",
     tapScreen: "Ашу үшін экранды басыңыз",
+    openInvitation: "Шақыруды ашыңыз",
     invitation: "Шақыру",
     welcome: "Қош келдіңіз",
   },

@@ -37,6 +37,8 @@ export const EXTRA_LANGS: ExtraLang[] = ["ru", "kk"];
 export type InvitationData = {
   /** Explicit opt-in; absent keeps the original appearance of every existing order. */
   designVersion?: "premium-v1";
+  /** Выдано владельцем без оплаты (Mini App «Бесплатно яратиш»): причина, кто и когда. Сумма заказа 0 */
+  staffGrant?: { reason: StaffGrantReason; by: number; at: string };
   occasion: Occasion;
   /** Никоҳ: жених и невеста */
   groom?: string;
@@ -78,3 +80,7 @@ export type InvitationData = {
 
 /** demo — с водяным знаком «НАМУНА» и без музыки (до оплаты); full — полная версия */
 export type InvitationMode = "demo" | "full";
+
+/** Причины бесплатной выдачи владельцем: подарок, пример, оплачено наличными, замена */
+export const STAFF_GRANT_REASONS = ["gift", "sample", "cash", "replace"] as const;
+export type StaffGrantReason = (typeof STAFF_GRANT_REASONS)[number];

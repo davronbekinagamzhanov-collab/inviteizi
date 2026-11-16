@@ -90,7 +90,7 @@ export function Opening({ inv }: { inv: Invitation }) {
               animate={{ opacity: going ? 0 : 1 }}
               transition={{ duration: 0.3 }}
             >
-              <span className="soft-pulse font-body text-[17px] tracking-[0.08em] text-[#F3DDB8]">
+              <span data-open-prompt className="soft-pulse font-body text-[17px] tracking-[0.08em] text-[#F3DDB8]">
                 {t.opening.tapToOpen}
               </span>
             </motion.span>

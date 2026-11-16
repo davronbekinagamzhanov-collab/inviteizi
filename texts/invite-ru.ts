@@ -321,6 +321,7 @@ export const ru = {
   opening: {
     tapToOpen: "Нажмите, чтобы открыть",
     tapScreen: "Нажмите на экран, чтобы открыть",
+    openInvitation: "Откройте приглашение",
     invitation: "Приглашение",
     welcome: "Добро пожаловать",
   },

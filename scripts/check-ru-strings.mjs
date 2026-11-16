@@ -14,6 +14,8 @@ import path from "node:path";
 const arg = (name, def) => process.argv.find((a) => a.startsWith(`--${name}=`))?.split("=")[1] ?? def;
 const BASE = arg("base", "http://localhost:3130");
 const only = arg("only", "");
+// --lang=uz: только проверка пустых значений (undefined/NaN), --lang=ru (по умолчанию) — ещё и узбекские строки
+const LANG = arg("lang", "ru");
 if (!["localhost", "127.0.0.1"].includes(new URL(BASE).hostname) && !BASE.includes(".vercel.app")) {
   throw Error("Только локальный сервер или Vercel Preview");
 }
@@ -76,7 +78,7 @@ try {
     const page = await context.newPage();
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
-    const res = await page.goto(`${BASE}/demo/${d.id}?lang=ru`, { waitUntil: "networkidle", timeout: 120000 });
+    const res = await page.goto(`${BASE}/demo/${d.id}?lang=${LANG}`, { waitUntil: "networkidle", timeout: 120000 });
     await page.waitForTimeout(600);
     const collect = () =>
       page.evaluate(() => {
@@ -111,7 +113,10 @@ try {
     await page.waitForTimeout(600);
     const after = await collect();
     const sample = futureDemoData(d.sample, new Date());
-    const bad = findings(`${before.text}\n${after.text}`, clientStrings(sample));
+    const all = `${before.text}\n${after.text}`;
+    // пустые значения в тексте страницы: «undefined», «NaN», «[object Object]», «null» — на любом языке
+    const broken = [...new Set(all.match(/(^|[^a-zа-я])(undefined|NaN|null)(?=$|[^a-zа-я])|\[object Object\]/gi) ?? [])];
+    const bad = [...(LANG === "ru" ? findings(all, clientStrings(sample)) : []), ...broken.map((b) => `пусто: ${b.trim()}`)];
     results.push({ id: d.id, number: d.number, status: res?.status(), lang: after.lang, errors, bad });
     console.log(
       `${bad.length || errors.length ? "FAIL" : "ok  "} ${d.id} ${after.lang} ${bad.slice(0, 4).join(" | ")}`,
@@ -123,6 +128,6 @@ try {
 }
 const out = process.env.CHECK_RU_REPORT ?? path.join(tmpdir(), "inviteizi-ru-strings.json");
 await writeFile(out, JSON.stringify(results, null, 2));
-const failed = results.filter((r) => r.bad.length || r.errors.length || r.status !== 200 || r.lang !== "ru");
+const failed = results.filter((r) => r.bad.length || r.errors.length || r.status !== 200 || !String(r.lang).startsWith(LANG));
 console.log(`\nДизайнов: ${results.length}, с замечаниями: ${failed.length}. Отчёт: ${out}`);
 process.exitCode = failed.length ? 1 : 0;
