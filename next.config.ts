@@ -40,11 +40,16 @@ const nextConfig: NextConfig = {
       "/art/:path*",
       "/floral/:path*",
       "/music/:path*",
-      "/audio/:path*",
       "/og/:path*",
       "/pilots/:path*",
       "/materials/:path*",
-    ].map((source) => ({ source, headers: year }));
+    ]
+      .map((source) => ({ source, headers: year }))
+      // Песни: новый файл — новое имя, содержимое по старому адресу не меняется → immutable, без перепроверок.
+      // Range-запросы (перемотка, iPhone) Vercel отдаёт сам: 206 + Accept-Ranges.
+      .concat([
+        { source: "/audio/:path*", headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }] },
+      ]);
   },
   // без значка Next.js в углу: владелец смотрит пригласительные с телефона в режиме разработки
   devIndicators: false,
