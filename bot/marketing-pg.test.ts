@@ -548,3 +548,109 @@ it.skipIf(!native)("flags-off legacy notice worker never consumes paused marketi
   expect(await repo.claimDueNotices(new Date(Date.now() + 3600000), 50)).toHaveLength(0);
   expect((await sql`select sent_at from public.bot_notices where key=${"mk:paid_pack:" + o.id}`)[0].sent_at).toBeNull();
 });
+
+// ── Готовность к рекламе (17.11.2026): полные пути клиента на настоящей базе ──
+
+async function launchSim() {
+  const { Sim } = await import("./testing/sim");
+  const sim = new Sim({ now: "2026-12-01T07:00:00Z" });
+  sim.deps.repo = repo;
+  sim.repo = repo as unknown as typeof sim.repo;
+  sim.deps.env = {
+    ...sim.deps.env,
+    marketing: { ui: true, delivery: true, referrals: true, promos: true, status: true, edits: true },
+  };
+  return sim;
+}
+const owner = { id: 500, firstName: null, username: null, languageCode: null };
+
+it.skipIf(!native)(
+  "реклама через партнёра: join_ из админки → клиент по ссылке партнёра → заказ → чек → ✅ (дважды) → начисление ровно 1 раз",
+  async () => {
+    const { ownerAdmin } = await import("./app/owner-admin"),
+      { nikohWithReceipt } = await import("./testing/paths"),
+      { uz } = await import("@/texts/bot-uz"),
+      { partnerSource } = await import("@/lib/owner-panel");
+    const sim = await launchSim();
+    const made = (await ownerAdmin(sim.deps, owner, "ownerPartnerNew", {
+      name: "Салон " + ++n,
+      phone: "+7 701 555 44 33",
+      rate: "15%",
+      schedule: "weekly",
+    })) as { id: number; link: string };
+    const partnerUser = ++n;
+    await sim.start(partnerUser, "join_" + /start=join_([a-z0-9]+)/.exec(made.link)![1]);
+    await sim.click(partnerUser, uz.langUz);
+    await sim.contact(partnerUser, "77015554433");
+    expect((await repo.getPartner(made.id))?.telegramId).toBe(partnerUser);
+
+    const client = ++n;
+    await sim.start(client, partnerSource((await repo.getPartner(made.id))!.code));
+    const o = await nikohWithReceipt(sim, client);
+    expect(o.status).toBe("receipt_sent");
+    await sim.callback(500, `ok:${o.number}`, 1);
+    await sim.callback(500, `ok:${o.number}`, 1);
+    expect((await repo.getOrder(o.id))?.status).toBe("active");
+    const earnings = await sql`select amount from public.partner_earnings where partner_id=${made.id}`;
+    expect(earnings.map((e) => Number(e.amount))).toEqual([Math.round((o.amount * 15) / 100)]);
+    const due = (await ownerAdmin(sim.deps, owner, "ownerPayouts", {})) as { due: { id: number; amount: number }[] };
+    expect(due.due.find((x) => x.id === made.id)?.amount).toBe(Math.round((o.amount * 15) / 100));
+  },
+  60000,
+);
+
+it.skipIf(!native)(
+  "промокод: код из админки → клиент вводит → цена со скидкой → чек → ✅ списан 1 раз; ❌ — использование возвращается",
+  async () => {
+    const { ownerAdmin } = await import("./app/owner-admin"),
+      { nikohOrder } = await import("./testing/paths"),
+      { uz } = await import("@/texts/bot-uz");
+    const sim = await launchSim();
+    const code = "LAUNCH" + ++n;
+    expect(await ownerAdmin(sim.deps, owner, "ownerPromoCreate", { code, percent: 25, limit: 1 })).toMatchObject({
+      ok: true,
+    });
+    const used = async () =>
+      (
+        (await ownerAdmin(sim.deps, owner, "ownerPromos", {})) as {
+          promos: { code: string; used: number; reserved: number }[];
+        }
+      ).promos.find((p) => p.code === code)!;
+    const pay = async (client: number) => {
+      const o = await nikohOrder(sim, client);
+      await sim.command(client, "promo", `${o.number} ${code.toLowerCase()}`);
+      const quoted = (await repo.getOrder(o.id))!;
+      await sim.click(client, /^💳 Тўлаш/);
+      await sim.click(client, uz.pay.confirmYes);
+      await sim.photo(client, `RECEIPT_${client}`);
+      return { o, quoted, after: (await repo.getOrder(o.id))! };
+    };
+
+    // 1) ❌ владельца: использование возвращается, цена — снова полная
+    const first = await pay(++n);
+    expect(first.quoted.amount).toBe(Math.floor((first.o.amount * 75) / 100));
+    expect(first.after.status).toBe("receipt_sent");
+    expect(await used()).toMatchObject({ used: 0, reserved: 1 });
+    await sim.callback(500, `nr:${first.o.number}:money`, 1);
+    expect(await repo.getOrder(first.o.id)).toMatchObject({ status: "rejected", amount: first.o.amount });
+    expect(await used()).toMatchObject({ used: 0, reserved: 0 });
+
+    // 2) лимит 1 снова свободен: другой клиент, ✅ дважды → списан ровно 1 раз
+    const second = await pay(++n);
+    expect(second.after).toMatchObject({ status: "receipt_sent", amount: Math.floor((second.o.amount * 75) / 100) });
+    await sim.callback(500, `ok:${second.o.number}`, 1);
+    await sim.callback(500, `ok:${second.o.number}`, 1);
+    expect((await repo.getOrder(second.o.id))?.status).toBe("active");
+    expect(await used()).toMatchObject({ used: 1, reserved: 0 });
+    expect(
+      await sql`select state from public.promotion_reservations r join public.promotion_codes p on p.id=r.promo_id where p.code=${code}`,
+    ).toEqual(expect.arrayContaining([{ state: "consumed" }, { state: "released" }]));
+
+    // 3) лимит исчерпан: третий клиент код не получает, цена полная
+    const third = ++n;
+    const o3 = await nikohOrder(sim, third);
+    await sim.command(third, "promo", `${o3.number} ${code}`);
+    expect((await repo.getOrder(o3.id))?.amount).toBe(o3.amount);
+  },
+  60000,
+);
