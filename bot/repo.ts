@@ -281,6 +281,12 @@ export interface Repo {
   errorSummary(since: Date): Promise<{ count: number; top: string } | null>;
   /** Было ли отправлено сообщение с ключом, начинающимся на prefix, после since */
   noticeSentSince(prefix: string, since: Date): Promise<boolean>;
+  /** Когда последний раз ушло сообщение/отметка с ключом на prefix (проверка здоровья). Нет — null */
+  lastNoticeAt?(prefix: string): Promise<Date | null>;
+  /** Отметка без сообщения (проверка здоровья): ключ записан как «отправлен», в Telegram ничего не уходит */
+  markNotice?(key: string, now: Date): Promise<boolean>;
+  /** База отвечает (select 1) */
+  ping?(): Promise<void>;
   /** Черновики анкеты (users.state) клиентов, не заходивших с before: id и состояние */
   staleDraftStates(before: Date): Promise<{ id: number; state: Record<string, unknown> }[]>;
 }

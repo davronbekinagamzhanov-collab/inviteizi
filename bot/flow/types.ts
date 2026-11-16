@@ -38,6 +38,8 @@ export type Deps = {
   signMusicUpload?: (path: string) => Promise<{ clientToken: string; pathname: string; url: string }>;
   /** Удалить свои песни клиентов из Storage (автоочистка неоплаченных черновиков) */
   removeMusic?: (urls: string[]) => Promise<void>;
+  /** Проверка здоровья файлов и базы (bot/health.ts). Нет — cron её пропускает (тесты) */
+  health?: import("../health").HealthIo;
 };
 
 /** Шаги анкеты (users.step) */

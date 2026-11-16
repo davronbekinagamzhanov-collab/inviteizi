@@ -682,6 +682,11 @@ export const staff = {
     errors: (n: number, period: string, top: string) => `⚠️ Бот: ${n} ${n % 10 === 1 && n % 100 !== 11 ? "ошибка" : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? "ошибки" : "ошибок"} ${period} — ${top || "без описания"}\nПодробности — в журнале bot_errors (Supabase).`,
     errorsHour: "за час",
     errorsNight: "за ночь",
+    /** Проверка здоровья (cron каждые 10 минут, 17.11.2026) */
+    filesDown: (codes: string) => `⚠️ Файлы не открываются (${codes}): музыка/фото у клиентов не работают.`,
+    filesUp: "✅ Файлы снова работают.",
+    dbDown: (code: string) => `⚠️ База данных не отвечает (${code}): бот и заказы не работают.`,
+    dbUp: "✅ База данных снова работает.",
     mgrPaidOut: (amount: string, month: string) => `✅ Вам переведено ${amount} за ${month}.`,
   },
   /** Партнёры (v2, часть 5) */

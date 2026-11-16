@@ -878,3 +878,16 @@ it.skipIf(!native)(
     expect(await fresh.claimPromoLine(id, new Date(+t0 + gap), gap)).toBe(true);
   },
 );
+
+it.skipIf(!native)("проверка здоровья: отметки без сообщений, последнее время по префиксу, ping", async () => {
+  const t1 = new Date("2026-12-01T08:00:00Z"),
+    t2 = new Date("2026-12-01T08:10:00Z");
+  expect(await repo.markNotice(`health:test:fail:1:`, t1)).toBe(true);
+  expect(await repo.markNotice(`health:test:fail:1:`, t1)).toBe(false);
+  await repo.markNotice(`health:test:fail:2:`, t2);
+  expect(await repo.lastNoticeAt("health:test:fail:")).toEqual(t2);
+  expect(await repo.lastNoticeAt("health:test:none:")).toBeNull();
+  // Отметка никогда не уходит в Telegram
+  expect((await repo.claimDueNotices(new Date("2030-01-01T00:00:00Z"), 100)).filter((n) => n.key.startsWith("health:"))).toEqual([]);
+  await expect(repo.ping()).resolves.toBeUndefined();
+});

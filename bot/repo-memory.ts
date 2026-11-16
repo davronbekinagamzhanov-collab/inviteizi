@@ -313,6 +313,20 @@ export class MemoryRepo implements Repo {
     const top = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "";
     return { count: list.length, top };
   }
+  async lastNoticeAt(prefix: string) {
+    const times = [...this.notices.values()].filter((n) => n.key.startsWith(prefix) && n.sentAt).map((n) => +n.sentAt!);
+    return times.length ? new Date(Math.max(...times)) : null;
+  }
+  async markNotice(key: string, now: Date) {
+    if (this.notices.has(key)) return false;
+    this.notices.set(key, { key, chatId: 0, text: "", markup: null, dueAt: new Date("9999-01-01T00:00:00Z"), sentAt: now });
+    return true;
+  }
+  /** Тесты: база «упала» */
+  pingFails = false;
+  async ping() {
+    if (this.pingFails) throw Object.assign(new Error("connect ECONNREFUSED"), { code: "ECONNREFUSED" });
+  }
   async noticeSentSince(prefix: string, since: Date) {
     return [...this.notices.values()].some((n) => n.key.startsWith(prefix) && n.sentAt && +n.sentAt >= +since);
   }
