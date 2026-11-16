@@ -20,6 +20,7 @@ import { BrandBadge } from "./Brand";
 import { Rsvp } from "./Rsvp";
 import { melody as defaultMelody } from "../themes/oq-ot/melody";
 import { ONE_PAGE_LOOKS, type OnePageLook } from "../one-page-looks";
+import { FrameDividerMark, FrameLayer } from "./OnePageFrame";
 
 const vollkorn = localFont({
   preload: false,
@@ -105,7 +106,12 @@ export function OnePage({ id, data, mode }: TemplateProps & { id: string }) {
     };
   }, [look.paper]);
 
-  const photo = data.photos?.[0] ?? look.photo ?? null;
+  const comp = look.composition ?? (look.art ? "band" : "plain");
+  // Медальон: фото клиента → фото дизайна → картина дизайна в круге
+  const photo = data.photos?.[0] ?? look.photo ?? (comp === "medallion" ? (look.art ?? null) : null);
+  const art = !photo && look.art ? look.art : null;
+  const band = comp === "band" && art;
+  const padX = look.frame ? 30 : 22;
   const many = inv.program.length > 1;
   const vars = {
     "--op-paper": look.paper,
@@ -114,6 +120,10 @@ export function OnePage({ id, data, mode }: TemplateProps & { id: string }) {
     "--op-soft": look.soft,
     "--op-line": look.line,
     "--op-display": FAMILY[look.font],
+    // Палитра для бейджа InviteIZI (brandTone читает --c-*): иначе на тёмном «Сапфир» надпись не видна
+    "--c-paper": look.paper,
+    "--c-ink": look.ink,
+    "--c-accent": look.accent,
     "--s": String(scale),
   } as CSSProperties;
 
@@ -131,9 +141,9 @@ export function OnePage({ id, data, mode }: TemplateProps & { id: string }) {
       >
         <div ref={content} className="group relative flex h-full flex-col">
           {/* Картина дизайна — полосой сверху, растворяется в бумагу; текст — ниже, в оставшемся месте */}
-          {look.art && !photo && (
+          {band && (
             <img
-              src={look.art}
+              src={band}
               alt=""
               aria-hidden
               data-one-art
@@ -149,10 +159,25 @@ export function OnePage({ id, data, mode }: TemplateProps & { id: string }) {
           <div
             className="flex flex-1 flex-col items-center justify-center text-center"
             style={{
-              padding: `${look.art && !photo ? "calc(4px * var(--s))" : "calc(56px * var(--s))"} 22px calc(64px * var(--s))`,
+              padding: `${band ? "calc(4px * var(--s))" : "calc(56px * var(--s))"} ${padX}px ${comp === "bottom" && art ? "calc(8px * var(--s))" : "calc(64px * var(--s))"}`,
               gap: "calc(14px * var(--s))",
             }}
           >
+            {comp === "arch" && art && (
+              <img
+                src={art}
+                alt=""
+                aria-hidden
+                data-one-art
+                className="shrink-0 object-cover"
+                style={{
+                  width: "calc(150px * var(--s) * var(--s))",
+                  height: "calc(176px * var(--s) * var(--s))",
+                  borderRadius: "999px 999px 14px 14px",
+                  boxShadow: `0 0 0 4px ${look.paper}, 0 0 0 5px ${look.accent}`,
+                }}
+              />
+            )}
             {photo && (
               <img
                 src={photo}
@@ -198,11 +223,7 @@ export function OnePage({ id, data, mode }: TemplateProps & { id: string }) {
                 {inv.text.greeting}
               </p>
             )}
-            <span
-              aria-hidden
-              className="block"
-              style={{ width: 56, height: 1, background: look.accent, opacity: 0.6 }}
-            />
+            <FrameDividerMark kind={look.frame?.divider ?? "line"} accent={look.accent} />
             <ol className="flex w-full flex-col" style={{ gap: "calc(12px * var(--s))" }}>
               {inv.program.map((e, i) => (
                 <li
@@ -272,7 +293,23 @@ export function OnePage({ id, data, mode }: TemplateProps & { id: string }) {
               </button>
             )}
           </div>
+          {comp === "bottom" && art && (
+            <img
+              src={art}
+              alt=""
+              aria-hidden
+              data-one-art
+              className="pointer-events-none w-full shrink-0 object-cover"
+              style={{
+                height: "calc(150px * var(--s) * var(--s))",
+                maskImage: "linear-gradient(transparent, #000 45%)",
+                WebkitMaskImage: "linear-gradient(transparent, #000 45%)",
+                opacity: look.dark ? 0.5 : 0.95,
+              }}
+            />
+          )}
         </div>
+        {look.frame && <FrameLayer id={id} frame={look.frame} accent={look.accent} line={look.line} />}
 
         {inv.hasMusic && (
           <MusicButton
