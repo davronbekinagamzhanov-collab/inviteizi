@@ -1,3 +1,4 @@
+import { remindPromotions, runBroadcast } from "./broadcast";
 import { flushMarketing, withMarketingReady } from "./marketing";
 /**
  * Задания по расписанию (pg_cron → POST /api/cron каждые 10 минут):
@@ -36,6 +37,9 @@ export type CronResult = {
   reviews: number;
   cleaned: number;
   errorAlerts: number;
+  /** Рассылка об акции: поставлено напоминаний «Охирги кун!» и отправлено сообщений */
+  broadcastQueued?: number;
+  broadcastSent?: number;
   errors: number;
 };
 
@@ -224,6 +228,15 @@ export async function runCron(input: Deps): Promise<CronResult> {
   } catch (e) {
     r.errors++;
     console.error("cron notices", e instanceof Error ? e.name : "Error");
+  }
+
+  // ── Рассылка об акции: «Охирги кун!» за 24 ч и отправка очереди (25 в секунду) ──
+  try {
+    r.broadcastQueued = await remindPromotions(deps);
+    r.broadcastSent = (await runBroadcast(deps, { budgetMs: 20_000 })).sent;
+  } catch (e) {
+    r.errors++;
+    console.error("cron broadcast", e instanceof Error ? e.name : "Error");
   }
 
   // ── v2, часть 10: напоминания не купившим, отзывы, автоочистка ──

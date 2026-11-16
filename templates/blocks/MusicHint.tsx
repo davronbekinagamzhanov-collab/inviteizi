@@ -34,8 +34,10 @@ export function MusicHint({ inv }: { inv: Invitation }) {
     const id = setTimeout(() => setTouched(true), MUSIC_HINT_MS);
     return () => clearTimeout(id);
   }, [scrolled]);
-  if (!inv.hasMusic || inv.hasOpening || touched) return null;
-  const shown = scrolled && !inv.playing;
+  // Звук не включился сам (запрет телефона) — кнопка видна сразу, у любого дизайна, пока музыка не заиграет
+  const blocked = inv.musicBlocked && !inv.playing;
+  if (!inv.hasMusic || (!blocked && (inv.hasOpening || touched))) return null;
+  const shown = blocked || (scrolled && !inv.playing);
   return (
     <button
       type="button"
@@ -49,10 +51,15 @@ export function MusicHint({ inv }: { inv: Invitation }) {
       }}
       className={`fixed right-[calc(max(1rem,calc((100vw-430px)/2+1rem))+3.75rem)] ${inv.mode === "demo" ? "bottom-[calc(3.6rem+env(safe-area-inset-bottom))]" : "bottom-[calc(1.1rem+env(safe-area-inset-bottom))]"} z-40 inline-flex h-11 items-center gap-2 whitespace-nowrap rounded-full bg-[var(--n-paper,#fffaf2)]/90 pl-3 pr-4 font-sans text-[14px] font-medium text-[var(--n-ink,#3b2a1e)] shadow-[0_8px_22px_-10px_rgba(40,30,20,.55)] ring-1 ring-[var(--n-ink,#3b2a1e)]/15 backdrop-blur-sm transition-[opacity,transform] duration-500 ease-[cubic-bezier(.22,1,.36,1)] active:scale-95 ${shown ? "opacity-100" : "pointer-events-none translate-y-2 opacity-0"}`}
     >
-      <span aria-hidden className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--n-ink,#3b2a1e)] text-[var(--n-paper,#fffaf2)]">
-        <svg viewBox="0 0 24 24" className="ml-0.5 h-3.5 w-3.5"><path fill="currentColor" d="M8 5.5v13l11-6.5z" /></svg>
+      <span
+        aria-hidden
+        className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--n-ink,#3b2a1e)] text-[var(--n-paper,#fffaf2)]"
+      >
+        <svg viewBox="0 0 24 24" className="ml-0.5 h-3.5 w-3.5">
+          <path fill="currentColor" d="M8 5.5v13l11-6.5z" />
+        </svg>
       </span>
-      {t.musicHint}
+      {blocked ? t.musicBlocked : t.musicHint}
     </button>
   );
 }

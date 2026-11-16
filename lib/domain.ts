@@ -41,6 +41,8 @@ export type UserRecord = {
   /** v2: напоминаний «не купившим» уже отправлено (0–4); nudgeOff — «🔕 Бошқа юборманг» или бот заблокирован */
   nudgeCount?: number;
   nudgeOff?: boolean;
+  /** «🔕 Хабарларни ўчириш» в рассылке об акции или бот заблокирован (403) */
+  broadcastOff?: boolean;
 };
 
 export type MusicRecord = {
@@ -117,8 +119,21 @@ export type Promotion = {
   stoppedAt: Date | null;
   createdBy: number;
   createdAt: Date;
+  /** Рассылка клиентам (по умолчанию да) и напоминание «Охирги кун!» за 24 ч (по умолчанию да) */
+  broadcast?: boolean;
+  remind?: boolean;
+  /** Когда рассылка/напоминание ушли в очередь (один раз); null — ещё нет */
+  broadcastAt?: Date | null;
+  remindAt?: Date | null;
 };
-export type NewPromotion = Omit<Promotion, "id" | "stoppedAt" | "createdAt">;
+export type NewPromotion = Omit<Promotion, "id" | "stoppedAt" | "createdAt" | "broadcastAt" | "remindAt">;
+
+/** Получатель рассылки: пользователь бота, который не отключал сообщения и не блокировал бота */
+export type BroadcastUser = { id: number; lang: Lang | null; source: string | null; username: string | null };
+
+/** Сообщение рассылки в очереди (bot_notices, ключ promo:<акция>:<пользователь>:<start|last>) */
+export type BroadcastJob = { key: string; chatId: number; token: string; attempts: number };
+export type BroadcastStats = { queued: number; sent: number; blocked: number; failed: number };
 
 /** Оптовик: постоянная скидка, без акций, промокодов и начислений партнёрам */
 export type Wholesaler = { userId: number; percent: number; createdAt: Date; removedAt: Date | null };

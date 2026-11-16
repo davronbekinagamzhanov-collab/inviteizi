@@ -8,6 +8,14 @@ export type SalesLang = "uz" | "ru" | "kk";
 export const strike = (s: string) => [...s].map((ch) => (ch === " " ? " " : ch + "̶")).join("");
 
 const uz = {
+  // Рассылка об акции (17.11.2026)
+  bcLast: "⏰ Охирги кун!",
+  bcLeft: (d: number, h: number) =>
+    d > 0 ? `Акция тугашига ${d} кун ${h} соат қолди` : `Акция тугашига ${h} соат қолди`,
+  bcFormats: { animated: "Анимацияли", scroll: "Варақланадиган", simple: "Оддий" } as Record<string, string>,
+  bcChoose: "🎉 Танлаш",
+  bcOff: "🔕 Хабарларни ўчириш",
+  bcOffDone: "Хабарлар ўчирилди. Акциялар ҳақида бошқа ёзмаймиз.",
   free: "БЕПУЛ",
   off: (p: number) => `−${p} %`,
   saving: (x: string) => `Тежайсиз ${x}`,
@@ -46,6 +54,12 @@ const uz = {
 };
 
 const ru: typeof uz = {
+  bcLast: "⏰ Последний день!",
+  bcLeft: (d, h) => (d > 0 ? `До конца акции ${d} дн ${h} ч` : `До конца акции ${h} ч`),
+  bcFormats: { animated: "Анимация", scroll: "Листаемое", simple: "Простое" },
+  bcChoose: "🎉 Выбрать",
+  bcOff: "🔕 Отключить сообщения",
+  bcOffDone: "Сообщения отключены. Больше не пишем об акциях.",
   free: "БЕСПЛАТНО",
   off: (p) => `−${p} %`,
   saving: (x) => `Экономия ${x}`,
@@ -80,6 +94,12 @@ const ru: typeof uz = {
 
 const kk: typeof uz = {
   ...ru,
+  bcLast: "⏰ Соңғы күн!",
+  bcLeft: (d, h) => (d > 0 ? `Акция аяқталуына ${d} күн ${h} сағ қалды` : `Акция аяқталуына ${h} сағ қалды`),
+  bcFormats: { animated: "Анимациялы", scroll: "Парақталатын", simple: "Қарапайым" },
+  bcChoose: "🎉 Таңдау",
+  bcOff: "🔕 Хабарламаларды өшіру",
+  bcOffDone: "Хабарламалар өшірілді. Акциялар туралы бұдан былай жазбаймыз.",
   free: "ТЕГІН",
   saving: (x) => `Үнемдеу ${x}`,
   timer: (d, h, m) =>

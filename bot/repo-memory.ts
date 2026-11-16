@@ -24,6 +24,7 @@ import type {
   Lang,
   MusicRecord,
   NewOrder,
+  BroadcastJob,
   NewPromotion,
   Promotion,
   Wholesaler,
@@ -164,6 +165,114 @@ export class MemoryRepo implements Repo {
       .slice(0, limit);
     for (const n of due) n.sentAt = now;
     return due.map(({ sentAt, ...n }) => (void sentAt, clone(n)));
+  }
+  // ── Рассылка об акции (как bot_notices с арендой) ──
+  broadcast = new Map<
+    string,
+    {
+      key: string;
+      chatId: number;
+      dueAt: Date;
+      sentAt: Date | null;
+      deadAt: Date | null;
+      code: string | null;
+      token: string | null;
+      leaseUntil: Date | null;
+      sendingAt: Date | null;
+      attempts: number;
+    }
+  >();
+  blockedUsers = new Set<number>();
+  async listBroadcastUsers() {
+    return [...this.users.values()]
+      .filter((u) => !u.broadcastOff && !u.nudgeOff && !this.blockedUsers.has(u.id))
+      .map((u) => ({ id: u.id, lang: u.lang, source: u.source, username: u.username }));
+  }
+  async setBroadcastOff(userId: number, off: boolean, blocked = false) {
+    const u = this.users.get(userId);
+    if (u) u.broadcastOff = off;
+    if (blocked) this.blockedUsers.add(userId);
+  }
+  async markPromotionBroadcast(id: string, kind: "start" | "last", now: Date, minGapMs: number) {
+    const p = this.promotions.find((x) => x.id === id);
+    if (!p) return false;
+    if (kind === "last") {
+      if (p.remindAt) return false;
+      p.remindAt = now;
+      return true;
+    }
+    if (p.broadcastAt) return false;
+    if (this.promotions.some((x) => x.broadcastAt && +now - +x.broadcastAt < minGapMs)) return false;
+    p.broadcastAt = now;
+    return true;
+  }
+  async enqueueBroadcast(rows: { key: string; chatId: number; dueAt: Date }[]) {
+    let n = 0;
+    for (const r of rows) {
+      if (this.broadcast.has(r.key)) continue;
+      this.broadcast.set(r.key, {
+        ...r,
+        sentAt: null,
+        deadAt: null,
+        code: null,
+        token: null,
+        leaseUntil: null,
+        sendingAt: null,
+        attempts: 0,
+      });
+      n++;
+    }
+    return n;
+  }
+  async claimBroadcast(now: Date, limit: number, leaseMs: number) {
+    const out: BroadcastJob[] = [];
+    for (const j of [...this.broadcast.values()].sort((a, b) => +a.dueAt - +b.dueAt)) {
+      if (out.length >= limit) break;
+      if (j.sentAt || j.deadAt || +j.dueAt > +now || (j.leaseUntil && +j.leaseUntil > +now)) continue;
+      // Аренда истекла посреди отправки: Telegram мог доставить — не повторяем (ровно 1 раз), считаем сбоем
+      if (j.sendingAt) {
+        j.deadAt = now;
+        j.code = "ambiguous";
+        continue;
+      }
+      j.token = crypto.randomUUID();
+      j.leaseUntil = new Date(+now + leaseMs);
+      j.attempts++;
+      out.push({ key: j.key, chatId: j.chatId, token: j.token, attempts: j.attempts });
+    }
+    return out;
+  }
+  async markBroadcastSending(key: string, token: string, now: Date) {
+    const j = this.broadcast.get(key);
+    if (!j || j.token !== token || j.sentAt || j.deadAt) return false;
+    j.sendingAt = now;
+    return true;
+  }
+  async ackBroadcast(key: string, token: string, now: Date) {
+    const j = this.broadcast.get(key);
+    if (!j || j.token !== token) return;
+    j.sentAt = now;
+    j.token = null;
+    j.leaseUntil = null;
+  }
+  async failBroadcast(key: string, token: string, r: { retryAt?: Date; code: string }, now: Date) {
+    const j = this.broadcast.get(key);
+    if (!j || j.token !== token) return;
+    j.token = null;
+    j.leaseUntil = null;
+    j.sendingAt = null;
+    j.code = r.code;
+    if (r.retryAt) j.dueAt = r.retryAt;
+    else j.deadAt = now;
+  }
+  async broadcastStats(prefix: string) {
+    const list = [...this.broadcast.values()].filter((j) => j.key.startsWith(prefix));
+    return {
+      queued: list.filter((j) => !j.sentAt && !j.deadAt).length,
+      sent: list.filter((j) => j.sentAt).length,
+      blocked: list.filter((j) => j.deadAt && j.code === "blocked").length,
+      failed: list.filter((j) => j.deadAt && j.code !== "blocked").length,
+    };
   }
   // ── Часть 10 ──
   reviews: { orderId: string; userId: number; stars: number; text: string | null; createdAt: Date }[] = [];

@@ -527,3 +527,17 @@
   border-color: var(--ink);
   color: #fff8ec;
 }
+.previewImg {
+  width: 100%;
+  max-width: 240px;
+  aspect-ratio: 9 / 16;
+  object-fit: cover;
+  border-radius: 12px;
+  justify-self: center;
+}
+.previewText {
+  margin: 0;
+  white-space: pre-line;
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}

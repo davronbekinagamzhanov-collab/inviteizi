@@ -80,11 +80,13 @@ const ADMIN_MOCK = {
   ownerClientOrders: { orders: [{ id: "o1", number: 141, amount: 8000, design: "Муҳр", names: "Азиз ва Мадина", url: "http://localhost/demo/muhr" }] },
   ownerPromotions: {
     promotions: [
-      { id: "p1", name: "Куз чегирмаси", percent: 50, startsAt: iso(1), endsAt: iso(30), occasions: null, formats: ["animated"], forPartnerClients: false, state: "running", orders: 6, sum: 24000, free: 0 },
-      { id: "p0", name: "Наврўз — бепул", percent: 100, startsAt: iso(0), endsAt: iso(1), occasions: ["nikoh"], formats: null, forPartnerClients: true, state: "stopped", orders: 3, sum: 0, free: 3 },
+      { id: "p1", name: "Куз чегирмаси", percent: 50, startsAt: iso(1), endsAt: iso(30), occasions: null, formats: ["animated"], forPartnerClients: false, state: "running", orders: 6, sum: 24000, free: 0, broadcast: true, remind: true, broadcastAt: null, remindAt: null, progress: { queued: 0, sent: 0, blocked: 0, failed: 0 } },
+      { id: "p0", name: "Наврўз — бепул", percent: 100, startsAt: iso(0), endsAt: iso(1), occasions: ["nikoh"], formats: null, forPartnerClients: true, state: "stopped", orders: 3, sum: 0, free: 3, broadcast: true, remind: true, broadcastAt: iso(0), remindAt: null, progress: { queued: 0, sent: 412, blocked: 9, failed: 1 } },
     ],
   },
   ownerPromotionStop: { ok: true },
+  ownerBroadcastPreview: { ok: true, recipients: 431, photo: null, uz: "🎉 «Куз чегирмаси» · −50 %\n\nАнимацияли: 8 000 ₸ → 4 000 ₸\n\nАкция тугашига 2 кун 5 соат қолди", ru: "🎉 «Куз чегирмаси» · −50 %", buttons: ["🎉 Танлаш", "🔕 Хабарларни ўчириш"], sentAt: null },
+  ownerBroadcastStart: { ok: true, queued: 431, recipients: 431 },
   ownerPromotionCreate: { ok: true, id: "p2" },
   ownerWholesalers: { wholesalers: [{ userId: 9, name: "@toyxona_saltanat", percent: 20, orders: 4, sum: 25600, since: iso(2) }] },
   ownerWholesaleSet: { ok: true, userId: 9 },
@@ -197,6 +199,11 @@ try {
         await page.getByRole("button", { name: "Да, выключить" }).click();
       });
       await screen("promotions", "promotions", async () => {
+        await page.locator("[data-broadcast-open]").click();
+        await page.locator("[data-broadcast-count]").waitFor();
+        if (await overflow(page)) errors.push("broadcast preview overflow");
+        await page.screenshot({ path: `${out}/${width}-broadcast-preview.png`, fullPage: true });
+        await page.getByRole("button", { name: /Отправить 431/ }).click();
         await page.getByRole("button", { name: "Остановить" }).click();
         await page.getByRole("button", { name: "Да, остановить" }).click();
       });
@@ -212,7 +219,7 @@ try {
         await page.locator("[data-share-link]").waitFor();
       });
       const sent = new Set(calls.map((c) => c.action));
-      for (const a of ["ownerPartnerNew", "ownerPartnerTerms", "ownerPartnerPause", "ownerManagerInvite", "ownerManagerRemove", "ownerPayoutMark", "ownerPromoCreate", "ownerPromoDisable", "ownerClientLink", "ownerPromotionStop"])
+      for (const a of ["ownerPartnerNew", "ownerPartnerTerms", "ownerPartnerPause", "ownerManagerInvite", "ownerManagerRemove", "ownerPayoutMark", "ownerPromoCreate", "ownerPromoDisable", "ownerClientLink", "ownerPromotionStop", "ownerBroadcastStart"])
         if (!sent.has(a)) errors.push(`${a} not sent`);
       const mark = calls.find((c) => c.action === "ownerPayoutMark");
       if (mark && (mark.amount !== 2800 || mark.version !== 1)) errors.push("payout mark body");

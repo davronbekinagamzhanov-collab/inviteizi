@@ -3,7 +3,10 @@
 import { initDataOf } from "./telegram";
 
 export class ApiError extends Error {
-  constructor(public code: string, public status = 0) {
+  constructor(
+    public code: string,
+    public status = 0,
+  ) {
     super(code);
   }
 }
@@ -36,7 +39,13 @@ export async function api<T>(action: string, body: Record<string, unknown> = {})
 }
 
 /** Загрузка файла с прогрессом (0–1). kind=photo → {url}; kind=receipt → результат чека */
-export function upload<T>(kind: "photo" | "receipt", file: Blob, name: string, params: Record<string, string>, onProgress?: (p: number) => void): Promise<T> {
+export function upload<T>(
+  kind: "photo" | "receipt",
+  file: Blob,
+  name: string,
+  params: Record<string, string>,
+  onProgress?: (p: number) => void,
+): Promise<T> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     const q = new URLSearchParams({ kind, ...params });
@@ -49,7 +58,8 @@ export function upload<T>(kind: "photo" | "receipt", file: Blob, name: string, p
       try {
         data = JSON.parse(xhr.responseText);
       } catch {
-        return reject(new ApiError("server", xhr.status));
+        // Vercel отвечает на слишком большое тело не JSON-ом — это «файл большой», а не «ошибка сервера»
+        return reject(new ApiError(xhr.status === 413 ? "tooBig" : "server", xhr.status));
       }
       if (xhr.status === 401) return reject(new ApiError("auth", 401));
       if (xhr.status >= 400 && data.error) return reject(new ApiError(data.error, xhr.status));
@@ -61,26 +71,58 @@ export function upload<T>(kind: "photo" | "receipt", file: Blob, name: string, p
   });
 }
 
-export const MAX_FILE = 10 * 1024 * 1024;
-/** Тело запроса Vercel ≤ 4,5 МБ: всё, что телефон может разобрать, ужимаем до 1600 px JPEG */
-const MAX_RAW_UPLOAD = 4.3 * 1024 * 1024;
+/**
+ * Лимит — на то, что уходит на сервер (тело запроса Vercel ≤ 4,5 МБ), а не на исходный файл:
+ * фото с камеры Pixel/Samsung бывают 10–25 МБ, после сжатия до 1600 px это ~300 КБ (17.11.2026).
+ * MAX_FILE — только защита памяти телефона от совсем огромных файлов.
+ */
+export const MAX_FILE = 60 * 1024 * 1024;
+/** PDF и то, что телефон не смог разобрать, уходят как есть — в пределах тела запроса */
+export const MAX_RAW_UPLOAD = 4.3 * 1024 * 1024;
 const MAX_SIDE = 1600;
 
-/** Картинка → JPEG до 1600 px. HEIC, который браузер не умеет открыть, уходит как есть (сервер разберёт), если влезает */
+/** Открыть картинку: createImageBitmap с поворотом по EXIF → без параметров (старый Android) → через <img> */
+async function decode(
+  file: File,
+): Promise<{ src: CanvasImageSource; width: number; height: number; done: () => void }> {
+  for (const opts of [{ imageOrientation: "from-image" }, undefined] as (ImageBitmapOptions | undefined)[]) {
+    try {
+      const b = opts ? await createImageBitmap(file, opts) : await createImageBitmap(file);
+      return { src: b, width: b.width, height: b.height, done: () => b.close?.() };
+    } catch {
+      // следующий способ
+    }
+  }
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.src = url;
+  try {
+    await img.decode();
+  } catch (e) {
+    URL.revokeObjectURL(url);
+    throw e;
+  }
+  return { src: img, width: img.naturalWidth, height: img.naturalHeight, done: () => URL.revokeObjectURL(url) };
+}
+
+/** Картинка → JPEG до 1600 px (≤ 4,3 МБ). HEIC, который браузер не умеет открыть, уходит как есть, если влезает */
 export async function shrinkImage(file: File): Promise<{ blob: Blob; name: string }> {
   if (file.size > MAX_FILE) throw new ApiError("tooBig");
   try {
-    const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" } as ImageBitmapOptions);
-    const scale = Math.min(1, MAX_SIDE / Math.max(bitmap.width, bitmap.height));
-    const w = Math.max(1, Math.round(bitmap.width * scale));
-    const h = Math.max(1, Math.round(bitmap.height * scale));
+    const img = await decode(file);
+    if (!img.width || !img.height) throw new Error("empty");
+    const scale = Math.min(1, MAX_SIDE / Math.max(img.width, img.height));
+    const w = Math.max(1, Math.round(img.width * scale));
+    const h = Math.max(1, Math.round(img.height * scale));
     const canvas = document.createElement("canvas");
     canvas.width = w;
     canvas.height = h;
-    canvas.getContext("2d")!.drawImage(bitmap, 0, 0, w, h);
-    bitmap.close?.();
-    const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, "image/jpeg", 0.86));
-    if (blob) return { blob, name: "photo.jpg" };
+    canvas.getContext("2d")!.drawImage(img.src, 0, 0, w, h);
+    img.done();
+    for (const q of [0.86, 0.72, 0.6]) {
+      const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, "image/jpeg", q));
+      if (blob && blob.size <= MAX_RAW_UPLOAD) return { blob, name: "photo.jpg" };
+    }
   } catch {
     // не смогли открыть — попробуем отправить как есть
   }
