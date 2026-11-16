@@ -5,16 +5,21 @@ import { t } from "@/texts/uz-cyrl";
 import type { Invitation } from "./useInvitation";
 
 /**
- * Дизайн без заставки (Оддий, Варақланадиган): на первом экране мягкая заметная кнопка «▶ Мусиқа»
- * рядом с круглой кнопкой музыки в углу — так она не закрывает имена и дату.
- * Браузер включает звук только после нажатия — поэтому кнопка, а не автозапуск. Уходит, когда музыка играет
- * или гость пролистал первый экран (там уже есть круглая кнопка музыки).
+ * Дизайн без заставки (Оддий, Варақланадиган): мягкая заметная кнопка «▶ Мусиқа» рядом с круглой кнопкой музыки.
+ * Браузер включает звук только после нажатия — поэтому кнопка, а не автозапуск.
+ * 17.11.2026: на нетронутом первом экране её нет (закрывала нижнюю строку — дату/место). Появляется после первой
+ * прокрутки, когда нижняя строка первого экрана уже поднялась, держится 5 секунд и уходит; уходит и когда музыка играет.
  */
+export const MUSIC_HINT_AFTER_PX = 24;
+const MUSIC_HINT_MS = 5000;
+
 export function MusicHint({ inv }: { inv: Invitation }) {
-  const [onFirstScreen, setOnFirstScreen] = useState(true);
+  const [scrolled, setScrolled] = useState(false);
   const [touched, setTouched] = useState(false);
   useEffect(() => {
-    const check = () => setOnFirstScreen(window.scrollY < window.innerHeight * 0.5);
+    const check = () => {
+      if (window.scrollY > MUSIC_HINT_AFTER_PX) setScrolled(true);
+    };
     check();
     window.addEventListener("scroll", check, { passive: true });
     return () => window.removeEventListener("scroll", check);
@@ -23,13 +28,14 @@ export function MusicHint({ inv }: { inv: Invitation }) {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- раз заиграло, подсказка больше не нужна
     if (inv.playing) setTouched(true);
   }, [inv.playing]);
-  // Видна первые 5 секунд: замечают сразу, а дальше она не закрывает имена и дату (остаётся круглая кнопка)
+  // 5 секунд с первой прокрутки, дальше остаётся только круглая кнопка
   useEffect(() => {
-    const id = setTimeout(() => setTouched(true), 5000);
+    if (!scrolled) return;
+    const id = setTimeout(() => setTouched(true), MUSIC_HINT_MS);
     return () => clearTimeout(id);
-  }, []);
+  }, [scrolled]);
   if (!inv.hasMusic || inv.hasOpening || touched) return null;
-  const shown = onFirstScreen && !inv.playing;
+  const shown = scrolled && !inv.playing;
   return (
     <button
       type="button"
