@@ -1,6 +1,6 @@
 import { payCopy } from "@/texts/pay";
 import { payerLine } from "./pay-name";
-import { applyPricing, buyerOf } from "../pricing";
+import { applyPricing, buyerOf, priceNote } from "../pricing";
 import { salesCopy } from "@/texts/sales";
 import { issueByPromotion, priceLinesFor } from "./sales";
 import { flushMarketing, fulfillPromotion } from "../marketing";
@@ -301,6 +301,15 @@ async function checkWithPrice(c: Ctx, o: OrderRecord) {
   return lines ? base.replace(/\n💳 .*$/, `\n${lines}`) : base;
 }
 
+async function promoRows(c: Ctx, o: OrderRecord): Promise<InlineButton[][]> {
+  if (!(await canUsePromo(c, o))) return [];
+  const t = salesCopy(c.lang);
+  const note = await priceNote(c.deps, o);
+  if (note?.kind === "promo")
+    return [[{ text: `✕ ${t.promoActive(note.label, note.percent)}`, data: `pcx:${o.number}` }]];
+  return [[{ text: t.promoBanner, data: `pc:${o.number}` }]];
+}
+
 async function canUsePromo(c: Ctx, o: OrderRecord) {
   if (!c.deps.env.marketing?.promos || !c.deps.repo.marketing) return false;
   if (o.pricing?.kind === "promotion" && o.amount === 0) return false;
@@ -351,7 +360,8 @@ export async function payOrder(c: Ctx, n: number, confirmed = false, stamp?: str
           },
         ],
         // Промокод — только обычным клиентам и при включённых промокодах; бесплатно по акции — уже лучше любого кода
-        ...((await canUsePromo(c, o)) ? [[{ text: salesCopy(c.lang).promoButton, data: `pc:${o.number}` }]] : []),
+        // Промокод — заметной кнопкой; уже применён — «✕ KOD: −20 %» (убрать)
+        ...(await promoRows(c, o)),
         [{ text: c.tx.order.edit, data: `edit:${o.number}` }],
       ]),
     );

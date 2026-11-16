@@ -375,8 +375,9 @@ export function Pay({
             {T.form.editData}
           </button>
         </Section>
-        <PriceBlock order={order} />
+        {/* Промокод — заметная плашка над суммой */}
         <PromoField order={order} onApplied={setOrder} />
+        <PriceBlock order={order} />
         <p className={s.formErr} style={{ color: "var(--ink)" }}>
           {T.pay.checkWarn}
         </p>

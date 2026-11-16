@@ -40,7 +40,7 @@ import {
   rsvpAnswers,
 } from "./orders";
 import { cmdFind, cmdOrders, cmdStats } from "./admin";
-import { mainMenu, ownerUrl, roleOf, send, startMenu, texts, txFor } from "./util";
+import { mainMenu, ownerUrl, PAYABLE_STATUSES, roleOf, send, startMenu, texts, txFor } from "./util";
 import type { Lang } from "@/lib/domain";
 import { dashboard } from "./dashboard";
 import {
@@ -599,6 +599,13 @@ async function onCallback(c: Ctx, d: string) {
     }
     case "pc":
       return apply(c, await beginPromo(c, n));
+    case "pcx": {
+      // «✕ KOD» — убрать промокод и показать проверку с обычной ценой
+      const o = await c.deps.repo.getOrderByNumber(n);
+      if (o && o.userId === c.user.id && PAYABLE_STATUSES.includes(o.status))
+        await c.deps.repo.marketing?.releaseHold(o.id);
+      return apply(c, await payOrder(c, n));
+    }
     case "paid":
       return apply(c, await beginPaid(c, n, b === undefined ? undefined : Number(b)));
     case "rcpt":

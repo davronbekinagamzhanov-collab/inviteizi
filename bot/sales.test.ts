@@ -309,7 +309,7 @@ describe("промокод: кнопки зависят от флага", () => 
     s.tg
       .to(id)
       .flatMap((m) => (m.markup && "inline" in m.markup ? m.markup.inline.flat() : []))
-      .filter((b) => b.text === salesTexts.uz.promoButton);
+      .filter((b) => b.text === salesTexts.uz.promoBanner);
 
   it("флаг включён: «🎟 Промокод» в боте и «Есть промокод?» в Mini App видны клиенту на шаге оплаты", async () => {
     const s = new Sim();

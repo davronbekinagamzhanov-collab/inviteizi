@@ -44,6 +44,8 @@ export async function appAction(
       return ok(await app.quoteOrder(deps, user, body.orderId));
     case "promo":
       return ok(await app.promoForOrder(deps, user, body.orderId, body.code));
+    case "promoRemove":
+      return ok(await app.removePromo(deps, user, body.orderId));
     case "confirmPay":
       return ok(await app.confirmPay(deps, user, body.orderId, body.terms));
     // Оплата без чека: «✅ Тўладим» + имя, как в Kaspi

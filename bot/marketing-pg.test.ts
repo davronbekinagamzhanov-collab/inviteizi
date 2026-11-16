@@ -783,7 +783,7 @@ it.skipIf(!native)(
     const client = ++n;
     const o = await nikohOrder(sim, client);
     await sim.click(client, /^💳 Тўлаш/);
-    await sim.click(client, T.promoButton);
+    await sim.click(client, T.promoBanner);
     expect(sim.lastText(client)).toContain(T.promoAsk);
     await sim.text(client, "NOSUCH");
     expect(sim.tg.to(client).some((m) => m.text.includes(T.promoErrors.promo_unavailable))).toBe(true);
@@ -791,6 +791,14 @@ it.skipIf(!native)(
     expect(sim.tg.to(client).some((m) => m.text.includes(T.promoApplied(code, 25, "5 990 ₸")))).toBe(true);
     expect((await repo.getOrder(o.id))?.amount).toBe(5990);
     expect(sim.lastText(client)).toContain(T.promoLine(code, 25));
+    // «✕ KOD: −25 %» — убрать: цена снова обычная, код освобождается
+    await sim.click(client, `✕ ${T.promoActive(code, 25)}`);
+    expect((await repo.getOrder(o.id))?.amount).toBe(7990);
+    // Mini App: снова применить и убрать «✕»
+    const app = await import("./app/service");
+    const u = { id: client, firstName: null, username: null, languageCode: null };
+    expect(await app.promoForOrder(sim.deps, u, o.id, code)).toMatchObject({ ok: true, order: { amount: 5990 } });
+    expect(await app.removePromo(sim.deps, u, o.id)).toMatchObject({ ok: true, order: { amount: 7990, price: null } });
     await freshPromotions();
   },
   60000,
