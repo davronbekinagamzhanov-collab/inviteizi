@@ -84,7 +84,7 @@ describe.skipIf(!BASE)("фото клиента на устройствах", ()
   }, 120_000);
 
   for (const [name, d] of Object.entries(DEVICES))
-    it(`${name}: JPEG ${"15 МБ"} 4000×3000 → сжато на телефоне, в заказе 1 фото`, async () => {
+    it(`${name}: JPEG 15 МБ 4000×3000 → сжато на телефоне, в заказе 1 фото; оплата и чек-фото 15 МБ`, async () => {
       expect(bigJpeg.byteLength).toBeGreaterThan(12 * 1024 * 1024);
       const id = ++n;
       const { ctx, page, errors, uploads } = await openApp(browser, BASE!, sim, "/app", who(id), d.device, d.platform);
@@ -112,6 +112,19 @@ describe.skipIf(!BASE)("фото клиента на устройствах", ()
         await page.getByText(appUz.pay.checkWarn).waitFor({ timeout: 30_000 });
         const [o] = await sim.repo.listOrdersByUser(id);
         expect(o.data.photos ?? []).toHaveLength(1);
+        expect(await overflow(page)).toBe(false);
+        // Оплата: условия → «Всё верно» → чек фото 15 МБ с камеры (ужимается так же) → ожидание проверки
+        await page.locator('input[name="terms"]').check();
+        await page.getByRole("button", { name: appUz.pay.checkYes }).click();
+        await page.getByText(appUz.pay.how).waitFor();
+        await page
+          .locator('input[type="file"]')
+          .last()
+          .setInputFiles({ name: "chek.jpg", mimeType: "image/jpeg", buffer: bigJpeg });
+        await page.getByText(appUz.pay.waitTitle).waitFor({ timeout: 30_000 });
+        expect(uploads.receipt).toHaveLength(1);
+        expect(uploads.receipt[0]).toBeLessThan(1.5 * 1024 * 1024);
+        expect((await sim.repo.getOrder(o.id))!.status).toBe("receipt_sent");
         expect(await overflow(page)).toBe(false);
       } finally {
         await ctx.close();
@@ -168,6 +181,28 @@ describe.skipIf(!BASE)("музыка на устройствах", () => {
       expect(errors).toEqual([]);
     }, 120_000);
 
+  for (const [name, d] of Object.entries(DEVICES))
+    it(`${name}: открыть конверт → ответ гостя «Келаман» → спасибо`, async () => {
+      const { ctx, page, errors } = await openDemo(d.device, "muhr");
+      try {
+        await page.route("**/api/rsvp", (r) => r.fulfill({ json: { ok: true } }));
+        await page.waitForTimeout(600);
+        if (d.device.hasTouch) await opener(page).tap();
+        else await opener(page).click();
+        const form = page.locator("[data-rsvp]");
+        await form.scrollIntoViewIfNeeded({ timeout: 15_000 });
+        await form.locator("input").first().fill("Шавкат ака");
+        await form.getByRole("button", { name: "+" }).click();
+        await form.locator('button[type="submit"]').click();
+        await form.locator("button", { hasText: /./ }).first().waitFor();
+        await page.waitForFunction(() => !document.querySelector("[data-rsvp] form"), null, { timeout: 10_000 });
+        expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)).toBe(false);
+      } finally {
+        await ctx.close();
+      }
+      expect(errors).toEqual([]);
+    }, 120_000);
+
   it("Pixel 7: телефон запретил звук → заметная кнопка «Мусиқани ёқиш учун ▶ ни босинг», а не тишина", async () => {
     const { ctx, page } = await openDemo(DEVICES["Pixel 7"].device, "muhr", true);
     try {
@@ -179,4 +214,127 @@ describe.skipIf(!BASE)("музыка на устройствах", () => {
       await ctx.close();
     }
   }, 120_000);
+});
+
+// ── Панели ролей (Pixel 7 и iPhone 13): партнёр (уз), менеджер (ру), оптовик (цена) — от ссылки до панели ──
+describe.skipIf(!BASE)("панели ролей на Pixel 7 и iPhone 13", () => {
+  const PARTNER = 8800;
+  const MANAGER = 8700;
+  const WHOLESALE = 8900;
+  const CLIENT = 8801;
+  /** В узбекской панели нет русских букв ы/щ (э и ъ в узбекском есть), в русской — узбекских ў/қ/ғ/ҳ */
+  const mixed = (text: string, lang: "uz" | "ru") => (lang === "uz" ? /[ыщЫЩ]/ : /[ўқғҳЎҚҒҲ]/).exec(text)?.[0] ?? null;
+
+  beforeAll(async () => {
+    const { ownerAdmin } = await import("@/bot/app/owner-admin");
+    const { partnerSource } = await import("@/lib/owner-panel");
+    const admin = (a: Parameters<typeof ownerAdmin>[2], b: Record<string, unknown> = {}) =>
+      ownerAdmin(sim.deps, { ...who(ADMIN), languageCode: "ru" }, a, b) as Promise<Record<string, unknown>>;
+    const m = await admin("ownerManagerInvite");
+    await sim.start(MANAGER, "mgr_" + /start=mgr_([a-z0-9]+)/.exec(String(m.link))![1]);
+    const p = (await admin("ownerPartnerNew", {
+      name: "Салон Малика",
+      phone: "+77011234567",
+      rate: "15%",
+      schedule: "weekly",
+    })) as {
+      id: number;
+      link: string;
+    };
+    await sim.start(PARTNER, "join_" + /start=join_([a-z0-9]+)/.exec(p.link)![1]);
+    await sim.click(PARTNER, uz.langUz);
+    await sim.contact(PARTNER, "77011234567");
+    // клиент партнёра оплатил: начисление видно, имени клиента — нет
+    await sim.start(CLIENT, partnerSource((await sim.repo.getPartner(p.id))!.code));
+    // Заказ с чеком (часы симуляции — сегодняшние, календарь бота не нужен)
+    const { getDesign } = await import("@/templates/registry");
+    const sample = getDesign("muhr")!.sample;
+    const day = new Date(Date.now() + 20 * 86_400_000).toISOString().slice(0, 10);
+    const o = await sim.repo.createOrder({
+      userId: CLIENT,
+      occasion: "nikoh",
+      format: "animated",
+      templateId: "muhr",
+      data: { ...sample, groom: "Азиз", bride: "Мадина", events: sample.events.map((e) => ({ ...e, date: day })) },
+      music: { kind: "none" },
+      amount: 8000,
+      slugBase: "aziz-madina-panel",
+      status: "receipt_sent",
+    });
+    await sim.callback(ADMIN, `ok:${o.number}`, 1);
+    await sim.start(WHOLESALE);
+    await sim.click(WHOLESALE, uz.langUz);
+    await admin("ownerWholesaleSet", { userId: WHOLESALE, percent: 20 });
+  }, 120_000);
+
+  for (const name of ["Pixel 7", "iPhone 13"] as const) {
+    const d = DEVICES[name];
+    it(`${name}: партнёр — своя панель, ссылка p_, постер, начисление, клиенты без имён, текст только уз`, async () => {
+      const { ctx, page, errors } = await openApp(
+        browser,
+        BASE!,
+        sim,
+        "/app/panel",
+        who(PARTNER),
+        d.device,
+        d.platform,
+      );
+      try {
+        await page.locator('[data-role="partner"]').waitFor({ timeout: 60_000 });
+        const text = await page.locator("body").innerText();
+        expect(text).toMatch(/start=p_[a-z0-9]+/);
+        expect(text).not.toContain("Азиз");
+        expect(text).not.toContain("Мадина");
+        expect(mixed(text.replace(/https?:\S+/g, ""), "uz")).toBeNull();
+        expect(await page.locator('[data-card="due"]').innerText()).toMatch(/1\s?200/);
+        await page.getByRole("button", { name: /Ўзбекча/ }).click();
+        await page.waitForTimeout(800);
+        expect(sim.tg.to(PARTNER).some((m) => m.type === "document")).toBe(true);
+        expect(await overflow(page)).toBe(false);
+      } finally {
+        await ctx.close();
+      }
+      expect(errors).toEqual([]);
+    }, 120_000);
+
+    it(`${name}: менеджер — своя панель на русском, без денег владельца`, async () => {
+      const { ctx, page, errors } = await openApp(
+        browser,
+        BASE!,
+        sim,
+        "/app/panel",
+        { ...who(MANAGER), languageCode: "ru" },
+        d.device,
+        d.platform,
+      );
+      try {
+        await page.locator('[data-role="manager"]').waitFor({ timeout: 60_000 });
+        const text = await page.locator("body").innerText();
+        expect(text).not.toContain("Салон Малика · 1 200");
+        expect(text).not.toMatch(/Оплачено\s+\d/);
+        expect(mixed(text.replace(/https?:\S+/g, ""), "ru")).toBeNull();
+        expect(await overflow(page)).toBe(false);
+      } finally {
+        await ctx.close();
+      }
+      expect(errors).toEqual([]);
+    }, 120_000);
+
+    it(`${name}: оптовик — панели нет (вежливый отказ), в приложении без бейджей акции`, async () => {
+      const panel = await openApp(browser, BASE!, sim, "/app/panel", who(WHOLESALE), d.device, d.platform);
+      try {
+        await panel.page.locator("[data-phase=denied]").waitFor({ timeout: 60_000 });
+      } finally {
+        await panel.ctx.close();
+      }
+      const appView = await openApp(browser, BASE!, sim, "/app", who(WHOLESALE), d.device, d.platform);
+      try {
+        await appView.page.locator("[data-design]").first().waitFor({ timeout: 60_000 });
+        expect(await appView.page.locator("[data-deal-banner], [data-deal-price]").count()).toBe(0);
+      } finally {
+        await appView.ctx.close();
+      }
+      expect([...panel.errors.filter((e) => !/403/.test(e)), ...appView.errors]).toEqual([]);
+    }, 120_000);
+  }
 });
