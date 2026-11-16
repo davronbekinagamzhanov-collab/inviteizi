@@ -233,3 +233,98 @@ describe("партнёр", () => {
     expect(await app.editOrder(s.deps, user(PARTNER), o.id)).toEqual({ error: "notFound" });
   });
 });
+
+// ── 17.11.2026: все роли через тот же обработчик, что у сервера Mini App (bot/app/dispatch.ts) ──
+
+describe("права: каждый запрос админки и панелей от чужой роли — 403", () => {
+  it("клиент, менеджер, партнёр и оптовик получают 403 на все действия владельца; клиент и оптовик — на панель ролей", async () => {
+    const { appAction } = await import("./app/dispatch");
+    const { OWNER_ADMIN_ACTIONS, ownerAdmin } = await import("./app/owner-admin");
+    const s = new Sim();
+    await makeManager(s);
+    const token = await createPartner(s, ADMIN, "Салон Малика");
+    await join(s, token);
+    await start(s, CLIENT);
+    await start(s, OTHER);
+    expect(await ownerAdmin(s.deps, user(ADMIN), "ownerWholesaleSet", { userId: OTHER, percent: 10 })).toMatchObject({
+      ok: true,
+    });
+    const o = await nikohOrder(s, CLIENT);
+    const ownerActions = [...OWNER_ADMIN_ACTIONS, "owner", "ownerExport", "ownerAct", "freeIssue"];
+    const body = {
+      orderId: o.id,
+      id: 1,
+      userId: CLIENT,
+      percent: 10,
+      act: `ok:${o.number}`,
+      reason: "gift",
+      period: "d",
+    };
+    for (const who of [CLIENT, ALISHER, PARTNER, OTHER])
+      for (const action of ownerActions) {
+        const r = await appAction(s.deps, user(who), { action, ...body });
+        expect(r.status, `${who} ${action}`).toBe(403);
+      }
+    for (const who of [CLIENT, OTHER]) {
+      expect(
+        (await appAction(s.deps, user(who), { action: "rolePanel", period: "d" })).status,
+        `rolePanel ${who}`,
+      ).toBe(403);
+      expect((await appAction(s.deps, user(who), { action: "partnerPoster", lang: "uz" })).status).toBe(403);
+    }
+    // ничего не изменилось
+    expect((await s.repo.getOrder(o.id))!.status).toBe(o.status);
+    expect(await s.repo.listPromotions()).toEqual([]);
+    expect((await s.repo.listWholesalers()).map((w) => w.userId)).toEqual([OTHER]);
+    // свои панели открываются
+    expect((await appAction(s.deps, user(ALISHER), { action: "rolePanel", period: "d" })).status).toBe(200);
+    expect((await appAction(s.deps, user(PARTNER), { action: "rolePanel", period: "d" })).status).toBe(200);
+    expect((await appAction(s.deps, user(ADMIN), { action: "owner", period: "d" })).status).toBe(200);
+  });
+
+  it("чужой заказ через Mini App: цена, промокод, подтверждение, чек, правка, отмена — не найдено", async () => {
+    const { appAction } = await import("./app/dispatch");
+    const s = new Sim();
+    const o = await nikohOrder(s, CLIENT);
+    for (const action of ["quote", "promo", "confirmPay", "edit", "cancel"]) {
+      const r = await appAction(s.deps, user(OTHER), { action, orderId: o.id, code: "X", terms: true });
+      expect(JSON.stringify(r.body), action).toMatch(/notFound|disabled|forbidden/);
+    }
+    expect((await s.repo.getOrder(o.id))!).toMatchObject({ status: o.status, amount: o.amount });
+  });
+});
+
+describe("акция по ролям (Mini App, тот же обработчик)", () => {
+  it("клиенту бейджи и скидка; партнёру, менеджеру, оптовику, админу — нет; партнёр не видит чужих клиентов", async () => {
+    const { appAction } = await import("./app/dispatch");
+    const { ownerAdmin } = await import("./app/owner-admin");
+    const s = new Sim();
+    await makeManager(s);
+    const token = await createPartner(s, ADMIN, "Салон Малика");
+    await join(s, token);
+    await start(s, OTHER);
+    await ownerAdmin(s.deps, user(ADMIN), "ownerWholesaleSet", { userId: OTHER, percent: 20 });
+    await ownerAdmin(s.deps, user(ADMIN), "ownerPromotionCreate", {
+      name: "Куз",
+      percent: 50,
+      startsAt: "2026-11-01T00:00",
+      endsAt: "2026-11-08T00:00",
+    });
+    // цена на шаге оплаты
+    const quote = async (id: number) => {
+      const o = await nikohOrder(s, id);
+      return ((await appAction(s.deps, user(id), { action: "quote", orderId: o.id })).body as { order: app.AppOrder })
+        .order;
+    };
+    expect(await quote(CLIENT)).toMatchObject({ amount: 4000, price: { kind: "promotion" } });
+    expect(await quote(OTHER)).toMatchObject({ amount: 6400, price: { kind: "wholesale", percent: 20 } });
+    expect(await quote(PARTNER)).toMatchObject({ amount: 8000, price: null });
+    const session = async (id: number) =>
+      (await appAction(s.deps, user(id), { action: "session" })).body as { promotion: unknown };
+    expect((await session(CLIENT)).promotion).toMatchObject({ percent: 50 });
+    for (const id of [ADMIN, ALISHER, PARTNER, OTHER]) expect((await session(id)).promotion, `роль ${id}`).toBeNull();
+    // партнёр не видит имён и ссылок клиентов
+    const panel = await appAction(s.deps, user(PARTNER), { action: "rolePanel", period: "m" });
+    expect(JSON.stringify(panel.body)).not.toContain("Азиз");
+  });
+});

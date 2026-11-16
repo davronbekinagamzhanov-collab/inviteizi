@@ -108,6 +108,8 @@ export type AppSession = {
   staff?: boolean;
   /** Действующая акция для этого покупателя (партнёрам, оптовикам, сотрудникам — null: бейджей нет) */
   promotion?: PromotionView | null;
+  /** Оптовик: постоянная скидка, % (для ожидаемой цены в итоге; точную считает сервер на шаге оплаты) */
+  wholesalePercent?: number | null;
 };
 
 const MAX_ORDERS = 20;
@@ -258,6 +260,7 @@ export async function openSession(deps: Deps, u: AppUser): Promise<AppSession> {
     contact: `https://t.me/${deps.env.ownerUsername.replace(/^@/, "")}`,
     staff: await deps.repo.isAdmin(u.id),
     promotion: await catalogPromotion(deps, u.id),
+    wholesalePercent: (await deps.repo.getWholesaler(u.id))?.percent ?? null,
   };
 }
 

@@ -249,3 +249,17 @@ describe("витрина акции в боте", () => {
     expect(s.tg.to(800).some((m) => m.text.includes("−50 %"))).toBe(false);
   });
 });
+
+describe("кнопка оплаты до перехода к оплате", () => {
+  it("после «Тасдиқлаш» кнопка «💳 Тўлаш» уже с ценой по акции (не старой)", async () => {
+    const s = new Sim();
+    await promotion(s);
+    await nikohOrder(s, 1);
+    const buttons = s.tg
+      .to(1)
+      .flatMap((m) => (m.markup && "inline" in m.markup ? m.markup.inline.flat() : []))
+      .map((b) => b.text);
+    expect(buttons.some((t) => /^💳 Тўлаш/.test(t) && t.includes("4 000"))).toBe(true);
+    expect(buttons.some((t) => /^💳 Тўлаш/.test(t) && t.includes("8 000"))).toBe(false);
+  });
+});

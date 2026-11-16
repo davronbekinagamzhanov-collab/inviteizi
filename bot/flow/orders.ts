@@ -147,7 +147,7 @@ export async function upsertDraftOrder(
       const current = await repo.getOrder(old.id);
       return { kind: current?.status === "receipt_sent" ? "waiting" : "closed" };
     }
-    return { kind: "updated", order: o };
+    return { kind: "updated", order: await applyPricing(deps, o) };
   }
 
   const selected = getDesign(s.templateId);
@@ -170,7 +170,8 @@ export async function upsertDraftOrder(
     expectedQ,
     handledUpdates,
   );
-  return o ? { kind: "created", order: o } : { kind: "race" };
+  // Ожидаемая цена (акция / оптовая) видна сразу на кнопке «💳 Тўлаш»; при переходе к оплате — фиксируется ещё раз
+  return o ? { kind: "created", order: await applyPricing(deps, o) } : { kind: "race" };
 }
 
 export async function confirmDraft(c: Ctx): Promise<Result> {

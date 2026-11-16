@@ -16,6 +16,7 @@ import { appKk } from "@/texts/app-kk";
 import { api, ApiError } from "./ui/api";
 import { Catalog, Heart, type Chip } from "./ui/Catalog";
 import { DealPrice, dealPrice, useLivePromotion } from "./ui/Deal";
+import { discounted } from "@/lib/pricing-math";
 import { emptyForm } from "./ui/form-defaults";
 
 import type { Track } from "./ui/Summary";
@@ -532,7 +533,12 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
   const price = order?.amount ?? (design ? PRICES[design.format] : 0);
   // Акция для этого покупателя (сервер шлёт только обычному клиенту); закончилась — исчезает сама
   const { promotion } = useLivePromotion(session?.promotion);
-  const deal = design ? dealPrice(promotion, design, PRICES[design.format]) : null;
+  // Ожидаемая цена до перехода к оплате: акция или оптовая скидка (точную фиксирует сервер на шаге оплаты)
+  const deal = design
+    ? (dealPrice(promotion, design, PRICES[design.format]) ??
+      (session?.wholesalePercent ? discounted(PRICES[design.format], session.wholesalePercent) : null))
+    : null;
+  const shownPrice = design && deal !== null && (!order || order.amount === PRICES[design.format]) ? deal : price;
 
   // Своя кнопка внизу страницы видна (native MainButton не показана, а у экрана есть главное действие)
   const ownBar = !nativeMain && phase === "ready" && !viewer && !bigPreview && !help && MAIN_SCREENS.has(screen.name);
@@ -555,7 +561,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
         };
         break;
       case "summary":
-        main = { text: T.summary.pay(price), onClick: toPay, progress: busy };
+        main = { text: T.summary.pay(shownPrice), onClick: toPay, progress: busy };
         break;
       case "wait":
         main =
