@@ -65,7 +65,8 @@ export default function CatalogPage() {
             </h2>
             <ul className="mt-6 grid grid-cols-2 gap-x-3 gap-y-8">
               {list.map((d, i) => (
-                <li key={d.id}>
+                // колонка: кнопка «Кўриш» всегда внизу карточки, даже если у соседа есть строка «с фото»
+                <li key={d.id} className="flex flex-col">
                   <Link
                     href={`/demo/${d.id}`}
                     className="block overflow-hidden rounded-[20px] bg-[#efe6d6] shadow-[0_14px_30px_-20px_rgba(59,42,30,0.6)] ring-1 ring-[#b8892f]/25"
@@ -94,9 +95,10 @@ export default function CatalogPage() {
                   </p>
                   <p className="text-[16px] font-bold">{t.price(PRICES[d.format])}</p>
                   {d.clientPhotos && <p className="text-[14px] text-[#6b5a48]">{t.catalog.withPhoto}</p>}
+                  <span aria-hidden className="h-2 shrink-0" />
                   <Link
                     href={`/demo/${d.id}`}
-                    className="gold-fill mt-2 block rounded-full py-2.5 text-center text-[16px] font-bold text-[#3b2a1e]"
+                    className="gold-fill mt-auto block rounded-full py-2.5 text-center text-[16px] font-bold text-[#3b2a1e]"
                   >
                     {t.catalog.open}
                   </Link>
