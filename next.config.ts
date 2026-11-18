@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/api/bot": [
       "./assets/fonts/**/*.ttf",
+      "./assets/keepsake/**/*",
       "./public/art/**/*.webp",
       "./public/art/**/*.png",
       "./public/floral/*.webp",
@@ -12,6 +13,7 @@ const nextConfig: NextConfig = {
     ],
     "/api/cron": [
       "./assets/fonts/**/*.ttf",
+      "./assets/keepsake/**/*",
       "./public/art/**/*.webp",
       "./public/art/**/*.png",
       "./public/floral/*.webp",
@@ -20,12 +22,14 @@ const nextConfig: NextConfig = {
     ],
     "/api/marketing/status-preview": [
       "./assets/fonts/**/*.ttf",
+      "./assets/keepsake/**/*",
       "./public/art/**/*.webp",
       "./public/art/**/*.png",
       "./public/floral/*.webp",
       "./public/vip/**/*.webp",
       "./public/pilots/*.png",
     ],
+    "/api/app": ["./assets/fonts/**/*.ttf", "./assets/keepsake/**/*"],
     "/*/opengraph-image": ["./assets/fonts/**/*.ttf", "./public/og/**/*"],
   },
   cacheComponents: true,

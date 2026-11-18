@@ -9,6 +9,7 @@ import { CURRENT_DESIGN_VERSION } from "@/templates/design-version";
 import { rsvpTotals } from "@/lib/rsvp";
 /** Заказ: создание/сохранение, оплата Kaspi, чек, решение админа, «мои приглашения», смена ссылки */
 import QRCode from "qrcode";
+import { sendKeepsakeOffer } from "../keepsake";
 import type { Ctx, Deps, Draft, Result, Step } from "./types";
 import type { Lang, OrderRecord } from "@/lib/domain";
 import type { InlineButton } from "../tg";
@@ -626,6 +627,8 @@ export async function sendLinkPack(deps: Deps, o: OrderRecord, afterPayment: boo
   try {
     const png = await QRCode.toBuffer(url, { width: 600, margin: 2 });
     const sent = await tg.sendPhoto(client, new Uint8Array(png), { caption, markup });
+    // «📥 Сақлаб олиш»: фото, PDF для печати, видео — отдельным сообщением с кнопками
+    await sendKeepsakeOffer(deps, o, await langOf(deps, client));
     return { linkSent: true, shareSent: true, messageId: sent.messageId };
   } catch (e) {
     console.error("клиенту не отправлено: QR", e instanceof Error ? e.name : "Error");
@@ -633,6 +636,7 @@ export async function sendLinkPack(deps: Deps, o: OrderRecord, afterPayment: boo
   // QR не ушёл — то же самое текстом (ссылка и кнопки важнее картинки)
   try {
     const sent = await tg.sendMessage(client, caption, { markup });
+    await sendKeepsakeOffer(deps, o, await langOf(deps, client));
     return { linkSent: true, shareSent: true, messageId: sent.messageId };
   } catch (e) {
     console.error("клиенту не отправлено: ссылка", e instanceof Error ? e.name : "Error");
@@ -787,6 +791,7 @@ export async function myOrders(c: Ctx) {
       rows.push([{ text: marketingCopy(c.lang).editButton, data: `fix:${o.number}` }]);
     const last: InlineButton[] = o.status === "active" ? [{ text: c.tx.my.link, data: `link:${o.number}` }] : [];
     if (o.status === "active" && o.data.rsvp) rows.push([{ text: c.tx.rsvp.answers, data: `rsvp:${o.number}` }]);
+    if (o.status === "active" && c.deps.keepsake) rows.push([{ text: c.tx.keepsake.button, data: `ks:${o.number}` }]);
     rows.push([...last, { text: c.tx.contact, url: ownerUrl(c) }]);
     const title = `${namesOf(o.data)} · ${designName(o.templateId)}`;
     await send(c, c.tx.my.item(o.number, title, c.tx.my.statuses[o.status], pageUrl(c, o.slug)), inline(rows));

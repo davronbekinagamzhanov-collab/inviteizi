@@ -19,7 +19,7 @@ import type { ClaimStatus, InviteKind, InviteUse, Manager } from "@/lib/roles";
  * Поведение — как у bot/repo-memory.ts (общий набор тестов bot/repo.contract.ts).
  * Таблицы: supabase/migrations/*_schema.sql.
  */
-import type { NewPartner, Notice, PartnerPatch, Repo } from "./repo";
+import type { NewPartner, Notice, PartnerPatch, RenderKind, RenderPatch, RenderRecord, Repo } from "./repo";
 import type {
   InvitationData,
   InvitationEvent,
@@ -254,6 +254,29 @@ function toOrder(r: OrderRow): OrderRecord {
     expiresAt: r.expires_at,
   };
 }
+
+type RenderRow = {
+  order_id: string;
+  kind: RenderKind;
+  status: RenderRecord["status"];
+  attempts: number;
+  url: string | null;
+  telegram_file_id: string | null;
+  error: string | null;
+  created_at: Date;
+  updated_at: Date;
+};
+const toRender = (r: RenderRow): RenderRecord => ({
+  orderId: r.order_id,
+  kind: r.kind,
+  status: r.status,
+  attempts: r.attempts,
+  url: r.url,
+  telegramFileId: r.telegram_file_id,
+  error: r.error,
+  createdAt: r.created_at,
+  updatedAt: r.updated_at,
+});
 
 function toMusicRecord(r: MusicRow): MusicRecord {
   return {
@@ -758,6 +781,18 @@ export class PgRepo implements Repo {
         { count: number }[]
       >`select count(*)::int as count from public.bot_errors where created_at >= ${since}`;
       return { count, top: rows[0]?.reason ?? "" };
+    } catch (e) {
+      const code = (e as { code?: string } | null)?.code;
+      if (code === "42501" || isMissingTable(e)) return null;
+      throw e;
+    }
+  }
+
+  async errorSteps(since: Date) {
+    try {
+      return await this.sql<{ step: string; n: number }[]>`
+        select coalesce(step, '—') as step, count(*)::int as n from public.bot_errors
+        where created_at >= ${since} group by 1 order by 2 desc limit 3`;
     } catch (e) {
       const code = (e as { code?: string } | null)?.code;
       if (code === "42501" || isMissingTable(e)) return null;
@@ -1416,6 +1451,54 @@ export class PgRepo implements Repo {
 
   async setMusicTelegramFileId(musicId: string, fileId: string) {
     await this.sql`update public.music set telegram_file_id = ${fileId} where id = ${musicId}`;
+  }
+
+  // ── «Сақлаб олиш» (order_renders) ──
+  async getRender(orderId: string, kind: RenderKind) {
+    const [r] = await this.sql<RenderRow[]>`
+      select * from public.order_renders where order_id = ${orderId} and kind = ${kind}`;
+    return r ? toRender(r) : null;
+  }
+
+  async saveRender(orderId: string, kind: RenderKind, patch: RenderPatch) {
+    const [r] = await this.sql<RenderRow[]>`
+      insert into public.order_renders (order_id, kind, status, attempts, url, telegram_file_id, error)
+      values (${orderId}, ${kind}, ${patch.status ?? "queued"}, ${patch.attempts ?? 0}, ${patch.url ?? null},
+              ${patch.telegramFileId ?? null}, ${patch.error?.slice(0, 300) ?? null})
+      on conflict (order_id, kind) do update set
+        status = ${patch.status !== undefined ? this.sql`excluded.status` : this.sql`order_renders.status`},
+        attempts = ${patch.attempts !== undefined ? this.sql`excluded.attempts` : this.sql`order_renders.attempts`},
+        url = ${patch.url !== undefined ? this.sql`excluded.url` : this.sql`order_renders.url`},
+        telegram_file_id = ${patch.telegramFileId !== undefined ? this.sql`excluded.telegram_file_id` : this.sql`order_renders.telegram_file_id`},
+        error = ${patch.error !== undefined ? this.sql`excluded.error` : this.sql`order_renders.error`},
+        updated_at = now()
+      returning *`;
+    return toRender(r);
+  }
+
+  async claimRender(orderId: string, kind: RenderKind) {
+    // Вставка или перезапуск после неудачи — одним запросом; иначе строка не меняется (fresh = false)
+    const [fresh] = await this.sql<RenderRow[]>`
+      insert into public.order_renders (order_id, kind, status, attempts)
+      values (${orderId}, ${kind}, 'queued', 0)
+      on conflict (order_id, kind) do update set status = 'queued', attempts = 0, error = null, updated_at = now()
+        where order_renders.status = 'failed'
+      returning *`;
+    if (fresh) return { record: toRender(fresh), fresh: true };
+    return { record: (await this.getRender(orderId, kind))!, fresh: false };
+  }
+
+  async listRenders(filter: { orderId?: string; stuckBefore?: Date; withUrl?: boolean }) {
+    const o = filter.orderId ?? null;
+    const withUrl = filter.withUrl ?? false;
+    const before = filter.stuckBefore ?? null;
+    const rows = await this.sql<RenderRow[]>`
+      select * from public.order_renders
+      where (${o}::uuid is null or order_id = ${o}::uuid)
+        and (${before}::timestamptz is null or (status in ('queued', 'running') and updated_at < ${before}::timestamptz))
+        and (not ${withUrl}::boolean or url is not null)
+      order by updated_at`;
+    return rows.map(toRender);
   }
 
   // ── Заказы ──

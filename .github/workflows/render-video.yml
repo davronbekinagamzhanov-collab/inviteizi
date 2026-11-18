@@ -1,0 +1,43 @@
+# Видео «Сақлаб олиш» (19.11.2026): бот присылает repository_dispatch «render-video» с данными заказа,
+# здесь Playwright записывает /<slug>?render=video, ffmpeg склеивает со звуком, файл уходит в Vercel Blob,
+# бот получает ответ на /api/render и отправляет видео клиенту.
+# Секреты репозитория (Settings → Secrets and variables → Actions): BLOB_READ_WRITE_TOKEN, RENDER_CALLBACK_SECRET.
+name: render-video
+
+on:
+  repository_dispatch:
+    types: [render-video]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: render-video-${{ github.event.client_payload.orderId }}
+  cancel-in-progress: false
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: scripts/render-video.mjs
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Playwright и Blob (без всего проекта)
+        run: |
+          npm init -y >/dev/null
+          npm install --no-audit --no-fund playwright-core@1.56.1 playwright@1.56.1 @vercel/blob@2.8.2
+          npx playwright install --with-deps chromium
+          ffmpeg -version | head -1 || (sudo apt-get update && sudo apt-get install -y ffmpeg)
+      - name: Запись видео
+        env:
+          JOB: ${{ toJSON(github.event.client_payload) }}
+          BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
+          RENDER_CALLBACK_SECRET: ${{ secrets.RENDER_CALLBACK_SECRET }}
+        run: |
+          export CHROME="$(node -e 'console.log(require("playwright").chromium.executablePath())')"
+          node scripts/render-video.mjs

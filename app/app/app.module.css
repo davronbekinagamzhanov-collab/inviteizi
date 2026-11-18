@@ -1007,6 +1007,49 @@ textarea.input {
   padding: 10px;
 }
 
+/* Что входит в формат: «🖼 Фото + 🖨 PDF (+ 🎬 Видео)» */
+.includes {
+  margin: 4px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #6f5119; /* золото потемнее: контраст ≥ 4,5 на молочном */
+}
+.viewerIncludes {
+  padding: 6px 16px 8px;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  color: #6f5119; /* золото потемнее: контраст ≥ 4,5 на молочном */
+}
+
+/* «📥 Сақлаб олиш»: фото, PDF, видео */
+.keepsake {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 8px;
+  padding: 10px 0 2px;
+  animation: fade 0.4s var(--ease) both;
+}
+.keepsakeGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.keepsakeGrid > button {
+  min-width: 0;
+  justify-content: center;
+  gap: 6px;
+}
+.keepsakeGrid > button:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+.keepsakeHint {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.35;
+  opacity: 0.75;
+}
+
 /* ── Подсказка (тост) ── */
 .toast {
   position: fixed;

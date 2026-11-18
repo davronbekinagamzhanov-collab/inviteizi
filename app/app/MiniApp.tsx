@@ -671,6 +671,7 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
                   onOpen={(d) => go({ name: "view", id: d.id })}
                   resume={resume}
                   promotion={session.promotion}
+                  keepsake={session.keepsake}
                 />
               )}
               {screen.name === "form" && design && draft && (
@@ -803,6 +804,14 @@ export default function MiniApp({ fontClass }: { fontClass: string }) {
                   <span className={s.viewerDeal}>
                     <DealPrice base={PRICES[d.format]} deal={v} />
                   </span>
+                </div>
+              ) : null;
+            })()}
+            {(() => {
+              const d = getDesign(screen.id);
+              return d && session?.keepsake?.files ? (
+                <div className={s.viewerIncludes} data-view-includes>
+                  {T.catalog.includes(d.format === "animated" && session.keepsake.video)}
                 </div>
               ) : null;
             })()}

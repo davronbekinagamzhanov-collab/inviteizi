@@ -39,6 +39,8 @@ export interface Tg {
   sendPhoto(chatId: number, photo: string | Uint8Array, opts?: FileOpts): Promise<SentFile>;
   /** doc — file_id или байты (чек PDF из приложения, выгрузка xlsx) */
   sendDocument(chatId: number, doc: string | Uint8Array, opts?: FileOpts): Promise<SentFile>;
+  /** Видео (MP4 по адресу или file_id): «Сақлаб олиш» → «🎬 Видео» */
+  sendVideo(chatId: number, video: string, opts?: FileOpts & { width?: number; height?: number }): Promise<SentFile>;
   /** Альбом из 2–10 фото (каталог в чате: 3 обложки сразу). Возвращает id всех сообщений альбома */
   sendMediaGroup(chatId: number, photos: { url: string; caption?: string }[]): Promise<Sent & { messageIds: number[] }>;
   /** Удалить своё сообщение (старый альбом каталога, старое меню). Уже удалённое — не ошибка */

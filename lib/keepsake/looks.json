@@ -1,0 +1,704 @@
+{
+  "muhr": {
+    "paper": "#f3f4f1",
+    "ink": "#2c3b49",
+    "accent": "#2c3b49",
+    "namesFont": "a561f12094-500.ttf",
+    "namesItalic": true,
+    "bodyFont": "fcda940bf2-400.ttf",
+    "dark": false,
+    "zone": [
+      0.052,
+      0.161
+    ]
+  },
+  "vip-zarbof": {
+    "paper": "#c5a78a",
+    "ink": "#30373a",
+    "accent": "#f2ebdf",
+    "namesFont": "eb942ccf8a-400.ttf",
+    "namesItalic": false,
+    "bodyFont": "253da9a04d-400.ttf",
+    "dark": false,
+    "zone": [
+      0,
+      0
+    ]
+  },
+  "sapfir": {
+    "paper": "#132b4c",
+    "ink": "#f4ebd6",
+    "accent": "#f4ebd6",
+    "namesFont": "aed4de7429-500.ttf",
+    "namesItalic": false,
+    "bodyFont": "lora-regular",
+    "dark": true,
+    "zone": [
+      0.052,
+      0.802
+    ]
+  },
+  "tulpor-quvonchi": {
+    "paper": "#f5eee3",
+    "ink": "#674d3b",
+    "accent": "#674d3b",
+    "namesFont": "aed4de7429-500.ttf",
+    "namesItalic": false,
+    "bodyFont": "lora-regular",
+    "dark": false,
+    "zone": [
+      0.266,
+      0.802
+    ]
+  },
+  "vip-zarrin-ahd": {
+    "paper": "#f5eee3",
+    "ink": "#562b29",
+    "accent": "#562b29",
+    "namesFont": "e4f4db8b8f-400.ttf",
+    "namesItalic": false,
+    "bodyFont": "e4f4db8b8f-400.ttf",
+    "dark": false,
+    "zone": [
+      0.469,
+      0.802
+    ]
+  },
+  "vip-marvarid": {
+    "paper": "#f8f5ed",
+    "ink": "#494239",
+    "accent": "#494239",
+    "namesFont": "e4f4db8b8f-400.ttf",
+    "namesItalic": false,
+    "bodyFont": "e4f4db8b8f-400.ttf",
+    "dark": false,
+    "zone": [
+      0.052,
+      0.594
+    ]
+  },
+  "vip-bogi-visol": {
+    "paper": "#162517",
+    "ink": "#fff8e8",
+    "accent": "#293e32",
+    "namesFont": "e4f4db8b8f-400.ttf",
+    "namesItalic": false,
+    "bodyFont": "a9028061f1-400.ttf",
+    "dark": true,
+    "zone": [
+      0.271,
+      0.396
+    ]
+  },
+  "vip-ipak-ziyosi": {
+    "paper": "#786658",
+    "ink": "#fff9ef",
+    "accent": "#49362f",
+    "namesFont": "e4f4db8b8f-300.ttf",
+    "namesItalic": false,
+    "bodyFont": "a9028061f1-400.ttf",
+    "dark": false,
+    "zone": [
+      0,
+      0
+    ]
+  },
+  "vip-visol-nuri": {
+    "paper": "#d3bba4",
+    "ink": "#fff8ec",
+    "accent": "#484033",
+    "namesFont": "e4f4db8b8f-400.ttf",
+    "namesItalic": false,
+    "bodyFont": "e4f4db8b8f-400.ttf",
+    "dark": false,
+    "zone": [
+      0.245,
+      0.255
+    ]
+  },
+  "vip-tilla-muhr": {
+    "paper": "#181609",
+    "ink": "#ffffff",
+    "accent": "#37342e",
+    "namesFont": "e4f4db8b8f-300.ttf",
+    "namesItalic": false,
+    "bodyFont": "a9028061f1-400.ttf",
+    "dark": true,
+    "zone": [
+      0.073,
+      0.094
+    ]
+  },
+  "vip-osmon": {
+    "paper": "#b9c9d7",
+    "ink": "#233e53",
+    "accent": "#233e53",
+    "namesFont": "e4f4db8b8f-300.ttf",
+    "namesItalic": false,
+    "bodyFont": "a9028061f1-400.ttf",
+    "dark": false,
+    "zone": [
+      0.052,
+      0.307
+    ]
+  },
+  "vip-suzana": {
+    "paper": "#f8f3e9",
+    "ink": "#7a2234",
+    "accent": "#f8f2e8",
+    "namesFont": "e4f4db8b8f-400.ttf",
+    "namesItalic": false,
+    "bodyFont": "a9028061f1-400.ttf",
+    "dark": false,
+    "zone": [
+      0.594,
+      0.802
+    ]
+  },
+  "ipak": {
+    "paper": "#efe8df",
+    "ink": "#3b322b",
+    "accent": "#3b322b",
+    "namesFont": "a561f12094-400.ttf",
+    "namesItalic": true,
+    "bodyFont": "05d3fd3a9c-400.ttf",
+    "dark": false,
+    "zone": [
+      0.052,
+      0.443
+    ]
+  },
+  "gul-doira": {
+    "paper": "#f5e7d6",
+    "ink": "#67483f",
+    "accent": "#67483f",
+    "namesFont": "a561f12094-500.ttf",
+    "namesItalic": true,
+    "bodyFont": "fcda940bf2-400.ttf",
+    "dark": false,
+    "zone": [
+      0.385,
+      0.682
+    ]
+  },
+  "suzani-medalyon": {
+    "paper": "#efe4d3",
+    "ink": "#58332f",
+    "accent": "#58332f",
+    "namesFont": "95e6bee66e-500.ttf",
+    "namesItalic": false,
+    "bodyFont": "lora-regular",
+    "dark": false,
+    "zone": [
+      0.234,
+      0.802
+    ]
+  },
+  "suvbuyoq-tuman": {
+    "paper": "#f4ece1",
+    "ink": "#35516b",
+    "accent": "#35516b",
+    "namesFont": "a561f12094-500.ttf",
+    "namesItalic": true,
+    "bodyFont": "fcda940bf2-400.ttf",
+    "dark": false,
+    "zone": [
+      0.411,
+      0.677
+    ]
+  },
+  "suvbuyoq-zumrad": {
+    "paper": "#f8e8ca",
+    "ink": "#214b3b",
+    "accent": "#214b3b",
+    "namesFont": "e4f4db8b8f-500.ttf",
+    "namesItalic": false,
+    "bodyFont": "fcda940bf2-400.ttf",
+    "dark": false,
+    "zone": [
+      0.411,
+      0.802
+    ]
+  },
+  "suvbuyoq-upa": {
+    "paper": "#fdf7f0",
+    "ink": "#784d56",
+    "accent": "#784d56",
+    "namesFont": "a561f12094-500.ttf",
+    "namesItalic": true,
+    "bodyFont": "a561f12094-500.ttf",
+    "dark": false,
+    "zone": [
+      0.052,
+      0.573
+    ]
+  },
+  "nur-varaq": {
+    "paper": "#f7f1ee",
+    "ink": "#2e2326",
+    "accent": "#2e2326",
+    "namesFont": "28ec490464-400.ttf",
+    "namesItalic": true,
+    "bodyFont": "fcda940bf2-400.ttf",
+    "dark": false,
+    "zone": [
+      0.672,
+      0.802
+    ]
+  },
+  "girih-barg": {
+    "paper": "#f3e7d4",
+    "ink": "#344a3c",
+    "accent": "#344a3c",
+    "namesFont": "a561f12094-500.ttf",
+    "namesItalic": true,
+    "bodyFont": "fcda940bf2-400.ttf",
+    "dark": false,
+    "zone": [
+      0.266,
+      0.693
+    ]
+  },
+  "oq-maktub": {
+    "paper": "#eaeadf",
+    "ink": "#293c34",
+    "accent": "#293c34",
+    "namesFont": "95e6bee66e-500.ttf",
+    "namesItalic": false,
+    "bodyFont": "lora-regular",
+    "dark": false,
+    "zone": [
+      0.052,
+      0.802
+    ]
+  },
+  "xotira-albom": {
+    "paper": "#e8ebe8",
+    "ink": "#1f2a35",
+    "accent": "#1f2a35",
+    "namesFont": "6a2de21868-400.ttf",
+    "namesItalic": false,
+    "bodyFont": "fcda940bf2-400.ttf",
+    "dark": false,
+    "zone": [
+      0.052,
+      0.448
+    ]
+  },
+  "muhrli-maktub": {
+    "paper": "#fcf5f3",
+    "ink": "#4b3b3a",
+    "accent": "#4b3b3a",
+    "namesFont": "a561f12094-400.ttf",
+    "namesItalic": true,
+    "bodyFont": "fcda940bf2-400.ttf",
+    "dark": false,
+    "zone": [
+      0.609,
+      0.802
+    ]
+  },
+  "ipak-albom": {
+    "paper": "#f3efe1",
+    "ink": "#2c2d22",
+    "accent": "#2c2d22",
+    "namesFont": "1f3b0563d2-500.ttf",
+    "namesItalic": false,
+    "bodyFont": "lora-regular",
+    "dark": false,
+    "zone": [
+      0.052,
+      0.802
+    ]
+  },
+  "oltin-monogramma": {
+    "paper": "#f9f5ed",
+    "ink": "#3b2a1e",
+    "accent": "#3b2a1e",
+    "namesFont": "e4f4db8b8f-500.ttf",
+    "namesItalic": false,
+    "bodyFont": "e4f4db8b8f-600.ttf",
+    "dark": false,
+    "zone": [
+      0.578,
+      0.802
+    ]
+  },
+  "vip-oq-tulpor": {
+    "paper": "#d7c8b7",
+    "ink": "#344c3e",
+    "accent": "#344c3e",
+    "namesFont": "e4f4db8b8f-400.ttf",
+    "namesItalic": false,
+    "bodyFont": "a9028061f1-400.ttf",
+    "dark": false,
+    "zone": [
+      0,
+      0
+    ]
+  },
+  "zarhal-duo": {
+    "paper": "#faf7ed",
+    "ink": "#354d3f",
+    "accent": "#354d3f",
+    "namesFont": "a561f12094-500.ttf",
+    "namesItalic": true,
+    "bodyFont": "e4f4db8b8f-500.ttf",
+    "dark": false,
+    "zone": [
+      0.052,
+      0.802
+    ]
+  },
+  "moviy-ayvon": {
+    "paper": "#f9f6ee",
+    "ink": "#345b6e",
+    "accent": "#345b6e",
+    "namesFont": "e4f4db8b8f-500.ttf",
+    "namesItalic": false,
+    "bodyFont": "e4f4db8b8f-500.ttf",
+    "dark": false,
+    "zone": [
+      0.052,
+      0.438
+    ]
+  },
+  "kashta-tilagi": {
+    "paper": "#f1f3f4",
+    "ink": "#354a69",
+    "accent": "#354a69",
+    "namesFont": "aed4de7429-500.ttf",
+    "namesItalic": false,
+    "bodyFont": "lora-regular",
+    "dark": false,
+    "zone": [
+      0.198,
+      0.802
+    ]
+  },
+  "ganch-darvoza": {
+    "paper": "#f3f0e8",
+    "ink": "#29231c",
+    "accent": "#29231c",
+    "namesFont": "23011d83fd-400.ttf",
+    "namesItalic": false,
+    "bodyFont": "fcda940bf2-400.ttf",
+    "dark": false,
+    "zone": [
+      0.12,
+      0.609
+    ]
+  },
+  "bog": {
+    "paper": "#f7f8f3",
+    "ink": "#2f3d36",
+    "accent": "#4a5a51",
+    "namesFont": "e4f4db8b8f-500.ttf",
+    "namesItalic": false,
+    "bodyFont": "fcda940bf2-400.ttf",
+    "dark": false,
+    "zone": [
+      0.172,
+      0.505
+    ]
+  },
+  "lola-medalyon": {
+    "paper": "#f3f1e4",
+    "ink": "#22281f",
+    "accent": "#22281f",
+    "namesFont": "f39557d891-500.ttf",
+    "namesItalic": false,
+    "bodyFont": "lora-regular",
+    "dark": false,
+    "zone": [
+      0.052,
+      0.802
+    ]
+  },
+  "lola-bodom": {
+    "paper": "#f9faf7",
+    "ink": "#2e3d34",
+    "accent": "#2e3d34",
+    "namesFont": "f0960415aa-400.ttf",
+    "namesItalic": false,
+    "bodyFont": "fcda940bf2-400.ttf",
+    "dark": false,
+    "zone": [
+      0.318,
+      0.75
+    ]
+  },
+  "doppi-kitob": {
+    "paper": "#fafbf8",
+    "ink": "#1e2230",
+    "accent": "#1e2230",
+    "namesFont": "8ad500683c-400.ttf",
+    "namesItalic": false,
+    "bodyFont": "fcda940bf2-400.ttf",
+    "dark": false,
+    "zone": [
+      0.266,
+      0.802
+    ]
+  },
+  "doppicha": {
+    "paper": "#fff8ed",
+    "ink": "#3c4f43",
+    "accent": "#3c4f43",
+    "namesFont": "aed4de7429-500.ttf",
+    "namesItalic": false,
+    "bodyFont": "lora-regular",
+    "dark": false,
+    "zone": [
+      0.052,
+      0.802
+    ]
+  },
+  "sahar-sabosi": {
+    "paper": "#faf7ed",
+    "ink": "#3c513b",
+    "accent": "#3c513b",
+    "namesFont": "a561f12094-500.ttf",
+    "namesItalic": true,
+    "bodyFont": "e4f4db8b8f-500.ttf",
+    "dark": false,
+    "zone": [
+      0.693,
+      0.802
+    ]
+  },
+  "subhi-safo": {
+    "paper": "#fcf6ed",
+    "ink": "#315766",
+    "accent": "#315766",
+    "namesFont": "e4f4db8b8f-500.ttf",
+    "namesItalic": false,
+    "bodyFont": "e4f4db8b8f-500.ttf",
+    "dark": false,
+    "zone": [
+      0.052,
+      0.417
+    ]
+  },
+  "bog-nasimi": {
+    "paper": "#f0f0e3",
+    "ink": "#435e44",
+    "accent": "#435e44",
+    "namesFont": "aed4de7429-500.ttf",
+    "namesItalic": false,
+    "bodyFont": "lora-regular",
+    "dark": false,
+    "zone": [
+      0.052,
+      0.781
+    ]
+  },
+  "tong-naqshi": {
+    "paper": "#eef2f3",
+    "ink": "#29485c",
+    "accent": "#29485c",
+    "namesFont": "aed4de7429-500.ttf",
+    "namesItalic": false,
+    "bodyFont": "lora-regular",
+    "dark": false,
+    "zone": [
+      0.255,
+      0.802
+    ]
+  },
+  "qozon-tongi": {
+    "paper": "#f2ede5",
+    "ink": "#251f1b",
+    "accent": "#251f1b",
+    "namesFont": "94f845b7e9-400.ttf",
+    "namesItalic": false,
+    "bodyFont": "94f845b7e9-400.ttf",
+    "dark": false,
+    "zone": [
+      0.578,
+      0.802
+    ]
+  },
+  "tong-dasturxon": {
+    "paper": "#f5eee3",
+    "ink": "#7a3b2e",
+    "accent": "#3a2a22",
+    "namesFont": "a561f12094-400.ttf",
+    "namesItalic": true,
+    "bodyFont": "e4f4db8b8f-500.ttf",
+    "dark": false,
+    "zone": [
+      0.557,
+      0.802
+    ]
+  },
+  "non-albom": {
+    "paper": "#f5eee1",
+    "ink": "#33261b",
+    "accent": "#33261b",
+    "namesFont": "1f3b0563d2-500.ttf",
+    "namesItalic": false,
+    "bodyFont": "lora-regular",
+    "dark": false,
+    "zone": [
+      0.349,
+      0.802
+    ]
+  },
+  "tonggi-piyola": {
+    "paper": "#f9f4ea",
+    "ink": "#3d3128",
+    "accent": "#3d3128",
+    "namesFont": "f0960415aa-400.ttf",
+    "namesItalic": false,
+    "bodyFont": "e4f4db8b8f-500.ttf",
+    "dark": false,
+    "zone": [
+      0.391,
+      0.786
+    ]
+  },
+  "tong-varaq": {
+    "paper": "#f3ead9",
+    "ink": "#23303a",
+    "accent": "#23303a",
+    "namesFont": "8ad500683c-400.ttf",
+    "namesItalic": false,
+    "bodyFont": "8ad500683c-400.ttf",
+    "dark": false,
+    "zone": [
+      0.052,
+      0.802
+    ]
+  },
+  "choy-maktub": {
+    "paper": "#f7f1e3",
+    "ink": "#33291f",
+    "accent": "#33291f",
+    "namesFont": "95e6bee66e-500.ttf",
+    "namesItalic": false,
+    "bodyFont": "lora-regular",
+    "dark": false,
+    "zone": [
+      0.052,
+      0.802
+    ]
+  },
+  "vip-umr-ziyosi": {
+    "paper": "#eadccd",
+    "ink": "#543e36",
+    "accent": "#543e36",
+    "namesFont": "a9028061f1-400.ttf",
+    "namesItalic": false,
+    "bodyFont": "a9028061f1-400.ttf",
+    "dark": false,
+    "zone": [
+      0.052,
+      0.448
+    ]
+  },
+  "umr-durdonasi": {
+    "paper": "#fcf6ed",
+    "ink": "#68513c",
+    "accent": "#68513c",
+    "namesFont": "fcda940bf2-400.ttf",
+    "namesItalic": false,
+    "bodyFont": "e4f4db8b8f-500.ttf",
+    "dark": false,
+    "zone": [
+      0.052,
+      0.63
+    ]
+  },
+  "qadr-surati": {
+    "paper": "#eff1f3",
+    "ink": "#354f63",
+    "accent": "#354f63",
+    "namesFont": "aed4de7429-500.ttf",
+    "namesItalic": false,
+    "bodyFont": "lora-regular",
+    "dark": false,
+    "zone": [
+      0.401,
+      0.802
+    ]
+  },
+  "umr-daraxti": {
+    "paper": "#faf5ec",
+    "ink": "#4e5945",
+    "accent": "#4e5945",
+    "namesFont": "fcda940bf2-400.ttf",
+    "namesItalic": false,
+    "bodyFont": "e4f4db8b8f-500.ttf",
+    "dark": false,
+    "zone": [
+      0.052,
+      0.422
+    ]
+  },
+  "bordo-guldasta": {
+    "paper": "#f7ece7",
+    "ink": "#692939",
+    "accent": "#692939",
+    "namesFont": "aed4de7429-500.ttf",
+    "namesItalic": false,
+    "bodyFont": "lora-regular",
+    "dark": false,
+    "zone": [
+      0.255,
+      0.802
+    ]
+  },
+  "zarhal-lavha": {
+    "paper": "#fdf6eb",
+    "ink": "#514332",
+    "accent": "#514332",
+    "namesFont": "fcda940bf2-400.ttf",
+    "namesItalic": false,
+    "bodyFont": "fcda940bf2-400.ttf",
+    "dark": false,
+    "zone": [
+      0.167,
+      0.802
+    ]
+  },
+  "umr-kitobi": {
+    "paper": "#fbf4e8",
+    "ink": "#2b2117",
+    "accent": "#2b2117",
+    "namesFont": "28ec490464-400.ttf",
+    "namesItalic": true,
+    "bodyFont": "8ad500683c-400.ttf",
+    "dark": false,
+    "zone": [
+      0.052,
+      0.802
+    ]
+  },
+  "hurmat-maktub": {
+    "paper": "#eef3f1",
+    "ink": "#1f2b2e",
+    "accent": "#1f2b2e",
+    "namesFont": "95e6bee66e-500.ttf",
+    "namesItalic": false,
+    "bodyFont": "lora-regular",
+    "dark": false,
+    "zone": [
+      0.052,
+      0.802
+    ]
+  },
+  "pion-guldasta": {
+    "paper": "#faebe6",
+    "ink": "#6e1e2e",
+    "accent": "#6e1e2e",
+    "namesFont": "a561f12094-600.ttf",
+    "namesItalic": true,
+    "bodyFont": "a561f12094-600.ttf",
+    "dark": false,
+    "zone": [
+      0.052,
+      0.271
+    ]
+  }
+}

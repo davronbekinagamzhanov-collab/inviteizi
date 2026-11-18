@@ -10,6 +10,7 @@ import { useT } from "./shared";
 import { CheckIcon, ClockIcon, CloseIcon, SpinnerIcon } from "./icons";
 import { CancelButton } from "./Cancel";
 import { copyText, haptic, openLink, shareLink } from "./telegram";
+import { api } from "./api";
 import s from "../app.module.css";
 
 type Props = {
@@ -35,10 +36,58 @@ function StatusBadge({ o }: { o: AppOrder }) {
   );
 }
 
+type KeepsakeKind = "story" | "feed" | "a5" | "a6" | "video";
+type KeepsakeOutcome = "sent" | "queued" | "already" | "busy" | "failed" | "unavailable" | "notActive" | "notFound";
+
+/** «📥 Сақлаб олиш»: фото, PDF для печати, видео — файл приходит в чат с ботом */
+function KeepsakePanel({ o, onToast }: { o: AppOrder; onToast: (t: string) => void }) {
+  const T = useT();
+  const k = T.orders.keepsake;
+  const [busy, setBusy] = useState<KeepsakeKind | null>(null);
+  const kinds: KeepsakeKind[] = ["story", "feed", "a5", "a6", ...(o.keepsake?.video ? (["video"] as const) : [])];
+  async function get(kind: KeepsakeKind) {
+    if (busy) return; // двойное нажатие
+    haptic.tap();
+    setBusy(kind);
+    try {
+      const r = await api<{ outcome?: KeepsakeOutcome }>("keepsake", { orderId: o.id, kind });
+      const outcome = r.outcome ?? "failed";
+      if (outcome === "sent" || outcome === "queued") haptic.ok();
+      onToast(k.result[outcome]);
+    } catch {
+      onToast(k.result.failed);
+    } finally {
+      setBusy(null);
+    }
+  }
+  return (
+    <div className={s.keepsake} data-keepsake>
+      <p className={s.keepsakeHint}>{k.hint}</p>
+      <div className={s.keepsakeGrid}>
+        {kinds.map((kind) => (
+          <button
+            key={kind}
+            type="button"
+            className={`${s.btn} ${s.btnGhost} ${s.btnSmall}`}
+            disabled={busy !== null}
+            aria-busy={busy === kind}
+            onClick={() => get(kind)}
+          >
+            {busy === kind ? <SpinnerIcon size={16} /> : null}
+            {k.kinds[kind]}
+          </button>
+        ))}
+      </div>
+      <p className={s.keepsakeHint}>{k.print}</p>
+    </div>
+  );
+}
+
 export function Orders({ orders, onEdit, onPay, onStatus, onCancel, onToast, busy = false }: Props) {
   const [editing, setEditing] = useState<string | null>(null);
   const T = useT();
   const [qr, setQr] = useState<{ id: string; src: string } | null>(null);
+  const [files, setFiles] = useState<string | null>(null);
 
   async function showQr(o: AppOrder) {
     haptic.tap();
@@ -96,10 +145,24 @@ export function Orders({ orders, onEdit, onPay, onStatus, onCancel, onToast, bus
                   <button type="button" className={`${s.btn} ${s.btnGhost} ${s.btnSmall}`} onClick={() => showQr(o)} aria-expanded={qr?.id === o.id}>
                     {T.orders.qr}
                   </button>
+                  {o.keepsake && (
+                    <button
+                      type="button"
+                      className={`${s.btn} ${s.btnSmall}`}
+                      onClick={() => {
+                        haptic.tap();
+                        setFiles(files === o.id ? null : o.id);
+                      }}
+                      aria-expanded={files === o.id}
+                    >
+                      {T.orders.keepsake.button}
+                    </button>
+                  )}
                 </>
               )}
               {o.canEdit && <CancelButton onCancel={() => onCancel(o)} />}
             </div>
+            {files === o.id && o.keepsake && <KeepsakePanel o={o} onToast={onToast} />}
             {qr?.id === o.id && (
               <div className={s.qr}>
                 {/* eslint-disable-next-line @next/next/no-img-element -- QR из data: URL */}

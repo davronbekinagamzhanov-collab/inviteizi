@@ -99,6 +99,15 @@ export function createTg(api: Api, token: string): Tg {
       const m = await api.sendDocument(chatId, file, { ...sendExtra(opts), ...(opts.caption ? { caption: opts.caption } : {}) });
       return { messageId: m.message_id, fileId: m.document?.file_id };
     },
+    async sendVideo(chatId, video, opts = {}) {
+      const m = await api.sendVideo(chatId, video, {
+        ...sendExtra(opts),
+        ...(opts.caption ? { caption: opts.caption } : {}),
+        ...(opts.width ? { width: opts.width, height: opts.height } : {}),
+        supports_streaming: true,
+      });
+      return { messageId: m.message_id, fileId: m.video?.file_id };
+    },
     async sendMediaGroup(chatId, photos) {
       const ms = await api.sendMediaGroup(chatId, photos.map((p) => ({ type: "photo" as const, media: p.url, ...(p.caption ? { caption: p.caption } : {}) })));
       const messageIds = ms.map((m) => m.message_id);

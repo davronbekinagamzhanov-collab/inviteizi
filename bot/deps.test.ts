@@ -3,7 +3,7 @@ import { createBotDeps } from "./deps";
 import { uploadFile } from "@/lib/storage";
 vi.mock("./repo-pg",()=>({createPgRepo:()=>({})}));
 vi.mock("./telegram",()=>({createTg:()=>({getFileUrl:async()=>"https://api.telegram.org/file/bot111:TEST/music/file.mp3"})}));
-vi.mock("@/lib/storage",()=>({uploadFile:vi.fn(async()=>"https://files.invalid/music/opaque.mp3")}));
+vi.mock("@/lib/storage",()=>({uploadFile:vi.fn(async()=>"https://files.invalid/music/opaque.mp3"),storageConfigured:()=>false}));
 afterEach(()=>{vi.unstubAllEnvs();vi.unstubAllGlobals();});
 it("new public audio URLs contain neither Telegram user ID, file ID nor bot token",async()=>{
   for(const [key,value] of Object.entries({TELEGRAM_BOT_TOKEN:"111:TEST",OWNER_USERNAME:"owner",KASPI_PHONE:"+70000000000",KASPI_NAME:"Test"})) vi.stubEnv(key,value);

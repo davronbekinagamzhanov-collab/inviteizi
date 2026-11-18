@@ -1,4 +1,5 @@
 /** Шаги выбора: тадбир → дизайн из каталога (альбом по 3 обложки). Шага «формат» больше нет — у каждого дизайна своя цена */
+import { videoAvailable } from "../keepsake";
 import { catalogPromotion, discounted, promotionCovers } from "../pricing";
 import { salesCopy, strike } from "@/texts/sales";
 import { promotionLine } from "./sales";
@@ -133,6 +134,8 @@ async function render(c: Ctx) {
     t.pageTitle,
     "",
     ...lines,
+    // Что входит: фото и PDF — во всех, видео — в анимацияли (если рендер подключён)
+    ...(c.deps.keepsake ? ["", c.tx.format.includes(videoAvailable(c.deps, { format: "animated" }))] : []),
     ...(credits.length ? ["", ...credits] : []),
   ].join("\n");
   ids.push((await send(c, text, inline(rows))).messageId);

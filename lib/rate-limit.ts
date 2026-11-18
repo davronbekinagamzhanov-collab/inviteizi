@@ -11,6 +11,8 @@ export const LIMITS = {
   api: { max: 90, windowMs: 60_000 },
   /** Подписанная ссылка на загрузку своей песни (до 20 МБ) */
   musicUpload: { max: 6, windowMs: 10 * 60_000 },
+  /** «📥 Сақлаб олиш»: файл в чат (строится 1–5 с) */
+  keepsake: { max: 12, windowMs: 10 * 60_000 },
   /** Загрузка фото клиента и чека */
   upload: { max: 20, windowMs: 10 * 60_000 },
 } satisfies Record<string, Limit>;
