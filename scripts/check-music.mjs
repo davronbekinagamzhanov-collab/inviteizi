@@ -1,4 +1,8 @@
 // Read-only asset inventory and local production browser check. No DB, gate, sync or writes to Storage.
+// 19.11.2026: отключён — читал песни из Supabase Storage (с 16.11 отвечает 402). Что реально играет — тест
+// lib/music-available.test.ts (каждый адрес → файл в public/), прод — утренняя проверка bot/daily-check.ts.
+console.error("Скрипт отключён: песни больше не в Supabase Storage (402). Проверка музыки: npx vitest run lib/music-available.test.ts");
+process.exit(1);
 import "./ts-hooks.mjs";
 import { chromium } from "playwright-core";
 import { readFile, writeFile } from "node:fs/promises";

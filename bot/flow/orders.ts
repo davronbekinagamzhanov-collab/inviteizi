@@ -628,7 +628,7 @@ export async function sendLinkPack(deps: Deps, o: OrderRecord, afterPayment: boo
     const png = await QRCode.toBuffer(url, { width: 600, margin: 2 });
     const sent = await tg.sendPhoto(client, new Uint8Array(png), { caption, markup });
     // «📥 Сақлаб олиш»: фото, PDF для печати, видео — отдельным сообщением с кнопками
-    await sendKeepsakeOffer(deps, o, await langOf(deps, client));
+    if (afterPayment || promotion) await sendKeepsakeOffer(deps, o, await langOf(deps, client));
     return { linkSent: true, shareSent: true, messageId: sent.messageId };
   } catch (e) {
     console.error("клиенту не отправлено: QR", e instanceof Error ? e.name : "Error");
@@ -636,7 +636,7 @@ export async function sendLinkPack(deps: Deps, o: OrderRecord, afterPayment: boo
   // QR не ушёл — то же самое текстом (ссылка и кнопки важнее картинки)
   try {
     const sent = await tg.sendMessage(client, caption, { markup });
-    await sendKeepsakeOffer(deps, o, await langOf(deps, client));
+    if (afterPayment || promotion) await sendKeepsakeOffer(deps, o, await langOf(deps, client));
     return { linkSent: true, shareSent: true, messageId: sent.messageId };
   } catch (e) {
     console.error("клиенту не отправлено: ссылка", e instanceof Error ? e.name : "Error");

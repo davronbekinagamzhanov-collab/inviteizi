@@ -84,3 +84,7 @@ export type InvitationMode = "demo" | "full";
 /** Причины бесплатной выдачи владельцем: подарок, пример, оплачено наличными, замена */
 export const STAFF_GRANT_REASONS = ["gift", "sample", "cash", "replace"] as const;
 export type StaffGrantReason = (typeof STAFF_GRANT_REASONS)[number];
+
+/** Демо каталога: форма «Келасизми?» видна как образец и ничего не отправляет (19.11.2026) */
+// подчёркивания в адресе заказа невозможны (isValidSlug), поэтому настоящий заказ с таким адресом не появится
+export const DEMO_RSVP_SLUG = "_namuna_";

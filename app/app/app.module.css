@@ -892,6 +892,7 @@ textarea.input {
 }
 .req {
   display: flex;
+  flex-wrap: wrap; /* узкий экран (iPhone SE, 320 px): кнопка «Нусхалаш» уходит под номер, номер не рассыпается */
   align-items: center;
   gap: 10px;
   padding: 12px 0;
@@ -901,7 +902,7 @@ textarea.input {
   border-bottom: 0;
 }
 .req span {
-  flex: 1;
+  flex: 1 1 170px;
   min-width: 0;
 }
 .req small {
@@ -1850,6 +1851,7 @@ textarea.input {
   background: var(--card, #fffaf2);
 }
 .kaspiPhone {
+  white-space: nowrap;
   font-size: 22px;
   letter-spacing: 0.02em;
   font-variant-numeric: tabular-nums;

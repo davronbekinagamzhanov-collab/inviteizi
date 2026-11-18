@@ -1,4 +1,5 @@
 "use client";
+import { DEMO_RSVP_SLUG } from "@/lib/types";
 
 import { useState, type CSSProperties, type FormEvent } from "react";
 import { t } from "@/texts/uz-cyrl";
@@ -36,7 +37,8 @@ export function rsvpVars(l: RsvpLook): CSSProperties {
 }
 
 /** Карточка со своими цветами: одинаково читается на светлых и тёмных дизайнах */
-export function Rsvp({ slug, preview, look }: { slug: string; preview: boolean; look?: RsvpLook }) {
+export function Rsvp({ slug, preview: previewProp, look }: { slug: string; preview: boolean; look?: RsvpLook }) {
+  const preview = previewProp || slug === DEMO_RSVP_SLUG;
   const [name, setName] = useState("");
   const [guests, setGuests] = useState(1);
   const [state, setState] = useState<State>("form");
