@@ -10,6 +10,7 @@ import type { InlineButton } from "./tg";
 import type { RenderKind, RenderRecord } from "./repo";
 import { txFor } from "./flow/util";
 import { recordBotError } from "./errors";
+import { staff } from "@/texts/bot-ru";
 
 export type FileKind = "story" | "feed" | "a5" | "a6";
 export const FILE_KINDS: readonly FileKind[] = ["story", "feed", "a5", "a6"];
@@ -76,6 +77,19 @@ export async function sendKeepsakeOffer(deps: Deps, o: OrderRecord, lang: Lang) 
   }
 }
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Заказ по id (Mini App) или номеру (бот); мусор в запросе — «не найден», а не ошибка базы */
+export async function findOrder(deps: Deps, ref: { id?: string; number?: number }) {
+  if (ref.id !== undefined) return UUID.test(ref.id) ? deps.repo.getOrder(ref.id).catch(() => null) : null;
+  if (ref.number !== undefined && Number.isSafeInteger(ref.number) && ref.number > 0)
+    return deps.repo.getOrderByNumber(ref.number).catch(() => null);
+  return null;
+}
+
+/** Видео в очереди дольше этого без ответа runner'а — можно заказать заново */
+export const VIDEO_STUCK_MS = 20 * 60_000;
+
 /** Двойное нажатие: один и тот же файл одного заказа не строим дважды одновременно */
 const busy = new Set<string>();
 
@@ -132,14 +146,11 @@ export async function deliverKeepsake(
   kind: RenderKind,
 ): Promise<KeepsakeOutcome> {
   if (!deps.keepsake || !isKeepsakeKind(kind)) return "unavailable";
-  const o = orderRef.id
-    ? await deps.repo.getOrder(orderRef.id)
-    : orderRef.number
-      ? await deps.repo.getOrderByNumber(orderRef.number)
-      : null;
+  const o = await findOrder(deps, orderRef);
   if (!o || (o.userId !== userId && !(await deps.repo.isAdmin(userId)))) return "notFound";
   if (o.status !== "active") return "notActive";
-  const lang = (await deps.repo.getUser(o.userId))?.lang ?? "uz";
+  // язык подписей — того, кто получает файл (админ, помогающий клиенту, — на своём)
+  const lang = (await deps.repo.getUser(userId))?.lang ?? "uz";
   const to = userId;
 
   if (kind === "video") {
@@ -152,7 +163,9 @@ export async function deliverKeepsake(
         await deps.tg.sendVideo(to, r.telegramFileId ?? r.url!, { caption: txFor(lang).keepsake.videoCaption });
         return "sent";
       }
-      return "already";
+      // runner пропал без ответа (упал до первого сообщения) — клиент может заказать снова
+      if (+deps.now() - +r.updatedAt < VIDEO_STUCK_MS) return "already";
+      return (await dispatch(deps, o, { ...r, attempts: 0 })) ? "queued" : "failed";
     }
     return (await dispatch(deps, o, claim.record)) ? "queued" : "failed";
   }
@@ -197,7 +210,7 @@ async function dispatch(deps: Deps, o: OrderRecord, r: RenderRecord): Promise<bo
 async function tellOwner(deps: Deps, o: OrderRecord, error: string) {
   for (const id of deps.keepsake?.ownerIds() ?? []) {
     await deps.tg
-      .sendMessage(id, `⚠️ Видео №${o.number} не получилось: ${error.slice(0, 200)}\nКлиенту отправлено: «картинки и PDF готовы».`)
+      .sendMessage(id, staff.keepsakeVideoFailed(o.number, error.slice(0, 200)))
       .catch(() => undefined);
   }
 }
@@ -212,6 +225,8 @@ export async function videoResult(
   const r = await deps.repo.getRender(orderId, "video");
   if (!o || !r) return "notFound";
   const lang = (await deps.repo.getUser(o.userId))?.lang ?? "uz";
+  // видео уже готово: поздние/повторные ответы runner'а ничего не меняют (без второго рендера и второго видео)
+  if (r.status === "done" && result.status !== "done") return "ok";
   if (result.status === "running") {
     await deps.repo.saveRender(orderId, "video", { status: "running" });
     return "ok";

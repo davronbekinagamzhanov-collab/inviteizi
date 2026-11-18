@@ -1,5 +1,5 @@
 import { PgMarketing } from "./marketing-repo";
-import { playableMusic } from "@/lib/music-available";
+import { MUSIC_BORROW, playableMusic } from "@/lib/music-available";
 import { RSVP_IP_HOUR_LIMIT, RSVP_ORDER_LIMIT, type RsvpInput, type RsvpRecord } from "@/lib/rsvp";
 import {
   earningFor,
@@ -1444,6 +1444,8 @@ export class PgRepo implements Repo {
       select id, title_uz, title_ru, file_url, telegram_file_id, sort, occasion, is_artist
       from public.music
       where is_active
+        and (${occasion ?? null}::text is null or occasion is null or occasion = ${occasion ?? null}
+             or id = any(${occasion ? [...MUSIC_BORROW[occasion]] : []}::text[]))
       order by sort, id`;
     // Только песни, чей файл есть на сайте; у тадбира не меньше 3 (lib/music-available.ts)
     return playableMusic(rows.map(toMusicRecord), occasion);

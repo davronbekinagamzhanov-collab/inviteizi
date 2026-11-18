@@ -201,6 +201,42 @@ describe("«📥 Сақлаб олиш» в боте", () => {
   });
 });
 
+describe("«📥 Сақлаб олиш»: находки ревью", () => {
+  beforeEach(() => resetRateLimits());
+  it("поздний «failed»/«running» после готового видео — без второго рендера и без смены статуса", async () => {
+    const s = new Sim();
+    const k = withKeepsake(s);
+    const o = await paidOrder(s, 1);
+    await deliverKeepsake(s.deps, 1, { number: o.number }, "video");
+    await videoResult(s.deps, o.id, { status: "done", url: BLOB });
+    expect(await videoResult(s.deps, o.id, { status: "failed", error: "late" })).toBe("ok");
+    expect(await videoResult(s.deps, o.id, { status: "running" })).toBe("ok");
+    expect(k.jobs).toHaveLength(1);
+    expect((await s.repo.getRender(o.id, "video"))!.status).toBe("done");
+  });
+  it("runner пропал без ответа: через 20 минут клиент может заказать видео снова", async () => {
+    const s = new Sim();
+    const k = withKeepsake(s);
+    const o = await paidOrder(s, 1);
+    expect(await deliverKeepsake(s.deps, 1, { number: o.number }, "video")).toBe("queued");
+    s.advance(5);
+    expect(await deliverKeepsake(s.deps, 1, { number: o.number }, "video")).toBe("already");
+    // repo-memory ставит updatedAt по настоящим часам — сдвигаем отметку назад
+    s.repo.renders.get(`${o.id}:video`)!.updatedAt = new Date(+s.deps.now() - 21 * 60_000);
+    expect(await deliverKeepsake(s.deps, 1, { number: o.number }, "video")).toBe("queued");
+    expect(k.jobs).toHaveLength(2);
+  });
+  it("мусор вместо номера/id — «не найдено», без запроса в базу с ошибкой", async () => {
+    const s = new Sim();
+    withKeepsake(s);
+    expect(await deliverKeepsake(s.deps, 1, { id: "abc" }, "story")).toBe("notFound");
+    expect(await deliverKeepsake(s.deps, 1, { number: NaN }, "story")).toBe("notFound");
+    expect((await appAction(s.deps, user(1), { action: "keepsake", orderId: "'; drop table", kind: "story" })).status).toBe(403);
+    await s.callback(1, "ks:abc", 1);
+    await s.callback(1, "ks:abc:story", 1);
+  });
+});
+
 describe("«📥 Сақлаб олиш» в Mini App", () => {
   beforeEach(() => resetRateLimits());
   it("свой оплаченный — файл в чат; чужой — 403; неоплаченный — 403", async () => {

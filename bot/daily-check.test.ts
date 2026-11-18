@@ -96,6 +96,25 @@ describe("утренняя самопроверка", () => {
   });
 });
 
+describe("время проверки ограничено", () => {
+  it("сайт отвечает очень медленно — проверка укладывается в бюджет и пишет «не успели проверить»", async () => {
+    const s = at("2026-11-19T04:05:00Z");
+    const slow: HealthIo = {
+      recipients: () => [ADMIN],
+      fetch: (async (_u: string, init?: RequestInit) =>
+        new Promise((resolve, reject) => {
+          const t = setTimeout(() => resolve(new Response("<p>ok</p>")), 5000);
+          init?.signal?.addEventListener("abort", () => (clearTimeout(t), reject(new Error("timeout"))));
+        })) as typeof fetch,
+    };
+    const { dailyProblems } = await import("./daily-check");
+    const t0 = Date.now();
+    const r = await dailyProblems(s.deps, slow, 1500);
+    expect(Date.now() - t0).toBeLessThan(9000);
+    expect(r.problems.join("\n")).toContain("Не успели проверить");
+  }, 20_000);
+});
+
 describe("что считается мусором в странице", () => {
   it("undefined/NaN в тексте страницы — да; в скриптах Next — нет; старые цены — да; новые — нет", () => {
     expect(badTextIn(GOOD)).toEqual([]);

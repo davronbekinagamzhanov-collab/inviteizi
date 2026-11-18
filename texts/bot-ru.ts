@@ -569,6 +569,21 @@ export const ru = {
  */
 export const staff = {
   back: "◀️ Назад",
+  /** «Сақлаб олиш»: видео не получилось после повтора (19.11.2026) */
+  keepsakeVideoFailed: (n: number, error: string) =>
+    `⚠️ Видео №${n} не получилось: ${error}\nКлиенту отправлено: «картинки и PDF готовы».`,
+  /** Утренняя самопроверка прода (bot/daily-check.ts): пишется, только если есть проблемы */
+  daily: {
+    title: (checked: number) => `⚠️ Утренняя проверка: есть проблемы (проверено ${checked})`,
+    demoDown: "Демо не открываются",
+    demoJunk: "В демо лишнее (undefined/NaN/старая цена/Supabase)",
+    coversDown: "Обложки не открываются",
+    musicDown: "Музыка не открывается",
+    noAnswer: "нет ответа",
+    errors: (list: string) => `Ошибки бота за сутки (топ-3): ${list}`,
+    stuck: (min: number, n: number, list: string) => `Видео зависли (> ${min} мин): ${n} — ${list}`,
+    timeout: (n: number) => `Не успели проверить за отведённое время: ${n} адресов — сайт отвечает медленно`,
+  },
   ownerTitle: "👋 Панель InviteIZI",
   managerTitle: "👋 Панель менеджера InviteIZI",
   today: (paid: number, sum: string) => (paid ? `Сегодня: оплат ${paid} · ${sum}` : "Сегодня оплат пока нет"),

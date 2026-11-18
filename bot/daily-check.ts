@@ -12,6 +12,9 @@ import type { HealthIo } from "./health";
 import { ON_SALE_IDS } from "@/templates/catalog";
 import { getDesign, thumbOf } from "@/templates/registry";
 import { demoMusicUrl } from "@/lib/music";
+import { staff } from "@/texts/bot-ru";
+
+const D = staff.daily;
 import type { Occasion } from "@/lib/types";
 
 const MIN = 60_000;
@@ -40,12 +43,19 @@ export function badTextIn(html: string): string[] {
 const kzDay = (d: Date) => new Date(+d + 5 * 60 * MIN).toISOString().slice(0, 10);
 const kzHour = (d: Date) => new Date(+d + 5 * 60 * MIN).getUTCHours();
 
+/** Весь обход — не дольше этого: cron живёт 60 с, остальные задания идут раньше */
+export const BUDGET_MS = 35_000;
+/** Адрес не проверен: время вышло */
+const SKIPPED = -1;
+let deadline = Infinity;
+
 async function get(io: HealthIo, url: string, range = false, body = false) {
+  if (Date.now() >= deadline) return { status: SKIPPED, text: "" };
   try {
     const res = await io.fetch(url, {
       headers: range ? { range: "bytes=0-1" } : {},
       cache: "no-store",
-      signal: AbortSignal.timeout(12_000),
+      signal: AbortSignal.timeout(Math.max(1000, Math.min(10_000, deadline - Date.now()))),
     });
     const text = body ? await res.text() : (await res.body?.cancel().catch(() => undefined), "");
     return { status: res.status, text };
@@ -72,7 +82,9 @@ async function pool<T, R>(items: T[], n: number, f: (x: T) => Promise<R>): Promi
 export type DailyReport = { problems: string[]; checked: number };
 
 /** Сама проверка (без отметки дня и без сообщения) */
-export async function dailyProblems(deps: Deps, io: HealthIo): Promise<DailyReport> {
+export async function dailyProblems(deps: Deps, io: HealthIo, budgetMs = BUDGET_MS): Promise<DailyReport> {
+  deadline = Date.now() + budgetMs;
+  let skipped = 0;
   const base = deps.env.publicBaseUrl.replace(/\/+$/, "");
   const problems: string[] = [];
   let checked = 0;
@@ -83,9 +95,9 @@ export async function dailyProblems(deps: Deps, io: HealthIo): Promise<DailyRepo
   // Демо всех дизайнов в продаже: открывается и без мусора в тексте
   const demos = await pool([...ON_SALE_IDS], 8, async (id) => ({ id, ...(await get(io, `${base}/demo/${id}`, false, true)) }));
   checked += demos.length;
-  list("Демо не открываются", demos.filter((d) => d.status !== 200).map((d) => `${d.id} ${d.status || "нет ответа"}`));
+  list(D.demoDown, demos.filter((d) => d.status !== 200 && d.status !== SKIPPED).map((d) => `${d.id} ${d.status || D.noAnswer}`));
   list(
-    "В демо лишнее (undefined/NaN/старая цена/Supabase)",
+    D.demoJunk,
     demos.filter((d) => d.status === 200).flatMap((d) => badTextIn(d.text).map((b) => `${d.id}: ${b}`)),
   );
 
@@ -96,7 +108,7 @@ export async function dailyProblems(deps: Deps, io: HealthIo): Promise<DailyRepo
     return { id, status: url ? (await get(io, url, true)).status : 0 };
   });
   checked += covers.length;
-  list("Обложки не открываются", covers.filter((c) => c.status !== 200 && c.status !== 206).map((c) => `${c.id} ${c.status || "—"}`));
+  list(D.coversDown, covers.filter((c) => c.status !== 200 && c.status !== 206 && c.status !== SKIPPED).map((c) => `${c.id} ${c.status || D.noAnswer}`));
 
   // Музыка: активные песни списка и демо-мелодии
   const music = new Set<string>();
@@ -108,15 +120,16 @@ export async function dailyProblems(deps: Deps, io: HealthIo): Promise<DailyRepo
   const songs = await pool([...music], 8, async (url) => ({ url, status: (await get(io, url, true)).status }));
   checked += songs.length;
   list(
-    "Музыка не открывается",
-    songs.filter((x) => x.status !== 200 && x.status !== 206).map((x) => `${x.url.replace(base, "")} ${x.status || "—"}`),
+    D.musicDown,
+    songs.filter((x) => x.status !== 200 && x.status !== 206 && x.status !== SKIPPED).map((x) => `${x.url.replace(base, "")} ${x.status || D.noAnswer}`),
   );
 
   // Каталог
   for (const path of ["/catalog", "/catalog/invite"]) {
     const r = await get(io, `${base}${path}`, false, true);
     checked++;
-    if (r.status !== 200) problems.push(`• ${path}: ${r.status || "нет ответа"}`);
+    if (r.status === SKIPPED) continue;
+    if (r.status !== 200) problems.push(`• ${path}: ${r.status || D.noAnswer}`);
     else {
       const bad = badTextIn(r.text);
       if (bad.length) problems.push(`• ${path}: ${bad.join(", ")}`);
@@ -128,16 +141,22 @@ export async function dailyProblems(deps: Deps, io: HealthIo): Promise<DailyRepo
   const steps = await deps.repo.errorSteps(new Date(+now - DAY)).catch(() => null);
   const total = (steps ?? []).reduce((n, x) => n + x.n, 0);
   if (steps && total >= ERRORS_ALERT)
-    problems.push(`• Ошибки бота за сутки (топ-3): ${steps.map((x) => `${x.step} — ${x.n}`).join(", ")}`);
+    problems.push(`• ${D.errors(steps.map((x) => `${x.step} — ${x.n}`).join(", "))}`);
 
   // Видео, зависшие в очереди
   const stuck = await deps.repo.listRenders({ stuckBefore: new Date(+now - STUCK_MIN * MIN) }).catch(() => []);
   if (stuck.length) {
     const numbers: string[] = [];
     for (const r of stuck.slice(0, 5)) numbers.push(`№${(await deps.repo.getOrder(r.orderId))?.number ?? "?"}`);
-    problems.push(`• Видео зависли (> ${STUCK_MIN} мин): ${stuck.length} — ${numbers.join(", ")}`);
+    problems.push(`• ${D.stuck(STUCK_MIN, stuck.length, numbers.join(", "))}`);
   }
-  return { problems, checked };
+  skipped =
+    demos.filter((d) => d.status === SKIPPED).length +
+    covers.filter((c) => c.status === SKIPPED).length +
+    songs.filter((x) => x.status === SKIPPED).length;
+  // сайт настолько медленный, что не успели всё обойти, — это тоже проблема, о ней надо знать
+  if (skipped) problems.push(`• ${D.timeout(skipped)}`);
+  return { problems, checked: checked - skipped };
 }
 
 /** Из cron: после 09:00 по Алматы, один раз в день; сообщение — только при проблемах */
@@ -149,8 +168,9 @@ export async function dailyCheck(deps: Deps, io: HealthIo): Promise<{ ran: boole
   // отметка дня ставится ДО проверки: два cron подряд не проверяют дважды
   if (!(await repo.markNotice(`health:daily:${day}`, now))) return { ran: false, sent: 0, problems: [] };
   const { problems, checked } = await dailyProblems(deps, io);
+  deadline = Infinity;
   if (!problems.length) return { ran: true, sent: 0, problems };
-  const text = [`⚠️ Утренняя проверка: есть проблемы (проверено ${checked})`, ...problems].join("\n").slice(0, 3900);
+  const text = [D.title(checked), ...problems].join("\n").slice(0, 3900);
   let sent = 0;
   for (const id of io.recipients())
     try {

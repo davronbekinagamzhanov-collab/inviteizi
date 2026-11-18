@@ -67,3 +67,20 @@ it.skipIf(!native)("order_renders: сохранение, одновременн�
   // неверный вид файла база не примет
   await expect(sql`insert into public.order_renders(order_id,kind) values(${o.id},'gif')`).rejects.toThrow();
 });
+
+it.skipIf(!native)("listMusic на PostgreSQL: песни без файла скрыты, никоҳ берёт подходящие мелодии других тадбиров (≥ 3)", async () => {
+  const site = (id: string) => `https://inviteizi.vercel.app/audio/originals/${id}.mp3`;
+  for (const [id, occ] of [
+    ["inviteizi-sunnat-oilaviy-shodlik", "sunnat"],
+    ["inviteizi-yubiley-diydor", "yubiley"],
+    ["inviteizi-sunnat-mehr-rishtasi", "sunnat"],
+    ["inviteizi-sunnat-qutlug-qadam", "sunnat"],
+  ] as const)
+    await sql`insert into public.music(id,title_uz,title_ru,file_url,sort,is_active,occasion) values(${id},'t','t',${site(id)},100,true,${occ}) on conflict (id) do nothing`;
+  await sql`insert into public.music(id,title_uz,title_ru,file_url,sort,is_active,occasion) values('nikoh-dead','t','t','https://x.supabase.co/storage/v1/object/public/music/nikoh/a.mp3',1,true,'nikoh') on conflict (id) do nothing`;
+  const nikoh = (await repo.listMusic("nikoh")).map((m) => m.id);
+  expect(nikoh).not.toContain("nikoh-dead");
+  expect(nikoh).toEqual(expect.arrayContaining(["inviteizi-sunnat-oilaviy-shodlik", "inviteizi-yubiley-diydor", "inviteizi-sunnat-mehr-rishtasi"]));
+  expect(nikoh).not.toContain("inviteizi-sunnat-qutlug-qadam");
+  expect((await repo.listMusic("sunnat")).every((m) => m.occasion === "sunnat")).toBe(true);
+});

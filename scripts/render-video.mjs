@@ -127,7 +127,8 @@ async function music(dir) {
 
 function encode(concat, audio, out, bitrate) {
   const args = ["-y", "-f", "concat", "-safe", "0", "-i", concat];
-  if (audio) args.push("-i", audio);
+  // короткая песня (своя, 5–10 с) повторяется — видео не обрывается раньше последнего кадра
+  if (audio) args.push("-stream_loop", "-1", "-i", audio);
   else args.push("-f", "lavfi", "-i", "anullsrc=channel_layout=stereo:sample_rate=44100");
   args.push(
     "-t", String(LENGTH),
