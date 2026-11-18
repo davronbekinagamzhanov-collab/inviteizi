@@ -6,6 +6,8 @@ import { cache } from "react";
 import { connection } from "next/server";
 import type { InvitationData, InvitationEvent, OrderRecord } from "./domain";
 import { db } from "./db";
+import { demoMusicUrl } from "./music";
+import { isPlayableMusicUrl } from "./music-available";
 
 export type PageMode = "full" | "demo" | "expired";
 
@@ -56,8 +58,16 @@ export function invitationData(order: OrderRecord, listMusicUrl?: string | null)
   const m = order.music;
   if (m.kind === "none") return { ...rest, noMusic: true };
   const url = m.kind === "list" ? listMusicUrl : m.url;
-  return url ? { ...rest, musicUrl: url } : { ...rest, noMusic: true };
+  // Песня больше не играет (была в Supabase Storage — 402 с 16.11.2026, или её файла нет на сайте):
+  // гость слышит демо-мелодию своего тадбира, а не тишину и не ошибку в журнале
+  const playable = m.kind === "list" ? isPlayableMusicUrl(url) : Boolean(url) && !isDeadStorageUrl(url!);
+  if (playable) return { ...rest, musicUrl: url! };
+  const fallback = demoMusicUrl(order.occasion);
+  return fallback ? { ...rest, musicUrl: fallback } : { ...rest, noMusic: true };
 }
+
+/** Своя песня клиента в прежнем Supabase Storage — не открывается (402) */
+const isDeadStorageUrl = (url: string) => /\.supabase\.co\/storage\//.test(url);
 
 async function musicFileUrl(musicId: string): Promise<string | null> {
   const [r] = await db()<{ file_url: string }[]>`select file_url from public.music where id = ${musicId}`;

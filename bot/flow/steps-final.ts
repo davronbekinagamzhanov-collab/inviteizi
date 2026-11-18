@@ -209,7 +209,9 @@ export const musicList: Step = {
     if (v.startsWith("p:")) {
       let sent;
       try {
-        sent = await c.deps.tg.sendAudio(c.chatId, m.telegramFileId ?? m.fileUrl, { title: trackTitle(c, m) });
+        // Telegram скачивает песню сам — нужен полный адрес (в базе может лежать «/audio/...»)
+        const fileUrl = m.fileUrl.startsWith("/") ? `${c.deps.env.publicBaseUrl}${m.fileUrl}` : m.fileUrl;
+        sent = await c.deps.tg.sendAudio(c.chatId, m.telegramFileId ?? fileUrl, { title: trackTitle(c, m) });
       } catch (e) {
         // No URL/token in logs; a failed preview must not change the chosen music.
         console.error("previewMusic", e instanceof Error ? e.name : "Error");

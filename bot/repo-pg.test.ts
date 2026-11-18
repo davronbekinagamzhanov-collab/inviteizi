@@ -153,9 +153,9 @@ describe.skipIf(!hasDb)("PgRepo (Supabase)", () => {
       const b = `t-${tag}-b`;
       const off = `t-${tag}-off`;
       await db()`insert into public.music (id, title_uz, title_ru, file_url, sort, is_active) values
-        (${b}, 'Б', 'Б', 'https://x/b.mp3', -1, true),
-        (${a}, 'А', 'А', 'https://x/a.mp3', -2, true),
-        (${off}, 'В', 'В', 'https://x/c.mp3', -3, false)`;
+        (${b}, 'Б', 'Б', 'https://inviteizi.vercel.app/audio/originals/inviteizi-yubiley-diydor.mp3', -1, true),
+        (${a}, 'А', 'А', 'https://inviteizi.vercel.app/audio/originals/inviteizi-yubiley-diydor.mp3', -2, true),
+        (${off}, 'В', 'В', 'https://inviteizi.vercel.app/audio/originals/inviteizi-yubiley-diydor.mp3', -3, false)`;
       const r = await repo();
       const mine = (await r.listMusic()).filter((m) => m.id.startsWith(`t-${tag}-`));
       expect(mine.map((m) => m.id)).toEqual([a, b]);
@@ -163,7 +163,7 @@ describe.skipIf(!hasDb)("PgRepo (Supabase)", () => {
         id: a,
         titleUz: "А",
         titleRu: "А",
-        fileUrl: "https://x/a.mp3",
+        fileUrl: "https://inviteizi.vercel.app/audio/originals/inviteizi-yubiley-diydor.mp3",
         telegramFileId: null,
         sort: -2,
         occasion: null,
@@ -178,13 +178,23 @@ describe.skipIf(!hasDb)("PgRepo (Supabase)", () => {
       const n = `t-${tag}-nikoh`;
       const s = `t-${tag}-sunnat`;
       await db()`insert into public.music (id, title_uz, title_ru, file_url, sort, is_active, occasion, is_artist) values
-        (${n}, 'Н', 'Н', 'https://x/n.mp3', -5, true, 'nikoh', true),
-        (${s}, 'С', 'С', 'https://x/s.mp3', -4, true, 'sunnat', false)`;
+        (${n}, 'Н', 'Н', 'https://inviteizi.vercel.app/audio/originals/inviteizi-yubiley-diydor.mp3', -5, true, 'nikoh', true),
+        (${s}, 'С', 'С', 'https://inviteizi.vercel.app/audio/originals/inviteizi-yubiley-diydor.mp3', -4, true, 'sunnat', false)`;
       const r = await repo();
       const nikoh = (await r.listMusic("nikoh")).filter((m) => m.id.startsWith(`t-${tag}-`)).map((m) => m.id);
       expect(nikoh).toContain(n);
       expect(nikoh).not.toContain(s);
       expect((await r.listMusic("nikoh")).find((m) => m.id === n)?.isArtist).toBe(true);
+    });
+
+    it("listMusic — песня без файла на сайте (Supabase Storage, 402) не показывается", async () => {
+      const { db } = await import("@/lib/db");
+      const dead = `t-${tag}-dead`;
+      await db()`insert into public.music (id, title_uz, title_ru, file_url, sort, is_active, occasion) values
+        (${dead}, 'Х', 'Х', 'https://hjakyirmyauqhurkqhsn.supabase.co/storage/v1/object/public/music/nikoh/x.mp3', -9, true, 'nikoh')`;
+      const r = await repo();
+      expect((await r.listMusic()).some((m) => m.id === dead)).toBe(false);
+      expect((await r.listMusic("nikoh")).some((m) => m.id === dead)).toBe(false);
     });
 
     it("stats: новые заказы и выручка попадают в «сегодня», источник считается", async () => {

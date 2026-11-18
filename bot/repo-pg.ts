@@ -1,4 +1,5 @@
 import { PgMarketing } from "./marketing-repo";
+import { playableMusic } from "@/lib/music-available";
 import { RSVP_IP_HOUR_LIMIT, RSVP_ORDER_LIMIT, type RsvpInput, type RsvpRecord } from "@/lib/rsvp";
 import {
   earningFor,
@@ -1404,13 +1405,13 @@ export class PgRepo implements Repo {
 
   // ── Музыка ──
   async listMusic(occasion?: Occasion) {
-    const o = occasion ?? null;
     const rows = await this.sql<MusicRow[]>`
       select id, title_uz, title_ru, file_url, telegram_file_id, sort, occasion, is_artist
       from public.music
-      where is_active and (${o}::text is null or occasion is null or occasion = ${o})
+      where is_active
       order by sort, id`;
-    return rows.map(toMusicRecord);
+    // Только песни, чей файл есть на сайте; у тадбира не меньше 3 (lib/music-available.ts)
+    return playableMusic(rows.map(toMusicRecord), occasion);
   }
 
   async setMusicTelegramFileId(musicId: string, fileId: string) {

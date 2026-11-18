@@ -17,16 +17,11 @@ describe("музыка: имена файлов и названия", () => {
     expect(titleFromFile("yangi-qoshiq_2024").uz).toBe("yangi qoshiq");
   });
 
-  it("у каждого тадбира есть мелодия для демо, и её файл лежит в своей папке", () => {
+  it("у каждого тадбира есть мелодия для демо, и её файл лежит на сайте", () => {
     for (const o of Object.keys(MUSIC_FOLDERS) as Occasion[]) {
       const url = demoMusicUrl(o);
-      if (url?.startsWith("/audio/originals/")) { expect(existsSync(`public${url}`), url).toBe(true); continue; }
-      expect(url, o).toMatch(new RegExp(`/music/${MUSIC_FOLDERS[o]}/[a-z0-9-]+\.mp3$`));
-      const name = url!.split("/").at(-1)!;
-      // файлы музыки не в git (живут в хранилище) — на чистой копии папок нет
-      if (existsSync(`public/music/${MUSIC_FOLDERS[o]}`)) {
-        expect(existsSync(`public/music/${MUSIC_FOLDERS[o]}/${name}`), `${o}: ${name}`).toBe(true);
-      }
+      expect(url, o).toMatch(/^\/audio\/(originals|lib)\/[a-z0-9/-]+\.mp3$/);
+      expect(existsSync(`public${url}`), url).toBe(true);
     }
   });
 
