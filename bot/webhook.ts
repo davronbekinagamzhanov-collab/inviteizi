@@ -2,6 +2,7 @@
  * HTTP-обработчики без привязки к Next: app/api/bot и app/api/cron только передают сюда запрос.
  * Так их можно проверить тестами с FakeTg и MemoryRepo.
  */
+import { checkDatabase } from "./health";
 import { timingSafeEqual } from "node:crypto";
 import type { Update } from "grammy/types";
 import type { Deps } from "./flow/types";
@@ -48,6 +49,9 @@ export async function handleCronRequest(
 ): Promise<Response> {
   const secret = req.headers.get("x-cron-secret");
   if (!secret || !(await opts.check(secret))) return json({ ok: false }, 401);
-  const result = await runCron(opts.getDeps());
+  const deps = opts.getDeps();
+  // База не отвечает — владельцу сообщение (раз в час), остальные задания без базы бессмысленны
+  if (deps.health && !(await checkDatabase(deps, deps.health))) return json({ ok: false, db: false }, 503);
+  const result = await runCron(deps);
   return json({ ok: true, ...result });
 }

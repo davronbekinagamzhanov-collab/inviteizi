@@ -1,5 +1,6 @@
 import { remindPromotions, runBroadcast } from "./broadcast";
 import { flushMarketing, withMarketingReady } from "./marketing";
+import { checkFiles } from "./health";
 /**
  * Задания по расписанию (pg_cron → POST /api/cron каждые 10 минут):
  *  - админам: чек ждёт больше 30 минут — напоминание днём, дальше каждые 2 часа до 21:00;
@@ -38,6 +39,7 @@ export type CronResult = {
   reviews: number;
   cleaned: number;
   errorAlerts: number;
+  healthAlerts: number;
   /** Рассылка об акции: поставлено напоминаний «Охирги кун!» и отправлено сообщений */
   broadcastQueued?: number;
   broadcastSent?: number;
@@ -144,9 +146,19 @@ export async function runCron(input: Deps): Promise<CronResult> {
     reviews: 0,
     cleaned: 0,
     errorAlerts: 0,
+    healthAlerts: 0,
     errors: 0,
   };
   const ctx = { deps };
+
+  // ── Здоровье файлов: песня с сайта и тестовый файл Blob; два сбоя подряд — владельцу ──
+  if (deps.health)
+    try {
+      r.healthAlerts = (await checkFiles(deps, deps.health)).sent;
+    } catch (e) {
+      r.errors++;
+      console.error("cron health", e instanceof Error ? e.name : "Error");
+    }
 
   // ── Админам: чек ждёт > 30 мин — днём (08:00–21:00), дальше каждые 2 часа до 21:00 ──
   const hour = kzHour(now);

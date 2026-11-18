@@ -41,7 +41,9 @@ import {
 } from "@/lib/order-rules";
 import { isQuiet } from "@/lib/quiet-hours";
 import { PHOTO_MAX_COUNT } from "../own-photo";
-import { ownMusicPath } from "../own-music";
+import { OWN_MUSIC_MAX, OWN_MUSIC_TYPES, ownMusicPath } from "../own-music";
+import { CLIENT_PHOTO_URL } from "../own-photo";
+import { isOurFileUrl, StorageUnavailableError } from "@/lib/storage";
 import { removeUnusedMedia } from "../flow/care";
 
 /** Черновик, как его хранит и присылает приложение */
@@ -405,12 +407,11 @@ export async function musicFor(deps: Deps, templateId: unknown, lang: Lang) {
   };
 }
 
-export const OWN_MUSIC_MAX = 20 * 1024 * 1024;
-const OWN_MUSIC_EXT = ["mp3", "m4a", "aac", "ogg", "oga", "opus", "wav"];
+const OWN_MUSIC_EXT = Object.keys(OWN_MUSIC_TYPES);
 
 /**
- * Своя песня из приложения: подписанная ссылка на загрузку прямо в бакет music (телефон грузит сам,
- * с процентом; лимит тела Vercel 4,5 МБ не мешает). До 20 МБ, только аудио.
+ * Своя песня из приложения: одноразовый токен Vercel Blob на загрузку прямо с телефона
+ * (с процентом; лимит тела Vercel 4,5 МБ не мешает). До 12 МБ, только mp3/m4a.
  */
 export async function musicUpload(deps: Deps, ext: unknown, size: unknown) {
   const e = typeof ext === "string" ? ext.toLowerCase().replace(/^\./, "") : "";
@@ -419,17 +420,18 @@ export async function musicUpload(deps: Deps, ext: unknown, size: unknown) {
   if (size > OWN_MUSIC_MAX) return { error: "tooBig" as const };
   if (!deps.signMusicUpload) return { error: "server" as const };
   const id = Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, "0")).join("");
-  return deps.signMusicUpload(`own/${id}.${e}`);
+  try {
+    return await deps.signMusicUpload(`own/${id}.${e}`);
+  } catch (err) {
+    if (err instanceof StorageUnavailableError) return { error: "storage" as const };
+    throw err;
+  }
 }
 
 /** Фото клиента: только наши адреса из бакета photos, не больше трёх */
 function cleanPhotos(deps: Deps, photos: unknown): string[] | undefined {
   if (!Array.isArray(photos)) return undefined;
-  const ok = photos.filter(
-    (p): p is string =>
-      typeof p === "string" &&
-      /^https:\/\/[a-z0-9]+\.supabase\.co\/storage\/v1\/object\/public\/photos\/client\/[a-f0-9]{64}\.webp$/.test(p),
-  );
+  const ok = photos.filter((p): p is string => typeof p === "string" && CLIENT_PHOTO_URL.test(p) && isOurFileUrl(p));
   return ok.length ? [...new Set(ok)].slice(0, PHOTO_MAX_COUNT) : undefined;
 }
 
@@ -444,7 +446,7 @@ function toDraft(deps: Deps, prev: Draft, d: AppDraft, data: Partial<InvitationD
         : d.music?.kind === "own" &&
             typeof d.music.url === "string" &&
             ownMusicPath(d.music.url) &&
-            /^https:\/\/[a-z0-9]+\.supabase\.co\/storage\/v1\/object\/public\/music\/own\//.test(d.music.url)
+            isOurFileUrl(d.music.url)
           ? {
               kind: "own",
               fileId: prev.music?.kind === "own" && prev.music.url === d.music.url ? prev.music.fileId : "app",

@@ -4,6 +4,7 @@ import { appGate, json } from "@/lib/app-auth";
 import { allow, LIMITS } from "@/lib/rate-limit";
 import { submitReceipt } from "@/bot/app/service";
 import { PhotoFormatError, PHOTO_MAX_BYTES } from "@/bot/own-photo";
+import { StorageUnavailableError } from "@/lib/storage";
 
 export const maxDuration = 60;
 
@@ -42,6 +43,8 @@ export async function POST(req: Request) {
     return json({ error: "bad" }, 400);
   } catch (e) {
     if (e instanceof PhotoFormatError) return json({ error: "format" }, 400);
+    // Хранилище не подключено (нет BLOB_READ_WRITE_TOKEN) — клиенту «временно недоступно», не «ошибка»
+    if (e instanceof StorageUnavailableError) return json({ error: "storage" }, 503);
     console.error("api/app/upload", kind, e instanceof Error ? e.name : "Error");
     return json({ error: "server" }, 500);
   }

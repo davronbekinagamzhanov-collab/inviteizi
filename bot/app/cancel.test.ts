@@ -3,11 +3,18 @@
  * Отмена удаляет личные данные (заказ, фото, черновик), оставляет обезличенную запись шага;
  * чужой заказ, чек на проверке и оплаченный — не отменяются.
  */
-import { describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { Sim } from "../testing/sim";
 import { activeDesigns } from "@/templates/registry";
 import type { AppUser } from "@/lib/tg-init-data";
 import * as app from "./service";
+
+// Наше хранилище: Blob этого проекта (store abcd1234) и старый Supabase проекта abcd — чужие адреса не принимаются
+beforeAll(() => {
+  vi.stubEnv("BLOB_READ_WRITE_TOKEN", "vercel_blob_rw_abcd1234_secret");
+  vi.stubEnv("SUPABASE_URL", "https://abcd.supabase.co");
+});
+afterAll(() => vi.unstubAllEnvs());
 
 const user = (id: number, lang = "uz"): AppUser => ({ id, firstName: "Апа", username: `u${id}`, languageCode: lang });
 const PHOTO = `https://abcd.supabase.co/storage/v1/object/public/photos/client/${"a".repeat(64)}.webp`;
@@ -205,7 +212,9 @@ describe("п.21: музыка", () => {
     { id: "yor-yor", titleUz: "Ёр-ёр", titleRu: "Ёр-ёр", fileUrl: "https://cdn.test/music/yor-yor.mp3", telegramFileId: null, sort: 1, occasion: "nikoh" as const },
     { id: "osh-kuy", titleUz: "Ош куйи", titleRu: "Ош куйи", fileUrl: "https://cdn.test/music/osh.mp3", telegramFileId: null, sort: 2, occasion: "nahorgi" as const },
   ];
-  const OWN = `https://abcd.supabase.co/storage/v1/object/public/music/own/${"c".repeat(32)}.mp3`;
+  // Новые песни — Vercel Blob (17.11.2026); старые адреса Supabase продолжают приниматься
+  const OWN = `https://abcd1234.public.blob.vercel-storage.com/music/own/${"c".repeat(32)}.mp3`;
+  const OLD_OWN = `https://abcd.supabase.co/storage/v1/object/public/music/own/${"e".repeat(32)}.mp3`;
 
   it("готовые мелодии других тадбиров — ниже, с категорией; выбранная сохраняется в заказе и играет в НАМУНА", async () => {
     const { invitationData } = await import("@/lib/orders");
@@ -221,12 +230,15 @@ describe("п.21: музыка", () => {
     expect(invitationData(o, "https://cdn.test/music/osh.mp3").musicUrl).toBe("https://cdn.test/music/osh.mp3");
   });
 
-  it("своя песня из приложения: подписанная загрузка (до 20 МБ, только аудио), сохраняется в заказе и играет в НАМУНА", async () => {
+  it("своя песня из приложения: токен на загрузку (до 12 МБ, только mp3/m4a), сохраняется в заказе и играет в НАМУНА", async () => {
     const { invitationData } = await import("@/lib/orders");
     const sim = new Sim({ music });
-    sim.deps.signMusicUpload = async (path) => ({ signedUrl: `https://abcd.supabase.co/sign/${path}`, url: `https://abcd.supabase.co/storage/v1/object/public/music/${path}` });
+    sim.deps.signMusicUpload = async (path) => ({ clientToken: "vercel_blob_client_test", pathname: `music/${path}`, url: `https://abcd1234.public.blob.vercel-storage.com/music/${path}` });
     expect(await app.musicUpload(sim.deps, "exe", 100)).toEqual({ error: "format" });
-    expect(await app.musicUpload(sim.deps, "mp3", 21 * 1024 * 1024)).toEqual({ error: "tooBig" });
+    expect(await app.musicUpload(sim.deps, "ogg", 100)).toEqual({ error: "format" });
+    expect(await app.musicUpload(sim.deps, "wav", 100)).toEqual({ error: "format" });
+    expect(await app.musicUpload(sim.deps, "mp3", 12 * 1024 * 1024 + 1)).toEqual({ error: "tooBig" });
+    expect(await app.musicUpload(sim.deps, "m4a", 12 * 1024 * 1024)).toMatchObject({ pathname: expect.stringMatching(/^music\/own\/[a-f0-9]{32}\.m4a$/) });
     const up = await app.musicUpload(sim.deps, "MP3", 3_000_000);
     if ("error" in up) throw new Error("upload");
     expect(up.url).toMatch(/\/music\/own\/[a-f0-9]{32}\.mp3$/);
@@ -236,6 +248,18 @@ describe("п.21: музыка", () => {
     expect(o.music).toMatchObject({ kind: "own", url: OWN, title: "Бизнинг қўшиқ" });
     expect(invitationData(o).musicUrl).toBe(OWN);
     expect((await app.openSession(sim.deps, user(104))).draft?.music).toEqual({ kind: "own", url: OWN, title: "Бизнинг қўшиқ" });
+    // Старый адрес Supabase (заказы до 17.11) по-прежнему принимается
+    const old = await app.submitDraft(sim.deps, user(106), { templateId: design.id, form, music: { kind: "own", url: OLD_OWN } });
+    if (!("ok" in old)) throw new Error("old");
+    expect((await sim.repo.getOrder(old.order.id))!.music).toMatchObject({ kind: "own", url: OLD_OWN });
+    // Хранилище не подключено — понятная ошибка, а не падение
+    const { StorageUnavailableError } = await import("@/lib/storage");
+    sim.deps.signMusicUpload = async () => { throw new StorageUnavailableError("test"); };
+    expect(await app.musicUpload(sim.deps, "mp3", 100)).toEqual({ error: "storage" });
+    // Чужой store Vercel Blob с похожим адресом не принимается
+    const foreign = await app.submitDraft(sim.deps, user(107), { templateId: design.id, form, music: { kind: "own", url: `https://zzzz9999.public.blob.vercel-storage.com/music/own/${"f".repeat(32)}.mp3` } });
+    if (!("ok" in foreign)) throw new Error("foreign");
+    expect((await sim.repo.getOrder(foreign.order.id))!.music).toEqual({ kind: "list", musicId: "yor-yor" });
     // Чужой адрес вместо нашего бакета не принимается
     const bad = await app.submitDraft(sim.deps, user(105), { templateId: design.id, form, music: { kind: "own", url: `https://evil.test/storage/v1/object/public/music/own/${"d".repeat(32)}.mp3` } });
     if (!("ok" in bad)) throw new Error("bad");

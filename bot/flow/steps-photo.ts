@@ -1,4 +1,5 @@
 /** Фото клиента: «📷 Таклифномага расмларингизни қўшасизми?» (только у дизайнов с фото) */
+import { StorageUnavailableError } from "@/lib/storage";
 import type { Ctx, Result, Step } from "./types";
 import { after, backRow, data, ib, inline, send } from "./util";
 import { getDesign } from "@/templates/registry";
@@ -88,6 +89,7 @@ export const photoUpload: Step = {
     } catch (e) {
       if (e instanceof PhotoTooBigError) return { hint: p.tooBig };
       if (e instanceof PhotoFormatError) return { hint: p.badFormat };
+      if (e instanceof StorageUnavailableError) return { hint: p.storageDown };
       // Адрес файла Telegram содержит токен — в лог только имя ошибки
       console.error("savePhoto", e instanceof Error ? e.name : "Error");
       return { hint: p.saveFailed };

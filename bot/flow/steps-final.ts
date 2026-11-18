@@ -10,7 +10,9 @@ import { catalogList, pageOf } from "./steps-order";
 import { confirmDraft } from "./orders";
 import { photoStepFor } from "./steps-photo";
 import { recordBotError, toEntry } from "../errors";
-import { MusicTooBigError } from "../own-music";
+import { MusicFormatError, MusicTooBigError } from "../own-music";
+import { ownAudioFormat } from "../audio-type";
+import { StorageUnavailableError } from "@/lib/storage";
 
 /** Варианты текста показываем по 3, «🔄 Бошқа вариантлар» листает дальше по кругу */
 const PAGE = 3;
@@ -236,6 +238,10 @@ export const musicOwn: Step = {
     const isAudioDoc = u.kind === "document" && (/^audio\//.test(u.mimeType ?? "") || AUDIO_EXT.test(u.fileName ?? ""));
     if (u.kind !== "audio" && !isAudioDoc) return { hint: c.tx.music.sendFile };
     const file = u as Extract<typeof u, { kind: "audio" | "document" }>;
+    // Только mp3/m4a (17.11.2026): другие форматы не у всех телефонов играют, а сжимать на сервере нельзя
+    // Без имени и типа (пересланная из канала) — формат проверит сервер по пути файла Telegram
+    if ((file.fileName || file.mimeType) && !ownAudioFormat(file.fileName, file.mimeType))
+      return { hint: c.tx.music.format };
     if ((file.fileSize ?? 0) > MAX_MUSIC_BYTES) {
       return { hint: c.tx.music.tooBig(((file.fileSize ?? 0) / 1024 / 1024).toFixed(1)) };
     }
@@ -247,6 +253,8 @@ export const musicOwn: Step = {
         url = await c.deps.saveMusic(file.fileId, c.user.id);
       } catch (e) {
         if (e instanceof MusicTooBigError) return { hint: c.tx.music.tooBigUnknown };
+        if (e instanceof MusicFormatError) return { hint: c.tx.music.format };
+        if (e instanceof StorageUnavailableError) return { hint: c.tx.music.storageDown };
         console.error("saveMusic", e instanceof Error ? e.name : "Error");
         await recordBotError(c.deps, toEntry(e, u, c.step, "ack"));
       }

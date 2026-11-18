@@ -764,6 +764,34 @@ export class PgRepo implements Repo {
     }
   }
 
+  async lastNoticeAt(prefix: string) {
+    try {
+      const [r] = await this.sql<{ at: Date | null }[]>`select max(sent_at) as at from public.bot_notices
+        where key like ${prefix + "%"} and sent_at is not null`;
+      return r?.at ?? null;
+    } catch (e) {
+      if (isMissingTable(e)) return null;
+      throw e;
+    }
+  }
+
+  async markNotice(key: string, now: Date) {
+    try {
+      // due_at в далёком будущем: claimDueNotices такую строку никогда не возьмёт, сообщения нет
+      const rows = await this.sql`insert into public.bot_notices(key, chat_id, body, due_at, sent_at)
+        values(${key}, 0, ${this.sql.json({ text: "", markup: null })}, '9999-01-01T00:00:00Z', ${now})
+        on conflict (key) do nothing returning key`;
+      return rows.length > 0;
+    } catch (e) {
+      if (isMissingTable(e)) return false;
+      throw e;
+    }
+  }
+
+  async ping() {
+    await this.sql`select 1`;
+  }
+
   async noticeSentSince(prefix: string, since: Date) {
     try {
       const rows = await this

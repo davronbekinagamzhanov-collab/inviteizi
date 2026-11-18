@@ -17,18 +17,18 @@ it("new public audio URLs contain neither Telegram user ID, file ID nor bot toke
   expect(vi.mocked(uploadFile).mock.calls[1][1]).toBe(path);
 });
 
-it.each(["declared", "streamed"])("rejects %s audio over 20 MiB before writing Storage, even without reliable Telegram metadata",async kind=>{
+it.each(["declared", "streamed"])("rejects %s audio over 12 MiB before writing Storage, even without reliable Telegram metadata",async kind=>{
   for(const [key,value] of Object.entries({TELEGRAM_BOT_TOKEN:"111:TEST",OWNER_USERNAME:"owner",KASPI_PHONE:"+70000000000",KASPI_NAME:"Test"})) vi.stubEnv(key,value);
   vi.mocked(uploadFile).mockClear();
   let cancelled=false;
   const response=kind==="declared"
-    ? new Response(new Uint8Array([1]),{headers:{"content-length":String(20*1024*1024+1)}})
+    ? new Response(new Uint8Array([1]),{headers:{"content-length":String(12*1024*1024+1)}})
     : new Response(new ReadableStream({
       start(controller){for(let i=0;i<22;i++)controller.enqueue(new Uint8Array(1024*1024));},
       cancel(){cancelled=true;},
     }));
   vi.stubGlobal("fetch",vi.fn(async()=>response));
-  await expect(createBotDeps().saveMusic!("OVERSIZED",1)).rejects.toThrow(/20/);
+  await expect(createBotDeps().saveMusic!("OVERSIZED",1)).rejects.toThrow(/12/);
   expect(uploadFile).not.toHaveBeenCalled();
   if(kind==="streamed")expect(cancelled).toBe(true);
 });

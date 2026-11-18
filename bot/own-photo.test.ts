@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import sharp from "sharp";
 import { GrammyError } from "grammy";
-import { copyClientPhoto, isHeic, photoPath, PhotoFormatError, PhotoTooBigError, toWebp, PHOTO_CHAT_MAX_BYTES } from "./own-photo";
+import { copyClientPhoto, isHeic, photoPath, PhotoFormatError, PhotoTooBigError, toWebp, PHOTO_CHAT_MAX_BYTES, PHOTO_STORED_MAX_BYTES } from "./own-photo";
 
 const jpeg = () => sharp({ create: { width: 3000, height: 2000, channels: 3, background: "#c9a" } }).jpeg().toBuffer();
 
@@ -60,7 +60,23 @@ describe("фото клиента", () => {
   });
 
   it("путь в бакете по публичному адресу", () => {
-    expect(photoPath("https://x.supabase.co/storage/v1/object/public/photos/client/a%20b.webp")).toBe("client/a b.webp");
+    const h = "a".repeat(64);
+    expect(photoPath(`https://x.supabase.co/storage/v1/object/public/photos/client/${h}.webp`)).toBe(`client/${h}.webp`);
+    expect(photoPath(`https://abc123.public.blob.vercel-storage.com/photos/client/${h}.webp`)).toBe(`client/${h}.webp`);
+    expect(photoPath("https://x.supabase.co/storage/v1/object/public/photos/client/a%20b.webp")).toBeNull();
+    expect(photoPath(`https://evil.example/photos/client/${h}.webp`)).toBeNull();
     expect(photoPath("https://images.unsplash.com/photo-1")).toBeNull();
   });
+});
+
+describe("фото в хранилище не больше 600 КБ (17.11.2026)", () => {
+  it("шумная фотография 4000×3000 после сжатия ≤ 600 КБ", async () => {
+    const w = 4000,
+      h = 3000,
+      raw = Buffer.alloc(w * h * 3);
+    for (let i = 0; i < raw.length; i++) raw[i] = (Math.random() * 256) | 0; // худший случай для сжатия
+    const jpeg = await sharp(raw, { raw: { width: w, height: h, channels: 3 } }).jpeg({ quality: 95 }).toBuffer();
+    const webp = await toWebp(new Uint8Array(jpeg));
+    expect(webp.byteLength).toBeLessThanOrEqual(PHOTO_STORED_MAX_BYTES);
+  }, 60_000);
 });

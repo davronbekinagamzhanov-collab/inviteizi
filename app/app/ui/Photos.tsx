@@ -75,7 +75,13 @@ export function Photos({ photos, onChange, onToast, onPending }: { photos: strin
         }
       } catch (e) {
         haptic.error();
-        onToast(e instanceof ApiError && e.code === "tooBig" ? T.photos.tooBig : T.photos.bad);
+        onToast(
+          e instanceof ApiError && e.code === "tooBig"
+            ? T.photos.tooBig
+            : e instanceof ApiError && e.code === "storage"
+              ? T.photos.unavailable
+              : T.photos.bad,
+        );
       } finally {
         setPending((p) => p.filter((x) => x.key !== key));
         URL.revokeObjectURL(preview);
