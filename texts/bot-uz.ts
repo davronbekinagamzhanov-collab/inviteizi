@@ -451,11 +451,49 @@ export const uz = {
   },
 
   role: {
+    /** Этап 3 (19.11.2026): одно приветствие по join_, короткое меню партнёра и «Батафсил» */
+    joinWelcome: (s: { name: string; rate: string; schedule: string; ask: boolean }) =>
+      [
+        `🤝 Хуш келибсиз, ${s.name}! Сиз InviteIZI ҳамкорисиз.`,
+        "",
+        `💰 Сизга: ${s.rate} — ҳар бир тўловдан`,
+        `📅 Тўлов: ${s.schedule}, Kaspi'га`,
+        "🔗 Ҳаволангиз ва постерингиз тайёр.",
+        "",
+        "Бугун:",
+        "1. «🔗 Ҳавола ва QR» — постерни чоп этинг ёки ҳаволани WhatsApp'да юборинг.",
+        "2. «💳 Kaspi рақамим» — тўлов келадиган рақамни ёзинг.",
+        "3. Танишларга айтинг: онлайн таклифнома 5 дақиқада, 2 990 ₸ дан.",
+        ...(s.ask ? ["", "Тилни танланг · Выберите язык"] : []),
+      ].join("\n"),
+    partnerMenu: (s: { name: string; earned: string; due: string; next: string; today: number; pending: boolean; noKaspi: boolean }) =>
+      [
+        `🤝 ${s.name}`,
+        "",
+        `💰 Жами ишланган: ${s.earned}`,
+        `⏳ Тўланиши керак: ${s.due}`,
+        `📅 Кейинги тўлов: ${s.next}`,
+        `✅ Бугун тўловлар: ${s.today}`,
+        ...(s.pending ? ["", "⏳ Тасдиқ кутилмоқда. QR ишлайди, тўловлар ҳисобланади."] : []),
+        ...(s.noKaspi ? ["", "💳 Kaspi рақамингизни киритинг — тўлов шунга келади 👇"] : []),
+      ].join("\n"),
+    btnLink: "🔗 Ҳавола ва QR",
+    btnPayouts: "💰 Тўловлар",
+    btnDetail: "📋 Батафсил",
+    btnHow: "❓ Қандай ишлайди",
+    btnKaspi: "💳 Kaspi рақамим",
+    howText: "❓ Қандай ишлайди\n\n1. Ҳаволангиз ёки QR'ни тўй қилаётганларга беринг: келин-куёв оилалари, тўйхона, фотограф мижозлари.\n2. Улар шу ҳавола орқали таклифнома қилиб тўласа — сизга ҳар бир тўловдан фоиз ёзилади.\n3. Пул Kaspi'га тўлов кунида келади (рақам — «💳 Kaspi рақамим»).\n4. Мижоз сўраса: таклифнома 5 дақиқада, 2 990 ₸ дан, мусиқа ва харита билан.\n5. Савол бўлса — «📞 Боғланиш».",
+    detailTitle: "📋 Батафсил (исмларсиз)",
+    detailDays: "Кунлар бўйича (7 кун):",
+    detailWeeks: "Ҳафталар бўйича (4 ҳафта):",
+    detailRow: (label: string, scanned: number, namuna: number, paid: number, sum: string) =>
+      `${label}: ${scanned} ўтиш · ${namuna} намуна · ${paid} тўлов · ${sum}`,
+    weekLabel: (from: string, to: string) => `${from}–${to}`,
+    kaspiSaved: (k: string) => `✅ Kaspi: ${k} — тўловлар шунга келади.`,
+    dateLine: (day: number, month: string, weekday: string) => `${day} ${month}, ${weekday}`,
     panel: "🖥 Панель",
     partnerTitle: "🤝 InviteIZI ҳамкори",
     menu: "🤝 Ҳамкор менюси",
-    partnerHome: (name: string, pending: boolean) =>
-      `🤝 InviteIZI ҳамкори\n${name}${pending ? "\n\n⏳ Тасдиқ кутилмоқда. QR ишлайди, тўловлар ҳисобланади." : ""}`,
     /** Ссылка join_: язык ещё не выбран — текст на двух языках */
     joinHello: "🤝 Сиз InviteIZI ҳамкорисиз!\n🤝 Вы партнёр InviteIZI!\n\nТилни танланг · Выберите язык",
     joinHello3: "🤝 Сиз InviteIZI ҳамкорисиз!\n🤝 Вы партнёр InviteIZI!\n🤝 Сіз InviteIZI серіктесісіз!\n\nТилни танланг · Выберите язык · Тілді таңдаңыз",

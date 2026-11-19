@@ -55,15 +55,18 @@ export async function setChoices(sim: Sim, id: number, o: { text?: number; music
 
 
 /** /start → язык → «Создать» (клиент стоит на выборе тадбира) */
+/** Язык спрашивают только у новых — у того, кто уже выбрал (партнёр, оптовик), кнопки нет */
+const asksLang = (sim: Sim, id: number, label: string) => JSON.stringify(sim.last(id)?.markup ?? "").includes(label);
+
 export async function startUz(sim: Sim, id: number, payload = "") {
   await sim.start(id, payload);
-  await sim.click(id, uz.langUz);
+  if (asksLang(sim, id, uz.langUz)) await sim.click(id, uz.langUz);
   await sim.text(id, uz.menu.create);
 }
 
 export async function startRu(sim: Sim, id: number, payload = "") {
   await sim.start(id, payload);
-  await sim.click(id, ru.langRu);
+  if (asksLang(sim, id, ru.langRu)) await sim.click(id, ru.langRu);
   await sim.text(id, ru.menu.create);
 }
 

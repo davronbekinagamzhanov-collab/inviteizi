@@ -253,7 +253,7 @@ describe.skipIf(!BASE)("панели ролей на Pixel 7 и iPhone 13", () =
     };
     await sim.start(PARTNER, "join_" + /start=join_([a-z0-9]+)/.exec(p.link)![1]);
     await sim.click(PARTNER, uz.langUz);
-    await sim.contact(PARTNER, "77011234567");
+    // этап 3: после выбора языка сразу меню (телефон не спрашиваем)
     // клиент партнёра оплатил: начисление видно, имени клиента — нет
     await sim.start(CLIENT, partnerSource((await sim.repo.getPartner(p.id))!.code));
     // Заказ с чеком (часы симуляции — сегодняшние, календарь бота не нужен)

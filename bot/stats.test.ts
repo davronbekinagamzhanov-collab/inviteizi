@@ -128,7 +128,8 @@ describe("статистика менеджера и партнёра", () => {
     await paid(s, 1, partnerSource("salon111"));
     await s.start(2, partnerSource("salon111")); // скан без заказа
     await s.start(PARTNER);
-    await s.click(PARTNER, uz.role.stats);
+    // старая кнопка статистики (pn:ps) продолжает работать; в меню теперь «📋 Батафсил»
+    await s.callback(PARTNER, "pn:ps", s.last(PARTNER)!.id);
     const screen = s.last(PARTNER)!;
     expect(screen.text).toContain("QR сканерлади: 2");
     expect(screen.text).toContain("Тўлов: 1");

@@ -459,11 +459,49 @@ export const ru = {
   },
 
   role: {
+    /** Этап 3 (19.11.2026): одно приветствие по join_, короткое меню партнёра и «Батафсил» */
+    joinWelcome: (s: { name: string; rate: string; schedule: string; ask: boolean }) =>
+      [
+        `🤝 Добро пожаловать, ${s.name}! Вы партнёр InviteIZI.`,
+        "",
+        `💰 Вам: ${s.rate} — с каждой оплаты`,
+        `📅 Выплата: ${s.schedule}, на Kaspi`,
+        "🔗 Ваша ссылка и постер готовы.",
+        "",
+        "Сегодня:",
+        "1. «🔗 Ссылка и QR» — распечатайте постер или отправьте ссылку в WhatsApp.",
+        "2. «💳 Мой Kaspi» — напишите номер для выплат.",
+        "3. Расскажите знакомым: онлайн-приглашение за 5 минут, от 2 990 ₸.",
+        ...(s.ask ? ["", "Тилни танланг · Выберите язык"] : []),
+      ].join("\n"),
+    partnerMenu: (s: { name: string; earned: string; due: string; next: string; today: number; pending: boolean; noKaspi: boolean }) =>
+      [
+        `🤝 ${s.name}`,
+        "",
+        `💰 Заработано всего: ${s.earned}`,
+        `⏳ К выплате: ${s.due}`,
+        `📅 Следующая выплата: ${s.next}`,
+        `✅ Оплат сегодня: ${s.today}`,
+        ...(s.pending ? ["", "⏳ Ждёт подтверждения. QR работает, оплаты считаются."] : []),
+        ...(s.noKaspi ? ["", "💳 Укажите номер Kaspi — выплаты придут на него 👇"] : []),
+      ].join("\n"),
+    btnLink: "🔗 Ссылка и QR",
+    btnPayouts: "💰 Выплаты",
+    btnDetail: "📋 Подробнее",
+    btnHow: "❓ Как это работает",
+    btnKaspi: "💳 Мой Kaspi",
+    howText: "❓ Как это работает\n\n1. Давайте ссылку или QR тем, кто готовит той: семьям жениха и невесты, тойханам, клиентам фотографа.\n2. Если по вашей ссылке оформят и оплатят приглашение — вам процент с каждой оплаты.\n3. Деньги приходят на Kaspi в день выплаты (номер — «💳 Мой Kaspi»).\n4. Если клиент спросит: приглашение за 5 минут, от 2 990 ₸, с музыкой и картой.\n5. Вопросы — «📞 Связаться».",
+    detailTitle: "📋 Подробнее (без имён)",
+    detailDays: "По дням (7 дней):",
+    detailWeeks: "По неделям (4 недели):",
+    detailRow: (label: string, scanned: number, namuna: number, paid: number, sum: string) =>
+      `${label}: ${scanned} перех. · ${namuna} образц. · ${paid} опл. · ${sum}`,
+    weekLabel: (from: string, to: string) => `${from}–${to}`,
+    kaspiSaved: (k: string) => `✅ Kaspi: ${k} — выплаты придут на него.`,
+    dateLine: (day: number, month: string, weekday: string) => `${day} ${month}, ${weekday}`,
     panel: "🖥 Панель",
     partnerTitle: "🤝 Партнёр InviteIZI",
     menu: "🤝 Меню партнёра",
-    partnerHome: (name: string, pending: boolean) =>
-      `🤝 Партнёр InviteIZI\n${name}${pending ? "\n\n⏳ Ждёт подтверждения. QR работает, оплаты считаются." : ""}`,
     joinHello: uz.role.joinHello,
     joinHello3: uz.role.joinHello3,
     askPhone: "📱 Отправьте ваш номер — нажмите кнопку внизу 👇",
@@ -588,6 +626,16 @@ export const staff = {
   managerTitle: "👋 Панель менеджера InviteIZI",
   today: (paid: number, sum: string) => (paid ? `Сегодня: оплат ${paid} · ${sum}` : "Сегодня оплат пока нет"),
   networkLine: (partners: number) => `Партнёров в вашей сети: ${partners}`,
+  /** Этап 3: главное менеджеру одним взглядом */
+  managerHome: (s: { partners: number; today: number; month: number; monthName: string; earned: string; goal: string }) =>
+    [
+      "👋 Панель менеджера InviteIZI",
+      "",
+      `🤝 Партнёров в сети: ${s.partners}`,
+      `✅ Оплат сети: сегодня ${s.today} · за ${s.monthName} ${s.month}`,
+      `💰 Ваш заработок за ${s.monthName}: ${s.earned}`,
+      s.goal,
+    ].join("\n"),
   btn: {
     panel: "👋 Панель",
     stats: "📊 Статистика",
@@ -599,7 +647,7 @@ export const staff = {
     ownerApp: "🖥 Панель",
     create: "✨ Создать приглашение",
     settings: "⚙️ Настройки",
-    myStats: "📊 Моя статистика",
+    myStats: "📋 Подробнее",
     myPartners: "🤝 Мои партнёры",
     newPartner: "➕ Новый партнёр",
     earnings: "💰 Мой заработок",

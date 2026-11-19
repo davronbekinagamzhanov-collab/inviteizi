@@ -48,7 +48,6 @@ import {
   acceptPartnerInvite,
   joinKaspi,
   joinLang,
-  joinPhone,
   partnerAction,
   partnerConfirm,
   partnerName,
@@ -133,7 +132,6 @@ export const steps: Record<StepId, Step> = {
   partnerPropose,
   partnerProposeSchedule,
   joinLang,
-  joinPhone,
   joinKaspi,
 };
 

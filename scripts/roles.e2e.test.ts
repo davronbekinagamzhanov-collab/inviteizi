@@ -70,7 +70,7 @@ beforeAll(async () => {
   });
   await sim.start(PARTNER, "join_" + /start=join_([a-z0-9]+)/.exec(String(p.link))![1]);
   await sim.click(PARTNER, uz.langUz);
-  await sim.contact(PARTNER, "77011234567");
+  // этап 3: после выбора языка сразу меню (телефон не спрашиваем)
   await sim.start(WHOLESALE);
   await sim.click(WHOLESALE, uz.langUz);
   await admin("ownerWholesaleSet", { userId: WHOLESALE, percent: 20 });

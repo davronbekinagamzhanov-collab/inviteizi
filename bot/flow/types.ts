@@ -96,7 +96,6 @@ export type StepId =
   | "partnerPropose"
   | "partnerProposeSchedule"
   | "joinLang"
-  | "joinPhone"
   | "joinKaspi";
 
 /** Данные анкеты по ходу заполнения (тадбиры могут быть недозаполнены) */
