@@ -66,6 +66,9 @@ export type RenderRecord = {
 };
 export type RenderPatch = Partial<Pick<RenderRecord, "status" | "attempts" | "url" | "telegramFileId" | "error">>;
 
+/** client_orders.ref_source оптовика: его клиент забирает уже оплаченный заказ (этап 3) */
+export const WHOLESALE_REF = "wholesale";
+
 export interface Repo {
   /** Optional additive service; never initialized against a live DB in tests. */
   marketing?: import("./marketing-repo").PgMarketing;

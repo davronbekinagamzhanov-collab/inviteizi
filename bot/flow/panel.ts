@@ -13,7 +13,9 @@ import { kzMidnight, kzMonth, managerMonth, managerPaid, ruMonth } from "@/lib/m
 import { staff as S } from "@/texts/bot-ru";
 import { texts } from "./util";
 import { editOrSend, inline, namesOf, PAYABLE_STATUSES, pageUrl, price, roleOf, send } from "./util";
-import { orderButtons, sendReceiptTo } from "./orders";
+import { orderButtons, sendLinkPack, sendReceiptTo } from "./orders";
+import { sendKeepsakeOffer } from "../keepsake";
+import { WHOLESALE_REF } from "../repo";
 import { panelData, partnerDetailScreen, partnerHowScreen, partnerMenu, partnerRowOf, payoutsText, ptList, sendPack, startNewPartner } from "./partners";
 import { managerEarningsScreen, partnerStatsScreen, statsScreen } from "./stats";
 import { exportScreen } from "./export";
@@ -96,7 +98,7 @@ async function managerHome(c: Ctx): Promise<Screen> {
       month: cur.orders,
       monthName: ruMonth(month),
       earned: price(cur.amount),
-      goal: cur.orders >= MANAGER_GOAL ? S.st.goalDone(price(MANAGER_BONUS)) : S.st.goal(cur.orders, MANAGER_GOAL, price(MANAGER_BONUS)),
+      goal: cur.orders >= MANAGER_GOAL ? S.n.goalDone(price(MANAGER_BONUS)) : S.n.goal(cur.orders, MANAGER_GOAL, price(MANAGER_BONUS)),
     }),
     rows: [
       [
@@ -275,6 +277,24 @@ export async function toClient(c: Ctx, n: number): Promise<Result | void> {
   await send(c, uz, inline(wa));
 }
 
+/**
+ * wcl:<n> — оптовик передаёт свой ОПЛАЧЕННЫЙ заказ клиенту (этап 3): одноразовая ссылка o_ с меткой «wholesale»;
+ * клиент забирает — заказ, ссылка и ответы гостей теперь у клиента. Неоплаченный — сначала оплатить.
+ */
+export async function wholesaleToClient(c: Ctx, n: number): Promise<void> {
+  if (c.chatId !== c.user.id || !(await c.deps.repo.getWholesaler(c.user.id))) return void (await toast(c, c.tx.oldButton));
+  const o = Number.isSafeInteger(n) && n > 0 ? await c.deps.repo.getOrderByNumber(n).catch(() => null) : null;
+  if (!o || o.userId !== c.user.id) return void (await toast(c, c.tx.order.notFound));
+  if (o.status !== "active") return void (await send(c, c.tx.wholesale.payFirst));
+  const token = newToken();
+  await c.deps.repo.issueClientOrder({ orderId: o.id, createdBy: c.user.id, tokenHash: hashToken(token), refSource: WHOLESALE_REF });
+  const share = { url: pageUrl(c, o.slug), bot: `https://t.me/${await c.deps.tg.botUsername()}?start=o_${token}` };
+  const text = c.tx.wholesale.share(share);
+  const wa = waLink(text);
+  await send(c, c.tx.wholesale.how);
+  await send(c, text, inline(wa ? [[{ text: "WhatsApp", url: wa }]] : []));
+}
+
 /** start=o_<токен>: клиент забирает заказ, собранный для него. Он теперь его — дальше обычная оплата и чек */
 export async function claimOrder(c: Ctx, token: string): Promise<"shown" | "askLang" | "done"> {
   const r = await c.deps.repo.claimClientOrder(hashToken(token), c.user.id, c.deps.now());
@@ -296,6 +316,13 @@ export async function claimOrder(c: Ctx, token: string): Promise<"shown" | "askL
 }
 
 export async function showClaimed(c: Ctx, o: OrderRecord) {
+  // оптовик передал уже оплаченный заказ: сразу ссылка, QR, ответы гостей и «📥 Сақлаб олиш»
+  if (o.status === "active" && o.userId === c.user.id) {
+    await send(c, c.tx.wholesale.got(pageUrl(c, o.slug)));
+    await sendLinkPack(c.deps, o, false);
+    await sendKeepsakeOffer(c.deps, o, c.lang);
+    return;
+  }
   if (!PAYABLE_STATUSES.includes(o.status) || o.userId !== c.user.id)
     return void (await send(c, c.tx.role.claimClosed));
   await send(c, c.tx.role.claimed(pageUrl(c, o.slug), price(o.amount)), inline(orderButtons(c, o, false)));

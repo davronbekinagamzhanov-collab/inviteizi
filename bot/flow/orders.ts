@@ -777,6 +777,9 @@ export async function myOrders(c: Ctx) {
     return;
   }
   const seller = await isSeller(c);
+  // оптовик: скидка видна сверху, у оплаченных заказов — «📤 Мижозга юбориш»
+  const wholesaler = c.chatId === c.user.id ? await c.deps.repo.getWholesaler(c.user.id).catch(() => null) : null;
+  if (wholesaler) await send(c, c.tx.wholesale.line(wholesaler.percent));
   for (const o of list) {
     // До оплаты — всё можно менять; чек на проверке — ждём; ссылка выдана — заказ закрыт
     const rows: InlineButton[][] = [];
@@ -792,6 +795,7 @@ export async function myOrders(c: Ctx) {
     const last: InlineButton[] = o.status === "active" ? [{ text: c.tx.my.link, data: `link:${o.number}` }] : [];
     if (o.status === "active" && o.data.rsvp) rows.push([{ text: c.tx.rsvp.answers, data: `rsvp:${o.number}` }]);
     if (o.status === "active" && c.deps.keepsake) rows.push([{ text: c.tx.keepsake.button, data: `ks:${o.number}` }]);
+    if (o.status === "active" && wholesaler) rows.push([{ text: c.tx.wholesale.toClient, data: `wcl:${o.number}` }]);
     rows.push([...last, { text: c.tx.contact, url: ownerUrl(c) }]);
     const title = `${namesOf(o.data)} · ${designName(o.templateId)}`;
     await send(c, c.tx.my.item(o.number, title, c.tx.my.statuses[o.status], pageUrl(c, o.slug)), inline(rows));

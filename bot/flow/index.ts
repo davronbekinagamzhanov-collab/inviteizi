@@ -68,7 +68,7 @@ import { catalogList, pageOf } from "./steps-order";
 import { rememberUpdate } from "../update";
 import { classifyError, isUnreachable, recordBotError, toEntry } from "../errors";
 import { beginAttempt } from "./delivery";
-import { acceptManager, claimOrder, panelAction, roleHome, showClaimed, toClient } from "./panel";
+import { acceptManager, claimOrder, panelAction, roleHome, showClaimed, toClient, wholesaleToClient } from "./panel";
 import { parseStartToken } from "@/lib/roles";
 import { gotPayout, payManagerAction, payPartnerAction } from "./notify";
 import { partnerStatsAction, statsAction } from "./stats";
@@ -335,7 +335,10 @@ async function welcome(c: Ctx) {
   if (!(await roleHome(c))) {
     // Акция — одной строкой под приветствием (только обычному клиенту, не чаще раза в 6 часов)
     const line = await promotionLine(c);
-    await send(c, c.tx.welcome(c.user.firstName) + (line ? `\n\n${line}` : ""), await startMenu(c));
+    // оптовику — его скидка одной строкой (акции ему не действуют)
+    const ws = await c.deps.repo.getWholesaler(c.user.id).catch(() => null);
+    const extra = ws ? c.tx.wholesale.line(ws.percent) : line;
+    await send(c, c.tx.welcome(c.user.firstName) + (extra ? `\n\n${extra}` : ""), await startMenu(c));
   }
   await save(c);
 }
@@ -519,6 +522,7 @@ async function onCallback(c: Ctx, d: string) {
     }
     return;
   }
+  if (d.startsWith("wcl:")) return wholesaleToClient(c, Number(d.slice(4)));
   if (d.startsWith("fix:")) {
     const result = await beginCorrection(c, Number(d.slice(4)));
     return result ? apply(c, result) : undefined;

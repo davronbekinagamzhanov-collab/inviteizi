@@ -19,7 +19,7 @@ import type { ClaimStatus, InviteKind, InviteUse, Manager } from "@/lib/roles";
 import { isReservedSlug } from "@/lib/slug";
 import { summarize, withoutStaffAnalytics, type MetricEvent, type EventKind, type Period } from "@/lib/analytics";
 import type { Occasion } from "@/lib/types";
-import type { Repo } from "./repo";
+import { WHOLESALE_REF, type Repo } from "./repo";
 import type {
   Lang,
   MusicRecord,
@@ -631,8 +631,10 @@ export class MemoryRepo implements Repo {
     if (co.claimedBy === clientId) return { status: "mine", order: clone(order) };
     if (co.claimedBy !== null) return { status: "used" };
     if (co.createdBy === clientId) return { status: "creator", order: clone(order) };
-    if (!["draft", "preview", "awaiting_payment", "rejected"].includes(order.status) || order.userId !== co.createdBy)
-      return { status: "closed" };
+    // оптовик передаёт клиенту уже оплаченный заказ (ref «wholesale»); остальные — только неоплаченные
+    const payable = ["draft", "preview", "awaiting_payment", "rejected"].includes(order.status);
+    const paidTransfer = co.refSource === WHOLESALE_REF && order.status === "active";
+    if ((!payable && !paidTransfer) || order.userId !== co.createdBy) return { status: "closed" };
     co.claimedBy = clientId;
     order.userId = clientId;
     order.updatedAt = this.now();

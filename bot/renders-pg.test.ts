@@ -84,3 +84,25 @@ it.skipIf(!native)("listMusic на PostgreSQL: песни без файла ск
   expect(nikoh).not.toContain("inviteizi-sunnat-qutlug-qadam");
   expect((await repo.listMusic("sunnat")).every((m) => m.occasion === "sunnat")).toBe(true);
 });
+
+it.skipIf(!native)("этап 3: оплаченный заказ оптовика забирает клиент (ref wholesale); обычная ссылка оплаченный не отдаёт", async () => {
+  const { WHOLESALE_REF } = await import("./repo");
+  const { createHash } = await import("node:crypto");
+  const d = designs.find((x) => x.format === "animated")!;
+  const h = (t: string) => createHash("sha256").update(t).digest("hex");
+  for (const id of [990101, 990102, 990103]) await repo.touchUser({ id, username: null, firstName: "К" });
+  const mk = async (slug: string) => {
+    const o = await repo.createOrder({ userId: 990101, occasion: d.occasion, format: d.format, templateId: d.id, data: d.sample, music: { kind: "none" }, amount: 6390, slugBase: slug });
+    await sql`update public.orders set status = 'active', paid_at = now() where id = ${o.id}`;
+    return o;
+  };
+  const a = await mk("ws-paid");
+  await repo.issueClientOrder({ orderId: a.id, createdBy: 990101, tokenHash: h("tok-a"), refSource: WHOLESALE_REF });
+  expect(await repo.claimClientOrder(h("tok-a"), 990102, new Date())).toMatchObject({ status: "claimed" });
+  expect((await repo.getOrder(a.id))!.userId).toBe(990102);
+  expect((await repo.claimClientOrder(h("tok-a"), 990103, new Date())).status).toBe("used");
+  const b = await mk("ws-plain");
+  await repo.issueClientOrder({ orderId: b.id, createdBy: 990101, tokenHash: h("tok-b"), refSource: null });
+  expect((await repo.claimClientOrder(h("tok-b"), 990102, new Date())).status).toBe("closed");
+  expect((await repo.getOrder(b.id))!.userId).toBe(990101);
+});

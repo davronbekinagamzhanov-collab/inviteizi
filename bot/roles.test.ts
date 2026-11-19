@@ -88,6 +88,9 @@ describe("менеджер", () => {
     const token = await makeManager(s);
     expect(s.tg.to(MANAGER).map((m) => m.text)).toContain(staff.managerWelcome);
     expect(s.lastText(MANAGER)).toContain(staff.managerTitle);
+    // этап 3: одним взглядом — сеть, оплаты сегодня/месяц, заработок, прогресс до бонуса
+    for (const line of ["🤝 Партнёров в сети: 0", "✅ Оплат сети: сегодня 0 · за ", "💰 Ваш заработок за ", "🎯 0/30 до бонуса 15 000 ₸"])
+      expect(s.lastText(MANAGER)).toContain(line);
     for (const label of [staff.btn.myStats, staff.btn.myPartners, staff.btn.newPartner, staff.btn.earnings, staff.btn.client, staff.btn.create]) expect(buttons(s, MANAGER)).toContain(label);
     expect((await s.repo.getUser(MANAGER))!.lang).toBe("ru");
     expect(s.tg.to(ADMIN).some((m) => m.text.startsWith("✅") && m.text.includes("теперь менеджер"))).toBe(true);

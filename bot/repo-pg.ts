@@ -19,7 +19,7 @@ import type { ClaimStatus, InviteKind, InviteUse, Manager } from "@/lib/roles";
  * Поведение — как у bot/repo-memory.ts (общий набор тестов bot/repo.contract.ts).
  * Таблицы: supabase/migrations/*_schema.sql.
  */
-import type { NewPartner, Notice, PartnerPatch, RenderKind, RenderPatch, RenderRecord, Repo } from "./repo";
+import { WHOLESALE_REF, type NewPartner, type Notice, type PartnerPatch, type RenderKind, type RenderPatch, type RenderRecord, type Repo } from "./repo";
 import type {
   InvitationData,
   InvitationEvent,
@@ -1145,7 +1145,11 @@ export class PgRepo implements Repo {
         if (Number(co.createdBy) === clientId)
           return { status: "creator" as const, order: (await loadOrder(tx, co.orderId)) ?? undefined };
         const moved = await tx`update public.orders set user_id = ${clientId}, updated_at = ${now}
-          where id = ${co.orderId} and user_id = ${co.createdBy} and status in ('draft','preview','awaiting_payment','rejected') returning id`;
+          where id = ${co.orderId} and user_id = ${co.createdBy}
+            and (status in ('draft','preview','awaiting_payment','rejected')
+                 or (status = 'active' and exists (select 1 from public.client_orders c
+                       where c.order_id = ${co.orderId} and c.ref_source = ${WHOLESALE_REF})))
+          returning id`;
         if (!moved.length) return { status: "closed" as const };
         await tx`update public.client_orders set claimed_by = ${clientId}, claimed_at = ${now} where order_id = ${co.orderId}`;
         return { status: "claimed" as const, order: (await loadOrder(tx, co.orderId)) ?? undefined };
