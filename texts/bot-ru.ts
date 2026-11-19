@@ -209,6 +209,9 @@ export const ru = {
     answersN: (people: number, families: number) => (families ? `📝 Ответы · гостей: ${people} · семей: ${families}` : "📝 Ответы"),
     howButton: "❓ Как это работает?",
     how: "Гости нажимают в приглашении «Келаман» (приду) или «Келолмайман» (не смогу).\n\nОтветы будут здесь:\nМеню → Мои приглашения → 📝 Ответы\n\nОтветы сохраняются после оплаты.",
+    /** Тилаки гостей (этап 3): в ежедневном отчёте и в «📝 Жавоблар» */
+    wishesHead: "💌 Пожелания:",
+    wishLine: (name: string, wish: string) => `💬 ${name}: «${wish}»`,
     digest: (replies: number, coming: number, people: number, declined: number) => `Сегодня ответов: ${replies}. Придут: ${coming} (всего ${people} чел.), не смогут: ${declined}`,
     empty: "Ответов пока нет.",
     head: (replies: number, people: number, declined: number) => `📝 Ответов: ${replies}\nПридут: ${people} чел.\nНе смогут: ${declined}`,

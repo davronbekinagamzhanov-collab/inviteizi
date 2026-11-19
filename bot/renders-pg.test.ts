@@ -106,3 +106,24 @@ it.skipIf(!native)("этап 3: оплаченный заказ оптовика
   expect((await repo.claimClientOrder(h("tok-b"), 990102, new Date())).status).toBe("closed");
   expect((await repo.getOrder(b.id))!.userId).toBe(990101);
 });
+
+it.skipIf(!native)("этап 3: тилак — сохраняется, повтор другого гостя без тилака; до миграции ответ сохраняется без тилака", async () => {
+  const d = designs.find((x) => x.format === "animated")!;
+  await repo.touchUser({ id: 990201, username: null, firstName: "К" });
+  const o = await repo.createOrder({ userId: 990201, occasion: d.occasion, format: d.format, templateId: d.id, data: d.sample, music: { kind: "none" }, amount: 7990, slugBase: "wish-pg" });
+  const base = { orderId: o.id, ipHash: "h", guests: 2, attending: true };
+  expect(await repo.saveRsvp({ ...base, visitorKey: "a".repeat(16), name: "А", wish: "Бахтли бўлинг" })).toBe("ok");
+  expect(await repo.saveRsvp({ ...base, visitorKey: "b".repeat(16), name: "Б", wish: "бахтли бўлинг" })).toBe("ok");
+  const rows = Object.fromEntries((await repo.listRsvp(o.id)).map((r) => [r.name, r.wish]));
+  expect(rows).toEqual({ А: "Бахтли бўлинг", Б: null });
+  // база проверяет длину сама
+  await expect(sql`update public.rsvp_responses set wish = ${"x".repeat(301)} where order_id = ${o.id}`).rejects.toThrow();
+  // до миграции: колонки нет — ответ всё равно сохраняется, список читается
+  await sql`alter table public.rsvp_responses drop column wish`;
+  try {
+    expect(await repo.saveRsvp({ ...base, visitorKey: "c".repeat(16), name: "В", wish: "Тилак" })).toBe("ok");
+    expect((await repo.listRsvp(o.id)).map((r) => r.name).sort()).toEqual(["А", "Б", "В"]);
+  } finally {
+    await sql.unsafe(await (await import("node:fs/promises")).readFile("supabase/migrations/20261120120000_rsvp_wish.sql", "utf8"));
+  }
+});

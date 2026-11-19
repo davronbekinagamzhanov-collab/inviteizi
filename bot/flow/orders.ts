@@ -660,6 +660,22 @@ export async function resendLink(c: Ctx, n: number): Promise<Result> {
 }
 
 const RSVP_SHOWN = 40;
+/** Лимит сообщения Telegram 4096 — с запасом */
+const TG_TEXT_MAX = 3900;
+
+/** «💌 Тилаклар:» — пожелания гостей, сколько влезает в сообщение (новые первыми). Пусто — "" */
+export function wishesBlock(tx: { rsvp: { wishesHead: string; wishLine: (n: string, w: string) => string } }, list: { name: string; wish?: string | null }[], room: number) {
+  const lines: string[] = [];
+  let used = tx.rsvp.wishesHead.length + 2;
+  for (const r of list) {
+    if (!r.wish) continue;
+    const line = tx.rsvp.wishLine(r.name, r.wish);
+    if (used + line.length + 1 > room) break;
+    lines.push(line);
+    used += line.length + 1;
+  }
+  return lines.length ? `\n\n${tx.rsvp.wishesHead}\n${lines.join("\n")}` : "";
+}
 
 /** Ответы гостей: видит только хозяин заказа */
 export async function rsvpAnswers(c: Ctx, n: number): Promise<Result> {
@@ -678,7 +694,8 @@ export async function rsvpAnswers(c: Ctx, n: number): Promise<Result> {
     .slice(0, RSVP_SHOWN)
     .map((r) => (r.attending ? c.tx.rsvp.lineYes(r.name, r.guests) : c.tx.rsvp.lineNo(r.name)));
   if (list.length > RSVP_SHOWN) lines.push(c.tx.rsvp.more(list.length - RSVP_SHOWN));
-  await send(c, [c.tx.rsvp.head(total.replies, total.people, total.declined), "", ...lines].join("\n"));
+  const head = [c.tx.rsvp.head(total.replies, total.people, total.declined), "", ...lines].join("\n");
+  await send(c, head + wishesBlock(c.tx, list, TG_TEXT_MAX - head.length));
   return { stay: true };
 }
 

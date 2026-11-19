@@ -126,7 +126,7 @@ export async function withRsvp(deps: Deps, orders: AppOrder[], records: OrderRec
           replies: [...list]
             .sort((x, y) => +y.updatedAt - +x.updatedAt)
             .slice(0, RSVP_SHOWN)
-            .map((r) => ({ name: r.name, guests: r.guests, attending: r.attending, wish: (r as { wish?: string | null }).wish ?? null, at: r.updatedAt.toISOString() })),
+            .map((r) => ({ name: r.name, guests: r.guests, attending: r.attending, wish: r.wish ?? null, at: r.updatedAt.toISOString() })),
         },
       };
     }),

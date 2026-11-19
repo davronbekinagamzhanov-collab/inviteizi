@@ -69,8 +69,13 @@ export class MemoryRepo implements Repo {
       ]),
     ];
   }
-  async saveRsvp(input: RsvpInput) {
+  async saveRsvp(raw: RsvpInput) {
     const now = this.now();
+    // одинаковое пожелание другого гостя этого приглашения — повтор, ответ без него (как в PgRepo)
+    const dup =
+      raw.wish &&
+      this.rsvp.some((r) => r.orderId === raw.orderId && r.visitorKey !== raw.visitorKey && r.wish?.toLowerCase() === raw.wish!.toLowerCase());
+    const input = { ...raw, wish: dup ? null : (raw.wish ?? null) };
     const old = this.rsvp.find((r) => r.orderId === input.orderId && r.visitorKey === input.visitorKey);
     if (old) {
       Object.assign(old, input, { updatedAt: now });
@@ -106,7 +111,7 @@ export class MemoryRepo implements Repo {
     return this.rsvp
       .filter((r) => r.orderId === orderId)
       .sort((a, b) => +b.updatedAt - +a.updatedAt)
-      .map(({ name, guests, attending, updatedAt }) => ({ name, guests, attending, updatedAt }));
+      .map(({ name, guests, attending, updatedAt, wish }) => ({ name, guests, attending, updatedAt, wish: wish ?? null }));
   }
   async panelSnapshot(): Promise<PanelSnapshot> {
     const orders = [...this.orders.values()].map((o): PanelOrder => {

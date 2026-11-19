@@ -196,6 +196,9 @@ export const uz = {
     answersN: (people: number, families: number) => (families ? `📝 Жавоблар · ${people} киши · ${families} оила` : "📝 Жавоблар"),
     howButton: "❓ Бу қандай ишлайди?",
     how: "Меҳмонлар таклифномада «Келаман» ёки «Келолмайман» тугмасини босади.\n\nЖавобларни бу ерда кўрасиз:\nМеню → Менинг таклифномаларим → 📝 Жавоблар\n\nЖавоблар тўловдан кейин сақланади.",
+    /** Тилаки гостей (этап 3): в ежедневном отчёте и в «📝 Жавоблар» */
+    wishesHead: "💌 Тилаклар:",
+    wishLine: (name: string, wish: string) => `💬 ${name}: «${wish}»`,
     digest: (replies: number, coming: number, people: number, declined: number) => `Бугун ${replies} киши жавоб берди: ${coming} келади (жами ${people} киши), ${declined} келолмайди`,
     empty: "Ҳозирча жавоб йўқ.",
     head: (replies: number, people: number, declined: number) => `📝 Жавоблар: ${replies}\nКелади: ${people} киши\nКелолмайди: ${declined}`,

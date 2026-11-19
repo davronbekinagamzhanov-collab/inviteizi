@@ -2,27 +2,13 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { resetRateLimits } from "@/lib/rate-limit";
 import { uz } from "@/texts/bot-uz";
-import { payTexts } from "@/texts/pay";
 import type { AppUser } from "@/lib/tg-init-data";
 import { appAction } from "./app/dispatch";
 import type { AppOrder } from "./app/service";
-import { nikohOrder } from "./testing/paths";
-import { ADMIN, Sim } from "./testing/sim";
+import { nikohOrder, paidWithRsvp } from "./testing/paths";
+import { Sim } from "./testing/sim";
 
 const user = (id: number): AppUser => ({ id, firstName: null, username: null, languageCode: null });
-
-export async function paidWithRsvp(s: Sim, id: number) {
-  const o = await nikohOrder(s, id);
-  await s.click(id, /^💳 Тўлаш/);
-  await s.click(id, uz.pay.confirmYes);
-  await s.click(id, payTexts.uz.paid);
-  await s.text(id, "Давронбек И.");
-  const card = s.tg.to(ADMIN).filter((m) => m.text.includes("Давронбек И.")).at(-1)!;
-  await s.callback(ADMIN, `ok:${o.number}`, card.id);
-  const paid = (await s.repo.getOrder(o.id))!;
-  await s.repo.updateOrder(o.id, { data: { ...paid.data, rsvp: true } });
-  return (await s.repo.getOrder(o.id))!;
-}
 
 describe("«📝 Жавоблар» у клиента", () => {
   beforeEach(() => resetRateLimits());

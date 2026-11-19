@@ -580,19 +580,42 @@ export class PgRepo implements Repo {
   }
 
   async saveRsvp(input: RsvpInput) {
+    try {
+      return await this.saveRsvpTx(input, true);
+    } catch (e) {
+      // Миграция «тилак» ещё не применена (нет колонки wish) — ответ сохраняется без пожелания
+      if ((e as { code?: string } | null)?.code !== "42703") throw e;
+      return this.saveRsvpTx(input, false);
+    }
+  }
+
+  private saveRsvpTx(input: RsvpInput, withWish: boolean) {
     return this.sql.begin(async (tx) => {
-      // По очереди на заказ: лимиты нельзя обойти одновременными запросами
+      // По очереди на заказ: лимиты нельзя обойти одновременными запросами (блокировка только на эту транзакцию)
       await tx`select pg_advisory_xact_lock(hashtext(${input.orderId}))`;
-      const [old] =
-        await tx`update public.rsvp_responses set name=${input.name}, guests=${input.guests}, attending=${input.attending}, updated_at=now()
-        where order_id=${input.orderId} and visitor_key=${input.visitorKey} returning id`;
+      // Одинаковое пожелание от другого гостя того же приглашения — повтор (спам/копия): ответ сохраняем без него
+      let wish = withWish ? (input.wish ?? null) : null;
+      if (wish) {
+        const [dup] = await tx`select 1 from public.rsvp_responses
+          where order_id=${input.orderId} and visitor_key<>${input.visitorKey} and lower(wish)=lower(${wish}) limit 1`;
+        if (dup) wish = null;
+      }
+      const [old] = withWish
+        ? await tx`update public.rsvp_responses set name=${input.name}, guests=${input.guests}, attending=${input.attending}, wish=${wish}, updated_at=now()
+          where order_id=${input.orderId} and visitor_key=${input.visitorKey} returning id`
+        : await tx`update public.rsvp_responses set name=${input.name}, guests=${input.guests}, attending=${input.attending}, updated_at=now()
+          where order_id=${input.orderId} and visitor_key=${input.visitorKey} returning id`;
       if (old) return "ok" as const;
       const [n] = await tx<{ total: number; ip: number }[]>`select count(*)::int8 as total,
         count(*) filter (where ip_hash=${input.ipHash} and created_at > now() - interval '1 hour')::int8 as ip
         from public.rsvp_responses where order_id=${input.orderId}`;
       if (n.total >= RSVP_ORDER_LIMIT || n.ip >= RSVP_IP_HOUR_LIMIT) return "limited" as const;
-      await tx`insert into public.rsvp_responses(order_id,visitor_key,name,guests,attending,ip_hash)
-        values(${input.orderId},${input.visitorKey},${input.name},${input.guests},${input.attending},${input.ipHash})`;
+      if (withWish)
+        await tx`insert into public.rsvp_responses(order_id,visitor_key,name,guests,attending,ip_hash,wish)
+          values(${input.orderId},${input.visitorKey},${input.name},${input.guests},${input.attending},${input.ipHash},${wish})`;
+      else
+        await tx`insert into public.rsvp_responses(order_id,visitor_key,name,guests,attending,ip_hash)
+          values(${input.orderId},${input.visitorKey},${input.name},${input.guests},${input.attending},${input.ipHash})`;
       return "ok" as const;
     });
   }
@@ -616,7 +639,8 @@ export class PgRepo implements Repo {
     try {
       const rows = await this.sql<
         RsvpRecord[]
-      >`select name, guests, attending, updated_at as "updatedAt" from public.rsvp_responses where order_id=${orderId} order by updated_at desc`;
+      >`select name, guests, attending, updated_at as "updatedAt", to_jsonb(r)->>'wish' as wish
+        from public.rsvp_responses r where order_id=${orderId} order by updated_at desc`;
       return [...rows];
     } catch (e) {
       if (isMissingTable(e)) return [];

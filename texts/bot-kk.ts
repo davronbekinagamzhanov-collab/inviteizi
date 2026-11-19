@@ -199,6 +199,9 @@ export const kk: BotTexts = {
     answersN: (people: number, families: number) => (families ? `📝 Жауаптар · ${people} адам · ${families} отбасы` : "📝 Жауаптар"),
     howButton: "❓ Бұл қалай жұмыс істейді?",
     how: "Қонақтар шақырудағы «Келемін» немесе «Келе алмаймын» батырмасын басады.\n\nЖауаптарды осы жерден көресіз:\nМәзір → Менің шақыруларым → 📝 Жауаптар\n\nЖауаптар төлемнен кейін сақталады.",
+    /** Тилаки гостей (этап 3): в ежедневном отчёте и в «📝 Жавоблар» */
+    wishesHead: "💌 Тілектер:",
+    wishLine: (name: string, wish: string) => `💬 ${name}: «${wish}»`,
     digest: (replies: number, coming: number, people: number, declined: number) => `Бүгін ${replies} адам жауап берді: ${coming} келеді (барлығы ${people} адам), ${declined} келе алмайды`,
     empty: "Әзірге жауап жоқ.",
     head: (replies: number, people: number, declined: number) => `📝 Жауаптар: ${replies}\nКеледі: ${people} адам\nКеле алмайды: ${declined}`,
