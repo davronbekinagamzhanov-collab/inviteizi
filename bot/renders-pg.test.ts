@@ -150,3 +150,21 @@ it.skipIf(!native)("этап 3: без блокировки адреса — 8 �
   expect(many.filter((r) => r === "ok")).toHaveLength(20);
   expect((await repo.listRsvp(o.id)).length).toBe(21);
 });
+
+it.skipIf(!native)("ревью этапа 3: заказ, забранный оптовиком у менеджера, оптовик передаёт клиенту дальше; чужой — нет", async () => {
+  const { WHOLESALE_REF } = await import("./repo");
+  const { createHash } = await import("node:crypto");
+  const h = (t: string) => createHash("sha256").update(t).digest("hex");
+  const d = designs.find((x) => x.format === "animated")!;
+  for (const id of [990401, 990402, 990403, 990404]) await repo.touchUser({ id, username: null, firstName: "К" });
+  const o = await repo.createOrder({ userId: 990401, occasion: d.occasion, format: d.format, templateId: d.id, data: d.sample, music: { kind: "none" }, amount: 7990, slugBase: "chain-pg" });
+  expect(await repo.issueClientOrder({ orderId: o.id, createdBy: 990401, tokenHash: h("m1"), refSource: null })).toBe(true);
+  expect((await repo.claimClientOrder(h("m1"), 990402, new Date())).status).toBe("claimed");
+  await sql`update public.orders set status = 'active', paid_at = now() where id = ${o.id}`;
+  // посторонний не может перевыдать
+  expect(await repo.issueClientOrder({ orderId: o.id, createdBy: 990404, tokenHash: h("x"), refSource: WHOLESALE_REF })).toBe(false);
+  // оптовик (тот, кто забрал) — может
+  expect(await repo.issueClientOrder({ orderId: o.id, createdBy: 990402, tokenHash: h("w1"), refSource: WHOLESALE_REF })).toBe(true);
+  expect((await repo.claimClientOrder(h("w1"), 990403, new Date())).status).toBe("claimed");
+  expect((await repo.getOrder(o.id))!.userId).toBe(990403);
+});

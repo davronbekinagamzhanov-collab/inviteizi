@@ -134,7 +134,7 @@ export function Rsvp({ slug, preview: previewProp, look }: { slug: string; previ
               />
               <span className="flex justify-between text-[13px] opacity-75">
                 <span>{tx.wishHint}</span>
-                <span aria-hidden>{[...wish].length}/300</span>
+                <span aria-hidden>{wish.length}/300</span>
               </span>
             </label>
             {wishError && (

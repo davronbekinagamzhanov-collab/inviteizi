@@ -239,7 +239,8 @@ export interface Repo {
     createdBy: number;
     tokenHash: string;
     refSource: string | null;
-  }): Promise<void>;
+    /** false — ссылка не выдана (заказ уже забрал кто-то другой) */
+  }): Promise<boolean>;
   /** Клиент забирает заказ: заказ переходит к нему (user_id), один раз */
   claimClientOrder(
     tokenHash: string,

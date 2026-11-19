@@ -623,6 +623,36 @@ export const ru = {
  */
 export const staff = {
   back: "◀️ Назад",
+  /** Главный экран админки (этап 3): «Сегодня» → «📋 Подробнее» */
+  ownerHome: {
+    today: "Сегодня",
+    newUsers: "Новых в боте",
+    orders: "Заказов",
+    paid: "Оплачено",
+    waiting: "Ждут проверки оплаты",
+    check: "Проверить ↓",
+    waitingTitle: (n: number) => `Ждут проверки оплаты (${n})`,
+    more: "📋 Подробнее ▼",
+    less: "Скрыть подробности ▲",
+    byDays: "По дням",
+    daysN: (n: number) => `${n} дней`,
+    cols: ["День", "Новые", "Заказы", "Оплаты", "₸"] as const,
+    byOccasion: "По тадбирам",
+    byFormat: "По форматам",
+    bySource: "Откуда клиенты",
+    empty: "За период пусто",
+    groupRow: (paid: number, sum: string, orders: number) => `${paid} опл. · ${sum} · ${orders} зак.`,
+    occasions: { nikoh: "Никоҳ", nahorgi: "Наҳорги ош", sunnat: "Суннат", yubiley: "Юбилей" } as Record<string, string>,
+    formats: { animated: "Анимированное", scroll: "С прокруткой", simple: "Простое" } as Record<string, string>,
+    sources: { own: "Сами пришли", partner: "Партнёры", manager: "Менеджеры", promotion: "Акция" } as Record<string, string>,
+    funnel: { users: "Зашли в бот", viewers: "Открыли образцы дизайнов", namuna: "Сделали НАМУНА", paid: "Оплатили" },
+    card: "Карточка",
+    hide: "Скрыть",
+    tg: (client: string) => `Клиент в Telegram: ${client}`,
+    source: (s: string | null) => `Источник: ${s ?? "сам пришёл"}`,
+    paidAt: (at: string) => `Оплачен: ${at}`,
+    openInvite: "Открыть приглашение ↗",
+  },
   /** «Сақлаб олиш»: видео не получилось после повтора (19.11.2026) */
   keepsakeVideoFailed: (n: number, error: string) =>
     `⚠️ Видео №${n} не получилось: ${error}\nКлиенту отправлено: «картинки и PDF готовы».`,

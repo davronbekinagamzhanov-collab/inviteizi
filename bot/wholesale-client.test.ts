@@ -93,3 +93,15 @@ describe("оптовик → клиент", () => {
 function texts(s: Sim, id: number) {
   return s.tg.to(id).map((m) => m.text);
 }
+
+describe("ревью этапа 3: цепочка менеджер → оптовик → клиент (память)", () => {
+  it("перевыдать может только тот, кто забрал", async () => {
+    const s = new Sim();
+    await s.repo.touchUser({ id: 1 });
+    const o = await nikohOrder(s, 1);
+    expect(await s.repo.issueClientOrder({ orderId: o.id, createdBy: 1, tokenHash: "a", refSource: null })).toBe(true);
+    await s.repo.claimClientOrder("a", 2);
+    expect(await s.repo.issueClientOrder({ orderId: o.id, createdBy: 3, tokenHash: "b", refSource: "wholesale" })).toBe(false);
+    expect(await s.repo.issueClientOrder({ orderId: o.id, createdBy: 2, tokenHash: "c", refSource: "wholesale" })).toBe(true);
+  });
+});

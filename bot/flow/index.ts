@@ -548,7 +548,8 @@ async function onCallback(c: Ctx, d: string) {
       await toast(c, c.tx.keepsake.making);
       const userId = c.user.id;
       return later(c, async () => {
-        const outcome = await deliverKeepsake(c.deps, userId, { number: Number(n) }, kind as never);
+        // любой сбой (база, Telegram) — клиенту понятный ответ, а не тишина после «⏳ Тайёрланмоқда…»
+        const outcome = await deliverKeepsake(c.deps, userId, { number: Number(n) }, kind as never).catch(() => "failed" as const);
         if (outcome !== "sent") await send(c, keepsakeToast(c.lang, outcome));
       });
     }

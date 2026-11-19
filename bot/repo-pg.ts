@@ -1155,10 +1155,14 @@ export class PgRepo implements Repo {
   }
 
   async issueClientOrder(o: { orderId: string; createdBy: number; tokenHash: string; refSource: string | null }) {
-    await this.sql`insert into public.client_orders(order_id,created_by,token_hash,ref_source)
+    // уже забран — заново выдать может только тот, кто его забрал (цепочка: менеджер → оптовик → клиент)
+    const rows = await this.sql`insert into public.client_orders(order_id,created_by,token_hash,ref_source)
       values(${o.orderId},${o.createdBy},${o.tokenHash},${o.refSource})
-      on conflict (order_id) do update set token_hash = excluded.token_hash, ref_source = excluded.ref_source, created_by = excluded.created_by
-      where public.client_orders.claimed_by is null`;
+      on conflict (order_id) do update set token_hash = excluded.token_hash, ref_source = excluded.ref_source,
+        created_by = excluded.created_by, claimed_by = null, claimed_at = null
+      where public.client_orders.claimed_by is null or public.client_orders.claimed_by = excluded.created_by
+      returning order_id`;
+    return rows.length > 0;
   }
 
   async claimClientOrder(

@@ -216,6 +216,15 @@ describe("«📥 Сақлаб олиш»: после ответа Telegram (эт
     await queue[0]();
     expect(k.rendered).toEqual([`${o.number}:story`]);
     expect(s.tg.to(1).at(-1)!.type).toBe("photo");
+    // база упала во время отложенной задачи — клиенту «не получилось», не тишина
+    const getOrderByNumber = s.repo.getOrderByNumber.bind(s.repo);
+    s.repo.getOrderByNumber = async () => {
+      throw new Error("db down");
+    };
+    await s.callback(1, `ks:${o.number}:feed`, 1);
+    await queue[1]();
+    expect(s.lastText(1)).toBe(K.failed);
+    s.repo.getOrderByNumber = getOrderByNumber;
   });
 });
 

@@ -81,9 +81,10 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** Заказ по id (Mini App) или номеру (бот); мусор в запросе — «не найден», а не ошибка базы */
 export async function findOrder(deps: Deps, ref: { id?: string; number?: number }) {
-  if (ref.id !== undefined) return UUID.test(ref.id) ? deps.repo.getOrder(ref.id).catch(() => null) : null;
+  // мусор в запросе — «не найден»; сбой базы — ошибка (вызывающий ответит «не получилось»)
+  if (ref.id !== undefined) return UUID.test(ref.id) ? deps.repo.getOrder(ref.id) : null;
   if (ref.number !== undefined && Number.isSafeInteger(ref.number) && ref.number > 0)
-    return deps.repo.getOrderByNumber(ref.number).catch(() => null);
+    return deps.repo.getOrderByNumber(ref.number);
   return null;
 }
 

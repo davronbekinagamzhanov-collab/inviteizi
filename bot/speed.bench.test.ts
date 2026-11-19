@@ -1,7 +1,7 @@
 /**
  * Этап 3, п.3 — скорость бота: сколько запросов к базе и сколько миллисекунд уходит на одно обновление Telegram
  * на типовых шагах (/start, каталог, шаг анкеты, оплата). Настоящий PgRepo на изолированной PostgreSQL
- * (scripts/marketing-test-db.mjs, MARKETING_LOCAL_PG=1). RTT=<мс> — задержка на каждый запрос, как Vercel → Supabase.
+ * (scripts/marketing-test-db.mjs, MARKETING_LOCAL_PG=1). Время сети в проде ≈ число запросов × задержка до Supabase.
  * BENCH_OUT=<файл> — записать таблицу. Не читает DATABASE_URL.
  */
 import { afterAll, beforeAll, expect, it, vi } from "vitest";
@@ -17,7 +17,6 @@ import type { Sql } from "@/lib/db";
 
 vi.mock("next/font/local", () => ({ default: () => ({ variable: "fixture-font" }) }));
 const native = process.env.MARKETING_LOCAL_PG === "1";
-const RTT = Number(process.env.RTT ?? 0);
 let sql: Sql, repo: PgRepo;
 let queries = 0;
 const log: string[] = [];
@@ -49,11 +48,6 @@ beforeAll(async () => {
       if (process.env.BENCH_LOG) log.push(q.replace(/\s+/g, " ").slice(0, 110));
     },
   }) as unknown as Sql;
-  // задержка сети на каждый запрос (как от Vercel до пулера Supabase)
-  if (RTT) {
-    const orig = sql.unsafe.bind(sql);
-    void orig;
-  }
   repo = new PgRepo(sql);
 }, 30_000);
 afterAll(async () => {
@@ -83,16 +77,12 @@ it.skipIf(!native)("запросы к базе на одно обновлени�
   // дальше путь анкеты как в тестах — до сводки
   const { nikohToReview } = await import("./testing/paths");
   await nikohToReview(s, id + 1);
-  const steps: [string, () => Promise<unknown>][] = [];
-  void steps;
-  await measure("шаг анкеты (имя жениха)", async () => {
+  await measure("новый клиент: /start → язык → каталог → Никоҳ (4 обновления)", async () => {
     await s.start(id + 2);
     await s.click(id + 2, uz.langUz);
     await s.text(id + 2, uz.menu.create);
     await s.click(id + 2, uz.category.nikoh);
   });
-  const o = (await repo.listOrdersByUser(id + 1))[0] ?? null;
-  void o;
   await measure("сводка → «Тасдиқлаш» (создание заказа)", () => s.click(id + 1, uz.review.confirm));
   await measure("«💳 Тўлаш»", () => s.click(id + 1, /^💳 Тўлаш/));
   await measure("«✅ Ҳаммаси тўғри»", () => s.click(id + 1, uz.pay.confirmYes));

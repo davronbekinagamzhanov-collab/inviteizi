@@ -26,7 +26,8 @@ export function memoRepo(repo: Repo): Repo {
             hit.catch(() => cache.delete(key));
             cache.set(key, hit);
           }
-          return hit;
+          // каждому — своя копия: изменение объекта одним кодом не видно другому
+          return hit.then((v) => (Array.isArray(v) ? [...v] : v && typeof v === "object" ? { ...v } : v));
         };
       if (WRITE.test(prop))
         return (...args: unknown[]) => {

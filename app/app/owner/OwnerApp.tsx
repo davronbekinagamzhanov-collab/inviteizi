@@ -6,7 +6,7 @@
  */
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ru as BOT_RU } from "@/texts/bot-ru";
+import { ru as BOT_RU, staff as BOT } from "@/texts/bot-ru";
 import type { OwnerPanel, OwnerPeriod } from "@/bot/app/owner";
 import { api, ApiError } from "../ui/api";
 import { haptic, openLink, setupTelegram, tg } from "../ui/telegram";
@@ -27,9 +27,7 @@ const TABS = [
   { id: "funnel", label: "Где уходят" },
   { id: "wholesale", label: "Оптовики" },
 ] as const;
-const OCCASION: Record<string, string> = { nikoh: "Никоҳ", nahorgi: "Наҳорги ош", sunnat: "Суннат", yubiley: "Юбилей" };
-const FORMAT: Record<string, string> = { animated: "Анимированное", scroll: "С прокруткой", simple: "Простое" };
-const SOURCE: Record<string, string> = { own: "Сами пришли", partner: "Партнёры", manager: "Менеджеры", promotion: "Акция" };
+const H = BOT.ownerHome;
 /** «19.11» из «2026-11-19» */
 const dm = (day: string) => `${day.slice(8, 10)}.${day.slice(5, 7)}`;
 type Tab = (typeof TABS)[number]["id"];
@@ -202,17 +200,17 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
       <main className={s.wrap} style={{ opacity: loading ? 0.55 : 1 }}>
         {/* Главное за сегодня — одним взглядом */}
         <section className={s.cards} aria-label="Сегодня" data-owner-today>
-          <h1 className={s.todayTitle}>Сегодня</h1>
+          <h1 className={s.todayTitle}>{H.today}</h1>
           <div className={s.card} data-today="users">
-            <small>Новых в боте</small>
+            <small>{H.newUsers}</small>
             <strong>{t.newUsers}</strong>
           </div>
           <div className={s.card} data-today="orders">
-            <small>Заказов</small>
+            <small>{H.orders}</small>
             <strong>{t.orders}</strong>
           </div>
           <div className={`${s.card} ${s.cardWide}`} data-today="paid">
-            <small>Оплачено</small>
+            <small>{H.paid}</small>
             <strong>{money(t.revenue)}</strong>
             <span>
               {t.paid} {plural(t.paid, "заказ", "заказа", "заказов")}
@@ -228,15 +226,15 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
               document.getElementById("receipts")?.scrollIntoView({ behavior: "smooth", block: "start" });
             }}
           >
-            <small>Ждут проверки оплаты</small>
+            <small>{H.waiting}</small>
             <strong>{t.waiting}</strong>
-            {t.waiting > 0 && <span>Проверить ↓</span>}
+            {t.waiting > 0 && <span>{H.check}</span>}
           </button>
         </section>
 
         {data.receipts.length > 0 && (
           <section id="receipts" data-owner-receipts>
-            <h2 className={s.h3}>Ждут проверки оплаты ({data.receipts.length})</h2>
+            <h2 className={s.h3}>{H.waitingTitle(data.receipts.length)}</h2>
             {data.receipts.map((r) => (
               <article key={r.number} className={s.receipt}>
                 <div>
@@ -331,7 +329,7 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
             setMore(!more);
           }}
         >
-          {more ? "Скрыть подробности ▲" : "📋 Подробнее ▼"}
+          {more ? H.less : H.more}
         </button>
 
         {more && (
@@ -387,11 +385,11 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
 
         <section data-owner-days>
           <div className={s.dayHead}>
-            <h3 className={s.h3}>По дням</h3>
+            <h3 className={s.h3}>{H.byDays}</h3>
             <div className={s.mini} role="tablist" aria-label="Дней">
               {([7, 30] as const).map((n) => (
                 <button key={n} type="button" role="tab" aria-selected={days === n} onClick={() => setDays(n)}>
-                  {n} дней
+                  {H.daysN(n)}
                 </button>
               ))}
             </div>
@@ -399,11 +397,9 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
           <table className={s.table}>
             <thead>
               <tr>
-                <th>День</th>
-                <th>Новые</th>
-                <th>Заказы</th>
-                <th>Оплаты</th>
-                <th>₸</th>
+                {H.cols.map((x) => (
+                  <th key={x}>{x}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -422,22 +418,22 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
 
         {(
           [
-            ["По тадбирам", data.detail.occasions, OCCASION, "occasions"],
-            ["По форматам", data.detail.formats, FORMAT, "formats"],
-            ["Откуда клиенты", data.detail.sources, SOURCE, "sources"],
+            [H.byOccasion, data.detail.occasions, H.occasions, "occasions"],
+            [H.byFormat, data.detail.formats, H.formats, "formats"],
+            [H.bySource, data.detail.sources, H.sources, "sources"],
           ] as const
         ).map(([title, rows, names, key]) => (
           <section key={key} data-owner-group={key}>
             <h3 className={s.h3}>{title}</h3>
             {rows.length === 0 ? (
-              <p className={s.hint}>За период пусто</p>
+              <p className={s.hint}>{H.empty}</p>
             ) : (
               <ul className={s.stuck}>
                 {rows.map((r) => (
                   <li key={r.id}>
                     <span>{(names as Record<string, string>)[r.id] ?? r.id}</span>
                     <b>
-                      {r.paid} опл. · {money(r.revenue)} · {r.orders} зак.
+                      {H.groupRow(r.paid, money(r.revenue), r.orders)}
                     </b>
                   </li>
                 ))}
@@ -520,17 +516,17 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
                         aria-expanded={card === o.number}
                         onClick={() => setCard(card === o.number ? null : o.number)}
                       >
-                        {card === o.number ? "Скрыть" : "Карточка"}
+                        {card === o.number ? H.hide : H.card}
                       </button>
                     </div>
                     {card === o.number && (
                       <div className={s.cardBody} data-order-details>
-                        <p className={s.rowSub}>Клиент в Telegram: {o.client}</p>
-                        <p className={s.rowSub}>Источник: {o.partner ?? "сам пришёл"}</p>
-                        {o.paidAt && <p className={s.rowSub}>Оплачен: {when(o.paidAt)}</p>}
+                        <p className={s.rowSub}>{H.tg(o.client)}</p>
+                        <p className={s.rowSub}>{H.source(o.partner)}</p>
+                        {o.paidAt && <p className={s.rowSub}>{H.paidAt(when(o.paidAt))}</p>}
                         {o.url && (
                           <button type="button" className={s.link} onClick={() => openLink(o.url!)}>
-                            Открыть приглашение ↗
+                            {H.openInvite}
                           </button>
                         )}
                         {/* назначить заказчика оптовиком (сервер проверит роль) */}
@@ -621,10 +617,10 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
         {tab === "funnel" && (
           <section className={s.funnel}>
             {[
-              { label: "Зашли в бот", n: data.detail.funnel.users },
-              ...(data.detail.funnel.viewers === null ? [] : [{ label: "Открыли образцы дизайнов", n: data.detail.funnel.viewers }]),
-              { label: "Сделали НАМУНА", n: data.detail.funnel.namuna },
-              { label: "Оплатили", n: data.detail.funnel.payers },
+              { label: H.funnel.users, n: data.detail.funnel.users },
+              ...(data.detail.funnel.viewers === null ? [] : [{ label: H.funnel.viewers, n: data.detail.funnel.viewers }]),
+              { label: H.funnel.namuna, n: data.detail.funnel.namuna },
+              { label: H.funnel.paid, n: data.detail.funnel.payers },
             ].map((x) => (
               <div key={x.label} className={s.step}>
                 <div className={s.stepHead}>

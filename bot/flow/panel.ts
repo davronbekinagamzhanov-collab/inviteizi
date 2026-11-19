@@ -287,7 +287,8 @@ export async function wholesaleToClient(c: Ctx, n: number): Promise<void> {
   if (!o || o.userId !== c.user.id) return void (await toast(c, c.tx.order.notFound));
   if (o.status !== "active") return void (await send(c, c.tx.wholesale.payFirst));
   const token = newToken();
-  await c.deps.repo.issueClientOrder({ orderId: o.id, createdBy: c.user.id, tokenHash: hashToken(token), refSource: WHOLESALE_REF });
+  if (!(await c.deps.repo.issueClientOrder({ orderId: o.id, createdBy: c.user.id, tokenHash: hashToken(token), refSource: WHOLESALE_REF })))
+    return void (await send(c, c.tx.role.claimClosed));
   const share = { url: pageUrl(c, o.slug), bot: `https://t.me/${await c.deps.tg.botUsername()}?start=o_${token}` };
   const text = c.tx.wholesale.share(share);
   const wa = waLink(text);

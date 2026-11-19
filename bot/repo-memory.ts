@@ -625,9 +625,11 @@ export class MemoryRepo implements Repo {
   }
   async issueClientOrder(o: { orderId: string; createdBy: number; tokenHash: string; refSource: string | null }) {
     const old = this.clientOrders.find((x) => x.orderId === o.orderId);
-    if (old?.claimedBy) return;
-    if (old) Object.assign(old, o);
+    // уже забран — заново выдать может только тот, кто его забрал (цепочка: менеджер → оптовик → клиент)
+    if (old?.claimedBy && old.claimedBy !== o.createdBy) return false;
+    if (old) Object.assign(old, o, { claimedBy: null });
     else this.clientOrders.push({ ...o, claimedBy: null });
+    return true;
   }
   async claimClientOrder(tokenHash: string, clientId: number): Promise<{ status: ClaimStatus; order?: OrderRecord }> {
     const co = this.clientOrders.find((x) => x.tokenHash === tokenHash);
