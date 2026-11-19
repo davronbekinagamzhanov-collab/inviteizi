@@ -205,6 +205,8 @@ export const ru = {
     reviewOff: "Ответы гостей: нет",
     edit: "✏️ Ответы",
     answers: "📝 Ответы",
+    /** Кнопка с числом: сколько придёт (человек) и сколько семей ответили «да» (этап 3) */
+    answersN: (people: number, families: number) => (families ? `📝 Ответы · гостей: ${people} · семей: ${families}` : "📝 Ответы"),
     howButton: "❓ Как это работает?",
     how: "Гости нажимают в приглашении «Келаман» (приду) или «Келолмайман» (не смогу).\n\nОтветы будут здесь:\nМеню → Мои приглашения → 📝 Ответы\n\nОтветы сохраняются после оплаты.",
     digest: (replies: number, coming: number, people: number, declined: number) => `Сегодня ответов: ${replies}. Придут: ${coming} (всего ${people} чел.), не смогут: ${declined}`,

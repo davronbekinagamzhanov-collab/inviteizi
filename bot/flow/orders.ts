@@ -793,7 +793,11 @@ export async function myOrders(c: Ctx) {
     if (o.status === "active" && c.deps.env.marketing?.edits)
       rows.push([{ text: marketingCopy(c.lang).editButton, data: `fix:${o.number}` }]);
     const last: InlineButton[] = o.status === "active" ? [{ text: c.tx.my.link, data: `link:${o.number}` }] : [];
-    if (o.status === "active" && o.data.rsvp) rows.push([{ text: c.tx.rsvp.answers, data: `rsvp:${o.number}` }]);
+    if (o.status === "active" && o.data.rsvp) {
+      // «📝 Жавоблар · 12 киши · 5 оила» — сколько придёт, сразу на кнопке
+      const t = rsvpTotals(await c.deps.repo.listRsvp(o.id).catch(() => []));
+      rows.push([{ text: c.tx.rsvp.answersN(t.people, t.replies - t.declined), data: `rsvp:${o.number}` }]);
+    }
     if (o.status === "active" && c.deps.keepsake) rows.push([{ text: c.tx.keepsake.button, data: `ks:${o.number}` }]);
     if (o.status === "active" && wholesaler) rows.push([{ text: c.tx.wholesale.toClient, data: `wcl:${o.number}` }]);
     rows.push([...last, { text: c.tx.contact, url: ownerUrl(c) }]);

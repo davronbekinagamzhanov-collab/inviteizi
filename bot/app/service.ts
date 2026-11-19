@@ -94,7 +94,44 @@ export type AppOrder = {
   createdAt: string;
   /** «📥 Сақлаб олиш»: файлы доступны (оплачен) и есть ли видео (анимацияли + рендер подключён) */
   keepsake?: { video: boolean } | null;
+  /** «📝 Жавоблар» (этап 3): только у оплаченных с ответами гостей; последние 40 ответов */
+  rsvp?: AppRsvp | null;
 };
+
+export type AppRsvp = {
+  /** сколько придёт человек и сколько семей ответили «да» */
+  people: number;
+  families: number;
+  declined: number;
+  replies: { name: string; guests: number; attending: boolean; wish: string | null; at: string }[];
+};
+
+const RSVP_SHOWN = 40;
+
+/** Ответы гостей к оплаченным заказам клиента — параллельно, сбой одного не ломает список */
+export async function withRsvp(deps: Deps, orders: AppOrder[], records: OrderRecord[]): Promise<AppOrder[]> {
+  return Promise.all(
+    orders.map(async (a, i) => {
+      const o = records[i];
+      if (o.status !== "active" || !o.data.rsvp) return a;
+      const list = await deps.repo.listRsvp(o.id).catch(() => null);
+      if (!list) return a;
+      const coming = list.filter((r) => r.attending);
+      return {
+        ...a,
+        rsvp: {
+          people: coming.reduce((n, r) => n + r.guests, 0),
+          families: coming.length,
+          declined: list.length - coming.length,
+          replies: [...list]
+            .sort((x, y) => +y.updatedAt - +x.updatedAt)
+            .slice(0, RSVP_SHOWN)
+            .map((r) => ({ name: r.name, guests: r.guests, attending: r.attending, wish: (r as { wish?: string | null }).wish ?? null, at: r.updatedAt.toISOString() })),
+        },
+      };
+    }),
+  );
+}
 
 export type AppSession = {
   userId: number;
@@ -247,7 +284,8 @@ export async function openSession(deps: Deps, u: AppUser): Promise<AppSession> {
   const lang = langFor(user.lang, u.languageCode, Boolean(deps.env.kazakhEnabled));
   if (!user.lang) await deps.repo.setLang(u.id, lang);
   const all = await deps.repo.listOrdersByUser(u.id);
-  const orders = all.slice(0, MAX_ORDERS).map((o) => appOrder(deps, o, lang));
+  const shown = all.slice(0, MAX_ORDERS);
+  const orders = await withRsvp(deps, shown.map((o) => appOrder(deps, o, lang)), shown);
   // Черновик правки заказа, который уже оплачен или на проверке чека, — больше не черновик: новый заказ с чистого листа
   let draft = draftOf(user.state as Draft);
   const bound = draft?.orderId ? all.find((o) => o.id === draft!.orderId) : undefined;
@@ -696,7 +734,7 @@ export async function listOrders(deps: Deps, u: AppUser) {
   const list = await Promise.all(
     (await deps.repo.listOrdersByUser(u.id)).slice(0, MAX_ORDERS).map((o) => applyPricing(deps, o)),
   );
-  return { orders: list.map((o) => appOrder(deps, o, lang)) };
+  return { orders: await withRsvp(deps, list.map((o) => appOrder(deps, o, lang)), list) };
 }
 
 // ── Чек из приложения ──

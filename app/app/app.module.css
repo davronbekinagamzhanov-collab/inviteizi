@@ -1023,6 +1023,28 @@ textarea.input {
   color: #6f5119; /* золото потемнее: контраст ≥ 4,5 на молочном */
 }
 
+/* «📝 Жавоблар»: ответы гостей */
+.answers {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+  font-size: 15px;
+}
+.answers li {
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  overflow-wrap: anywhere;
+}
+.wish {
+  margin: 4px 0 0;
+  font-style: italic;
+  color: var(--muted);
+}
+
 /* «📥 Сақлаб олиш»: фото, PDF, видео */
 .keepsake {
   grid-column: 1 / -1;

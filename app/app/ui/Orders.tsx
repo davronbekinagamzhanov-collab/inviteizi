@@ -83,11 +83,39 @@ function KeepsakePanel({ o, onToast }: { o: AppOrder; onToast: (t: string) => vo
   );
 }
 
+/** «📝 Жавоблар»: сколько придёт и последние ответы гостей (видит только хозяин приглашения) */
+function AnswersPanel({ o }: { o: AppOrder }) {
+  const T = useT();
+  const a = T.orders.answers;
+  const r = o.rsvp;
+  if (!r) return null;
+  return (
+    <div className={s.keepsake} data-answers>
+      {r.replies.length === 0 ? (
+        <p className={s.keepsakeHint}>{a.none}</p>
+      ) : (
+        <>
+          {r.declined > 0 && <p className={s.keepsakeHint}>{a.declined(r.declined)}</p>}
+          <ul className={s.answers}>
+            {r.replies.map((x, i) => (
+              <li key={i}>
+                <b>{x.name}</b> · {x.attending ? `${a.yes}, ${a.guests(x.guests)}` : a.no}
+                {x.wish && <p className={s.wish}>«{x.wish}»</p>}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </div>
+  );
+}
+
 export function Orders({ orders, onEdit, onPay, onStatus, onCancel, onToast, busy = false }: Props) {
   const [editing, setEditing] = useState<string | null>(null);
   const T = useT();
   const [qr, setQr] = useState<{ id: string; src: string } | null>(null);
   const [files, setFiles] = useState<string | null>(null);
+  const [answers, setAnswers] = useState<string | null>(null);
 
   async function showQr(o: AppOrder) {
     haptic.tap();
@@ -145,6 +173,20 @@ export function Orders({ orders, onEdit, onPay, onStatus, onCancel, onToast, bus
                   <button type="button" className={`${s.btn} ${s.btnGhost} ${s.btnSmall}`} onClick={() => showQr(o)} aria-expanded={qr?.id === o.id}>
                     {T.orders.qr}
                   </button>
+                  {o.rsvp && (
+                    <button
+                      type="button"
+                      className={`${s.btn} ${s.btnGhost} ${s.btnSmall}`}
+                      data-answers-open
+                      aria-expanded={answers === o.id}
+                      onClick={() => {
+                        haptic.tap();
+                        setAnswers(answers === o.id ? null : o.id);
+                      }}
+                    >
+                      {o.rsvp.families ? T.orders.answers.count(o.rsvp.people, o.rsvp.families) : T.orders.answers.title}
+                    </button>
+                  )}
                   {o.keepsake && (
                     <button
                       type="button"
@@ -163,6 +205,7 @@ export function Orders({ orders, onEdit, onPay, onStatus, onCancel, onToast, bus
               {o.canEdit && <CancelButton onCancel={() => onCancel(o)} />}
             </div>
             {files === o.id && o.keepsake && <KeepsakePanel o={o} onToast={onToast} />}
+            {answers === o.id && <AnswersPanel o={o} />}
             {qr?.id === o.id && (
               <div className={s.qr}>
                 {/* eslint-disable-next-line @next/next/no-img-element -- QR из data: URL */}

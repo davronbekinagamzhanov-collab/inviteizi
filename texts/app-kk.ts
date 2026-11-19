@@ -269,6 +269,16 @@ export const appKk: AppTexts = {
 
   orders: {
     title: "Менің шақыруларым",
+    /** «📝 Жавоблар» (этап 3): сколько придёт, список ответов гостей */
+    answers: {
+      title: "📝 Жауаптар",
+      count: (people: number, families: number) => `📝 Жауаптар · ${people} адам · ${families} отбасы`,
+      none: "Әзірге жауап жоқ.",
+      yes: "келеді",
+      no: "келмейді",
+      guests: (n: number) => `${n} адам`,
+      declined: (n: number) => `Келмейді: ${n}`,
+    },
     keepsake: {
       button: "📥 Сақтау",
       hint: "Файл бот чатына келеді — сол жерден сақтап, жіберіңіз.",
