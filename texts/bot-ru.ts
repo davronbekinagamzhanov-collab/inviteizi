@@ -635,6 +635,7 @@ export const staff = {
     musicDown: "Музыка не открывается",
     noAnswer: "нет ответа",
     errors: (list: string) => `Ошибки бота за сутки (топ-3): ${list}`,
+    slow: (n: number) => `Медленные ответы бота (> 3 с) за сутки: ${n} — подробности в «Ошибки», шаг slow`,
     stuck: (min: number, n: number, list: string) => `Видео зависли (> ${min} мин): ${n} — ${list}`,
     timeout: (n: number) => `Не успели проверить за отведённое время: ${n} адресов — сайт отвечает медленно`,
   },

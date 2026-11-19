@@ -329,7 +329,7 @@ export class MemoryRepo implements Repo {
     const counts = new Map<string, number>();
     for (const e of this.botErrors.filter((x) => +(x as { at?: Date }).at! >= +since))
       counts.set(e.step ?? "—", (counts.get(e.step ?? "—") ?? 0) + 1);
-    return [...counts.entries()].map(([step, n]) => ({ step, n })).sort((a, b) => b.n - a.n).slice(0, 3);
+    return [...counts.entries()].map(([step, n]) => ({ step, n })).sort((a, b) => b.n - a.n).slice(0, 10);
   }
   async lastNoticeAt(prefix: string) {
     const times = [...this.notices.values()].filter((n) => n.key.startsWith(prefix) && n.sentAt).map((n) => +n.sentAt!);

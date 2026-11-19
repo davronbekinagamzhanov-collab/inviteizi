@@ -24,6 +24,8 @@ export const DAILY_HOUR = 9;
 const OCCASIONS: Occasion[] = ["nikoh", "nahorgi", "sunnat", "yubiley"];
 /** Ошибок бота за сутки, начиная с которых это проблема (единичные сбои связи у гостей — шум) */
 export const ERRORS_ALERT = 3;
+/** Медленных ответов бота (> 3 с, записываются не чаще раза в 5 минут) за сутки, начиная с которых — проблема */
+export const SLOW_ALERT = 3;
 const STUCK_MIN = 20;
 
 /** Что не должно появляться на странице приглашения */
@@ -138,10 +140,13 @@ export async function dailyProblems(deps: Deps, io: HealthIo, budgetMs = BUDGET_
 
   // Ошибки бота за сутки по шагам
   const now = deps.now();
-  const steps = await deps.repo.errorSteps(new Date(+now - DAY)).catch(() => null);
-  const total = (steps ?? []).reduce((n, x) => n + x.n, 0);
-  if (steps && total >= ERRORS_ALERT)
-    problems.push(`• ${D.errors(steps.map((x) => `${x.step} — ${x.n}`).join(", "))}`);
+  const all = await deps.repo.errorSteps(new Date(+now - DAY)).catch(() => null);
+  // «slow» — не ошибка, а медленный ответ бота (> 3 с): отдельной строкой
+  const steps = (all ?? []).filter((x) => x.step !== "slow").slice(0, 3);
+  const total = steps.reduce((n, x) => n + x.n, 0);
+  if (all && total >= ERRORS_ALERT) problems.push(`• ${D.errors(steps.map((x) => `${x.step} — ${x.n}`).join(", "))}`);
+  const slow = all?.find((x) => x.step === "slow")?.n ?? 0;
+  if (slow >= SLOW_ALERT) problems.push(`• ${D.slow(slow)}`);
 
   // Видео, зависшие в очереди
   const stuck = await deps.repo.listRenders({ stuckBefore: new Date(+now - STUCK_MIN * MIN) }).catch(() => []);

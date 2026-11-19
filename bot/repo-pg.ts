@@ -591,8 +591,6 @@ export class PgRepo implements Repo {
 
   private saveRsvpTx(input: RsvpInput, withWish: boolean) {
     return this.sql.begin(async (tx) => {
-      // По очереди на заказ: лимиты нельзя обойти одновременными запросами (блокировка только на эту транзакцию)
-      await tx`select pg_advisory_xact_lock(hashtext(${input.orderId}))`;
       // Одинаковое пожелание от другого гостя того же приглашения — повтор (спам/копия): ответ сохраняем без него
       let wish = withWish ? (input.wish ?? null) : null;
       if (wish) {
@@ -600,22 +598,30 @@ export class PgRepo implements Repo {
           where order_id=${input.orderId} and visitor_key<>${input.visitorKey} and lower(wish)=lower(${wish}) limit 1`;
         if (dup) wish = null;
       }
+      // Гость поправил свой ответ — без блокировки (лимиты считаются только для новых ответов)
       const [old] = withWish
         ? await tx`update public.rsvp_responses set name=${input.name}, guests=${input.guests}, attending=${input.attending}, wish=${wish}, updated_at=now()
           where order_id=${input.orderId} and visitor_key=${input.visitorKey} returning id`
         : await tx`update public.rsvp_responses set name=${input.name}, guests=${input.guests}, attending=${input.attending}, updated_at=now()
           where order_id=${input.orderId} and visitor_key=${input.visitorKey} returning id`;
       if (old) return "ok" as const;
+      // Новый ответ: по очереди на заказ — лимиты нельзя обойти одновременными запросами.
+      // Под блокировкой только подсчёт и вставка (две короткие команды), до конца транзакции
+      await tx`select pg_advisory_xact_lock(hashtext(${input.orderId}))`;
       const [n] = await tx<{ total: number; ip: number }[]>`select count(*)::int8 as total,
         count(*) filter (where ip_hash=${input.ipHash} and created_at > now() - interval '1 hour')::int8 as ip
         from public.rsvp_responses where order_id=${input.orderId}`;
       if (n.total >= RSVP_ORDER_LIMIT || n.ip >= RSVP_IP_HOUR_LIMIT) return "limited" as const;
       if (withWish)
         await tx`insert into public.rsvp_responses(order_id,visitor_key,name,guests,attending,ip_hash,wish)
-          values(${input.orderId},${input.visitorKey},${input.name},${input.guests},${input.attending},${input.ipHash},${wish})`;
+          values(${input.orderId},${input.visitorKey},${input.name},${input.guests},${input.attending},${input.ipHash},${wish})
+          on conflict (order_id, visitor_key) do update set name=excluded.name, guests=excluded.guests,
+            attending=excluded.attending, wish=excluded.wish, updated_at=now()`;
       else
         await tx`insert into public.rsvp_responses(order_id,visitor_key,name,guests,attending,ip_hash)
-          values(${input.orderId},${input.visitorKey},${input.name},${input.guests},${input.attending},${input.ipHash})`;
+          values(${input.orderId},${input.visitorKey},${input.name},${input.guests},${input.attending},${input.ipHash})
+          on conflict (order_id, visitor_key) do update set name=excluded.name, guests=excluded.guests,
+            attending=excluded.attending, updated_at=now()`;
       return "ok" as const;
     });
   }
@@ -829,7 +835,7 @@ export class PgRepo implements Repo {
     try {
       return await this.sql<{ step: string; n: number }[]>`
         select coalesce(step, '—') as step, count(*)::int as n from public.bot_errors
-        where created_at >= ${since} group by 1 order by 2 desc limit 3`;
+        where created_at >= ${since} group by 1 order by 2 desc limit 10`;
     } catch (e) {
       const code = (e as { code?: string } | null)?.code;
       if (code === "42501" || isMissingTable(e)) return null;
@@ -1000,15 +1006,20 @@ export class PgRepo implements Repo {
 
   async findPartnerForUser(userId: number, username: string | null) {
     try {
-      const [byId] = await this.sql<
-        Partner[]
-      >`select ${this.sql.unsafe(PARTNER_COLUMNS)} from public.partners where telegram_id = ${userId} and status <> 'rejected' order by id limit 1`;
-      if (byId) return byId;
-      if (!username) return null;
-      const [bound] = await this.sql<Partner[]>`update public.partners set telegram_id = ${userId}
-        where id = (select id from public.partners where telegram_id is null and status <> 'rejected' and lower(username) = lower(${username}) order by id limit 1)
-        returning ${this.sql.unsafe(PARTNER_COLUMNS)}`;
-      return bound ?? null;
+      // Один запрос (этап 3, скорость): партнёр по Telegram id, а если его нет — привязка по @username
+      const cols = this.sql.unsafe(PARTNER_COLUMNS);
+      const [p] = await this.sql<Partner[]>`
+        with by_id as (
+          select ${cols} from public.partners where telegram_id = ${userId} and status <> 'rejected' order by id limit 1
+        ), bound as (
+          update public.partners set telegram_id = ${userId}
+          where ${username}::text is not null and not exists (select 1 from by_id)
+            and id = (select id from public.partners where telegram_id is null and status <> 'rejected'
+                        and lower(username) = lower(${username}::text) order by id limit 1)
+          returning ${cols}
+        )
+        select * from by_id union all select * from bound limit 1`;
+      return p ?? null;
     } catch (e) {
       if (isMissingTable(e)) return null;
       throw e;
@@ -1554,7 +1565,8 @@ export class PgRepo implements Repo {
   }
 
   private async insertOrder(o: NewOrder, expectedQ?: number, handledUpdates?: number[]): Promise<OrderRecord | null> {
-    // Одинаковый slugBase одновременно: блокировка в транзакции + повтор при гонке
+    // Одинаковый slugBase одновременно: адрес уникален в базе (orders_slug_key) — проигравший берёт следующий
+    // свободный при повторе. Без pg_advisory_xact_lock (этап 3): блокировка заставляла ждать всех с тем же slugBase
     for (let attempt = 0; ; attempt++) {
       try {
         return await this.sql.begin(async (tx) => {
@@ -1564,7 +1576,6 @@ export class PgRepo implements Repo {
               where id = ${o.userId} and step = 'review' and coalesce((state->>'q')::int,0) = ${expectedQ} returning id`;
             if (!claimed.length) return null;
           }
-          await tx`select pg_advisory_xact_lock(hashtext(${"slug:" + o.slugBase}))`;
           const slug = await this.freeSlug(tx, o.slugBase);
           const cols: Columns = {
             user_id: o.userId,
@@ -1582,7 +1593,7 @@ export class PgRepo implements Repo {
           return (await loadOrder(tx, id))!;
         });
       } catch (e) {
-        if (attempt < 4 && isUniqueSlugViolation(e)) continue;
+        if (attempt < 9 && isUniqueSlugViolation(e)) continue;
         throw e;
       }
     }

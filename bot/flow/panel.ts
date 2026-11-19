@@ -11,7 +11,7 @@ import { isQuiet } from "@/lib/quiet-hours";
 import { hashToken, INVITE_TTL_MS, MANAGER_BONUS, MANAGER_GOAL, managerName, managerSource, newToken } from "@/lib/roles";
 import { kzMidnight, kzMonth, managerMonth, managerPaid, ruMonth } from "@/lib/money";
 import { staff as S } from "@/texts/bot-ru";
-import { texts } from "./util";
+import { later, texts } from "./util";
 import { editOrSend, inline, namesOf, PAYABLE_STATUSES, pageUrl, price, roleOf, send } from "./util";
 import { orderButtons, sendLinkPack, sendReceiptTo } from "./orders";
 import { sendKeepsakeOffer } from "../keepsake";
@@ -460,7 +460,8 @@ export async function panelAction(c: Ctx, action: string, arg: string): Promise<
     case "pq": {
       const p = await c.deps.repo.findPartnerForUser(c.user.id, c.user.username);
       if (!p) return void (await toast(c, c.tx.oldButton));
-      if (action === "pq") return void (await sendPack(c, p));
+      // QR и постер (картинка + PDF) — после ответа Telegram
+      if (action === "pq") return void (await later(c, () => sendPack(c, p)));
       const r = await partnerRowOf(c.deps, p);
       if (!r) return void (await toast(c, c.tx.oldButton));
       return show(c, { text: payoutsText(c, p, r), rows: [[{ text: c.tx.back, data: "pn:home" }]] });

@@ -201,6 +201,24 @@ describe("«📥 Сақлаб олиш» в боте", () => {
   });
 });
 
+describe("«📥 Сақлаб олиш»: после ответа Telegram (этап 3)", () => {
+  beforeEach(() => resetRateLimits());
+  it("кнопка отвечает сразу («⏳»), файл строится после ответа вебхука", async () => {
+    const s = new Sim();
+    const k = withKeepsake(s);
+    const o = await paidOrder(s, 1);
+    const queue: (() => Promise<void>)[] = [];
+    s.deps.defer = (t) => void queue.push(t);
+    await s.callback(1, `ks:${o.number}:story`, 1);
+    expect(s.tg.answers.at(-1)?.text).toBe(K.making);
+    expect(k.rendered).toEqual([]);
+    expect(queue).toHaveLength(1);
+    await queue[0]();
+    expect(k.rendered).toEqual([`${o.number}:story`]);
+    expect(s.tg.to(1).at(-1)!.type).toBe("photo");
+  });
+});
+
 describe("«📥 Сақлаб олиш»: находки ревью", () => {
   beforeEach(() => resetRateLimits());
   it("поздний «failed»/«running» после готового видео — без второго рендера и без смены статуса", async () => {

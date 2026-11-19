@@ -127,3 +127,26 @@ it.skipIf(!native)("этап 3: тилак — сохраняется, повт�
     await sql.unsafe(await (await import("node:fs/promises")).readFile("supabase/migrations/20261120120000_rsvp_wish.sql", "utf8"));
   }
 });
+
+it.skipIf(!native)("этап 3: без блокировки адреса — 8 одновременных заказов «aziz-madina» получают разные адреса; ответы гостей: двойное нажатие и лимит IP", async () => {
+  const d = designs.find((x) => x.format === "animated")!;
+  for (let i = 0; i < 8; i++) await repo.touchUser({ id: 990300 + i, username: null, firstName: "К" });
+  const made = await Promise.all(
+    Array.from({ length: 8 }, (_, i) =>
+      repo.createOrder({ userId: 990300 + i, occasion: d.occasion, format: d.format, templateId: d.id, data: d.sample, music: { kind: "none" }, amount: 7990, slugBase: "aziz-madina-pg" }),
+    ),
+  );
+  expect(new Set(made.map((o) => o.slug)).size).toBe(8);
+  expect(made.map((o) => o.slug)).toContain("aziz-madina-pg");
+  const o = made[0];
+  const base = { orderId: o.id, guests: 1, attending: true, name: "Г" };
+  // двойное нажатие одного гостя одновременно — одна строка, без ошибки
+  const twice = await Promise.all([1, 2].map(() => repo.saveRsvp({ ...base, visitorKey: "z".repeat(16), ipHash: "ip1" })));
+  expect(twice).toEqual(["ok", "ok"]);
+  // 25 новых гостей с одного IP одновременно — сохраняется не больше лимита (20)
+  const many = await Promise.all(
+    Array.from({ length: 25 }, (_, i) => repo.saveRsvp({ ...base, visitorKey: `v${String(i).padStart(15, "0")}`, ipHash: "ip2" })),
+  );
+  expect(many.filter((r) => r === "ok")).toHaveLength(20);
+  expect((await repo.listRsvp(o.id)).length).toBe(21);
+});
