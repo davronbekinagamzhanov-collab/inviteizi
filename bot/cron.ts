@@ -1,6 +1,7 @@
 import { remindPromotions, runBroadcast } from "./broadcast";
 import { flushMarketing, withMarketingReady } from "./marketing";
 import { checkFiles } from "./health";
+import { wishesBlock } from "./flow/orders";
 import { dailyCheck } from "./daily-check";
 /**
  * Задания по расписанию (pg_cron → POST /api/cron каждые 10 минут):
@@ -74,7 +75,9 @@ async function sendRsvpDigests(deps: Deps, now: Date, r: CronResult) {
     const tx = txFor((await deps.repo.getUser(o.userId))?.lang);
     const coming = fresh.filter((a) => a.attending).length;
     try {
-      await deps.tg.sendMessage(o.userId, tx.rsvp.digest(total.replies, coming, total.people, total.declined), {
+      const digest = tx.rsvp.digest(total.replies, coming, total.people, total.declined);
+      // тилаки — в этом же сообщении (не по одному), публично на приглашении их нет
+      await deps.tg.sendMessage(o.userId, digest + wishesBlock(tx, fresh, 3900 - digest.length), {
         markup: inline([[{ text: tx.rsvp.answers, data: `rsvp:${o.number}` }]]),
       });
       r.rsvpDigests++;

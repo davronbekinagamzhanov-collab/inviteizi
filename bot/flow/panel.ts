@@ -8,12 +8,15 @@ import type { InlineButton } from "../tg";
 import type { OrderRecord } from "@/lib/domain";
 import { overview, partnerRows, type Partner, type PartnerRow } from "@/lib/owner-panel";
 import { isQuiet } from "@/lib/quiet-hours";
-import { hashToken, INVITE_TTL_MS, managerName, managerSource, newToken } from "@/lib/roles";
+import { hashToken, INVITE_TTL_MS, MANAGER_BONUS, MANAGER_GOAL, managerName, managerSource, newToken } from "@/lib/roles";
+import { kzMidnight, kzMonth, managerMonth, managerPaid, ruMonth } from "@/lib/money";
 import { staff as S } from "@/texts/bot-ru";
-import { texts } from "./util";
-import { editOrSend, inline, namesOf, ownerUrl, PAYABLE_STATUSES, pageUrl, price, roleOf, send } from "./util";
-import { orderButtons, sendReceiptTo } from "./orders";
-import { panelData, partnerRowOf, payoutsText, ptList, sendPack, startNewPartner } from "./partners";
+import { later, texts } from "./util";
+import { editOrSend, inline, namesOf, PAYABLE_STATUSES, pageUrl, price, roleOf, send } from "./util";
+import { orderButtons, sendLinkPack, sendReceiptTo } from "./orders";
+import { sendKeepsakeOffer } from "../keepsake";
+import { WHOLESALE_REF } from "../repo";
+import { panelData, partnerDetailScreen, partnerHowScreen, partnerMenu, partnerRowOf, payoutsText, ptList, sendPack, startNewPartner } from "./partners";
 import { managerEarningsScreen, partnerStatsScreen, statsScreen } from "./stats";
 import { exportScreen } from "./export";
 import type { Ctx, Deps, Result } from "./types";
@@ -82,8 +85,21 @@ export function ownerAppUrl(miniAppUrl: string, page: "owner" | "panel" = "owner
 async function managerHome(c: Ctx): Promise<Screen> {
   const s = await panelData(c.deps);
   const mine = s.partners.filter((p) => p.managedBy === c.user.id).length;
+  const managers = await c.deps.repo.listManagers();
+  const now = c.deps.now();
+  const month = kzMonth(now);
+  const cur = managerMonth(s, managers, c.user.id, month);
+  const from = kzMidnight(now);
+  const today = managerPaid(s, managers, c.user.id, from, new Date(+from + 86_400_000)).length;
   return {
-    text: `${S.managerTitle}\n\n${S.networkLine(mine)}`,
+    text: S.managerHome({
+      partners: mine,
+      today,
+      month: cur.orders,
+      monthName: ruMonth(month),
+      earned: price(cur.amount),
+      goal: cur.orders >= MANAGER_GOAL ? S.n.goalDone(price(MANAGER_BONUS)) : S.n.goal(cur.orders, MANAGER_GOAL, price(MANAGER_BONUS)),
+    }),
     rows: [
       [
         { text: S.btn.myStats, data: "pn:ms" },
@@ -102,23 +118,9 @@ async function managerHome(c: Ctx): Promise<Screen> {
   };
 }
 
-function partnerHome(c: Ctx, p: Partner): Screen {
-  const r = c.tx.role;
-  return {
-    text: r.partnerHome(p.name, p.status === "pending"),
-    rows: [
-      [
-        { text: r.stats, data: "pn:ps" },
-        { text: r.qr, data: "pn:pq" },
-      ],
-      [
-        { text: r.payouts, data: "pn:pp" },
-        { text: c.tx.contact, url: ownerUrl(c) },
-      ],
-      ...(c.deps.env.miniAppUrl ? [[{ text: r.panel, webApp: ownerAppUrl(c.deps.env.miniAppUrl, "panel") }]] : []),
-      [c.deps.env.miniAppUrl ? { text: r.self, webApp: c.deps.env.miniAppUrl } : { text: r.self, data: "pn:self" }],
-    ],
-  };
+/** Меню партнёра (этап 3): 4 строки и кнопки — bot/flow/partners.ts partnerMenu */
+async function partnerHome(c: Ctx, p: Partner): Promise<Screen> {
+  return partnerMenu(c, p);
 }
 
 /**
@@ -133,7 +135,7 @@ export async function roleHome(c: Ctx, fresh = false): Promise<boolean> {
   else {
     const p = await c.deps.repo.findPartnerForUser(c.user.id, c.user.username);
     if (!p) return false;
-    await show(c, partnerHome(c, p), fresh);
+    await show(c, await partnerHome(c, p), fresh);
   }
   return true;
 }
@@ -275,6 +277,25 @@ export async function toClient(c: Ctx, n: number): Promise<Result | void> {
   await send(c, uz, inline(wa));
 }
 
+/**
+ * wcl:<n> — оптовик передаёт свой ОПЛАЧЕННЫЙ заказ клиенту (этап 3): одноразовая ссылка o_ с меткой «wholesale»;
+ * клиент забирает — заказ, ссылка и ответы гостей теперь у клиента. Неоплаченный — сначала оплатить.
+ */
+export async function wholesaleToClient(c: Ctx, n: number): Promise<void> {
+  if (c.chatId !== c.user.id || !(await c.deps.repo.getWholesaler(c.user.id))) return void (await toast(c, c.tx.oldButton));
+  const o = Number.isSafeInteger(n) && n > 0 ? await c.deps.repo.getOrderByNumber(n).catch(() => null) : null;
+  if (!o || o.userId !== c.user.id) return void (await toast(c, c.tx.order.notFound));
+  if (o.status !== "active") return void (await send(c, c.tx.wholesale.payFirst));
+  const token = newToken();
+  if (!(await c.deps.repo.issueClientOrder({ orderId: o.id, createdBy: c.user.id, tokenHash: hashToken(token), refSource: WHOLESALE_REF })))
+    return void (await send(c, c.tx.role.claimClosed));
+  const share = { url: pageUrl(c, o.slug), bot: `https://t.me/${await c.deps.tg.botUsername()}?start=o_${token}` };
+  const text = c.tx.wholesale.share(share);
+  const wa = waLink(text);
+  await send(c, c.tx.wholesale.how);
+  await send(c, text, inline(wa ? [[{ text: "WhatsApp", url: wa }]] : []));
+}
+
 /** start=o_<токен>: клиент забирает заказ, собранный для него. Он теперь его — дальше обычная оплата и чек */
 export async function claimOrder(c: Ctx, token: string): Promise<"shown" | "askLang" | "done"> {
   const r = await c.deps.repo.claimClientOrder(hashToken(token), c.user.id, c.deps.now());
@@ -296,6 +317,13 @@ export async function claimOrder(c: Ctx, token: string): Promise<"shown" | "askL
 }
 
 export async function showClaimed(c: Ctx, o: OrderRecord) {
+  // оптовик передал уже оплаченный заказ: сразу ссылка, QR, ответы гостей и «📥 Сақлаб олиш»
+  if (o.status === "active" && o.userId === c.user.id) {
+    await send(c, c.tx.wholesale.got(pageUrl(c, o.slug)));
+    await sendLinkPack(c.deps, o, false);
+    await sendKeepsakeOffer(c.deps, o, c.lang);
+    return;
+  }
   if (!PAYABLE_STATUSES.includes(o.status) || o.userId !== c.user.id)
     return void (await send(c, c.tx.role.claimClosed));
   await send(c, c.tx.role.claimed(pageUrl(c, o.slug), price(o.amount)), inline(orderButtons(c, o, false)));
@@ -343,7 +371,7 @@ export async function acceptManager(c: Ctx, token: string): Promise<boolean> {
 const OWNER = new Set(["stats", "rc", "pt", "po", "ex", "set", "madd", "mrm"]);
 const MANAGER = new Set(["ms", "mp", "mpn", "me", "mq"]);
 const SELLER = new Set(["cl", "mk"]);
-const PARTNER = new Set(["ps", "pq", "pp", "self"]);
+const PARTNER = new Set(["ps", "pq", "pp", "pd", "ph", "pk", "self"]);
 
 /**
  * Вернёт { kind: "dashboard" } для статистики и партнёров владельца (их рисует панель-отчёт),
@@ -419,11 +447,22 @@ export async function panelAction(c: Ctx, action: string, arg: string): Promise<
     }
     case "ps":
       return show(c, (await partnerScreen(c)) ?? { text: c.tx.oldButton, rows: [] });
+    case "pd":
+    case "ph":
+    case "pk": {
+      const p = await c.deps.repo.findPartnerForUser(c.user.id, c.user.username);
+      if (!p) return void (await toast(c, c.tx.oldButton));
+      if (action === "ph") return show(c, partnerHowScreen(c));
+      if (action === "pd") return show(c, await partnerDetailScreen(c, p));
+      c.s = { q: c.s.q, partnerId: p.id };
+      return { enter: "joinKaspi" };
+    }
     case "pp":
     case "pq": {
       const p = await c.deps.repo.findPartnerForUser(c.user.id, c.user.username);
       if (!p) return void (await toast(c, c.tx.oldButton));
-      if (action === "pq") return void (await sendPack(c, p));
+      // QR и постер (картинка + PDF) — после ответа Telegram
+      if (action === "pq") return void (await later(c, () => sendPack(c, p)));
       const r = await partnerRowOf(c.deps, p);
       if (!r) return void (await toast(c, c.tx.oldButton));
       return show(c, { text: payoutsText(c, p, r), rows: [[{ text: c.tx.back, data: "pn:home" }]] });

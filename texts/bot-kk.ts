@@ -195,8 +195,13 @@ export const kk: BotTexts = {
     reviewOff: "Қонақтар жауабы: жоқ",
     edit: "✏️ Жауаптар",
     answers: "📝 Жауаптар",
+    /** Кнопка с числом: сколько придёт (человек) и сколько семей ответили «да» (этап 3) */
+    answersN: (people: number, families: number) => (families ? `📝 Жауаптар · ${people} адам · ${families} отбасы` : "📝 Жауаптар"),
     howButton: "❓ Бұл қалай жұмыс істейді?",
     how: "Қонақтар шақырудағы «Келемін» немесе «Келе алмаймын» батырмасын басады.\n\nЖауаптарды осы жерден көресіз:\nМәзір → Менің шақыруларым → 📝 Жауаптар\n\nЖауаптар төлемнен кейін сақталады.",
+    /** Тилаки гостей (этап 3): в ежедневном отчёте и в «📝 Жавоблар» */
+    wishesHead: "💌 Тілектер:",
+    wishLine: (name: string, wish: string) => `💬 ${name}: «${wish}»`,
     digest: (replies: number, coming: number, people: number, declined: number) => `Бүгін ${replies} адам жауап берді: ${coming} келеді (барлығы ${people} адам), ${declined} келе алмайды`,
     empty: "Әзірге жауап жоқ.",
     head: (replies: number, people: number, declined: number) => `📝 Жауаптар: ${replies}\nКеледі: ${people} адам\nКеле алмайды: ${declined}`,
@@ -396,10 +401,49 @@ export const kk: BotTexts = {
   admin: ru.admin,
 
   role: {
+    /** Этап 3 (19.11.2026): одно приветствие по join_, короткое меню партнёра и «Батафсил» */
+    joinWelcome: (s: { name: string; rate: string; schedule: string; ask: boolean }) =>
+      [
+        `🤝 Қош келдіңіз, ${s.name}! Сіз InviteIZI серіктесісіз.`,
+        "",
+        `💰 Сізге: ${s.rate} — әр төлемнен`,
+        `📅 Төлем: ${s.schedule}, Kaspi-ге`,
+        "🔗 Сілтемеңіз бен постеріңіз дайын.",
+        "",
+        "Бүгін:",
+        "1. «🔗 Сілтеме және QR» — постерді басып шығарыңыз немесе сілтемені WhatsApp-қа жіберіңіз.",
+        "2. «💳 Kaspi нөмірім» — төлем келетін нөмірді жазыңыз.",
+        "3. Таныстарға айтыңыз: онлайн шақыру 5 минутта, 2 990 ₸-ден.",
+        ...(s.ask ? ["", "Тилни танланг · Выберите язык · Тілді таңдаңыз"] : []),
+      ].join("\n"),
+    partnerMenu: (s: { name: string; earned: string; due: string; next: string; today: number; pending: boolean; noKaspi: boolean }) =>
+      [
+        `🤝 ${s.name}`,
+        "",
+        `💰 Барлығы табылды: ${s.earned}`,
+        `⏳ Төленуі керек: ${s.due}`,
+        `📅 Келесі төлем: ${s.next}`,
+        `✅ Бүгінгі төлемдер: ${s.today}`,
+        ...(s.pending ? ["", "⏳ Растау күтілуде. QR жұмыс істейді, төлемдер есептеледі."] : []),
+        ...(s.noKaspi ? ["", "💳 Kaspi нөміріңізді енгізіңіз — төлем соған келеді 👇"] : []),
+      ].join("\n"),
+    btnLink: "🔗 Сілтеме және QR",
+    btnPayouts: "💰 Төлемдер",
+    btnDetail: "📋 Толығырақ",
+    btnHow: "❓ Қалай жұмыс істейді",
+    btnKaspi: "💳 Kaspi нөмірім",
+    howText: "❓ Қалай жұмыс істейді\n\n1. Сілтемені немесе QR-ды той жасайтындарға беріңіз.\n2. Олар сіздің сілтеме арқылы шақыру жасап төлесе — әр төлемнен сізге пайыз.\n3. Ақша төлем күні Kaspi-ге келеді («💳 Kaspi нөмірім»).\n4. Клиент сұраса: шақыру 5 минутта, 2 990 ₸-ден, музыкамен және картамен.\n5. Сұрақ болса — «📞 Байланыс».",
+    detailTitle: "📋 Толығырақ (атсыз)",
+    detailDays: "Күндер бойынша (7 күн):",
+    detailWeeks: "Апталар бойынша (4 апта):",
+    detailRow: (label: string, scanned: number, namuna: number, paid: number, sum: string) =>
+      `${label}: ${scanned} өту · ${namuna} үлгі · ${paid} төлем · ${sum}`,
+    weekLabel: (from: string, to: string) => `${from}–${to}`,
+    kaspiSaved: (k: string) => `✅ Kaspi: ${k} — төлемдер соған келеді.`,
+    dateLine: (day: number, month: string, weekday: string) => `${day} ${month}, ${weekday}`,
     panel: "🖥 Панель",
     partnerTitle: "🤝 InviteIZI серіктесі",
     menu: "🤝 Серіктес мәзірі",
-    partnerHome: (name: string, pending: boolean) => `🤝 InviteIZI серіктесі\n${name}${pending ? "\n\n⏳ Растау күтілуде. QR жұмыс істейді, төлемдер есептеледі." : ""}`,
     joinHello: "🤝 Сиз InviteIZI ҳамкорисиз!\n🤝 Вы партнёр InviteIZI!\n\nТилни танланг · Выберите язык",
     joinHello3: "🤝 Сиз InviteIZI ҳамкорисиз!\n🤝 Вы партнёр InviteIZI!\n🤝 Сіз InviteIZI серіктесісіз!\n\nТилни танланг · Выберите язык · Тілді таңдаңыз",
     askPhone: "📱 Нөміріңізді жіберіңіз — төмендегі батырманы басыңыз 👇",
@@ -457,6 +501,17 @@ export const kk: BotTexts = {
     item: (n: number, title: string, status: string, url: string) => `#${n} · ${title}\n${status}\n${url}`,
     statuses,
     link: "🔗 Сілтеме",
+  },
+
+  /** Оптовик (этап 3): скидка в меню, «📤 Мижозга юбориш» — оплаченный заказ переходит его клиенту */
+  wholesale: {
+    line: (pct: number) => `🏷 Көтерме жеңілдігіңіз: ${pct} % — әр тапсырысқа`,
+    toClient: "📤 Клиентке жіберу",
+    payFirst: "Алдымен төлеңіз — төлегеннен кейін шақыруды клиентке бересіз.",
+    share: (s: { url: string; bot: string }) =>
+      `Сәлеметсіз бе! 🎉 Шақыруыңыз дайын:\n${s.url}\n\nӨзіңізге алу үшін сілтемені басыңыз — Telegram ашылады, қонақтар жауабын өзіңіз көресіз:\n${s.bot}`,
+    how: "👇 Осы хабарды клиентіңізге жіберіңіз. Сілтеме бір рет жұмыс істейді.",
+    got: (url: string) => `🎉 Шақыру сіздікі!\n${url}\n\nҚонақтар жауабы «📂 Менің шақыруларым» бөлімінде.`,
   },
 
   keepsake: {

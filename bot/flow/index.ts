@@ -1,3 +1,4 @@
+import { memoRepo } from "../repo-memo";
 import { deliverKeepsake, keepsakeOffer, keepsakeToast } from "../keepsake";
 import { correctionStep, beginCorrection } from "./correction";
 import { beginPromo, promoCode, promotionLine } from "./sales";
@@ -41,14 +42,13 @@ import {
   rsvpAnswers,
 } from "./orders";
 import { cmdFind, cmdOrders, cmdStats } from "./admin";
-import { mainMenu, ownerUrl, PAYABLE_STATUSES, roleOf, send, startMenu, texts, txFor } from "./util";
+import { later, mainMenu, ownerUrl, PAYABLE_STATUSES, roleOf, send, startMenu, texts, txFor } from "./util";
 import type { Lang } from "@/lib/domain";
 import { dashboard } from "./dashboard";
 import {
   acceptPartnerInvite,
   joinKaspi,
   joinLang,
-  joinPhone,
   partnerAction,
   partnerConfirm,
   partnerName,
@@ -69,7 +69,7 @@ import { catalogList, pageOf } from "./steps-order";
 import { rememberUpdate } from "../update";
 import { classifyError, isUnreachable, recordBotError, toEntry } from "../errors";
 import { beginAttempt } from "./delivery";
-import { acceptManager, claimOrder, panelAction, roleHome, showClaimed, toClient } from "./panel";
+import { acceptManager, claimOrder, panelAction, roleHome, showClaimed, toClient, wholesaleToClient } from "./panel";
 import { parseStartToken } from "@/lib/roles";
 import { gotPayout, payManagerAction, payPartnerAction } from "./notify";
 import { partnerStatsAction, statsAction } from "./stats";
@@ -133,7 +133,6 @@ export const steps: Record<StepId, Step> = {
   partnerPropose,
   partnerProposeSchedule,
   joinLang,
-  joinPhone,
   joinKaspi,
 };
 
@@ -145,9 +144,39 @@ const isStep = (s: string): s is StepId => s in steps;
  * Повторяем только временные сбои (сеть, 429/5xx Telegram, соединение с базой) и не больше MAX_ATTEMPTS раз.
  * Пока повтор возможен, клиенту ничего не пишем: иначе он получит ошибку, а затем обычный ответ.
  */
+/** Медленное обновление (этап 3): дольше этого — запись в bot_errors (step «slow»), не чаще раза в 5 минут */
+export const SLOW_UPDATE_MS = 3000;
+const SLOW_EVERY_MS = 5 * 60_000;
+let lastSlowAt = 0;
+
 export async function handle(baseDeps: Deps, u: BotUpdate): Promise<boolean> {
+  const t0 = Date.now();
+  try {
+    return await handleUpdate(baseDeps, u);
+  } finally {
+    const ms = Date.now() - t0;
+    if (ms > SLOW_UPDATE_MS && Date.now() - lastSlowAt >= SLOW_EVERY_MS) {
+      lastSlowAt = Date.now();
+      await recordBotError(baseDeps, {
+        step: "slow",
+        updateKind: u.kind,
+        errorName: "Slow",
+        errorCode: null,
+        message: `${u.kind === "callback" ? `кнопка ${u.data.split(":")[0]}` : u.kind === "command" ? `/${u.command}` : u.kind} — ${ms} мс`,
+        stack: null,
+        outcome: "ack",
+      });
+    }
+  }
+}
+
+/** Только для тестов: сбросить «не чаще раза в 5 минут» */
+export const resetSlowThrottle = () => void (lastSlowAt = 0);
+
+async function handleUpdate(baseDeps: Deps, u: BotUpdate): Promise<boolean> {
   const attempt = beginAttempt(baseDeps, u.updateId);
-  let deps: Deps = { ...baseDeps, tg: attempt.tg };
+  // роль человека и прочие «кто это» — один раз на обновление (bot/repo-memo.ts)
+  let deps: Deps = { ...baseDeps, tg: attempt.tg, repo: memoRepo(baseDeps.repo) };
   let c: Ctx | undefined;
   try {
     deps = await withMarketingReady(deps);
@@ -337,7 +366,10 @@ async function welcome(c: Ctx) {
   if (!(await roleHome(c))) {
     // Акция — одной строкой под приветствием (только обычному клиенту, не чаще раза в 6 часов)
     const line = await promotionLine(c);
-    await send(c, c.tx.welcome(c.user.firstName) + (line ? `\n\n${line}` : ""), await startMenu(c));
+    // оптовику — его скидка одной строкой (акции ему не действуют)
+    const ws = await c.deps.repo.getWholesaler(c.user.id).catch(() => null);
+    const extra = ws ? c.tx.wholesale.line(ws.percent) : line;
+    await send(c, c.tx.welcome(c.user.firstName) + (extra ? `\n\n${extra}` : ""), await startMenu(c));
   }
   await save(c);
 }
@@ -511,16 +543,22 @@ async function onCallback(c: Ctx, d: string) {
       const m = keepsakeOffer(c.deps, o, c.lang);
       return void (await send(c, m.text, m.markup));
     }
-    // сначала короткий ответ на кнопку (Telegram ждёт ≤ 15 с, PDF строится дольше)
-    if (kind !== "video") await toast(c, c.tx.keepsake.making);
-    const outcome = await deliverKeepsake(c.deps, c.user.id, { number: Number(n) }, kind as never);
-    if (kind === "video" || outcome !== "sent") {
-      const text = keepsakeToast(c.lang, outcome);
-      if (outcome === "already" || outcome === "busy") return c.answered ? undefined : toast(c, text);
-      return void (await send(c, text));
+    // сначала короткий ответ на кнопку; файл строится ПОСЛЕ ответа Telegram (бот не ждёт PDF)
+    if (kind !== "video") {
+      await toast(c, c.tx.keepsake.making);
+      const userId = c.user.id;
+      return later(c, async () => {
+        // любой сбой (база, Telegram) — клиенту понятный ответ, а не тишина после «⏳ Тайёрланмоқда…»
+        const outcome = await deliverKeepsake(c.deps, userId, { number: Number(n) }, kind as never).catch(() => "failed" as const);
+        if (outcome !== "sent") await send(c, keepsakeToast(c.lang, outcome));
+      });
     }
-    return;
+    const outcome = await deliverKeepsake(c.deps, c.user.id, { number: Number(n) }, kind as never);
+    const text = keepsakeToast(c.lang, outcome);
+    if (outcome === "already" || outcome === "busy") return c.answered ? undefined : toast(c, text);
+    return void (await send(c, text));
   }
+  if (d.startsWith("wcl:")) return wholesaleToClient(c, Number(d.slice(4)));
   if (d.startsWith("fix:")) {
     const result = await beginCorrection(c, Number(d.slice(4)));
     return result ? apply(c, result) : undefined;

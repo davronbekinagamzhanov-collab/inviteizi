@@ -42,7 +42,7 @@ async function partner(s: Sim, tgId: number, rate = "1000") {
   })) as { id: number; link: string };
   await s.start(tgId, "join_" + /start=join_([a-z0-9]+)/.exec(p.link)![1]);
   await s.click(tgId, uz.langUz);
-  await s.contact(tgId, "77011234567");
+  // этап 3: после выбора языка сразу меню (телефон не спрашиваем)
   return (await s.repo.getPartner(p.id))!;
 }
 

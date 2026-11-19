@@ -541,3 +541,100 @@
   font-size: 15px;
   overflow-wrap: anywhere;
 }
+
+/* Этап 3: главный экран «Сегодня» → «📋 Подробнее» */
+.todayTitle {
+  grid-column: span 2;
+  margin: 12px 0 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+button.card {
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+button.card:disabled {
+  cursor: default;
+}
+.cardAlert {
+  border-color: var(--gold);
+  background: #fbefd9;
+}
+.cardAlert span {
+  color: var(--ink);
+  font-weight: 600;
+}
+.more {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  margin: 18px 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--card);
+  font: inherit;
+  font-weight: 700;
+  color: var(--ink);
+  cursor: pointer;
+}
+.dayHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 14px;
+}
+.mini {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 10px;
+  background: #efe3cf;
+}
+.mini button {
+  min-height: 34px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.mini button[aria-selected="true"] {
+  background: var(--card);
+  color: var(--ink);
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+.table th,
+.table td {
+  padding: 7px 4px;
+  border-bottom: 1px solid var(--line);
+  text-align: right;
+}
+.table th:first-child,
+.table td:first-child {
+  text-align: left;
+}
+.table th {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 13px;
+}
+.cardBody {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--line);
+}
+.stuck li {
+  gap: 8px;
+  flex-wrap: wrap;
+}

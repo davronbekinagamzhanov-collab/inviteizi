@@ -582,7 +582,7 @@ it.skipIf(!native)(
     const partnerUser = ++n;
     await sim.start(partnerUser, "join_" + /start=join_([a-z0-9]+)/.exec(made.link)![1]);
     await sim.click(partnerUser, uz.langUz);
-    await sim.contact(partnerUser, "77015554433");
+    // этап 3: после выбора языка сразу меню (телефон не спрашиваем)
     expect((await repo.getPartner(made.id))?.telegramId).toBe(partnerUser);
 
     const client = ++n;
@@ -745,7 +745,7 @@ it.skipIf(!native)(
     const pu = ++n;
     await sim.start(pu, "join_" + /start=join_([a-z0-9]+)/.exec(made.link)![1]);
     await sim.click(pu, uz.langUz);
-    await sim.contact(pu, "77015554433");
+    // этап 3: после выбора языка сразу меню (телефон не спрашиваем)
     const op = await nikohOrder(sim, pu);
     await sim.click(pu, /^💳 Тўлаш/);
     expect((await repo.getOrder(op.id))?.amount).toBe(7990);

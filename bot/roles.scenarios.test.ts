@@ -67,7 +67,8 @@ async function createPartner(s: Sim, who: number, name: string) {
 async function join(s: Sim, token: string, id = PARTNER) {
   await s.start(id, `join_${token}`);
   await s.click(id, uz.langUz);
-  await s.contact(id, "77011234567");
+  // этап 3: номер телефона не спрашиваем; Kaspi — из меню «💳»
+  await s.callback(id, "pn:pk", 1);
   await s.text(id, "+7 701 123 45 67");
 }
 

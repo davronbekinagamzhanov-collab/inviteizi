@@ -25,11 +25,12 @@ import { isQuiet } from "@/lib/quiet-hours";
 import { posterPdf, renderPosterPng } from "@/lib/poster";
 import { posterKk } from "@/texts/invite-kk";
 import { activeDesigns, PRICES } from "@/templates/registry";
-import { earningFor } from "@/lib/owner-panel";
+import { earningFor, partnerRowsWithin } from "@/lib/owner-panel";
+import { kzMidnight, nextPayDay } from "@/lib/money";
 import { staff as S } from "@/texts/bot-ru";
 import type { InlineButton } from "../tg";
 import { recordBotError, toEntry } from "../errors";
-import { editOrSend, ib, inline, price, roleOf, send, texts } from "./util";
+import { editOrSend, ib, inline, ownerUrl, price, roleOf, send, texts } from "./util";
 import { roleHome } from "./panel";
 import { afterPartnerPayout } from "./notify";
 import type { Ctx, Deps, Result, Step } from "./types";
@@ -901,48 +902,47 @@ async function myPartner(c: Ctx) {
   return p && p.telegramId === c.user.id && p.status !== "rejected" ? p : null;
 }
 
+/** «15%» или «1 000 ₸» — ставка партнёра одной строкой */
+const rateText = (p: Partner) => (p.ratePercent != null ? `${p.ratePercent}%` : price(p.rate));
+
+/**
+ * Первый вход по join_ (этап 3): ОДНО сообщение — что получил (ставка, график), ссылка и постер готовы,
+ * 3 шага на сегодня и выбор языка. Нажал язык — это же сообщение становится приветствием на его языке с меню.
+ */
 export const joinLang: Step = {
   async ask(c) {
+    const p = await myPartner(c);
     const tx = texts.uz;
     const kk = Boolean(c.deps.env.kazakhEnabled);
     await send(
       c,
-      kk ? tx.role.joinHello3 : tx.role.joinHello,
+      p
+        ? tx.role.joinWelcome({ name: p.name, rate: rateText(p), schedule: tx.role.schedule[p.schedule], ask: true })
+        : kk
+          ? tx.role.joinHello3
+          : tx.role.joinHello,
       inline([[ib(c, tx.langUz, "uz"), ib(c, tx.langRu, "ru"), ...(kk ? [ib(c, tx.langKk, "kk")] : [])]]),
     );
   },
   async onButton(c, v) {
     if (v !== "uz" && v !== "ru" && !(v === "kk" && c.deps.env.kazakhEnabled)) return null;
-    if (!(await myPartner(c))) return { done: true };
+    const p = await myPartner(c);
+    if (!p) return { done: true };
     await c.deps.repo.setLang(c.user.id, v);
     c.user.lang = v;
     c.lang = v;
     c.tx = texts[v];
-    return { to: "joinPhone" };
+    const t = c.tx.role;
+    const menu = await partnerMenu(c, p);
+    // то же сообщение: приветствие на выбранном языке + кнопки меню (без второго сообщения подряд)
+    await editOrSend(c, t.joinWelcome({ name: p.name, rate: rateText(p), schedule: t.schedule[p.schedule], ask: false }), inline(menu.rows));
+    await syncMenuButton(c.deps, c.user.id, "partner", c.tx.menuButton);
+    await tellBringer(c.deps, p, T.joined(p.name, tgOf({ telegramId: c.user.id, username: c.user.username })));
+    return { done: true };
   },
 };
 
-export const joinPhone: Step = {
-  replyKeyboard: true,
-  async ask(c) {
-    await send(c, c.tx.role.askPhone, { reply: [[{ text: c.tx.role.phoneButton, contact: true }]] });
-  },
-  async onMessage(c) {
-    const p = await myPartner(c);
-    if (!p) return { done: true };
-    // Кнопка «📱 Рақамни юбориш» — свой номер; чужую карточку контакта не принимаем. Номер текстом — тоже можно
-    const phone =
-      c.u.kind === "contact" && c.u.own
-        ? normalizePhone(c.u.phone)
-        : c.u.kind === "text"
-          ? normalizePhone(c.u.text)
-          : null;
-    if (!phone) return { hint: c.tx.role.badPhone };
-    await c.deps.repo.updatePartner(p.id, { phone });
-    return { to: "joinKaspi" };
-  },
-};
-
+/** «💳 Kaspi рақамим»: партнёр сам пишет/меняет номер для выплат (владелец видит его в «Выплатах») */
 export const joinKaspi: Step = {
   replyKeyboard: true,
   async ask(c) {
@@ -960,10 +960,8 @@ export const joinKaspi: Step = {
       c.u.kind === "text" ? normalizeKaspi(c.u.text) : c.u.kind === "contact" ? normalizePhone(c.u.phone) : null;
     if (!kaspi) return { hint: c.tx.role.badKaspi };
     await c.deps.repo.updatePartner(p.id, { kaspi });
-    // Убрать нижнюю клавиатуру и сразу показать меню партнёра
-    await send(c, c.tx.role.joined, { removeReply: true });
+    await send(c, c.tx.role.kaspiSaved(fmtPhone(kaspi)), { removeReply: true });
     await roleHome(c, true);
-    await tellBringer(c.deps, p, T.joined(p.name, tgOf({ telegramId: c.user.id, username: c.user.username })));
     return { done: true };
   },
 };
@@ -1049,6 +1047,90 @@ export async function creditPartnerSafely(c: Ctx, order: OrderRecord) {
     await recordBotError(c.deps, toEntry(e, c.u, c.step, "ack"));
   }
 }
+
+// ── Партнёр: короткое меню, «Батафсил», «Қандай ишлайди» (этап 3, 19.11.2026) ──
+
+const DAY_MS = 86_400_000;
+
+/** «24 ноябр, душанба» — дата следующей выплаты словами на языке партнёра */
+function payDateText(c: Ctx, p: Partner) {
+  const t = c.tx.role;
+  const day = nextPayDay(p.schedule, c.deps.now());
+  const d = new Date(`${day}T00:00:00Z`);
+  return t.dateLine(d.getUTCDate(), t.months[d.getUTCMonth()], t.weekdays[d.getUTCDay()]);
+}
+
+/** Сумма начислений и число оплат партнёра за [from, to) — без имён клиентов */
+function partnerWindow(s: PanelSnapshot, p: Partner, from: Date, to: Date) {
+  const inside = (d: Date) => +d >= +from && +d < +to;
+  const row = partnerRowsWithin(s, inside).find((x) => x.partner.id === p.id);
+  const sum = s.earnings.filter((e) => e.partnerId === p.id && inside(e.createdAt)).reduce((n, e) => n + e.amount, 0);
+  return { scanned: row?.scanned ?? 0, namuna: row?.started ?? 0, paid: row?.paid ?? 0, sum };
+}
+
+/** Главное меню партнёра: 4 строки + кнопки. Чужие имена и логины не показываются */
+export async function partnerMenu(c: Ctx, p: Partner): Promise<{ text: string; rows: InlineButton[][] }> {
+  const t = c.tx.role;
+  const s = await panelData(c.deps);
+  const all = partnerRows(s, "all", c.deps.now()).find((x) => x.partner.id === p.id);
+  const from = kzMidnight(c.deps.now());
+  const today = partnerWindow(s, p, from, new Date(+from + DAY_MS));
+  return {
+    text: t.partnerMenu({
+      name: p.name,
+      earned: price(all?.earned ?? 0),
+      due: price(all ? all.due + all.onHold : 0),
+      next: payDateText(c, p),
+      today: today.paid,
+      pending: p.status === "pending",
+      noKaspi: !p.kaspi,
+    }),
+    rows: [
+      [
+        { text: t.btnLink, data: "pn:pq" },
+        { text: t.btnPayouts, data: "pn:pp" },
+      ],
+      [
+        { text: t.btnDetail, data: "pn:pd" },
+        { text: t.btnHow, data: "pn:ph" },
+      ],
+      [
+        { text: t.btnKaspi, data: "pn:pk" },
+        { text: c.tx.contact, url: ownerUrl(c) },
+      ],
+      // своё приглашение партнёр заказывает как клиент
+      [c.deps.env.miniAppUrl ? { text: t.self, webApp: c.deps.env.miniAppUrl } : { text: t.self, data: "pn:self" }],
+    ],
+  };
+}
+
+/** «📋 Батафсил»: по дням (7) и неделям (4) — переходы, НАМУНА, оплаты, сумма; без имён */
+export async function partnerDetailScreen(c: Ctx, p: Partner) {
+  const t = c.tx.role;
+  const s = await panelData(c.deps);
+  const today = kzMidnight(c.deps.now());
+  const dm = (d: Date) => {
+    const x = new Date(+d + 5 * 3_600_000).toISOString();
+    return `${x.slice(8, 10)}.${x.slice(5, 7)}`;
+  };
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const from = new Date(+today - i * DAY_MS);
+    const w = partnerWindow(s, p, from, new Date(+from + DAY_MS));
+    return t.detailRow(dm(from), w.scanned, w.namuna, w.paid, price(w.sum));
+  });
+  const weeks = Array.from({ length: 4 }, (_, i) => {
+    const to = new Date(+today + DAY_MS - i * 7 * DAY_MS);
+    const from = new Date(+to - 7 * DAY_MS);
+    const w = partnerWindow(s, p, from, to);
+    return t.detailRow(t.weekLabel(dm(from), dm(new Date(+to - DAY_MS))), w.scanned, w.namuna, w.paid, price(w.sum));
+  });
+  return {
+    text: [t.detailTitle, "", t.detailDays, ...days, "", t.detailWeeks, ...weeks].join("\n"),
+    rows: [[{ text: c.tx.back, data: "pn:home" }]],
+  };
+}
+
+export const partnerHowScreen = (c: Ctx) => ({ text: c.tx.role.howText, rows: [[{ text: c.tx.back, data: "pn:home" }]] });
 
 // ── Партнёр: /hamkor и экраны меню ──
 

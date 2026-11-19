@@ -19,7 +19,7 @@ import type { ClaimStatus, InviteKind, InviteUse, Manager } from "@/lib/roles";
 import { isReservedSlug } from "@/lib/slug";
 import { summarize, withoutStaffAnalytics, type MetricEvent, type EventKind, type Period } from "@/lib/analytics";
 import type { Occasion } from "@/lib/types";
-import type { Repo } from "./repo";
+import { WHOLESALE_REF, type Repo } from "./repo";
 import type {
   Lang,
   MusicRecord,
@@ -69,8 +69,13 @@ export class MemoryRepo implements Repo {
       ]),
     ];
   }
-  async saveRsvp(input: RsvpInput) {
+  async saveRsvp(raw: RsvpInput) {
     const now = this.now();
+    // одинаковое пожелание другого гостя этого приглашения — повтор, ответ без него (как в PgRepo)
+    const dup =
+      raw.wish &&
+      this.rsvp.some((r) => r.orderId === raw.orderId && r.visitorKey !== raw.visitorKey && r.wish?.toLowerCase() === raw.wish!.toLowerCase());
+    const input = { ...raw, wish: dup ? null : (raw.wish ?? null) };
     const old = this.rsvp.find((r) => r.orderId === input.orderId && r.visitorKey === input.visitorKey);
     if (old) {
       Object.assign(old, input, { updatedAt: now });
@@ -106,7 +111,7 @@ export class MemoryRepo implements Repo {
     return this.rsvp
       .filter((r) => r.orderId === orderId)
       .sort((a, b) => +b.updatedAt - +a.updatedAt)
-      .map(({ name, guests, attending, updatedAt }) => ({ name, guests, attending, updatedAt }));
+      .map(({ name, guests, attending, updatedAt, wish }) => ({ name, guests, attending, updatedAt, wish: wish ?? null }));
   }
   async panelSnapshot(): Promise<PanelSnapshot> {
     const orders = [...this.orders.values()].map((o): PanelOrder => {
@@ -128,6 +133,7 @@ export class MemoryRepo implements Repo {
         updatedAt: o.updatedAt,
         slug: o.slug,
         names: [o.data.groom, o.data.bride, o.data.person].filter(Boolean).join(" & ") || null,
+        promotion: Boolean(o.pricing?.kind === "promotion"),
       };
     });
     const users = [...this.users.values()].map((u) => ({ id: u.id, createdAt: u.createdAt, source: u.source }));
@@ -313,11 +319,17 @@ export class MemoryRepo implements Repo {
     const top = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "";
     return { count: list.length, top };
   }
+  async demoViewers(from: Date, to: Date) {
+    const ids = new Set<number>();
+    for (const e of this.analyticsEvents.values())
+      if (+e.createdAt >= +from && +e.createdAt < +to) ids.add(e.userId);
+    return [...ids];
+  }
   async errorSteps(since: Date) {
     const counts = new Map<string, number>();
     for (const e of this.botErrors.filter((x) => +(x as { at?: Date }).at! >= +since))
       counts.set(e.step ?? "—", (counts.get(e.step ?? "—") ?? 0) + 1);
-    return [...counts.entries()].map(([step, n]) => ({ step, n })).sort((a, b) => b.n - a.n).slice(0, 3);
+    return [...counts.entries()].map(([step, n]) => ({ step, n })).sort((a, b) => b.n - a.n).slice(0, 10);
   }
   async lastNoticeAt(prefix: string) {
     const times = [...this.notices.values()].filter((n) => n.key.startsWith(prefix) && n.sentAt).map((n) => +n.sentAt!);
@@ -613,9 +625,11 @@ export class MemoryRepo implements Repo {
   }
   async issueClientOrder(o: { orderId: string; createdBy: number; tokenHash: string; refSource: string | null }) {
     const old = this.clientOrders.find((x) => x.orderId === o.orderId);
-    if (old?.claimedBy) return;
-    if (old) Object.assign(old, o);
+    // уже забран — заново выдать может только тот, кто его забрал (цепочка: менеджер → оптовик → клиент)
+    if (old?.claimedBy && old.claimedBy !== o.createdBy) return false;
+    if (old) Object.assign(old, o, { claimedBy: null });
     else this.clientOrders.push({ ...o, claimedBy: null });
+    return true;
   }
   async claimClientOrder(tokenHash: string, clientId: number): Promise<{ status: ClaimStatus; order?: OrderRecord }> {
     const co = this.clientOrders.find((x) => x.tokenHash === tokenHash);
@@ -624,8 +638,10 @@ export class MemoryRepo implements Repo {
     if (co.claimedBy === clientId) return { status: "mine", order: clone(order) };
     if (co.claimedBy !== null) return { status: "used" };
     if (co.createdBy === clientId) return { status: "creator", order: clone(order) };
-    if (!["draft", "preview", "awaiting_payment", "rejected"].includes(order.status) || order.userId !== co.createdBy)
-      return { status: "closed" };
+    // оптовик передаёт клиенту уже оплаченный заказ (ref «wholesale»); остальные — только неоплаченные
+    const payable = ["draft", "preview", "awaiting_payment", "rejected"].includes(order.status);
+    const paidTransfer = co.refSource === WHOLESALE_REF && order.status === "active";
+    if ((!payable && !paidTransfer) || order.userId !== co.createdBy) return { status: "closed" };
     co.claimedBy = clientId;
     order.userId = clientId;
     order.updatedAt = this.now();

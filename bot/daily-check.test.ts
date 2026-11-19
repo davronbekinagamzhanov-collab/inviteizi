@@ -124,3 +124,26 @@ describe("что считается мусором в странице", () => {
     expect(badTextIn("<p>2 990 ₸ · 4 990 ₸ · 7 990 ₸ · 18 000 ₸</p>")).toEqual([]);
   });
 });
+
+describe("медленные ответы бота (этап 3)", () => {
+  it("обновление дольше 3 с — запись slow (не чаще раза в 5 минут); утренняя проверка показывает их число", async () => {
+    const { handle, resetSlowThrottle } = await import("./flow");
+    const s = at("2026-11-19T04:05:00Z");
+    resetSlowThrottle();
+    // Telegram «тормозит» на 3,1 с
+    const slowTg = s.deps.tg.sendMessage.bind(s.deps.tg);
+    s.deps.tg.sendMessage = (async (...a: Parameters<typeof slowTg>) => {
+      await new Promise((r) => setTimeout(r, 3100));
+      return slowTg(...a);
+    }) as typeof slowTg;
+    await handle(s.deps, { kind: "command", command: "start", args: "", from: { id: 7, username: null, firstName: "A" }, chatId: 7, messageId: 1 } as never);
+    await handle(s.deps, { kind: "command", command: "start", args: "", from: { id: 8, username: null, firstName: "B" }, chatId: 8, messageId: 2 } as never);
+    const slow = s.repo.botErrors.filter((e) => e.step === "slow");
+    expect(slow).toHaveLength(1);
+    expect(slow[0].message).toMatch(/^\/start — \d{4} мс$/);
+    for (let i = 0; i < 2; i++) await s.repo.logBotError({ ...slow[0] });
+    const r = await dailyCheck(s.deps, io());
+    expect(r.problems.join("\n")).toContain("Медленные ответы бота (> 3 с) за сутки: 3");
+    expect(r.problems.join("\n")).not.toContain("Ошибки бота");
+  }, 20_000);
+});

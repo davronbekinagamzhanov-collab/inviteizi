@@ -59,8 +59,11 @@ export async function startMenu(c: Ctx): Promise<{ inline: InlineButton[][] }> {
 /** Роль человека в личном чате. В группе — всегда клиент: панели там не открываются */
 export async function roleOf(c: Pick<Ctx, "deps" | "user" | "chatId">): Promise<Role> {
   if (c.chatId !== c.user.id) return "client";
-  if (await c.deps.repo.isAdmin(c.user.id)) return "owner";
-  if (await c.deps.repo.getManager(c.user.id)) return "manager";
+  // админ и менеджер — одновременно (одна задержка сети вместо двух); партнёра ищем только у остальных:
+  // поиск партнёра привязывает его по @username, сотрудника привязывать нельзя
+  const [admin, manager] = await Promise.all([c.deps.repo.isAdmin(c.user.id), c.deps.repo.getManager(c.user.id)]);
+  if (admin) return "owner";
+  if (manager) return "manager";
   if (await c.deps.repo.findPartnerForUser(c.user.id, c.user.username)) return "partner";
   return "client";
 }
@@ -170,4 +173,11 @@ export const after = <T extends string>(c: Ctx, next: T): T | "review" => c.s.re
 /** Строка заказа для «моих» и для админа */
 export function orderTitle(o: OrderRecord) {
   return `${namesOf(o.data)} · ${t.occasionTitles[o.occasion]}`;
+}
+
+/** Выполнить после ответа Telegram, если можно (deps.defer), иначе сразу. Ошибка задачи — только в лог */
+export async function later(c: Ctx, task: () => Promise<void>) {
+  const safe = () => task().catch((e) => console.error("deferred", e instanceof Error ? e.name : "Error"));
+  if (c.deps.defer) c.deps.defer(safe);
+  else await safe();
 }

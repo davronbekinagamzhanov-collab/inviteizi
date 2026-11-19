@@ -42,6 +42,11 @@ export type Deps = {
   health?: import("../health").HealthIo;
   /** «Сақлаб олиш»: фото, PDF, видео (bot/keepsake.ts). Нет — кнопок файлов нет (тесты без них) */
   keepsake?: import("../keepsake").KeepsakeIo;
+  /**
+   * Тяжёлая работа ПОСЛЕ ответа Telegram (этап 3, скорость): у вебхука max_connections 1 — пока одно обновление
+   * строит PDF или постер, ждут все. В проде — after() из next/server; нет (тесты) — выполняется сразу.
+   */
+  defer?: (task: () => Promise<void>) => void;
 };
 
 /** Шаги анкеты (users.step) */
@@ -96,7 +101,6 @@ export type StepId =
   | "partnerPropose"
   | "partnerProposeSchedule"
   | "joinLang"
-  | "joinPhone"
   | "joinKaspi";
 
 /** Данные анкеты по ходу заполнения (тадбиры могут быть недозаполнены) */

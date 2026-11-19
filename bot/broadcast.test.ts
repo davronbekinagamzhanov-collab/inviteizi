@@ -41,7 +41,7 @@ async function world() {
   })) as { id: number; link: string };
   await s.start(PARTNER, "join_" + /start=join_([a-z0-9]+)/.exec(p.link)![1]);
   await s.click(PARTNER, uz.langUz);
-  await s.contact(PARTNER, "77011234567");
+  // этап 3: после выбора языка сразу меню (телефон не спрашиваем)
   const code = (await s.repo.getPartner(p.id))!.code;
   for (const id of [CLIENT, SILENT, BLOCKED, WHOLESALE]) {
     await s.start(id);

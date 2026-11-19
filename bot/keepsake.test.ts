@@ -3,7 +3,7 @@
  * ответ runner'а, повтор 1 раз, сообщение владельцу. Отказы: чужой заказ, неоплаченный, двойное нажатие,
  * нет рендера видео (кнопки нет), неверный секрет ответа, чужой адрес видео.
  */
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { resetRateLimits } from "@/lib/rate-limit";
 import { uz } from "@/texts/bot-uz";
 import { ru } from "@/texts/bot-ru";
@@ -201,6 +201,33 @@ describe("«📥 Сақлаб олиш» в боте", () => {
   });
 });
 
+describe("«📥 Сақлаб олиш»: после ответа Telegram (этап 3)", () => {
+  beforeEach(() => resetRateLimits());
+  it("кнопка отвечает сразу («⏳»), файл строится после ответа вебхука", async () => {
+    const s = new Sim();
+    const k = withKeepsake(s);
+    const o = await paidOrder(s, 1);
+    const queue: (() => Promise<void>)[] = [];
+    s.deps.defer = (t) => void queue.push(t);
+    await s.callback(1, `ks:${o.number}:story`, 1);
+    expect(s.tg.answers.at(-1)?.text).toBe(K.making);
+    expect(k.rendered).toEqual([]);
+    expect(queue).toHaveLength(1);
+    await queue[0]();
+    expect(k.rendered).toEqual([`${o.number}:story`]);
+    expect(s.tg.to(1).at(-1)!.type).toBe("photo");
+    // база упала во время отложенной задачи — клиенту «не получилось», не тишина
+    const getOrderByNumber = s.repo.getOrderByNumber.bind(s.repo);
+    s.repo.getOrderByNumber = async () => {
+      throw new Error("db down");
+    };
+    await s.callback(1, `ks:${o.number}:feed`, 1);
+    await queue[1]();
+    expect(s.lastText(1)).toBe(K.failed);
+    s.repo.getOrderByNumber = getOrderByNumber;
+  });
+});
+
 describe("«📥 Сақлаб олиш»: находки ревью", () => {
   beforeEach(() => resetRateLimits());
   it("поздний «failed»/«running» после готового видео — без второго рендера и без смены статуса", async () => {
@@ -281,5 +308,48 @@ describe("/api/render — ответ runner'а", () => {
     const ok = await handleRenderCallback(req("Bearer sec", { orderId: o.id, status: "done", url: BLOB }), "sec", deps);
     expect(ok.status).toBe(200);
     expect(s.tg.to(1).filter((m) => m.type === "video")).toHaveLength(1);
+  });
+});
+
+describe("видео без секретов не видно нигде (этап 3)", () => {
+  beforeEach(() => resetRateLimits());
+  it("нет GITHUB_DISPATCH_TOKEN / RENDER_CALLBACK_SECRET — нет кнопки в боте, в Mini App, в каталоге и строке «что входит»", async () => {
+    const { keepsakeIo } = await import("./keepsake-io");
+    for (const k of ["GITHUB_DISPATCH_TOKEN", "RENDER_CALLBACK_SECRET", "BLOB_READ_WRITE_TOKEN"]) vi.stubEnv(k, "");
+    const io = keepsakeIo("https://inviteizi.vercel.app");
+    expect(io.dispatchVideo).toBeUndefined();
+    expect(io.videoJob).toBeUndefined();
+    // только один секрет — тоже нет
+    vi.stubEnv("GITHUB_DISPATCH_TOKEN", "github_pat_x");
+    expect(keepsakeIo("https://inviteizi.vercel.app").dispatchVideo).toBeUndefined();
+    vi.unstubAllEnvs();
+    const s = new Sim();
+    s.deps.keepsake = { ...io, render: async () => new Uint8Array([1]) };
+    const o = await paidOrder(s, 1);
+    expect(o.format).toBe("animated");
+    const offer = s.tg.to(1).find((m) => m.text.startsWith(K.offer))!;
+    expect(btns(offer.markup)).not.toContain(K.video);
+    expect(offer.text).not.toContain(K.offerVideo);
+    const session = (await appAction(s.deps, user(1), { action: "session" })).body as { keepsake?: { video: boolean }; orders: { keepsake?: { video: boolean } | null }[] };
+    expect(session.keepsake).toEqual({ files: true, video: false });
+    expect(session.orders[0].keepsake).toEqual({ video: false });
+    expect(await deliverKeepsake(s.deps, 1, { number: o.number }, "video")).toBe("unavailable");
+    expect(uz.format.includes(false)).not.toContain("🎬");
+  });
+
+  it("запуск видео — workflow_dispatch (токену хватает «Actions: write»), данные заказа одним входом job", async () => {
+    const { dispatchVideoJob } = await import("./keepsake-io");
+    let call: { url: string; body: { ref: string; inputs: { job: string } } } | null = null;
+    const fake = (async (url: string, init: RequestInit) => {
+      call = { url, body: JSON.parse(String(init.body)) };
+      return new Response(null, { status: 204 });
+    }) as unknown as typeof fetch;
+    const job = { orderId: "o", slug: "aziz-madina", url: "u", musicUrl: null, cta: "c", link: "l", paper: "#fff", ink: "#000", callback: "cb" };
+    await dispatchVideoJob(job, "t", "owner/repo", fake);
+    expect(call!.url).toBe("https://api.github.com/repos/owner/repo/actions/workflows/render-video.yml/dispatches");
+    expect(call!.body.ref).toBe("main");
+    expect(JSON.parse(call!.body.inputs.job)).toEqual(job);
+    const fail = (async () => new Response("{}", { status: 403 })) as unknown as typeof fetch;
+    await expect(dispatchVideoJob(job, "t", "owner/repo", fail)).rejects.toThrow("GitHub dispatch 403");
   });
 });

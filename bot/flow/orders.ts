@@ -660,6 +660,22 @@ export async function resendLink(c: Ctx, n: number): Promise<Result> {
 }
 
 const RSVP_SHOWN = 40;
+/** Лимит сообщения Telegram 4096 — с запасом */
+const TG_TEXT_MAX = 3900;
+
+/** «💌 Тилаклар:» — пожелания гостей, сколько влезает в сообщение (новые первыми). Пусто — "" */
+export function wishesBlock(tx: { rsvp: { wishesHead: string; wishLine: (n: string, w: string) => string } }, list: { name: string; wish?: string | null }[], room: number) {
+  const lines: string[] = [];
+  let used = tx.rsvp.wishesHead.length + 2;
+  for (const r of list) {
+    if (!r.wish) continue;
+    const line = tx.rsvp.wishLine(r.name, r.wish);
+    if (used + line.length + 1 > room) break;
+    lines.push(line);
+    used += line.length + 1;
+  }
+  return lines.length ? `\n\n${tx.rsvp.wishesHead}\n${lines.join("\n")}` : "";
+}
 
 /** Ответы гостей: видит только хозяин заказа */
 export async function rsvpAnswers(c: Ctx, n: number): Promise<Result> {
@@ -678,7 +694,8 @@ export async function rsvpAnswers(c: Ctx, n: number): Promise<Result> {
     .slice(0, RSVP_SHOWN)
     .map((r) => (r.attending ? c.tx.rsvp.lineYes(r.name, r.guests) : c.tx.rsvp.lineNo(r.name)));
   if (list.length > RSVP_SHOWN) lines.push(c.tx.rsvp.more(list.length - RSVP_SHOWN));
-  await send(c, [c.tx.rsvp.head(total.replies, total.people, total.declined), "", ...lines].join("\n"));
+  const head = [c.tx.rsvp.head(total.replies, total.people, total.declined), "", ...lines].join("\n");
+  await send(c, head + wishesBlock(c.tx, list, TG_TEXT_MAX - head.length));
   return { stay: true };
 }
 
@@ -777,6 +794,9 @@ export async function myOrders(c: Ctx) {
     return;
   }
   const seller = await isSeller(c);
+  // оптовик: скидка видна сверху, у оплаченных заказов — «📤 Мижозга юбориш»
+  const wholesaler = c.chatId === c.user.id ? await c.deps.repo.getWholesaler(c.user.id).catch(() => null) : null;
+  if (wholesaler) await send(c, c.tx.wholesale.line(wholesaler.percent));
   for (const o of list) {
     // До оплаты — всё можно менять; чек на проверке — ждём; ссылка выдана — заказ закрыт
     const rows: InlineButton[][] = [];
@@ -790,8 +810,13 @@ export async function myOrders(c: Ctx) {
     if (o.status === "active" && c.deps.env.marketing?.edits)
       rows.push([{ text: marketingCopy(c.lang).editButton, data: `fix:${o.number}` }]);
     const last: InlineButton[] = o.status === "active" ? [{ text: c.tx.my.link, data: `link:${o.number}` }] : [];
-    if (o.status === "active" && o.data.rsvp) rows.push([{ text: c.tx.rsvp.answers, data: `rsvp:${o.number}` }]);
+    if (o.status === "active" && o.data.rsvp) {
+      // «📝 Жавоблар · 12 киши · 5 оила» — сколько придёт, сразу на кнопке
+      const t = rsvpTotals(await c.deps.repo.listRsvp(o.id).catch(() => []));
+      rows.push([{ text: c.tx.rsvp.answersN(t.people, t.replies - t.declined), data: `rsvp:${o.number}` }]);
+    }
     if (o.status === "active" && c.deps.keepsake) rows.push([{ text: c.tx.keepsake.button, data: `ks:${o.number}` }]);
+    if (o.status === "active" && wholesaler) rows.push([{ text: c.tx.wholesale.toClient, data: `wcl:${o.number}` }]);
     rows.push([...last, { text: c.tx.contact, url: ownerUrl(c) }]);
     const title = `${namesOf(o.data)} · ${designName(o.templateId)}`;
     await send(c, c.tx.my.item(o.number, title, c.tx.my.statuses[o.status], pageUrl(c, o.slug)), inline(rows));

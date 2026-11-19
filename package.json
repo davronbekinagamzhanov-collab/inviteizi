@@ -18,7 +18,7 @@
     "grammy": "^1.46.0",
     "heic-decode": "^2.1.0",
     "motion": "^14.4.0",
-    "next": "16.4.2",
+    "next": "16.4.6",
     "pdf-lib": "^1.17.1",
     "postgres": "^3.4.9",
     "qrcode": "^1.5.4",
@@ -36,11 +36,16 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.4.2",
+    "eslint-config-next": "16.4.6",
     "jsqr": "^1.4.0",
     "playwright-core": "^1.56.1",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^3.2.7"
+  },
+  "overrides": {
+    "@vercel/cli-config": {
+      "zod": "^4.6.6"
+    }
   }
 }

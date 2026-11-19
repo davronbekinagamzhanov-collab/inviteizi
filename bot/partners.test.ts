@@ -61,7 +61,8 @@ async function createPartner(s: Sim, who: number, o: { name?: string; phone?: st
 async function join(s: Sim, token: string, id = PARTNER, lang = uz.langUz) {
   await s.start(id, `join_${token}`);
   await s.click(id, lang);
-  await s.contact(id, "77011234567");
+  // этап 3: номер телефона не спрашиваем; Kaspi — из меню «💳»
+  await s.callback(id, "pn:pk", 1);
   await s.text(id, "+7 701 123 45 67");
 }
 
@@ -257,27 +258,35 @@ describe("предложение менеджера", () => {
 });
 
 describe("ссылка join_", () => {
-  it("язык → номер кнопкой → Kaspi «тот же номер» → меню партнёра; тому, кто привёл, — «подключился»", async () => {
+  it("этап 3: одно приветствие (ставка, график, 3 шага, выбор языка) → то же сообщение на его языке с меню; Kaspi — сам из меню", async () => {
     const s = new Sim();
     const token = await createPartner(s, ADMIN);
+    const before = s.tg.to(PARTNER).length;
     await s.start(PARTNER, `join_${token}`);
-    expect(s.lastText(PARTNER)).toBe(uz.role.joinHello);
+    // ровно одно сообщение: приветствие с выбором языка
+    expect(s.tg.to(PARTNER).length - before).toBe(1);
+    const hello = s.last(PARTNER)!;
+    expect(hello.text).toContain("Салон Малика");
+    expect(hello.text).toContain("Тилни танланг · Выберите язык");
+    expect(hello.text).toMatch(/1\. .*\n2\. .*\n3\. /);
     await s.click(PARTNER, ru.langRu);
-    expect(s.lastText(PARTNER)).toBe(ru.role.askPhone);
-    expect(s.last(PARTNER)!.markup).toEqual({ reply: [[{ text: ru.role.phoneButton, contact: true }]] });
-    // Чужая карточка контакта — нет
-    await s.contact(PARTNER, "77779998877", false);
-    expect(texts(s, PARTNER)).toContain(ru.role.badPhone);
-    await s.contact(PARTNER, "77011234567");
+    // то же сообщение стало русским приветствием с меню — новых сообщений нет
+    expect(s.tg.to(PARTNER).length - before).toBe(1);
+    const welcome = s.last(PARTNER)!;
+    expect(welcome.text).toContain("Добро пожаловать, Салон Малика!");
+    expect(welcome.text).not.toContain("Выберите язык");
+    expect(JSON.stringify(welcome.markup)).toContain(ru.role.btnKaspi);
+    expect((await s.user(PARTNER))!).toMatchObject({ lang: "ru", step: "idle" });
+    expect(texts(s, ADMIN)).toContain(T.joined("Салон Малика", `@user${PARTNER}`));
+    // Kaspi — сам из меню; неверный номер — подсказка
+    await s.callback(PARTNER, "pn:pk", 1);
     expect(s.lastText(PARTNER)).toBe(ru.role.askKaspi);
     await s.text(PARTNER, "1234");
     expect(texts(s, PARTNER)).toContain(ru.role.badKaspi);
     await s.text(PARTNER, "+7 701 123 45 67");
-    expect(s.repo.partners[0]).toMatchObject({ telegramId: PARTNER, username: `user${PARTNER}`, phone: "+77011234567", kaspi: "+77011234567" });
-    expect(texts(s, PARTNER)).toContain(ru.role.joined);
-    expect(s.lastText(PARTNER)).toContain(ru.role.partnerHome("Салон Малика", false));
-    expect((await s.user(PARTNER))!).toMatchObject({ lang: "ru", step: "idle" });
-    expect(texts(s, ADMIN)).toContain(T.joined("Салон Малика", `@user${PARTNER}`));
+    expect(s.repo.partners[0]).toMatchObject({ telegramId: PARTNER, username: `user${PARTNER}`, kaspi: "+77011234567" });
+    expect(texts(s, PARTNER).some((t) => t.startsWith("✅ Kaspi: +7 701 123 45 67"))).toBe(true);
+    expect(s.lastText(PARTNER)).toContain("💰 Заработано всего: 0 ₸");
     // join_ не записывается как источник клиента
     expect((await s.user(PARTNER))!.source).toBeNull();
   });
@@ -331,8 +340,8 @@ describe("ссылка join_", () => {
     await makeManager(s);
     const token = await createPartner(s, MANAGER, { rate: "0" });
     await join(s, token);
-    expect(s.lastText(PARTNER)).toContain(uz.role.partnerHome("Салон Малика", true));
-    await s.click(PARTNER, uz.role.payouts);
+    expect(s.lastText(PARTNER)).toContain("⏳ Тасдиқ кутилмоқда");
+    await s.click(PARTNER, uz.role.btnPayouts);
     expect(s.lastText(PARTNER)).toContain(uz.role.countOnly);
   });
 
@@ -343,7 +352,7 @@ describe("ссылка join_", () => {
     await join(s, token);
     await paidOrder(s, CLIENT, s.repo.partners[0].code);
     await s.start(PARTNER);
-    await s.click(PARTNER, uz.role.payouts);
+    await s.click(PARTNER, uz.role.btnPayouts);
     expect(s.lastText(PARTNER)).toContain(uz.role.onHold("1 000 ₸"));
     expect(s.lastText(PARTNER)).toContain(uz.role.payDay(uz.role.schedule.monthly));
   });
@@ -443,11 +452,11 @@ describe("лимиты Telegram на новые тексты", () => {
       T.card({ name: long, status: T.status.pending, phone: "+7 701 123 45 67", tg: "@" + "u".repeat(32), kaspi: "4400 4301 2345 6789", terms: T.terms("1 000 000 ₸", T.scheduleLower.monthly), manager: "@" + "m".repeat(32), proposal: T.terms("1 000 000 ₸", T.scheduleLower.daily) }),
       T.newFrom("@" + "m".repeat(32), long, "+7 701 123 45 67", T.terms("1 000 000 ₸", T.scheduleLower.monthly)),
       T.proposal("@" + "m".repeat(32), long, "1 000 000 ₸ → 1 000 000 ₸", "раз в месяц (1-го) → каждый день"),
-      ...[uz, ru].flatMap((tx) => [tx.role.joinHello, tx.role.askKaspi, tx.role.joinShare(`https://t.me/x?start=join_${"a".repeat(20)}`), tx.role.partnerHome(long, true)]),
+      ...[uz, ru].flatMap((tx) => [tx.role.joinHello, tx.role.askKaspi, tx.role.joinShare(`https://t.me/x?start=join_${"a".repeat(20)}`), tx.role.partnerMenu({ name: long, earned: "1 000 000 ₸", due: "1 000 000 ₸", next: "30 сентябр, чоршанба", today: 999, pending: true, noKaspi: true }), tx.role.joinWelcome({ name: long, rate: "1 000 000 ₸", schedule: "ҳар ойнинг 1-куни", ask: true }), tx.role.howText]),
     ];
     for (const m of msgs) expect(m.length, m).toBeLessThanOrEqual(TG_LIMITS.message);
     for (const a of [T.already, T.decided.active, T.decided.rejected, ru.oldButton]) expect(a.length).toBeLessThanOrEqual(TG_LIMITS.alert);
-    const labels = [...Object.values(T.btn).map((b) => (typeof b === "function" ? b("1 000 000 ₸") : b)), uz.role.phoneButton, ru.role.phoneButton, ...Object.values(T.schedule)];
+    const labels = [...Object.values(T.btn).map((b) => (typeof b === "function" ? b("1 000 000 ₸") : b)), ...[uz, ru].flatMap((tx) => [tx.role.btnLink, tx.role.btnPayouts, tx.role.btnDetail, tx.role.btnHow, tx.role.btnKaspi]), ...Object.values(T.schedule)];
     for (const l of labels) expect(l.length, l).toBeLessThanOrEqual(TG_LIMITS.button);
     for (const data of ["pa:paid:2147483647:1000000:9999", "pa:sset:2147483647:monthly", "pa:l:0:999"]) expect(Buffer.byteLength(data)).toBeLessThanOrEqual(TG_LIMITS.callbackData);
   });
@@ -468,7 +477,7 @@ describe("QR и постер (часть 6)", () => {
 
     await join(s, token);
     await s.start(PARTNER);
-    await s.click(PARTNER, uz.role.qr);
+    await s.click(PARTNER, uz.role.btnLink);
     expect(qrOf(s, PARTNER).text).toBe(uz.role.qrCaption(p.name, `https://t.me/inviteizi_test_bot?start=p_${p.code}`));
     expect(s.lastText(PARTNER)).toBe(uz.role.refLink(`https://t.me/inviteizi_test_bot?start=p_${p.code}`));
     await s.click(PARTNER, uz.role.posterRu);
@@ -511,7 +520,7 @@ describe("Ссылка партнёра текстом (fix/app-polish)", () => 
 
     await join(s, token);
     await s.start(PARTNER);
-    await s.click(PARTNER, uz.role.qr);
+    await s.click(PARTNER, uz.role.btnLink);
     const pm = s.last(PARTNER)!;
     expect(pm.text).toBe(uz.role.refLink(link));
     expect((pm.markup as { inline: { text: string; copy?: string }[][] }).inline.flat()).toEqual([{ text: uz.role.copyLink, copy: link }]);
@@ -525,8 +534,10 @@ describe("Ссылка партнёра текстом (fix/app-polish)", () => 
     expect((await s.user(CLIENT))!.source).toBe(partnerSource(p.code));
     expect(o.number).toBeGreaterThan(0);
     await s.start(PARTNER);
-    await s.click(PARTNER, uz.role.stats);
-    expect(s.lastText(PARTNER)).toContain(`${uz.role.statsText({ period: "", scanned: 0, paid: 1, earned: "", paidOut: "", due: "", link: "" }).split("\n").find((l) => l.startsWith("Тўлов"))}`);
+    // «📋 Батафсил»: по дням — 1 тўлов, без имён и номеров заказов
+    await s.click(PARTNER, uz.role.btnDetail);
+    expect(s.lastText(PARTNER)).toContain("1 тўлов");
+    expect(s.lastText(PARTNER)).not.toMatch(/user\d|Клиент\d|№\d/);
   }, 30_000);
 });
 

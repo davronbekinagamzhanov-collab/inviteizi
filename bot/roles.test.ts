@@ -88,6 +88,9 @@ describe("менеджер", () => {
     const token = await makeManager(s);
     expect(s.tg.to(MANAGER).map((m) => m.text)).toContain(staff.managerWelcome);
     expect(s.lastText(MANAGER)).toContain(staff.managerTitle);
+    // этап 3: одним взглядом — сеть, оплаты сегодня/месяц, заработок, прогресс до бонуса
+    for (const line of ["🤝 Партнёров в сети: 0", "✅ Оплат сети: сегодня 0 · за ", "💰 Ваш заработок за ", "🎯 0/30 до бонуса 15 000 ₸"])
+      expect(s.lastText(MANAGER)).toContain(line);
     for (const label of [staff.btn.myStats, staff.btn.myPartners, staff.btn.newPartner, staff.btn.earnings, staff.btn.client, staff.btn.create]) expect(buttons(s, MANAGER)).toContain(label);
     expect((await s.repo.getUser(MANAGER))!.lang).toBe("ru");
     expect(s.tg.to(ADMIN).some((m) => m.text.startsWith("✅") && m.text.includes("теперь менеджер"))).toBe(true);
@@ -168,12 +171,20 @@ describe("партнёр", () => {
     const s = new Sim();
     await s.repo.createPartner({ code: "malika11", name: "Салон Малика", telegramId: 900, username: null, rate: 1000 });
     await start(s, 900);
-    expect(s.lastText(900)).toContain(uz.role.partnerHome("Салон Малика", false));
+    // этап 3: 4 строки — заработано, к выплате, следующая выплата, оплат сегодня
+    const menu = s.lastText(900)!;
+    for (const line of ["🤝 Салон Малика", "💰 Жами ишланган: 0 ₸", "⏳ Тўланиши керак: 0 ₸", "📅 Кейинги тўлов:", "✅ Бугун тўловлар: 0"])
+      expect(menu).toContain(line);
     const b = buttons(s, 900);
-    for (const label of [uz.role.stats, uz.role.qr, uz.role.payouts, uz.contact, uz.role.self]) expect(b).toContain(label);
+    for (const label of [uz.role.btnLink, uz.role.btnPayouts, uz.role.btnDetail, uz.role.btnHow, uz.role.btnKaspi, uz.contact, uz.role.self])
+      expect(b).toContain(label);
     expect(b).not.toContain(uz.menu.create);
     const home = s.last(900)!.id;
-    await s.click(900, uz.role.payouts);
+    await s.click(900, uz.role.btnHow);
+    expect(s.tg.to(900).find((m) => m.id === home)!.text).toBe(uz.role.howText);
+    expect(uz.role.howText.split("\n").filter((l) => /^\d\. /.test(l))).toHaveLength(5);
+    await s.callback(900, "pn:home", home);
+    await s.click(900, uz.role.btnPayouts);
     expect(s.tg.to(900).find((m) => m.id === home)!.text).toContain(uz.role.payoutsText({ earned: "0 ₸", paidOut: "0 ₸", due: "0 ₸" }).split("\n")[0]);
     await s.callback(900, "pn:home", home);
     expect(s.tg.to(900).find((m) => m.id === home)!.text).toContain("Салон Малика");
@@ -183,7 +194,8 @@ describe("партнёр", () => {
     const s = new Sim();
     await s.repo.createPartner({ code: "malika22", name: "Малика", telegramId: 901, username: null, rate: 1000 });
     await start(s, 901, "", ru.langRu);
-    expect(s.lastText(901)).toContain(ru.role.partnerHome("Малика", false));
+    expect(s.lastText(901)).toContain("💰 Заработано всего: 0 ₸");
+    expect(s.lastText(901)).not.toMatch(/[ўқғҳ]/i);
     await s.callback(901, "pn:po", 1);
     expect(lastToast(s)).toBe(ru.oldButton);
   });
@@ -257,6 +269,7 @@ describe("заказ для клиента", () => {
     const partner = await s.repo.createPartner({ code: "pppp1111", name: "П", telegramId: 900, username: null, rate: 1000 });
     await start(s, CLIENT, partnerSource(partner.code));
     await s.command(MANAGER, "lang");
+    await s.click(MANAGER, uz.langUz);
     const o = await nikohOrder(s, MANAGER);
     await s.click(MANAGER, staff.btn.toClient);
     const token = /start=o_([a-z0-9]+)/.exec(s.lastText(MANAGER))![1];
@@ -288,7 +301,7 @@ describe("лимиты Telegram для новых текстов", () => {
       staff.clientHow, staff.st.exHint, staff.managerLink(`https://t.me/inviteizi_bot?start=mgr_${"a".repeat(20)}`),
       staff.st.earnRule("500 ₸", "15 000 ₸", 30),
       ...[uz, ru].flatMap((tx) => [
-        tx.role.partnerHome(long, false), tx.role.claimed("https://inviteizi.vercel.app/" + "a".repeat(60), "10 000 ₸"),
+        tx.role.partnerMenu({ name: long, earned: "1 000 000 ₸", due: "1 000 000 ₸", next: "30 сентябр, чоршанба", today: 999, pending: true, noKaspi: true }), tx.role.claimed("https://inviteizi.vercel.app/" + "a".repeat(60), "10 000 ₸"),
         tx.role.clientShare({ url: "https://inviteizi.vercel.app/" + "a".repeat(60), amount: "10 000 ₸", bot: `https://t.me/inviteizi_bot?start=o_${"a".repeat(20)}` }),
         tx.role.payoutsText({ earned: "1 000 000 ₸", paidOut: "1 000 000 ₸", due: "1 000 000 ₸" }),
       ]),

@@ -66,6 +66,9 @@ export type RenderRecord = {
 };
 export type RenderPatch = Partial<Pick<RenderRecord, "status" | "attempts" | "url" | "telegramFileId" | "error">>;
 
+/** client_orders.ref_source оптовика: его клиент забирает уже оплаченный заказ (этап 3) */
+export const WHOLESALE_REF = "wholesale";
+
 export interface Repo {
   /** Optional additive service; never initialized against a live DB in tests. */
   marketing?: import("./marketing-repo").PgMarketing;
@@ -236,7 +239,8 @@ export interface Repo {
     createdBy: number;
     tokenHash: string;
     refSource: string | null;
-  }): Promise<void>;
+    /** false — ссылка не выдана (заказ уже забрал кто-то другой) */
+  }): Promise<boolean>;
   /** Клиент забирает заказ: заказ переходит к нему (user_id), один раз */
   claimClientOrder(
     tokenHash: string,
@@ -307,6 +311,8 @@ export interface Repo {
   }): Promise<void>;
   /** Ошибки бота с since: сколько и самая частая причина. Нет доступа/таблицы — null */
   errorSummary(since: Date): Promise<{ count: number; top: string } | null>;
+  /** Кто открывал образцы дизайнов (demo_opened / design_selected) за [from, to). Нет таблицы — null */
+  demoViewers(from: Date, to: Date): Promise<number[] | null>;
   /** Ошибки бота с since по шагам (топ-3 для ежедневной проверки). Нет таблицы — null */
   errorSteps(since: Date): Promise<{ step: string; n: number }[] | null>;
   /** Было ли отправлено сообщение с ключом, начинающимся на prefix, после since */

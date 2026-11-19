@@ -44,6 +44,8 @@ export function Rsvp({ slug, preview: previewProp, look }: { slug: string; previ
   const [state, setState] = useState<State>("form");
   const [attending, setAttending] = useState<boolean | null>(null);
   const [trap, setTrap] = useState("");
+  const [wish, setWish] = useState("");
+  const [wishError, setWishError] = useState<"wishLink" | "wishLong" | null>(null);
 
   const tx = t.rsvp;
   async function submit(e: FormEvent, value: boolean) {
@@ -60,8 +62,23 @@ export function Rsvp({ slug, preview: previewProp, look }: { slug: string; previ
       const res = await fetch("/api/rsvp", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ slug, visitorKey: visitorKey(), name, guests: value ? guests : 0, attending: value, website: trap }),
+        body: JSON.stringify({
+          slug,
+          visitorKey: visitorKey(),
+          name,
+          guests: value ? guests : 0,
+          attending: value,
+          website: trap,
+          ...(wish.trim() ? { wish: wish.trim() } : {}),
+        }),
       });
+      if (res.status === 422) {
+        const body = (await res.json().catch(() => ({}))) as { error?: string };
+        setWishError(body.error === "wishLink" ? "wishLink" : "wishLong");
+        setState("form");
+        return;
+      }
+      setWishError(null);
       setState(res.ok ? "done" : res.status === 429 ? "limited" : "error");
     } catch {
       setState("error");
@@ -102,6 +119,29 @@ export function Rsvp({ slug, preview: previewProp, look }: { slug: string; previ
                 <button type="button" aria-label={tx.more} onClick={() => setGuests((n) => Math.min(MAX_GUESTS, n + 1))} className="h-11 w-11 rounded-full bg-[var(--rsvp-soft,#efe3cd)] text-[20px]">+</button>
               </span>
             </div>
+            <label className="flex flex-col gap-1 text-[15px]">
+              {tx.wish}
+              <textarea
+                value={wish}
+                onChange={(e) => {
+                  setWish(e.target.value);
+                  setWishError(null);
+                }}
+                maxLength={300}
+                rows={2}
+                data-rsvp-wish
+                className="min-h-16 resize-none rounded-[var(--rsvp-btn-radius,0.75rem)] border border-[var(--rsvp-line,#c9a86a)] bg-white px-3 py-2 text-[16px] text-[var(--rsvp-ink,#2b1f16)]"
+              />
+              <span className="flex justify-between text-[13px] opacity-75">
+                <span>{tx.wishHint}</span>
+                <span aria-hidden>{wish.length}/300</span>
+              </span>
+            </label>
+            {wishError && (
+              <p role="alert" className="text-center text-[14px] text-[#9b2c1f]">
+                {wishError === "wishLink" ? tx.wishLink : tx.wishLong}
+              </p>
+            )}
             <div className="grid grid-cols-2 gap-2">
               <button type="submit" disabled={!name.trim() || state === "sending"} onClick={(e) => submit(e, true)} className="min-h-12 rounded-[var(--rsvp-btn-radius,0.75rem)] bg-[var(--rsvp-accent,#3f6b47)] px-2 text-[16px] font-semibold text-[var(--rsvp-accent-ink,#fff)] disabled:opacity-50">{tx.yes}</button>
               <button type="button" disabled={!name.trim() || state === "sending"} onClick={(e) => submit(e, false)} className="min-h-12 rounded-[var(--rsvp-btn-radius,0.75rem)] bg-[var(--rsvp-soft,#efe3cd)] px-2 text-[16px] font-semibold text-[var(--rsvp-ink,#2b1f16)] disabled:opacity-50">{tx.no}</button>

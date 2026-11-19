@@ -19,14 +19,17 @@ const PERIODS: { id: OwnerPeriod; label: string }[] = [
   { id: "m", label: "Месяц" },
   { id: "y", label: "Год" },
 ];
+// Чеки на проверке — на главном экране сразу под «Сегодня»; здесь разделы «📋 Подробнее»
 const TABS = [
-  { id: "receipts", label: "Чеки" },
   { id: "orders", label: "Заказы" },
   { id: "partners", label: "Партнёры" },
   { id: "designs", label: "Дизайны" },
   { id: "funnel", label: "Где уходят" },
   { id: "wholesale", label: "Оптовики" },
 ] as const;
+const H = BOT.ownerHome;
+/** «19.11» из «2026-11-19» */
+const dm = (day: string) => `${day.slice(8, 10)}.${day.slice(5, 7)}`;
 type Tab = (typeof TABS)[number]["id"];
 
 const STATUS: Record<string, string> = {
@@ -58,7 +61,12 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
   const [period, setPeriod] = useState<OwnerPeriod>("d");
   const [data, setData] = useState<OwnerPanel | null>(null);
   const [loading, setLoading] = useState(false);
-  const [tab, setTab] = useState<Tab>("receipts");
+  const [tab, setTab] = useState<Tab>("orders");
+  /** «📋 Подробнее»: период, итоги, по дням/тадбирам/форматам/источникам, разделы */
+  const [more, setMore] = useState(false);
+  const [days, setDays] = useState<7 | 30>(7);
+  /** Открытая карточка заказа (Telegram клиента — только в ней) */
+  const [card, setCard] = useState<number | null>(null);
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("");
   const [partner, setPartner] = useState("");
@@ -146,7 +154,7 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
         (!partner || (partner === "none" ? !o.partner : String(o.partnerId) === partner)) &&
         (!needle ||
           String(o.number) === needle ||
-          [o.names, o.client, o.design].some((x) => x?.toLowerCase().includes(needle))),
+          [o.names, o.design].some((x) => x?.toLowerCase().includes(needle))),
     );
   }, [data, q, status, partner]);
 
@@ -186,117 +194,47 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
     );
 
   const c = data.cards;
+  const t = data.today;
   return (
     <div className={`${s.root} ${fontClass}`} lang="ru" aria-busy={loading}>
-      <header className={s.top}>
-        <div className={s.periods} role="tablist" aria-label="Период">
-          {PERIODS.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              role="tab"
-              aria-selected={period === p.id}
-              onClick={() => pickPeriod(p.id)}
-            >
-              {p.label}
-            </button>
-          ))}
-        </div>
-      </header>
-
       <main className={s.wrap} style={{ opacity: loading ? 0.55 : 1 }}>
-        <p className={s.label}>{data.label}</p>
-        <section className={s.cards} aria-label="Итоги">
-          <div className={`${s.card} ${s.cardWide}`} data-card="paid">
-            <small>Оплачено</small>
-            <strong>{money(c.revenue)}</strong>
+        {/* Главное за сегодня — одним взглядом */}
+        <section className={s.cards} aria-label="Сегодня" data-owner-today>
+          <h1 className={s.todayTitle}>{H.today}</h1>
+          <div className={s.card} data-today="users">
+            <small>{H.newUsers}</small>
+            <strong>{t.newUsers}</strong>
+          </div>
+          <div className={s.card} data-today="orders">
+            <small>{H.orders}</small>
+            <strong>{t.orders}</strong>
+          </div>
+          <div className={`${s.card} ${s.cardWide}`} data-today="paid">
+            <small>{H.paid}</small>
+            <strong>{money(t.revenue)}</strong>
             <span>
-              {c.paid} {plural(c.paid, "заказ", "заказа", "заказов")}
+              {t.paid} {plural(t.paid, "заказ", "заказа", "заказов")}
             </span>
           </div>
-          <div className={s.card} data-card="namuna">
-            <small>Образцы без оплаты</small>
-            <strong>{c.namuna}</strong>
-          </div>
-          <div className={s.card} data-card="conversion">
-            <small>Конверсия</small>
-            <strong>{c.conversion === null ? "—" : `${c.conversion}%`}</strong>
-            <span>
-              {c.payers} из {c.makers}
-            </span>
-          </div>
-          <div className={`${s.card} ${s.cardWide}`} data-card="due">
-            <small>К выплате партнёрам</small>
-            <strong>{money(c.due)}</strong>
-          </div>
-        </section>
-        {c.freeByPromotion > 0 && (
-          <p className={s.hint} data-free-promotion>
-            Бесплатно по акции: {c.freeByPromotion} (в продажи не входят)
-          </p>
-        )}
-        {data.testOrders > 0 && (
-          <p className={s.hint} data-test-orders>
-            Тестовые заказы админов не учитываются ({data.testOrders})
-          </p>
-        )}
-        {Object.values(data.free).some(Boolean) && (
-          <p className={s.hint} data-free-grants>
-            Бесплатно выдано: подарок {data.free.gift} · пример {data.free.sample} · наличные {data.free.cash} · замена{" "}
-            {data.free.replace}
-          </p>
-        )}
-
-        <section className={s.actions} aria-label="Действия">
-          <Link className={`${s.action} ${s.actionMain}`} href="/app" data-owner-create>
-            ✨ Создать приглашение
-          </Link>
-          {(
-            [
-              ["partners", "🤝 Партнёры"],
-              ["managers", "👤 Менеджеры"],
-              ["payouts", "💰 Выплаты"],
-              ["promos", "🎟 Промокоды"],
-              ["client", "📤 Заказ для клиента"],
-              ["promotions", "🎉 Акции"],
-            ] as [OwnerScreen, string][]
-          ).map(([id, label]) => (
-            <button
-              key={id}
-              type="button"
-              className={s.action}
-              data-owner-open={id}
-              onClick={() => {
-                haptic.tap();
-                setScreen(id);
-                window.scrollTo(0, 0);
-              }}
-            >
-              {label}
-            </button>
-          ))}
+          <button
+            type="button"
+            className={`${s.card} ${s.cardWide} ${t.waiting ? s.cardAlert : ""}`}
+            data-today="waiting"
+            disabled={!t.waiting}
+            onClick={() => {
+              haptic.tap();
+              document.getElementById("receipts")?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+          >
+            <small>{H.waiting}</small>
+            <strong>{t.waiting}</strong>
+            {t.waiting > 0 && <span>{H.check}</span>}
+          </button>
         </section>
 
-        <nav className={s.tabs} role="tablist" aria-label="Разделы">
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              role="tab"
-              aria-selected={tab === t.id}
-              onClick={() => {
-                haptic.select();
-                setTab(t.id);
-              }}
-            >
-              {t.id === "receipts" && data.receipts.length ? `${t.label} (${data.receipts.length})` : t.label}
-            </button>
-          ))}
-        </nav>
-
-        {tab === "receipts" && (
-          <section data-owner-receipts>
-            {data.receipts.length === 0 && <p className={s.hint}>{BOT.receiptsNone}</p>}
+        {data.receipts.length > 0 && (
+          <section id="receipts" data-owner-receipts>
+            <h2 className={s.h3}>{H.waitingTitle(data.receipts.length)}</h2>
             {data.receipts.map((r) => (
               <article key={r.number} className={s.receipt}>
                 <div>
@@ -351,6 +289,176 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
           </section>
         )}
 
+        <section className={s.actions} aria-label="Действия">
+          <Link className={`${s.action} ${s.actionMain}`} href="/app" data-owner-create>
+            ✨ Создать приглашение
+          </Link>
+          {(
+            [
+              ["partners", "🤝 Партнёры"],
+              ["managers", "👤 Менеджеры"],
+              ["payouts", "💰 Выплаты"],
+              ["promos", "🎟 Промокоды"],
+              ["client", "📤 Заказ для клиента"],
+              ["promotions", "🎉 Акции"],
+            ] as [OwnerScreen, string][]
+          ).map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              className={s.action}
+              data-owner-open={id}
+              onClick={() => {
+                haptic.tap();
+                setScreen(id);
+                window.scrollTo(0, 0);
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </section>
+
+        <button
+          type="button"
+          className={s.more}
+          data-owner-more
+          aria-expanded={more}
+          onClick={() => {
+            haptic.tap();
+            setMore(!more);
+          }}
+        >
+          {more ? H.less : H.more}
+        </button>
+
+        {more && (
+          <>
+        <div className={s.periods} role="tablist" aria-label="Период">
+          {PERIODS.map((p) => (
+            <button key={p.id} type="button" role="tab" aria-selected={period === p.id} onClick={() => pickPeriod(p.id)}>
+              {p.label}
+            </button>
+          ))}
+        </div>
+        <p className={s.label}>{data.label}</p>
+        <section className={s.cards} aria-label="Итоги периода">
+          <div className={`${s.card} ${s.cardWide}`} data-card="paid">
+            <small>Оплачено</small>
+            <strong>{money(c.revenue)}</strong>
+            <span>
+              {c.paid} {plural(c.paid, "заказ", "заказа", "заказов")}
+            </span>
+          </div>
+          <div className={s.card} data-card="namuna">
+            <small>Образцы без оплаты</small>
+            <strong>{c.namuna}</strong>
+          </div>
+          <div className={s.card} data-card="conversion">
+            <small>Конверсия</small>
+            <strong>{c.conversion === null ? "—" : `${c.conversion}%`}</strong>
+            <span>
+              {c.payers} из {c.makers}
+            </span>
+          </div>
+          <div className={`${s.card} ${s.cardWide}`} data-card="due">
+            <small>К выплате партнёрам</small>
+            <strong>{money(c.due)}</strong>
+          </div>
+        </section>
+        {c.freeByPromotion > 0 && (
+          <p className={s.hint} data-free-promotion>
+            Бесплатно по акции: {c.freeByPromotion} (в продажи не входят)
+          </p>
+        )}
+        {data.testOrders > 0 && (
+          <p className={s.hint} data-test-orders>
+            Тестовые заказы админов не учитываются ({data.testOrders})
+          </p>
+        )}
+        {Object.values(data.free).some(Boolean) && (
+          <p className={s.hint} data-free-grants>
+            Бесплатно выдано: подарок {data.free.gift} · пример {data.free.sample} · наличные {data.free.cash} · замена{" "}
+            {data.free.replace}
+          </p>
+        )}
+
+        <section data-owner-days>
+          <div className={s.dayHead}>
+            <h3 className={s.h3}>{H.byDays}</h3>
+            <div className={s.mini} role="tablist" aria-label="Дней">
+              {([7, 30] as const).map((n) => (
+                <button key={n} type="button" role="tab" aria-selected={days === n} onClick={() => setDays(n)}>
+                  {H.daysN(n)}
+                </button>
+              ))}
+            </div>
+          </div>
+          <table className={s.table}>
+            <thead>
+              <tr>
+                {H.cols.map((x) => (
+                  <th key={x}>{x}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {data.detail.days.slice(0, days).map((d) => (
+                <tr key={d.day}>
+                  <td>{dm(d.day)}</td>
+                  <td>{d.users}</td>
+                  <td>{d.orders}</td>
+                  <td>{d.paid}</td>
+                  <td>{d.revenue ? money(d.revenue).replace(" ₸", "") : "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+
+        {(
+          [
+            [H.byOccasion, data.detail.occasions, H.occasions, "occasions"],
+            [H.byFormat, data.detail.formats, H.formats, "formats"],
+            [H.bySource, data.detail.sources, H.sources, "sources"],
+          ] as const
+        ).map(([title, rows, names, key]) => (
+          <section key={key} data-owner-group={key}>
+            <h3 className={s.h3}>{title}</h3>
+            {rows.length === 0 ? (
+              <p className={s.hint}>{H.empty}</p>
+            ) : (
+              <ul className={s.stuck}>
+                {rows.map((r) => (
+                  <li key={r.id}>
+                    <span>{(names as Record<string, string>)[r.id] ?? r.id}</span>
+                    <b>
+                      {H.groupRow(r.paid, money(r.revenue), r.orders)}
+                    </b>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        ))}
+
+        <nav className={s.tabs} role="tablist" aria-label="Разделы">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              role="tab"
+              aria-selected={tab === t.id}
+              onClick={() => {
+                haptic.select();
+                setTab(t.id);
+              }}
+            >
+              {t.label}
+            </button>
+          ))}
+        </nav>
+
         {tab === "orders" && (
           <section>
             <input
@@ -395,21 +503,36 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
                       <b>№{o.number}</b>
                       <span className={s.amount}>{money(o.amount)}</span>
                     </div>
-                    <p className={s.rowMain}>{o.names || o.client}</p>
+                    <p className={s.rowMain}>{o.names || "—"}</p>
                     <p className={s.rowSub}>
                       {when(o.createdAt)} · {o.design}
-                      {o.partner ? ` · ${o.partner}` : ""}
                     </p>
                     <div className={s.rowFoot}>
                       <span className={`${s.badge} ${o.paid ? s.badgeOk : ""}`}>{STATUS[o.status] ?? o.status}</span>
-                      {o.url && (
-                        <button type="button" className={s.link} onClick={() => openLink(o.url!)}>
-                          Открыть ↗
-                        </button>
-                      )}
+                      <button
+                        type="button"
+                        className={s.link}
+                        data-order-card={o.number}
+                        aria-expanded={card === o.number}
+                        onClick={() => setCard(card === o.number ? null : o.number)}
+                      >
+                        {card === o.number ? H.hide : H.card}
+                      </button>
                     </div>
-                    {/* «Список клиентов»: назначить заказчика оптовиком (сервер проверит роль) */}
-                    <WholesaleAssign target={{ orderNumber: o.number }} toast={toast} />
+                    {card === o.number && (
+                      <div className={s.cardBody} data-order-details>
+                        <p className={s.rowSub}>{H.tg(o.client)}</p>
+                        <p className={s.rowSub}>{H.source(o.partner)}</p>
+                        {o.paidAt && <p className={s.rowSub}>{H.paidAt(when(o.paidAt))}</p>}
+                        {o.url && (
+                          <button type="button" className={s.link} onClick={() => openLink(o.url!)}>
+                            {H.openInvite}
+                          </button>
+                        )}
+                        {/* назначить заказчика оптовиком (сервер проверит роль) */}
+                        <WholesaleAssign target={{ orderNumber: o.number }} toast={toast} />
+                      </div>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -494,9 +617,10 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
         {tab === "funnel" && (
           <section className={s.funnel}>
             {[
-              { label: "Новые клиенты", n: data.funnel.clients },
-              { label: "Сделали образец", n: data.funnel.makers },
-              { label: "Оплатили", n: data.funnel.payers },
+              { label: H.funnel.users, n: data.detail.funnel.users },
+              ...(data.detail.funnel.viewers === null ? [] : [{ label: H.funnel.viewers, n: data.detail.funnel.viewers }]),
+              { label: H.funnel.namuna, n: data.detail.funnel.namuna },
+              { label: H.funnel.paid, n: data.detail.funnel.payers },
             ].map((x) => (
               <div key={x.label} className={s.step}>
                 <div className={s.stepHead}>
@@ -506,7 +630,7 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
                 <div className={s.bar}>
                   <i
                     style={{
-                      width: `${Math.min(100, Math.round((x.n / Math.max(1, data.funnel.clients, data.funnel.makers)) * 100))}%`,
+                      width: `${Math.min(100, Math.round((x.n / Math.max(1, data.detail.funnel.users, data.detail.funnel.viewers ?? 0, data.detail.funnel.namuna)) * 100))}%`,
                     }}
                   />
                 </div>
@@ -531,6 +655,8 @@ export default function OwnerApp({ fontClass }: { fontClass: string }) {
         <button type="button" className={s.excel} onClick={excel}>
           📤 Excel
         </button>
+          </>
+        )}
       </main>
       {note && (
         <div className={s.toast} role="status">

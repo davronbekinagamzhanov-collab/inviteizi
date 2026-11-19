@@ -20,8 +20,12 @@ export function keepsakeFolder(orderId: string, secret: string) {
   return createHmac("sha256", secret).update("inviteizi:keepsake:v1\0").update(orderId).digest("hex").slice(0, 32);
 }
 
+/**
+ * Запуск workflow «render-video» (workflow_dispatch): токену достаточно права «Actions: write» на этот репозиторий
+ * (repository_dispatch требовал бы «Contents: write»). Данные заказа — одним входом job (JSON).
+ */
 export async function dispatchVideoJob(job: VideoJob, token: string, repo: string, fetchImpl: typeof fetch = fetch) {
-  const res = await fetchImpl(`https://api.github.com/repos/${repo}/dispatches`, {
+  const res = await fetchImpl(`https://api.github.com/repos/${repo}/actions/workflows/render-video.yml/dispatches`, {
     method: "POST",
     headers: {
       authorization: `Bearer ${token}`,
@@ -29,7 +33,7 @@ export async function dispatchVideoJob(job: VideoJob, token: string, repo: strin
       "x-github-api-version": "2022-11-28",
       "content-type": "application/json",
     },
-    body: JSON.stringify({ event_type: "render-video", client_payload: job }),
+    body: JSON.stringify({ ref: "main", inputs: { job: JSON.stringify(job) } }),
     signal: AbortSignal.timeout(10_000),
   });
   if (res.status !== 204) throw new Error(`GitHub dispatch ${res.status}`);

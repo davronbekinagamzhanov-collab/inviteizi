@@ -1,3 +1,4 @@
+import { payTexts } from "@/texts/pay";
 /** Готовые пути по боту для сценарных тестов */
 import { uz } from "@/texts/bot-uz";
 import { ru } from "@/texts/bot-ru";
@@ -6,7 +7,7 @@ import type { Format } from "@/lib/domain";
 import { FORMATS } from "@/templates/registry";
 import type { Draft } from "../flow/types";
 import { catalogList, PAGE } from "../flow/steps-order";
-import type { Sim } from "./sim";
+import { ADMIN, type Sim } from "./sim";
 
 
 /**
@@ -55,15 +56,18 @@ export async function setChoices(sim: Sim, id: number, o: { text?: number; music
 
 
 /** /start → язык → «Создать» (клиент стоит на выборе тадбира) */
+/** Язык спрашивают только у новых — у того, кто уже выбрал (партнёр, оптовик), кнопки нет */
+const asksLang = (sim: Sim, id: number, label: string) => JSON.stringify(sim.last(id)?.markup ?? "").includes(label);
+
 export async function startUz(sim: Sim, id: number, payload = "") {
   await sim.start(id, payload);
-  await sim.click(id, uz.langUz);
+  if (asksLang(sim, id, uz.langUz)) await sim.click(id, uz.langUz);
   await sim.text(id, uz.menu.create);
 }
 
 export async function startRu(sim: Sim, id: number, payload = "") {
   await sim.start(id, payload);
-  await sim.click(id, ru.langRu);
+  if (asksLang(sim, id, ru.langRu)) await sim.click(id, ru.langRu);
   await sim.text(id, ru.menu.create);
 }
 
@@ -136,4 +140,18 @@ export async function nikohWithReceipt(sim: Sim, id: number, names?: [string, st
 /** Выбрать дизайн по id, где бы он ни стоял в каталоге */
 export async function selectCatalogDesign(sim: Sim, user: number, template: string) {
   await pickDesign(sim, user, template);
+}
+
+/** Оплаченный «Тўладим» + ✅ заказ с включёнными ответами гостей (этап 3) */
+export async function paidWithRsvp(s: Sim, id: number) {
+  const o = await nikohOrder(s, id);
+  await s.click(id, /^💳 Тўлаш/);
+  await s.click(id, uz.pay.confirmYes);
+  await s.click(id, payTexts.uz.paid);
+  await s.text(id, "Давронбек И.");
+  const card = s.tg.to(ADMIN).filter((m) => m.text.includes("Давронбек И.")).at(-1)!;
+  await s.callback(ADMIN, `ok:${o.number}`, card.id);
+  const paid = (await s.repo.getOrder(o.id))!;
+  await s.repo.updateOrder(o.id, { data: { ...paid.data, rsvp: true } });
+  return (await s.repo.getOrder(o.id))!;
 }

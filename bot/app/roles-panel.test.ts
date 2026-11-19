@@ -80,9 +80,10 @@ describe("панель менеджера и партнёра: доступ", ()
     expect(s.tg.to(OTHER_PARTNER).some((m) => m.text?.includes(mine.code))).toBe(false);
   });
 
-  it("кнопка «🖥 Панель» в меню менеджера и партнёра ведёт на /app/panel", async () => {
+  // этап 3: партнёр работает в боте (короткое меню); панель в приложении — у менеджера
+  it("кнопка «🖥 Панель» в меню менеджера ведёт на /app/panel", async () => {
     const { s } = await world();
-    for (const id of [MANAGER, PARTNER]) {
+    for (const id of [MANAGER]) {
       await s.start(id);
       if (s.lastText(id)?.startsWith("Тилни танланг")) await s.click(id, uz.langUz);
       const rows = (s.last(id)?.markup as { inline: { text: string; webApp?: string }[][] }).inline.flat();

@@ -2,7 +2,7 @@
  * «📥 Сақлаб олиш» (19.11.2026): после оплаты клиент получает не только ссылку, но и готовые файлы
  * своего приглашения — фото для статуса и ленты, PDF для печати (A5/A6), видео (только «Анимацияли»).
  * Одно ядро для бота и Mini App (deliverKeepsake). Файлы строит lib/keepsake/render.tsx (через deps.keepsake),
- * видео — GitHub Actions (scripts/render-video.mjs) по repository_dispatch, ответ — /api/cron?t=render.
+ * видео — GitHub Actions (scripts/render-video.mjs) по workflow_dispatch, ответ — /api/cron?t=render.
  */
 import type { Deps } from "./flow/types";
 import type { Lang, OrderRecord } from "@/lib/domain";
@@ -81,9 +81,10 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** Заказ по id (Mini App) или номеру (бот); мусор в запросе — «не найден», а не ошибка базы */
 export async function findOrder(deps: Deps, ref: { id?: string; number?: number }) {
-  if (ref.id !== undefined) return UUID.test(ref.id) ? deps.repo.getOrder(ref.id).catch(() => null) : null;
+  // мусор в запросе — «не найден»; сбой базы — ошибка (вызывающий ответит «не получилось»)
+  if (ref.id !== undefined) return UUID.test(ref.id) ? deps.repo.getOrder(ref.id) : null;
   if (ref.number !== undefined && Number.isSafeInteger(ref.number) && ref.number > 0)
-    return deps.repo.getOrderByNumber(ref.number).catch(() => null);
+    return deps.repo.getOrderByNumber(ref.number);
   return null;
 }
 

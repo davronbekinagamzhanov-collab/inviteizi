@@ -128,3 +128,75 @@ describe("этап 3.1: понятные ответы гостей", () => {
     expect(await s.repo.claimRsvpDigest("x", day, s.clock)).toBe(false);
   });
 });
+
+describe("тилак гостя (этап 3)", () => {
+  const withWish = (slug: string, key: string, wish: unknown) =>
+    new Request("https://x.test/api/rsvp", {
+      method: "POST",
+      headers: { origin: "https://x.test", "content-type": "application/json", "x-forwarded-for": "1.1.1.1" },
+      body: JSON.stringify({ slug, visitorKey: `guest-key-${key}-0000000`, name: `Меҳмон ${key}`, guests: 2, attending: true, wish }),
+    });
+
+  it("пусто — без тилака; длинно (> 300) и ссылка — 422 с причиной, ответ не сохраняется; «!!!!!!» сжимается", async () => {
+    const { cleanWish } = await import("@/lib/rsvp");
+    expect(cleanWish(undefined)).toBeNull();
+    expect(cleanWish("   ")).toBeNull();
+    expect(cleanWish("Бахтли бўлинглар!!!!!!!")).toBe("Бахтли бўлинглар!!!");
+    expect(cleanWish("а".repeat(301))).toBe("а".repeat(3));
+    expect(cleanWish("Бахт ".repeat(61))).toBe("long");
+    for (const link of ["https://spam.example", "www.casino.ru", "t.me/kanal", "Обуна бўлинг @kanal_uz", "sayt.uz га киринг"])
+      expect(cleanWish(link), link).toBe("link");
+    expect(cleanWish("Тўйингиз муборак, 5.5 соатда келамиз")).toBe("Тўйингиз муборак, 5.5 соатда келамиз");
+
+    const s = new Sim();
+    const o = await paidOrder(s, 1);
+    expect((await post(s, withWish(o.slug, "a", ""))).status).toBe(204);
+    const long = await post(s, withWish(o.slug, "b", "Бахт ".repeat(61)));
+    expect(long.status).toBe(422);
+    expect(await long.json()).toEqual({ error: "wishLong" });
+    const link = await post(s, withWish(o.slug, "c", "Каналимиз: t.me/xyz"));
+    expect(await link.json()).toEqual({ error: "wishLink" });
+    const list = await s.repo.listRsvp(o.id);
+    expect(list.map((r) => r.name)).toEqual(["Меҳмон a"]);
+    expect(list[0].wish).toBeNull();
+  });
+
+  it("повтор: тот же тилак другого гостя — ответ сохраняется без тилака; свой ответ можно поправить", async () => {
+    const s = new Sim();
+    const o = await paidOrder(s, 1);
+    await post(s, withWish(o.slug, "a", "Бахтли бўлинглар"));
+    await post(s, withWish(o.slug, "b", "бахтли бўлинглар"));
+    await post(s, withWish(o.slug, "a", "Бахтли бўлинглар, илоҳим!"));
+    const byName = Object.fromEntries((await s.repo.listRsvp(o.id)).map((r) => [r.name, r.wish]));
+    expect(byName).toEqual({ "Меҳмон a": "Бахтли бўлинглар, илоҳим!", "Меҳмон b": null });
+  });
+
+  it("хозяин видит тилаки в ежедневном отчёте (одним сообщением) и в «📝 Жавоблар»; на приглашении — нет", async () => {
+    const s = new Sim();
+    const o = await paidOrder(s, 1);
+    await post(s, withWish(o.slug, "a", "Бахтли бўлинглар"));
+    await post(s, withWish(o.slug, "b", "Тўйингиз муборак"));
+    at(s, "2026-11-01T15:00:00Z");
+    expect(await runCron(s.deps)).toMatchObject({ rsvpDigests: 1 });
+    const [msg] = digests(s, 1);
+    expect(msg.text).toContain(uz.rsvp.wishesHead);
+    expect(msg.text).toContain(uz.rsvp.wishLine("Меҳмон a", "Бахтли бўлинглар"));
+    expect(msg.text).toContain(uz.rsvp.wishLine("Меҳмон b", "Тўйингиз муборак"));
+    await s.callback(1, `rsvp:${o.number}`, msg.id);
+    expect(s.lastText(1)).toContain(uz.rsvp.wishLine("Меҳмон a", "Бахтли бўлинглар"));
+    // в данных страницы приглашения тилаков нет
+    const { invitationData } = await import("@/lib/orders");
+    expect(JSON.stringify(invitationData((await s.repo.getOrder(o.id))!))).not.toContain("Бахтли");
+  });
+
+  it("много длинных тилаков — сообщение не длиннее лимита Telegram", async () => {
+    const s = new Sim();
+    const o = await paidOrder(s, 1);
+    for (let i = 0; i < 40; i++) await post(s, withWish(o.slug, `k${i}`, `Тилак ${i} ` + "бахт ва саодат ".repeat(18)));
+    at(s, "2026-11-01T15:00:00Z");
+    await runCron(s.deps);
+    expect(digests(s, 1)[0].text.length).toBeLessThanOrEqual(4096);
+    await s.callback(1, `rsvp:${o.number}`, 1);
+    expect(s.lastText(1)!.length).toBeLessThanOrEqual(4096);
+  });
+});

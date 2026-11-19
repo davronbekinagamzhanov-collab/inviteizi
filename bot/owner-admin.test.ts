@@ -37,7 +37,8 @@ async function withRoles() {
   });
   await s.start(PARTNER, `join_${token(p.link, "join")}`);
   await s.click(PARTNER, uz.langUz);
-  await s.contact(PARTNER, "77011234567");
+  // этап 3: номер телефона не спрашиваем; Kaspi — из меню «💳»
+  await s.callback(PARTNER, "pn:pk", 1);
   await s.text(PARTNER, "+7 701 123 45 67");
   await s.start(CLIENT);
   await s.click(CLIENT, uz.langUz);

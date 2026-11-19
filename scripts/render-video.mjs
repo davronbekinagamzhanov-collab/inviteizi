@@ -1,7 +1,7 @@
 // Видео «Сақлаб олиш» (19.11.2026): MP4 9:16, 12–14 с — конверт/первый экран → имена → дата и место →
 // последний кадр «Таклифномани очинг» + ссылка; музыка заказа (или демо-мелодия). H.264 + AAC, ≤ 15 МБ.
-// Запускается в GitHub Actions (.github/workflows/render-video.yml) по repository_dispatch от бота:
-//   JOB='<json client_payload>' BLOB_READ_WRITE_TOKEN=… RENDER_CALLBACK_SECRET=… node scripts/render-video.mjs
+// Запускается в GitHub Actions (.github/workflows/render-video.yml) по workflow_dispatch от бота (вход job):
+//   JOB='<json данных заказа>' BLOB_READ_WRITE_TOKEN=… RENDER_CALLBACK_SECRET=… node scripts/render-video.mjs
 // Локально (без загрузки и ответа боту):  JOB='…' node scripts/render-video.mjs --out /tmp/video.mp4
 import { chromium } from "playwright-core";
 import { execFileSync } from "node:child_process";

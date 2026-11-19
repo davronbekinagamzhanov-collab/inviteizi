@@ -205,8 +205,13 @@ export const ru = {
     reviewOff: "Ответы гостей: нет",
     edit: "✏️ Ответы",
     answers: "📝 Ответы",
+    /** Кнопка с числом: сколько придёт (человек) и сколько семей ответили «да» (этап 3) */
+    answersN: (people: number, families: number) => (families ? `📝 Ответы · гостей: ${people} · семей: ${families}` : "📝 Ответы"),
     howButton: "❓ Как это работает?",
     how: "Гости нажимают в приглашении «Келаман» (приду) или «Келолмайман» (не смогу).\n\nОтветы будут здесь:\nМеню → Мои приглашения → 📝 Ответы\n\nОтветы сохраняются после оплаты.",
+    /** Тилаки гостей (этап 3): в ежедневном отчёте и в «📝 Жавоблар» */
+    wishesHead: "💌 Пожелания:",
+    wishLine: (name: string, wish: string) => `💬 ${name}: «${wish}»`,
     digest: (replies: number, coming: number, people: number, declined: number) => `Сегодня ответов: ${replies}. Придут: ${coming} (всего ${people} чел.), не смогут: ${declined}`,
     empty: "Ответов пока нет.",
     head: (replies: number, people: number, declined: number) => `📝 Ответов: ${replies}\nПридут: ${people} чел.\nНе смогут: ${declined}`,
@@ -459,11 +464,49 @@ export const ru = {
   },
 
   role: {
+    /** Этап 3 (19.11.2026): одно приветствие по join_, короткое меню партнёра и «Батафсил» */
+    joinWelcome: (s: { name: string; rate: string; schedule: string; ask: boolean }) =>
+      [
+        `🤝 Добро пожаловать, ${s.name}! Вы партнёр InviteIZI.`,
+        "",
+        `💰 Вам: ${s.rate} — с каждой оплаты`,
+        `📅 Выплата: ${s.schedule}, на Kaspi`,
+        "🔗 Ваша ссылка и постер готовы.",
+        "",
+        "Сегодня:",
+        "1. «🔗 Ссылка и QR» — распечатайте постер или отправьте ссылку в WhatsApp.",
+        "2. «💳 Мой Kaspi» — напишите номер для выплат.",
+        "3. Расскажите знакомым: онлайн-приглашение за 5 минут, от 2 990 ₸.",
+        ...(s.ask ? ["", "Тилни танланг · Выберите язык"] : []),
+      ].join("\n"),
+    partnerMenu: (s: { name: string; earned: string; due: string; next: string; today: number; pending: boolean; noKaspi: boolean }) =>
+      [
+        `🤝 ${s.name}`,
+        "",
+        `💰 Заработано всего: ${s.earned}`,
+        `⏳ К выплате: ${s.due}`,
+        `📅 Следующая выплата: ${s.next}`,
+        `✅ Оплат сегодня: ${s.today}`,
+        ...(s.pending ? ["", "⏳ Ждёт подтверждения. QR работает, оплаты считаются."] : []),
+        ...(s.noKaspi ? ["", "💳 Укажите номер Kaspi — выплаты придут на него 👇"] : []),
+      ].join("\n"),
+    btnLink: "🔗 Ссылка и QR",
+    btnPayouts: "💰 Выплаты",
+    btnDetail: "📋 Подробнее",
+    btnHow: "❓ Как это работает",
+    btnKaspi: "💳 Мой Kaspi",
+    howText: "❓ Как это работает\n\n1. Давайте ссылку или QR тем, кто готовит той: семьям жениха и невесты, тойханам, клиентам фотографа.\n2. Если по вашей ссылке оформят и оплатят приглашение — вам процент с каждой оплаты.\n3. Деньги приходят на Kaspi в день выплаты (номер — «💳 Мой Kaspi»).\n4. Если клиент спросит: приглашение за 5 минут, от 2 990 ₸, с музыкой и картой.\n5. Вопросы — «📞 Связаться».",
+    detailTitle: "📋 Подробнее (без имён)",
+    detailDays: "По дням (7 дней):",
+    detailWeeks: "По неделям (4 недели):",
+    detailRow: (label: string, scanned: number, namuna: number, paid: number, sum: string) =>
+      `${label}: ${scanned} перех. · ${namuna} образц. · ${paid} опл. · ${sum}`,
+    weekLabel: (from: string, to: string) => `${from}–${to}`,
+    kaspiSaved: (k: string) => `✅ Kaspi: ${k} — выплаты придут на него.`,
+    dateLine: (day: number, month: string, weekday: string) => `${day} ${month}, ${weekday}`,
     panel: "🖥 Панель",
     partnerTitle: "🤝 Партнёр InviteIZI",
     menu: "🤝 Меню партнёра",
-    partnerHome: (name: string, pending: boolean) =>
-      `🤝 Партнёр InviteIZI\n${name}${pending ? "\n\n⏳ Ждёт подтверждения. QR работает, оплаты считаются." : ""}`,
     joinHello: uz.role.joinHello,
     joinHello3: uz.role.joinHello3,
     askPhone: "📱 Отправьте ваш номер — нажмите кнопку внизу 👇",
@@ -536,6 +579,17 @@ export const ru = {
     link: "🔗 Ссылка",
   },
 
+  /** Оптовик (этап 3): скидка в меню, «📤 Мижозга юбориш» — оплаченный заказ переходит его клиенту */
+  wholesale: {
+    line: (pct: number) => `🏷 Ваша оптовая скидка: ${pct} % — на каждый заказ`,
+    toClient: "📤 Отправить клиенту",
+    payFirst: "Сначала оплатите — после оплаты приглашение можно передать клиенту.",
+    share: (s: { url: string; bot: string }) =>
+      `Здравствуйте! 🎉 Ваше приглашение готово:\n${s.url}\n\nЧтобы забрать его себе, нажмите ссылку — откроется Telegram, ответы гостей будете видеть вы:\n${s.bot}`,
+    how: "👇 Отправьте это сообщение клиенту (WhatsApp или Telegram). Ссылка одноразовая: после неё приглашение и ответы гостей — у клиента.",
+    got: (url: string) => `🎉 Приглашение ваше!\n${url}\n\nОтветы гостей — в «📂 Мои приглашения».`,
+  },
+
   keepsake: {
     button: "📥 Сохранить файлы",
     offer: "📥 Сохранить — приглашение готовыми файлами:\n🖼 Картинка для статуса и WhatsApp\n🖨 Для печати — в любой типографии A5/A6",
@@ -569,6 +623,36 @@ export const ru = {
  */
 export const staff = {
   back: "◀️ Назад",
+  /** Главный экран админки (этап 3): «Сегодня» → «📋 Подробнее» */
+  ownerHome: {
+    today: "Сегодня",
+    newUsers: "Новых в боте",
+    orders: "Заказов",
+    paid: "Оплачено",
+    waiting: "Ждут проверки оплаты",
+    check: "Проверить ↓",
+    waitingTitle: (n: number) => `Ждут проверки оплаты (${n})`,
+    more: "📋 Подробнее ▼",
+    less: "Скрыть подробности ▲",
+    byDays: "По дням",
+    daysN: (n: number) => `${n} дней`,
+    cols: ["День", "Новые", "Заказы", "Оплаты", "₸"] as const,
+    byOccasion: "По тадбирам",
+    byFormat: "По форматам",
+    bySource: "Откуда клиенты",
+    empty: "За период пусто",
+    groupRow: (paid: number, sum: string, orders: number) => `${paid} опл. · ${sum} · ${orders} зак.`,
+    occasions: { nikoh: "Никоҳ", nahorgi: "Наҳорги ош", sunnat: "Суннат", yubiley: "Юбилей" } as Record<string, string>,
+    formats: { animated: "Анимированное", scroll: "С прокруткой", simple: "Простое" } as Record<string, string>,
+    sources: { own: "Сами пришли", partner: "Партнёры", manager: "Менеджеры", promotion: "Акция" } as Record<string, string>,
+    funnel: { users: "Зашли в бот", viewers: "Открыли образцы дизайнов", namuna: "Сделали НАМУНА", paid: "Оплатили" },
+    card: "Карточка",
+    hide: "Скрыть",
+    tg: (client: string) => `Клиент в Telegram: ${client}`,
+    source: (s: string | null) => `Источник: ${s ?? "сам пришёл"}`,
+    paidAt: (at: string) => `Оплачен: ${at}`,
+    openInvite: "Открыть приглашение ↗",
+  },
   /** «Сақлаб олиш»: видео не получилось после повтора (19.11.2026) */
   keepsakeVideoFailed: (n: number, error: string) =>
     `⚠️ Видео №${n} не получилось: ${error}\nКлиенту отправлено: «картинки и PDF готовы».`,
@@ -581,6 +665,7 @@ export const staff = {
     musicDown: "Музыка не открывается",
     noAnswer: "нет ответа",
     errors: (list: string) => `Ошибки бота за сутки (топ-3): ${list}`,
+    slow: (n: number) => `Медленные ответы бота (> 3 с) за сутки: ${n} — подробности в «Ошибки», шаг slow`,
     stuck: (min: number, n: number, list: string) => `Видео зависли (> ${min} мин): ${n} — ${list}`,
     timeout: (n: number) => `Не успели проверить за отведённое время: ${n} адресов — сайт отвечает медленно`,
   },
@@ -588,6 +673,16 @@ export const staff = {
   managerTitle: "👋 Панель менеджера InviteIZI",
   today: (paid: number, sum: string) => (paid ? `Сегодня: оплат ${paid} · ${sum}` : "Сегодня оплат пока нет"),
   networkLine: (partners: number) => `Партнёров в вашей сети: ${partners}`,
+  /** Этап 3: главное менеджеру одним взглядом */
+  managerHome: (s: { partners: number; today: number; month: number; monthName: string; earned: string; goal: string }) =>
+    [
+      "👋 Панель менеджера InviteIZI",
+      "",
+      `🤝 Партнёров в сети: ${s.partners}`,
+      `✅ Оплат сети: сегодня ${s.today} · за ${s.monthName} ${s.month}`,
+      `💰 Ваш заработок за ${s.monthName}: ${s.earned}`,
+      s.goal,
+    ].join("\n"),
   btn: {
     panel: "👋 Панель",
     stats: "📊 Статистика",
@@ -599,7 +694,7 @@ export const staff = {
     ownerApp: "🖥 Панель",
     create: "✨ Создать приглашение",
     settings: "⚙️ Настройки",
-    myStats: "📊 Моя статистика",
+    myStats: "📋 Подробнее",
     myPartners: "🤝 Мои партнёры",
     newPartner: "➕ Новый партнёр",
     earnings: "💰 Мой заработок",

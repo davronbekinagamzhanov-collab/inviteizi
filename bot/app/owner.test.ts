@@ -110,3 +110,37 @@ describe("тестовые заказы админов", () => {
     expect(bot.text).toContain(S.staffExcluded(1));
   });
 });
+
+describe("этап 3: главный экран «Сегодня» и «Подробнее»", () => {
+  it("сегодня: новые в боте, заказы, оплачено (шт. и ₸), ждут проверки; подробнее — по дням, тадбирам, форматам, источникам, воронка", async () => {
+    const { s } = await dataset();
+    const waitingOrder = await nikohWithReceipt(s, 4, ["Азиз", "Мадина"]);
+    await s.repo.recordEvent(5, "demo_opened", "muhr", "k1");
+    await s.start(5);
+    const r = await ownerPanel(s.deps, ADMIN, "d");
+    if ("error" in r) throw new Error("forbidden");
+    expect(r.today).toMatchObject({ orders: 4, paid: 2, waiting: 1 });
+    expect(r.today.revenue).toBe(r.cards.revenue);
+    expect(r.today.newUsers).toBeGreaterThanOrEqual(4);
+    expect(r.receipts.map((x) => x.number)).toEqual([waitingOrder.number]);
+    // по дням: 30 строк, сегодня первым, сумма дня = оплачено сегодня
+    expect(r.detail.days).toHaveLength(30);
+    expect(r.detail.days[0]).toMatchObject({ orders: 4, paid: 2, revenue: r.today.revenue });
+    expect(r.detail.occasions).toEqual([expect.objectContaining({ id: "nikoh", orders: 4, paid: 2 })]);
+    expect(r.detail.formats.reduce((n, x) => n + x.orders, 0)).toBe(4);
+    const src = Object.fromEntries(r.detail.sources.map((x) => [x.id, x.paid]));
+    expect(src).toMatchObject({ partner: 1, own: 1 });
+    // образцы смотрели 4 заказчика (выбор дизайна) + 1 человек, открывший демо
+    expect(r.detail.funnel).toMatchObject({ users: 5, viewers: 5, namuna: 4, payers: 2 });
+  }, 30_000);
+
+  it("в списке заказов — имена из анкеты; Telegram клиента только в карточке (поле client), пустых имён нет", async () => {
+    const { s } = await dataset();
+    const r = await ownerPanel(s.deps, ADMIN, "d");
+    if ("error" in r) throw new Error("forbidden");
+    for (const o of r.orders) {
+      expect(o.names).toBeTruthy();
+      expect(o.client).toBeTruthy();
+    }
+  }, 30_000);
+});
