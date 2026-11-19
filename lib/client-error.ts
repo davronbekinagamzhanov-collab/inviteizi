@@ -1,5 +1,5 @@
 /**
- * Ошибки звука с настоящих телефонов (17.11.2026) → bot_errors. Без данных клиента: имя ошибки, состояние <audio>,
+ * Ошибки звука с настоящих телефонов (17.11.2026; маршрут /api/demo-event?t=audio) → bot_errors. Без данных клиента: имя ошибки, состояние <audio>,
  * адрес файла музыки (без параметров), где открыто (iframe Mini App / Telegram / браузер), дизайн, user-agent.
  * Не больше 20 записей в час с одного адреса; тело ≤ 2 КБ.
  */
@@ -10,7 +10,7 @@ const LIMIT = { max: 20, windowMs: 3_600_000 };
 const str = (v: unknown, max: number) => (typeof v === "string" ? v.slice(0, max) : null);
 const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : null);
 
-export async function POST(req: Request) {
+export async function handleClientError(req: Request) {
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
   if (!allow(`client-error:${ip}`, LIMIT)) return new Response(null, { status: 429 });
   const raw = await req.text();

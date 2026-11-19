@@ -1,6 +1,6 @@
 # Видео «Сақлаб олиш» (19.11.2026): бот присылает repository_dispatch «render-video» с данными заказа,
 # здесь Playwright записывает /<slug>?render=video, ffmpeg склеивает со звуком, файл уходит в Vercel Blob,
-# бот получает ответ на /api/render и отправляет видео клиенту.
+# бот получает ответ на /api/cron?t=render и отправляет видео клиенту.
 # Секреты репозитория (Settings → Secrets and variables → Actions): BLOB_READ_WRITE_TOKEN, RENDER_CALLBACK_SECRET.
 name: render-video
 

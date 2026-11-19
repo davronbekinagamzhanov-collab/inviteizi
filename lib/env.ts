@@ -73,7 +73,7 @@ export const env = {
   extraLangs: (): ("ru" | "kk")[] => (env.kazakhEnabled() ? ["ru", "kk"] : ["ru"]),
   /** Видео «Сақлаб олиш»: токен GitHub (право actions/contents: запуск repository_dispatch) */
   renderDispatchToken: () => optional("GITHUB_DISPATCH_TOKEN"),
-  /** Общий секрет с GitHub Actions: runner видео подписывает им ответ /api/render */
+  /** Общий секрет с GitHub Actions: runner видео подписывает им ответ /api/cron?t=render */
   renderCallbackSecret: () => optional("RENDER_CALLBACK_SECRET"),
   /** Репозиторий, где лежит workflow рендера видео */
   renderRepo: () => optional("RENDER_GITHUB_REPO") ?? "davronbekinagamzhanov-collab/inviteizi",

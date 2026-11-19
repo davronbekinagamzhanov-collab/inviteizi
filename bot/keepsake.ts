@@ -2,7 +2,7 @@
  * «📥 Сақлаб олиш» (19.11.2026): после оплаты клиент получает не только ссылку, но и готовые файлы
  * своего приглашения — фото для статуса и ленты, PDF для печати (A5/A6), видео (только «Анимацияли»).
  * Одно ядро для бота и Mini App (deliverKeepsake). Файлы строит lib/keepsake/render.tsx (через deps.keepsake),
- * видео — GitHub Actions (scripts/render-video.mjs) по repository_dispatch, ответ — /api/render.
+ * видео — GitHub Actions (scripts/render-video.mjs) по repository_dispatch, ответ — /api/cron?t=render.
  */
 import type { Deps } from "./flow/types";
 import type { Lang, OrderRecord } from "@/lib/domain";
@@ -215,7 +215,7 @@ async function tellOwner(deps: Deps, o: OrderRecord, error: string) {
   }
 }
 
-/** Ответ runner'а видео (/api/render): running / done (адрес MP4 в Blob) / failed (повтор 1 раз) */
+/** Ответ runner'а видео (/api/cron?t=render): running / done (адрес MP4 в Blob) / failed (повтор 1 раз) */
 export async function videoResult(
   deps: Deps,
   orderId: string,

@@ -1,7 +1,10 @@
 import { verifyDemoToken } from "@/lib/demo-tracking";
 import { PgRepo } from "@/bot/repo-pg";
 import { getDesign } from "@/templates/registry";
+import { handleClientError } from "@/lib/client-error";
+/** ?t=audio — ошибки звука с телефонов (lib/client-error.ts); иначе — открытие демо. Один маршрут: лимит 12 функций Vercel Hobby */
 export async function POST(request: Request) {
+  if (new URL(request.url).searchParams.get("t") === "audio") return handleClientError(request);
   const denied = () => new Response(null, { status: 400 });
   if (request.headers.get("origin") !== new URL(request.url).origin || /bot|crawler|spider|preview/i.test(request.headers.get("user-agent") ?? "")) return denied();
   if (!request.headers.get("content-type")?.startsWith("application/json")) return denied();

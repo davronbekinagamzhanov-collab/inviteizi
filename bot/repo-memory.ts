@@ -810,7 +810,7 @@ export class MemoryRepo implements Repo {
     return r ? clone(r) : null;
   }
   async saveRender(orderId: string, kind: RenderKind, patch: RenderPatch) {
-    const now = new Date();
+    const now = this.now();
     const prev = this.renders.get(`${orderId}:${kind}`);
     const next: RenderRecord = {
       orderId,
