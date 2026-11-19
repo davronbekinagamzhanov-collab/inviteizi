@@ -1,18 +1,23 @@
-# Видео «Сақлаб олиш» (19.11.2026): бот присылает repository_dispatch «render-video» с данными заказа,
+# Видео «Сақлаб олиш» (19.11.2026): бот запускает этот workflow (workflow_dispatch, вход job — JSON заказа;
+# токену бота хватает права «Actions: write»),
 # здесь Playwright записывает /<slug>?render=video, ffmpeg склеивает со звуком, файл уходит в Vercel Blob,
 # бот получает ответ на /api/cron?t=render и отправляет видео клиенту.
 # Секреты репозитория (Settings → Secrets and variables → Actions): BLOB_READ_WRITE_TOKEN, RENDER_CALLBACK_SECRET.
 name: render-video
 
 on:
-  repository_dispatch:
-    types: [render-video]
+  workflow_dispatch:
+    inputs:
+      job:
+        description: "Данные заказа (JSON) — присылает бот"
+        required: true
+        type: string
 
 permissions:
   contents: read
 
 concurrency:
-  group: render-video-${{ github.event.client_payload.orderId }}
+  group: render-video-${{ fromJSON(inputs.job).orderId }}
   cancel-in-progress: false
 
 jobs:
@@ -35,7 +40,7 @@ jobs:
           ffmpeg -version | head -1 || (sudo apt-get update && sudo apt-get install -y ffmpeg)
       - name: Запись видео
         env:
-          JOB: ${{ toJSON(github.event.client_payload) }}
+          JOB: ${{ inputs.job }}
           BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
           RENDER_CALLBACK_SECRET: ${{ secrets.RENDER_CALLBACK_SECRET }}
         run: |

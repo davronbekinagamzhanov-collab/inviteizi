@@ -83,11 +83,31 @@
    работают (строятся каждый раз заново), видео — нет.
 2. Фото и PDF работают сразу, без секретов. С подключённым Vercel Blob файлы ещё и сохраняются (папка `keepsake/`),
    автоочистка удаляет их через 30 дней после тадбира вместе с фото клиента.
-3. Видео — включается двумя парами секретов (без них кнопки «🎬 Видео» нет):
-   - GitHub → репозиторий → Settings → Secrets and variables → Actions → New repository secret:
-     `BLOB_READ_WRITE_TOKEN` (тот же, что в Vercel) и `RENDER_CALLBACK_SECRET` (любая длинная случайная строка);
-   - Vercel → Settings → Environment Variables (Production): `RENDER_CALLBACK_SECRET` (та же строка) и
-     `GITHUB_DISPATCH_TOKEN` — GitHub → Settings → Developer settings → Fine-grained token, только этот репозиторий,
-     права **Contents: Read and write** (нужно для repository_dispatch) → Redeploy.
+3. Видео — включается, когда добавлены 4 значения (без них кнопки «🎬 Видео» нет нигде: ни в боте, ни в Mini App,
+   ни в строке «что входит»). Делается один раз, ~10 минут, с компьютера:
+
+   **Шаг А. Придумайте секрет.** Любая длинная строка из букв и цифр (40+ знаков), например из менеджера паролей.
+   Это `RENDER_CALLBACK_SECRET` — он вставляется в двух местах ниже, одинаково.
+
+   **Шаг Б. Токен GitHub (только запуск видео).**
+   github.com → аватар справа сверху → **Settings** → внизу слева **Developer settings** → **Personal access tokens**
+   → **Fine-grained tokens** → **Generate new token**:
+   - Token name: `inviteizi-video`; Expiration: 1 год;
+   - Repository access: **Only select repositories** → `inviteizi`;
+   - Permissions → Repository permissions → **Actions: Read and write** (больше ничего не включать);
+   - **Generate token** → скопируйте (начинается с `github_pat_…`, показывается один раз).
+
+   **Шаг В. Секреты в GitHub** (их читает робот, который записывает видео).
+   Репозиторий `inviteizi` → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**, два раза:
+   - Name `BLOB_READ_WRITE_TOKEN` — значение из Vercel → проект → **Settings** → **Environment Variables** → `BLOB_READ_WRITE_TOKEN` (глазок → копировать);
+   - Name `RENDER_CALLBACK_SECRET` — строка из шага А.
+
+   **Шаг Г. Переменные в Vercel** (их читает бот).
+   Vercel → проект `inviteizi` → **Settings** → **Environment Variables** → **Add New**, окружение **Production**, два раза:
+   - `GITHUB_DISPATCH_TOKEN` — токен из шага Б;
+   - `RENDER_CALLBACK_SECRET` — та же строка из шага А.
+   Затем **Deployments** → у последнего Production «⋯» → **Redeploy**.
+   Видео заработает после слияния этой ветки в `main` (GitHub запускает робота из файла `.github/workflows/render-video.yml` в `main`).
+
 4. Проверить: тестовый «Анимацияли» заказ → ✅ → «🎬 Видео» → «Видео тайёрланмоқда» → через 2–3 мин видео в чате.
    GitHub → Actions → render-video — зелёный запуск. Не пришло за 20 мин — утренняя проверка напишет «Видео зависли».
