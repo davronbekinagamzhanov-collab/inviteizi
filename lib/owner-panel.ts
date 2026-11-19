@@ -27,6 +27,8 @@ export type PanelOrder = {
   /** Для панели в приложении: ссылка /{slug} и имена в приглашении (поиск) */
   slug?: string | null;
   names?: string | null;
+  /** Цена зафиксирована по акции (orders.promotion_id) — источник «акция» в подробностях владельца */
+  promotion?: boolean;
 };
 export type PanelUser = { id: number; createdAt: Date; source: string | null };
 /** График выплат: каждый день / раз в неделю (пн) / раз в месяц (1-го) */

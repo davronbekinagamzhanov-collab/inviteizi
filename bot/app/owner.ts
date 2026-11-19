@@ -16,6 +16,7 @@ import { sendExport } from "../flow/export";
 import { designName } from "../flow/util";
 import { ownerFreeGrants, ownerReceipts, type OwnerReceipt } from "./owner-actions";
 import type { StaffGrantReason } from "@/lib/types";
+import { ownerDetail, ownerToday, type OwnerDetail, type OwnerToday } from "./owner-summary";
 
 export const OWNER_PERIODS = ["d", "w", "m", "y"] as const;
 export type OwnerPeriod = (typeof OWNER_PERIODS)[number];
@@ -83,6 +84,10 @@ export type OwnerPanel = {
   receipts: OwnerReceipt[];
   /** Бесплатные выдачи владельца за период по причинам: сумма 0, в продажах и начислениях не участвуют */
   free: Record<StaffGrantReason, number>;
+  /** Главный экран (этап 3): всегда за сегодня */
+  today: OwnerToday;
+  /** «📋 Подробнее»: по дням, тадбирам, форматам, источникам, воронка за период */
+  detail: OwnerDetail;
 };
 
 export async function isOwnerUser(deps: Deps, userId: number) {
@@ -139,6 +144,7 @@ export async function ownerPanel(
     };
   });
 
+  const receipts = await ownerReceipts(deps);
   const designs = activeDesigns()
     .map((d) => ({
       id: d.id,
@@ -189,7 +195,9 @@ export async function ownerPanel(
         };
       }),
     designs,
-    receipts: await ownerReceipts(deps),
+    receipts,
+    today: ownerToday(s, now, receipts.length),
+    detail: ownerDetail(s, managers, now, r, await deps.repo.demoViewers(r.from, r.to).catch(() => null)),
     free: await ownerFreeGrants(deps, r.from, r.to),
     funnel: {
       clients: s.users.filter((u) => inside(u.createdAt)).length,

@@ -128,6 +128,7 @@ export class MemoryRepo implements Repo {
         updatedAt: o.updatedAt,
         slug: o.slug,
         names: [o.data.groom, o.data.bride, o.data.person].filter(Boolean).join(" & ") || null,
+        promotion: Boolean(o.pricing?.kind === "promotion"),
       };
     });
     const users = [...this.users.values()].map((u) => ({ id: u.id, createdAt: u.createdAt, source: u.source }));
@@ -312,6 +313,12 @@ export class MemoryRepo implements Repo {
     }
     const top = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "";
     return { count: list.length, top };
+  }
+  async demoViewers(from: Date, to: Date) {
+    const ids = new Set<number>();
+    for (const e of this.analyticsEvents.values())
+      if (+e.createdAt >= +from && +e.createdAt < +to) ids.add(e.userId);
+    return [...ids];
   }
   async errorSteps(since: Date) {
     const counts = new Map<string, number>();

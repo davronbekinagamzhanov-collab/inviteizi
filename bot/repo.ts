@@ -307,6 +307,8 @@ export interface Repo {
   }): Promise<void>;
   /** Ошибки бота с since: сколько и самая частая причина. Нет доступа/таблицы — null */
   errorSummary(since: Date): Promise<{ count: number; top: string } | null>;
+  /** Кто открывал образцы дизайнов (demo_opened / design_selected) за [from, to). Нет таблицы — null */
+  demoViewers(from: Date, to: Date): Promise<number[] | null>;
   /** Ошибки бота с since по шагам (топ-3 для ежедневной проверки). Нет таблицы — null */
   errorSteps(since: Date): Promise<{ step: string; n: number }[] | null>;
   /** Было ли отправлено сообщение с ключом, начинающимся на prefix, после since */

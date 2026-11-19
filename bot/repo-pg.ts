@@ -630,7 +630,8 @@ export class PgRepo implements Repo {
         PanelOrder[]
       >`select o.id, o.number, o.user_id as "userId", u.username, u.first_name as "firstName", o.status, o.occasion, o.format,
         o.template_id as "templateId", o.music_kind as "musicKind", o.amount, o.created_at as "createdAt", o.paid_at as "paidAt", o.updated_at as "updatedAt", (to_jsonb(o)->>'marketing_refunded_at')::timestamptz as "refundedAt",
-        o.slug, nullif(concat_ws(' & ', o.groom, o.bride, o.person), '') as names
+        o.slug, nullif(concat_ws(' & ', o.groom, o.bride, o.person), '') as names,
+        (to_jsonb(o)->>'promotion_id') is not null as promotion
         from public.orders o join public.users u on u.id = o.user_id`;
       const users = await tx<PanelUser[]>`select id, created_at as "createdAt", source from public.users`;
       return { orders: [...orders], users: [...users] };
@@ -784,6 +785,18 @@ export class PgRepo implements Repo {
     } catch (e) {
       const code = (e as { code?: string } | null)?.code;
       if (code === "42501" || isMissingTable(e)) return null;
+      throw e;
+    }
+  }
+
+  async demoViewers(from: Date, to: Date) {
+    try {
+      const rows = await this.sql<{ id: number }[]>`
+        select distinct user_id as id from public.analytics_events
+        where kind in ('demo_opened', 'design_selected') and created_at >= ${from} and created_at < ${to}`;
+      return rows.map((r) => Number(r.id));
+    } catch (e) {
+      if (isMissingTable(e)) return null;
       throw e;
     }
   }
