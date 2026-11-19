@@ -9,7 +9,7 @@ import {
   type PartnerPayout,
   type PayoutSchedule,
 } from "@/lib/owner-panel";
-import type { NewPartner, Notice, PartnerPatch } from "./repo";
+import type { NewPartner, Notice, PartnerPatch, RenderKind, RenderPatch, RenderRecord } from "./repo";
 import type { BotErrorEntry } from "./errors";
 import type { ClaimStatus, InviteKind, InviteUse, Manager } from "@/lib/roles";
 /**
@@ -312,6 +312,12 @@ export class MemoryRepo implements Repo {
     }
     const top = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "";
     return { count: list.length, top };
+  }
+  async errorSteps(since: Date) {
+    const counts = new Map<string, number>();
+    for (const e of this.botErrors.filter((x) => +(x as { at?: Date }).at! >= +since))
+      counts.set(e.step ?? "—", (counts.get(e.step ?? "—") ?? 0) + 1);
+    return [...counts.entries()].map(([step, n]) => ({ step, n })).sort((a, b) => b.n - a.n).slice(0, 3);
   }
   async lastNoticeAt(prefix: string) {
     const times = [...this.notices.values()].filter((n) => n.key.startsWith(prefix) && n.sentAt).map((n) => +n.sentAt!);
@@ -795,6 +801,47 @@ export class MemoryRepo implements Repo {
   async setMusicTelegramFileId(musicId: string, fileId: string) {
     const m = this.music.find((x) => x.id === musicId);
     if (m) m.telegramFileId = fileId;
+  }
+
+  // ── «Сақлаб олиш» ──
+  renders = new Map<string, RenderRecord>();
+  async getRender(orderId: string, kind: RenderKind) {
+    const r = this.renders.get(`${orderId}:${kind}`);
+    return r ? clone(r) : null;
+  }
+  async saveRender(orderId: string, kind: RenderKind, patch: RenderPatch) {
+    const now = new Date();
+    const prev = this.renders.get(`${orderId}:${kind}`);
+    const next: RenderRecord = {
+      orderId,
+      kind,
+      status: "queued",
+      attempts: 0,
+      url: null,
+      telegramFileId: null,
+      error: null,
+      createdAt: now,
+      ...prev,
+      ...patch,
+      updatedAt: now,
+    };
+    this.renders.set(`${orderId}:${kind}`, next);
+    return clone(next);
+  }
+  async claimRender(orderId: string, kind: RenderKind) {
+    const prev = this.renders.get(`${orderId}:${kind}`);
+    if (prev && prev.status !== "failed") return { record: clone(prev), fresh: false };
+    return { record: await this.saveRender(orderId, kind, { status: "queued", attempts: 0, error: null }), fresh: true };
+  }
+  async listRenders(filter: { orderId?: string; stuckBefore?: Date; withUrl?: boolean }) {
+    return clone(
+      [...this.renders.values()].filter(
+        (r) =>
+          (!filter.orderId || r.orderId === filter.orderId) &&
+          (!filter.withUrl || r.url !== null) &&
+          (!filter.stuckBefore || ((r.status === "queued" || r.status === "running") && r.updatedAt < filter.stuckBefore)),
+      ),
+    );
   }
 
   // ── Заказы ──

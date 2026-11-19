@@ -37,7 +37,7 @@ function checkCaption(method: string, caption?: string) {
 export type FakeMessage = {
   id: number;
   chatId: number;
-  type: "text" | "photo" | "document" | "audio";
+  type: "text" | "photo" | "document" | "audio" | "video";
   text: string; // текст или подпись
   markup?: Markup;
   /** url / file_id / байты */
@@ -155,6 +155,13 @@ export class FakeTg implements Tg {
       fileName: opts.fileName,
     });
     return { ...sent, fileId: typeof doc === "string" ? doc : `TGDOC_${this.nextFile++}` };
+  }
+
+  async sendVideo(chatId: number, video: string, opts: FileOpts = {}): Promise<SentFile> {
+    checkCaption("sendVideo", opts.caption);
+    checkMarkup("sendVideo", opts.markup);
+    const sent = this.push({ chatId, type: "video", text: opts.caption ?? "", markup: opts.markup, media: video });
+    return { ...sent, fileId: video.startsWith("http") ? `TGVIDEO_${this.nextFile++}` : video };
   }
 
   async sendMediaGroup(chatId: number, photos: { url: string; caption?: string }[]) {

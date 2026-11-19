@@ -227,7 +227,10 @@ describe("п.21: музыка", () => {
     if (!("ok" in r)) throw new Error(JSON.stringify(r));
     const o = (await sim.repo.getOrder(r.order.id))!;
     expect(o.music).toEqual({ kind: "list", musicId: "osh-kuy" });
-    expect(invitationData(o, "https://cdn.test/music/osh.mp3").musicUrl).toBe("https://cdn.test/music/osh.mp3");
+    // играет файл песни с сайта; песня без файла на сайте — демо-мелодия тадбира (lib/music-available.ts)
+    const site = "https://inviteizi.vercel.app/audio/originals/inviteizi-yubiley-diydor.mp3";
+    expect(invitationData(o, site).musicUrl).toBe(site);
+    expect(invitationData(o, "https://cdn.test/music/osh.mp3").musicUrl).toMatch(/^\/audio\/originals\//);
   });
 
   it("своя песня из приложения: токен на загрузку (до 12 МБ, только mp3/m4a), сохраняется в заказе и играет в НАМУНА", async () => {

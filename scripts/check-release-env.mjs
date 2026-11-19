@@ -17,7 +17,12 @@ check("ANALYTICS_SIGNING_SECRET",s=>s.length>=32);
 check("KASPI_PHONE",s=>/^\+?[\d\s()-]+$/.test(s)&&s.replace(/\D/g,"").length>=10);
 check("KASPI_NAME",s=>s.length>0);
 check("PAYMENT_CARD_NUMBER",s=>/^[\d\s-]+$/.test(s)&&/^\d{13,19}$/.test(s.replace(/[\s-]/g,"")),false);
-check("STORAGE_GATE_SECRET",s=>s.length>=32);
+// Supabase Storage не используется с 16.11.2026 (402): секрет нужен только чтобы удалять старые файлы оттуда
+check("STORAGE_GATE_SECRET",s=>s.length>=32,false);
+// Фото клиентов и своя песня — Vercel Blob; видео «Сақлаб олиш» — GitHub Actions (оба секрета вместе)
+check("BLOB_READ_WRITE_TOKEN",s=>/^vercel_blob_rw_[A-Za-z0-9]+_/.test(s),false);
+check("RENDER_CALLBACK_SECRET",s=>s.length>=24,false);
+check("GITHUB_DISPATCH_TOKEN",s=>s.length>=20,false);
 if(value("DATABASE_URL"))check("DATABASE_URL",s=>{try{const u=new URL(s);return ["postgres:","postgresql:"].includes(u.protocol)&&Boolean(u.hostname&&u.password)&&/^inviteizi_server(?:\.|$)/.test(decodeURIComponent(u.username));}catch{return false;}});
 else check("DB_SERVER_PASSWORD",s=>s.length>0);
 for(const [key,get] of [["PUBLIC_BASE_URL",env.publicBaseUrl],["SUPABASE_URL",env.supabaseUrl]]){

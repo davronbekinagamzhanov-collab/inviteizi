@@ -228,3 +228,22 @@ textarea,
 [data-rsvp] textarea {
   caret-color: var(--rsvp-accent, var(--caret, #a8772a));
 }
+
+/* ?render=video|plate — запись видео и снимок дизайна для «Сақлаб олиш»: только сам дизайн */
+html[data-render] [data-music-button],
+html[data-render] [data-brand-badge],
+html[data-render] [data-brand-footer],
+html[data-render] [data-lang-switch],
+html[data-render] [data-tap-hint],
+html[data-render] [data-watermark],
+html[data-render] [data-rsvp],
+html[data-render] [data-photo-credits],
+html[data-render] [data-paid-refresh] {
+  display: none !important;
+}
+html[data-render] {
+  scrollbar-width: none;
+}
+html[data-render]::-webkit-scrollbar {
+  display: none;
+}

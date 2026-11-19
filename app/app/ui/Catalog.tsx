@@ -75,6 +75,8 @@ export function Catalog(props: {
   onOpen: (d: Design) => void;
   resume: { title: string; cover: string; onResume: () => void; onCancel: () => Promise<boolean> } | null;
   promotion?: PromotionView | null;
+  /** «Сақлаб олиш»: фото и PDF во всех форматах, видео — в анимацияли */
+  keepsake?: { files: boolean; video: boolean };
 }) {
   const T = useT();
   const { promotion } = useLivePromotion(props.promotion);
@@ -182,6 +184,7 @@ export function Catalog(props: {
       {layer}
       {prices && (
         <PricesSheet
+          keepsake={props.keepsake}
           onClose={() => setPrices(false)}
           onOpen={(d) => {
             setPrices(false);
@@ -196,7 +199,15 @@ export function Catalog(props: {
 const FORMATS: Format[] = ["animated", "scroll", "simple"];
 
 /** «Нархлар фарқи»: 8 000 — очилиш анимацияси, 6 000 — варақланади, 5 000 — бир саҳифа; по примеру-демо на каждый */
-function PricesSheet({ onClose, onOpen }: { onClose: () => void; onOpen: (d: Design) => void }) {
+function PricesSheet({
+  onClose,
+  onOpen,
+  keepsake,
+}: {
+  onClose: () => void;
+  onOpen: (d: Design) => void;
+  keepsake?: { files: boolean; video: boolean };
+}) {
   const T = useT();
   const all = activeDesigns();
   return (
@@ -222,6 +233,7 @@ function PricesSheet({ onClose, onOpen }: { onClose: () => void; onOpen: (d: Des
             <div key={f} className={s.priceRow} data-format={f}>
               <b>{T.price(PRICES[f])}</b>
               <p>{T.catalog.pricesRows[f]}</p>
+              {keepsake?.files && <p className={s.includes}>{T.catalog.includes(f === "animated" && keepsake.video)}</p>}
               {example && (
                 <button
                   type="button"

@@ -1,6 +1,7 @@
 import { remindPromotions, runBroadcast } from "./broadcast";
 import { flushMarketing, withMarketingReady } from "./marketing";
 import { checkFiles } from "./health";
+import { dailyCheck } from "./daily-check";
 /**
  * Задания по расписанию (pg_cron → POST /api/cron каждые 10 минут):
  *  - админам: чек ждёт больше 30 минут — напоминание днём, дальше каждые 2 часа до 21:00;
@@ -29,6 +30,8 @@ export type CronResult = {
   archived: number;
   rsvpDigests: number;
   photosRemoved: number;
+  /** Файлы «Сақлаб олиш», удалённые из Blob автоочисткой */
+  keepsakeRemoved?: number;
   musicRemoved: number;
   partnerNotices: number;
   sleeping: number;
@@ -40,6 +43,8 @@ export type CronResult = {
   cleaned: number;
   errorAlerts: number;
   healthAlerts: number;
+  /** Утренняя самопроверка: сколько сообщений ушло владельцу */
+  dailyAlerts?: number;
   /** Рассылка об акции: поставлено напоминаний «Охирги кун!» и отправлено сообщений */
   broadcastQueued?: number;
   broadcastSent?: number;
@@ -106,6 +111,15 @@ async function removeExpiredFiles(deps: Deps, now: Date, r: CronResult) {
   const used = new Set(
     all.filter((o) => !due(o)).flatMap((o) => [...(o.data.photos ?? []), ...(ownUrl(o) ? [ownUrl(o)!] : [])]),
   );
+  // Файлы «Сақлаб олиш» (фото, PDF, видео в Blob) — тем же сроком; строка остаётся без адреса
+  const renders = await deps.repo.listRenders({ withUrl: true }).catch(() => []);
+  const dueIds = new Set(all.filter(due).map((o) => o.id));
+  const expiredRenders = renders.filter((x) => dueIds.has(x.orderId));
+  if (expiredRenders.length) {
+    await deps.removePhotos?.(expiredRenders.map((x) => x.url!));
+    for (const x of expiredRenders) await deps.repo.saveRender(x.orderId, x.kind, { url: null, telegramFileId: null });
+    r.keepsakeRemoved = (r.keepsakeRemoved ?? 0) + expiredRenders.length;
+  }
   for (const o of all) {
     const photos = o.data.photos ?? [],
       music = ownUrl(o);
@@ -294,6 +308,16 @@ export async function runCron(input: Deps): Promise<CronResult> {
     r.errors++;
     console.error("cron rsvp digest", e instanceof Error ? e.name : "Error");
   }
+
+  // ── Утренняя самопроверка прода (после 09:00 по Алматы, раз в день; сообщение — только при проблемах).
+  //    Последней: остальные задания cron не ждут ~100 запросов проверки ──
+  if (deps.health)
+    try {
+      r.dailyAlerts = (await dailyCheck(deps, deps.health)).sent;
+    } catch (e) {
+      r.errors++;
+      console.error("cron daily check", e instanceof Error ? e.name : "Error");
+    }
 
   return r;
 }

@@ -50,6 +50,22 @@ export type Notice = {
   dueAt: Date;
 };
 
+/** «Сақлаб олиш» (19.11.2026): готовый файл заказа — фото, PDF, видео (таблица order_renders) */
+export type RenderKind = "story" | "feed" | "a5" | "a6" | "video";
+export type RenderStatus = "queued" | "running" | "done" | "failed";
+export type RenderRecord = {
+  orderId: string;
+  kind: RenderKind;
+  status: RenderStatus;
+  attempts: number;
+  url: string | null;
+  telegramFileId: string | null;
+  error: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+export type RenderPatch = Partial<Pick<RenderRecord, "status" | "attempts" | "url" | "telegramFileId" | "error">>;
+
 export interface Repo {
   /** Optional additive service; never initialized against a live DB in tests. */
   marketing?: import("./marketing-repo").PgMarketing;
@@ -100,6 +116,18 @@ export interface Repo {
   /** Активные треки по sort; с occasion — только треки этого тадбира (и треки без тадбира) */
   listMusic(occasion?: Occasion): Promise<MusicRecord[]>;
   setMusicTelegramFileId(musicId: string, fileId: string): Promise<void>;
+
+  // ── «Сақлаб олиш»: готовые файлы заказа ──
+  getRender(orderId: string, kind: RenderKind): Promise<RenderRecord | null>;
+  /** Создать или дополнить строку (status/attempts/url/file_id/error); updated_at = сейчас */
+  saveRender(orderId: string, kind: RenderKind, patch: RenderPatch): Promise<RenderRecord>;
+  /**
+   * Поставить в очередь атомарно: строки нет или прошлый раз неудача → queued, fresh = true;
+   * уже в очереди / рендерится / готово → fresh = false (двойное нажатие не создаёт второй рендер)
+   */
+  claimRender(orderId: string, kind: RenderKind): Promise<{ record: RenderRecord; fresh: boolean }>;
+  /** Файлы заказа (для автоочистки) или зависшие (queued/running дольше stuckBefore) */
+  listRenders(filter: { orderId?: string; stuckBefore?: Date; withUrl?: boolean }): Promise<RenderRecord[]>;
 
   // ── Заказы ──
   /** Создаёт заказ: номер по порядку, slug = slugBase или slugBase-2, -3… если занят */
@@ -279,6 +307,8 @@ export interface Repo {
   }): Promise<void>;
   /** Ошибки бота с since: сколько и самая частая причина. Нет доступа/таблицы — null */
   errorSummary(since: Date): Promise<{ count: number; top: string } | null>;
+  /** Ошибки бота с since по шагам (топ-3 для ежедневной проверки). Нет таблицы — null */
+  errorSteps(since: Date): Promise<{ step: string; n: number }[] | null>;
   /** Было ли отправлено сообщение с ключом, начинающимся на prefix, после since */
   noticeSentSince(prefix: string, since: Date): Promise<boolean>;
   /** Когда последний раз ушло сообщение/отметка с ключом на prefix (проверка здоровья). Нет — null */

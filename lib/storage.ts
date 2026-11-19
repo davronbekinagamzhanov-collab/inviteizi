@@ -11,7 +11,7 @@ import { del, head, put } from "@vercel/blob";
 import { generateClientTokenFromReadWriteToken } from "@vercel/blob/client";
 import { env } from "./env";
 
-export type Bucket = "music" | "photos" | "health";
+export type Bucket = "music" | "photos" | "health" | "keepsake";
 
 /** Год в кэше: имя файла меняется вместе с содержимым */
 const YEAR = 31_536_000;
@@ -50,7 +50,7 @@ export function publicUrl(bucket: Bucket, path: string): string {
 
 /** Адрес из нашего Blob-хранилища (любой store-id Vercel Blob; путь — только наши папки) */
 export const BLOB_URL =
-  /^https:\/\/[a-z0-9]+\.public\.blob\.vercel-storage\.com\/(music|photos|health)\/[A-Za-z0-9._/-]+$/;
+  /^https:\/\/[a-z0-9]+\.public\.blob\.vercel-storage\.com\/(music|photos|health|keepsake)\/[A-Za-z0-9._/-]+$/;
 /** Старый адрес Supabase Storage (заказы до 17.11.2026) */
 export const LEGACY_URL = /^https:\/\/[a-z0-9]+\.supabase\.co\/storage\/v1\/object\/public\/(music|photos)\/(.+)$/;
 

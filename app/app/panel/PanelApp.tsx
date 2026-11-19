@@ -272,7 +272,7 @@ function Partner({ d, T, onNote }: { d: PartnerPanel; T: typeof appUz.partnerPan
             {T.copy}
           </button>
           <button type="button" className={s.excel} onClick={() => shareLink(d.link, "InviteIZI")}>
-            ↗
+            {T.shareLink}
           </button>
         </div>
       </div>

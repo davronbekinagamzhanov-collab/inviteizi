@@ -1,3 +1,4 @@
+import { demoMusicUrl } from "./music";
 import { describe, expect, it } from "vitest";
 import { computeExpiresAt, invitationData, pageMode } from "./orders";
 import type { InvitationData, OrderRecord } from "./domain";
@@ -87,7 +88,8 @@ describe("pageMode", () => {
 describe("invitationData — музыка заказа для шаблона", () => {
   it("из списка → адрес файла трека", () => {
     const d = invitationData(order({ music: { kind: "list", musicId: "yor-yor" } }), "https://x/yor-yor.mp3");
-    expect(d.musicUrl).toBe("https://x/yor-yor.mp3");
+    // чужой сайт не играет — заказ получает демо-мелодию тадбира (lib/music-available.ts)
+    expect(d.musicUrl).toBe(demoMusicUrl(d.occasion ?? "nikoh"));
     expect(d.noMusic).toBeUndefined();
   });
 
@@ -101,9 +103,10 @@ describe("invitationData — музыка заказа для шаблона", (
     expect(d.noMusic).toBe(true);
     expect(d.musicUrl).toBeUndefined();
   });
-  it("missing historical track never plays a different template melody instead", () => {
-    expect(invitationData(order({ music: { kind: "list", musicId: "missing" } })).noMusic).toBe(true);
-    expect(invitationData(order({ music: { kind: "own", fileId: "old" } })).noMusic).toBe(true);
+  it("недоступная песня (нет строки, нет файла) → демо-мелодия своего тадбира, не тишина (19.11.2026)", () => {
+    const o = order({ music: { kind: "list", musicId: "missing" } });
+    expect(invitationData(o).musicUrl).toBe(demoMusicUrl(o.occasion));
+    expect(invitationData(order({ music: { kind: "own", fileId: "old" } })).musicUrl).toBe(demoMusicUrl(o.occasion));
   });
 
   it("остальные данные не меняются", () => {

@@ -65,7 +65,7 @@ for (const [template, lang] of [
         },
         slug: "fixture-invitation",
       } as OrderRecord;
-    const url = "https://preview.invalid/fixture-invitation",
+    const url = "https://inviteizi.vercel.app/fixture-invitation",
       png = await statusPoster(order, url, lang),
       meta = await sharp(png).metadata();
     expect([meta.width, meta.height]).toEqual([1080, 1920]);

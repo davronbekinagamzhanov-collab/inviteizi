@@ -163,23 +163,26 @@ describe.skipIf(!BASE)("роли в браузере", () => {
           await shot("03-summary");
           // кнопка «к оплате» — уже с ценой по акции, а не со старой
           const payText = await main(page).innerText();
-          if (!payText.includes("4 000") || payText.includes("8 000")) bad.push(`кнопка оплаты: ${payText}`);
+          // 7 990 −50 % → 3 990 (округление вниз до …90, 17.11.2026)
+          if (!payText.includes("3 990") || payText.includes("7 990")) bad.push(`кнопка оплаты: ${payText}`);
           await main(page).click();
           await page.locator('[data-price-deal="promotion"]').waitFor();
           const priceText = await page.locator('[data-price-deal="promotion"]').innerText();
           expect(priceText).toContain(S.saving("4 000 ₸").split(" ")[0]);
+          expect(priceText).toContain("3 990");
           await shot("04-check");
           await page.locator('input[name="terms"]').check();
           await page.getByRole("button", { name: T.pay.checkYes }).click();
-          await page.getByText(T.pay.how).waitFor();
+          await page.locator("[data-kaspi]").waitFor();
           await shot("05-pay");
-          await page
-            .locator('input[type="file"]')
-            .setInputFiles({ name: "chek.pdf", mimeType: "application/pdf", buffer: PDF });
-          await page.getByText(T.pay.waitTitle).waitFor();
+          // основной путь с 17.11.2026: «✅ Тўладим» + имя из Kaspi (чек — по желанию)
+          await page.locator("[data-paid]").click();
+          await page.locator('input[name="payerName"]').fill("Давронбек И.");
+          await page.locator("[data-payer-form] button[type=submit]").click();
+          await page.getByText(T.pay.waitTitle).waitFor({ timeout: 20_000 });
           await shot("06-wait");
           const [o] = await sim.repo.listOrdersByUser(id);
-          expect(o).toMatchObject({ status: "receipt_sent", amount: 4000 });
+          expect(o).toMatchObject({ status: "receipt_sent", amount: 3990, payerName: "Давронбек И." });
           await sim.callback(ADMIN, `ok:${o.number}`, 1);
           expect((await sim.repo.getOrder(o.id))!.status).toBe("active");
         } finally {
@@ -203,8 +206,9 @@ describe.skipIf(!BASE)("роли в браузере", () => {
         const q = (await appAction(sim.deps, who(id, "uz"), { action: "quote", orderId: o.id })).body as {
           order: app.AppOrder;
         };
-        if (kind === null && (q.order.amount !== 8000 || q.order.price)) out.push(`партнёр: цена ${q.order.amount}`);
-        if (kind === "wholesale" && (q.order.amount !== 6400 || q.order.price?.kind !== "wholesale"))
+        if (kind === null && (q.order.amount !== 7990 || q.order.price)) out.push(`партнёр: цена ${q.order.amount}`);
+        // 7 990 −20 % → 6 390
+        if (kind === "wholesale" && (q.order.amount !== 6390 || q.order.price?.kind !== "wholesale"))
           out.push(`оптовик: цена ${q.order.amount}`);
         await page.screenshot({ path: `${OUT}/role-${id}-catalog.png` });
         out.push(...errors);

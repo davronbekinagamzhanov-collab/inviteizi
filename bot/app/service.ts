@@ -1,3 +1,4 @@
+import { deliverKeepsake, videoAvailable } from "../keepsake";
 import { computeExpiresAt } from "@/lib/orders";
 import { applyPricing, buyerOf, catalogPromotion, priceNote, type PriceNote, type PromotionView } from "../pricing";
 import { applyPromoCode, issueByPromotion } from "../flow/sales";
@@ -91,6 +92,8 @@ export type AppOrder = {
   /** Чек не принят: причина на языке клиента */
   rejectReason: string | null;
   createdAt: string;
+  /** «📥 Сақлаб олиш»: файлы доступны (оплачен) и есть ли видео (анимацияли + рендер подключён) */
+  keepsake?: { video: boolean } | null;
 };
 
 export type AppSession = {
@@ -112,6 +115,8 @@ export type AppSession = {
   promotion?: PromotionView | null;
   /** Оптовик: постоянная скидка, % (для ожидаемой цены в итоге; точную считает сервер на шаге оплаты) */
   wholesalePercent?: number | null;
+  /** «Сақлаб олиш»: что входит в каталоге — фото и PDF всегда, видео — когда подключён рендер */
+  keepsake?: { files: boolean; video: boolean };
 };
 
 const MAX_ORDERS = 20;
@@ -149,6 +154,7 @@ export function appOrder(deps: Deps, o: OrderRecord, lang: Lang = "uz"): AppOrde
     paid: PAID_STATUSES.includes(o.status),
     rejectReason: o.status === "rejected" ? reasonIn(o.rejectReason, lang) : null,
     createdAt: o.createdAt.toISOString(),
+    keepsake: o.status === "active" && deps.keepsake ? { video: videoAvailable(deps, o) } : null,
   };
 }
 
@@ -263,6 +269,7 @@ export async function openSession(deps: Deps, u: AppUser): Promise<AppSession> {
     staff: await deps.repo.isAdmin(u.id),
     promotion: await catalogPromotion(deps, u.id),
     wholesalePercent: (await deps.repo.getWholesaler(u.id))?.percent ?? null,
+    keepsake: { files: Boolean(deps.keepsake), video: videoAvailable(deps, { format: "animated" }) },
   };
 }
 
@@ -783,4 +790,14 @@ export async function submitReceipt(deps: Deps, u: AppUser, orderId: unknown, f:
     return { error: "send" };
   }
   return { ok: true, night: isQuiet(now) };
+}
+
+/**
+ * «📥 Сақлаб олиш» из приложения: файл уходит в чат с ботом (на телефоне его проще сохранить и переслать,
+ * чем скачать из WebView). Права — на сервере: только свой оплаченный заказ (или админ).
+ */
+export async function keepsakeAction(deps: Deps, u: AppUser, orderId: unknown, kind: unknown) {
+  if (typeof orderId !== "string" || orderId.length > 64) return { error: "notFound" as const };
+  const outcome = await deliverKeepsake(deps, u.id, { id: orderId }, kind as never);
+  return { outcome };
 }

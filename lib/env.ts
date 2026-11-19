@@ -71,6 +71,12 @@ export const env = {
   kazakhEnabled: () => optional("KAZAKH_ENABLED")?.toLowerCase() === "true",
   /** Языки приглашения кроме узбекского, которые можно выбрать сейчас (казахский — только при KAZAKH_ENABLED=true) */
   extraLangs: (): ("ru" | "kk")[] => (env.kazakhEnabled() ? ["ru", "kk"] : ["ru"]),
+  /** Видео «Сақлаб олиш»: токен GitHub (право actions/contents: запуск repository_dispatch) */
+  renderDispatchToken: () => optional("GITHUB_DISPATCH_TOKEN"),
+  /** Общий секрет с GitHub Actions: runner видео подписывает им ответ /api/render */
+  renderCallbackSecret: () => optional("RENDER_CALLBACK_SECRET"),
+  /** Репозиторий, где лежит workflow рендера видео */
+  renderRepo: () => optional("RENDER_GITHUB_REPO") ?? "davronbekinagamzhanov-collab/inviteizi",
   /** Есть ли доступ к базе (для тестов и страниц, которые без базы показывают заглушку) */
   hasDatabase: () => Boolean(optional("DATABASE_URL") || optional("DB_SERVER_PASSWORD")),
 };

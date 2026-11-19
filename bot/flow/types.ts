@@ -40,6 +40,8 @@ export type Deps = {
   removeMusic?: (urls: string[]) => Promise<void>;
   /** Проверка здоровья файлов и базы (bot/health.ts). Нет — cron её пропускает (тесты) */
   health?: import("../health").HealthIo;
+  /** «Сақлаб олиш»: фото, PDF, видео (bot/keepsake.ts). Нет — кнопок файлов нет (тесты без них) */
+  keepsake?: import("../keepsake").KeepsakeIo;
 };
 
 /** Шаги анкеты (users.step) */

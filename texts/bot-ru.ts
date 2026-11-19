@@ -96,6 +96,8 @@ export const ru = {
 
   format: {
     ask: "Какое приглашение? 👇",
+    /** Что входит (19.11.2026): видео — только когда подключён рендер */
+    includes: (video: boolean) => `В каждом: 🖼 Фото + 🖨 PDF для печати${video ? "\n✨ В анимированном — ещё 🎬 Видео" : ""}`,
     animated: (price: string) => `✨ Анимированное — ${price}`,
     scroll: (price: string) => `📜 С прокруткой — ${price}`,
     simple: (price: string) => `📄 Простое — ${price}`,
@@ -533,6 +535,31 @@ export const ru = {
     statuses,
     link: "🔗 Ссылка",
   },
+
+  keepsake: {
+    button: "📥 Сохранить файлы",
+    offer: "📥 Сохранить — приглашение готовыми файлами:\n🖼 Картинка для статуса и WhatsApp\n🖨 Для печати — в любой типографии A5/A6",
+    offerVideo: "🎬 Видео с музыкой",
+    pick: "Нажмите нужное 👇",
+    story: "🖼 Для статуса",
+    feed: "🖼 Для ленты",
+    a5: "🖨 PDF A5",
+    a6: "🖨 PDF A6",
+    video: "🎬 Видео",
+    making: "⏳ Готовим…",
+    busy: "⏳ Уже готовим, немного подождите",
+    storyCaption: "🖼 Для статуса и сторис (9:16). Сохраните и поставьте в статус.",
+    feedCaption: "🖼 Для ленты и WhatsApp (4:5).",
+    printCaption: (size: string) =>
+      `🖨 Для печати — в любой типографии ${size}. Поля под обрез 3 мм есть, QR открывает онлайн-приглашение.`,
+    videoQueued: "🎬 Видео готовится, пришлём через 2–3 минуты.",
+    videoAlready: "🎬 Видео уже готовится — подождите 2–3 минуты, пришлём сами.",
+    videoCaption: "🎬 Видео вашего приглашения. Отправьте в WhatsApp и Telegram.",
+    videoFailed: "😔 Видео сейчас не получилось. Картинки и PDF готовы — нажмите кнопки. Админ в курсе.",
+    failed: "😔 Файл сейчас не получился. Нажмите ещё раз через минуту.",
+    notActive: "Файлы будут готовы после оплаты.",
+    sentToChat: "✅ Отправлено в чат",
+  },
 } satisfies BotTexts;
 
 
@@ -542,6 +569,21 @@ export const ru = {
  */
 export const staff = {
   back: "◀️ Назад",
+  /** «Сақлаб олиш»: видео не получилось после повтора (19.11.2026) */
+  keepsakeVideoFailed: (n: number, error: string) =>
+    `⚠️ Видео №${n} не получилось: ${error}\nКлиенту отправлено: «картинки и PDF готовы».`,
+  /** Утренняя самопроверка прода (bot/daily-check.ts): пишется, только если есть проблемы */
+  daily: {
+    title: (checked: number) => `⚠️ Утренняя проверка: есть проблемы (проверено ${checked})`,
+    demoDown: "Демо не открываются",
+    demoJunk: "В демо лишнее (undefined/NaN/старая цена/Supabase)",
+    coversDown: "Обложки не открываются",
+    musicDown: "Музыка не открывается",
+    noAnswer: "нет ответа",
+    errors: (list: string) => `Ошибки бота за сутки (топ-3): ${list}`,
+    stuck: (min: number, n: number, list: string) => `Видео зависли (> ${min} мин): ${n} — ${list}`,
+    timeout: (n: number) => `Не успели проверить за отведённое время: ${n} адресов — сайт отвечает медленно`,
+  },
   ownerTitle: "👋 Панель InviteIZI",
   managerTitle: "👋 Панель менеджера InviteIZI",
   today: (paid: number, sum: string) => (paid ? `Сегодня: оплат ${paid} · ${sum}` : "Сегодня оплат пока нет"),

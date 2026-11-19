@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import { glueData } from "@/lib/typography";
 import { notFound } from "next/navigation";
 import { demoMusicUrl } from "@/lib/music";
+import { DEMO_RSVP_SLUG } from "@/lib/types";
 import { designs, getDesign } from "@/templates/registry";
 import { DesignView } from "@/templates/design-loaders";
 import { existingArt } from "@/templates/art";
@@ -46,6 +47,9 @@ async function LiveDemo({ params, searchParams }: PageProps<"/demo/[template]">)
           ...futureDemoData(design.sample, new Date()),
           langs: env.extraLangs(),
           musicUrl: demoMusicUrl(design.occasion),
+          // форма ответа гостя — образцом (без отправки): клиент видит, что гости смогут ответить
+          rsvp: true,
+          rsvpSlug: DEMO_RSVP_SLUG,
         })}
         mode="full"
         art={existingArt(design)}

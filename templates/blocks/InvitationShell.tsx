@@ -64,6 +64,22 @@ export function InvitationShell({
     };
   }, [pageColor]);
 
+  // ?render=video (видео «Сақлаб олиш», снимок дизайна): без кнопок, бейджей и плашек, конверт открывается сам
+  useEffect(() => {
+    const render = new URLSearchParams(window.location.search).get("render");
+    if (render !== "video" && render !== "plate") return;
+    const el = document.documentElement;
+    el.dataset.render = render;
+    const timer = window.setTimeout(
+      () => document.querySelector<HTMLElement>("[data-open]:not(:disabled)")?.click(),
+      render === "video" ? 1600 : 50,
+    );
+    return () => {
+      window.clearTimeout(timer);
+      delete el.dataset.render;
+    };
+  }, []);
+
   return (
     // reducedMotion="user": если в телефоне отключены анимации, не мучаем гостя
     <MotionConfig reducedMotion="user">

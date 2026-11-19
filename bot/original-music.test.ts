@@ -5,7 +5,7 @@ import {Sim} from './testing/sim';import {startUz} from './testing/paths';import
 describe('all twelve original choices through the existing music flow',()=>{
  useHistoricalCatalog();
  for(const [index,t] of tracks.entries())it(`${t.id}: preview, choose, persist exact music ID and public URL`,async()=>{
-  const music=tracks.map((row,i)=>({id:row.id,titleUz:row.titleUz,titleRu:row.titleRu,fileUrl:'https://fixture.invalid/audio/originals/'+row.id+'.mp3',sort:i,occasion:row.occasion as 'sunnat'|'yubiley',telegramFileId:null}));
+  const music=tracks.map((row,i)=>({id:row.id,titleUz:row.titleUz,titleRu:row.titleRu,fileUrl:'https://inviteizi.vercel.app/audio/originals/'+row.id+'.mp3',sort:i,occasion:row.occasion as 'sunnat'|'yubiley',telegramFileId:null}));
   const sim=new Sim({music}),user=980000+index,design=getDesign(t.occasion==='sunnat'?'sunnat-muqova':'umr-sahifalari')!;
   await startUz(sim,user);await sim.repo.saveStep(user,'music',{q:700,occasion:design.occasion,format:design.format,templateId:design.id,data:{...design.sample,rsvp:false}});
   await sim.callback(user,'a:700:list',1);

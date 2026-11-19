@@ -1,3 +1,4 @@
+import { deliverKeepsake, keepsakeOffer, keepsakeToast } from "../keepsake";
 import { correctionStep, beginCorrection } from "./correction";
 import { beginPromo, promoCode, promotionLine } from "./sales";
 import { beginPaid, forwardedReceipt, payerName } from "./pay-name";
@@ -501,6 +502,25 @@ async function stale(c: Ctx, n?: number) {
 }
 
 async function onCallback(c: Ctx, d: string) {
+  // «📥 Сақлаб олиш»: ks:<номер> — кнопки файлов; ks:<номер>:<вид> — файл в чат (видео — в очередь)
+  if (d.startsWith("ks:")) {
+    const [, n = "", kind] = d.split(":");
+    if (!kind) {
+      const o = await c.deps.repo.getOrderByNumber(Number(n));
+      if (!o || o.userId !== c.user.id || o.status !== "active" || !c.deps.keepsake) return toast(c, c.tx.order.notFound);
+      const m = keepsakeOffer(c.deps, o, c.lang);
+      return void (await send(c, m.text, m.markup));
+    }
+    // сначала короткий ответ на кнопку (Telegram ждёт ≤ 15 с, PDF строится дольше)
+    if (kind !== "video") await toast(c, c.tx.keepsake.making);
+    const outcome = await deliverKeepsake(c.deps, c.user.id, { number: Number(n) }, kind as never);
+    if (kind === "video" || outcome !== "sent") {
+      const text = keepsakeToast(c.lang, outcome);
+      if (outcome === "already" || outcome === "busy") return c.answered ? undefined : toast(c, text);
+      return void (await send(c, text));
+    }
+    return;
+  }
   if (d.startsWith("fix:")) {
     const result = await beginCorrection(c, Number(d.slice(4)));
     return result ? apply(c, result) : undefined;

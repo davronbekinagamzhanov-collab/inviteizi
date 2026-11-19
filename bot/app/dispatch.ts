@@ -55,6 +55,14 @@ export async function appAction(
     }
     case "orders":
       return ok(await app.listOrders(deps, user));
+    // «📥 Сақлаб олиш»: файл в чат; чужой/неоплаченный заказ — 403
+    case "keepsake": {
+      if (!allow(`keepsake:${user.id}`, LIMITS.keepsake)) return res({ error: "tooOften" }, 429);
+      const r = await app.keepsakeAction(deps, user, body.orderId, body.kind);
+      if ("error" in r) return res(r, 403);
+      const status = r.outcome === "notFound" || r.outcome === "notActive" ? 403 : 200;
+      return res(r, status);
+    }
     case "musicUpload": {
       if (!allow(`music:${user.id}`, LIMITS.musicUpload)) return res({ error: "tooOften" }, 429);
       const r = await app.musicUpload(deps, body.ext, body.size);
