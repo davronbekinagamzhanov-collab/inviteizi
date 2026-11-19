@@ -46,7 +46,7 @@ function withKeepsake(s: Sim, video = true) {
             link: `inviteizi.vercel.app/${o.slug}`,
             paper: "#ffffff",
             ink: "#000000",
-            callback: "https://inviteizi.vercel.app/api/render",
+            callback: "https://inviteizi.vercel.app/api/cron?t=render",
           }),
           dispatchVideo: async (job: VideoJob) => {
             if (failDispatch) throw new Error("GitHub dispatch 500");

@@ -30,7 +30,7 @@ async function open(opts: { broken?: boolean } = {}) {
       ? r.fulfill({ status: 404, contentType: "text/plain", body: "nope" })
       : r.fulfill({ status: 200, contentType: "audio/wav", body: wav, headers: { "accept-ranges": "bytes" } }),
   );
-  await page.route("**/api/client-error", (r) => {
+  await page.route("**/api/demo-event?t=audio", (r) => {
     reports.push(JSON.parse(r.request().postData() ?? "{}"));
     return r.fulfill({ status: 204, body: "" });
   });

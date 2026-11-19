@@ -67,7 +67,7 @@ export function keepsakeIo(publicBaseUrl: string): KeepsakeIo {
         link: link.replace(/^https?:\/\//, ""),
         paper: look.paper,
         ink: look.ink,
-        callback: `${publicBaseUrl}/api/render`,
+        callback: `${publicBaseUrl}/api/cron?t=render`,
       };
     };
     io.dispatchVideo = (job) => dispatchVideoJob(job, token, env.renderRepo());

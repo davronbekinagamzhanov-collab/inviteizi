@@ -334,7 +334,7 @@ export function reportAudio(el: HTMLAudioElement | null, name: string) {
       design: (window as { __inviteDesign?: string }).__inviteDesign ?? null,
       ua: navigator.userAgent.slice(0, 200),
     });
-    void fetch("/api/client-error", {
+    void fetch("/api/demo-event?t=audio", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body,

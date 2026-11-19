@@ -1,5 +1,5 @@
 /**
- * Ответ runner'а видео (GitHub Actions → POST /api/render): Authorization: Bearer RENDER_CALLBACK_SECRET.
+ * Ответ runner'а видео (GitHub Actions → POST /api/cron?t=render): Authorization: Bearer RENDER_CALLBACK_SECRET.
  * Тело: { orderId, status: running|done|failed, url?, error? }. Адрес видео — только наш Vercel Blob (keepsake/…mp4).
  */
 import { timingSafeEqual } from "node:crypto";
